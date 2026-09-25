@@ -33,6 +33,46 @@ Los documentos admitidos son `FIRMA_MEDICO`, `SELLO_MEDICO`, `ORDEN_MEDICA` e
 `requiredDocuments` y `exclusionNotes`, preservando claves desconocidas del
 JSON de elegibilidad.
 
+## Portabilidad del titular
+
+Portabilidad de póliza e historial de siniestralidad a 1 clic (subtarea 3.3):
+el titular exporta su propio historial de coberturas, atenciones, siniestros
+y diagnósticos como un certificado sellado con SHA-256, verificable
+públicamente por cualquier tercero (una nueva aseguradora, un auditor) sin
+sesión ni exposición de datos clínicos.
+
+| Método y ruta | Quién puede | Respuesta |
+| --- | --- | --- |
+| `POST /insurance/portability/export` | El titular del `patientProfileId` del cuerpo, o plataforma | `201` con `PortabilityExportResultDto` (`certificateId`, `manifestHash`, URLs de descarga y verificación, resumen actuarial) |
+| `GET /insurance/portability/certificates/:certificateId/pdf` | El titular del certificado, o plataforma | `200` PDF con QR y sello |
+| `GET /insurance/portability/certificates/:certificateId/json` | El titular del certificado, o plataforma | `200` JSON, exactamente como se selló |
+| `GET /public/portability/verify/:manifestHash` | Sin sesión (`@Public`) | `200` `PortabilityVerificationResponseDto` sin PHI, o `404` |
+
+**Autorización**: sin `@Roles` — `InsurancePortabilityService` resuelve la
+titularidad con `ProfileOwnershipService.assertOwnsPatientProfile` (el actor
+del JWT o un rol de plataforma). Un rechazo por perfil ajeno responde `403`
+y deja un asiento `INSURANCE_PORTABILITY_DENIED` en `audit.audit_log`
+(AC-03-03-D); un intento de descargar el certificado de otro responde `403`
+antes de leer el archivo.
+
+**Persistencia**: el certificado NO tiene tabla propia — reusa
+`health_data.health_export_jobs`/`health_export_manifests` (el
+`content_hash` del manifiesto ES el sello impreso), más `common.files`
+(PHI), `audit.dsar_requests` (`DSAR_TYPE_PORTABILITY`) y
+`audit.data_access_log`, todo en una transacción. El `generatedAt` que
+devuelve el `verify` público es el mismo instante sellado en el JSON y el
+PDF (`health_export_jobs.requested_at` se fija explícitamente, no un
+`new Date()` posterior).
+
+**Contenido del certificado** (`schemaVersion: 'alovida.insurance-portability/2'`):
+pólizas/coberturas, atenciones (`clinical.encounters`, sin motivo de
+consulta — minimización de PHI ante un tercero), reclamos con su dictamen
+vigente, diagnósticos codificados y un resumen actuarial (totales,
+siniestralidad estimada contra la prima de lista del plan). El QR y
+`verificationUrl` apuntan a `${WEB_APP_BASE_URL}/verify/portability/:hash`
+del frontend (`scheduling/notices/agenda-notices.env.ts`); el hash público
+se acepta en mayúsculas o minúsculas y se normaliza antes de consultar.
+
 ## Contenido
 
 ### Subcarpetas

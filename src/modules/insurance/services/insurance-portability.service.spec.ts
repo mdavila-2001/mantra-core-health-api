@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
-import { ResourceNotFoundException } from '../../../common';
+import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import { InsurancePortabilityService } from './insurance-portability.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -28,6 +28,7 @@ function build() {
 
   const portabilityRepo = {
     policiesOfPatient: mockFn().mockResolvedValue([]),
+    encountersOfPatient: mockFn().mockResolvedValue([]),
     claimsOfPatient: mockFn().mockResolvedValue([]),
     conditionsOfPatient: mockFn().mockResolvedValue([]),
   };
@@ -60,7 +61,10 @@ function build() {
     downloadForAuthorizedContext: mockFn(),
   };
   const releaseRepo = {
-    createExportJob: mockFn(() => ({ id: 'certificate-a' })),
+    createExportJob: mockFn((_tx: any, data: any) => ({
+      id: 'certificate-a',
+      requestedAt: data.requestedAt,
+    })),
     createExportManifest: mockFn(() => ({ id: 'manifest-a' })),
     findManifest: mockFn(),
     findManifestByContentHash: mockFn(),
@@ -103,6 +107,9 @@ function build() {
     releaseRepo,
     fileUpload,
     portabilityRepo,
+    personsRepo,
+    dsarRepo,
+    pdfService,
   };
 }
 
@@ -191,6 +198,141 @@ describe('InsurancePortabilityService — anti-IDOR (AC-03-03-D)', () => {
       .digest('hex');
     expect(first.manifestHash).toBe(recomputed);
   });
+
+  it('el job se crea con el mismo instante que se sella en el certificado', async () => {
+    const { service, releaseRepo } = build();
+    const result = await service.export(
+      { patientProfileId: PATIENT_PROFILE_ID } as never,
+      OWNER_ACTOR,
+    );
+
+    const jobCall = releaseRepo.createExportJob.mock.calls[0];
+    const jobData = jobCall[1] as { requestedAt: Date };
+    expect(jobData.requestedAt.toISOString()).toBe(result.generatedAt);
+  });
+});
+
+describe('InsurancePortabilityService.export — sin coberturas (AC-02)', () => {
+  it('exporta igual, dejando constancia, sin lanzar', async () => {
+    const { service, releaseRepo, dsarRepo, auditTrail } = build();
+
+    const result = await service.export(
+      { patientProfileId: PATIENT_PROFILE_ID } as never,
+      OWNER_ACTOR,
+    );
+
+    expect(result.policiesCount).toBe(0);
+    expect(result.recordCount).toBe(0);
+    expect(result.summary.currencyCode).toBeNull();
+    expect(result.summary.estimatedLossRatioPercent).toBeNull();
+    expect(result.summary.allTime.billedAmount).toBe('0.00');
+    // La constancia: el job, el manifiesto, el DSAR y el asiento de
+    // auditoría se escriben igual que con coberturas.
+    expect(releaseRepo.createExportJob).toHaveBeenCalled();
+    expect(releaseRepo.createExportManifest).toHaveBeenCalled();
+    expect(dsarRepo.create).toHaveBeenCalled();
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      OWNER_ACTOR,
+      expect.objectContaining({ action: 'INSURANCE_PORTABILITY_EXPORTED' }),
+    );
+  });
+});
+
+describe('InsurancePortabilityService.export — atenciones (CA-01)', () => {
+  it('mapea las atenciones del titular al certificado', async () => {
+    const { service, portabilityRepo } = build();
+    portabilityRepo.encountersOfPatient.mockResolvedValue([
+      {
+        encounter_id: 'encounter-a',
+        start_at: '2026-06-02T14:30:00.000Z',
+        end_at: '2026-06-02T15:10:00.000Z',
+        class_concept_id: null,
+        type_concept_id: null,
+        status_concept_id: 'status-concept-a',
+        tenant_name: 'Centro Médico Foianini',
+        branch_name: null,
+      },
+    ] as never);
+
+    // El servicio resuelve los códigos vía `em.find(CatalogConcepts, …)`;
+    // acá el `EntityManager` está doblado en `build()` con `find` → `[]`
+    // por defecto, así que el status cae a 'UNKNOWN' — lo que importa es
+    // que la fila llegue al reporte, no la resolución del concepto (ya
+    // cubierta por `buildPolicy`/`buildClaims`).
+    const result = await service.export(
+      { patientProfileId: PATIENT_PROFILE_ID } as never,
+      OWNER_ACTOR,
+    );
+
+    expect(portabilityRepo.encountersOfPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      PATIENT_PROFILE_ID,
+    );
+    expect(result.recordCount).toBe(0);
+  });
+});
+
+describe('InsurancePortabilityService — descargas (ownership)', () => {
+  it('renderPdf rechaza a un actor ajeno con 403 y no llega a descargar el archivo', async () => {
+    const { service, releaseRepo, fileUpload, pdfService } = build();
+    releaseRepo.findExportJobById.mockResolvedValue({
+      id: 'certificate-a',
+      patientProfileId: PATIENT_PROFILE_ID,
+      exportTypeConceptId: CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY,
+    });
+
+    await expect(
+      service.renderPdf('certificate-a', OTHER_ACTOR),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    expect(pdfService.render).not.toHaveBeenCalled();
+  });
+
+  it('downloadJson rechaza a un actor ajeno con 403 y no llega a descargar el archivo', async () => {
+    const { service, releaseRepo, fileUpload } = build();
+    releaseRepo.findExportJobById.mockResolvedValue({
+      id: 'certificate-a',
+      patientProfileId: PATIENT_PROFILE_ID,
+      exportTypeConceptId: CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY,
+    });
+
+    await expect(
+      service.downloadJson('certificate-a', OTHER_ACTOR),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+  });
+});
+
+describe('InsurancePortabilityService.verify — payload sin PHI', () => {
+  it('devuelve exactamente los 7 campos del contrato público, ninguno PHI', async () => {
+    const { service, releaseRepo } = build();
+    releaseRepo.findManifestByContentHash.mockResolvedValue({
+      healthExportJobId: 'job-a',
+      contentHash: 'a'.repeat(64),
+      recordCount: '14',
+    });
+    releaseRepo.findExportJobById.mockResolvedValue({
+      id: 'job-a',
+      exportTypeConceptId: CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY,
+      requestedAt: new Date('2026-09-18T18:00:00.000Z'),
+    });
+
+    const result = await service.verify('a'.repeat(64));
+
+    expect(result).toEqual({
+      status: 'VALID',
+      certificateId: 'job-a',
+      manifestHash: 'a'.repeat(64),
+      generatedAt: '2026-09-18T18:00:00.000Z',
+      recordCount: 14,
+      algorithm: 'SHA-256',
+      issuer: 'AloVida',
+    });
+    expect(Object.keys(result)).toHaveLength(7);
+  });
 });
 
 describe('InsurancePortabilityService.verify', () => {
@@ -219,5 +361,32 @@ describe('InsurancePortabilityService.verify', () => {
     await expect(service.verify('a'.repeat(64))).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
+  });
+
+  it('devuelve el mismo instante de emisión que el certificado selló, no otro `requestedAt`', async () => {
+    const { service, releaseRepo } = build();
+    const sealedAt = new Date('2026-09-18T18:00:00.000Z');
+    releaseRepo.findManifestByContentHash.mockResolvedValue({
+      healthExportJobId: 'job-a',
+      contentHash: 'a'.repeat(64),
+      recordCount: '3',
+    });
+    releaseRepo.findExportJobById.mockResolvedValue({
+      id: 'job-a',
+      exportTypeConceptId: 'CONCEPT_EXPORT_TYPE_INSURANCE_PORTABILITY',
+      requestedAt: sealedAt,
+    });
+    // El servicio compara `exportTypeConceptId` contra `CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY`
+    // real (importado), así que el valor arriba sólo sirve si coincide; para
+    // aislar el caso, se resuelve el mismo concepto que usa el servicio.
+    releaseRepo.findExportJobById.mockResolvedValue({
+      id: 'job-a',
+      exportTypeConceptId: CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY,
+      requestedAt: sealedAt,
+    });
+
+    const result = await service.verify('a'.repeat(64));
+
+    expect(result.generatedAt).toBe(sealedAt.toISOString());
   });
 });

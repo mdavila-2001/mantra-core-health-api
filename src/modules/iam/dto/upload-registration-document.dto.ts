@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Lo que devuelve `POST /iam/auth/upload-registration-document`: el `fileId`
- * que el alta (`POST /iam/auth/register-organization`, `legalDocuments`)
- * tiene que reenviar para reclamarlo.
+ * que el alta de organización (`legalDocuments`) o profesional
+ * (`credentials[].fileId`) tiene que reenviar para reclamarlo.
  */
 export class RegistrationDocumentUploadResponseDto {
   /**

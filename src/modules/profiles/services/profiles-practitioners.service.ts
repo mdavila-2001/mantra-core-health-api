@@ -72,11 +72,13 @@ import {
   SetPractitionerPhotoDto,
   AddOwnCredentialDto,
   OwnCredentialResponseDto,
+  UpdateOwnCredentialDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import {
   AddressesRepository,
   ContactPointsRepository,
+  IdentifiersRepository,
 } from '../../common/repositories';
 import { Identifiers } from '../../common/entities';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
@@ -200,6 +202,7 @@ export class ProfilesPractitionersService {
     private readonly attachableFiles: AttachableFileService,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
     private readonly catalogConceptsRepo: CatalogConceptsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
@@ -761,9 +764,10 @@ export class ProfilesPractitionersService {
    * alta no admite corregir); ahora delega en `replaceResidenceAddress`,
    * mismo criterio que ya tenía `ProfilesPatientsService.reemplazarDireccion`.
    */
-  private async reemplazarDomicilio(
+  private async reemplazarDireccion(
     tx: EntityManager,
     personId: string,
+    useConceptId: string,
     cambios: {
       municipalityConceptId?: string;
       lines?: string;
@@ -780,7 +784,7 @@ export class ProfilesPractitionersService {
       this.catalogConceptsRepo,
       {
         personId,
-        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        useConceptId,
         municipalityConceptId: cambios.municipalityConceptId,
         lines: cambios.lines,
         latitude: cambios.latitude,
@@ -792,39 +796,53 @@ export class ProfilesPractitionersService {
   }
 
   /**
-   * El documento de identidad y el domicilio completo (municipio, calle y
-   * coordenadas si las declaró).
+   * El documento de identidad y las dos direcciones de contacto (domicilio y
+   * trabajo, con coordenadas si se declararon).
    *
-   * Los dos los escribe el alta y ninguno volvía en la ficha. Van juntos en una
+   * El alta escribe estos datos y ninguno volvía en la ficha. Van juntos en una
    * lectura porque se piden a la vez y ninguno depende del otro; y devuelve un
    * objeto vacío en vez de fallar, para que la envoltura `sinTumbarLaFicha`
    * tenga algo neutro con lo que seguir.
    */
-  private async leerDocumentoYDomicilio(
+  private async leerDocumentoYDirecciones(
     em: EntityManager,
     personId: string,
   ): Promise<{
     nationalId?: string;
     issuerArea?: string;
+    taxId?: string;
+    taxHolderName?: string;
     municipio?: string;
     homeAddress?: AddressSummary;
+    workAddress?: AddressSummary;
   }> {
-    const [documentos, domicilio] = await Promise.all([
+    const [documentos, domicilio, trabajo] = await Promise.all([
       em.find(Identifiers, { ownerId: personId, validTo: null }),
       this.addressesRepo.findVigenteByOwnerAndUse(
         em,
         personId,
         CONCEPTS.ADDR_USE_HOME,
       ),
+      this.addressesRepo.findVigenteByOwnerAndUse(
+        em,
+        personId,
+        CONCEPTS.ADDR_USE_WORK,
+      ),
     ]);
     const documento = documentos.find(
       (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
+    const fiscal = documentos.find(
+      (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    );
     return {
       nationalId: documento?.value,
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      taxId: fiscal?.value,
+      taxHolderName: fiscal?.holderName,
       municipio: domicilio?.municipalityConceptId,
       homeAddress: summarizeAddress(domicilio),
+      workAddress: summarizeAddress(trabajo),
     };
   }
 
@@ -939,16 +957,16 @@ export class ProfilesPractitionersService {
             { profileId, pieza: 'contacto' },
           )
         : Promise.resolve([]),
-      // El documento y el domicilio: sólo en la lectura propia y envueltos como
-      // el resto. Un fallo acá deja la ficha sin esos dos datos, no sin ficha.
+      // El documento y las direcciones: sólo en la lectura propia y envueltos
+      // como el resto. Un fallo acá deja la ficha sin esos datos, no sin ficha.
       incluyeContacto
         ? this.sinTumbarLaFicha(
-            () => this.leerDocumentoYDomicilio(em, person.id),
+            () => this.leerDocumentoYDirecciones(em, person.id),
             {},
             { profileId, pieza: 'filiación' },
           )
         : Promise.resolve(
-            {} as Awaited<ReturnType<typeof this.leerDocumentoYDomicilio>>,
+            {} as Awaited<ReturnType<typeof this.leerDocumentoYDirecciones>>,
           ),
     ]);
 
@@ -1007,8 +1025,11 @@ export class ProfilesPractitionersService {
       birthDate: person.birthDate,
       nationalId: filiacion.nationalId,
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
+      taxId: filiacion.taxId,
+      taxHolderName: filiacion.taxHolderName,
       residenceMunicipalityConceptId: filiacion.municipio,
       homeAddress: filiacion.homeAddress,
+      workAddress: filiacion.workAddress,
       // Ocupación y empleador viven en `persons`, no en `filiacion` (que ya
       // resuelve solo `incluyeContacto`): sin este condicional saldrían
       // también en la ficha que ve un tercero, y son un dato personal como el
@@ -1042,6 +1063,12 @@ export class ProfilesPractitionersService {
         id: credential.id,
         credentialTypeConceptId: credential.credentialTypeConceptId,
         number: credential.number,
+        // El identificador permite que el titular vuelva a descargar el
+        // diploma. No se incluye en la ficha de terceros: un UUID no es un
+        // permiso de lectura y tampoco debe revelar vínculos a documentos.
+        ...(incluyeContacto && credential.fileId
+          ? { fileId: credential.fileId }
+          : {}),
         issuingInstitutionText: credential.issuingInstitutionText,
         issueDate: credential.issueDate,
         expiryDate: credential.expiryDate,
@@ -1187,6 +1214,17 @@ export class ProfilesPractitionersService {
         aplicarEmpresa(person, dto);
         touch(person, actor.id);
 
+        if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
+          await this.reemplazarNit(
+            tx,
+            person.id,
+            dto.taxId,
+            dto.taxHolderName,
+            actor.id,
+            ahora,
+          );
+        }
+
         if (dto.phone !== undefined) {
           await this.reemplazarTelefono(
             tx,
@@ -1224,14 +1262,33 @@ export class ProfilesPractitionersService {
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
         ) {
-          await this.reemplazarDomicilio(
+          await this.reemplazarDireccion(
             tx,
             person.id,
+            CONCEPTS.ADDR_USE_HOME,
             {
               municipalityConceptId: dto.residenceMunicipalityConceptId,
               lines: dto.homeAddressLines,
               latitude: dto.homeLatitude,
               longitude: dto.homeLongitude,
+            },
+            actor.id,
+            ahora,
+          );
+        }
+        if (
+          dto.workAddressLines !== undefined ||
+          dto.workLatitude !== undefined ||
+          dto.workLongitude !== undefined
+        ) {
+          await this.reemplazarDireccion(
+            tx,
+            person.id,
+            CONCEPTS.ADDR_USE_WORK,
+            {
+              lines: dto.workAddressLines,
+              latitude: dto.workLatitude,
+              longitude: dto.workLongitude,
             },
             actor.id,
             ahora,
@@ -1246,6 +1303,51 @@ export class ProfilesPractitionersService {
     // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
     // las colecciones y la actividad, que esta operación no toca.
     return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Reemplaza la identidad fiscal sin destruir su historial.
+   *
+   * El NIT y su titular son un solo hecho de facturación: si el PATCH trae
+   * únicamente uno, el otro se conserva de la fila vigente. Una cadena vacía
+   * en el número cierra la fila sin abrir otra.
+   */
+  private async reemplazarNit(
+    tx: EntityManager,
+    personId: string,
+    nit: string | undefined,
+    razonSocial: string | undefined,
+    actorUserId: string,
+    ahora: Date,
+  ): Promise<void> {
+    const filas = await tx.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const vigente = filas.find(
+      (fila) => fila.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    );
+    const numero = (nit ?? vigente?.value ?? '').trim();
+    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
+
+    if (vigente?.value === numero && (vigente.holderName ?? '') === titular) {
+      return;
+    }
+    if (vigente) {
+      vigente.validTo = ahora;
+      touch(vigente, actorUserId);
+    }
+    if (numero === '') return;
+
+    this.identifiersRepo.create(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+      value: numero,
+      holderName: titular === '' ? undefined : titular,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId,
+    });
   }
 
   /**
@@ -1667,7 +1769,10 @@ export class ProfilesPractitionersService {
       'Verifying credential',
     );
     return this.em.transactional(async (tx) => {
-      const credential = await this.credentialsRepo.findById(tx, credentialId);
+      const credential = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
       if (!credential) {
         throw new ResourceNotFoundException('Credencial no encontrada', {
           credentialId,
@@ -2508,6 +2613,90 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * Corrige una credencial propia mientras siga pendiente de revisión.
+   * Reutiliza el propietario resuelto desde la sesión y el control existente
+   * del ciclo de vida/propiedad de archivos.
+   */
+  async updateOwnCredential(
+    credentialId: string,
+    dto: UpdateOwnCredentialDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (
+      dto.credentialTypeConceptId !== undefined &&
+      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+        dto.credentialTypeConceptId,
+      )
+    ) {
+      throw new PreconditionFailedException(
+        'Ese concepto no es un tipo de credencial profesional',
+        { credentialTypeConceptId: dto.credentialTypeConceptId },
+      );
+    }
+
+    await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const credential = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
+      if (!credential || credential.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Título no encontrado', {
+          credentialId,
+        });
+      }
+      if (credential.stateConceptId !== PROF.CRED_PENDING) {
+        throw new PreconditionFailedException(
+          'Ese título ya fue verificado o rechazado; no se puede editar',
+          { credentialId, stateConceptId: credential.stateConceptId },
+        );
+      }
+
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.credential.updateOwn',
+          },
+          {
+            subject: 'El archivo del título',
+            notFound: 'El archivo del título no existe',
+          },
+        );
+      }
+
+      if (dto.credentialTypeConceptId !== undefined) {
+        credential.credentialTypeConceptId = dto.credentialTypeConceptId;
+      }
+      if (dto.number !== undefined) credential.number = dto.number.trim();
+      if (dto.issuingInstitutionText !== undefined) {
+        credential.issuingInstitutionText = dto.issuingInstitutionText.trim();
+      }
+      if (dto.issueDate !== undefined) {
+        credential.issueDate = new Date(dto.issueDate);
+      }
+      if (dto.fileId !== undefined) credential.fileId = dto.fileId;
+      touch(credential, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.credential.updateOwn',
+          credentialId,
+          actorId: actor.id,
+        },
+        'Own professional credential updated',
+      );
+    });
+  }
+
+  /**
    * Retira un título propio cargado por error (ALV-009/formación).
    *
    * Sólo mientras está PENDIENTE: uno ya verificado o rechazado es un hecho
@@ -2532,7 +2721,10 @@ export class ProfilesPractitionersService {
         tx,
         actor,
       );
-      const credencial = await this.credentialsRepo.findById(tx, credentialId);
+      const credencial = await this.credentialsRepo.findByIdForUpdate(
+        tx,
+        credentialId,
+      );
       if (!credencial || credencial.practitionerProfileId !== profileId) {
         throw new ResourceNotFoundException('Título no encontrado', {
           credentialId,

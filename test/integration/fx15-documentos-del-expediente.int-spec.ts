@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 import { SEED } from '../../src/common';
 
 /**
@@ -57,6 +62,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: PASSWORD,
         name: 'Profesional',

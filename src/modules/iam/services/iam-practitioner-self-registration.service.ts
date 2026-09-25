@@ -61,8 +61,12 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
-import { createResidenceAddress } from '../../common/services/residence-address';
+import {
+  createResidenceAddress,
+  createWorkAddress,
+} from '../../common/services/residence-address';
 import { FileUploadService } from '../../common/services/file-upload.service';
+import { AttachableFileService } from '../../common/services/attachable-file.service';
 import { FileCategory, FileSensitivity } from '../../common/dto';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
@@ -136,13 +140,14 @@ interface ContactoDeclarado {
 }
 
 /**
- * Traduce los cinco campos de contacto del alta a filas de
+ * Traduce los contactos del alta a filas de
  * `common.contact_points`.
  *
- * El registro del médico pide correo y celular **personales** además de los del
- * trabajo, y un fijo de trabajo. Cada uno se distingue por el par
- * sistema × uso; el correo de trabajo es además la identidad de login, por eso
- * es el único obligatorio.
+ * Cuando llega `workEmail`, `email` es el correo de acceso/personal y el nuevo
+ * campo representa el de trabajo. Sin `workEmail`, `email` sigue guardándose
+ * como correo laboral para no cambiar el comportamiento de clientes anteriores;
+ * `personalEmail` continúa siendo aceptado como contacto personal opcional.
+ * Cada contacto se distingue por sistema × uso.
  *
  * `dto.phone` es la forma anterior de declarar el teléfono y se grababa como
  * `PHONE` con uso de trabajo. **Sigue cayendo exactamente ahí**: reinterpretarlo
@@ -159,6 +164,7 @@ function contactosDeclarados(
     RegisterPractitionerDto,
     | 'email'
     | 'personalEmail'
+    | 'workEmail'
     | 'mobilePhone'
     | 'workMobilePhone'
     | 'workLandline'
@@ -166,17 +172,20 @@ function contactosDeclarados(
   >,
 ): readonly ContactoDeclarado[] {
   const fijoDeTrabajo = dto.workLandline ?? dto.phone;
+  const correoPersonal =
+    dto.personalEmail ?? (dto.workEmail ? dto.email : undefined);
+  const correoTrabajo = dto.workEmail ?? dto.email;
 
   const candidatos: readonly (ContactoDeclarado | null)[] = [
     {
       systemConceptId: CONCEPTS.CONTACT_EMAIL,
-      value: dto.email,
+      value: correoTrabajo,
       useConceptId: CONCEPTS.CONTACT_USE_WORK,
     },
-    dto.personalEmail
+    correoPersonal
       ? {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
-          value: dto.personalEmail,
+          value: correoPersonal,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
         }
       : null,
@@ -288,6 +297,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly tracing: TracingService,
     private readonly ownSiteProvisioning: OwnSiteProvisioningService,
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    private readonly attachableFiles: AttachableFileService,
     @Optional()
     private readonly fileUploadService?: FileUploadService,
   ) {
@@ -432,17 +442,13 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
-      // Con documento, el departamento emisor es obligatorio (el DTO ya lo
-      // exige por `@ValidateIf`); se comprueba acá también porque un llamador
-      // que no pase por el `ValidationPipe` HTTP podría saltárselo. Antes de
-      // cualquier escritura: la foto de perfil se sube a almacenamiento más
-      // abajo y un rollback de la transacción no la borraría.
-      if (dto.nationalId) {
-        await this.assertDepartamentoEmisor(
-          tx,
-          dto.issuerAdministrativeAreaConceptId,
-        );
-      }
+      // El CI y su departamento emisor son requisitos del alta médica. Se
+      // comprueba el catálogo también acá para proteger a llamadores que no
+      // pasen por el ValidationPipe HTTP. Ocurre antes de cualquier escritura.
+      await this.assertDepartamentoEmisor(
+        tx,
+        dto.issuerAdministrativeAreaConceptId,
+      );
 
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma
       // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
@@ -640,11 +646,28 @@ export class IamPractitionerSelfRegistrationService {
             { credentialTypeConceptId: declarada.credentialTypeConceptId },
           );
         }
+        if (declarada.fileId) {
+          await this.attachableFiles.claimAnonymousUpload(
+            tx,
+            declarada.fileId,
+            { tenantId: SEED.tenantId, ownerUserId: user.id },
+            {
+              allowedMimeTypes: ['application/pdf'],
+              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+              operation: 'iam.practitioner.self-register.credential',
+            },
+            {
+              subject: 'El título académico',
+              notFound: 'El título académico no fue encontrado',
+            },
+          );
+        }
         this.professionalCredentialsRepo.create(tx, {
           practitionerProfileId: person.id,
           credentialTypeConceptId: declarada.credentialTypeConceptId,
           number: numero,
           issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
+          fileId: declarada.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,
         });
@@ -693,23 +716,19 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      if (dto.nationalId) {
-        // `issuerAdministrativeAreaConceptId` ya se comprobó semánticamente
-        // (VS_BO_DEPARTMENT) al principio de esta transacción.
-        this.identifiersRepo.create(tx, {
-          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-          ownerId: person.id,
-          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-          value: dto.nationalId,
-          useConceptId: CONCEPTS.USE_OFFICIAL,
-          stateConceptId: CONCEPTS.STATE_ACTIVE,
-          // Sólo tiene sentido dentro de este `if`: es el departamento que
-          // emitió ESTE documento, no un dato suelto de la persona.
-          issuerAdministrativeAreaConceptId:
-            dto.issuerAdministrativeAreaConceptId,
-          actorUserId: user.id,
-        });
-      }
+      // El departamento emisor ya se comprobó semánticamente
+      // (VS_BO_DEPARTMENT) al principio de esta transacción.
+      this.identifiersRepo.create(tx, {
+        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+        ownerId: person.id,
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: dto.nationalId,
+        useConceptId: CONCEPTS.USE_OFFICIAL,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
+        actorUserId: user.id,
+      });
 
       // Domicilio: municipio, calle y coordenadas elegidas en el alta (P19).
       // El departamento lo deriva el ayudante del código del INE, no viene
@@ -725,6 +744,22 @@ export class IamPractitionerSelfRegistrationService {
           lines: dto.homeAddressLines,
           latitude: dto.homeLatitude,
           longitude: dto.homeLongitude,
+          actorUserId: user.id,
+        },
+      );
+
+      // Dirección y punto de trabajo (MED-03): fila distinta de HOME y del
+      // consultorio propio opcional. El registro sólo tiene líneas y GPS; no
+      // selecciona municipio laboral, que queda sin derivación administrativa.
+      await createWorkAddress(
+        this.addressesRepo,
+        tx,
+        this.catalogConceptsRepo,
+        {
+          personId: person.id,
+          lines: dto.workAddressLines,
+          latitude: dto.workLatitude,
+          longitude: dto.workLongitude,
           actorUserId: user.id,
         },
       );
@@ -925,8 +960,8 @@ export class IamPractitionerSelfRegistrationService {
    * La columna `issuer_administrative_area_concept_id` es una FK plana a
    * `terminology.catalog_concepts`: la base aceptaría cualquier concepto (un
    * municipio, una especialidad) como si fuera un departamento. El DTO exige
-   * el campo con `@ValidateIf` cuando hay `nationalId`, así que `conceptId`
-   * indefinido sólo puede llegar acá si alguien invoca el servicio sin pasar
+   * el campo es obligatorio, así que `conceptId` indefinido sólo puede llegar
+   * acá si alguien invoca el servicio sin pasar
    * por el `ValidationPipe` HTTP — se lo rechaza igual, en vez de dejar que
    * `assertIsAdministrativeArea` reciba `undefined`.
    *
@@ -940,7 +975,7 @@ export class IamPractitionerSelfRegistrationService {
   ): Promise<void> {
     if (conceptId === undefined) {
       throw new PreconditionFailedException(
-        'El departamento emisor es obligatorio cuando se declara el documento',
+        'El departamento emisor es obligatorio para el alta del profesional',
         { field: 'issuerAdministrativeAreaConceptId' },
       );
     }

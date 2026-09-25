@@ -35,7 +35,10 @@ import {
   ReferenceRangesRepository,
   PrescriptionFavoritesRepository,
 } from './repositories';
-import { ServiceRequestsRepository } from '../clinical/repositories';
+import {
+  EncountersRepository,
+  ServiceRequestsRepository,
+} from '../clinical/repositories';
 // Los favoritos de prescripción cuelgan del perfil profesional de quien pide, y
 // `ProfileOwnershipService` es quien resuelve de quién es la sesión. Se provee la
 // clase con sus tres repositorios —todos sin estado, reciben el EntityManager por
@@ -82,6 +85,7 @@ import {
     PrescriptionFavoritesRepository,
     // Repositorio de otro módulo (clinical) reutilizado por el fan-out de order sets
     ServiceRequestsRepository,
+    EncountersRepository,
     // Titularidad del perfil profesional (ver el comentario del import)
     ProfileOwnershipService,
     PersonAccountLinksRepository,

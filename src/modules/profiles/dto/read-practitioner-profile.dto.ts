@@ -85,6 +85,14 @@ export class PractitionerCredentialDto {
   @ApiProperty()
   number!: string;
 
+  /** Identificador del diploma adjunto. Sólo se incluye en la lectura propia. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Sólo en la lectura propia; permite descargar el diploma adjunto',
+  })
+  fileId?: string;
+
   /** Dónde se cursó, en texto libre: la institución no siempre es un tenant. */
   @ApiPropertyOptional()
   issuingInstitutionText?: string;
@@ -241,7 +249,7 @@ export class PractitionerProfileSummaryDto {
   @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
   workEmail?: string;
 
-  /** Correo personal, el que no sirve para entrar. */
+  /** Correo personal declarado por el profesional. */
   @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
   personalEmail?: string;
 
@@ -291,6 +299,14 @@ export class PractitionerProfileSummaryDto {
   })
   issuerAdministrativeAreaConceptId?: string;
 
+  /** NIT para facturación; sólo se incluye en la lectura propia. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  taxId?: string;
+
+  /** Nombre o razón social asociada al NIT; sólo en la lectura propia. */
+  @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
+  taxHolderName?: string;
+
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Municipio de residencia (VS_BO_MUNICIPALITY)',
@@ -303,6 +319,10 @@ export class PractitionerProfileSummaryDto {
    */
   @ApiPropertyOptional({ type: OwnAddressDto })
   homeAddress?: OwnAddressDto;
+
+  /** Dirección del lugar de trabajo; sólo en la lectura propia. */
+  @ApiPropertyOptional({ type: OwnAddressDto })
+  workAddress?: OwnAddressDto;
 
   /**
    * Ocupación elegida del catálogo (VS_BO_OCCUPATION). Sólo en la lectura

@@ -52,20 +52,20 @@ const PHONE_PATTERN_MESSAGE =
  * plataforma la que valida la matrícula antes de que el perfil pueda atender.
  *
  * El identificador de login es el **correo**, como en el alta del owner de una
- * organización. El documento de identidad es opcional y se guarda como
+ * organización. El CI es obligatorio para el alta profesional y se guarda como
  * identificador oficial de la persona.
  */
 export class RegisterPractitionerDto {
   /**
-   * Correo de trabajo, con el que el profesional iniciará sesión.
+   * Correo con el que el profesional iniciará sesión.
    *
-   * Es el **correo de trabajo** y a la vez la identidad de login: así se venía
-   * grabando ya (`CONTACT_USE_WORK`) y así lo confirmó el propietario al pedir
-   * los dos correos separados. El personal viaja en {@link personalEmail} y no
-   * sirve para entrar.
+   * Por compatibilidad, sin `workEmail` se conserva el comportamiento anterior
+   * y se guarda también como contacto de trabajo. Si se envía `workEmail`, este
+   * campo se trata como correo personal/de acceso y `workEmail` como contacto
+   * laboral.
    */
   @ApiProperty({
-    description: 'Correo de trabajo; es la identidad de login del profesional',
+    description: 'Correo de acceso del profesional',
     format: 'email',
     maxLength: 320,
   })
@@ -74,7 +74,9 @@ export class RegisterPractitionerDto {
   email!: string;
 
   /**
-   * Correo personal, distinto del de trabajo con el que se entra.
+   * Correo personal explícito. Si se omite y llega `workEmail`, `email` se usa
+   * como contacto personal; sin `workEmail`, se conserva la forma anterior en
+   * la que `email` es el contacto laboral y este campo agrega el personal.
    */
   @ApiPropertyOptional({
     description: 'Correo personal; no sirve para iniciar sesión',
@@ -85,6 +87,17 @@ export class RegisterPractitionerDto {
   @IsEmail()
   @MaxLength(320)
   personalEmail?: string;
+
+  /** Correo del lugar de trabajo, separado del correo de acceso. */
+  @ApiPropertyOptional({
+    description: 'Correo de trabajo, distinto del correo de acceso',
+    format: 'email',
+    maxLength: 320,
+  })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(320)
+  workEmail?: string;
 
   /**
    * Contraseña en claro; se persiste sólo su hash argon2id.
@@ -258,33 +271,29 @@ export class RegisterPractitionerDto {
    */
   @ApiPropertyOptional({
     description:
-      'Especialidades declaradas (hasta 3). La primera queda como principal.',
+      'Especialidades declaradas (una principal y hasta tres adicionales).',
     type: [String],
     format: 'uuid',
-    maxItems: 3,
+    maxItems: 4,
   })
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(3)
+  @ArrayMaxSize(4)
   @IsUUID(undefined, { each: true })
   specialtyConceptIds?: string[];
 
-  /**
-   * Documento de identidad. Opcional: se guarda como identificador oficial de
-   * la persona, no como credencial de login.
-   */
-  @ApiPropertyOptional({
+  /** Documento de identidad obligatorio para asociar la matrícula a la persona. */
+  @ApiProperty({
     description:
-      'Documento de identidad (se guarda como identificador oficial)',
+      'Documento de identidad obligatorio; se guarda como identificador oficial',
     maxLength: 40,
   })
-  @IsOptional()
   @IsString()
   @MaxLength(40)
   @Matches(/^[A-Za-z0-9.-]+$/, {
     message: 'El documento sólo admite letras, dígitos, punto y guion',
   })
-  nationalId?: string;
+  nationalId!: string;
 
   /**
    * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`).
@@ -296,23 +305,17 @@ export class RegisterPractitionerDto {
    * `400 property issuerAdministrativeAreaConceptId should not exist`, así que
    * elegir el departamento rompía el alta entera en vez de enriquecerla.
    *
-   * Se ignora sin `nationalId`: sin documento no hay identificador al que
-   * atarle un departamento de emisión. **Con documento pasa a ser obligatorio**
-   * (PR #390 del front): `@ValidateIf` sin `@IsOptional` — agregarlo anularía
-   * la condición y dejaría el campo opcional siempre.
+   * El CI es obligatorio en el alta profesional, por eso también se exige el
+   * departamento de emisión. El concepto se vuelve a validar contra
+   * `VS_BO_DEPARTMENT` antes de persistir el identificador.
    */
-  @ApiPropertyOptional({
+  @ApiProperty({
     format: 'uuid',
     description:
-      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); ' +
-      'obligatorio si se envía `nationalId`',
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
   })
-  @ValidateIf(
-    (dto: RegisterPractitionerDto) =>
-      typeof dto.nationalId === 'string' && dto.nationalId.trim() !== '',
-  )
   @IsUUID()
-  issuerAdministrativeAreaConceptId?: string;
+  issuerAdministrativeAreaConceptId!: string;
 
   /**
    * Municipio de residencia (miembro de `VS_BO_MUNICIPALITY`).
@@ -381,6 +384,39 @@ export class RegisterPractitionerDto {
   @Min(-180)
   @Max(180)
   homeLongitude?: number;
+
+  /** Calle y número de la dirección laboral, separada del domicilio particular. */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Calle y número de la dirección laboral',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  workAddressLines?: string;
+
+  /** Latitud del trabajo. Se envía junto con {@link RegisterPractitionerDto.workLongitude}. */
+  @ApiPropertyOptional({ minimum: -90, maximum: 90 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  workLatitude?: number;
+
+  /** Longitud del trabajo. Ver {@link RegisterPractitionerDto.workLatitude}. */
+  @ApiPropertyOptional({ minimum: -180, maximum: 180 })
+  @ValidateIf(
+    (dto: RegisterPractitionerDto) =>
+      dto.workLatitude !== undefined || dto.workLongitude !== undefined,
+  )
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  workLongitude?: number;
 
   /**
    * Forma anterior de declarar el teléfono del trabajo.
@@ -684,6 +720,20 @@ export class RegisterPractitionerCredentialDto {
   @IsString()
   @MaxLength(200)
   issuingInstitutionText?: string;
+
+  /**
+   * PDF precargado anónimamente por `POST /iam/auth/upload-registration-document`.
+   * El alta lo reclama para el usuario recién creado dentro de la misma
+   * transacción y lo vincula a esta fila de credencial.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  fileId?: string;
 }
 
 /** Resultado del auto-registro de un profesional de salud. */

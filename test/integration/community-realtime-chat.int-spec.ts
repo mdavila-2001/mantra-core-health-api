@@ -6,6 +6,7 @@ import {
   bearer,
   type TestContext,
   camposObligatoriosDePaciente,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -90,6 +91,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
     await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(emailDoctor),
         email: emailDoctor,
         password: 'S3cret-passw0rd',
         name: 'Renata',

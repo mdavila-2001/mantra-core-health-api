@@ -11,15 +11,15 @@ import { RegistrationDocumentUploadResponseDto } from '../dto';
 const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
 
 /**
- * Pre-carga pública de un documento legal del registro de organización
- * (subtarea 1.2): `POST /iam/auth/upload-registration-document`.
+ * Pre-carga pública de un PDF para un registro —documento legal de
+ * organización o credencial profesional—: `POST /iam/auth/upload-registration-document`.
  *
  * Delega en `FileUploadService.uploadAnonymous` con una política más
  * estricta que la de `/common/files/upload` (sólo PDF, no toda la categoría
  * `DOCUMENT`) y sin actor: quien sube todavía no tiene cuenta. El archivo
- * queda sin dueño hasta que `POST /iam/auth/register-organization` lo
- * reclama por su `fileId` (`AttachableFileService.claimAnonymousUpload`,
- * dentro de la transacción del alta).
+ * queda sin dueño hasta que el alta correspondiente lo reclama por su
+ * `fileId` (`AttachableFileService.claimAnonymousUpload`, dentro de la
+ * transacción del alta).
  */
 @Injectable()
 export class IamRegistrationDocumentUploadService {
@@ -32,7 +32,7 @@ export class IamRegistrationDocumentUploadService {
 
   /**
    * @param file - Contenido recibido por multipart.
-   * @returns El `fileId` a reenviar en `legalDocuments` del alta.
+   * @returns El `fileId` a reenviar en `legalDocuments` o `credentials[].fileId`.
    * @throws PreconditionFailedException si el contenido viene vacío, excede
    *   el máximo configurado o no es un PDF (por magic bytes, no por el
    *   `Content-Type` declarado).

@@ -19,7 +19,67 @@ const ALTA_MINIMA = {
   password: 'secreto12',
   displayName: 'Ana Rojas',
   licenseNumber: 'MP-1234',
+  nationalId: '4821993',
+  issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
 };
+
+describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
+  it('rechaza el alta si falta el documento de identidad', async () => {
+    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
+    expect(await propiedadesConError(sinDocumento)).toContain('nationalId');
+  });
+});
+
+describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
+  it('acepta el correo laboral junto al correo de acceso personal', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        email: 'ana.personal@example.test',
+        workEmail: 'ana@hospital.example.test',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un correo laboral con formato inválido', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workEmail: 'no-es-un-correo',
+      }),
+    ).toEqual(['workEmail']);
+  });
+});
+
+describe('RegisterPractitionerDto · especialidad principal y tres adicionales (MED-02)', () => {
+  const cuatroEspecialidades = [
+    '7218acbc-5098-56ae-980a-9345961ced89',
+    'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
+    'e0f2c074-572e-521c-a647-0ec85de5ff62',
+    '3f29af08-4339-5c4f-90d6-e3831c7f0fbc',
+  ];
+
+  it('acepta una especialidad principal y tres adicionales', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        specialtyConceptIds: cuatroEspecialidades,
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza una especialidad principal y cuatro adicionales', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        specialtyConceptIds: [
+          ...cuatroEspecialidades,
+          'c7a25eba-6961-5b97-bfae-bf1e2a33ce19',
+        ],
+      }),
+    ).toEqual(['specialtyConceptIds']);
+  });
+});
 
 /**
  * Aplana el árbol de `ValidationError` a rutas `a.b.c`, igual que hace el
@@ -147,6 +207,36 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     ).toEqual([]);
   });
 
+  it('acepta el fileId del PDF precargado para asociarlo a ese título', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'TIT-001',
+            fileId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un fileId que no es uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'TIT-001',
+            fileId: 'documento-subido',
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.fileId']);
+  });
+
   it('rechaza un elemento sin número', async () => {
     expect(
       await propiedadesConError({
@@ -254,25 +344,16 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
   });
 });
 
-/**
- * El departamento emisor del documento (1.4): `ALTA_MINIMA` no trae
- * `nationalId`, así que sirve tal cual para «sin documento, el departamento
- * no hace falta». Con documento pasa a ser obligatorio (PR #390 del front) —
- * mismo catálogo `VS_BO_DEPARTMENT` que en `RegisterPatientDto`, pero acá
- * condicionado a `nationalId` en vez de siempre obligatorio.
- */
+/** CI y departamento emisor obligatorios para el alta profesional (MED-01). */
 describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', () => {
-  it('acepta el alta sin documento ni departamento', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
-  });
-
-  it('rechaza el documento sin departamento', async () => {
-    expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        nationalId: '4821993',
-      }),
-    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  it('rechaza el alta si falta el departamento emisor', async () => {
+    const {
+      issuerAdministrativeAreaConceptId: _issuerAdministrativeAreaConceptId,
+      ...sinDepartamento
+    } = ALTA_MINIMA;
+    expect(await propiedadesConError(sinDepartamento)).toEqual([
+      'issuerAdministrativeAreaConceptId',
+    ]);
   });
 
   it('acepta documento y departamento juntos', async () => {
@@ -286,20 +367,16 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
     ).toEqual([]);
   });
 
-  it('acepta el departamento sin documento: se ignora', async () => {
+  it('rechaza el departamento sin documento', async () => {
+    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
     expect(
       await propiedadesConError({
-        ...ALTA_MINIMA,
-        issuerAdministrativeAreaConceptId:
-          '22222222-2222-4222-8222-222222222222',
+        ...sinDocumento,
       }),
-    ).toEqual([]);
+    ).toEqual(['nationalId']);
   });
 
-  it('un documento en blanco no activa la exigencia del departamento', async () => {
-    // El `Matches` del propio `nationalId` ya lo rechaza; lo que se fija acá
-    // es que el `ValidateIf` no dispare por una condición mal escrita
-    // (`!== undefined` en vez de comprobar la cadena vacía).
+  it('rechaza el CI en blanco', async () => {
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,
@@ -454,5 +531,41 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
       forbidNonWhitelisted: true,
     });
     expect(rutasConError(errores)).toEqual(['homeLongitude']);
+  });
+});
+
+/**
+ * La dirección laboral y el GPS (MED-03) se guardan aparte del domicilio.
+ */
+describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
+  it('acepta la dirección y el par de coordenadas del trabajo', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workAddressLines: 'Hospital Central, Av. Principal 200',
+        workLatitude: -17.78,
+        workLongitude: -63.18,
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta el alta sin dirección de trabajo', async () => {
+    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+  });
+
+  it('rechaza coordenadas laborales incompletas', async () => {
+    expect(
+      await propiedadesConError({ ...ALTA_MINIMA, workLatitude: -17.78 }),
+    ).toEqual(['workLongitude']);
+  });
+
+  it('rechaza coordenadas laborales fuera de rango', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        workLatitude: -91,
+        workLongitude: -63.18,
+      }),
+    ).toEqual(['workLatitude']);
   });
 });

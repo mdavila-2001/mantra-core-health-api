@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1308 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1308 requests en 142 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1360 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1360 requests en 142 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -4654,7 +4654,7 @@
       ]
     },
     {
-      "name": "admin (37)",
+      "name": "admin (87)",
       "item": [
         {
           "name": "content-packs",
@@ -5277,6 +5277,1325 @@
           ]
         },
         {
+          "name": "data-catalog",
+          "item": [
+            {
+              "name": "GET /admin/catalog/coverage · Cobertura explicada por dimensión (técnica, semántica, owner, sensibilidad, revisión)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/coverage",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "coverage"
+                  ],
+                  "query": [
+                    {
+                      "key": "schema",
+                      "value": "schema-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UNKNOWN sin escaneo terminado; NOT_APPLICABLE con denominador cero. Nunca un porcentaje inventado.\n\n`GET /admin/catalog/coverage`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataCatalogController_coverage`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('coverageId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects · Inventario de tablas y vistas, con estado de su ficha",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects"
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto como nextCursor",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "schema",
+                      "value": "schema-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "kind",
+                      "value": "TABLE",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "observationStatus",
+                      "value": "OBSERVED",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "reviewStatus",
+                      "value": "DRAFT",
+                      "description": "NONE = sin ficha",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Nombre técnico o de negocio",
+                      "disabled": true
+                    },
+                    {
+                      "key": "missing",
+                      "value": "purpose",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Inventario de tablas y vistas, con estado de su ficha. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataCatalogController_listObjects`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/scans · Corridas de escaneo, de la más reciente a la más antigua",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/scans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "scans"
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto como nextCursor",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Corridas de escaneo, de la más reciente a la más antigua. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/scans`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataCatalogController_listScans`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.scans || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('scanId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/schemas · Resumen por schema del alcance observado",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/schemas",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "schemas"
+                  ]
+                },
+                "description": "Resumen por schema del alcance observado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/schemas`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataCatalogController_listSchemas`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.schemas || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('schemaId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/scans · Solicitar un escaneo técnico (202 tras aceptación durable)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{Idempotency_Key}}",
+                    "description": "",
+                    "disabled": true
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/scans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "scans"
+                  ]
+                },
+                "description": "El worker data_catalog lo ejecuta. 409 si ya hay uno vivo de la misma fuente.\n\n`POST /admin/catalog/scans`\n\nRespuesta esperada: **202**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `DataCatalogController_requestScan`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/annotations/{annotationId}/review · Aprobar o rechazar la revisión vigente de una ficha",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/annotations/:annotationId/review",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "annotations",
+                    ":annotationId",
+                    "review"
+                  ],
+                  "variable": [
+                    {
+                      "key": "annotationId",
+                      "value": "{{annotationId}}",
+                      "description": "Identificador de ruta · variable `{{annotationId}}`"
+                    }
+                  ]
+                },
+                "description": "403 si quien revisa escribió la revisión; 409 si hay una revisión más reciente; 422 sin evidencia o sin comentario de rechazo.\n\n`POST /admin/catalog/annotations/{annotationId}/review`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `DataCatalogController_review`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"APPROVED\",\n  \"expectedRevisionNo\": 1,\n  \"comment\": \"comment-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{annotationId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.annotationId);",
+                      "  if (id) pm.environment.set('annotationId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/columns/{columnId}/evidence · Enlazar evidencia a una columna",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:columnId/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":columnId",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "columnId",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Enlazar evidencia a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/catalog/columns/{columnId}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `DataCatalogController_addColumnEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"SCHEMA_COMMENT\",\n  \"reference\": \"reference-ejemplo\",\n  \"excerpt\": \"excerpt-ejemplo\",\n  \"sourceRevision\": \"sourceRevision-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{columnId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.columnId);",
+                      "  if (id) pm.environment.set('columnId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/objects/{objectId}/evidence · Enlazar evidencia a la tabla",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "Enlazar evidencia a la tabla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/catalog/objects/{objectId}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `DataCatalogController_addObjectEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"SCHEMA_COMMENT\",\n  \"reference\": \"reference-ejemplo\",\n  \"excerpt\": \"excerpt-ejemplo\",\n  \"sourceRevision\": \"sourceRevision-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{objectId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.objectId);",
+                      "  if (id) pm.environment.set('objectId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/scans/{scanId}/cancel · Pedir la cancelación",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/scans/:scanId/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "scans",
+                    ":scanId",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "scanId",
+                      "value": "{{scanId}}",
+                      "description": "Identificador de ruta · variable `{{scanId}}`"
+                    }
+                  ]
+                },
+                "description": "En cola se cancela ya; en marcha queda cancelRequestedAt y el runner la confirma.\n\n`POST /admin/catalog/scans/{scanId}/cancel`\n\nRespuesta esperada: **202**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `DataCatalogController_cancelScan`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/columns/{columnId}/evidence · Evidencia de una columna",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:columnId/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":columnId",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "columnId",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Evidencia de una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/columns/{columnId}/evidence`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_listColumnEvidence`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.columns || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('columnId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/columns/{columnId}/history · Revisiones y decisiones de la ficha de una columna",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:columnId/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":columnId",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "columnId",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Revisiones y decisiones de la ficha de una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/columns/{columnId}/history`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_columnHistory`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.columns || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('columnId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId} · Ficha técnica, de negocio, cobertura y gobierno de un objeto",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "Ficha técnica, de negocio, cobertura y gobierno de un objeto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects/{objectId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_getObject`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId}/changes · Historial técnico (cambios detectados por escaneos)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "changes"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto como nextCursor",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Historial técnico (cambios detectados por escaneos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects/{objectId}/changes`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_listObjectChanges`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.changes || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('changeId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId}/columns · Columnas observadas y sus fichas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/columns",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "columns"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "Columnas observadas y sus fichas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects/{objectId}/columns`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_listColumns`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.columns || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('columnId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId}/evidence · Evidencia de la tabla",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "Evidencia de la tabla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects/{objectId}/evidence`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_listObjectEvidence`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId}/history · Revisiones y decisiones de la ficha de la tabla",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "Revisiones y decisiones de la ficha de la tabla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/objects/{objectId}/history`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_objectHistory`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/objects/{objectId}/impact · Impacto estructural (FK observadas): qué depende de la tabla y de qué depende",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/impact",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "impact"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "direction",
+                      "value": "both",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "depth",
+                      "value": "2",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Profundidad máx. 5 y 200 nodos; declara truncamiento y alcance. Una FK no es un flujo de datos.\n\n`GET /admin/catalog/objects/{objectId}/impact`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_impact`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/scans/{scanId} · Estado, contadores, huella y limitaciones de una corrida",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/scans/:scanId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "scans",
+                    ":scanId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "scanId",
+                      "value": "{{scanId}}",
+                      "description": "Identificador de ruta · variable `{{scanId}}`"
+                    }
+                  ]
+                },
+                "description": "Estado, contadores, huella y limitaciones de una corrida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/scans/{scanId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_getScan`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.scans || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('scanId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/scans/{scanId}/changes · Diff detectado por una corrida",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/scans/:scanId/changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "scans",
+                    ":scanId",
+                    "changes"
+                  ],
+                  "variable": [
+                    {
+                      "key": "scanId",
+                      "value": "{{scanId}}",
+                      "description": "Identificador de ruta · variable `{{scanId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto como nextCursor",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Diff detectado por una corrida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/scans/{scanId}/changes`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DataCatalogController_listScanChanges`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.changes || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('changeId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /admin/catalog/columns/{columnId}/annotation · Crear o editar la ficha de una columna",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:columnId/annotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":columnId",
+                    "annotation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "columnId",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Crear o editar la ficha de una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /admin/catalog/columns/{columnId}/annotation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `DataCatalogController_upsertColumnAnnotation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedVersion\": 0,\n  \"submit\": false,\n  \"changeReason\": \"changeReason-ejemplo\",\n  \"businessName\": {},\n  \"definition\": {},\n  \"purpose\": {},\n  \"existenceRationale\": {},\n  \"rowGrain\": {},\n  \"alternativesRationale\": {},\n  \"processSupported\": {},\n  \"sourceOfTruth\": {},\n  \"producers\": [\n    \"producers-ejemplo\"\n  ],\n  \"consumers\": [\n    \"consumers-ejemplo\"\n  ],\n  \"deletionImpact\": {},\n  \"businessOwner\": {},\n  \"dataSteward\": {},\n  \"technicalOwner\": {},\n  \"unit\": {},\n  \"valueDomain\": {},\n  \"nullSemantics\": {},\n  \"sensitivity\": \"UNKNOWN\",\n  \"openQuestions\": [\n    {\n      \"field\": \"businessName\",\n      \"question\": \"question-ejemplo\",\n      \"owner\": \"owner-ejemplo\",\n      \"dueDate\": \"2026-01-01\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /admin/catalog/objects/{objectId}/annotation · Crear o editar la ficha de una tabla (expectedVersion obligatorio)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/objects/:objectId/annotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "objects",
+                    ":objectId",
+                    "annotation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "objectId",
+                      "value": "{{objectId}}",
+                      "description": "Identificador de ruta · variable `{{objectId}}`"
+                    }
+                  ]
+                },
+                "description": "409 si la ficha cambió desde que se leyó; 422 si falta un campo obligatorio al enviar a revisión o el texto es relleno.\n\n`PUT /admin/catalog/objects/{objectId}/annotation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `DataCatalogController_upsertObjectAnnotation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedVersion\": 0,\n  \"submit\": false,\n  \"changeReason\": \"changeReason-ejemplo\",\n  \"businessName\": {},\n  \"definition\": {},\n  \"purpose\": {},\n  \"existenceRationale\": {},\n  \"rowGrain\": {},\n  \"alternativesRationale\": {},\n  \"processSupported\": {},\n  \"sourceOfTruth\": {},\n  \"producers\": [\n    \"producers-ejemplo\"\n  ],\n  \"consumers\": [\n    \"consumers-ejemplo\"\n  ],\n  \"deletionImpact\": {},\n  \"businessOwner\": {},\n  \"dataSteward\": {},\n  \"technicalOwner\": {},\n  \"unit\": {},\n  \"valueDomain\": {},\n  \"nullSemantics\": {},\n  \"sensitivity\": \"UNKNOWN\",\n  \"openQuestions\": [\n    {\n      \"field\": \"businessName\",\n      \"question\": \"question-ejemplo\",\n      \"owner\": \"owner-ejemplo\",\n      \"dueDate\": \"2026-01-01\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
           "name": "directory-admin-tenants",
           "item": [
             {
@@ -5603,6 +6922,1207 @@
                       "pm.test('status 200', function () {",
                       "  pm.response.to.have.status(200);",
                       "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ops-console",
+          "item": [
+            {
+              "name": "GET /admin/ops/backups · Políticas de backup con su última prueba de restauración",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/backups",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "backups"
+                  ]
+                },
+                "description": "Políticas de backup con su última prueba de restauración. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/backups`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_backups`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.backups || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('backupId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/change-requests · Solicitudes de cambio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/change-requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "change-requests"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Solicitudes de cambio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/change-requests`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_changeRequests`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.changeRequests || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('changeRequestId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/deployments · Despliegues recientes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/deployments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "deployments"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Despliegues recientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/deployments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_deployments`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.deployments || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('deploymentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/incidents · Incidentes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/incidents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "incidents"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "open",
+                      "value": "True",
+                      "description": "Sólo incidentes vivos (abiertos, reconocidos, mitigados)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Incidentes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/incidents`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_incidents`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.incidents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('incidentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/readiness · Preparación para producción: controles PASS/FAIL/UNKNOWN/N_A con evidencia",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/readiness",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "readiness"
+                  ]
+                },
+                "description": "Un control bloqueante en FAIL o UNKNOWN impide READY. Nunca se promedia.\n\n`GET /admin/ops/readiness`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_readiness`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.readiness || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('readinessId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/slos · SLO activos con su última medición (numerador y denominador)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/slos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "slos"
+                  ]
+                },
+                "description": "SLO activos con su última medición (numerador y denominador). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/slos`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `OpsConsoleController_slos`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.slos || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('sloId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/ops/incidents/{id} · Incidente con su timeline",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/ops/incidents/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "ops",
+                    "incidents",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{incidentId}}",
+                      "description": "Identificador de ruta · variable `{{incidentId}}`"
+                    }
+                  ]
+                },
+                "description": "Incidente con su timeline. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/ops/incidents/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `OpsConsoleController_incident`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.incidents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('incidentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "qa-execution",
+          "item": [
+            {
+              "name": "GET /admin/qa/plans · Planes, del más reciente al más antiguo",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "PENDING_APPROVAL",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "suiteId",
+                      "value": "suiteId-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Planes, del más reciente al más antiguo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/plans`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaExecutionController_listPlans`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.plans || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('planId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/targets · Destinos aprobados por entorno (sin valores de secretos)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/targets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "targets"
+                  ]
+                },
+                "description": "Destinos aprobados por entorno (sin valores de secretos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/targets`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaExecutionController_listTargets`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.targets || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('targetId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/qa/plans · Pedir un plan (202). Queda QUEUED o PENDING_APPROVAL; lo ejecuta el worker qa_lab",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{Idempotency_Key}}",
+                    "description": "",
+                    "disabled": true
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans"
+                  ]
+                },
+                "description": "Pedir un plan (202). Queda QUEUED o PENDING_APPROVAL; lo ejecuta el worker qa_lab. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/qa/plans`\n\nRespuesta esperada: **202**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `QaExecutionController_createPlan`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"suiteId\": \"suiteId-ejemplo\",\n  \"environmentId\": \"environmentId-ejemplo\",\n  \"limits\": {\n    \"maxRequests\": 1,\n    \"maxDurationSeconds\": 1,\n    \"requestTimeoutMs\": 1,\n    \"minIntervalMs\": 1\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{planId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.planId);",
+                      "  if (id) pm.environment.set('planId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/qa/plans/preflight · Dry-run: pasos, URL resueltas, límites recortados, hash y si requiere aprobación. No llama a nada",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans/preflight",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans",
+                    "preflight"
+                  ]
+                },
+                "description": "Dry-run: pasos, URL resueltas, límites recortados, hash y si requiere aprobación. No llama a nada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/qa/plans/preflight`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `QaExecutionController_preflight`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"suiteId\": \"suiteId-ejemplo\",\n  \"environmentId\": \"environmentId-ejemplo\",\n  \"limits\": {\n    \"maxRequests\": 1,\n    \"maxDurationSeconds\": 1,\n    \"requestTimeoutMs\": 1,\n    \"minIntervalMs\": 1\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{planId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.planId);",
+                      "  if (id) pm.environment.set('planId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/qa/plans/{planId}/approvals · Aprobar o rechazar el hash vigente del plan, con vencimiento",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans/:planId/approvals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans",
+                    ":planId",
+                    "approvals"
+                  ],
+                  "variable": [
+                    {
+                      "key": "planId",
+                      "value": "{{planId}}",
+                      "description": "Identificador de ruta · variable `{{planId}}`"
+                    }
+                  ]
+                },
+                "description": "Aprobar o rechazar el hash vigente del plan, con vencimiento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/qa/plans/{planId}/approvals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `QaExecutionController_approve`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"APPROVED\",\n  \"planHash\": \"planHash-ejemplo\",\n  \"reason\": \"reason-ejemplo\",\n  \"expiresInMinutes\": 60\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{approvalId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.approvalId);",
+                      "  if (id) pm.environment.set('approvalId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/qa/plans/{planId}/cancel · Pedir la cancelación (el runner la confirma entre casos)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans/:planId/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans",
+                    ":planId",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "planId",
+                      "value": "{{planId}}",
+                      "description": "Identificador de ruta · variable `{{planId}}`"
+                    }
+                  ]
+                },
+                "description": "Pedir la cancelación (el runner la confirma entre casos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/qa/plans/{planId}/cancel`\n\nRespuesta esperada: **202**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `QaExecutionController_cancel`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{planId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.planId);",
+                      "  if (id) pm.environment.set('planId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/plans/{planId} · Plan con pasos, límites, aprobaciones y bitácora ordenada",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/plans/:planId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "plans",
+                    ":planId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "planId",
+                      "value": "{{planId}}",
+                      "description": "Identificador de ruta · variable `{{planId}}`"
+                    }
+                  ]
+                },
+                "description": "Plan con pasos, límites, aprobaciones y bitácora ordenada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/plans/{planId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `QaExecutionController_getPlan`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.plans || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('planId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /admin/qa/environments/{environmentId}/target · Registrar o cambiar el destino de un entorno (cambiarlo invalida planes aprobados)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/environments/:environmentId/target",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "environments",
+                    ":environmentId",
+                    "target"
+                  ],
+                  "variable": [
+                    {
+                      "key": "environmentId",
+                      "value": "{{environmentId}}",
+                      "description": "Identificador de ruta · variable `{{environmentId}}`"
+                    }
+                  ]
+                },
+                "description": "Registrar o cambiar el destino de un entorno (cambiarlo invalida planes aprobados). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /admin/qa/environments/{environmentId}/target`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `QaExecutionController_upsertTarget`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"scheme\": \"http\",\n  \"host\": \"host-ejemplo\",\n  \"port\": 1,\n  \"allowedPathPrefixes\": [\n    \"/api\"\n  ],\n  \"allowPrivateNetwork\": false,\n  \"allowMutations\": false,\n  \"authSecretRef\": \"authSecretRef-ejemplo\",\n  \"authHeaderName\": \"authorization\",\n  \"maxRequests\": 300,\n  \"maxDurationSeconds\": 60,\n  \"requestTimeoutMs\": 10000,\n  \"minIntervalMs\": 200,\n  \"status\": \"ACTIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "qa-lab-read",
+          "item": [
+            {
+              "name": "GET /admin/qa/defects · Defectos deduplicados por firma",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/defects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "defects"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "status-ejemplo",
+                      "description": "Código: DEFECT_OPEN, DEFECT_TRIAGED, …",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Defectos deduplicados por firma. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/defects`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaLabReadController_defects`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.defects || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('defectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/environments · Entornos de prueba",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/environments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "environments"
+                  ]
+                },
+                "description": "Entornos de prueba. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/environments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaLabReadController_environments`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.environments || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('environmentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/runs · Corridas recientes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "runs"
+                  ],
+                  "query": [
+                    {
+                      "key": "suiteId",
+                      "value": "suiteId-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Corridas recientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/runs`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaLabReadController_runs`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.runs || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('runId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/suites · Suites con conteo de casos y última corrida",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/suites",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "suites"
+                  ]
+                },
+                "description": "Suites con conteo de casos y última corrida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/suites`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `QaLabReadController_suites`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.suites || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('suiteId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/runs/{runId} · Corrida con resultados por caso y veredicto por aserción (valor observado)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/runs/:runId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "runs",
+                    ":runId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "runId",
+                      "value": "{{runId}}",
+                      "description": "Identificador de ruta · variable `{{runId}}`"
+                    }
+                  ]
+                },
+                "description": "Corrida con resultados por caso y veredicto por aserción (valor observado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/runs/{runId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `QaLabReadController_run`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.runs || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('runId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/qa/suites/{suiteId} · Suite con casos y aserciones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/qa/suites/:suiteId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "qa",
+                    "suites",
+                    ":suiteId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "suiteId",
+                      "value": "{{suiteId}}",
+                      "description": "Identificador de ruta · variable `{{suiteId}}`"
+                    }
+                  ]
+                },
+                "description": "Suite con casos y aserciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/qa/suites/{suiteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `QaLabReadController_suite`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.suites || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('suiteId', first.id);",
+                      "}"
                     ]
                   }
                 }
@@ -6098,7 +8618,7 @@
                 "description": "Definir una política de backup (RPO/RTO/inmutabilidad). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/ops/backup-policies`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `BackupController_createPolicy`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"resourceScopeConceptId\": \"<resourceScopeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"backupTypeConceptId\": \"<backupTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"rpoSeconds\": 1,\n  \"rtoSeconds\": 1,\n  \"retentionDays\": 1,\n  \"immutableCopyRequired\": true,\n  \"encryptionRequired\": true,\n  \"restoreTestFrequencyDays\": 1\n}",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"resourceScopeConceptId\": \"<resourceScopeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"backupTypeConceptId\": \"<backupTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"rpoSeconds\": 0,\n  \"rtoSeconds\": 1,\n  \"retentionDays\": 1,\n  \"immutableCopyRequired\": true,\n  \"encryptionRequired\": true,\n  \"restoreTestFrequencyDays\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -7005,6 +9525,592 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.tenantResidencyBindingId);",
                       "  if (id) pm.environment.set('tenantResidencyBindingId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "telemetry-analytics",
+          "item": [
+            {
+              "name": "GET /admin/analytics/funnels · Embudos definidos con sus pasos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/funnels",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "funnels"
+                  ]
+                },
+                "description": "Embudos definidos con sus pasos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/funnels`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_listFunnels`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.funnels || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('funnelId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/overview · Totales, rutas y eventos principales de la ventana",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/overview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "overview"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Totales, rutas y eventos principales de la ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/overview`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_overview`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/pipeline-health · Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/pipeline-health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "pipeline-health"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/pipeline-health`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_pipelineHealth`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/sessions · Sesiones de la ventana (sin identificadores de sesión ni sujeto)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "sessions"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Sesiones de la ventana (sin identificadores de sesión ni sujeto). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/sessions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_listSessions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.sessions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('sessionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/timeseries · Eventos y sesiones por hora o día (UTC), cubos vacíos en 0",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/timeseries",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "timeseries"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Eventos y sesiones por hora o día (UTC), cubos vacíos en 0. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/timeseries`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_timeseries`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.timeseries || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('timeseryId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/web-vitals · p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/web-vitals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "web-vitals"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "route",
+                      "value": "route-ejemplo",
+                      "description": "Plantilla de ruta, p. ej. /patients/:id",
+                      "disabled": true
+                    },
+                    {
+                      "key": "metric",
+                      "value": "LCP",
+                      "description": "Desglose p75 por ruta de esta métrica",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/web-vitals`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryAnalyticsController_webVitals`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.webVitals || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('webVitalId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/funnels/{funnelId}/report · Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/funnels/:funnelId/report",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "funnels",
+                    ":funnelId",
+                    "report"
+                  ],
+                  "variable": [
+                    {
+                      "key": "funnelId",
+                      "value": "{{funnelId}}",
+                      "description": "Identificador de ruta · variable `{{funnelId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: to − 7 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Por defecto: ahora",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "hour",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "portal",
+                      "value": "WEB",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/funnels/{funnelId}/report`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TelemetryAnalyticsController_funnelReport`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.funnels || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('funnelId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/sessions/{id} · Timeline de una sesión: eventos y nombres de propiedad, sin valores",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/sessions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "sessions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{sessionId}}",
+                      "description": "Identificador de ruta · variable `{{sessionId}}`"
+                    }
+                  ]
+                },
+                "description": "Timeline de una sesión: eventos y nombres de propiedad, sin valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/sessions/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TelemetryAnalyticsController_getSession`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.sessions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('sessionId', first.id);",
                       "}"
                     ]
                   }
@@ -42760,7 +45866,7 @@
       ]
     },
     {
-      "name": "internal (40)",
+      "name": "internal (42)",
       "item": [
         {
           "name": "audio-assets-internal",
@@ -43651,6 +46757,59 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.rebuildId);",
                       "  if (id) pm.environment.set('rebuildId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "data-catalog-internal",
+          "item": [
+            {
+              "name": "POST /internal/catalog/scans/run-next · Reclamar y ejecutar la siguiente corrida de escaneo (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/catalog/scans/run-next",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "catalog",
+                    "scans",
+                    "run-next"
+                  ]
+                },
+                "description": "Reclama con lease y SKIP LOCKED; recupera corridas cuyo worker murió. claimed=0 si no hay trabajo.\n\n`POST /internal/catalog/scans/run-next`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `DataCatalogInternalController_runNext`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
                       "}"
                     ]
                   }
@@ -45010,6 +48169,59 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.reconcileId);",
                       "  if (id) pm.environment.set('reconcileId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "qa-execution-internal",
+          "item": [
+            {
+              "name": "POST /internal/qa/plans/run-next · Reclamar y ejecutar el siguiente plan (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/qa/plans/run-next",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "qa",
+                    "plans",
+                    "run-next"
+                  ]
+                },
+                "description": "Reclamar y ejecutar el siguiente plan (worker). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/qa/plans/run-next`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `QaExecutionInternalController_runNext`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{planId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.planId);",
+                      "  if (id) pm.environment.set('planId', id);",
                       "}"
                     ]
                   }

@@ -79,6 +79,52 @@ describe('CommunityPublicController', () => {
         expect.objectContaining({ specialtyConceptId: undefined }),
       );
     });
+
+    it('departamento y municipio llegan al servicio (2.3)', async () => {
+      const d = build();
+
+      await d.controller.searchPractitioners(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'depto-lp',
+        'muni-el-alto',
+      );
+
+      expect(d.service.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'PRACTITIONER',
+          departmentConceptId: 'depto-lp',
+          municipalityConceptId: 'muni-el-alto',
+        }),
+      );
+    });
+  });
+
+  describe('directorio de organizaciones — filtro territorial (2.3)', () => {
+    it('departamento y municipio llegan al servicio junto con la ciudad', async () => {
+      const d = build();
+
+      await d.controller.searchOrganizations(
+        'clinica',
+        'El Alto',
+        undefined,
+        undefined,
+        'depto-lp',
+        'muni-el-alto',
+      );
+
+      expect(d.service.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'ORGANIZATION',
+          city: 'El Alto',
+          departmentConceptId: 'depto-lp',
+          municipalityConceptId: 'muni-el-alto',
+        }),
+      );
+    });
   });
 
   /**

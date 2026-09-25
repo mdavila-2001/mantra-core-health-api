@@ -43,6 +43,7 @@ import {
   type VerifiedBadgeDto,
 } from './community-verification.service';
 import { CommunityProfileStatsService } from './community-profile-stats.service';
+import { PublicTerritoryFilterService } from './public-territory-filter.service';
 import type {
   PublicCommentDto,
   PublicCommentPageDto,
@@ -245,6 +246,7 @@ export class CommunityPublicService {
    * @param specialtyCatalog - Quién decide si un uuid es una especialidad médica.
    * @param concepts - Conceptos del catálogo, para el rótulo de la especialidad.
    * @param logger - Logger estructurado.
+   * @param territory - Filtro territorial en dos pasos (departamento → municipio).
    */
   constructor(
     private readonly em: EntityManager,
@@ -257,6 +259,7 @@ export class CommunityPublicService {
     private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly concepts: CatalogConceptsRepository,
     private readonly logger: PinoLogger,
+    private readonly territory: PublicTerritoryFilterService,
   ) {
     this.logger.setContext(CommunityPublicService.name);
   }
@@ -692,6 +695,13 @@ export class CommunityPublicService {
      * `VS_MEDICAL_SPECIALTY`. Un uuid ajeno al conjunto da **422**.
      */
     specialtyConceptId?: string;
+    /** Departamento (`VS_BO_DEPARTMENT`) al que acotar; uno ajeno da **422**. */
+    departmentConceptId?: string;
+    /**
+     * Municipio (`VS_BO_MUNICIPALITY`) al que acotar; uno ajeno, o uno de otro
+     * departamento que el pedido, da **422**.
+     */
+    municipalityConceptId?: string;
     /** Cursor opaco. */
     cursor?: string;
     /** Tope pedido. */
@@ -723,6 +733,13 @@ export class CommunityPublicService {
         (await this.concepts.findById(em, specialtyConceptId))?.display ??
         undefined;
     }
+
+    // El lugar se valida con la misma regla que la especialidad: un uuid ajeno
+    // al catálogo es 422, nunca un filtro que se cae en silencio (2.3).
+    const territory = await this.territory.resolve(em, {
+      department: filtros.departmentConceptId,
+      municipality: filtros.municipalityConceptId,
+    });
 
     const targetTypeConceptId = filtros.kind
       ? Object.keys(KIND_BY_TARGET_CONCEPT).find(
@@ -757,16 +774,21 @@ export class CommunityPublicService {
     // sería una caída de la portada pública.
     const city = filtros.city?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
 
-    const desdeIndice = await this.searchFromIndex({
-      q,
-      kind: filtros.kind,
-      verified: filtros.verified,
-      city,
-      specialtyConceptId,
-      specialtyDisplay,
-      cursor: filtros.cursor,
-      limit,
-    });
+    // El índice no guarda departamento ni municipio: con un filtro territorial
+    // la única respuesta honesta es la del SQL, igual que con una especialidad
+    // sin rótulo. Servir la página del índice sin ese filtro sería mentir.
+    const desdeIndice = territory
+      ? null
+      : await this.searchFromIndex({
+          q,
+          kind: filtros.kind,
+          verified: filtros.verified,
+          city,
+          specialtyConceptId,
+          specialtyDisplay,
+          cursor: filtros.cursor,
+          limit,
+        });
     if (desdeIndice) return desdeIndice;
 
     const rows = await this.repo.searchProfiles(
@@ -776,6 +798,7 @@ export class CommunityPublicService {
         targetTypeConceptId,
         verified: filtros.verified,
         city,
+        territory,
         specialtyConceptId,
         after: this.decodeSqlCursor(filtros.cursor),
       },

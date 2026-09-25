@@ -14,10 +14,8 @@ import { Identifiers } from '../../src/modules/common/entities';
  * 1.4 · departamento de emisión del documento: obligatorio y validado
  * (PR #390 del front, mockup).
  *
- * El front ya trata `issuerAdministrativeAreaConceptId` como obligatorio en
- * el alta de paciente y sólo lo manda en la de profesional cuando hay
- * `nationalId`. La API iguala esa regla en el DTO (`@IsUUID`/`@ValidateIf`) y
- * agrega lo que el DTO no puede comprobar: que el uuid pertenezca de verdad a
+ * El alta profesional requiere CI y `issuerAdministrativeAreaConceptId`; la
+ * API valida ambos y también comprueba que el uuid pertenezca de verdad a
  * `VS_BO_DEPARTMENT` — la columna es una FK plana a
  * `terminology.catalog_concepts`, así que sin este chequeo cualquier concepto
  * (un municipio, una especialidad) pasaría como si fuera un departamento.
@@ -184,9 +182,9 @@ describe('1.4 · departamento de emisión del documento (integración)', () => {
       });
   });
 
-  it('escenario 6 · profesional sin CI ni departamento → 201, sin identificador nacional', async () => {
+  it('escenario 6 · profesional sin CI ni departamento → 400 de validación', async () => {
     const email = `p14-prof-nodoc-${marca}@example.test`;
-    const res = await http()
+    await http()
       .post('/iam/auth/register-practitioner')
       .send({
         email,
@@ -195,14 +193,14 @@ describe('1.4 · departamento de emisión del documento (integración)', () => {
         lastName: 'Salas',
         licenseNumber: `LIC-P14-NODOC-${marca}`,
       })
-      .expect(201);
-    creados.push({ userId: res.body.userId, personId: res.body.personId });
-
-    const em = ctx.orm.em.fork();
-    const identificador = await em.findOne(Identifiers, {
-      ownerId: res.body.personId,
-      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-    });
-    expect(identificador).toBeNull();
+      .expect(400)
+      .then((res) => {
+        expect(res.body.code).toBe('VALIDATION_FAILED');
+        expect(
+          (res.body.details.violations as string[]).some((v: string) =>
+            v.includes('nationalId'),
+          ),
+        ).toBe(true);
+      });
   });
 });

@@ -2,7 +2,12 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { CONCEPTS } from '../../../src/common';
 import { PROF } from '../../../src/modules/profiles/profiles.concepts';
-import { bootstrapTestApp, bearer, type TestContext } from '../harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from '../harness';
 
 /**
  * MCH-034 · el lookup de una asignación existente debe respetar el ámbito.
@@ -62,6 +67,7 @@ describe('MCH-034 · alta de rol respeta el ámbito exacto (integración)', () =
     await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(email),
         email,
         password: PASSWORD,
         name: 'Medico',

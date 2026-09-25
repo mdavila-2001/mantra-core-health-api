@@ -19,6 +19,7 @@ export * from './community-reviews-read.service';
 export * from './community-moderation-read.service';
 export * from './community-ratings.service';
 export * from './community-public.service';
+export * from './public-territory-filter.service';
 export * from './community-ratings.service';
 export * from './community-search-index.service';
 export * from './community-verification.service';

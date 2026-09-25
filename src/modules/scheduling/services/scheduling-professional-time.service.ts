@@ -68,6 +68,31 @@ export class SchedulingProfessionalTimeService {
   constructor(private readonly bookingsRepo: SchedulingBookingsRepository) {}
 
   /**
+   * Serializa las decisiones que comprometen el calendario de un profesional.
+   *
+   * Debe llamarse desde una transacción activa antes de leer si un rango está
+   * libre. El lock advisory pertenece a PostgreSQL, se comparte entre instancias
+   * del servicio y se libera al confirmar o revertir la transacción; así dos
+   * solicitudes concurrentes no pueden validar ambas contra la misma lectura
+   * vacía. La llave es global al profesional, no a una sede, porque puede
+   * atender en varias.
+   *
+   * @param em - Contexto transaccional activo.
+   * @param practitionerProfileId - Profesional cuyo calendario se bloqueará.
+   */
+  async bloquearAgendaDeProfesional(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<void> {
+    // `EntityManager.execute` propaga el contexto transaccional activo al
+    // driver. Llamar `getConnection().execute()` usaría el pool directamente y
+    // liberaría el advisory lock al terminar esa sentencia.
+    await em.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `scheduling.professional.calendar:${practitionerProfileId}`,
+    ]);
+  }
+
+  /**
    * Los compromisos del profesional que pisan un rango, cruzando sus sedes.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -193,6 +218,11 @@ export class SchedulingProfessionalTimeService {
     hasta: Date,
     excepto?: string,
   ): Promise<void> {
+    // El lock y la lectura pertenecen a la misma transacción. Sin él dos
+    // aceptaciones simultáneas pueden ver el mismo calendario libre y ambas
+    // insertar, incluso cuando cada una hace la validación correcta.
+    await this.bloquearAgendaDeProfesional(em, practitionerProfileId);
+
     const ocupado = await this.compromisos(
       em,
       practitionerProfileId,

@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { VirtualEncountersController } from './virtual-encounters.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
 
@@ -39,6 +40,16 @@ describe('VirtualEncountersController (UC-18-12)', () => {
     const d = build();
     await d.controller.join('ve1', actor);
     expect(d.virtualEncountersService.join).toHaveBeenCalledWith('ve1', actor);
+  });
+
+  it('permite que el rol PATIENT llegue al join para validar titularidad en el servicio', () => {
+    const handler = Object.getOwnPropertyDescriptor(
+      VirtualEncountersController.prototype,
+      'join',
+    )?.value;
+    const roles = Reflect.getMetadata(ROLES_KEY, handler);
+
+    expect(roles).toContain('PATIENT');
   });
 
   it('delegates end', async () => {

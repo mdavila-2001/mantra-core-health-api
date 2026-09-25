@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 
 /**
@@ -49,6 +54,7 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
   const beto = { nationalId: `FX9B${sufijo}`, token: '', pid: '' };
 
   let resourceId = '';
+  let secondResourceId = '';
   /**
    * Un municipio real del catálogo. El alta de paciente lo exige, y se busca
    * en vez de clavarse: los ids son deterministas pero fijarlos acá haría
@@ -148,6 +154,7 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',
@@ -182,6 +189,21 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
       })
       .expect(201);
     resourceId = recurso.body.id;
+
+    const segundoConsultorio = await http()
+      .post('/scheduling/resources')
+      .set(bearer(medico.token))
+      .send({
+        tenantId: medico.tenantId,
+        resourceType: 'PRACTITIONER',
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: medico.hpid,
+        name: 'Consultorio FX-9 alternativo',
+        timeZone: 'America/La_Paz',
+        capacity: 1,
+      })
+      .expect(201);
+    secondResourceId = segundoConsultorio.body.id;
   });
 
   afterAll(async () => {
@@ -211,6 +233,34 @@ describe('FX-9 · las carreras de la agenda (H-1)', () => {
     expect(creadas).toHaveLength(1);
 
     // El aserto que sostiene la prueba: la fila, no el código de respuesta.
+    expect(await citasQuePisan(cuando, 30)).toBe(1);
+  });
+
+  it('AC-14-10 · dos consultorios del mismo médico no confirman citas simultáneas', async () => {
+    const cuando = lunesLejano(4);
+    cuando.setUTCHours(14, 0, 0, 0);
+
+    const alta = (pid: string, resource: string) =>
+      http()
+        .post('/scheduling/appointments/direct')
+        .set(bearer(medico.token))
+        .send({
+          patientProfileId: pid,
+          resourceId: resource,
+          startAt: cuando.toISOString(),
+          durationMinutes: 30,
+          reasonText: 'Control en otra sede',
+        });
+
+    const [consultorioPrincipal, consultorioAlternativo] = await Promise.all([
+      alta(ana.pid, resourceId),
+      alta(beto.pid, secondResourceId),
+    ]);
+
+    const confirmadas = [consultorioPrincipal, consultorioAlternativo].filter(
+      (response) => response.status === 201,
+    );
+    expect(confirmadas).toHaveLength(1);
     expect(await citasQuePisan(cuando, 30)).toBe(1);
   });
 

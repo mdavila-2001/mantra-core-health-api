@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { AUTHZ } from '../../src/modules/authz/authz.concepts';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-10 · el turno de mostrador (AC-3.3) es una sola transacción, de verdad.
@@ -35,7 +41,15 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
     tenantId: '',
   };
 
+  const medicoAjeno = {
+    email: `fx10-med-ajeno-${sufijo}@example.test`,
+    token: '',
+    hpid: '',
+    tenantId: '',
+  };
+
   let resourceId = '';
+  let foreignResourceId = '';
 
   function claims(token: string): Record<string, unknown> {
     const [, cuerpo] = token.split('.');
@@ -78,9 +92,42 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
 
+    const roleRows = await ctx.orm.em.getConnection().execute<
+      {
+        code: string;
+        base_role_concept_id: string;
+        scope_concept_id: string;
+        is_system: boolean;
+        is_assignable: boolean;
+      }[]
+    >(
+      `select code, base_role_concept_id, scope_concept_id,
+              is_system, is_assignable
+         from authz.roles
+        where code in ('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+        order by code`,
+    );
+    expect(roleRows).toEqual([
+      {
+        code: 'SCHEDULING_ADMIN',
+        base_role_concept_id: AUTHZ.BASE_ROLE_ADMIN,
+        scope_concept_id: AUTHZ.SCOPE_TENANT,
+        is_system: true,
+        is_assignable: true,
+      },
+      {
+        code: 'SCHEDULING_AGENT',
+        base_role_concept_id: AUTHZ.BASE_ROLE_STAFF,
+        scope_concept_id: AUTHZ.SCOPE_TENANT,
+        is_system: true,
+        is_assignable: true,
+      },
+    ]);
+
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',
@@ -97,6 +144,86 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
       .expect(200);
     medico.token = login.body.accessToken;
     medico.tenantId = (claims(medico.token)['tenants'] as string[])[0];
+
+    const altaAjena = await http()
+      .post('/iam/auth/register-practitioner')
+      .send({
+        ...identidadProfesional(medicoAjeno.email),
+        email: medicoAjeno.email,
+        password: PASSWORD,
+        name: 'Otra',
+        lastName: 'Organización',
+        licenseNumber: `LIC-FX10-X-${sufijo}`,
+        credentialNumber: `CRED-FX10-X-${sufijo}`,
+      })
+      .expect(201);
+    medicoAjeno.hpid = altaAjena.body.practitionerProfileId;
+
+    const loginAjeno = await http()
+      .post('/iam/auth/login')
+      .send({ email: medicoAjeno.email, password: PASSWORD })
+      .expect(200);
+    medicoAjeno.token = loginAjeno.body.accessToken;
+    medicoAjeno.tenantId = (
+      claims(medicoAjeno.token)['tenants'] as string[]
+    )[0];
+
+    const recursoAjeno = await http()
+      .post('/scheduling/resources')
+      .set(bearer(medicoAjeno.token))
+      .send({
+        tenantId: medicoAjeno.tenantId,
+        resourceType: 'PRACTITIONER',
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: medicoAjeno.hpid,
+        name: 'Consultorio ajeno FX-10',
+        timeZone: 'America/La_Paz',
+        capacity: 1,
+      })
+      .expect(201);
+    foreignResourceId = recursoAjeno.body.id;
+
+    // El auto-registro profesional usa el tenant semilla para todos los
+    // profesionales. Movemos sólo este recurso a otro tenant ya sembrado para
+    // reproducir un UUID realmente ajeno sin inventar una fila incompleta.
+    const [foreignTenant] = await ctx.orm.em
+      .getConnection()
+      .execute<{ id: string }[]>(
+        `select id
+         from directory.tenants
+        where id <> ?
+        order by id
+        limit 1`,
+        [medico.tenantId],
+      );
+    await ctx.orm.em.getConnection().execute(
+      `update scheduling.schedulable_resources
+          set tenant_id = ?, updated_at = now()
+        where id = ?`,
+      [foreignTenant.id, foreignResourceId],
+    );
+
+    // El bootstrap ya materializó el rol. Se concede por la misma API pública
+    // que usa administración, con ámbito explícito en el tenant del mostrador.
+    await http()
+      .post(
+        `/authz/users/${String(claims(medico.token)['sub'])}/role-assignments`,
+      )
+      .set(bearer(ctx.adminToken))
+      .send({
+        roleCode: 'SCHEDULING_AGENT',
+        tenantId: medico.tenantId,
+      })
+      .expect(201);
+
+    const loginMostrador = await http()
+      .post('/iam/auth/login')
+      .send({ email: medico.email, password: PASSWORD })
+      .expect(200);
+    medico.token = loginMostrador.body.accessToken;
+    expect(claims(medico.token)['scopedRoles']).toMatchObject({
+      [medico.tenantId]: expect.arrayContaining(['SCHEDULING_AGENT']),
+    });
 
     const recurso = await http()
       .post('/scheduling/resources')
@@ -220,5 +347,22 @@ describe('FX-10 · el mostrador atómico (AC-3.3)', () => {
     // El rollback deshace TODO: ni la persona que se estaba registrando
     // sobrevive a una cita que nunca se pudo confirmar.
     expect(await contarIdentificador(segundo)).toBe(0);
+  });
+
+  it('un mostrador no usa una agenda de otro tenant ni conserva el paciente provisional', async () => {
+    const cuando = lunesLejano(3);
+    cuando.setUTCHours(11, 0, 0, 0);
+    const nationalId = `FX10X${sufijo}`;
+
+    await http()
+      .post('/scheduling/appointments/walk-in')
+      .set(bearer(medico.token))
+      .send({
+        ...walkInBody(nationalId, cuando),
+        resourceId: foreignResourceId,
+      })
+      .expect(403);
+
+    expect(await contarIdentificador(nationalId)).toBe(0);
   });
 });

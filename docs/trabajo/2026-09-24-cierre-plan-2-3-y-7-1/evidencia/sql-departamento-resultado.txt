@@ -1,0 +1,17 @@
+BEGIN
+ depto | sujetos 
+-------+---------
+ CH    |      14
+(1 row)
+
+ depto | sujetos 
+-------+---------
+ LP    |       0
+(1 row)
+
+ depto | sujetos 
+-------+---------
+ SC    |       0
+(1 row)
+
+ROLLBACK

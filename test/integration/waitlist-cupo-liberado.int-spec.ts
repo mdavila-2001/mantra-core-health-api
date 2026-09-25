@@ -5,6 +5,7 @@ import {
   bearer,
   camposObligatoriosDePaciente,
   type TestContext,
+  identidadProfesional,
 } from './harness';
 
 /**
@@ -152,6 +153,7 @@ describe('lista de espera · el cupo liberado, contra la base', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Elena',
@@ -173,6 +175,7 @@ describe('lista de espera · el cupo liberado, contra la base', () => {
     const alta2 = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(otroMedico.email),
         email: otroMedico.email,
         password: PASSWORD,
         name: 'Bruno',
