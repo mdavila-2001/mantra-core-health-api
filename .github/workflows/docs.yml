@@ -184,8 +184,19 @@ jobs:
 
       - name: Levantar MinIO
         # MinIO no admite un command propio dentro de `services:` (solo el CMD
-        # por defecto de la imagen, que requiere el argumento `server /data`) —
-        # se levanta con `docker run` en vez de como service container.
+        # por defecto de la imagen) — se levanta con `docker run` en vez de
+        # como service container.
+        #
+        # La imagen es la misma build de MinIO (RELEASE.2025-04-22T22-12-26Z)
+        # publicada por Bitnami, fijada por digest. La de siempre
+        # (`quay.io/minio/minio`) dejó de ser pública: desde el 24/09 quay pide
+        # autenticación y `minio/minio` ya no existe en Docker Hub, así que todo
+        # PR moría acá con `unauthorized` (exit 125). Es una sustitución de
+        # infraestructura externa, no un cambio funcional: mismo puerto, mismas
+        # credenciales, mismo healthcheck. Bitnami arranca el servidor con su
+        # propio script (datos en /bitnami/minio/data), por eso no lleva el
+        # argumento `server /data`. `bitnamilegacy` ya no se actualiza: el digest
+        # la vuelve inmutable, que es lo que un fixture de CI necesita.
         #
         # El `rm -f` de arriba no es defensivo porque sí: en un runner propio los
         # contenedores **sobreviven al job**, y este no es un service container
@@ -203,7 +214,7 @@ jobs:
           docker rm -f minio 2>/dev/null || true
           docker run -d --name minio -p 9000:9000 \
             -e MINIO_ROOT_USER=mantra -e MINIO_ROOT_PASSWORD=mantra12345678 \
-            quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+            docker.io/bitnamilegacy/minio:2025.4.22@sha256:50cec18ac4184af4671a78aedd5554942c8ae105d51a465fa82037949046da01
           for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
 
       - name: Instalar dependencias Node
