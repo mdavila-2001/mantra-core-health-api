@@ -389,6 +389,65 @@ export class ClaimDisputeSummaryDto {
   filingDeadline!: string | null;
 }
 
+/** Una exclusión formal, con su cita de cláusula (contrato §4). */
+export class ClaimExclusionDto {
+  @ApiProperty({ format: 'uuid' })
+  claimLineId!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  itemName!: string | null;
+
+  @ApiProperty({ type: String, description: 'Importe decimal exacto excluido' })
+  amount!: string;
+
+  @ApiProperty({ type: String })
+  policyClauseReference!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  denialRationale!: string | null;
+}
+
+/**
+ * El desglose de liquidación del detalle del prestador. `reconciled` es
+ * `true` sólo cuando `totalBilledAmount = totalApprovedAmount +
+ * totalPatientAmount + totalDeniedAmount` cuadra al centavo; un `false` no
+ * se tapa redondeando (contrato §3, §6).
+ */
+export class ClaimSettlementBreakdownDto {
+  @ApiProperty({
+    enum: ['AVAILABLE', 'PENDING_PUBLICATION', 'UNDER_REVIEW', 'NOT_AVAILABLE'],
+  })
+  availability!:
+    'AVAILABLE' | 'PENDING_PUBLICATION' | 'UNDER_REVIEW' | 'NOT_AVAILABLE';
+
+  @ApiProperty({ type: String, nullable: true })
+  totalBilledAmount!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  totalApprovedAmount!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  totalPatientAmount!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  totalDeniedAmount!: string | null;
+
+  @ApiProperty({ type: Boolean })
+  reconciled!: boolean;
+
+  @ApiProperty({ type: [ClaimExclusionDto] })
+  exclusions!: ClaimExclusionDto[];
+}
+
+/** La EOB de la versión vigente, mínima para que la pantalla la nombre. */
+export class ClaimEobDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  publishedAt!: string;
+}
+
 /**
  * El detalle completo de una solicitud.
  *
@@ -425,4 +484,18 @@ export class ClaimDetailDto {
   /** Disputas presentadas sobre esta solicitud. */
   @ApiProperty({ type: [ClaimDisputeSummaryDto] })
   disputes!: ClaimDisputeSummaryDto[];
+
+  /**
+   * Desglose conciliado de liquidación (Tarea 3 · H8 · CA-3.1/CA-3.3), con la
+   * misma semántica que `PatientInsuranceSettlementDto`: qué cubrió la
+   * aseguradora, qué quedó a cargo del paciente y qué se excluyó, con la
+   * cláusula formal de cada exclusión. Ver
+   * `docs/contracts/insurer-practitioner-settlement-batches.md` §3–§5.
+   */
+  @ApiProperty({ type: ClaimSettlementBreakdownDto })
+  settlement!: ClaimSettlementBreakdownDto;
+
+  /** La EOB de la versión vigente, si ya se publicó. */
+  @ApiProperty({ nullable: true, type: ClaimEobDto })
+  eob!: ClaimEobDto | null;
 }

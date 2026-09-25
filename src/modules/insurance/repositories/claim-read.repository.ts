@@ -8,6 +8,7 @@ import {
   InsuranceClaimLines,
   InsuranceClaims,
   PatientCoverages,
+  PatientExplanationsOfBenefit,
 } from '../entities';
 import { INS } from '../insurance.concepts';
 import { CatalogConcepts } from '../../terminology/entities';
@@ -286,6 +287,21 @@ export class ClaimReadRepository {
   ): Promise<ClaimLineAdjudications[]> {
     if (versionIds.length === 0) return Promise.resolve([]);
     return em.find(ClaimLineAdjudications, {
+      claimAdjudicationVersionId: { $in: [...versionIds] },
+    });
+  }
+
+  /**
+   * EOB publicadas o retiradas de las versiones dadas (H2 · desglose de
+   * liquidación, CA-3.1/CA-3.4). Una versión sin fila acá está sin publicar;
+   * el llamador decide qué hacer con eso, esta consulta sólo lee.
+   */
+  findEobsByVersionIds(
+    em: EntityManager,
+    versionIds: readonly string[],
+  ): Promise<PatientExplanationsOfBenefit[]> {
+    if (versionIds.length === 0) return Promise.resolve([]);
+    return em.find(PatientExplanationsOfBenefit, {
       claimAdjudicationVersionId: { $in: [...versionIds] },
     });
   }

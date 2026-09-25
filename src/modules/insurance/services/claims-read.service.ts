@@ -21,7 +21,11 @@ import type {
   InsuranceClaimLines,
   InsuranceClaims,
 } from '../entities';
-import { InsuranceBrokers as InsuranceBrokersEntity } from '../entities';
+import {
+  InsuranceBrokers as InsuranceBrokersEntity,
+  ClaimReversals,
+} from '../entities';
+import { buildClaimSettlementBreakdown } from './claim-settlement-breakdown';
 import type {
   ClaimAdjudicationDto,
   ClaimDetailDto,
@@ -31,6 +35,7 @@ import type {
   ClaimListItemDto,
   ClaimListQueryDto,
   ClaimListResponseDto,
+  ClaimSettlementBreakdownDto,
   InsuranceConceptDto,
   MoneyDto,
 } from '../dto';
@@ -173,16 +178,22 @@ export class ClaimsReadService {
       throw this.accessDenied();
     }
 
-    const [lines, versions, disputes] = await Promise.all([
+    const [lines, versions, disputes, reversals] = await Promise.all([
       this.claimRepo.findLinesByClaimIds(em, [claim.id]),
       this.claimRepo.findAdjudicationsByClaimIds(em, [claim.id]),
       this.claimRepo.findDisputesByClaimIds(em, [claim.id]),
+      em.find(ClaimReversals, { insuranceClaimId: claim.id }),
     ]);
 
     const current = this.currentVersion(versions);
-    const byLine = current
-      ? await this.claimRepo.findLineAdjudications(em, [current.id])
-      : [];
+    const [byLine, eobs] = await Promise.all([
+      current
+        ? this.claimRepo.findLineAdjudications(em, [current.id])
+        : Promise.resolve<ClaimLineAdjudications[]>([]),
+      current
+        ? this.claimRepo.findEobsByVersionIds(em, [current.id])
+        : Promise.resolve([]),
+    ]);
 
     const concepts = await this.conceptMap(em, [
       claim.statusConceptId,
@@ -219,12 +230,37 @@ export class ClaimsReadService {
       lines.map((line) => adjByLine.get(line.id)?.approvedAmount ?? null),
     );
 
+    const eob = eobs[0];
+    const itemNames = new Map<string, string>();
+    for (const line of lines) {
+      const name = concepts.get(line.serviceConceptId ?? '')?.display;
+      if (name) itemNames.set(line.id, name);
+    }
+    const breakdown = buildClaimSettlementBreakdown({
+      claim,
+      lines,
+      version: current,
+      adjudications: byLine,
+      eob,
+      reversed: reversals.length > 0,
+      itemNames,
+    });
+    const settlement: ClaimSettlementBreakdownDto = {
+      ...breakdown,
+      exclusions: [...breakdown.exclusions],
+    };
+
     return {
       header,
       lines: items,
       lineBilledTotal: { amount: billed ?? '0', currency },
       lineApprovedTotal:
         approved === null ? null : { amount: approved, currency },
+      settlement,
+      eob:
+        eob && eob.publishedAt
+          ? { id: eob.id, publishedAt: eob.publishedAt.toISOString() }
+          : null,
       adjudication: current
         ? this.buildAdjudication(current, concepts, currency)
         : null,
