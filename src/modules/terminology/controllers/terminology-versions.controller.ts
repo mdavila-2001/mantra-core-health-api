@@ -6,10 +6,12 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -30,6 +32,7 @@ import {
 } from '../services';
 import {
   ImportConceptsDto,
+  ImportConceptsFileRequestDto,
   ImportConceptsFileResponseDto,
   ImportConceptsResponseDto,
   PublishVersionResponseDto,
@@ -120,21 +123,42 @@ export class TerminologyVersionsController {
     schema: {
       type: 'object',
       required: ['file'],
-      properties: { file: { type: 'string', format: 'binary' } },
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        dryRun: { type: 'boolean', default: false },
+        profile: { type: 'string', default: 'conceptos' },
+      },
     },
   })
   @ApiOperation({
-    summary: 'UC-03-03: importa conceptos desde un archivo NDJSON',
+    summary:
+      'UC-03-03: importa filas desde un archivo, o las valida sin escribir',
   })
-  importConceptsFile(
+  async importConceptsFile(
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @UploadedFile() file: ArchivoSubido | undefined,
+    @Body() opciones: ImportConceptsFileRequestDto,
     @CurrentUser() user: AuthenticatedUser,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<ImportConceptsFileResponseDto> {
     if (!file) {
       throw new PreconditionFailedException('Falta el archivo', { versionId });
     }
-    return this.fileImportService.importFromFile(versionId, file.buffer, user);
+
+    const resultado = await this.fileImportService.importFromFile(
+      versionId,
+      file.buffer,
+      user,
+      opciones,
+    );
+
+    // Validar no crea nada, así que responder 201 diría que sí. El 201 queda
+    // para la importación que escribió, y el rechazo por errores también es
+    // 200: la petición se atendió y su respuesta es el informe de qué corregir.
+    if (resultado.dryRun || resultado.aborted) {
+      response.status(HttpStatus.OK);
+    }
+    return resultado;
   }
 
   /**
