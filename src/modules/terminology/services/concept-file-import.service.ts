@@ -16,8 +16,10 @@ import {
   FormatoNoAdmitidoError,
   type FilaLeida,
   type FormatoDeArchivo,
+  type ParseadorDeArchivo,
   type PerfilDeImportacion,
   type ProblemaDeFila,
+  type ResultadoDeParseo,
 } from '../import';
 import {
   CatalogConceptsRepository,
@@ -198,7 +200,12 @@ export class ConceptFileImportService {
 
     const { sourceId } = await this.exigirVersionEnBorrador(versionId);
 
-    const lectura = parseador.parsear(buffer, perfil);
+    const lectura = this.leerConElParseador(
+      parseador,
+      buffer,
+      perfil,
+      versionId,
+    );
     const validacion = validarFilas(lectura.filas, perfil);
     const problemas = [...lectura.problemas, ...validacion.problemas];
     const totalRead = contarFilasLeidas(formato, lectura.filas, problemas);
@@ -313,6 +320,50 @@ export class ConceptFileImportService {
         );
       }
       throw error;
+    }
+  }
+
+  /**
+   * Lee el archivo con el parseador de su formato, sin dejar escapar fallos de
+   * la biblioteca que haya detrás.
+   *
+   * El detector decide el formato mirando los primeros bytes, así que reconocer
+   * un archivo **no** garantiza poder abrirlo: una planilla cifrada, truncada o
+   * corrupta tiene la firma correcta y revienta al leerse. Sin esta red, ese
+   * fallo sale como error interno; quien subió el archivo merece el mismo 422
+   * que si el formato no se hubiera reconocido, porque desde su lado el
+   * resultado es idéntico: ese archivo no sirve.
+   *
+   * @param parseador - El parseador del formato detectado.
+   * @param buffer - Contenido del archivo.
+   * @param perfil - Qué columnas se esperan.
+   * @param versionId - Versión contra la que se está importando.
+   * @returns Las filas leídas y los problemas de lectura.
+   */
+  private leerConElParseador(
+    parseador: ParseadorDeArchivo,
+    buffer: Buffer,
+    perfil: PerfilDeImportacion,
+    versionId: string,
+  ): ResultadoDeParseo {
+    try {
+      return parseador.parsear(buffer, perfil);
+    } catch (error) {
+      // El motivo de la biblioteca queda en el registro, no en la respuesta:
+      // nombra su implementación y no le dice nada útil a quien cargó.
+      this.logger.warn(
+        {
+          versionId,
+          formato: parseador.formato,
+          motivo: error instanceof Error ? error.message : String(error),
+        },
+        'no se pudo leer el archivo con el parseador de su formato',
+      );
+      throw new ImportFileRejectedException(
+        ErrorCode.IMPORT_FORMAT_UNSUPPORTED,
+        `El archivo se reconoció como «${parseador.formato}» pero no se pudo leer`,
+        { versionId, formato: parseador.formato },
+      );
     }
   }
 

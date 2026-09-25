@@ -1,4 +1,9 @@
-import { CsvParser, NdjsonParser } from '../import';
+import {
+  CsvParser,
+  NdjsonParser,
+  XlsxParser,
+  type FormatoDeArchivo,
+} from '../import';
 import { LECTOR_DE_IMPORTACION } from './import-parsers.provider';
 
 describe('LECTOR_DE_IMPORTACION', () => {
@@ -10,12 +15,28 @@ describe('LECTOR_DE_IMPORTACION', () => {
       expect(LECTOR_DE_IMPORTACION.parseadorDe('ndjson')).toBeInstanceOf(
         NdjsonParser,
       );
+      expect(LECTOR_DE_IMPORTACION.parseadorDe('xlsx')).toBeInstanceOf(
+        XlsxParser,
+      );
     });
 
-    it('no devuelve nada para un formato que todavía no tiene parseador', () => {
-      // El formato de planilla lo reconoce el detector, pero quien lo lee llega
-      // por otro lado: hasta que se registre, pedirlo no puede inventar uno.
-      expect(LECTOR_DE_IMPORTACION.parseadorDe('xlsx')).toBeUndefined();
+    it('cubre todos los formatos que el contrato declara', () => {
+      // Esta es la prueba que se rompe sola el día que alguien sume un formato
+      // al contrato y se olvide de registrar quién lo lee: sin ella, ese hueco
+      // recién aparecería con un archivo real en la mano.
+      const declarados: readonly FormatoDeArchivo[] = ['ndjson', 'csv', 'xlsx'];
+
+      for (const formato of declarados) {
+        expect(LECTOR_DE_IMPORTACION.parseadorDe(formato)).toBeDefined();
+      }
+    });
+
+    it('no inventa un parseador para un formato que no está registrado', () => {
+      // La búsqueda es por el `formato` que cada parseador declara: pedir uno
+      // que nadie declaró tiene que devolver nada, no el primero de la lista.
+      expect(
+        LECTOR_DE_IMPORTACION.parseadorDe('parquet' as FormatoDeArchivo),
+      ).toBeUndefined();
     });
   });
 

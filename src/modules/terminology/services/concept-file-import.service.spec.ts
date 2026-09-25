@@ -10,6 +10,8 @@ import {
   ConceptFileImportService,
   ImportFileRejectedException,
 } from './concept-file-import.service';
+import * as XLSX from 'xlsx';
+
 import { LECTOR_DE_IMPORTACION } from './import-parsers.provider';
 
 const actor = { id: 'actor-1', roles: ['SECURITY_ADMIN'] } as never;
@@ -106,12 +108,39 @@ function armar(opciones?: { version?: unknown; existentes?: Set<string> }) {
   };
 }
 
-/** Una planilla, para el detector: firma del contenedor más su libro. */
+/**
+ * Una planilla que el detector reconoce pero nadie puede abrir: la firma del
+ * contenedor y nada más detrás.
+ */
 function planilla(): Buffer {
   return Buffer.concat([
     Buffer.from([0x50, 0x4b, 0x03, 0x04]),
     Buffer.from('xl/workbook.xml', 'utf8'),
   ]);
+}
+
+/**
+ * Una planilla de verdad, con encabezado y filas.
+ *
+ * Se arma acá en vez de leerse de un archivo porque lo que se prueba es el
+ * servicio, no el disco: el contenido tiene que estar a la vista de quien lee
+ * la prueba.
+ *
+ * @param filas - Cada fila como `[code, display]`.
+ * @returns El libro serializado, tal como llegaría subido.
+ */
+function planillaReal(filas: readonly (readonly string[])[]): Buffer {
+  const libro = XLSX.utils.book_new();
+  // `aoa_to_sheet` pide filas mutables: se copian acá en vez de aflojar el tipo
+  // del parámetro, que es lo que deja claro que esta función no las toca.
+  const celdas = [['code', 'display'], ...filas.map((fila) => [...fila])];
+  XLSX.utils.book_append_sheet(
+    libro,
+    XLSX.utils.aoa_to_sheet(celdas),
+    'conceptos',
+  );
+
+  return XLSX.write(libro, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
 }
 
 describe('ConceptFileImportService', () => {
@@ -158,6 +187,32 @@ describe('ConceptFileImportService', () => {
           totalErrors: '0',
         }),
       );
+    });
+
+    it('lee una planilla igual que cualquier otro formato', async () => {
+      // La planilla llegó por otro carril y se enchufa en la lista de
+      // parseadores: el servicio no la nombra en ningún lado. Que entre sin
+      // tocar ni el servicio ni el detector es exactamente lo que se buscaba.
+      const { service, creados } = armar();
+
+      const resultado = await service.importFromFile(
+        'v-1',
+        planillaReal([
+          ['B00', 'Herpes'],
+          ['B01', 'Varicela'],
+        ]),
+        actor,
+      );
+
+      expect(resultado).toMatchObject({
+        format: 'xlsx',
+        profile: 'conceptos',
+        aborted: false,
+        totalRead: 2,
+        inserted: 2,
+        errors: 0,
+      });
+      expect(creados.map((c) => c.code)).toEqual(['B00', 'B01']);
     });
 
     it('lee un CSV sin que nadie le diga que es un CSV', async () => {
@@ -439,9 +494,12 @@ describe('ConceptFileImportService', () => {
       ).rejects.toMatchObject({ code: ErrorCode.IMPORT_FORMAT_UNSUPPORTED });
     });
 
-    it('una planilla se reconoce, pero todavía no hay con qué leerla', async () => {
-      // El detector la distingue; el parseador llega por otro lado. Hasta
-      // entonces el rechazo dice justamente eso, en vez de un error genérico.
+    it('una planilla ilegible se rechaza como archivo que no sirve, no como error interno', async () => {
+      // Tiene la firma del contenedor, así que el detector la reconoce; abrirla
+      // es otra cosa. Una planilla cifrada, truncada o corrupta hace reventar a
+      // la biblioteca que la lee, y ese fallo no puede salir como error del
+      // servidor: desde el lado de quien la subió el resultado es el mismo que
+      // si el formato no se hubiera reconocido, y merece el mismo 422.
       const { service } = armar();
 
       await expect(

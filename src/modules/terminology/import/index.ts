@@ -12,6 +12,7 @@
 import { CsvParser } from './csv-parser';
 import { NdjsonParser } from './ndjson-parser';
 import type { ParseadorDeArchivo } from './row-contract';
+import { XlsxParser } from './xlsx-parser';
 
 export { CsvParser } from './csv-parser';
 export { detectarFormato } from './format-detector';
@@ -32,15 +33,17 @@ export {
   type ProblemaDeFila,
   type ResultadoDeParseo,
 } from './row-contract';
+export { XlsxParser } from './xlsx-parser';
 
 /**
  * Los parseadores disponibles, uno por formato reconocido.
  *
- * El de planillas se suma acá al integrar el trabajo que lo escribe, y con eso
- * el formato `xlsx` queda cubierto sin tocar ni el servicio ni el detector:
+ * El de planillas se sumó acá al integrarse el trabajo que lo escribió, y con
+ * eso el formato `xlsx` quedó cubierto sin tocar ni el servicio ni el detector:
  * ésa es toda la razón de que esta lista exista.
  */
 export const PARSEADORES_DE_IMPORTACION: readonly ParseadorDeArchivo[] = [
   new NdjsonParser(),
   new CsvParser(),
+  new XlsxParser(),
 ];
