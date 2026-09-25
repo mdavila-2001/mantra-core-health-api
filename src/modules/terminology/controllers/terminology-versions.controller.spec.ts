@@ -1,6 +1,7 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { TerminologyVersionsController } from './terminology-versions.controller';
 import { type AuthenticatedUser } from '../../../common';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const user: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
@@ -46,29 +47,127 @@ describe('TerminologyVersionsController', () => {
     expect(result).toBe(expected);
   });
 
-  it('importConceptsFile delega el archivo al importador', async () => {
-    const { controller, fileImport } = build();
-    const esperado = {
+  describe('importConceptsFile', () => {
+    /** El archivo tal como lo deja el interceptor de multipart. */
+    const archivo = { buffer: Buffer.from('x'), originalname: 'c.ndjson' };
+
+    /** Un informe de importación, con lo que cada caso necesita cambiar. */
+    const informe = (cambios: Record<string, unknown> = {}) => ({
       batchId: 'b-1',
+      format: 'ndjson',
+      profile: 'conceptos',
+      dryRun: false,
+      aborted: false,
       totalRead: 3,
       inserted: 2,
       skipped: 1,
       errors: 0,
       errorSamples: [],
-    };
-    fileImport.importFromFile.mockResolvedValue(esperado);
+      ...cambios,
+    });
 
-    const result = await controller.importConceptsFile(
-      'v-1',
-      { buffer: Buffer.from('x'), originalname: 'c.ndjson' },
-      user,
-    );
+    /** La respuesta HTTP, para ver si alguien le cambia el estado. */
+    const respuesta = () => ({ status: jest.fn() });
 
-    expect(fileImport.importFromFile).toHaveBeenCalledWith(
-      'v-1',
-      expect.any(Buffer),
-      user,
-    );
-    expect(result).toBe(esperado);
+    it('delega el archivo y lo que lo acompaña', async () => {
+      const { controller, fileImport } = build();
+      const esperado = informe();
+      fileImport.importFromFile.mockResolvedValue(esperado);
+      const res = respuesta();
+
+      const result = await controller.importConceptsFile(
+        'v-1',
+        archivo,
+        { dryRun: false, profile: 'conceptos' },
+        user,
+        res as never,
+      );
+
+      expect(fileImport.importFromFile).toHaveBeenCalledWith(
+        'v-1',
+        expect.any(Buffer),
+        user,
+        { dryRun: false, profile: 'conceptos' },
+      );
+      expect(result).toBe(esperado);
+    });
+
+    it('una importación que escribió conserva el 201', async () => {
+      const { controller, fileImport } = build();
+      fileImport.importFromFile.mockResolvedValue(informe());
+      const res = respuesta();
+
+      await controller.importConceptsFile(
+        'v-1',
+        archivo,
+        {},
+        user,
+        res as never,
+      );
+
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it('validar sin escribir responde 200, porque no creó nada', async () => {
+      const { controller, fileImport } = build();
+      fileImport.importFromFile.mockResolvedValue(
+        informe({ dryRun: true, batchId: null, inserted: 0 }),
+      );
+      const res = respuesta();
+
+      await controller.importConceptsFile(
+        'v-1',
+        archivo,
+        { dryRun: true },
+        user,
+        res as never,
+      );
+
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('un archivo rechazado por errores también responde 200', async () => {
+      // La petición se atendió y su respuesta es el informe de qué corregir;
+      // un 201 diría que se creó algo, y no se creó nada.
+      const { controller, fileImport } = build();
+      fileImport.importFromFile.mockResolvedValue(
+        informe({ aborted: true, batchId: null, inserted: 0, errors: 4 }),
+      );
+      const res = respuesta();
+
+      await controller.importConceptsFile(
+        'v-1',
+        archivo,
+        {},
+        user,
+        res as never,
+      );
+
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('la importación es del administrador de seguridad', () => {
+      // La matriz negativa completa se prueba contra la aplicación; esto fija
+      // que el endpoint no quede sin rol si alguien reordena los decoradores.
+      const roles = Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          TerminologyVersionsController.prototype,
+          'importConceptsFile',
+        )?.value as object,
+      ) as unknown;
+
+      expect(roles).toEqual(['SECURITY_ADMIN']);
+    });
+
+    it('sin archivo no se llama al importador', async () => {
+      const { controller, fileImport } = build();
+      const res = respuesta();
+
+      await expect(
+        controller.importConceptsFile('v-1', undefined, {}, user, res as never),
+      ).rejects.toThrow();
+      expect(fileImport.importFromFile).not.toHaveBeenCalled();
+    });
   });
 });

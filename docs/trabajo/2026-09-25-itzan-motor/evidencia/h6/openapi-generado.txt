@@ -1,0 +1,101 @@
+=== node tools/openapi/generate-openapi.mjs (dist al dia: build 10:40, ultimo cambio 10:33)
+2026-09-25T10:54:35-04:00
+{"level":40,"time":1790348128518,"pid":32072,"hostname":"«máquina»","context":"VerificationBypassService","event":"verification_bypass.active","nodeEnv":"development","msg":"DEV_VERIFICATION_BYPASS activo: la Guía de profesionales y la elegibilidad para citas no filtran por estado de verificación."}
+[Nest] 32072  - 25/09/2026, 10:55:28 a. m.   ERROR [ExceptionHandler] UnknownDependenciesException [Error]: Nest can't resolve dependencies of the PractitionerSettlementBatchesService (?, SettlementRepository, CatalogRepository, LinkedClaimAccessService, PracticeTenantLookupService). Please make sure that the argument Function at index [0] is available in the InsuranceModule module.
+
+Potential solutions:
+- Is InsuranceModule a valid NestJS module?
+- If Function is a provider, is it part of the current InsuranceModule?
+- If Function is exported from a separate @Module, is that module imported within InsuranceModule?
+  @Module({
+    imports: [ /* the Module containing Function */ ]
+  })
+
+For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+    at Injector.lookupComponentInParentModules (node_modules\@nestjs\core\injector\injector.js:300:19)
+    at async resolveParam (node_modules\@nestjs\core\injector\injector.js:150:38)
+    at async Promise.all (index 0)
+    at async Injector.resolveConstructorParams (node_modules\@nestjs\core\injector\injector.js:179:27)
+    at async Injector.loadInstance (node_modules\@nestjs\core\injector\injector.js:77:13)
+    at async Injector.loadProvider (node_modules\@nestjs\core\injector\injector.js:111:9)
+    at async node_modules\@nestjs\core\injector\instance-loader.js:56:13
+    at async Promise.all (index 39)
+    at async InstanceLoader.createInstancesOfProviders (node_modules\@nestjs\core\injector\instance-loader.js:55:9)
+    at async node_modules\@nestjs\core\injector\instance-loader.js:40:13 {
+  type: 'PractitionerSettlementBatchesService',
+  context: {
+    index: 0,
+    dependencies: [
+      [Function: Function],
+      [class SettlementRepository],
+      [class CatalogRepository],
+      [class LinkedClaimAccessService],
+      [class PracticeTenantLookupService]
+    ],
+    name: [Function: Function]
+  },
+  metadata: {
+    id: '4bacb72590c14b518bb4b'
+  },
+  moduleRef: {
+    id: '6b3257367bc239aa9412d'
+  }
+}
+exit=1
+
+=== segundo intento: yarn docs:openapi:generate
+2026-09-25T10:57:50-04:00
+{"level":40,"time":1790348492497,"pid":44212,"hostname":"«máquina»","context":"VerificationBypassService","event":"verification_bypass.active","nodeEnv":"development","msg":"DEV_VERIFICATION_BYPASS activo: la Guía de profesionales y la elegibilidad para citas no filtran por estado de verificación."}
+[Nest] 44212  - 25/09/2026, 11:01:43 a. m.    WARN Duplicate DTO detected: "BrokerProfileDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 44212  - 25/09/2026, 11:01:43 a. m.    WARN Duplicate DTO detected: "CreateAssignmentDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 44212  - 25/09/2026, 11:01:44 a. m.    WARN Duplicate DTO detected: "CreateAffiliationDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+  44/44 rutas públicas marcadas, 233 tags globales, 936 descripciones y 10530 respuestas de error añadidas.
+OpenAPI generado: 1254 paths, 1365 operaciones, 1226 esquemas.
+  → openapi\openapi.json
+  → openapi\openapi.yaml
+{"level":30,"time":1790348503663,"pid":44212,"hostname":"«máquina»","context":"PersistenceModule","msg":"Persistencia: «postgres-write» y «postgres-read» son equivalentes; comparten un único pool («cadena de conexión»)."}
+exit=0
+
+=== tras declarar los dos codigos de exito del endpoint
+2026-09-25T11:11:54-04:00
+{"level":40,"time":1790349494862,"pid":38104,"hostname":"«máquina»","context":"VerificationBypassService","event":"verification_bypass.active","nodeEnv":"development","msg":"DEV_VERIFICATION_BYPASS activo: la Guía de profesionales y la elegibilidad para citas no filtran por estado de verificación."}
+[Nest] 38104  - 25/09/2026, 11:18:34 a. m.    WARN Duplicate DTO detected: "BrokerProfileDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 38104  - 25/09/2026, 11:18:34 a. m.    WARN Duplicate DTO detected: "CreateAssignmentDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 38104  - 25/09/2026, 11:18:34 a. m.    WARN Duplicate DTO detected: "CreateAffiliationDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+  44/44 rutas públicas marcadas, 233 tags globales, 936 descripciones y 10530 respuestas de error añadidas.
+OpenAPI generado: 1254 paths, 1365 operaciones, 1229 esquemas.
+  → openapi\openapi.json
+  → openapi\openapi.yaml
+{"level":30,"time":1790349514111,"pid":38104,"hostname":"«máquina»","context":"PersistenceModule","msg":"Persistencia: «postgres-write» y «postgres-read» son equivalentes; comparten un único pool («cadena de conexión»)."}
+exit=0
+
+=== regeneracion final
+2026-09-25T11:26:49-04:00
+{"level":40,"time":1790350369613,"pid":42344,"hostname":"«máquina»","context":"VerificationBypassService","event":"verification_bypass.active","nodeEnv":"development","msg":"DEV_VERIFICATION_BYPASS activo: la Guía de profesionales y la elegibilidad para citas no filtran por estado de verificación."}
+[Nest] 42344  - 25/09/2026, 11:33:20 a. m.    WARN Duplicate DTO detected: "BrokerProfileDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 42344  - 25/09/2026, 11:33:20 a. m.    WARN Duplicate DTO detected: "CreateAssignmentDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+[Nest] 42344  - 25/09/2026, 11:33:20 a. m.    WARN Duplicate DTO detected: "CreateAffiliationDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.
+  44/44 rutas públicas marcadas, 233 tags globales, 936 descripciones y 10530 respuestas de error añadidas.
+OpenAPI generado: 1254 paths, 1365 operaciones, 1229 esquemas.
+  → openapi\openapi.json
+  → openapi\openapi.yaml
+{"level":30,"time":1790350399317,"pid":42344,"hostname":"«máquina»","context":"PersistenceModule","msg":"Persistencia: «postgres-write» y «postgres-read» son equivalentes; comparten un único pool («cadena de conexión»)."}
+exit=0

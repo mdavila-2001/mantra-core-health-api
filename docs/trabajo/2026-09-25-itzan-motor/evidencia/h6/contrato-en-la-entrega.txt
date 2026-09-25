@@ -1,0 +1,78 @@
+H6.S1.M2 — El contrato publicado ya puede viajar en la entrega
+===============================================================
+
+Por qué antes no podía
+----------------------
+Regenerar producía, además del endpoint de este carril, dos rutas de otra línea
+de trabajo, una docena de sus esquemas y cambios en la documentación generada de
+seis módulos. Era consecuencia de que la aplicación no arrancaba desde la rama de
+integración: sin poder arrancarla, nadie podía regenerar.
+
+Qué cambió
+----------
+Corregido el arranque, alguien regeneró los artefactos en la rama de integración
+(commit 25b30c8a). Comprobado que siguen al día:
+
+$ git diff --name-only 25b30c8a origin/dev -- src/ | grep -E "controller|dto"
+src/modules/pharmacy/controllers/pharmacy-read.controller.spec.ts
+
+Un único archivo bajo esas rutas, y es un `.spec.ts`. Ningún controlador ni DTO
+cambió desde la regeneración, así que el artefacto describe el código actual.
+
+La regeneración de este carril
+------------------------------
+$ yarn docs:openapi:generate
+GEN_EXIT=0
+  44/44 rutas públicas marcadas, 233 tags globales, 937 descripciones
+  y 10535 respuestas de error añadidas.
+OpenAPI generado: 1255 paths, 1366 operaciones, 1231 esquemas.
+
+$ git status --porcelain
+ M openapi/openapi.json
+ M openapi/openapi.yaml
+
+$ git diff --stat openapi/
+ openapi/openapi.json | 195 +++++++++++++++++++++++++++++++++++++++++
+ openapi/openapi.yaml | 147 +++++++++++++++++++++++++--
+ 2 files changed, 335 insertions(+), 7 deletions(-)
+
+El diff es sólo de este carril
+------------------------------
+Rutas que aparecen o desaparecen:
+
+$ git diff openapi/openapi.yaml | grep -E "^[+-]  /"
++  /terminology/import-template:
+
+Las líneas eliminadas, todas del mismo endpoint:
+
+-      summary: 'UC-03-03: importa conceptos desde un archivo NDJSON'
+-        UC-03-03: importa conceptos desde un archivo NDJSON. Requiere JWT y los
+-        roles o alcances declarados por el controlador. …
+-          description: ''
+
+Es el resumen del importador, que decía «desde un archivo NDJSON» y ahora lee
+cualquier formato que reconozca por contenido. Ninguna línea de otro carril.
+
+Validación
+----------
+$ yarn docs:openapi:lint
+validating openapi\openapi.yaml using lint rules for api 'alovida-health@v1'...
+openapi\openapi.yaml: validated in 4558ms
+Woohoo! Your API description is valid.
+REDOCLY_EXIT=0
+
+
+Cierre: las tres etapas sobre todo lo escrito
+==============================================
+$ yarn typecheck
+TYPECHECK_EXIT=0
+
+$ yarn lint --max-warnings=0 src/modules/terminology \
+    src/common/errors/error-codes.ts test/integration/terminology
+LINT_EXIT=1 — 20 problemas, los 20 en archivos de otro carril:
+  src/modules/terminology/import/xlsx-parser.ts        (8, uno de ellos no es de formato)
+  src/modules/terminology/import/xlsx-parser.spec.ts   (12)
+En los archivos de este carril: 0.
+
+$ yarn docs:openapi:lint
+REDOCLY_EXIT=0

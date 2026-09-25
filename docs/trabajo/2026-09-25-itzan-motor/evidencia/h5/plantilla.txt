@@ -1,0 +1,32 @@
+=== lint del módulo
+exit=0
+
+=== typecheck
+exit=0
+
+=== pruebas del módulo de terminología
+2026-09-25T10:34:55-04:00
+(node:11936) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25620) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 23 passed, 23 total
+Tests:       252 passed, 252 total
+Snapshots:   0 total
+Time:        17.066 s, estimated 18 s
+Ran all test suites matching src/modules/terminology.
+exit=0
+
+=== build
+exit=0
+
+=== lo que genera la plantilla de conceptos en CSV
+nombre: plantilla-conceptos.csv
+tipo:   text/csv; charset=utf-8
+bytes:  82
+---
+code,display,definition
+ZZ-000,Ejemplo sintético,Fila de ejemplo de la plantilla
+---
+exit=0

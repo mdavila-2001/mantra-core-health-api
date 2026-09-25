@@ -46,5 +46,24 @@ export enum ErrorCode {
    * y la memoria del proceso, no la cuota del cliente.
    */
   CONCURRENCY_LIMIT = 'CONCURRENCY_LIMIT',
+  /**
+   * El archivo de una carga masiva no es de ninguno de los formatos que el
+   * importador sabe leer (422). Se decide por **contenido**, no por extensión
+   * ni por el tipo declarado al subirlo, así que el cliente puede mostrarlo
+   * como «este archivo no sirve» sin matizar.
+   */
+  IMPORT_FORMAT_UNSUPPORTED = 'IMPORT_FORMAT_UNSUPPORTED',
+  /**
+   * El archivo de una carga masiva no tiene ninguna fila con contenido (422):
+   * está vacío, o trae sólo el encabezado. Separado de
+   * `IMPORT_FORMAT_UNSUPPORTED` porque el archivo **sí** se entendió, y lo que
+   * hay que decirle a quien lo cargó es distinto.
+   */
+  IMPORT_EMPTY_FILE = 'IMPORT_EMPTY_FILE',
+  /**
+   * Se pidió cargar con un perfil que no existe (422). El perfil dice qué
+   * columnas se esperan, así que es una lista cerrada: no se adivina.
+   */
+  IMPORT_PROFILE_UNKNOWN = 'IMPORT_PROFILE_UNKNOWN',
   INTERNAL = 'INTERNAL',
 }

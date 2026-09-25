@@ -1,0 +1,40 @@
+=== redocly lint del contrato
+2026-09-25T11:33:33-04:00
+validating openapi\openapi.yaml using lint rules for api 'alovida-health@v1'...
+openapi\openapi.yaml: validated in 1721ms
+
+Woohoo! Your API description is valid. 🎉
+
+lint exit=0
+
+=== comprobacion de cambios rompedores
+::error::Uso: check-breaking.mjs --base <openapi.json> --head <openapi.json> [--exceptions <archivo.json>]
+breaking exit=2
+
+=== cambios rompedores contra el contrato del corte
+::error::4 cambio(s) incompatible(s) del contrato OpenAPI sin excepción:
+  [new_required_request_field] POST /iam/users/assisted-practitioner-registration — nationalId
+    id: new_required_request_field:POST /iam/users/assisted-practitioner-registration:nationalId
+  [new_required_request_field] POST /iam/users/assisted-practitioner-registration — issuerAdministrativeAreaConceptId
+    id: new_required_request_field:POST /iam/users/assisted-practitioner-registration:issuerAdministrativeAreaConceptId
+  [new_required_request_field] POST /iam/auth/register-practitioner — nationalId
+    id: new_required_request_field:POST /iam/auth/register-practitioner:nationalId
+  [new_required_request_field] POST /iam/auth/register-practitioner — issuerAdministrativeAreaConceptId
+    id: new_required_request_field:POST /iam/auth/register-practitioner:issuerAdministrativeAreaConceptId
+
+Si la ruptura está aprobada, agregar una entrada con el `id` de arriba, `reason` y `migrationNote` al archivo de excepciones (--exceptions).
+exit=1
+
+=== replica del paso bloqueante de CI: base = contrato de la rama de integracion, con su archivo de excepciones
+::error::4 cambio(s) incompatible(s) del contrato OpenAPI sin excepción:
+  [new_required_request_field] POST /iam/users/assisted-practitioner-registration — nationalId
+    id: new_required_request_field:POST /iam/users/assisted-practitioner-registration:nationalId
+  [new_required_request_field] POST /iam/users/assisted-practitioner-registration — issuerAdministrativeAreaConceptId
+    id: new_required_request_field:POST /iam/users/assisted-practitioner-registration:issuerAdministrativeAreaConceptId
+  [new_required_request_field] POST /iam/auth/register-practitioner — nationalId
+    id: new_required_request_field:POST /iam/auth/register-practitioner:nationalId
+  [new_required_request_field] POST /iam/auth/register-practitioner — issuerAdministrativeAreaConceptId
+    id: new_required_request_field:POST /iam/auth/register-practitioner:issuerAdministrativeAreaConceptId
+
+Si la ruptura está aprobada, agregar una entrada con el `id` de arriba, `reason` y `migrationNote` al archivo de excepciones (--exceptions).
+exit=1
