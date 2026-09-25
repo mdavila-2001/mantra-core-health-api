@@ -1,0 +1,13 @@
+  console.log
+    grande-10k: 155 ms, heapUsed antes=37464248 después=46589288 (+9125040 bytes)
+
+      at Object.log (modules/terminology/import/xlsx-parser.spec.ts:95:13)
+
+(node:24176) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       18 passed, 18 total
+Snapshots:   0 total
+Time:        3.588 s
+Ran all test suites matching src/modules/terminology/import/xlsx-parser.spec.ts.
+exit=0
