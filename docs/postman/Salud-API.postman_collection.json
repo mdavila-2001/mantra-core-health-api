@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1360 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1360 requests en 142 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1365 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1365 requests en 143 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -894,7 +894,7 @@
             "description": "Alta pública desde cero, sin admin: crea cuenta + credencial + rol + persona + perfil profesional + licencia + título + idioma + membresía en una transacción. La licencia nace PENDIENTE de verificación: registrarse declara la matrícula, no la prueba, así que el perfil no aparece como habilitado ni acepta pacientes.\n\nRegistrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
+              "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"displayName\": \"Dra. de prueba\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -39571,7 +39571,7 @@
                 "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
+                  "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"displayName\": \"Dra. de prueba\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -39832,7 +39832,7 @@
               ]
             },
             {
-              "name": "POST /iam/auth/upload-registration-document · Pre-cargar un documento legal (PDF) del registro de organización",
+              "name": "POST /iam/auth/upload-registration-document · Pre-cargar un PDF para un registro de organización o profesional",
               "request": {
                 "method": "POST",
                 "header": [
@@ -39852,7 +39852,7 @@
                     "upload-registration-document"
                   ]
                 },
-                "description": "Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-document`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationDocument`",
+                "description": "Pre-cargar un PDF para un registro de organización o profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-document`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationDocument`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"<binario>\"\n}",
@@ -40112,7 +40112,7 @@
                 "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-practitioner-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedPractitionerRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    }\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"workEmail\": \"usuario@example.test\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"sedesLicenseNumber\": \"T.I. 538/14\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"licenseIssueDate\": \"2026-01-01\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"specialtyConceptIds\": [\n    \"<specialtyConceptIds: uuid existente>\"\n  ],\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"issuerAdministrativeAreaConceptId\": \"<issuerAdministrativeAreaConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": -90,\n  \"homeLongitude\": -180,\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": -90,\n  \"workLongitude\": -180,\n  \"phone\": \"phone-ejemplo\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"profilePhotoBase64\": \"2026-01-01T00:00:00.000Z\",\n  \"ownSite\": {\n    \"name\": \"name-ejemplo\",\n    \"timeZone\": \"America/La_Paz\",\n    \"address\": {\n      \"lines\": [\n        \"lines-ejemplo\"\n      ],\n      \"city\": \"city-ejemplo\",\n      \"latitude\": -90,\n      \"longitude\": -180\n    }\n  },\n  \"credentials\": [\n    {\n      \"credentialTypeConceptId\": \"<credentialTypeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"number\": \"number-ejemplo\",\n      \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n      \"fileId\": \"{{fileId}}\"\n    }\n  ],\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -59333,7 +59333,7 @@
       ]
     },
     {
-      "name": "pharmacy (28)",
+      "name": "pharmacy (29)",
       "item": [
         {
           "name": "pharmacy-directory",
@@ -59386,7 +59386,7 @@
               ]
             },
             {
-              "name": "GET /pharmacy/products · Buscar productos publicados por texto o por medicamento",
+              "name": "GET /pharmacy/products · Buscar productos publicados por texto, medicamento o farmacia",
               "request": {
                 "method": "GET",
                 "header": [
@@ -59420,6 +59420,12 @@
                       "disabled": true
                     },
                     {
+                      "key": "pharmacyId",
+                      "value": "{{pharmacyId}}",
+                      "description": "Sólo lo publicado por esta farmacia (carril A, H5)",
+                      "disabled": true
+                    },
+                    {
                       "key": "limit",
                       "value": "1",
                       "description": "Tope del listado (por defecto 50)",
@@ -59427,7 +59433,7 @@
                     }
                   ]
                 },
-                "description": "Buscar productos publicados por texto o por medicamento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /pharmacy/products`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PharmacyReadController_searchProducts`"
+                "description": "Buscar productos publicados por texto, medicamento o farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /pharmacy/products`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PharmacyReadController_searchProducts`"
               },
               "response": [],
               "event": [
@@ -59446,6 +59452,79 @@
                       "  const list = Array.isArray(body) ? body : (body.products || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('productId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /pharmacy/sites · Listar sedes publicadas, sueltas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pharmacy/sites",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pharmacy",
+                    "sites"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "search-ejemplo",
+                      "description": "Texto a buscar en el nombre de la farmacia o la sede",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lat",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Latitud WGS84 desde donde medir distancia (va con lng)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lng",
+                      "value": "lng-ejemplo",
+                      "description": "Longitud WGS84 desde donde medir distancia (va con lat)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope del listado (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar sedes publicadas, sueltas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /pharmacy/sites`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PharmacyReadController_listSites`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.sites || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('siteId', first.id);",
                       "}"
                     ]
                   }
@@ -62469,6 +62548,189 @@
       ]
     },
     {
+      "name": "practitioner-settlement-batches (3)",
+      "item": [
+        {
+          "name": "GET /practitioner-settlement-batches · Listar los lotes de liquidación del alcance del actor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioner-settlement-batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioner-settlement-batches"
+              ],
+              "query": [
+                {
+                  "key": "providerEntityId",
+                  "value": "<providerEntityId: uuid existente>",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-01-01",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-01-01",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar los lotes de liquidación del alcance del actor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /practitioner-settlement-batches`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PractitionerSettlementBatchesController_list`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.practitionerSettlementBatches || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('practitionerSettlementBatchId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /practitioner-settlement-batches · Generar (o repetir) el lote de liquidación del período",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioner-settlement-batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioner-settlement-batches"
+              ]
+            },
+            "description": "Generar (o repetir) el lote de liquidación del período. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /practitioner-settlement-batches`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `PractitionerSettlementBatchesController_generate`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"providerEntityId\": \"<providerEntityId: uuid existente>\",\n  \"cadence\": \"WEEKLY\",\n  \"periodStart\": \"2026-09-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{practitionerSettlementBatchId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.practitionerSettlementBatchId);",
+                  "  if (id) pm.environment.set('practitionerSettlementBatchId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /practitioner-settlement-batches/{id} · Consultar un lote de liquidación",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioner-settlement-batches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioner-settlement-batches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{practitionerSettlementBatchId}}",
+                  "description": "Identificador de ruta · variable `{{practitionerSettlementBatchId}}`"
+                }
+              ]
+            },
+            "description": "Consultar un lote de liquidación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /practitioner-settlement-batches/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PractitionerSettlementBatchesController_getById`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.practitionerSettlementBatches || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('practitionerSettlementBatchId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "practitioners (6)",
       "item": [
         {
@@ -65088,7 +65350,7 @@
       ]
     },
     {
-      "name": "profiles (39)",
+      "name": "profiles (40)",
       "item": [
         {
           "name": "profiles-patients",
@@ -67044,7 +67306,7 @@
                 "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/practitioners/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_updateOwnPractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"phone\": \"phone-ejemplo\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\"\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -67123,6 +67385,68 @@
                     "exec": [
                       "pm.test('status 200', function () {",
                       "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /profiles/practitioners/me/credentials/{credentialId} · Editar un título propio pendiente de verificación",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/credentials/:credentialId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "credentials",
+                    ":credentialId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "credentialId",
+                      "value": "{{credentialId}}",
+                      "description": "Identificador de ruta · variable `{{credentialId}}`"
+                    }
+                  ]
+                },
+                "description": "Sólo permite cambiar tipo, número, institución, fecha y documento de una credencial pendiente perteneciente al usuario autenticado. Los documentos deben haberse subido por ese mismo usuario.\n\n`PATCH /profiles/practitioners/me/credentials/{credentialId}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_updateOwnCredential`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"issuingInstitutionText\": \"issuingInstitutionText-ejemplo\",\n  \"issueDate\": \"2026-01-01\",\n  \"fileId\": \"{{fileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 204', function () {",
+                      "  pm.response.to.have.status(204);",
                       "});"
                     ]
                   }
@@ -68140,6 +68464,18 @@
                       "value": "limit-ejemplo",
                       "description": "",
                       "disabled": false
+                    },
+                    {
+                      "key": "department",
+                      "value": "department-ejemplo",
+                      "description": "concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422",
+                      "disabled": true
+                    },
+                    {
+                      "key": "municipality",
+                      "value": "municipality-ejemplo",
+                      "description": "concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422",
+                      "disabled": true
                     }
                   ]
                 },
@@ -68280,6 +68616,18 @@
                       "value": "limit-ejemplo",
                       "description": "",
                       "disabled": false
+                    },
+                    {
+                      "key": "department",
+                      "value": "department-ejemplo",
+                      "description": "concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422",
+                      "disabled": true
+                    },
+                    {
+                      "key": "municipality",
+                      "value": "municipality-ejemplo",
+                      "description": "concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422",
+                      "disabled": true
                     }
                   ]
                 },

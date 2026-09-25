@@ -1,0 +1,48 @@
+BROKEN LINK: D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\modules\data_catalog.md -> ../../../docs/adr/ADR-0024-portal-admin-catalogo-de-datos.md
+BROKEN LINK: D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\modules\insurance.md -> ../../../docs/contracts/insurer-practitioner-settlement-batches.md
+BROKEN LINK: D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\modules\qa_execution.md -> ../../../docs/adr/ADR-0025-qa-runner-en-servidor.md
+
+Páginas huérfanas (sin ningún enlace entrante desde otra página de docs/):
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\admin-portal\implementation-status.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\api\flujos-verificados-frontend.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\architecture\decisions\ADR-2026-08-10-audio-assets-worker.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\architecture\domain-boundaries-hardening.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\architecture\flows.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\contracts\insurer-practitioner-settlement-batches.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\endpoints\audio-assets.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\endpoints\README.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\guides\patient-coverage-copays.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\hardening\runs\7dc0fe52\CHECKPOINT-F02-F03-F05-F06-F07.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\hardening\runs\98e7fb5a\CHECKPOINT-F00-F01.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-22_datos-bolivia.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-22_para-marcelo.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-25_v419_para-justin.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-26_far-e1-verificacion-para-ender.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-26_mac-vinculo-el-eslabon-que-falta.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-26_membresia-asistencial-respuesta.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-26_que-nos-traba.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-27_far-respuestas-para-ender.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\2026-08-27_v422_para-justin.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\model-handoff\README.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\operations\ci-integration-recipe.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\operations\ci-runner-self-hosted.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\operations\corpus-mesh.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\progress\STATUS_LOG.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\reports\costo-infraestructura-y-operacion-2026-08-07.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\runbooks\audio-assets-production.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\tareas\subtarea-2.4-transparencia-copagos\evidence\api-final\verification.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-19-relacion-agenda-mensajeria\H1-especificacion-doble-estricto.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-19-relacion-agenda-mensajeria\H1-ficha-relacion.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-19-relacion-agenda-mensajeria\H1-registro-de-checks.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-19-relacion-agenda-mensajeria\H2-H5-ejecucion-de-la-relacion.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-19-relacion-agenda-mensajeria\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-20-cerrar-pendientes-carril-b\gates-no-aprobados.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-24-cierre-plan-2-3-y-7-1\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-24-insurance-exclusions-settlement-contracts\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-24-medical-module-codex-half\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-24-medical-module-execution\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-25-farmacia-datos\PLAN.md
+
+699 enlaces internos verificados en 265 páginas.
+3 enlaces rotos.
+EXIT:1

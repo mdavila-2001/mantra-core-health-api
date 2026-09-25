@@ -9,7 +9,7 @@
 # Módulo `qa_lab`
 
 **Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/qa_lab/README.md)
-· 2 controllers · 2 services · 2 repositories · 13 entidades · 1 DTO
+· 3 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
 
@@ -130,4 +130,15 @@ loguean payloads ni valores capturados.
   seguro, que es la opción conservadora; afinar por campo llegará con ese registro.
 - **Outbox**: `TestRunQueued`, `TestCaseFailed`, `ReleaseEvidenceLinked` se emitirán cuando exista
   el módulo 35.
+
+## Ejecución en el servidor y evaluación real (2026-09-18)
+
+- El runner oficial es el módulo 68 (`qa_execution`, ADR-0025): destinos aprobados, plan con
+  hash, aprobación y worker. `POST /qa/runs/:runId/cases/:caseId/execute` sigue existiendo para
+  compatibilidad, pero lo que reporta un cliente no es evidencia del servidor.
+- `evaluateResult` **evalúa de verdad** cuando recibe la respuesta observada por el runner
+  (`domain/assertion-evaluator.ts`) y guarda valor observado y motivo. Sin ella, la aserción se
+  registra con `DECLARATIVE_ONLY` (comportamiento anterior, que no era un oráculo).
+- Una corrida sin ningún caso aprobado ya no cierra como PASSED.
+- Lectura para el portal: `GET /admin/qa/environments|suites|suites/:id|runs|runs/:id|defects`.
 

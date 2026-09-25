@@ -2472,6 +2472,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 409 | `CONFLICT` | El caso sólo admite un diagnóstico principal | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | El paciente ya tiene esa condición activa | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |

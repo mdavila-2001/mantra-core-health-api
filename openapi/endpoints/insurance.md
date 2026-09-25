@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 40 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 43 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
-- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `PriorAuthController`, `ReconciliationController`
+- **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
+- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `PractitionerSettlementBatchesController`, `PriorAuthController`, `ReconciliationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -44,13 +44,16 @@ Referencia exhaustiva de 40 operación(es) del módulo `insurance`, derivada del
 31. [GET /insurance/portability/certificates/{certificateId}/pdf](#31-get-insurance-portability-certificates-certificateid-pdf) — Descargar el certificado de portabilidad en PDF
 32. [POST /insurance/portability/export](#32-post-insurance-portability-export) — Exportar el historial de póliza y siniestralidad del titular a 1 clic
 33. [POST /patient-coverages](#33-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-34. [POST /prior-authorization-requests](#34-post-prior-authorization-requests) — Solicitar autorización previa con items
-35. [POST /prior-authorization-requests/{id}/determinations](#35-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-36. [POST /provider-networks](#36-post-provider-networks) — Alta de red de prestadores (soporte)
-37. [POST /provider-networks/{id}/memberships](#37-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-38. [GET /public/portability/verify/{manifestHash}](#38-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
-39. [POST /reconciliation-batches](#39-post-reconciliation-batches) — Abrir lote de conciliación
-40. [POST /reconciliation-batches/{id}/items](#40-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+34. [GET /practitioner-settlement-batches](#34-get-practitioner-settlement-batches) — Listar los lotes de liquidación del alcance del actor
+35. [POST /practitioner-settlement-batches](#35-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
+36. [GET /practitioner-settlement-batches/{id}](#36-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
+37. [POST /prior-authorization-requests](#37-post-prior-authorization-requests) — Solicitar autorización previa con items
+38. [POST /prior-authorization-requests/{id}/determinations](#38-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+39. [POST /provider-networks](#39-post-provider-networks) — Alta de red de prestadores (soporte)
+40. [POST /provider-networks/{id}/memberships](#40-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+41. [GET /public/portability/verify/{manifestHash}](#41-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
+42. [POST /reconciliation-batches](#42-post-reconciliation-batches) — Abrir lote de conciliación
+43. [POST /reconciliation-batches/{id}/items](#43-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -2170,7 +2173,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `whatsappNumber` | Sí | `string` | longitud máxima 32; patrón runtime `/^\+[1-9]\d{6,14}$/`; admite null | Número de WhatsApp de atención al cliente, en formato E.164 | `+59171548278` |
+| `whatsappNumber` | Sí | `string` | longitud máxima 32; patrón runtime `/^\+[1-9]\d{7,14}$/`; admite null | Número de WhatsApp de atención al cliente, en formato E.164 | `+59171548278` |
 | `callCenterPhone` | Sí | `string` | longitud máxima 32; patrón runtime `/^[+\d][\d\s().-]{4,31}$/`; admite null | Teléfono o línea gratuita de atención al cliente | `800-10-6060` |
 | `supportEmail` | Sí | `string` | formato `email`; longitud máxima 120; admite null | Sin descripción específica en el contrato OpenAPI. | `siniestros@aseguradora.com.bo` |
 
@@ -3016,7 +3019,28 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "submittedAt": "2026-07-31T12:00:00.000Z",
       "filingDeadline": "2026-07-31"
     }
-  ]
+  ],
+  "settlement": {
+    "availability": "AVAILABLE",
+    "totalBilledAmount": "valor-ejemplo",
+    "totalApprovedAmount": "valor-ejemplo",
+    "totalPatientAmount": "valor-ejemplo",
+    "totalDeniedAmount": "valor-ejemplo",
+    "reconciled": true,
+    "exclusions": [
+      {
+        "claimLineId": "00000000-0000-4000-8000-000000000001",
+        "itemName": "Nombre de ejemplo",
+        "amount": "valor-ejemplo",
+        "policyClauseReference": "valor-ejemplo",
+        "denialRationale": "valor-ejemplo"
+      }
+    ]
+  },
+  "eob": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "publishedAt": "2026-07-31T12:00:00.000Z"
+  }
 }
 ```
 
@@ -3167,6 +3191,22 @@ Campos de la respuesta:
 | `disputes[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
 | `disputes[].submittedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `disputes[].filingDeadline` | Sí | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `settlement` | Sí | `ClaimSettlementBreakdownDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"availability":"AVAILABLE","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","reconciled":true,"exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]}` |
+| `settlement.availability` | Sí | `string` | valores: `AVAILABLE`, `PENDING_PUBLICATION`, `UNDER_REVIEW`, `NOT_AVAILABLE` | Sin descripción específica en el contrato OpenAPI. | `AVAILABLE` |
+| `settlement.totalBilledAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `settlement.totalApprovedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `settlement.totalPatientAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `settlement.totalDeniedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `settlement.reconciled` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `settlement.exclusions` | Sí | `array<ClaimExclusionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]` |
+| `settlement.exclusions[].claimLineId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `settlement.exclusions[].itemName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `settlement.exclusions[].amount` | Sí | `string` | Sin restricción adicional declarada | Importe decimal exacto excluido | `valor-ejemplo` |
+| `settlement.exclusions[].policyClauseReference` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `settlement.exclusions[].denialRationale` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `eob` | Sí | `ClaimEobDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","publishedAt":"2026-07-31T12:00:00.000Z"}` |
+| `eob.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `eob.publishedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5227,7 +5267,599 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /prior-authorization-requests
+## 34. GET /practitioner-settlement-batches
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
+- **Nombre:** Listar los lotes de liquidación del alcance del actor
+- **Operation ID:** `PractitionerSettlementBatchesController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSettlementBatchesController.list](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+
+### Descripción de negocio
+
+Listar los lotes de liquidación del alcance del actor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practitioner-settlement-batches` en `PractitionerSettlementBatchesController_list`. El controlador delega en `PractitionerSettlementBatchesService.list`. No recibe body. El tipo de retorno estático es `Promise<PractitionerSettlementBatchListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `providerEntityId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+| `to` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practitioner-settlement-batches HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practitioner-settlement-batches?providerEntityId=00000000-0000-4000-8000-000000000001&from=2026-07-31&to=2026-07-31 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSettlementBatchListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+      "carrierName": "Nombre de ejemplo",
+      "providerEntityId": "00000000-0000-4000-8000-000000000001",
+      "cadence": {},
+      "periodStart": "2026-07-31",
+      "periodEnd": "2026-07-31",
+      "currencyCode": "BOB",
+      "status": "SETTLEMENT_BATCH_ISSUED",
+      "generatedAt": "2026-07-31T12:00:00.000Z",
+      "replayed": true,
+      "totals": {
+        "totalBilledAmount": "valor-ejemplo",
+        "totalApprovedAmount": "valor-ejemplo",
+        "totalPatientAmount": "valor-ejemplo",
+        "totalDeniedAmount": "valor-ejemplo",
+        "totalReversalAdjustmentAmount": "valor-ejemplo"
+      },
+      "claims": [
+        {
+          "claimId": "00000000-0000-4000-8000-000000000001",
+          "claimIdentifier": "valor-ejemplo",
+          "adjudicationVersionId": "00000000-0000-4000-8000-000000000001",
+          "adjudicationVersion": 1,
+          "eobPublishedAt": "2026-07-31T12:00:00.000Z",
+          "totalBilledAmount": "valor-ejemplo",
+          "totalApprovedAmount": "valor-ejemplo",
+          "totalPatientAmount": "valor-ejemplo",
+          "totalDeniedAmount": "valor-ejemplo",
+          "exclusionsCount": 1
+        }
+      ],
+      "excludedClaims": [
+        {
+          "claimId": "00000000-0000-4000-8000-000000000001",
+          "claimIdentifier": "valor-ejemplo",
+          "reason": {}
+        }
+      ],
+      "reversalAdjustments": [
+        {
+          "claimId": "00000000-0000-4000-8000-000000000001",
+          "claimIdentifier": "valor-ejemplo",
+          "previousBatchId": "00000000-0000-4000-8000-000000000001",
+          "adjustmentAmount": "valor-ejemplo"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PractitionerSettlementBatchDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","providerEntityId":"00000000-0000-4000-8000-000000000001","cadence":{},"periodStart":"2026-07-31","periodEnd":"2026-07-31","currencyCode":"BOB","status":"SETTLEMENT_BATCH_ISSUED","generatedAt":"2026-07-31T12:00:00.000Z","replayed":true,"totals":{"totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","totalReversalAdjustmentAmount":"valor-ejemplo"},"claims":[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobPublishedAt":"2026-07-31T12:00:00.000Z","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","exclusionsCount":1}],"excludedClaims":[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","reason":{}}],"reversalAdjustments":[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","previousBatchId":"00000000-0000-4000-8000-000000000001","adjustmentAmount":"valor-ejemplo"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].providerEntityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].cadence` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_CADENCES)[number] | `{}` |
+| `items[].periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `items[].periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `items[].currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `SETTLEMENT_BATCH_ISSUED` |
+| `items[].generatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].replayed` | Sí | `boolean` | Sin restricción adicional declarada | true cuando la clave natural ya existía (idempotencia, contrato §9) | `true` |
+| `items[].totals` | Sí | `PractitionerSettlementBatchTotalsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","totalReversalAdjustmentAmount":"valor-ejemplo"}` |
+| `items[].totals.totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].totals.totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | A transferir por la aseguradora | `valor-ejemplo` |
+| `items[].totals.totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Copagos percibidos en consulta | `valor-ejemplo` |
+| `items[].totals.totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Exclusiones aplicadas | `valor-ejemplo` |
+| `items[].totals.totalReversalAdjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims` | Sí | `array<PractitionerSettlementBatchClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobPublishedAt":"2026-07-31T12:00:00.000Z","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","exclusionsCount":1}]` |
+| `items[].claims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].claims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims[].adjudicationVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].claims[].adjudicationVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].claims[].eobPublishedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].claims[].totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims[].totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims[].totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims[].totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].claims[].exclusionsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].excludedClaims` | Sí | `array<PractitionerSettlementBatchExcludedClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","reason":{}}]` |
+| `items[].excludedClaims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].excludedClaims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].excludedClaims[].reason` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_EXCLUSION_REASONS)[number] | `{}` |
+| `items[].reversalAdjustments` | Sí | `array<PractitionerSettlementBatchReversalAdjustmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","previousBatchId":"00000000-0000-4000-8000-000000000001","adjustmentAmount":"valor-ejemplo"}]` |
+| `items[].reversalAdjustments[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reversalAdjustments[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].reversalAdjustments[].previousBatchId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reversalAdjustments[].adjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Negativo | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La organización activa no administra una aseguradora ni tiene prácticas, unidades diagnósticas o farmacias activas | Excepción explícita en src/modules/insurance/services/practitioner-settlement-batches.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioner-settlement-batches"
+}
+```
+
+---
+
+## 35. POST /practitioner-settlement-batches
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
+- **Nombre:** Generar (o repetir) el lote de liquidación del período
+- **Operation ID:** `PractitionerSettlementBatchesController_generate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSettlementBatchesController.generate](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+
+### Descripción de negocio
+
+Generar (o repetir) el lote de liquidación del período. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Genera el lote del período, o devuelve el existente (contrato §9): `201` si es nuevo, `200` con `replayed: true` si ya existía.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /practitioner-settlement-batches` en `PractitionerSettlementBatchesController_generate`. El controlador delega en `PractitionerSettlementBatchesService.generate`. Valida el body como `GeneratePractitionerSettlementBatchDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSettlementBatchDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `GeneratePractitionerSettlementBatchDto`; los campos opcionales se omiten.
+
+```http
+POST /practitioner-settlement-batches HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "providerEntityId": "00000000-0000-4000-8000-000000000001",
+  "cadence": "WEEKLY",
+  "periodStart": "2026-09-01"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `providerEntityId` | Sí | `string` | formato `uuid` | billing_provider_entity_id | `00000000-0000-4000-8000-000000000001` |
+| `cadence` | Sí | `string` | valores: `WEEKLY`, `BIWEEKLY`, `MONTHLY` | Sin descripción específica en el contrato OpenAPI. | `WEEKLY` |
+| `periodStart` | Sí | `string` | formato `date` | Día 1 (MONTHLY), día 1 o 16 (BIWEEKLY), o cualquiera (WEEKLY) | `2026-09-01` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /practitioner-settlement-batches HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "providerEntityId": "00000000-0000-4000-8000-000000000001",
+  "cadence": "WEEKLY",
+  "periodStart": "2026-09-01"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSettlementBatchDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "carrierName": "Nombre de ejemplo",
+  "providerEntityId": "00000000-0000-4000-8000-000000000001",
+  "cadence": {},
+  "periodStart": "2026-07-31",
+  "periodEnd": "2026-07-31",
+  "currencyCode": "BOB",
+  "status": "SETTLEMENT_BATCH_ISSUED",
+  "generatedAt": "2026-07-31T12:00:00.000Z",
+  "replayed": true,
+  "totals": {
+    "totalBilledAmount": "valor-ejemplo",
+    "totalApprovedAmount": "valor-ejemplo",
+    "totalPatientAmount": "valor-ejemplo",
+    "totalDeniedAmount": "valor-ejemplo",
+    "totalReversalAdjustmentAmount": "valor-ejemplo"
+  },
+  "claims": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "adjudicationVersionId": "00000000-0000-4000-8000-000000000001",
+      "adjudicationVersion": 1,
+      "eobPublishedAt": "2026-07-31T12:00:00.000Z",
+      "totalBilledAmount": "valor-ejemplo",
+      "totalApprovedAmount": "valor-ejemplo",
+      "totalPatientAmount": "valor-ejemplo",
+      "totalDeniedAmount": "valor-ejemplo",
+      "exclusionsCount": 1
+    }
+  ],
+  "excludedClaims": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "reason": {}
+    }
+  ],
+  "reversalAdjustments": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "previousBatchId": "00000000-0000-4000-8000-000000000001",
+      "adjustmentAmount": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `providerEntityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cadence` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_CADENCES)[number] | `{}` |
+| `periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `SETTLEMENT_BATCH_ISSUED` |
+| `generatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `replayed` | Sí | `boolean` | Sin restricción adicional declarada | true cuando la clave natural ya existía (idempotencia, contrato §9) | `true` |
+| `totals` | Sí | `PractitionerSettlementBatchTotalsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","totalReversalAdjustmentAmount":"valor-ejemplo"}` |
+| `totals.totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `totals.totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | A transferir por la aseguradora | `valor-ejemplo` |
+| `totals.totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Copagos percibidos en consulta | `valor-ejemplo` |
+| `totals.totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Exclusiones aplicadas | `valor-ejemplo` |
+| `totals.totalReversalAdjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims` | Sí | `array<PractitionerSettlementBatchClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobPublishedAt":"2026-07-31T12:00:00.000Z","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","exclusionsCount":1}]` |
+| `claims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `claims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].adjudicationVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `claims[].adjudicationVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `claims[].eobPublishedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `claims[].totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].exclusionsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `excludedClaims` | Sí | `array<PractitionerSettlementBatchExcludedClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","reason":{}}]` |
+| `excludedClaims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `excludedClaims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `excludedClaims[].reason` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_EXCLUSION_REASONS)[number] | `{}` |
+| `reversalAdjustments` | Sí | `array<PractitionerSettlementBatchReversalAdjustmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","previousBatchId":"00000000-0000-4000-8000-000000000001","adjustmentAmount":"valor-ejemplo"}]` |
+| `reversalAdjustments[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reversalAdjustments[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `reversalAdjustments[].previousBatchId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reversalAdjustments[].adjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Negativo | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioner-settlement-batches"
+}
+```
+
+---
+
+## 36. GET /practitioner-settlement-batches/{id}
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
+- **Nombre:** Consultar un lote de liquidación
+- **Operation ID:** `PractitionerSettlementBatchesController_getById`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSettlementBatchesController.getById](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+
+### Descripción de negocio
+
+Consultar un lote de liquidación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practitioner-settlement-batches/{id}` en `PractitionerSettlementBatchesController_getById`. El controlador delega en `PractitionerSettlementBatchesService.getById`. No recibe body. El tipo de retorno estático es `Promise<PractitionerSettlementBatchDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practitioner-settlement-batches/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practitioner-settlement-batches/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerSettlementBatchDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSettlementBatchDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "carrierName": "Nombre de ejemplo",
+  "providerEntityId": "00000000-0000-4000-8000-000000000001",
+  "cadence": {},
+  "periodStart": "2026-07-31",
+  "periodEnd": "2026-07-31",
+  "currencyCode": "BOB",
+  "status": "SETTLEMENT_BATCH_ISSUED",
+  "generatedAt": "2026-07-31T12:00:00.000Z",
+  "replayed": true,
+  "totals": {
+    "totalBilledAmount": "valor-ejemplo",
+    "totalApprovedAmount": "valor-ejemplo",
+    "totalPatientAmount": "valor-ejemplo",
+    "totalDeniedAmount": "valor-ejemplo",
+    "totalReversalAdjustmentAmount": "valor-ejemplo"
+  },
+  "claims": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "adjudicationVersionId": "00000000-0000-4000-8000-000000000001",
+      "adjudicationVersion": 1,
+      "eobPublishedAt": "2026-07-31T12:00:00.000Z",
+      "totalBilledAmount": "valor-ejemplo",
+      "totalApprovedAmount": "valor-ejemplo",
+      "totalPatientAmount": "valor-ejemplo",
+      "totalDeniedAmount": "valor-ejemplo",
+      "exclusionsCount": 1
+    }
+  ],
+  "excludedClaims": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "reason": {}
+    }
+  ],
+  "reversalAdjustments": [
+    {
+      "claimId": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "previousBatchId": "00000000-0000-4000-8000-000000000001",
+      "adjustmentAmount": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `providerEntityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cadence` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_CADENCES)[number] | `{}` |
+| `periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `SETTLEMENT_BATCH_ISSUED` |
+| `generatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `replayed` | Sí | `boolean` | Sin restricción adicional declarada | true cuando la clave natural ya existía (idempotencia, contrato §9) | `true` |
+| `totals` | Sí | `PractitionerSettlementBatchTotalsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","totalReversalAdjustmentAmount":"valor-ejemplo"}` |
+| `totals.totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `totals.totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | A transferir por la aseguradora | `valor-ejemplo` |
+| `totals.totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Copagos percibidos en consulta | `valor-ejemplo` |
+| `totals.totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Exclusiones aplicadas | `valor-ejemplo` |
+| `totals.totalReversalAdjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims` | Sí | `array<PractitionerSettlementBatchClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobPublishedAt":"2026-07-31T12:00:00.000Z","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","exclusionsCount":1}]` |
+| `claims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `claims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].adjudicationVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `claims[].adjudicationVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `claims[].eobPublishedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `claims[].totalBilledAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalApprovedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalPatientAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].totalDeniedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `claims[].exclusionsCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `excludedClaims` | Sí | `array<PractitionerSettlementBatchExcludedClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","reason":{}}]` |
+| `excludedClaims[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `excludedClaims[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `excludedClaims[].reason` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof SETTLEMENT_EXCLUSION_REASONS)[number] | `{}` |
+| `reversalAdjustments` | Sí | `array<PractitionerSettlementBatchReversalAdjustmentDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","previousBatchId":"00000000-0000-4000-8000-000000000001","adjustmentAmount":"valor-ejemplo"}]` |
+| `reversalAdjustments[].claimId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reversalAdjustments[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `reversalAdjustments[].previousBatchId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reversalAdjustments[].adjustmentAmount` | Sí | `string` | Sin restricción adicional declarada | Negativo | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioner-settlement-batches/{id}"
+}
+```
+
+---
+
+## 37. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -5395,7 +6027,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /prior-authorization-requests/{id}/determinations
+## 38. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -5529,7 +6161,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /provider-networks
+## 39. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -5660,7 +6292,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /provider-networks/{id}/memberships
+## 40. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -5794,7 +6426,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /public/portability/verify/{manifestHash}
+## 41. GET /public/portability/verify/{manifestHash}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability-public`
@@ -5905,7 +6537,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /reconciliation-batches
+## 42. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -6038,7 +6670,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /reconciliation-batches/{id}/items
+## 43. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`

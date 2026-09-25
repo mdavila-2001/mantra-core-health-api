@@ -11348,6 +11348,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11443,6 +11447,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11538,6 +11546,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11633,6 +11645,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11679,6 +11695,8 @@ NestJS resuelve `GET /public/search/organizations` en `CommunityPublicController
 | `city` | query | No | `string` | Sin restricción adicional declarada | Ciudad a la que acotar; sin tildes ni mayúsculas que valgan | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `department` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
+| `municipality` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422 | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -11702,7 +11720,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/search/organizations?q=valor-ejemplo&city=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/search/organizations?q=valor-ejemplo&city=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo&department=valor-ejemplo&municipality=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -11729,6 +11747,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11824,6 +11846,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11871,6 +11897,8 @@ NestJS resuelve `GET /public/search/practitioners` en `CommunityPublicController
 | `specialty` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `department` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
+| `municipality` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422 | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -11894,7 +11922,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&specialty=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&specialty=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo&department=valor-ejemplo&municipality=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -11921,6 +11949,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |

@@ -3156,6 +3156,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 409 | `CONFLICT` | El encuentro ya tiene una sesión virtual | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3283,7 +3286,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 404 | `NOT_FOUND` | Sesión virtual no encontrada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión no está en progreso | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3341,7 +3347,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
 - Deben ser UUID válidos: `id`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3398,8 +3404,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 404 | `NOT_FOUND` | Sesión virtual no encontrada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no está agendada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

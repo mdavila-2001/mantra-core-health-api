@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1308 de 1308 endpoints** en **67 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1365 de 1365 endpoints** en **70 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -24,6 +24,7 @@ Se documentan **1308 de 1308 endpoints** en **67 módulos**. La referencia compl
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
+| `data_catalog` | 22 | [Abrir referencia](endpoints/data-catalog.md) |
 | `delegated_access` | 11 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 27 | [Abrir referencia](endpoints/diagnostics.md) |
@@ -38,7 +39,7 @@ Se documentan **1308 de 1308 endpoints** en **67 módulos**. La referencia compl
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 31 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 27 | [Abrir referencia](endpoints/identity-assurance.md) |
-| `insurance` | 40 | [Abrir referencia](endpoints/insurance.md) |
+| `insurance` | 43 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
@@ -46,18 +47,20 @@ Se documentan **1308 de 1308 endpoints** en **67 módulos**. La referencia compl
 | `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
+| `ops_console` | 7 | [Abrir referencia](endpoints/ops-console.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 17 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy` | 18 | [Abrir referencia](endpoints/pharmacy.md) |
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 28 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 43 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 44 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 18 | [Abrir referencia](endpoints/promotions.md) |
-| `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
+| `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |
+| `qa_lab` | 19 | [Abrir referencia](endpoints/qa-lab.md) |
 | `quotations` | 3 | [Abrir referencia](endpoints/quotations.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
@@ -67,7 +70,7 @@ Se documentan **1308 de 1308 endpoints** en **67 módulos**. La referencia compl
 | `surveys` | 13 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
-| `telemetry` | 13 | [Abrir referencia](endpoints/telemetry.md) |
+| `telemetry` | 21 | [Abrir referencia](endpoints/telemetry.md) |
 | `terminology` | 20 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |
