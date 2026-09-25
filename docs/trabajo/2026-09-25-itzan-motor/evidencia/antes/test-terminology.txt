@@ -1,0 +1,18 @@
+=== typecheck (con el contrato de fila escrito)
+exit=0
+=== tests del modulo terminology
+(node:40752) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:9020) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6088) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6880) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 16 passed, 16 total
+Tests:       176 passed, 176 total
+Snapshots:   0 total
+Time:        63.578 s
+Ran all test suites matching src/modules/terminology.
+exit=0
