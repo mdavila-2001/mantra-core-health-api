@@ -48,6 +48,20 @@ export interface JwtPayload {
    */
   tenantNames?: Record<string, string>;
   /**
+   * Código de tipo de cada tenant de `tenants`, indexado por id
+   * (`TenantTypeCode` de `directory.concepts.ts`: `'PAYER'`, `'PROVIDER'`,
+   * `'PHARMACY'`…).
+   *
+   * Igual que `tenantNames`, es sólo dato de presentación —**no participa de
+   * ninguna decisión de autorización**: quién puede hacer qué lo siguen
+   * decidiendo `roles` y el tenant del request—. Existe porque el frontend
+   * necesita saber si la organización activa es una aseguradora para recortar
+   * su propio menú a lo que le corresponde, y el token es el único lugar de
+   * donde puede sacarlo sin una ruta `/me`. Se omite por tenant cuyo
+   * `tenant_type_concept_id` no esté en el catálogo.
+   */
+  tenantTypes?: Record<string, string>;
+  /**
    * Perfil de paciente del titular de la cuenta, si tiene uno.
    *
    * Existe porque el autoservicio del portal lo NECESITA para operar -
