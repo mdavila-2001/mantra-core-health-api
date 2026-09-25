@@ -1,6 +1,7 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { TerminologyVersionsController } from './terminology-versions.controller';
 import { type AuthenticatedUser } from '../../../common';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 
 const user: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
@@ -143,6 +144,20 @@ describe('TerminologyVersionsController', () => {
       );
 
       expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('la importación es del administrador de seguridad', () => {
+      // La matriz negativa completa se prueba contra la aplicación; esto fija
+      // que el endpoint no quede sin rol si alguien reordena los decoradores.
+      const roles = Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          TerminologyVersionsController.prototype,
+          'importConceptsFile',
+        )?.value as object,
+      ) as unknown;
+
+      expect(roles).toEqual(['SECURITY_ADMIN']);
     });
 
     it('sin archivo no se llama al importador', async () => {

@@ -8,6 +8,7 @@ import {
   TerminologyValueSetsController,
   TerminologyFhirController,
   TerminologyTenantCatalogController,
+  TerminologyImportTemplateController,
 } from './controllers';
 import {
   CodeSystemsService,
@@ -18,6 +19,7 @@ import {
   TenantCatalogService,
   ConceptFileImportService,
   CodeSystemsReadService,
+  ImportTemplateService,
   IMPORT_PARSERS,
   LECTOR_DE_IMPORTACION,
 } from './services';
@@ -50,6 +52,7 @@ import {
     TerminologyValueSetsController,
     TerminologyFhirController,
     TerminologyTenantCatalogController,
+    TerminologyImportTemplateController,
   ],
   providers: [
     CodeSystemsService,
@@ -60,6 +63,7 @@ import {
     TenantCatalogService,
     ConceptFileImportService,
     CodeSystemsReadService,
+    ImportTemplateService,
     // Qué formatos sabe leer el importador y con qué perfiles. Va por token
     // para que sumar un formato sea cambiar esta lista y no el servicio.
     { provide: IMPORT_PARSERS, useValue: LECTOR_DE_IMPORTACION },

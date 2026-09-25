@@ -14,3 +14,4 @@ export * from './translate-concept.dto';
 export * from './tenant-catalog-policy.dto';
 export * from './search-concepts.dto';
 export * from './code-systems-read.dto';
+export * from './import-template.dto';
