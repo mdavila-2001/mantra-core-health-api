@@ -95,9 +95,12 @@ export class LiabilityService {
 
       let schedule = null;
       if (dto.liabilityScheduleId) {
+        // `FOR UPDATE`: dos pagos simultáneos de la misma cuota se serializan
+        // acá, y el segundo la ve ya PAGADA (T26 · AC-26-13).
         schedule = await this.liabilityRepo.findScheduleById(
           tx,
           dto.liabilityScheduleId,
+          { forUpdate: true },
         );
         if (!schedule || schedule.liabilityId !== liabilityId) {
           throw new ResourceNotFoundException(
@@ -106,6 +109,15 @@ export class LiabilityService {
               liabilityScheduleId: dto.liabilityScheduleId,
             },
           );
+        }
+        // Idempotencia por cuota: una cuota se paga una sola vez. Repetir el
+        // pago no crea una segunda fila en `liability_payments` ni un segundo
+        // asiento; responde 422, que es distinto de "no encontrada".
+        if (schedule.statusConceptId === ACCT.LIAB_SCHEDULE_PAID) {
+          throw new PreconditionFailedException('La cuota ya está pagada', {
+            liabilityScheduleId: dto.liabilityScheduleId,
+            installmentNumber: schedule.installmentNumber,
+          });
         }
       }
 

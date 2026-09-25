@@ -26,6 +26,7 @@ import {
   CreateOwnLiabilityDto,
   LiabilityCreatedResponseDto,
   LiabilitySummaryDto,
+  LiabilityScheduleResponseDto,
   RegisterLiabilityProgressDto,
   ProgressRegisteredResponseDto,
 } from '../dto';
@@ -167,6 +168,21 @@ export class AccountingPractitionerController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<LiabilityCreatedResponseDto> {
     return this.practitionerAccounting.createOwnLiability(dto, actor);
+  }
+
+  /** El cronograma cuota por cuota de un pasivo propio (T26 · AC-26-10). */
+  @Get('liabilities/:id/schedule')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Cronograma de cuotas de un pasivo propio',
+    description:
+      'Capital e interés separados por cuota, en orden de vencimiento. Sólo el profesional vinculado a la práctica del pasivo; un pasivo ajeno responde 422, no un cronograma vacío.',
+  })
+  readLiabilitySchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LiabilityScheduleResponseDto> {
+    return this.practitionerAccounting.readLiabilitySchedule(id, actor);
   }
 
   /** Prende o apaga la automatización de un pasivo propio. */
