@@ -28,6 +28,7 @@ import {
   InsuranceAnalyticsController,
   InsurancePortabilityController,
   InsurancePortabilityPublicController,
+  PractitionerSettlementBatchesController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -44,6 +45,7 @@ import {
   DeclaredCoveragesReader,
   InsurancePortabilityService,
   InsurancePortabilityPdfService,
+  PractitionerSettlementBatchesService,
 } from './services';
 import {
   CatalogRepository,
@@ -113,6 +115,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsuranceAnalyticsController,
     InsurancePortabilityController,
     InsurancePortabilityPublicController,
+    PractitionerSettlementBatchesController,
   ],
   providers: [
     // Repositorios
@@ -155,6 +158,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     DeclaredCoveragesReader,
     InsurancePortabilityService,
     InsurancePortabilityPdfService,
+    PractitionerSettlementBatchesService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

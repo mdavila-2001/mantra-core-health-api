@@ -11,3 +11,4 @@ export * from './claims-read.controller';
 export * from './insurance-analytics.controller';
 export * from './insurance-portability.controller';
 export * from './insurance-portability-public.controller';
+export * from './practitioner-settlement-batches.controller';

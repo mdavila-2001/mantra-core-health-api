@@ -1,4 +1,6 @@
 import { jest } from '@jest/globals';
+import { RequestMethod } from '@nestjs/common';
+import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 
 // Mock laxo: conserva el runtime de jest evitando el tipado estricto Mock<never>
 // de @jest/globals bajo el tsconfig raíz.
@@ -14,6 +16,14 @@ import { BrokerCommissionController } from './broker-commission.controller';
 import { InsuranceReadController } from './insurance-read.controller';
 import { ClaimsReadController } from './claims-read.controller';
 import { InsuranceAnalyticsController } from './insurance-analytics.controller';
+import { PractitionerSettlementBatchesController } from './practitioner-settlement-batches.controller';
+import {
+  PractitionerSettlementBatchDto,
+  PractitionerSettlementBatchTotalsDto,
+  PractitionerSettlementBatchClaimDto,
+  PractitionerSettlementBatchExcludedClaimDto,
+  PractitionerSettlementBatchReversalAdjustmentDto,
+} from '../dto';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
 const dto = {} as never;
@@ -276,6 +286,38 @@ describe('Insurance controllers (delegación)', () => {
   });
 
   /**
+   * CA-3.4: ninguna ruta del ciclo del reclamo permite editar o borrar una
+   * adjudicación o una EOB ya publicadas. `ClaimsController` sólo declara
+   * `POST` en sus cinco métodos (`submit`, `adjudicate`, `publishEob`,
+   * `reverse`, `openDispute`); una corrección se hace con una versión nueva,
+   * nunca con una mutación in situ.
+   */
+  it('ClaimsController sólo expone POST: ninguna ruta muta una adjudicación existente', () => {
+    const metodosHttp = Object.getOwnPropertyNames(
+      ClaimsController.prototype,
+    ).filter(
+      (nombre) =>
+        nombre !== 'constructor' &&
+        Reflect.hasMetadata(
+          PATH_METADATA,
+          (ClaimsController.prototype as unknown as Record<string, object>)[
+            nombre
+          ],
+        ),
+    );
+    expect(metodosHttp.length).toBeGreaterThan(0);
+    for (const nombre of metodosHttp) {
+      const metodo = Reflect.getMetadata(
+        METHOD_METADATA,
+        (ClaimsController.prototype as unknown as Record<string, object>)[
+          nombre
+        ],
+      );
+      expect(metodo).toBe(RequestMethod.POST);
+    }
+  });
+
+  /**
    * Subtarea 3.1 (v4.2.14): el tablero de siniestralidad de la aseguradora.
    * Sin `@Roles` — la barrera es membresía-o-rol, resuelta en el servicio
    * porque depende de a QUÉ aseguradora pertenece el actor.
@@ -301,5 +343,66 @@ describe('Insurance controllers (delegación)', () => {
         )['getLossRatioAnalytics'],
       ),
     ).toBeUndefined();
+  });
+
+  /**
+   * Tarea 3 · H8 (MED-E13..E16) — lotes periódicos de liquidación al
+   * profesional. Sin `@Roles`: la autorización la resuelve el servicio por
+   * pertenencia, igual que las escrituras vinculadas de `ClaimsController`.
+   */
+  it('PractitionerSettlementBatchesController delega en su servicio', async () => {
+    const res = { status: mockFn() };
+    const service = {
+      generate: mockFn().mockResolvedValue({ dto: { id: ID }, created: true }),
+      getById: mockFn().mockResolvedValue({ id: ID }),
+      list: mockFn().mockResolvedValue({ items: [] }),
+    };
+    const c = new PractitionerSettlementBatchesController(service as never);
+
+    const generated = await c.generate(dto, actor, res as never);
+    expect(generated).toEqual({ id: ID });
+    expect(service.generate).toHaveBeenCalledWith(dto, actor);
+    expect(res.status).toHaveBeenCalledWith(201);
+
+    await c.getById(ID, actor);
+    expect(service.getById).toHaveBeenCalledWith(ID, actor);
+
+    const query = {} as never;
+    await c.list(query, actor);
+    expect(service.list).toHaveBeenCalledWith(query, actor);
+
+    for (const metodo of ['generate', 'getById', 'list']) {
+      expect(
+        Reflect.getMetadata(
+          'requiredRoles',
+          (
+            PractitionerSettlementBatchesController.prototype as never as Record<
+              string,
+              object
+            >
+          )[metodo],
+        ),
+      ).toEqual([]);
+    }
+  });
+
+  it('el DTO del lote de liquidación no expone ninguna propiedad de pago (contrato §11)', () => {
+    const dtos = [
+      PractitionerSettlementBatchDto,
+      PractitionerSettlementBatchTotalsDto,
+      PractitionerSettlementBatchClaimDto,
+      PractitionerSettlementBatchExcludedClaimDto,
+      PractitionerSettlementBatchReversalAdjustmentDto,
+    ];
+    const prohibido = /paid|payment|receipt|voucher|qr/i;
+    for (const dto of dtos) {
+      const propiedades: string[] =
+        Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
+        [];
+      expect(propiedades.length).toBeGreaterThan(0);
+      for (const propiedad of propiedades) {
+        expect(propiedad.replace(/^:/, '')).not.toMatch(prohibido);
+      }
+    }
   });
 });
