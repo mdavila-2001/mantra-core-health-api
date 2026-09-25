@@ -463,12 +463,12 @@ declara qué se cerró contra el doble.
 | H7.S1.M3 | Suite de integración completa | Sin rojos nuevos | El radio del diff, aislado: `terminology.int-spec.ts` + el spec nuevo → **24 de 25**, y el único rojo (`glossary`) **falla igual en `dev` sin tocar**, con la salida literal idéntica. Corrida completa: ver «El comando documentado no es el que corre CI» | HECHO |
 | H7.S1.M4 | El diff no toca archivos de otros ni el esquema | Búsqueda vacía | comprobado antes de cada commit | HECHO |
 | H7.S2.M1 | Rebase sobre `origin/dev` | Limpio | 11 commits reubicados sobre `4dcaa279` **sin un solo conflicto**; respaldo previo en el tag `respaldo/pre-rebase-2026-09-25` | HECHO |
-| H7.S2.M2 | PR con la plantilla del repo, base `dev` | URL | `gh pr create --base dev` | TODO |
-| H7.S2.M3 | Estado del PR consultado con `gh` | `MERGEABLE` | `evidencia/pr/view.json` | TODO |
-| H7.S2.M4 | Checks del PR | Ninguno en fallo | `evidencia/pr/checks.txt` | TODO |
-| H7.S2.M5 | Sección «Pendiente de integrar»: XLSX y qué se verificó sólo con NDJSON y CSV | Lista | `REPORTE.md` | TODO |
-| H7.S2.M6 | Procesos corriendo cerrados o declarados | Lista o «ninguno» | revisión al cerrar | TODO |
-| H7.S2.M7 | Reporte con el avance en la primera línea, las tres secciones, el peldaño por área y la sección de seguridad | Primeras líneas | el reporte | TODO |
+| H7.S2.M2 | PR con la plantilla del repo, base `dev` | URL | **#463**, base `dev`, 46 archivos, +4 068 / −232 | HECHO |
+| H7.S2.M3 | Estado del PR consultado con `gh` | `MERGEABLE` | `evidencia/pr/view.json`: **`mergeable: MERGEABLE`**, sin conflictos. El `mergeStateStatus: BLOCKED` es por **revisión requerida** (`reviewDecision: REVIEW_REQUIRED`), no por el diff | HECHO |
+| H7.S2.M4 | Checks del PR | Ninguno en fallo | **No se cumple, y no por este PR:** `docs` muere a los 90 s en `Levantar MinIO` (`unauthorized`), antes de compilar nada. Salida literal en `evidencia/pr/checks.txt`. Los pasos siguientes no corren: **no están en verde, están sin medir**, y por eso se corrieron todos en local | BLOQUEADO |
+| H7.S2.M5 | Sección «Pendiente de integrar»: XLSX y qué se verificó sólo con NDJSON y CSV | Lista | En el cuerpo del PR y en «No cubierto» del reporte. El XLSX dejó de ser pendiente: se integró y quedó cableado | HECHO |
+| H7.S2.M6 | Procesos corriendo cerrados o declarados | Lista o «ninguno» | Ninguno queda vivo de este carril: las corridas de pruebas y del generador terminaron o se detuvieron; el stack de servicios sigue arriba porque no lo levantó este trabajo | HECHO |
+| H7.S2.M7 | Reporte con el avance en la primera línea, las tres secciones, el peldaño por área y la sección de seguridad | Primeras líneas | el reporte, con su sección «Seguridad» | HECHO |
 | H7.S2.M8 | Daily con la instalación del estándar, el avance y los dos cambios de contrato | Existe | listado | TODO |
 
 ## Riesgos y bloqueos previstos

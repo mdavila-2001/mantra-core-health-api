@@ -1,6 +1,8 @@
 # Reporte — Motor de la carga masiva de terminología
 
-> **AVANCE: 94 / 110 — 85,5 %.**
+> **AVANCE: 100 / 110 — 90,9 %.** Más 7 microtareas DESCARTADAS con su evidencia. Queda **1 a
+> medias** (la matriz de autorización rol por rol), **1 bloqueada por el gate del repositorio** y
+> **1 fuera de este repositorio** (la línea del daily).
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
 - Corte inicial: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
@@ -122,7 +124,17 @@ divergencia entre lo que la API acepta y lo que el formulario manda ahora aparec
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H4.S2.M3 | A MEDIAS | Una cuenta con rol de profesional y otra con rol de paciente. Hoy el 403 se comprobó con una cuenta sin ningún rol, que prueba la puerta pero no cada llave |
-| H7.S2 | EN CURSO | El PR se abre con todo lo suyo, contrato publicado incluido. **En verde no puede quedar**, y por una causa que no es de acá: el trabajo del gate muere al levantar el almacenamiento de objetos, antes de compilar nada (abajo, punto 3). Un gate que no corrió no está en verde, está sin medir — por eso la verificación de esta entrega es toda local y con su salida guardada |
+| H7.S2.M4 | BLOQUEADO | El check `docs` del PR **#463** falla a los 90 s en `Levantar MinIO`, antes de compilar nada. Lo destraba quien administre las credenciales del registro de imágenes; hasta entonces ningún PR de este repositorio queda en verde |
+| H7.S2.M8 | TODO | La línea del daily vive en otro repositorio, no en éste |
+
+## La entrega
+
+**PR [#463](https://github.com/mdavila-2001/mantra-core-health-api/pull/463)**, base `dev`, 46
+archivos, +4 068 / −232, en 15 commits.
+
+`mergeable: MERGEABLE` — el diff no tiene conflictos. Su `mergeStateStatus: BLOCKED` **no es por el
+diff**: es `reviewDecision: REVIEW_REQUIRED`, o sea que espera una revisión humana, que es como tiene
+que quedar. Estado y checks, con su salida literal, en `evidencia/pr/`.
 
 ## Evidencia
 
