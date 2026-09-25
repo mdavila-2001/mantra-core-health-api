@@ -300,6 +300,12 @@ export class PharmacySitePriceDto {
   medication!: PharmacyConceptDto | null;
 
   /**
+   * Si el producto exige receta médica para despacharse.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  requiresPrescription!: boolean | null;
+
+  /**
    * Identificador asociado a price list.
    */
   @ApiProperty({ format: 'uuid' })
@@ -388,6 +394,95 @@ export class PharmacySitePricesResponseDto {
 
   /**
    * Cantidad de precios servidos.
+   */
+  @ApiProperty()
+  count!: number;
+}
+
+/**
+ * Una sede publicada, suelta, tal como la lista `GET /pharmacy/sites`
+ * (carril A, H4). Campos idénticos a `PharmacySite` del front, para que el
+ * front pueda dejar de simularla sin renombrar nada.
+ */
+export class PharmacySiteListItemDto {
+  /**
+   * Identificador asociado a site.
+   */
+  @ApiProperty({ format: 'uuid' })
+  siteId!: string;
+
+  /**
+   * Nombre de la sede.
+   */
+  @ApiProperty()
+  siteName!: string;
+
+  /**
+   * Identificador asociado a pharmacy.
+   */
+  @ApiProperty({ format: 'uuid' })
+  pharmacyId!: string;
+
+  /**
+   * Nombre de la farmacia.
+   */
+  @ApiProperty()
+  pharmacyName!: string;
+
+  /**
+   * Dirección en una línea, o null si la sede no la registró.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  addressText!: string | null;
+
+  /**
+   * Latitud WGS84, si la dirección la registró.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  latitude!: number | null;
+
+  /**
+   * Longitud WGS84, si la dirección la registró.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  longitude!: number | null;
+
+  /**
+   * Distancia Haversine en km al origen consultado, con un decimal. `null`
+   * sin origen o sin coordenadas.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  distanceKm!: number | null;
+
+  /**
+   * true si la sede ofrece entrega a domicilio.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  homeDeliveryAvailable!: boolean | null;
+
+  /**
+   * true si la sede ofrece retiro en mostrador.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  pickupAvailable!: boolean | null;
+
+  /**
+   * Productos activos publicados por la farmacia dueña de esta sede.
+   */
+  @ApiProperty()
+  productCount!: number;
+}
+
+/** Las sedes publicadas del tenant activo, sueltas. */
+export class PharmacySiteListResponseDto {
+  /**
+   * Valor de items mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PharmacySiteListItemDto] })
+  items!: PharmacySiteListItemDto[];
+
+  /**
+   * Cantidad de sedes servidas.
    */
   @ApiProperty()
   count!: number;

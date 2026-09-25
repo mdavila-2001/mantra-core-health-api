@@ -1,0 +1,10 @@
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\pharmacy\controllers\pharmacy-read.controller.ts
+  104:7  error  Unsafe assignment of an error typed value                                                          @typescript-eslint/no-unsafe-assignment
+  184:4  error  'GeoPoint' is an 'error' type that acts as 'any' and overrides all other types in this union type  @typescript-eslint/no-redundant-type-constituents
+
+✖ 2 problems (2 errors, 0 warnings)
+
+EXIT:1
+
+[exited with code 0]
