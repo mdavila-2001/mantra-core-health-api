@@ -172,8 +172,13 @@ export class ImportConceptsFileResponseDto {
    * Sólo viaja en una validación sin escribir, que es cuando sirve: después de
    * importar, lo que entró se consulta en la versión.
    */
+  // El contrato no puede declarar columnas que dependen del perfil, así que
+  // van dichas acá: quien lea sólo el esquema vería únicamente `line`.
   @ApiPropertyOptional({
-    description: 'Primeras filas válidas, en una validación sin escribir',
+    description:
+      'Primeras filas válidas, en una validación sin escribir. Cada fila lleva ' +
+      '`line` más una clave por columna del perfil: para `conceptos`, `code`, ' +
+      '`display` y `definition`',
     type: [ImportPreviewRowDto],
   })
   preview?: ImportPreviewRowDto[];

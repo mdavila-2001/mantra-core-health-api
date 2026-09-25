@@ -17,6 +17,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import {
@@ -88,7 +89,7 @@ export class TerminologyVersionsController {
   }
 
   /**
-   * Importa conceptos desde un archivo NDJSON ya subido (UC-03-03, por archivo).
+   * Importa conceptos desde un archivo ya subido (UC-03-03, por archivo).
    *
    * Es la cara sin techo del import de arriba: aquél recibe los conceptos en el
    * cuerpo, y el cuerpo está limitado a 1 MB —unos diez mil conceptos—. Un
@@ -104,7 +105,7 @@ export class TerminologyVersionsController {
    * contenido y los contadores.
    *
    * @param versionId - Versión en borrador que recibe los conceptos.
-   * @param file - El archivo NDJSON.
+   * @param file - El archivo con las filas a importar.
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Los contadores de la importación y su lote.
    */
@@ -133,6 +134,21 @@ export class TerminologyVersionsController {
   @ApiOperation({
     summary:
       'UC-03-03: importa filas desde un archivo, o las valida sin escribir',
+  })
+  // Dos códigos de éxito, y el generador sólo deduce el de `@HttpCode`. Sin
+  // declarar el 200, quien lea el contrato publicado escribe un cliente que
+  // trata como error la validación sin escribir y el rechazo por errores.
+  @ApiResponse({
+    status: 201,
+    description: 'El archivo entró entero: los conceptos quedaron escritos',
+    type: ImportConceptsFileResponseDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'No se escribió nada: o se pidió validar sin escribir (`dryRun`), o el ' +
+      'archivo se rechazó entero por errores de fila (`aborted`)',
+    type: ImportConceptsFileResponseDto,
   })
   async importConceptsFile(
     @Param('versionId', ParseUUIDPipe) versionId: string,
