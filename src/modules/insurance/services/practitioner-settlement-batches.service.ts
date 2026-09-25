@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/postgresql';
 import {
   requireTenantId,
   sumarDecimales,
