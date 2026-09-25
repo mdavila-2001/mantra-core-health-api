@@ -74,6 +74,7 @@ Peldaño:        UNKNOWN
 | Q-I1 | HTTP en dry-run: ¿200 o 201? | 200: el repo ya usa `@Res({ passthrough: true })` (`audio-assets.controller.ts:46`, `data-catalog.controller.ts:254`, `iam-auth.controller.ts:279`) | Pablo |
 | Q-I2 | Sin índice único `(versión, code)`, ¿dos subidas simultáneas pueden duplicar? | Se prueba en H4.S1.M6; si duplica, riesgo residual y deuda del modelo | Dueño del modelo |
 | Q-I3 | ¿`preview` en la respuesta real o sólo en dry-run? | En ambas (mismas 20 filas) | Justin / Pablo |
+| Q-I7 | Una planilla reconocida pero ilegible (cifrada, truncada, corrupta) no encaja exacto en ninguno de los tres códigos `IMPORT_*`: el formato **sí** está admitido, pero el archivo no se puede abrir | Se reusa `IMPORT_FORMAT_UNSUPPORTED`, cuyo texto ya dice «el cliente puede mostrarlo como “este archivo no sirve” sin matizar». **No se agrega un código nuevo**: hay un cliente en el front leyendo la respuesta y un valor nuevo sería contrato nuevo. Si se prefiere distinguirlo, es un código más y su manejo del otro lado | Pablo / Justin |
 
 <!-- Fase 1 (descubrimiento) y fase 2 (plan por hitos) se agregan debajo al abrirlas. -->
 

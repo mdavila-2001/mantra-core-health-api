@@ -3,7 +3,8 @@
 > **AVANCE: 85 / 110 — 77,3 %.**
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
-- Corte: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
+- Corte inicial: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
+- Reintegrada sobre `origin/dev` @ `4dcaa27961588444bcfdeb4cbe8a3aa2d1b71650` (2026-09-25, tarde), sin conflictos
 - Peldaño de evidencia alcanzado (regla 30): **`VERIFIED`** para el motor y la plantilla. El endpoint se
   ejercitó contra la aplicación atendiendo peticiones, con la base respondiendo: **18 comprobaciones, todas
   en verde**, incluidas la no duplicación contada en base y la matriz de autorización. Debajo: lint 0, tipos
@@ -37,14 +38,39 @@
 | H7.S1 | Regresión completa del repositorio | suite unitaria entera | PASS · **714 suites · 8 657 pruebas · 0 fallos** · `evidencia/h7/regresion.txt` |
 | Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h3/cierre-verificacion.txt` |
 
+## Al reintegrarse con `dev` (2026-09-25, tarde)
+
+La rama se llevó al `dev` del día. Tres cosas que conviene dejar dichas:
+
+**El contrato que este carril publicó en la primera hora ya viajó.** El PR #462 lo llevó por cherry-pick
+—`row-contract.ts`, `csv-parser.ts`, `format-detector.ts` e `import-profiles.ts`—, y comparados uno a uno
+contra esta rama los cuatro son **idénticos**: nadie tuvo que retocarlos para construir encima. El rebase
+sobre `dev` no dio **un solo conflicto**.
+
+**La planilla se enchufó donde estaba previsto.** El parseador de XLSX se registró en la lista de
+`PARSEADORES_DE_IMPORTACION` y con eso el formato quedó cubierto **sin tocar el servicio ni el detector**:
+el detector ya reconocía la firma del contenedor y el contrato ya declaraba el formato. Es la razón por la
+que esa lista existía, y funcionó como se esperaba.
+
+**Integrarlo destapó un agujero de este carril, y se corrigió.** El servicio llamaba al parseador sin red.
+Reconocer un archivo por sus primeros bytes no garantiza poder abrirlo: con una planilla cifrada, truncada
+o corrupta, el error de la biblioteca (`Unsupported ZIP encryption`) **se escapaba como fallo interno** en
+vez de salir como rechazo con motivo. Ahora se convierte en el mismo rechazo que un formato no admitido
+—ver **Q-I7** en el plan, donde queda registrado por qué se reusa ese código en vez de inventar uno
+nuevo—, y el motivo de la biblioteca queda en el registro, nunca en la respuesta.
+
+Comprobado: **24 suites · 272 pruebas · 0 fallos** en el módulo (eran 23 · 252), `typecheck` en **0**, y
+**0 hallazgos de linter en los archivos de este carril**.
+
 ## A medias
 
 ### H2.S5.M7 — el registro de lectura dentro del módulo
 
 - **Qué anda:** el registro existe, está inyectado en el servicio y probado por sí mismo: devuelve el
-  parseador de cada formato registrado, no devuelve nada para el formato de planilla —que el detector
-  reconoce pero todavía no tiene quien lo lea— y no confunde una propiedad heredada del prototipo con un
-  perfil.
+  parseador de **cada uno de los tres formatos del contrato** —incluida la planilla, desde que se integró
+  el parseador que llegó por el otro carril— y no confunde una propiedad heredada del prototipo con un
+  perfil. Además se sumó la prueba que se rompe sola si alguien agrega un formato al contrato sin
+  registrar quién lo lee.
 - **Qué no anda:** nada observado.
 - **Qué falta exactamente:** nada. La aplicación arrancó y resolvió el módulo entero, y el endpoint
   respondió usando ese registro: quedó observado.
@@ -209,6 +235,26 @@ Pasa en **las últimas corridas de cuatro personas distintas**, desde la madruga
 dejó de servir esa etiqueta sin credenciales. No es de ningún carril, y mientras siga así **ningún PR de
 este repositorio puede quedar en verde**, porque el primer paso en rojo corta los que siguen y todos los
 gates quedan sin medir. Se clasifica `EXTERNAL`.
+
+### 4. El paso de linter está en rojo en `dev` — 20 hallazgos, ninguno de este carril
+
+Al reintegrarse con `dev`, `yarn lint --max-warnings=0` —el mismo comando que corre el gate— devuelve
+**20 hallazgos, los 20 en archivos de otro carril**, que este carril tiene prohibido tocar:
+
+| Ruta | Línea | Regla |
+|---|---|---|
+| `src/modules/terminology/import/xlsx-parser.ts` | 71, 77, 108, 116, 122, 225, 249 | `prettier/prettier` |
+| `src/modules/terminology/import/xlsx-parser.ts` | **254** | `@typescript-eslint/no-base-to-string` |
+| `src/modules/terminology/import/xlsx-parser.spec.ts` | 44, 45, 46, 47, 48, 72, 73, 76, 101, 103, 105 | `prettier/prettier` |
+
+Diecinueve son de formato y los arregla `yarn lint --fix` en una corrida. **El de la línea 254 no es de
+formato**: `'valor' will use Object's default stringification format ('[object Object]')`. Si por ahí
+puede pasar un objeto, una celda de la planilla terminaría importada como el texto `[object Object]` en
+vez de su contenido — conviene que lo mire quien escribió el archivo.
+
+Se verificó que **no los introdujo este carril**: `git diff origin/dev...HEAD` sobre esas dos rutas sale
+**vacío**. Están en `dev` desde que entró el PR #462. No se tocan: se documentan. En los archivos de este
+carril el linter da **0**.
 
 ## Desvíos del plan
 
