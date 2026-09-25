@@ -286,7 +286,7 @@ provider, valida cada fila; con al menos un problema → `aborted: true`, `inser
 el mismo informe más `preview`, sin escribir ni registrar; si no → escribe por tandas omitiendo existentes y
 registra el lote con su huella. Ningún camino devuelve 500 ni loguea contenido.
 **DoD:** spec unitario con doble de repositorio; llamada real de cada camino más el conteo de filas.
-**Estado:** TODO
+**Estado:** A MEDIAS — todo el comportamiento está escrito y medido contra dobles; falta ejercitarlo contra la aplicación viva.
 
 #### H3.S1 — Validación por fila
 
@@ -308,38 +308,71 @@ registra el lote con su huella. Ningún camino devuelve 500 ni loguea contenido.
 **CA:** Todo campo previo del DTO conserva nombre y tipo; los nuevos son los de §2; el servicio se comporta como
 dice el CA del hito.
 **DoD:** spec del servicio (caracterización más los casos nuevos) en verde.
-**Estado:** TODO
+**Estado:** HECHO — 24 casos en verde, de 12 que había.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H3.S2.M1 | DTO: `format`, `profile`, `dryRun`, `aborted`, `preview[]`, columna opcional en las muestras; el identificador de lote pasa a admitir nulo | Compila | typecheck | TODO |
-| H3.S2.M2 | Servicio: detectar → elegir parseador → parsear → validar | Caracterización verde | tests de `concept-file-import` | TODO |
-| H3.S2.M3 | Todo o nada (**cambio de contrato declarado**, hecho 1) | Spec + `decision-todo-o-nada.md` | idem | TODO |
-| H3.S2.M4 | Dry-run: vista previa de 20 filas válidas, sin escribir ni registrar lote | Spec con doble que falla si se lo llama | idem | TODO |
-| H3.S2.M5 | Conservar la omisión por tanda que ya existe (hecho 7) | Spec que cuenta consultas | idem | TODO |
-| H3.S2.M6 | Lote con leídas, insertadas, errores, huella y marcas de tiempo | Spec | idem | TODO |
-| H3.S2.M7 | Los tres códigos `IMPORT_*`; el archivo vacío pasa a llevar su código propio dentro del mismo 422 (hecho 5) | Spec ×3 | idem | TODO |
-| H3.S2.M8 | Nunca 500: buffer basura y fallo dentro del parseador salen como 422 | 2 PASS | idem | TODO |
-| H3.S2.M9 | **Log por campos explícitos** (hechos 3 y 4): nunca la vista previa, las muestras ni los valores | Búsqueda pegada + spec con logger doble | búsqueda de `logger.` | TODO |
+| H3.S2.M1 | DTO: `format`, `profile`, `dryRun`, `aborted`, `preview[]`, columna opcional en las muestras; el identificador de lote pasa a admitir nulo | Compila | typecheck | HECHO |
+| H3.S2.M2 | Servicio: detectar → elegir parseador → parsear → validar | Caracterización verde | tests de `concept-file-import` | HECHO |
+| H3.S2.M3 | Todo o nada (**cambio de contrato declarado**, hecho 1) | Spec + `decision-todo-o-nada.md` | idem | HECHO |
+| H3.S2.M4 | Dry-run: vista previa de 20 filas válidas, sin escribir ni registrar lote | Spec con doble que falla si se lo llama | idem | HECHO |
+| H3.S2.M5 | Conservar la omisión por tanda que ya existe (hecho 7) | Spec que cuenta consultas | idem | HECHO |
+| H3.S2.M6 | Lote con leídas, insertadas, errores, huella y marcas de tiempo | Spec | idem | HECHO |
+| H3.S2.M7 | Los tres códigos `IMPORT_*`; el archivo vacío pasa a llevar su código propio dentro del mismo 422 (hecho 5) | Spec ×3 | idem | HECHO |
+| H3.S2.M8 | Nunca 500: buffer basura y fallo dentro del parseador salen como 422 | 2 PASS | idem | HECHO |
+| H3.S2.M9 | **Log por campos explícitos** (hechos 3 y 4): nunca la vista previa, las muestras ni los valores | Búsqueda pegada + spec con logger doble | búsqueda de `logger.` | HECHO |
 
 #### H3.S3 — Controlador y llamadas reales
 
 **CA:** El endpoint recibe `dryRun` y `profile` como campos del formulario, los valida y los pasa al servicio;
 cada camino se observa contra la API real.
 **DoD:** `evidencia/h3/*.json` más el conteo de filas antes y después por camino.
-**Estado:** TODO
+**Estado:** A MEDIAS — el endpoint recibe los dos campos y decide su estado, con 4 casos en el spec del controlador. Las llamadas reales están BLOQUEADAS: piden la aplicación arriba.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H3.S3.M1 | Leer cómo reciben campos junto al archivo los otros imports del repo | Rutas en el plan | — | TODO |
-| H3.S3.M2 | DTO del cuerpo con validación por lista cerrada y documentación ensanchada | build | build | TODO |
-| H3.S3.M3 | 200 en dry-run y 201 en real (**Q-I1 resuelta**, hecho 10) | Decisión anotada | este plan | TODO |
-| H3.S3.M4 | Dry-run de `ok-50.csv` → 50 leídas, 0 errores, sin lote; conteo igual | 3 salidas | `evidencia/h3/` | TODO |
-| H3.S3.M5 | Importación real → 50 insertadas; conteo +50 | 2 salidas | idem | TODO |
-| H3.S3.M6 | `con-errores.csv` → abortado, 5 errores, 0 insertadas, con columna | 2 salidas | idem | TODO |
-| H3.S3.M7 | `no-es-nada.pdf` → 422 por formato, sin rastro de pila | Salida | idem | TODO |
-| H3.S3.M8 | Archivo vacío → 422; perfil desconocido → 422 | 2 salidas | idem | TODO |
-| H3.S3.M9 | `cinco.ndjson` → igual que en H1.S2.M6 salvo los campos nuevos | Diff acotado | `evidencia/h3/ndjson-compat.diff` | TODO |
+| H3.S3.M1 | Leer cómo reciben campos junto al archivo los otros imports del repo | Rutas en el plan | — | HECHO |
+| H3.S3.M2 | DTO del cuerpo con validación y documentación ensanchada | build | typecheck y build exit 0; **desvío:** el perfil **no** lleva lista cerrada, a propósito (ver abajo) | HECHO |
+| H3.S3.M3 | 200 al validar y 201 al escribir (**Q-I1 resuelta**) | Decisión anotada | este plan; 4 casos en el spec del controlador | HECHO |
+| H3.S3.M4 | Dry-run de `ok-50.csv` → 50 leídas, 0 errores, sin lote; conteo igual | 3 salidas | `evidencia/h3/` | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M5 | Importación real → 50 insertadas; conteo +50 | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M6 | `con-errores.csv` → abortado, 5 errores, 0 insertadas, con columna | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M7 | `no-es-nada.pdf` → 422 por formato, sin rastro de pila | Salida | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M8 | Archivo vacío → 422; perfil desconocido → 422 | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M9 | `cinco.ndjson` → igual que en H1.S2.M6 salvo los campos nuevos | Diff acotado | `evidencia/h3/ndjson-compat.diff` | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+
+##### Por qué el perfil no lleva lista cerrada en el DTO (desvío de H3.S3.M2)
+
+El contrato pide que un perfil fuera de la lista responda con su propio código.
+Si la lista se cierra en el DTO, quien pida un perfil inexistente recibe el error de validación
+genérico del formulario, y la pantalla no puede distinguirlo de un campo mal escrito. Cerrándola en
+el importador —que es quien sabe qué perfiles existen— el rechazo llega con el código que la
+pantalla necesita. El campo sigue validado: tiene que ser texto y tiene tope de largo.
+
+##### Q-I6 (nueva) — qué estado HTTP devuelve un archivo rechazado por errores
+
+El contrato fija **201** para la importación que escribe y **200** para la validación sin escribir,
+pero no dice nada del archivo que se rechaza entero por traer errores. Ese caso no es un error de la
+petición: es su respuesta, el informe de qué corregir.
+
+**Decisión de este carril: 200.** Un 201 afirmaría que se creó algo, y con `aborted: true` no se
+creó nada. Queda anotada para confirmar con quien construye la pantalla y con quien integra.
+
+##### Lo que quedó BLOQUEADO, y contra qué se cerró mientras tanto (regla 65)
+
+Las llamadas reales de H3.S3 necesitan la aplicación atendiendo peticiones contra una base viva, y
+eso no lo decide esta sesión. El contrato que falta —el endpoint— sí se puede nombrar, así que se
+cerró contra un doble de la respuesta HTTP, en los tres niveles:
+
+| Nivel | Qué se ejercitó | Dónde |
+|---|---|---|
+| Correcto | Una importación que escribió conserva su 201 | spec del controlador |
+| Límite | Validar sin escribir baja a 200, y un archivo rechazado por errores también | idem |
+| Inválido | Sin archivo no se llama al importador y la petición se rechaza | idem |
+
+El doble **no reemplaza** la llamada real. Lo que sólo se puede observar con la aplicación arriba:
+el estado que termina escribiendo el marco, la conversión del campo de formulario a booleano, el
+tope de tamaño de la subida y el rechazo por rol. Queda declarado en «No cubierto» del reporte.
 
 ### H4 — Idempotencia contra Postgres y matriz de autorización
 
