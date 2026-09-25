@@ -40,6 +40,23 @@ describe('TokenService · claims de presentación', () => {
     });
   });
 
+  it('incluye el tipo de cada tenant sin cambiar la lista de ids ni los nombres', () => {
+    const { service, jwt } = build();
+
+    service.signAccessToken('u-1', 'sid-1', ['USER'], ['t-1', 't-2'], {
+      tenantNames: { 't-1': 'Seguros Andina', 't-2': 'Hospital San Lucas' },
+      tenantTypes: { 't-1': 'PAYER', 't-2': 'PROVIDER' },
+    });
+
+    const payload = signedPayload(jwt);
+    expect(payload.tenants).toEqual(['t-1', 't-2']);
+    expect(payload.tenantNames).toEqual({
+      't-1': 'Seguros Andina',
+      't-2': 'Hospital San Lucas',
+    });
+    expect(payload.tenantTypes).toEqual({ 't-1': 'PAYER', 't-2': 'PROVIDER' });
+  });
+
   it('incluye el perfil de paciente como `pid` para el autoservicio del portal', () => {
     const { service, jwt } = build();
 
@@ -68,6 +85,7 @@ describe('TokenService · claims de presentación', () => {
     const payload = signedPayload(jwt);
     expect(payload).not.toHaveProperty('name');
     expect(payload).not.toHaveProperty('tenantNames');
+    expect(payload).not.toHaveProperty('tenantTypes');
     // Una cuenta que no es de un paciente no arrastra el claim.
     expect(payload).not.toHaveProperty('pid');
     // Ni la que no tiene perfil profesional el suyo.
@@ -80,6 +98,14 @@ describe('TokenService · claims de presentación', () => {
     service.signAccessToken('u-1', 'sid-1', ['USER'], [], { tenantNames: {} });
 
     expect(signedPayload(jwt)).not.toHaveProperty('tenantNames');
+  });
+
+  it('un mapa de tipos vacío tampoco se firma', () => {
+    const { service, jwt } = build();
+
+    service.signAccessToken('u-1', 'sid-1', ['USER'], [], { tenantTypes: {} });
+
+    expect(signedPayload(jwt)).not.toHaveProperty('tenantTypes');
   });
 
   it('issueSessionTokens propaga los datos de presentación', () => {

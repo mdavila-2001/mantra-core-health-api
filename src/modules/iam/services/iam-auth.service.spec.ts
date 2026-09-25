@@ -13,6 +13,7 @@ import * as argon2 from 'argon2';
 import { IamAuthService } from './iam-auth.service';
 import { TracingService } from '../../../observability';
 import { CONCEPTS } from '../../../common';
+import { TenantMemberships, Tenants } from '../../directory/entities';
 
 const PASSWORD = 'correct-horse-1';
 let PASSWORD_HASH: string;
@@ -156,6 +157,101 @@ describe('IamAuthService', () => {
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN }),
+      );
+    });
+
+    it('repuebla el nombre y el tipo de cada tenant en el token (tenantNames/tenantTypes)', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // `tx.find` sirve a las dos consultas de la transacción: las membresías
+      // activas (`loadActiveTenantIds`) y los tenants para nombre y tipo
+      // (`loadTenantDisplay`). Se discrimina por la entidad, como haría el ORM
+      // real con dos `em.find` distintos.
+      d.tx.find.mockImplementation((entity: unknown) => {
+        if (entity === TenantMemberships) {
+          return Promise.resolve([
+            { tenantId: 't-1', statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE },
+          ]);
+        }
+        if (entity === Tenants) {
+          return Promise.resolve([
+            {
+              id: 't-1',
+              tradeName: 'Seguros Andina',
+              legalName: 'Seguros Andina S.A.',
+              code: 'ANDINA',
+              tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PAYER,
+            },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        ['t-1'],
+        expect.objectContaining({
+          tenantNames: { 't-1': 'Seguros Andina' },
+          tenantTypes: { 't-1': 'PAYER' },
+        }),
+      );
+    });
+
+    it('un `tenant_type_concept_id` fuera del catálogo no entra en `tenantTypes`', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.tx.find.mockImplementation((entity: unknown) => {
+        if (entity === TenantMemberships) {
+          return Promise.resolve([
+            { tenantId: 't-1', statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE },
+          ]);
+        }
+        if (entity === Tenants) {
+          return Promise.resolve([
+            {
+              id: 't-1',
+              tradeName: 'Organización rara',
+              legalName: 'Organización rara S.A.',
+              code: 'RARA',
+              // Un concept id inventado: no está en TENANT_TYPE_CODE_BY_CONCEPT_ID.
+              tenantTypeConceptId: 'concepto-inexistente',
+            },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        ['t-1'],
+        expect.objectContaining({
+          tenantNames: { 't-1': 'Organización rara' },
+          tenantTypes: {},
+        }),
       );
     });
 
@@ -481,6 +577,55 @@ describe('IamAuthService', () => {
       });
       expect(active.stateConceptId).toBe(CONCEPTS.STATE_ROTATED);
       expect(d.refreshRepo.create).toHaveBeenCalled();
+    });
+
+    it('repuebla `tenantNames` y `tenantTypes` al rotar el token, igual que el login', async () => {
+      const d = build();
+      d.refreshRepo.findByHashForUpdate.mockResolvedValue({
+        id: 'rt1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        sessionId: 's1',
+        expiresAt: new Date('2030-01-01'),
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.findById.mockResolvedValue({
+        id: 's1',
+        userId: 'u1',
+        tokenId: 'tid',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.tx.find.mockImplementation((entity: unknown) => {
+        if (entity === TenantMemberships) {
+          return Promise.resolve([
+            { tenantId: 't-1', statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE },
+          ]);
+        }
+        if (entity === Tenants) {
+          return Promise.resolve([
+            {
+              id: 't-1',
+              tradeName: 'Seguros Andina',
+              legalName: 'Seguros Andina S.A.',
+              code: 'ANDINA',
+              tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PAYER,
+            },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      await d.service.refresh('raw');
+
+      expect(d.tokenService.signAccessToken).toHaveBeenCalledWith(
+        'u1',
+        'tid',
+        expect.anything(),
+        ['t-1'],
+        expect.objectContaining({
+          tenantNames: { 't-1': 'Seguros Andina' },
+          tenantTypes: { 't-1': 'PAYER' },
+        }),
+      );
     });
 
     // MCH-005: la comprobación de estado tiene que hacerse sobre la fila

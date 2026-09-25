@@ -175,6 +175,25 @@ export const TENANT_TYPE_CODES = Object.keys(
 ) as TenantTypeCode[];
 
 /**
+ * El inverso de {@link TENANT_TYPE_CONCEPT_BY_CODE}: concept id → código.
+ *
+ * Se deriva del mapa de ida para que las dos direcciones no puedan discrepar
+ * (mismo patrón que `BIRTH_SEX_CODE_BY_CONCEPT` en `profiles.concepts.ts`).
+ * Un `tenant_type_concept_id` que no esté en el catálogo (la columna admite
+ * cualquier uuid, ver `DirectoryTenantsService.resolveTenantType`) simplemente
+ * no tiene entrada acá: quien lo consulte lo trata como tipo desconocido, no
+ * como error.
+ */
+export const TENANT_TYPE_CODE_BY_CONCEPT_ID: Readonly<
+  Record<string, TenantTypeCode>
+> = Object.fromEntries(
+  Object.entries(TENANT_TYPE_CONCEPT_BY_CODE).map(([code, conceptId]) => [
+    conceptId,
+    code as TenantTypeCode,
+  ]),
+);
+
+/**
  * Tipos que operan atendiendo o formando en un territorio, y que por eso deben
  * declarar país y jurisdicción: es lo que determina bajo qué regulador operan.
  *

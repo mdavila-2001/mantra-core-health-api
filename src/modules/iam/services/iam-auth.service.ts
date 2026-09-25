@@ -38,7 +38,11 @@ import { AuthzEffectiveRolesService } from '../../authz/services';
 // Lectura cross-dominio acotada al límite de autenticación: al emitir el token
 // se resuelven las membresías de tenant del sujeto para embeberlas como claim.
 import { TenantMemberships, Tenants } from '../../directory/entities';
-import { DIR } from '../../directory/directory.concepts';
+import {
+  DIR,
+  TENANT_TYPE_CODE_BY_CONCEPT_ID,
+  type TenantTypeCode,
+} from '../../directory/directory.concepts';
 import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
@@ -195,22 +199,6 @@ export class IamAuthService {
   }
 
   /**
-   * Nombre de cada tenant, indexado por id, para los que el token va a declarar.
-   *
-   * Sólo sirve para mostrarlos: `tenants` sigue siendo la lista de uuid que
-   * valida el interceptor de tenant. Existe porque quien pertenece a más de una
-   * organización tenía que elegir entre identificadores, y elegir mal significa
-   * mirar los datos de otra institución.
-   *
-   * Prefiere el nombre comercial sobre el legal, que es el que la gente
-   * reconoce; el código queda de último recurso para que la lista nunca tenga
-   * una entrada en blanco.
-   *
-   * @param em - Contexto de persistencia.
-   * @param tenantIds - Tenants con membresía activa.
-   * @returns Mapa `id -> nombre`.
-   */
-  /**
    * Perfil de paciente del titular de la cuenta, para el claim `pid`.
    *
    * Recorre la misma cadena que `ProfilesPatientsService.getOwnSummary` -vínculo
@@ -271,15 +259,58 @@ export class IamAuthService {
     return practitioner?.profileId;
   }
 
-  private async loadTenantNames(
+  /**
+   * Nombre y tipo de cada tenant, indexado por id, para los que el token va a
+   * declarar.
+   *
+   * Sólo sirve para mostrarlos: `tenants` sigue siendo la lista de uuid que
+   * valida el interceptor de tenant, y ninguno de los dos mapas participa de
+   * ninguna decisión de autorización. El nombre existe porque quien pertenece
+   * a más de una organización tenía que elegir entre identificadores, y elegir
+   * mal significa mirar los datos de otra institución. El tipo existe porque
+   * el frontend necesita saber si la organización activa es una aseguradora
+   * para recortar su propio menú (`tenantTypes`, `JwtPayload`).
+   *
+   * Una sola consulta para los dos mapas: el tipo sale de la misma fila que ya
+   * se lee para el nombre.
+   *
+   * Prefiere el nombre comercial sobre el legal, que es el que la gente
+   * reconoce; el código queda de último recurso para que la lista nunca tenga
+   * una entrada en blanco. Un `tenant_type_concept_id` que no esté en
+   * {@link TENANT_TYPE_CODE_BY_CONCEPT_ID} (la columna admite cualquier uuid)
+   * simplemente no tiene entrada en `tenantTypes`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantIds - Tenants con membresía activa.
+   * @returns Los mapas `id -> nombre` e `id -> código de tipo`.
+   */
+  private async loadTenantDisplay(
     em: EntityManager,
     tenantIds: string[],
-  ): Promise<Record<string, string>> {
-    if (tenantIds.length === 0) return {};
+  ): Promise<{
+    tenantNames: Record<string, string>;
+    tenantTypes: Record<string, string>;
+  }> {
+    if (tenantIds.length === 0) return { tenantNames: {}, tenantTypes: {} };
     const rows = await em.find(Tenants, { id: { $in: tenantIds } });
-    return Object.fromEntries(
+    const tenantNames = Object.fromEntries(
       rows.map((row) => [row.id, row.tradeName || row.legalName || row.code]),
     );
+    const tenantTypes = Object.fromEntries(
+      rows
+        .map(
+          (row) =>
+            [
+              row.id,
+              TENANT_TYPE_CODE_BY_CONCEPT_ID[row.tenantTypeConceptId],
+            ] as const,
+        )
+        .filter(
+          (entry): entry is readonly [string, TenantTypeCode] =>
+            entry[1] !== undefined,
+        ),
+    );
+    return { tenantNames, tenantTypes };
   }
 
   /**
@@ -373,13 +404,18 @@ export class IamAuthService {
         activeRoles,
       );
       const tenants = await this.loadActiveTenantIds(tx, user.id);
+      const { tenantNames, tenantTypes } = await this.loadTenantDisplay(
+        tx,
+        tenants,
+      );
       const issued = this.tokenService.issueSessionTokens(
         user.id,
         roles,
         tenants,
         {
           name: user.displayName,
-          tenantNames: await this.loadTenantNames(tx, tenants),
+          tenantNames,
+          tenantTypes,
           scopedRoles,
           patientProfileId: await this.loadPatientProfileId(tx, user.id),
           practitionerProfileId: await this.loadPractitionerProfileId(
@@ -497,8 +533,13 @@ export class IamAuthService {
         );
         const tenants = await this.loadActiveTenantIds(tx, session.userId);
         // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
-        // token la interfaz perdería el nombre y volvería a mostrar el uuid.
+        // token la interfaz perdería el nombre y el tipo, y volvería a mostrar el
+        // uuid o a ofrecerle a la aseguradora el menú de una cuenta cualquiera.
         const holder = await this.usersRepo.findById(tx, session.userId);
+        const { tenantNames, tenantTypes } = await this.loadTenantDisplay(
+          tx,
+          tenants,
+        );
         const accessToken = this.tokenService.signAccessToken(
           session.userId,
           session.tokenId,
@@ -506,7 +547,8 @@ export class IamAuthService {
           tenants,
           {
             name: holder?.displayName,
-            tenantNames: await this.loadTenantNames(tx, tenants),
+            tenantNames,
+            tenantTypes,
             scopedRoles,
             patientProfileId: await this.loadPatientProfileId(
               tx,
