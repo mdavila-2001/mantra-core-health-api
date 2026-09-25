@@ -1,0 +1,74 @@
+H4.S1 — Importación de conceptos desde archivo, contra Postgres real
+====================================================================
+
+Comando
+-------
+yarn test:integration --ci --runInBand \
+  test/integration/terminology/concept-file-import.int-spec.ts
+
+Veredicto
+---------
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        283.929 s
+exit=0
+
+Qué cubrió cada prueba
+----------------------
+H4.S1.M3  el mismo archivo dos veces inserta una vez y omite la segunda
+          ok-50.csv ×2 -> 201 inserted:50/skipped:0, luego 201 inserted:0/skipped:50
+          conteo final: 50 conceptos · 2 lotes · 1 sola huella entre los dos
+
+H4.S1.M4  un archivo con errores no escribe nada ni deja lote
+          con-errores.csv -> 200 aborted:true totalRead:50 inserted:0 errors:5 batchId:null
+          muestras en las líneas 5, 9, 14, 20 y 33 — las cinco filas malas de la fixture
+          conteo final: 0 conceptos · 0 lotes
+
+H4.S1.M5  validar sin escribir deja la versión intacta
+          ok-50.csv con dryRun -> 200 dryRun:true totalRead:50 inserted:0 batchId:null
+          vista previa de 20 filas
+          conteo final: 0 conceptos · 0 lotes
+
+H4.S1.M6  dos importaciones simultáneas no duplican conceptos  (Q-I2)
+          conteo final: 50 conceptos, 50 códigos distintos
+          ninguna de las dos peticiones respondió 5xx
+
+
+Q-I2 — cómo se resolvió realmente la carrera
+--------------------------------------------
+Las dos subidas simultáneas NO duplicaron, y la garantía no la da el servicio:
+la da el índice único de la base. Una de las dos peticiones ganó y la otra fue
+rechazada por la restricción al intentar escribir.
+
+Petición que ganó:
+  status 201 · inserted:50 skipped:0 errors:0 · lote registrado
+
+Petición que perdió:
+  status 409 · code CONFLICT
+  restricción uq_catalog_concepts_version_code sobre catalog_concepts
+  clave en conflicto (code_system_version_id, code) = (..., ZZ-001)
+
+Dos consecuencias, las dos verificadas:
+
+1. El nombre de la restricción y el valor de la clave NO llegan al cliente.
+   Quedan sólo en el registro del servidor, con el identificador de correlación
+   como puente. Está decidido así a propósito en el manejador global de errores
+   del repositorio (src/common/filters/all-exceptions.filter.ts:201-208), que
+   explica el porqué en el mismo lugar. El cuerpo de la respuesta lleva código,
+   mensaje y correlación.
+
+2. El importador PUEDE responder 409, y el contrato publica 200, 201 y 422.
+   Es un estado no documentado, alcanzable sólo con dos subidas simultáneas de
+   códigos que se pisan. Queda anotado como Q-I8 en el plan: no se inventa un
+   manejo nuevo sin decidir antes qué tiene que ver quien carga.
+
+
+Hallazgo ajeno, no tocado
+-------------------------
+El registro del manejador global de errores incluye el detalle del driver, y ese
+detalle trae el valor de la clave en conflicto — un `code` de fila. Es anterior a
+este carril y es una decisión documentada del repositorio, no un descuido. Se
+deja registrado porque REQ-B-9 pide que el contenido de las filas no aparezca en
+los registros: el importador cumple, el manejador global tiene su propio criterio.
+Ruta: src/common/filters/all-exceptions.filter.ts:197-211.

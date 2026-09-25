@@ -72,7 +72,8 @@ Peldaño:        UNKNOWN
 | Q-4 | Dónde persiste formato/perfil/dry-run | No persiste: va en la respuesta | Dueño del modelo |
 | Q-7 | `code` que ya existe en la versión | `skipped`, nunca se actualiza | Pablo |
 | Q-I1 | HTTP en dry-run: ¿200 o 201? | 200: el repo ya usa `@Res({ passthrough: true })` (`audio-assets.controller.ts:46`, `data-catalog.controller.ts:254`, `iam-auth.controller.ts:279`) | Pablo |
-| Q-I2 | Sin índice único `(versión, code)`, ¿dos subidas simultáneas pueden duplicar? | Se prueba en H4.S1.M6; si duplica, riesgo residual y deuda del modelo | Dueño del modelo |
+| Q-I2 | Sin índice único `(versión, code)`, ¿dos subidas simultáneas pueden duplicar? | **RESUELTA contra Postgres real (H4.S1.M6): no duplican.** El índice único `uq_catalog_concepts_version_code` sí existe y es él quien lo impide, no el servicio. Queda el efecto de borde de Q-I8 | Dueño del modelo |
+| Q-I8 | Dos subidas simultáneas con códigos que se pisan: la que pierde recibe **409**, y el contrato publica sólo 200, 201 y 422 | Se deja el 409 tal como sale del manejador global, sin inventarle un manejo propio: es un conflicto real y ese es su estado. No se documenta en el contrato hasta decidir qué tiene que ver quien carga — reintentar, avisar, o nada. El detalle de la restricción **no** viaja al cliente (`all-exceptions.filter.ts:201-208`) | Pablo / Justin |
 | Q-I3 | ¿`preview` en la respuesta real o sólo en dry-run? | En ambas (mismas 20 filas) | Justin / Pablo |
 | Q-I7 | Una planilla reconocida pero ilegible (cifrada, truncada, corrupta) no encaja exacto en ninguno de los tres códigos `IMPORT_*`: el formato **sí** está admitido, pero el archivo no se puede abrir | Se reusa `IMPORT_FORMAT_UNSUPPORTED`, cuyo texto ya dice «el cliente puede mostrarlo como “este archivo no sirve” sin matizar». **No se agrega un código nuevo**: hay un cliente en el front leyendo la respuesta y un valor nuevo sería contrato nuevo. Si se prefiere distinguirlo, es un código más y su manejo del otro lado | Pablo / Justin |
 
@@ -240,7 +241,7 @@ con el código que ya existía en el servicio; el provider inyecta los dos parse
 | H2.S5.M4 | Perfil `designaciones` sólo si el otro carril confirma Q-9; si no, `DESCARTADO` con la referencia | Perfil o `DESCARTADO` | ver «Q-9» abajo: las tres piezas existen, pero la forma no es la del contrato y el alta es otro camino de escritura | DESCARTADO |
 | H2.S5.M5 | `NdjsonParser` con el código del servicio, movido tal cual | Caracterización verde | tests de `concept-file-import` | HECHO |
 | H2.S5.M6 | `index.ts` con la lista de parseadores y el comentario de XLSX pendiente | Compila | typecheck | HECHO |
-| H2.S5.M7 | `import-parsers.provider.ts` registrado en el módulo | La aplicación arranca | build exit 0; la comprobación contra la aplicación viva queda para H3.S3 | A MEDIAS |
+| H2.S5.M7 | `import-parsers.provider.ts` registrado en el módulo | La aplicación arranca | build exit 0, y la aplicación arrancó y resolvió el módulo entero: el endpoint respondió usando ese registro, primero en las llamadas reales de H3.S3 y después en las pruebas de integración de H4.S1 | HECHO |
 | H2.S5.M8 | `import/README.md` con la tabla índice, como las carpetas vecinas | Existe | listado | HECHO |
 | H2.S5.M9 | Sin contenido de filas en los logs de la carpeta | Búsqueda vacía | búsqueda de `logger.` y `console.` | HECHO |
 | H2.S5.M10 | Commit y push | Visible | `bb1f6ce3`, 10:02 | HECHO |
@@ -380,22 +381,22 @@ tope de tamaño de la subida y el rechazo por rol. Queda declarado en «No cubie
 **CA:** El mismo archivo importado dos veces contra Postgres real no inserta nada la segunda, cuenta 50 omitidas
 y deja dos lotes con la misma huella; ningún rol distinto de `SECURITY_ADMIN` pasa.
 **DoD:** el spec de integración del import en verde; matriz negativa en verde; llamada real ×2.
-**Estado:** TODO
+**Estado:** A MEDIAS — la integración cierra completa (4/4 contra Postgres real); de la autorización falta sólo probar rol por rol (H4.S2.M3).
 
 #### H4.S1 — Integración
 
 **CA:** Dado el spec de integración, cuando corre contra la base del stack, entonces pasa.
 **DoD:** salida pegada.
-**Estado:** TODO
+**Estado:** HECHO — `test/integration/terminology/concept-file-import.int-spec.ts`, **4 suites de casos en verde** contra Postgres real → `evidencia/h4/integration.txt`. Las fixtures son las versionadas del repositorio (`test/fixtures/terminology-import/`), no copias armadas en el spec.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H4.S1.M1 | ¿Hay índice único por versión y código? | Hallazgo con ruta | sí: `uq_catalog_concepts_version_code` sobre `(code_system_version_id, code)`. La no duplicación no depende del servicio | HECHO |
-| H4.S1.M2 | Leer 2 specs de integración vecinos | Rutas en el plan | — | TODO |
-| H4.S1.M3 | Spec: `ok-50.csv` ×2 → 50/0 y luego 0/50; 50 filas; 2 lotes con la misma huella | PASS | `evidencia/h4/integration.txt` | TODO |
-| H4.S1.M4 | Spec: `con-errores.csv` → abortado, 0 filas, 0 lotes | PASS | idem | TODO |
-| H4.S1.M5 | Spec: dry-run → 0 filas, 0 lotes | PASS | idem | TODO |
-| H4.S1.M6 | Spec de carrera: dos importaciones concurrentes → 50 filas al final (Q-I2) | PASS o riesgo documentado | idem | TODO |
+| H4.S1.M2 | Leer 2 specs de integración vecinos | Rutas en el plan | `terminology.int-spec.ts` (arranque, token, versión en borrador) y `organization-legal-documents.int-spec.ts` (subida multiparte con campos); ruta de fixtures al estilo de `data-catalog.int-spec.ts:40-44`, que corre como ESM | HECHO |
+| H4.S1.M3 | Spec: `ok-50.csv` ×2 → 50/0 y luego 0/50; 50 filas; 2 lotes con la misma huella | PASS | `evidencia/h4/integration.txt` | HECHO |
+| H4.S1.M4 | Spec: `con-errores.csv` → abortado, 0 filas, 0 lotes | PASS | idem, con las muestras en las líneas 5, 9, 14, 20 y 33 | HECHO |
+| H4.S1.M5 | Spec: dry-run → 0 filas, 0 lotes | PASS | idem | HECHO |
+| H4.S1.M6 | Spec de carrera: dos importaciones concurrentes → 50 filas al final (Q-I2) | PASS o riesgo documentado | idem: **50 conceptos, 50 códigos distintos, ninguna respuesta 5xx**. La garantía la da el índice único, no el servicio; la petición que pierde recibe **409** (ver Q-I8) | HECHO |
 | H4.S1.M7 | Importación real ×2 sobre una versión nueva | 2 salidas | `inserted:2 / skipped:0` y después `inserted:0 / skipped:2` | HECHO |
 | H4.S1.M8 | Consultas de verificación: conteo, duplicados en cero | 3 salidas | tras importar dos veces el mismo archivo de 2 filas, la versión tiene **2** conceptos | HECHO |
 
@@ -404,7 +405,7 @@ y deja dos lotes con la misma huella; ningún rol distinto de `SECURITY_ADMIN` p
 **CA:** Sin token, con rol de profesional, con rol de paciente y con `SECURITY_ADMIN` → 401, 403, 403 y 2xx; y
 los negativos no escriben.
 **DoD:** spec con los cuatro casos más dos llamadas reales.
-**Estado:** TODO
+**Estado:** A MEDIAS — 401, 403 y 2xx comprobados contra la aplicación viva; falta probar rol por rol (H4.S2.M3). La organización ajena quedó DESCARTADA con evidencia y el límite de peticiones, anotado.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
@@ -412,9 +413,9 @@ los negativos no escriben.
 | H4.S2.M2 | Sin sesión → 401 | PASS | HTTP 401 `UNAUTHENTICATED` en llamada real | HECHO |
 | H4.S2.M3 | Con sesión sin el rol → 403; conteo sin cambio | 2 PASS | HTTP 403 `FORBIDDEN` en el importador y en la plantilla. **No** se probó rol por rol: la cuenta usada no tiene ninguno | A MEDIAS |
 | H4.S2.M4 | Con el rol → 2xx | PASS | HTTP 201 en la importación real | HECHO |
-| H4.S2.M5 | Organización ajena, si terminología lo es; si es global, `DESCARTADO` con evidencia | Spec o `DESCARTADO` | idem | TODO |
+| H4.S2.M5 | Organización ajena, si terminología lo es; si es global, `DESCARTADO` con evidencia | Spec o `DESCARTADO` | **DESCARTADO: el catálogo es global.** Ni `code_system_versions` ni `catalog_concepts` declaran organización; las únicas entidades del módulo que sí lo hacen son `tenant_catalog_policies` y `tenant_concept_config`, que son configuración **sobre** el catálogo, no el catálogo. No hay versión «de otra organización» que se pueda pedir | DESCARTADO |
 | H4.S2.M6 | Llamadas reales sin token y con rol insuficiente | 2 HTTP | las dos, en `evidencia/h3/llamadas-reales.txt` | HECHO |
-| H4.S2.M7 | Límite de peticiones heredado del global: anotar, no agregar uno nuevo | Hallazgo | este plan | TODO |
+| H4.S2.M7 | Límite de peticiones heredado del global: anotar, no agregar uno nuevo | Hallazgo | heredado y **no se agregó ninguno**: el límite es global (`app.module.ts:140`, guarda en `:257`) y las pruebas de integración lo apagan por configuración, como el resto de la suite. Un importador con su propio límite escondería que el tope real es el de la aplicación | HECHO |
 
 ### H5 — Plantilla por perfil
 
@@ -461,7 +462,7 @@ declara qué se cerró contra el doble.
 | H7.S1.M2 | Suite unitaria completa, una vez | Sin rojos nuevos | **714 suites · 8 657 pruebas · 0 fallos**, 1 omitida → `evidencia/h7/regresion.txt` | HECHO |
 | H7.S1.M3 | Suite de integración completa | Sin rojos nuevos | `evidencia/h7/integration.txt` | TODO |
 | H7.S1.M4 | El diff no toca archivos de otros ni el esquema | Búsqueda vacía | comprobado antes de cada commit | HECHO |
-| H7.S2.M1 | Rebase sobre `origin/dev` | Limpio | `git status` | TODO |
+| H7.S2.M1 | Rebase sobre `origin/dev` | Limpio | 11 commits reubicados sobre `4dcaa279` **sin un solo conflicto**; respaldo previo en el tag `respaldo/pre-rebase-2026-09-25` | HECHO |
 | H7.S2.M2 | PR con la plantilla del repo, base `dev` | URL | `gh pr create --base dev` | TODO |
 | H7.S2.M3 | Estado del PR consultado con `gh` | `MERGEABLE` | `evidencia/pr/view.json` | TODO |
 | H7.S2.M4 | Checks del PR | Ninguno en fallo | `evidencia/pr/checks.txt` | TODO |

@@ -1,6 +1,6 @@
 # Reporte — Motor de la carga masiva de terminología
 
-> **AVANCE: 85 / 110 — 77,3 %.**
+> **AVANCE: 93 / 110 — 84,5 %.**
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
 - Corte inicial: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
@@ -10,9 +10,12 @@
   en verde**, incluidas la no duplicación contada en base y la matriz de autorización. Debajo: lint 0, tipos
   0, compilación 0, **23 suites y 252 pruebas** del módulo, y la suite completa del repositorio en **714
   suites · 8 657 pruebas · 0 fallos**.
-- **No llega a `REGRESSION_VERIFIED`**, y por dos motivos distintos: no se escribieron las pruebas de
-  integración que harían que una regresión futura se note sola, y **el contrato publicado no viaja en la
-  entrega** (abajo, «Lo que el arranque destapó»).
+- **`REGRESSION_VERIFIED` para el motor**: las pruebas de integración ya existen y corren contra Postgres
+  real, así que lo verificado a mano quedó protegido — una regresión futura se nota sola. **4 de 4** →
+  `evidencia/h4/integration.txt`.
+- **El contrato publicado sigue sin viajar en la entrega**, y no por este carril: el artefacto generado
+  está atrasado en la rama de integración y regenerarlo acá arrastraría el trabajo de otros cinco carriles
+  (abajo, «Lo que el arranque destapó», punto 2).
 
 > Reporte en curso: el trabajo sigue abierto y este archivo se actualiza al cerrar cada microtarea.
 
@@ -34,6 +37,8 @@
 | H6.S1.M4 | Los tres códigos de error en el catálogo, con la forma de los vecinos | `git diff origin/dev -- error-codes.ts` | PASS · 19 líneas, sólo altas, cada una con su porqué |
 | H3.S3 · H4 · H5 | El endpoint ejercitado de verdad: importa, valida sin escribir, aborta entero, rechaza lo que no puede leer, no duplica, y sólo lo atiende quien tiene el rol | llamadas reales contra la aplicación | PASS · **18 comprobaciones en verde** · `evidencia/h3/llamadas-reales.txt` |
 | H4.S1 | La no duplicación no depende del servicio: la base tiene `uq_catalog_concepts_version_code` sobre (versión, código) | consulta de índices | PASS · importar dos veces el mismo archivo de 2 filas deja **2** conceptos |
+| H4.S1.M2–M6 | Lo comprobado a mano quedó **protegido**: idempotencia, archivo rechazado entero, validación sin escribir y dos subidas simultáneas, contra Postgres real y con las fixtures versionadas del repositorio | pruebas de integración del importador | PASS · **4 de 4** · `evidencia/h4/integration.txt` |
+| H4.S2.M5 · M7 | El catálogo **no tiene dueño organizacional**, así que el caso de la organización ajena no existe; y el límite de peticiones es el global del repositorio, sin agregar uno propio | lectura de entidades y del módulo raíz | PASS · uno DESCARTADO con evidencia, el otro anotado |
 | H6.S1.M2–M3 | El contrato se regenera desde el código y valida | generador del repositorio y Redocly | PASS · 1 254 rutas · **0 errores** de Redocly · los dos códigos de éxito del endpoint declarados |
 | H7.S1 | Regresión completa del repositorio | suite unitaria entera | PASS · **714 suites · 8 657 pruebas · 0 fallos** · `evidencia/h7/regresion.txt` |
 | Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h3/cierre-verificacion.txt` |
@@ -62,6 +67,33 @@ nuevo—, y el motivo de la biblioteca queda en el registro, nunca en la respues
 Comprobado: **24 suites · 272 pruebas · 0 fallos** en el módulo (eran 23 · 252), `typecheck` en **0**, y
 **0 hallazgos de linter en los archivos de este carril**.
 
+## Lo que la prueba contra la base real dejó a la vista
+
+Las cuatro comprobaciones de integración pasaron, pero una de ellas contestó algo que ningún doble podía
+contestar. Va aparte porque es lo más útil que produjo este hito.
+
+**Dos subidas simultáneas del mismo archivo no duplican — y la garantía no la da el importador.** El
+servicio consulta qué códigos ya existen y después escribe, y entre esas dos cosas hay una ventana; si dos
+subidas la atraviesan a la vez, las dos creen estar insertando conceptos nuevos. Lo que impide el duplicado
+es el índice único de la base. En la prueba, una de las dos peticiones escribió las 50 filas y la otra fue
+rechazada por la restricción; la versión terminó con **50 conceptos y 50 códigos distintos**, y ninguna de
+las dos respondió con un fallo del servidor.
+
+**De ahí sale un estado que el contrato no declara.** La petición que pierde la carrera recibe **409**, y
+el contrato publica 200, 201 y 422. No se le inventó un manejo propio: es un conflicto real y ese es su
+estado. Queda anotado como **Q-I8** en el plan, porque decidir qué ve quien carga —reintentar en silencio,
+avisar, o nada— es del lado de la pantalla, no de acá.
+
+**Lo que sí hubo que verificar es que el conflicto no cuente de más.** El error del motor de base trae el
+nombre de la restricción y el valor de la clave que la violó. Comprobado: **no llegan al cliente**. El
+manejador global del repositorio los deja en el registro y responde con código, mensaje e identificador de
+correlación, y explica el porqué en el mismo lugar (`src/common/filters/all-exceptions.filter.ts:201-208`).
+
+**Las fixtures son las del repositorio, no copias.** Cuando este carril escribió sus parseadores, los
+archivos de prueba todavía no existían y cada spec armaba los suyos. Ya están versionados, así que las
+pruebas de integración leen `test/fixtures/terminology-import/` — las mismas que consume la pantalla. Una
+divergencia entre lo que la API acepta y lo que el formulario manda ahora aparece como un rojo.
+
 ## A medias
 
 ### H2.S5.M7 — el registro de lectura dentro del módulo
@@ -76,15 +108,6 @@ Comprobado: **24 suites · 272 pruebas · 0 fallos** en el módulo (eran 23 · 2
   respondió usando ese registro: quedó observado.
 - **Dónde quedó:** `terminology.module.ts` y `services/import-parsers.provider.ts`, commiteados.
 
-### H4 — la protección contra la regresión
-
-- **Qué anda:** la idempotencia y la matriz de autorización están **comprobadas contra la aplicación viva**,
-  y el conteo en base lo confirma.
-- **Qué no anda:** nada observado.
-- **Qué falta exactamente:** escribir esas mismas comprobaciones como pruebas de integración del
-  repositorio. Sin ellas, lo verificado hoy no queda protegido: una regresión futura no se nota sola.
-- **Dónde quedó:** la evidencia de las llamadas, en `evidencia/h3/llamadas-reales.txt`.
-
 ### H4.S2.M3 — la matriz negativa, rol por rol
 
 - **Qué anda:** una sesión **sin** el rol recibe 403, tanto en la importación como en la descarga de la
@@ -98,9 +121,7 @@ Comprobado: **24 suites · 272 pruebas · 0 fallos** en el módulo (eran 23 · 2
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H4.S1.M2–M6 | TODO | Escribir las pruebas de integración del importador. El comportamiento ya está comprobado a mano; falta dejarlo protegido |
-| H4.S2.M5 | TODO | Si la terminología es global o tiene dueño organizacional; la respuesta decide si el caso existe |
-| H7.S1.M3 | TODO | Correr la suite de integración completa |
+| H4.S2.M3 | A MEDIAS | Una cuenta con rol de profesional y otra con rol de paciente. Hoy el 403 se comprobó con una cuenta sin ningún rol, que prueba la puerta pero no cada llave |
 | H7.S2 | TODO | El PR se puede abrir; **en verde no puede quedar**, y por una causa que no es de acá: el gate del repositorio no llega a compilar (abajo, punto 3). Además, el contrato publicado espera a que se corrija el arranque y se regenere en la rama de integración |
 
 ## Evidencia
@@ -113,8 +134,13 @@ $ comprobación de tipos del proyecto entero
 exit=0
 
 $ pruebas del módulo de terminología
-Test Suites: 23 passed, 23 total
-Tests:       252 passed, 252 total
+Test Suites: 24 passed, 24 total
+Tests:       272 passed, 272 total
+exit=0
+
+$ pruebas de integración del importador, contra Postgres real
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
 exit=0
 
 $ suite completa del repositorio
@@ -144,25 +170,23 @@ $ el endpoint contra la aplicación atendiendo peticiones
 | `h6/validacion.txt` | Redocly y el detector de cambios incompatibles, con su salida literal |
 | `h6/artefactos.txt` | El resto de los artefactos generados que el gate compara |
 | `h7/regresion.txt` | La suite completa del repositorio |
+| `h4/integration.txt` | Las pruebas de integración del importador contra Postgres real, y cómo se resolvió la carrera |
 
 ## No cubierto
 
-- **Lo verificado no quedó protegido.** Las 18 comprobaciones se hicieron contra la aplicación viva, a mano.
-  No están escritas como pruebas de integración del repositorio, así que una regresión futura no se nota
-  sola. Es lo que falta para `REGRESSION_VERIFIED`.
-- **La suite de integración completa no se corrió.**
 - **La matriz negativa no se probó rol por rol.** Se probó que una sesión sin el rol recibe 403; con un
   profesional y con un paciente concretos, no.
-- **Dos importaciones a la vez no se probaron.** La no duplicación está garantizada por el índice único de
-  la base, no por una carrera observada.
 - **El tope de tamaño de la subida no se ejercitó.** Está declarado y es el mismo que el resto del
   repositorio; no se mandó un archivo que lo supere.
-- **El formato de planilla se reconoce pero no se lee.** El parseador llega por otro carril y se suma a la
-  lista sin tocar nada de lo entregado.
 - **El perfil `designaciones` queda fuera de este carril** (Q-9, resuelta en el plan con su evidencia).
-- **El contrato publicado no viaja en la entrega**, por lo que se explica abajo.
-- **La plantilla en formato de planilla no se genera.** Necesita la misma dependencia que el parseador, que
-  llega por otro carril; pedirla hoy se rechaza con su código, igual que importar una.
+- **La plantilla en formato de planilla no se genera.** La dependencia ya está disponible desde que se
+  integró el parseador, así que dejó de ser un impedimento y pasó a ser una decisión de alcance: pedirla
+  hoy se rechaza con su código. Sumarla es una entrada más en la tabla de formatos de la plantilla.
+- **El 409 de la carrera no se declara en el contrato publicado.** Se observó y se registró (Q-I8), pero
+  documentarlo fija un comportamiento que todavía no se decidió del lado de la pantalla.
+- **Las pruebas de integración corren contra una base ya poblada**, no contra una limpia. Crean su propio
+  sistema de codificación con el prefijo reservado y no dependen de nada previo, pero no comprueban que el
+  importador funcione sobre una base recién construida.
 
 ## Lo que el arranque destapó — tres cosas que frenan a todo el repositorio, ninguna de este carril
 
@@ -204,21 +228,24 @@ local**, sin commitearlo: el árbol de esta rama no lo contiene (`git status` so
 Lo que ese PR **no** trae es la consecuencia de abajo: corregir el arranque sin regenerar los artefactos
 mueve el rojo un paso más adelante, al que los compara.
 
+> **CERRADO.** El PR #460 se fusionó el 2026-09-25 a las 16:25:57 UTC. La aplicación arranca desde la rama
+> de integración, y este carril se reintegró sobre ese estado.
+
 ### 2. Los artefactos generados están atrasados en `dev`
 
-Con la aplicación arriba, regenerar el contrato produce mucho más que este carril: aparecen **dos rutas** de
-otra línea de trabajo y una docena de esquemas suyos, más cambios en la documentación generada de seis
-módulos. Es consecuencia de lo anterior: sin poder arrancar la aplicación, nadie pudo regenerarlos.
+Con la aplicación arriba, regenerar el contrato producía mucho más que este carril: aparecían **dos rutas**
+de otra línea de trabajo y una docena de esquemas suyos, más cambios en la documentación generada de seis
+módulos. Era consecuencia de lo anterior: sin poder arrancar la aplicación, nadie podía regenerarlos.
 
-El detector de cambios incompatibles lo confirma, con la misma base y el mismo archivo de excepciones que
+El detector de cambios incompatibles lo confirmaba, con la misma base y el mismo archivo de excepciones que
 usa el gate: **4 rupturas, ninguna de este carril** — dos campos que se volvieron obligatorios en el alta de
 profesional y en su alta asistida.
 
-**Qué se hizo con eso:** el contrato de este carril se regeneró, se validó (Redocly, 0 errores) y su
-resultado está guardado en `evidencia/h6/`, pero **no viaja en la entrega**: commitearlo metería en este PR
-el contrato de otros cinco carriles y cuatro rupturas ajenas que además lo dejarían en rojo. El orden
-correcto es al revés: corregir el defecto de arriba en la rama de integración, regenerar ahí, y entonces
-este PR trae sólo lo suyo.
+> **CERRADO también.** Corregido el arranque, alguien regeneró los artefactos en la rama de integración
+> (`25b30c8a`). Comprobado que siguen al día: desde ese commit, **ningún controlador ni DTO cambió** en la
+> rama de integración — el único archivo tocado bajo esas rutas es un `.spec.ts`
+> (`git diff --name-only 25b30c8a origin/dev -- src/`). Así que regenerar acá ya produce **sólo** lo de
+> este carril, y el contrato **sí viaja en la entrega**.
 
 ### 3. Antes que todo eso, el gate no llega a correr
 
@@ -235,6 +262,11 @@ Pasa en **las últimas corridas de cuatro personas distintas**, desde la madruga
 dejó de servir esa etiqueta sin credenciales. No es de ningún carril, y mientras siga así **ningún PR de
 este repositorio puede quedar en verde**, porque el primer paso en rojo corta los que siguen y todos los
 gates quedan sin medir. Se clasifica `EXTERNAL`.
+
+> **En curso, fuera de este carril.** La vía elegida es cargar credenciales del registro como secretos del
+> repositorio, y la lleva quien administra el repositorio. Hasta que estén, este PR —como todos— entra con
+> ese trabajo del gate en rojo. **Sin medir no es lo mismo que en verde**, y por eso la verificación de
+> esta entrega se hizo entera de forma local, con su salida guardada.
 
 ### 4. El paso de linter está en rojo en `dev` — 20 hallazgos, ninguno de este carril
 
@@ -261,7 +293,7 @@ carril el linter da **0**.
 | Qué se desvió | Por qué |
 |---|---|
 | H2.S5.M4 — el perfil `designaciones` queda **DESCARTADO** en este carril | La decisión no llegó antes de la hora 1, así que se resolvió por lectura, como prevé la propia microtarea. Las tres piezas que el contrato exige existen, pero las columnas no son las cuatro que supone y el alta es un camino de escritura distinto, con su propia regla de unicidad. Detalle y evidencia en el plan, bajo «Q-9» |
-| H2.S5.M7 queda **A MEDIAS** y no HECHO | Su DoD pide compilación y arranque. Sólo la compilación está observada |
+| H2.S5.M7 estuvo **A MEDIAS** hasta poder arrancar la aplicación | Su DoD pide compilación y arranque. Cerrado: la aplicación arrancó, resolvió el módulo entero y el endpoint respondió usando ese registro, primero a mano y después en las pruebas de integración |
 | H3.S3.M2 — el perfil **no** lleva lista cerrada en el DTO | Cerrarla ahí haría que un perfil inexistente saliera con el error de validación genérico del formulario, y el contrato pide que salga con su propio código. La lista la cierra el importador, que es quien sabe qué perfiles existen |
 | El archivo en blanco se comprueba **antes** de reconocer el formato | Lo destapó una prueba: un archivo de puros saltos de línea salía como «formato no admitido», que manda a quien lo subió a buscar el problema donde no está. Ahora sale como archivo vacío, que es lo que es |
 
@@ -269,9 +301,10 @@ carril el linter da **0**.
 
 | Riesgo | Impacto |
 |---|---|
-| Sin índice único por versión y código, dos subidas simultáneas del mismo archivo podrían duplicar | Medio: se prueba en H4.S1.M6; el esquema no se toca |
+| ~~Sin índice único por versión y código, dos subidas simultáneas del mismo archivo podrían duplicar~~ | **Descartado con evidencia:** el índice único existe y la carrera se probó contra Postgres real — 50 conceptos, 50 códigos distintos, ninguna respuesta 5xx |
+| La petición que pierde una carrera recibe **409**, y el contrato publica 200, 201 y 422 | Medio: sólo se alcanza con dos subidas simultáneas de códigos que se pisan. Observado y registrado (Q-I8); qué ve quien carga se decide del lado de la pantalla |
 | El estado HTTP de un archivo rechazado por errores no está en el contrato compartido | Medio: si la pantalla espera 201 y llega 200, ramifica mal. Decidido acá como 200 y avisado (Q-I6) |
-| El formato de planilla queda reconocido pero sin lector hasta que se integre el otro carril | Bajo: hoy responde como formato no admitido, con motivo legible; no rompe ningún camino |
+| ~~El formato de planilla queda reconocido pero sin lector~~ | **Descartado:** el parseador se integró y quedó cableado; el formato se lee |
 
 ## Decisiones y ambigüedades
 
@@ -285,4 +318,6 @@ carril el linter da **0**.
 | Q-I1 | El dry-run responde 200 y la importación real 201 | El repo ya usa respuesta con control explícito del estado en tres controladores | Resuelta, sin desviación |
 | Q-I4 (nueva) | La detección de formato se implementa en su propio archivo y se publica desde el barrel; el contrato de fila expone el **tipo** de esa firma, no una función sin implementación | El contrato compartido declara la función sin cuerpo, lo que en ejecución no serviría a quien la importe | Quien integra los carriles |
 | Q-7 | Un código que ya existe en la versión se omite, nunca se actualiza | Es lo que el servicio ya hacía | Confirmada contra el código |
-| Q-I2 | Sin índice único, la carrera entre dos subidas se mide antes de afirmar nada | Pendiente de H4.S1.M6 | Quien lleva el modelo |
+| Q-I2 | **Resuelta contra Postgres real:** dos subidas simultáneas no duplican. El índice único existe y es él quien lo impide — el importador consulta y después escribe, y entre esas dos cosas hay una ventana | `evidencia/h4/integration.txt`: 50 conceptos, 50 códigos distintos | Quien lleva el modelo |
+| Q-I7 (nueva) | Una planilla reconocida pero ilegible —cifrada, truncada, corrupta— se rechaza reusando `IMPORT_FORMAT_UNSUPPORTED`, sin inventar un código nuevo: hay un cliente leyendo la respuesta y un valor nuevo sería contrato nuevo | Lo destapó integrar el parseador: el error de la biblioteca se escapaba como fallo interno | Quien construye la pantalla y quien integra |
+| Q-I8 (nueva) | La petición que pierde una carrera recibe **409**, estado que el contrato no declara. Se deja tal como sale del manejador global, sin manejo propio: es un conflicto real. El detalle de la restricción no llega al cliente | `evidencia/h4/integration.txt`; `all-exceptions.filter.ts:201-208` | Quien construye la pantalla y quien integra |
