@@ -338,9 +338,27 @@ paths:
                 file:
                   type: string
                   format: binary
+                dryRun:
+                  type: boolean
+                  default: false
+                profile:
+                  type: string
+                  default: conceptos
       responses:
+        '200':
+          description: >-
+            No se escribió nada: o se pidió validar sin escribir (`dryRun`), o el archivo se rechazó entero por errores
+            de fila (`aborted`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportConceptsFileResponseDto'
         '201':
-          description: ''
+          description: 'El archivo entró entero: los conceptos quedaron escritos'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportConceptsFileResponseDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -361,12 +379,12 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
-      summary: 'UC-03-03: importa conceptos desde un archivo NDJSON'
+      summary: 'UC-03-03: importa filas desde un archivo, o las valida sin escribir'
       tags:
         - terminology
       description: >-
-        UC-03-03: importa conceptos desde un archivo NDJSON. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        UC-03-03: importa filas desde un archivo, o las valida sin escribir. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /terminology/versions/{versionId}/publish:
     post:
       operationId: TerminologyVersionsController_publishVersion
@@ -1004,6 +1022,45 @@ paths:
       description: >-
         UC-03-12: define la política de catálogo del tenant. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /terminology/import-template:
+    get:
+      operationId: TerminologyImportTemplateController_descargarPlantilla
+      parameters:
+        - name: profile
+          required: false
+          in: query
+          description: Qué se va a cargar
+          schema:
+            default: conceptos
+            type: string
+        - name: format
+          required: false
+          in: query
+          description: Formato de la plantilla
+          schema:
+            default: csv
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'UC-03-03: descarga la plantilla de importación de un perfil'
+      tags:
+        - terminology
+      description: >-
+        UC-03-03: descarga la plantilla de importación de un perfil. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /iam/users:
     get:
       operationId: IamUsersController_searchUsers
@@ -55017,6 +55074,88 @@ components:
             $ref: '#/components/schemas/ImportConceptItemDto'
       required:
         - concepts
+    ImportFileIssueDto:
+      type: object
+      properties:
+        line:
+          type: number
+          description: Fila del archivo, empezando en 1
+        column:
+          type: string
+          description: Columna con el problema, si es de una
+        message:
+          type: string
+          description: Motivo por el que la fila se descartó
+      required:
+        - line
+        - message
+    ImportPreviewRowDto:
+      type: object
+      properties:
+        line:
+          type: number
+          description: Fila del archivo, empezando en 1
+      required:
+        - line
+    ImportConceptsFileResponseDto:
+      type: object
+      properties:
+        batchId:
+          type: object
+          description: Lote de importación registrado; nulo si no se escribió nada
+          format: uuid
+          nullable: true
+        format:
+          type: string
+          description: Formato reconocido en el contenido del archivo
+          enum:
+            - ndjson
+            - csv
+            - xlsx
+        profile:
+          type: string
+          description: Perfil con el que se leyeron las columnas
+        dryRun:
+          type: boolean
+          description: La importación fue una validación sin escribir
+        aborted:
+          type: boolean
+          description: El archivo se rechazó entero por tener errores
+        totalRead:
+          type: number
+          description: Filas con contenido leídas
+        inserted:
+          type: number
+          description: Conceptos creados
+        skipped:
+          type: number
+          description: Códigos que ya existían en la versión
+        errors:
+          type: number
+          description: Problemas encontrados
+        errorSamples:
+          description: Primeros errores encontrados, como muestra
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportFileIssueDto'
+        preview:
+          description: >-
+            Primeras filas válidas, en una validación sin escribir. Cada fila lleva `line` más una clave por columna del
+            perfil: para `conceptos`, `code`, `display` y `definition`
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportPreviewRowDto'
+      required:
+        - batchId
+        - format
+        - profile
+        - dryRun
+        - aborted
+        - totalRead
+        - inserted
+        - skipped
+        - errors
+        - errorSamples
     ConceptPropertyInputDto:
       type: object
       properties:

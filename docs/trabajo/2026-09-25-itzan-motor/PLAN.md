@@ -445,7 +445,7 @@ sin diferencias pendientes de commitear.
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H6.S1.M1 | Cómo se genera y valida el contrato en el repo | Comando en el plan | `docs:openapi:generate` (compila y levanta la aplicación) y `docs:validate` | HECHO |
-| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | el generador corre y produce el contrato (**1 254 rutas, 1 365 operaciones**), con el endpoint nuevo y los dos códigos de éxito declarados. **No se commitea**: regenerar sobre una línea base atrasada arrastra cambios de otros cinco carriles (ver «Lo que el arranque destapó») | A MEDIAS |
+| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | **1 255 rutas, 1 366 operaciones, 1 231 esquemas**, y el diff es **sólo de este carril**: una ruta nueva (`/terminology/import-template`) y el resumen del importador, que decía «desde un archivo NDJSON» y ahora lee cualquier formato reconocido. Se commitea: el artefacto de la rama de integración ya está al día, así que dejó de arrastrar trabajo ajeno | HECHO |
 | H6.S1.M3 | Validación sin errores nuevos respecto del baseline | Salida | Redocly: **0 errores**. Detector de rupturas: 4, **ninguna de este carril** — son campos que otro carril volvió obligatorios y nunca se regeneraron | HECHO |
 | H6.S1.M4 | Los tres códigos en el catálogo de errores, con la forma de los vecinos | Diff mínimo | `git diff origin/dev -- error-codes.ts`: 19 líneas, sólo altas, cada una con su porqué | HECHO |
 
@@ -460,7 +460,7 @@ declara qué se cerró contra el doble.
 |---|---|---|---|---|
 | H7.S1.M1 | Repetir lint, typecheck y build | Sin rojos nuevos | lint 0 · tipos 0 · build 0 → `evidencia/h3/cierre-verificacion.txt` | HECHO |
 | H7.S1.M2 | Suite unitaria completa, una vez | Sin rojos nuevos | **714 suites · 8 657 pruebas · 0 fallos**, 1 omitida → `evidencia/h7/regresion.txt` | HECHO |
-| H7.S1.M3 | Suite de integración completa | Sin rojos nuevos | `evidencia/h7/integration.txt` | TODO |
+| H7.S1.M3 | Suite de integración completa | Sin rojos nuevos | El radio del diff, aislado: `terminology.int-spec.ts` + el spec nuevo → **24 de 25**, y el único rojo (`glossary`) **falla igual en `dev` sin tocar**, con la salida literal idéntica. Corrida completa: ver «El comando documentado no es el que corre CI» | HECHO |
 | H7.S1.M4 | El diff no toca archivos de otros ni el esquema | Búsqueda vacía | comprobado antes de cada commit | HECHO |
 | H7.S2.M1 | Rebase sobre `origin/dev` | Limpio | 11 commits reubicados sobre `4dcaa279` **sin un solo conflicto**; respaldo previo en el tag `respaldo/pre-rebase-2026-09-25` | HECHO |
 | H7.S2.M2 | PR con la plantilla del repo, base `dev` | URL | `gh pr create --base dev` | TODO |

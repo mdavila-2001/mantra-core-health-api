@@ -1,6 +1,6 @@
 # Reporte — Motor de la carga masiva de terminología
 
-> **AVANCE: 93 / 110 — 84,5 %.**
+> **AVANCE: 94 / 110 — 85,5 %.**
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
 - Corte inicial: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
@@ -13,9 +13,9 @@
 - **`REGRESSION_VERIFIED` para el motor**: las pruebas de integración ya existen y corren contra Postgres
   real, así que lo verificado a mano quedó protegido — una regresión futura se nota sola. **4 de 4** →
   `evidencia/h4/integration.txt`.
-- **El contrato publicado sigue sin viajar en la entrega**, y no por este carril: el artefacto generado
-  está atrasado en la rama de integración y regenerarlo acá arrastraría el trabajo de otros cinco carriles
-  (abajo, «Lo que el arranque destapó», punto 2).
+- **El contrato publicado viaja en la entrega.** Dejó de arrastrar trabajo ajeno en cuanto se corrigió el
+  arranque y alguien regeneró el artefacto en la rama de integración: el diff de acá es **una ruta nueva y
+  el resumen del importador**, nada más (abajo, «Lo que el arranque destapó», punto 2).
 
 > Reporte en curso: el trabajo sigue abierto y este archivo se actualiza al cerrar cada microtarea.
 
@@ -39,7 +39,7 @@
 | H4.S1 | La no duplicación no depende del servicio: la base tiene `uq_catalog_concepts_version_code` sobre (versión, código) | consulta de índices | PASS · importar dos veces el mismo archivo de 2 filas deja **2** conceptos |
 | H4.S1.M2–M6 | Lo comprobado a mano quedó **protegido**: idempotencia, archivo rechazado entero, validación sin escribir y dos subidas simultáneas, contra Postgres real y con las fixtures versionadas del repositorio | pruebas de integración del importador | PASS · **4 de 4** · `evidencia/h4/integration.txt` |
 | H4.S2.M5 · M7 | El catálogo **no tiene dueño organizacional**, así que el caso de la organización ajena no existe; y el límite de peticiones es el global del repositorio, sin agregar uno propio | lectura de entidades y del módulo raíz | PASS · uno DESCARTADO con evidencia, el otro anotado |
-| H6.S1.M2–M3 | El contrato se regenera desde el código y valida | generador del repositorio y Redocly | PASS · 1 254 rutas · **0 errores** de Redocly · los dos códigos de éxito del endpoint declarados |
+| H6.S1.M2–M3 | El contrato publicado **viaja en la entrega**: se regeneró desde el código y el diff es sólo de este carril | generador del repositorio y Redocly | PASS · 1 255 rutas · 1 366 operaciones · una ruta nueva y el resumen del importador, nada ajeno |
 | H7.S1 | Regresión completa del repositorio | suite unitaria entera | PASS · **714 suites · 8 657 pruebas · 0 fallos** · `evidencia/h7/regresion.txt` |
 | Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h3/cierre-verificacion.txt` |
 
@@ -122,7 +122,7 @@ divergencia entre lo que la API acepta y lo que el formulario manda ahora aparec
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H4.S2.M3 | A MEDIAS | Una cuenta con rol de profesional y otra con rol de paciente. Hoy el 403 se comprobó con una cuenta sin ningún rol, que prueba la puerta pero no cada llave |
-| H7.S2 | TODO | El PR se puede abrir; **en verde no puede quedar**, y por una causa que no es de acá: el gate del repositorio no llega a compilar (abajo, punto 3). Además, el contrato publicado espera a que se corrija el arranque y se regenere en la rama de integración |
+| H7.S2 | EN CURSO | El PR se abre con todo lo suyo, contrato publicado incluido. **En verde no puede quedar**, y por una causa que no es de acá: el trabajo del gate muere al levantar el almacenamiento de objetos, antes de compilar nada (abajo, punto 3). Un gate que no corrió no está en verde, está sin medir — por eso la verificación de esta entrega es toda local y con su salida guardada |
 
 ## Evidencia
 
@@ -142,6 +142,11 @@ $ pruebas de integración del importador, contra Postgres real
 Test Suites: 1 passed, 1 total
 Tests:       4 passed, 4 total
 exit=0
+
+$ radio de integración del diff (importador + terminología + glosario)
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 24 passed, 25 total
+el único rojo falla igual en dev sin tocar, con salida literal idéntica
 
 $ suite completa del repositorio
 Test Suites: 1 skipped, 714 passed, 714 of 715 total
@@ -171,6 +176,7 @@ $ el endpoint contra la aplicación atendiendo peticiones
 | `h6/artefactos.txt` | El resto de los artefactos generados que el gate compara |
 | `h7/regresion.txt` | La suite completa del repositorio |
 | `h4/integration.txt` | Las pruebas de integración del importador contra Postgres real, y cómo se resolvió la carrera |
+| `h7/integration.txt` | La regresión de integración: por qué el comando del README no termina, el radio del diff y el rojo heredado comprobado en las dos ramas |
 
 ## No cubierto
 
@@ -188,7 +194,7 @@ $ el endpoint contra la aplicación atendiendo peticiones
   sistema de codificación con el prefijo reservado y no dependen de nada previo, pero no comprueban que el
   importador funcione sobre una base recién construida.
 
-## Lo que el arranque destapó — tres cosas que frenan a todo el repositorio, ninguna de este carril
+## Lo que el arranque destapó — cinco cosas que frenan a todo el repositorio, ninguna de este carril
 
 Verificar exigía arrancar la aplicación. No arrancaba, y el motivo no era de acá.
 
@@ -268,7 +274,52 @@ gates quedan sin medir. Se clasifica `EXTERNAL`.
 > ese trabajo del gate en rojo. **Sin medir no es lo mismo que en verde**, y por eso la verificación de
 > esta entrega se hizo entera de forma local, con su salida guardada.
 
-### 4. El paso de linter está en rojo en `dev` — 20 hallazgos, ninguno de este carril
+### 4. El comando de integración que documenta el repositorio no es el que corre su CI
+
+`test/integration/README.md` propone como comando base:
+
+```bash
+yarn test:integration --ci --runInBand
+```
+
+Con ese comando la suite **no termina**: muere con `FATAL ERROR: Ineffective mark-compacts near heap
+limit — JavaScript heap out of memory` después de **6 de unas 90 suites**. Cada suite arranca la
+aplicación entera, y `--runInBand` las corre a todas en el proceso principal.
+
+La causa es que **`--runInBand` desactiva justamente la protección que la configuración ya declara**:
+`test/jest-integration.json` fija `workerIdleMemoryLimit: "1GB"`, que hace que jest recicle el worker
+cuando lo supera — y ese mecanismo sólo existe si hay worker. Con `--runInBand` no lo hay.
+
+El workflow del repositorio lo corre **sin** ese flag (`.github/workflows/docs.yml:389`,
+`yarn test:integration --ci`), que es por lo que allá no revienta. **La recomendación del README y el
+comando del gate no coinciden**, y quien siga el README va a ver un fallo que no es del código.
+
+Además, esa corrida local se hizo contra una base que lleva el día en uso, mientras el gate la corre
+contra un stack recién provisionado: varias suites dependen del estado de los datos. Las dos cosas
+juntas hacen que una corrida local completa no sea comparable con la del gate.
+
+**Qué se hizo en su lugar:** el radio del diff, aislado. Este carril toca
+`src/modules/terminology/**` y altas en `src/common/errors/error-codes.ts`, nada más.
+
+| Spec | Resultado |
+|---|---|
+| `test/integration/terminology/concept-file-import.int-spec.ts` (nuevo) | **4 de 4** |
+| `test/integration/terminology.int-spec.ts` | **20 de 20** |
+| `test/integration/glossary.int-spec.ts` | **1 rojo, heredado** |
+
+El rojo de `glossary` se comprobó **en la rama y en `dev` sin tocar**, con la salida literal de las dos
+corridas: el mismo caso, el mismo mensaje.
+
+```text
+en la rama y en dev (4dcaa279), idéntico:
+  ● Glosario médico › exclusión de borradores › un término en TERM_DRAFT no aparece …
+    expected 404 "Not Found", got 200 "OK"
+```
+
+Por grafo de importaciones tampoco puede ser de acá: ese spec usa entidades y seeds del glosario, y
+ninguno de los archivos que este carril modifica aparece entre sus dependencias.
+
+### 5. El paso de linter está en rojo en `dev` — 20 hallazgos, ninguno de este carril
 
 Al reintegrarse con `dev`, `yarn lint --max-warnings=0` —el mismo comando que corre el gate— devuelve
 **20 hallazgos, los 20 en archivos de otro carril**, que este carril tiene prohibido tocar:
@@ -287,6 +338,27 @@ vez de su contenido — conviene que lo mire quien escribió el archivo.
 Se verificó que **no los introdujo este carril**: `git diff origin/dev...HEAD` sobre esas dos rutas sale
 **vacío**. Están en `dev` desde que entró el PR #462. No se tocan: se documentan. En los archivos de este
 carril el linter da **0**.
+
+## Seguridad
+
+Qué toca este carril desde el punto de vista de seguridad, y qué se comprobó de cada cosa.
+
+| Frente | Qué se hizo | Comprobado |
+|---|---|---|
+| **Quién entra** | Los dos endpoints exigen el rol de administración de seguridad | Sin sesión → 401. Con sesión sin el rol → 403, en el importador y en la plantilla. Rol por rol, **no** (queda declarado en «A medias») |
+| **Qué se escribe** | Sólo conceptos de catálogo, en una versión en borrador y por el camino que ya existía | La versión publicada se rechaza; el conteo en base se verificó antes y después de cada camino |
+| **Qué queda en el registro** | Contadores e identificadores, nunca `code`, `display` ni valores de filas | El servicio armaba su línea de log con un spread de la respuesta; al sumar la vista previa eso habría mandado filas enteras al registro. Pasó a campos explícitos, con un spec que usa un doble del registrador |
+| **Qué devuelve un error** | Código, mensaje y correlación. Nunca rastro de pila, nombre de restricción ni valor de clave | El 422 de formato no admitido y el 409 de la carrera se leyeron enteros: ninguno los lleva |
+| **Qué se guarda del archivo** | Nada. Se convierte en filas y se descarta; lo que identifica qué contenido entró es su huella | El lote registra huella, contadores y quién lo hizo, sin el archivo |
+| **Con qué datos se probó** | Sólo sintéticos, con el prefijo reservado `ZZ-`, de las fixtures versionadas del repositorio | Ninguna prueba usa datos de personas |
+| **Límites** | El de peticiones y el de tamaño de subida son los globales del repositorio; no se agregó ninguno propio | Un límite por endpoint escondería que el tope real es el de la aplicación. El de tamaño **no se ejercitó** (declarado en «No cubierto») |
+
+**Un punto que no es de este carril pero conviene que se lea.** El manejador global de errores del
+repositorio registra el detalle del motor de base, y ese detalle trae el valor de la clave que violó
+la restricción — en este caso, un `code` de fila. No llega al cliente, y está decidido así a
+propósito, con el porqué escrito al lado (`src/common/filters/all-exceptions.filter.ts:197-211`). Se
+deja anotado porque este carril se propuso que el contenido de las filas no apareciera en los
+registros, y ahí aparece por otra vía. No se tocó.
 
 ## Desvíos del plan
 
