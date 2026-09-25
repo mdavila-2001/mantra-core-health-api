@@ -245,7 +245,7 @@ export class PractitionerProfileSummaryDto {
      nombrados para que la pantalla no tenga que adivinar cuál es cuál. Mismo
      cuidado que {@link email}: sólo en la lectura propia. */
 
-  /** Correo del lugar de trabajo, distinto del correo de acceso cuando aplica. */
+  /** Correo de trabajo: contacto laboral, editable; no es el de login. */
   @ApiPropertyOptional({ description: 'Sólo en la lectura propia' })
   workEmail?: string;
 

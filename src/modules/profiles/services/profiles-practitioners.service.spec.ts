@@ -167,6 +167,7 @@ function build() {
   const contactPointsRepo = {
     findVigentesByOwner: mockFn(() => Promise.resolve([])),
     findVigenteByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
+    findVigenteByOwnerSystemAndUse: mockFn(() => Promise.resolve(null)),
     closeVigente: mockFn(),
     create: mockFn(),
   };
@@ -2019,6 +2020,50 @@ describe('ProfilesPractitionersService', () => {
           lines: 'Calle Warnes 45',
           latitude: '-17.78',
           longitude: '-63.18',
+        }),
+      );
+    });
+
+    /**
+     * El correo de trabajo se edita como los otros cuatro contactos: es una
+     * fila correo × trabajo de `contact_points`, no la cuenta de IAM. Cierra la
+     * vigente y abre otra con el mismo par, sin tocar el correo personal.
+     */
+    it('workEmail reemplaza el contacto correo × trabajo', async () => {
+      const d = build();
+      prepararParaEditar(d, practitionerBase());
+      const vigente = { id: 'cp-1', value: 'viejo@alovida.mock' };
+      d.contactPointsRepo.findVigenteByOwnerSystemAndUse.mockResolvedValue(
+        vigente,
+      );
+
+      await d.service.updateOwnPractitionerProfile(
+        { workEmail: ' nuevo@clinica.bo ' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(
+        d.contactPointsRepo.findVigenteByOwnerSystemAndUse,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        d.contactPointsRepo.findVigenteByOwnerSystemAndUse,
+      ).toHaveBeenCalledWith(
+        expect.anything(),
+        'per-1',
+        CONCEPTS.CONTACT_EMAIL,
+        CONCEPTS.CONTACT_USE_WORK,
+      );
+      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+        vigente,
+        expect.any(Date),
+        'u-1',
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          value: 'nuevo@clinica.bo',
         }),
       );
     });
