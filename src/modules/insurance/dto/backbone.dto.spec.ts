@@ -192,6 +192,34 @@ describe('UpdateCarrierContactChannelsDto', () => {
     expect(await validate(dto)).toEqual([]);
   });
 
+  it('rechaza un WhatsApp de 7 dígitos: bajo el mínimo E.164 de la Tarea 2 (CA-2.4)', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: '+5917154',
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    const errors = await validate(dto);
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['whatsappNumber']),
+    );
+    expect(
+      Object.values(
+        errors.find((e) => e.property === 'whatsappNumber')?.constraints ?? {},
+      ),
+    ).toEqual(expect.arrayContaining([expect.stringContaining('E.164')]));
+  });
+
+  it('acepta un WhatsApp de exactamente 8 dígitos (el mínimo de la Tarea 2)', async () => {
+    const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
+      whatsappNumber: '+59171548',
+      callCenterPhone: null,
+      supportEmail: null,
+    });
+
+    expect(await validate(dto)).toEqual([]);
+  });
+
   it('rechaza un WhatsApp con letras', async () => {
     const dto = plainToInstance(UpdateCarrierContactChannelsDto, {
       whatsappNumber: '+591abc48278',

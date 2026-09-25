@@ -97,6 +97,28 @@ siniestralidad estimada contra la prima de lista del plan). El QR y
 del frontend (`scheduling/notices/agenda-notices.env.ts`); el hash público
 se acepta en mayúsculas o minúsculas y se normaliza antes de consultar.
 
+## Canales de contacto de la aseguradora
+
+`PUT /insurance-carriers/:id/contact-channels` administra el WhatsApp, call
+center y correo con los que la aseguradora atiende reclamos (Tarea 2,
+CA-2.1..2.5). Autorización: sin `@Roles` (los roles del prompt original,
+`ADMINISTRATOR`/`OWNER`, no existen en `role-mapping.ts`) — se resuelve como
+`createPlan`, con `administrableCarrier()`, y un `:id` ajeno al carrier del
+tenant activo responde `404` explícito.
+
+`whatsappNumber` exige formato E.164 con el signo `+` y **mínimo 8 dígitos**
+después de él (código de país incluido): un `@Transform` quita espacios,
+paréntesis, puntos y guiones antes de validar, así que `+591 715-48278` y
+`+591 (71) 548.278` se normalizan igual a `+59171548278`. `callCenterPhone`
+no exige E.164 (las líneas gratuitas bolivianas del tipo `800-10-xxxx` no lo
+son). `supportEmail` valida formato de correo. Los tres campos aceptan
+`null` para borrar el canal ya cargado.
+
+Lectura: `carrierWhatsappNumber`/`carrierCallCenterPhone` viajan en la
+cabecera de cada solicitud de seguro (`GET /insurance-claims`, `GET
+/insurance-claims/:id`) y en las coberturas propias del paciente (`GET
+/profiles/patients/me`), `null`/ausentes cuando la aseguradora no los cargó.
+
 ## Contenido
 
 ### Subcarpetas
