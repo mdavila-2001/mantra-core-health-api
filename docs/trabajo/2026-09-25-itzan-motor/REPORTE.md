@@ -1,12 +1,12 @@
 # Reporte — Motor de la carga masiva de terminología
 
-> **AVANCE: 53 / 110 — 48,2 %.**
+> **AVANCE: 60 / 110 — 54,5 %.**
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
 - Corte: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
 - Peldaño de evidencia alcanzado (regla 30): **`TESTED`** para el trabajo en conjunto, que es el más bajo de
   sus áreas. Todo lo escrito tiene pruebas dirigidas en verde —21 suites y 240 pruebas del módulo, con lint y
-  comprobación de tipos en 0—, y **ninguna área llegó a `VERIFIED`**: nada se ejercitó todavía contra la
+  comprobación de tipos en 0 y la compilación en 0—, y **ninguna área llegó a `VERIFIED`**: nada se ejercitó todavía contra la
   aplicación atendiendo peticiones, que es lo único que prueba el camino completo.
 
 > Reporte en curso: el trabajo sigue abierto y este archivo se actualiza al cerrar cada microtarea.
@@ -25,7 +25,9 @@
 | H3.S1 | Las reglas del catálogo viven en un solo lugar, así que los tres formatos dan los mismos errores | pruebas de `row-validator` | PASS · fila, columna y motivo legible en cada problema |
 | H3.S2 | **Todo o nada**, validación sin escribir con vista previa, formato reconocido por contenido, tres códigos de error propios y registro sin contenido del archivo | pruebas de `concept-file-import` | PASS · **24 casos**, de 12 que había |
 | H3.S3.M1–M3 | El endpoint recibe `dryRun` y `profile` del formulario y decide su estado: 201 si escribió, 200 si validó o si rechazó | pruebas del controlador | PASS · 4 casos de estado y delegación |
-| Cierre | Las tres etapas sobre todo lo escrito | lint de lo tocado, tipos del proyecto, pruebas del módulo | PASS · 0 · 0 · **21 suites, 240 pruebas** · `evidencia/h3/servicio.txt` |
+| H5 | Plantilla descargable por perfil, generada desde el mismo perfil que después lee el importador | pruebas de `import-template` y del controlador | PASS · 11 casos, incluida la que vuelve a leer la plantilla con el parseador real y exige cero problemas |
+| H6.S1.M4 | Los tres códigos de error en el catálogo, con la forma de los vecinos | `git diff origin/dev -- error-codes.ts` | PASS · 19 líneas, sólo altas, cada una con su porqué |
+| Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h5/plantilla.txt` |
 
 ## A medias
 
@@ -59,7 +61,10 @@
 |---|---|---|
 | H1.S2 completo | BLOQUEADO | La aplicación arriba contra una base viva, para guardar cómo responde el endpoint **antes** del cambio. El corte es inmutable, así que esa captura no se pierde: se toma desde `343795cc` cuando se pueda |
 | H3.S3.M4–M9 | BLOQUEADO | Lo mismo. Cerrado contra un doble en los tres niveles mientras tanto (ver el plan, «Lo que quedó BLOQUEADO») |
-| H4, H5, H6, H7 | TODO | Orden del plan. H4 necesita además Postgres para la idempotencia |
+| H5.S1.M6–M7 | BLOQUEADO / A MEDIAS | La descarga por HTTP. Lo que la plantilla genera ya está guardado, y que el importador la vuelva a leer sin un problema está probado contra el parseador real |
+| H6.S1.M2–M3 | BLOQUEADO | El generador del contrato publicado **levanta la aplicación entera** para leer los decoradores; sin configuración de base sale en 1 |
+| H4 completo | BLOQUEADO | Postgres y la aplicación: la idempotencia y la matriz negativa de autorización sólo se miden ejecutándolas |
+| H7 | TODO | La regresión completa se puede correr ya. El PR **no puede quedar en verde antes que H6**: el contrato publicado se regenera y se compara en el propio gate del repo, así que un cambio de contrato sin regenerar lo deja en rojo |
 
 ## Evidencia
 
@@ -85,6 +90,8 @@ exit=0
 | `antes/test-terminology.txt` | Línea base de las pruebas del módulo: 16 suites, 176 pruebas |
 | `h2/parseo.txt` | Las cuatro etapas sobre la lectura por formato y la validación |
 | `h3/servicio.txt` | Las tres etapas sobre el servicio ensanchado y el endpoint |
+| `h5/plantilla.txt` | Las cuatro etapas de la plantilla, y el archivo exacto que genera |
+| `h6/openapi.txt` | Por qué el contrato publicado no se pudo regenerar, con la salida literal |
 
 ## No cubierto
 
@@ -100,6 +107,9 @@ exit=0
 - **El formato de planilla se reconoce pero no se lee.** El parseador llega por otro carril y se suma a la
   lista sin tocar nada de lo entregado.
 - **El perfil `designaciones` queda fuera de este carril** (Q-9, resuelta en el plan con su evidencia).
+- **El contrato publicado no se regeneró**, así que todavía no muestra los campos nuevos ni los tres códigos.
+- **La plantilla en formato de planilla no se genera.** Necesita la misma dependencia que el parseador, que
+  llega por otro carril; pedirla hoy se rechaza con su código, igual que importar una.
 
 ## Desvíos del plan
 

@@ -420,32 +420,32 @@ los negativos no escriben.
 **CA:** El endpoint de plantilla con `SECURITY_ADMIN` descarga `plantilla-conceptos.<ext>` con las columnas
 canónicas y la fila de ejemplo; formato o perfil desconocidos → 422; y re-importarla en dry-run da 1 fila y 0 errores.
 **DoD:** dos descargas con su tipo y la re-importación pegadas; spec de autorización.
-**Estado:** TODO
+**Estado:** A MEDIAS — la plantilla se genera, se descarga con su tipo y su nombre, y el importador la vuelve a leer sin un problema. Falta la descarga por HTTP y la re-importación real.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H5.S1.M1 | Cómo devuelve archivos el repo | Patrón en el plan | — | TODO |
-| H5.S1.M2 | `import-template.service.ts` que genera desde los perfiles | Compila | typecheck | TODO |
-| H5.S1.M3 | Spec: CSV de 2 líneas, encabezado canónico, ejemplo sintético | PASS | tests de `import-template` | TODO |
-| H5.S1.M4 | Spec: formato desconocido y perfil desconocido → 422 | 2 PASS | idem | TODO |
-| H5.S1.M5 | El endpoint con su rol, su tipo de salida y su cabecera de descarga | build | build | TODO |
-| H5.S1.M6 | Descarga real y comprobación de su tipo | Archivo + tipo | `evidencia/h5/plantilla.txt` | TODO |
-| H5.S1.M7 | Re-importar la plantilla en dry-run → 1 leída, 0 errores | Salida | `evidencia/h5/reimport.json` | TODO |
-| H5.S1.M8 | Spec de autorización del endpoint | 2 PASS | según el patrón de H4.S2 | TODO |
+| H5.S1.M1 | Cómo devuelve archivos el repo | Patrón en el plan | archivo como flujo con el tipo y el nombre puestos en la respuesta, como en la entrega de audio | HECHO |
+| H5.S1.M2 | `import-template.service.ts` que genera desde los perfiles | Compila | typecheck exit 0 | HECHO |
+| H5.S1.M3 | Spec: CSV de 2 líneas, encabezado canónico, ejemplo sintético | PASS | 8 casos de `import-template` | HECHO |
+| H5.S1.M4 | Spec: formato desconocido y perfil desconocido → 422 | 2 PASS | idem, con los códigos propios | HECHO |
+| H5.S1.M5 | El endpoint con su rol, su tipo de salida y su cabecera de descarga | build | build exit 0; 3 casos del controlador | HECHO |
+| H5.S1.M6 | Descarga real y comprobación de su tipo | Archivo + tipo | lo que genera está en `evidencia/h5/plantilla.txt`; la descarga por HTTP falta | BLOQUEADO — necesita la aplicación arriba contra una base viva |
+| H5.S1.M7 | Re-importar la plantilla en dry-run → 1 leída, 0 errores | Salida | cerrado contra el parseador y el validador reales: 1 fila, 0 problemas de lectura y 0 de validación. Falta la llamada HTTP | A MEDIAS |
+| H5.S1.M8 | Spec de autorización del endpoint | 2 PASS | el rol declarado se comprueba en los dos endpoints; la matriz negativa completa es H4.S2 | A MEDIAS |
 
 ### H6 — Contrato publicado y códigos de error
 
 **CA:** El contrato publicado muestra `dryRun`, `profile`, la respuesta ensanchada, los tres 422 y la plantilla,
 sin diferencias pendientes de commitear.
 **DoD:** el comando del repo con exit 0; su validación sin errores nuevos.
-**Estado:** TODO
+**Estado:** A MEDIAS — los decoradores del contrato están escritos y los tres códigos declarados; regenerar el artefacto está BLOQUEADO.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H6.S1.M1 | Cómo se genera y valida el contrato en el repo | Comando en el plan | búsqueda en `package.json` | TODO |
-| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | `evidencia/h6/openapi.txt` | TODO |
-| H6.S1.M3 | Validación sin errores nuevos respecto del baseline | Salida | idem | TODO |
-| H6.S1.M4 | Los tres códigos en el catálogo de errores, con la forma de los vecinos | Diff mínimo | `git diff` de ese archivo | TODO |
+| H6.S1.M1 | Cómo se genera y valida el contrato en el repo | Comando en el plan | `docs:openapi:generate` (compila y levanta la aplicación) y `docs:validate` | HECHO |
+| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | el generador **levanta la aplicación entera** para leer los decoradores: sale en 1 sin configuración de base. Salida en `evidencia/h6/openapi.txt` | BLOQUEADO — necesita la aplicación arriba contra una base viva |
+| H6.S1.M3 | Validación sin errores nuevos respecto del baseline | Salida | depende de M2 | BLOQUEADO — necesita la aplicación arriba contra una base viva |
+| H6.S1.M4 | Los tres códigos en el catálogo de errores, con la forma de los vecinos | Diff mínimo | `git diff origin/dev -- error-codes.ts`: 19 líneas, sólo altas, cada una con su porqué | HECHO |
 
 ### H7 — Regresión, PR mergeable y cierre honesto
 
