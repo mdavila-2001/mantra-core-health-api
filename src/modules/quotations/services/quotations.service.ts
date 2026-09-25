@@ -5,10 +5,12 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { ServiceCatalogRepository } from '../../billing/repositories';
 import type { Quotations, QuotationInstallments } from '../../billing/entities';
+import { PracticeTenantLookupService } from '../../practice/services';
 import {
   QuotationInstallmentsRepository,
   QuotationsRepository,
@@ -32,6 +34,14 @@ function toIsoDate(date: Date): string {
  * propios, que arma quien atiende) y las condiciones ofertadas congeladas (snapshot)
  * para trazabilidad — si el catálogo cambia después, la cotización ya
  * emitida no se ve afectada.
+ *
+ * **Alcance.** El rol no decide quién ve o arma una cotización: lo decide la
+ * vinculación del actor con la práctica, igual que el `PATCH` del catálogo
+ * (`BillingServiceCatalogService.assertPuedeEditar`). Crear en una práctica
+ * ajena es 422 —la práctica viene declarada en el cuerpo, como en
+ * `LedgerService.assertPractitionerOwnsPractice`—; leer una cotización de una
+ * práctica ajena es el **mismo 404** que una inexistente; y el listado se acota
+ * en la consulta a las prácticas alcanzables, no después de leer.
  */
 @Injectable()
 export class QuotationsService {
@@ -42,6 +52,7 @@ export class QuotationsService {
    * @param quotationsRepo - Acceso a `billing.quotations`.
    * @param installmentsRepo - Acceso a `billing.quotation_installments`.
    * @param serviceCatalogRepo - Acceso a `billing.service_catalog`, para el snapshot.
+   * @param practiceTenantLookup - A qué prácticas llega el actor (vinculación u organización).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -49,6 +60,7 @@ export class QuotationsService {
     private readonly quotationsRepo: QuotationsRepository,
     private readonly installmentsRepo: QuotationInstallmentsRepository,
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(QuotationsService.name);
@@ -60,9 +72,11 @@ export class QuotationsService {
    * catálogo y persiste cotización + cuotas en una única transacción.
    *
    * @throws PreconditionFailedException si el actor no tiene perfil
-   * profesional, si `validUntil` no es posterior a `attentionDate`, o si el
-   * plan de pagos no cierra con el precio (ver `assertPaymentPlanClosesOnPrice`).
-   * @throws ResourceNotFoundException si el servicio no existe en el catálogo.
+   * profesional, si no alcanza la práctica declarada, si `validUntil` no es
+   * posterior a `attentionDate`, o si el plan de pagos no cierra con el precio
+   * (ver `assertPaymentPlanClosesOnPrice`).
+   * @throws ResourceNotFoundException si el servicio no existe en el catálogo
+   * o pertenece a otra práctica (mismo 404, a propósito).
    */
   async createQuotation(
     dto: CreateQuotationDto,
@@ -75,6 +89,16 @@ export class QuotationsService {
     if (!practitionerProfileId) {
       throw new PreconditionFailedException(
         'Se requiere un perfil profesional para crear una cotización',
+      );
+    }
+
+    // La práctica viene declarada en el cuerpo: el rol no alcanza, hay que
+    // estar vinculado a ella (mismo criterio y mismo mensaje que el asiento
+    // contable, `LedgerService.assertPractitionerOwnsPractice`).
+    if (!(await this.alcanzaPractica(actor, dto.practiceId))) {
+      throw new PreconditionFailedException(
+        'El profesional no tiene una vinculación activa con esa práctica',
+        { practiceId: dto.practiceId },
       );
     }
 
@@ -105,7 +129,11 @@ export class QuotationsService {
         tx,
         dto.serviceCatalogId,
       );
-      if (service === null) {
+      // Un servicio de otra práctica responde el MISMO 404 que uno
+      // inexistente (criterio del catálogo): probar uuids no confirma qué
+      // ofrece la práctica de al lado, y una cotización no puede congelar el
+      // nombre de un servicio que su práctica no ofrece.
+      if (service === null || service.practiceId !== dto.practiceId) {
         throw new ResourceNotFoundException(
           'Servicio no encontrado en el catálogo',
           { serviceCatalogId: dto.serviceCatalogId },
@@ -160,26 +188,44 @@ export class QuotationsService {
   /**
    * Trae una cotización con sus cuotas.
    *
-   * @throws ResourceNotFoundException si no existe.
+   * @throws ResourceNotFoundException si no existe, o si es de una práctica
+   * que el actor no alcanza — el mismo 404, para que probar ids no confirme
+   * qué cotizó la práctica de al lado.
    */
-  async getQuotation(id: string): Promise<QuotationResponseDto> {
+  async getQuotation(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<QuotationResponseDto> {
     const em = this.em.fork();
     const quotation = await this.quotationsRepo.findById(em, id);
-    if (quotation === null) {
+    if (
+      quotation === null ||
+      !(await this.alcanzaPractica(actor, quotation.practiceId))
+    ) {
       throw new ResourceNotFoundException('Cotización no encontrada', { id });
     }
     const installments = await this.installmentsRepo.findByQuotationId(em, id);
     return toResponseDto(quotation, installments);
   }
 
-  /** Lista las cotizaciones de un paciente, más recientes primero. */
+  /**
+   * Lista las cotizaciones de un paciente, más recientes primero, acotadas en
+   * la consulta a las prácticas que el actor alcanza. Sin ninguna práctica
+   * alcanzable no hay lectura: la lista es vacía sin ir a la base.
+   */
   async listQuotationsByPatient(
     patientProfileId: string,
+    actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto[]> {
+    const practiceIds = await this.practicasAlcanzables(actor);
+    if (practiceIds.length === 0) {
+      return [];
+    }
     const em = this.em.fork();
     const quotations = await this.quotationsRepo.findByPatient(
       em,
       patientProfileId,
+      practiceIds,
     );
     return Promise.all(
       quotations.map(async (quotation) => {
@@ -190,6 +236,72 @@ export class QuotationsService {
         return toResponseDto(quotation, installments);
       }),
     );
+  }
+
+  /**
+   * Si el actor alcanza esa práctica: por vinculación activa (quien atiende)
+   * o, para la cuenta administradora, porque la práctica es de su
+   * organización. Es `BillingServiceCatalogService.assertPuedeEditar` con
+   * respuesta booleana, porque acá el error lo decide el llamador: 422 al
+   * crear con una práctica declarada, 404 al leer por id.
+   */
+  private async alcanzaPractica(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<boolean> {
+    if (actor.practitionerProfileId !== undefined) {
+      const propias =
+        await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+          actor.practitionerProfileId,
+        );
+      if (propias.includes(practiceId)) return true;
+    }
+
+    if (actor.roles.includes('SECURITY_ADMIN')) {
+      const tenantId = getCurrentTenantId();
+      const tenantDeLaPractica =
+        await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+      // Sin tenant en contexto son los carriles internos, que no pasan por la
+      // cabecera: lo único que se exige es que la práctica exista.
+      if (
+        tenantDeLaPractica !== null &&
+        (tenantId === undefined || tenantDeLaPractica === tenantId)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Las prácticas que el actor alcanza, para acotar un listado **en la
+   * consulta**: las de su vinculación activa más, si es cuenta administradora,
+   * las activas de la organización en contexto. Sin organización en contexto
+   * la cuenta administradora no tiene contra qué acotar y no suma ninguna.
+   */
+  private async practicasAlcanzables(
+    actor: AuthenticatedUser,
+  ): Promise<string[]> {
+    const ids = new Set<string>();
+    if (actor.practitionerProfileId !== undefined) {
+      const propias =
+        await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+          actor.practitionerProfileId,
+        );
+      for (const id of propias) ids.add(id);
+    }
+    if (actor.roles.includes('SECURITY_ADMIN')) {
+      const tenantId = getCurrentTenantId();
+      if (tenantId !== undefined) {
+        const delTenant =
+          await this.practiceTenantLookup.findActivePracticeIdsForTenant(
+            tenantId,
+          );
+        for (const id of delTenant) ids.add(id);
+      }
+    }
+    return [...ids];
   }
 }
 

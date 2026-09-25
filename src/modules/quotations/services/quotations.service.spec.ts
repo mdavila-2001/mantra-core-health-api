@@ -8,6 +8,7 @@ import { assertPaymentPlanClosesOnPrice, toCents } from './payment-plan';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 
 const actor = {
@@ -17,6 +18,16 @@ const actor = {
 } as any;
 
 const actorSinPerfil = { id: 'user-2', roles: ['PRACTITIONER'] } as any;
+
+/** Cuenta administradora de la organización, sin perfil profesional. */
+const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+/** Un paciente autenticado: ni perfil profesional ni rol administrativo. */
+const paciente = {
+  id: 'user-3',
+  roles: ['PATIENT'],
+  patientProfileId: 'pat-1',
+} as any;
 
 const catalogItem = {
   id: 'svc-1',
@@ -65,12 +76,21 @@ function build() {
   const serviceCatalogRepo = {
     findById: mockFn(),
   };
+  // Por defecto el profesional de prueba está vinculado a `pr1`, la práctica
+  // de `baseDto` y de `catalogItem`: el camino feliz no tiene que declararlo.
+  // Las pruebas de alcance lo pisan.
+  const practiceTenantLookup = {
+    findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue(['pr1']),
+    findActivePracticeIdsForTenant: mockFn().mockResolvedValue([]),
+    findTenantOfPractice: mockFn().mockResolvedValue(null),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new QuotationsService(
     em as any,
     quotationsRepo as any,
     installmentsRepo as any,
     serviceCatalogRepo as any,
+    practiceTenantLookup as any,
     logger as any,
   );
   return {
@@ -80,6 +100,7 @@ function build() {
     quotationsRepo,
     installmentsRepo,
     serviceCatalogRepo,
+    practiceTenantLookup,
   };
 }
 
@@ -319,6 +340,80 @@ describe('QuotationsService.createQuotation', () => {
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     expect(d.em.transactional).not.toHaveBeenCalled();
   });
+
+  /* ---- alcance: actor ↔ práctica ↔ servicio ----------------------------------
+     El rol no alcanza (AC-24-11): la práctica viene declarada en el cuerpo y
+     hay que estar vinculado a ella; y el servicio cotizado tiene que ser de esa
+     misma práctica. Mismos criterios que el asiento contable (422 con práctica
+     declarada) y que el PATCH del catálogo (404 indistinguible). */
+
+  it('422 si el profesional no está vinculado a la práctica declarada, sin tocar el catálogo', async () => {
+    const d = build();
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      ['otra-practica'],
+    );
+
+    await expect(
+      d.service.createQuotation(baseDto, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('un servicio de otra práctica es el MISMO 404 que uno inexistente, y no persiste nada', async () => {
+    const d = build();
+    d.serviceCatalogRepo.findById.mockResolvedValue({
+      ...catalogItem,
+      practiceId: 'otra-practica',
+    });
+
+    await expect(
+      d.service.createQuotation(baseDto, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.quotationsRepo.create).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+
+  it('la cuenta administradora con perfil profesional cotiza en una práctica de su organización', async () => {
+    const d = build();
+    const adminConPerfil = {
+      ...admin,
+      practitionerProfileId: 'hp-admin',
+    } as any;
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      [],
+    );
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('mi-tenant');
+    d.serviceCatalogRepo.findById.mockResolvedValue(catalogItem);
+    d.quotationsRepo.create.mockReturnValue(quotationRow());
+
+    const res = await runWithTenant('mi-tenant', () =>
+      d.service.createQuotation(baseDto, adminConPerfil),
+    );
+
+    expect(res.id).toBe('q-1');
+  });
+
+  it('la cuenta administradora de otra organización no cotiza en esa práctica: 422', async () => {
+    const d = build();
+    const adminConPerfil = {
+      ...admin,
+      practitionerProfileId: 'hp-admin',
+    } as any;
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      [],
+    );
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      'otro-tenant',
+    );
+
+    await expect(
+      runWithTenant('mi-tenant', () =>
+        d.service.createQuotation(baseDto, adminConPerfil),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
+  });
 });
 
 describe('QuotationsService.getQuotation', () => {
@@ -326,9 +421,59 @@ describe('QuotationsService.getQuotation', () => {
     const d = build();
     d.quotationsRepo.findById.mockResolvedValue(null);
 
-    await expect(d.service.getQuotation('nope')).rejects.toBeInstanceOf(
+    await expect(d.service.getQuotation('nope', actor)).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
+  });
+
+  it('una cotización de una práctica ajena es el MISMO 404, no un 403, y no lee sus cuotas', async () => {
+    const d = build();
+    d.quotationsRepo.findById.mockResolvedValue(quotationRow());
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      ['otra-practica'],
+    );
+
+    await expect(d.service.getQuotation('q-1', actor)).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+    expect(d.installmentsRepo.findByQuotationId).not.toHaveBeenCalled();
+  });
+
+  it('un paciente autenticado, sin perfil profesional ni rol administrativo, recibe 404', async () => {
+    const d = build();
+    d.quotationsRepo.findById.mockResolvedValue(quotationRow());
+
+    await expect(
+      d.service.getQuotation('q-1', paciente),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('la cuenta administradora lee lo que cotizó su organización', async () => {
+    const d = build();
+    d.quotationsRepo.findById.mockResolvedValue(quotationRow());
+    d.installmentsRepo.findByQuotationId.mockResolvedValue([]);
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('mi-tenant');
+
+    const res = await runWithTenant('mi-tenant', () =>
+      d.service.getQuotation('q-1', admin),
+    );
+
+    expect(res.id).toBe('q-1');
+  });
+
+  it('la cuenta administradora de otra organización recibe 404', async () => {
+    const d = build();
+    d.quotationsRepo.findById.mockResolvedValue(quotationRow());
+    d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+      'otro-tenant',
+    );
+
+    await expect(
+      runWithTenant('mi-tenant', () => d.service.getQuotation('q-1', admin)),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('devuelve la cotización con sus cuotas', async () => {
@@ -342,7 +487,7 @@ describe('QuotationsService.getQuotation', () => {
       },
     ]);
 
-    const res = await d.service.getQuotation('q-1');
+    const res = await d.service.getQuotation('q-1', actor);
 
     expect(res.id).toBe('q-1');
     expect(res.installments).toHaveLength(1);
@@ -351,5 +496,80 @@ describe('QuotationsService.getQuotation', () => {
       dueDate: '2026-02-01',
       amount: '450.00',
     });
+  });
+});
+
+describe('QuotationsService.listQuotationsByPatient', () => {
+  it('acota la consulta a las prácticas del profesional, no filtra después de leer', async () => {
+    const d = build();
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      ['pr1', 'pr2'],
+    );
+    d.quotationsRepo.findByPatient.mockResolvedValue([quotationRow()]);
+    d.installmentsRepo.findByQuotationId.mockResolvedValue([]);
+
+    const res = await d.service.listQuotationsByPatient('pat-1', actor);
+
+    expect(d.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr1', 'pr2'],
+    );
+    expect(res).toHaveLength(1);
+  });
+
+  it('sin ninguna práctica alcanzable devuelve vacío sin ir a la base', async () => {
+    const d = build();
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      [],
+    );
+
+    const res = await d.service.listQuotationsByPatient('pat-1', actor);
+
+    expect(res).toEqual([]);
+    expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
+  });
+
+  it('un paciente autenticado no lista cotizaciones: ni vinculación ni organización', async () => {
+    const d = build();
+
+    const res = await d.service.listQuotationsByPatient('pat-1', paciente);
+
+    expect(res).toEqual([]);
+    expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
+  });
+
+  it('la cuenta administradora acota a las prácticas activas de su organización en contexto', async () => {
+    const d = build();
+    d.practiceTenantLookup.findActivePracticeIdsForTenant.mockResolvedValue([
+      'pr-a',
+      'pr-b',
+    ]);
+    d.quotationsRepo.findByPatient.mockResolvedValue([]);
+
+    await runWithTenant('mi-tenant', () =>
+      d.service.listQuotationsByPatient('pat-1', admin),
+    );
+
+    expect(
+      d.practiceTenantLookup.findActivePracticeIdsForTenant,
+    ).toHaveBeenCalledWith('mi-tenant');
+    expect(d.quotationsRepo.findByPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      'pat-1',
+      ['pr-a', 'pr-b'],
+    );
+  });
+
+  it('la cuenta administradora sin organización en contexto no tiene contra qué acotar: vacío', async () => {
+    const d = build();
+
+    const res = await d.service.listQuotationsByPatient('pat-1', admin);
+
+    expect(res).toEqual([]);
+    expect(
+      d.practiceTenantLookup.findActivePracticeIdsForTenant,
+    ).not.toHaveBeenCalled();
+    expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
   });
 });

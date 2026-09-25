@@ -59,10 +59,13 @@ export class QuotationsController {
   }
 
   /**
-   * Lista las cotizaciones de un paciente, más recientes primero.
+   * Lista las cotizaciones de un paciente, más recientes primero, acotadas a
+   * las prácticas que el actor alcanza (vinculación activa, u organización
+   * propia para la cuenta administradora).
    *
    * @param patientProfileId - Paciente cuyas cotizaciones se listan.
-   * @returns Las cotizaciones del paciente.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Las cotizaciones del paciente en las prácticas del actor.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -74,14 +77,20 @@ export class QuotationsController {
   })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto[]> {
-    return this.quotationsService.listQuotationsByPatient(patientProfileId);
+    return this.quotationsService.listQuotationsByPatient(
+      patientProfileId,
+      actor,
+    );
   }
 
   /**
-   * Trae una cotización con sus cuotas.
+   * Trae una cotización con sus cuotas. Una cotización de una práctica que el
+   * actor no alcanza responde el mismo 404 que una inexistente.
    *
    * @param id - Cotización a buscar.
+   * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns La cotización encontrada.
    */
   @Get(':id')
@@ -89,7 +98,8 @@ export class QuotationsController {
   @ApiOperation({ summary: 'Buscar una cotización por id' })
   findById(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto> {
-    return this.quotationsService.getQuotation(id);
+    return this.quotationsService.getQuotation(id, actor);
   }
 }

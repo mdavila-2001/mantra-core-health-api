@@ -81,14 +81,27 @@ export class QuotationsRepository {
     return em.findOne(Quotations, { id });
   }
 
-  /** Cotizaciones de un paciente, más recientes primero. */
+  /**
+   * Cotizaciones de un paciente, más recientes primero, acotadas a las
+   * prácticas que el actor alcanza.
+   *
+   * El acotado va en la consulta y no después de leer: una cotización de una
+   * práctica ajena no sale de la base. Con una lista vacía no hay nada que
+   * consultar — el servicio no llega hasta acá en ese caso.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyas cotizaciones se listan.
+   * @param practiceIds - Prácticas alcanzables por el actor (no vacía).
+   * @returns Las cotizaciones del paciente en esas prácticas.
+   */
   findByPatient(
     em: EntityManager,
     patientProfileId: string,
+    practiceIds: readonly string[],
   ): Promise<Quotations[]> {
     return em.find(
       Quotations,
-      { patientProfileId },
+      { patientProfileId, practiceId: { $in: [...practiceIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
   }

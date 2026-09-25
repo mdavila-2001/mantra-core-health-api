@@ -13,11 +13,26 @@ a través de los repositorios de este módulo.
 | Método | Ruta | Rol | Qué hace |
 |---|---|---|---|
 | `POST` | `/quotations` | `PRACTITIONER`, `CLINICIAN` | Crea la cotización con sus cuotas. |
-| `GET` | `/quotations?patientProfileId=` | autenticado | Lista las cotizaciones de un paciente, más recientes primero. |
-| `GET` | `/quotations/:id` | autenticado | Trae una cotización con sus cuotas. |
+| `GET` | `/quotations?patientProfileId=` | autenticado | Lista las cotizaciones de un paciente en las prácticas que el actor alcanza, más recientes primero. |
+| `GET` | `/quotations/:id` | autenticado | Trae una cotización con sus cuotas, si es de una práctica que el actor alcanza. |
 
-Cotizar exige rol clínico porque quien atiende es quien cotiza. Leer no lo exige,
+Cotizar exige rol clínico porque quien atiende es quien cotiza. Leer no exige rol,
 igual que el catálogo de servicios del que parte.
+
+## Alcance
+
+El rol no decide qué cotizaciones se ven ni dónde se cotiza: lo decide la
+**vinculación del actor con la práctica**, con el mismo criterio que el `PATCH`
+del catálogo (`BillingServiceCatalogService.assertPuedeEditar`):
+
+- un profesional alcanza las prácticas donde tiene una vinculación activa;
+- la cuenta administradora (`SECURITY_ADMIN`) alcanza además las prácticas de la
+  organización en contexto.
+
+`billing.quotations` no tiene `tenant_id` —cuelga de `practice_id`—, así que el
+aislamiento por organización del RLS no la cubre: la organización se resuelve a
+través de la práctica (`PracticeTenantLookupService`). El listado se acota **en la
+consulta**, no después de leer.
 
 ## El plan de pagos (v4.2.18)
 
@@ -47,8 +62,12 @@ anticipo entre 0 y el precio, cuota mayor que cero.
 
 ## Errores
 
-- Un servicio o una cotización inexistentes responden `404`.
+- Un servicio o una cotización inexistentes responden `404`. Un servicio de otra
+  práctica, o una cotización de una práctica que el actor no alcanza, responden
+  el **mismo** `404`: probar ids no confirma qué ofrece o cotizó la práctica de al
+  lado.
 - Crear sin perfil profesional en la cuenta responde `422`.
+- Crear en una práctica con la que el actor no tiene vinculación responde `422`.
 - Una vigencia (`validUntil`) que no es posterior a la fecha de atención
   responde `422`.
 - Un plan que no cierra con el precio responde `422`, con el total de las

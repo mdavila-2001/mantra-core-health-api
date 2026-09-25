@@ -30,7 +30,7 @@ Referencia exhaustiva de 3 operación(es) del módulo `quotations`, derivada del
 
 Listar las cotizaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Lista las cotizaciones de un paciente, más recientes primero.
+Contexto declarado en el controlador: Lista las cotizaciones de un paciente, más recientes primero, acotadas a las prácticas que el actor alcanza (vinculación activa, u organización propia para la cuenta administradora).
 
 ### Descripción del sistema
 
@@ -335,6 +335,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Servicio no encontrado en el catálogo | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Se requiere un perfil profesional para crear una cotización | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
 | 422 | `PRECONDITION_FAILED` | validUntil debe ser posterior a attentionDate | Excepción explícita en src/modules/quotations/services/quotations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -366,7 +367,7 @@ Ejemplo de error normalizado:
 
 Buscar una cotización por id. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Trae una cotización con sus cuotas.
+Contexto declarado en el controlador: Trae una cotización con sus cuotas. Una cotización de una práctica que el actor no alcanza responde el mismo 404 que una inexistente.
 
 ### Descripción del sistema
 
