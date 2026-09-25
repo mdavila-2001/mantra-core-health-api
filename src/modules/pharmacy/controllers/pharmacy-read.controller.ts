@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -7,11 +14,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ParseOptionalLimitPipe } from '../../../common';
+import { type GeoPoint } from '../../pharmacy_inventory/services';
 import { PharmacyReadService } from '../services';
 import {
   PharmacyDetailDto,
   PharmacyDirectoryResponseDto,
   PharmacyProductSearchResponseDto,
+  PharmacySiteListResponseDto,
   PharmacySitePricesResponseDto,
 } from '../dto';
 
@@ -69,6 +78,12 @@ export class PharmacyReadController {
     description: 'Medicamento del vademécum (medication_concept_id)',
   })
   @ApiQuery({
+    name: 'pharmacyId',
+    required: false,
+    format: 'uuid',
+    description: 'Sólo el catálogo de esta farmacia',
+  })
+  @ApiQuery({
     name: 'limit',
     required: false,
     description: 'Tope del listado (por defecto 50)',
@@ -78,9 +93,54 @@ export class PharmacyReadController {
     @Query('search') search?: string,
     @Query('conceptId', new ParseUUIDPipe({ optional: true }))
     conceptId?: string,
+    @Query('pharmacyId', new ParseUUIDPipe({ optional: true }))
+    pharmacyId?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PharmacyProductSearchResponseDto> {
-    return this.readService.searchProducts({ search, conceptId }, limit ?? 50);
+    return this.readService.searchProducts(
+      { search, conceptId, pharmacyId },
+      limit ?? 50,
+    );
+  }
+
+  /**
+   * H4 (carril Marcelo, 2026-09-25): las sedes publicadas, sueltas — sin
+   * filtrar por farmacia. Declarado **antes** de `sites/:siteId/prices` para
+   * que el router no confunda el segmento estático con el `:siteId`.
+   */
+  @Get('sites')
+  @ApiOperation({ summary: 'Listar las sedes publicadas del tenant activo' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Texto a buscar en el nombre de la farmacia o de la sede',
+  })
+  @ApiQuery({
+    name: 'lat',
+    required: false,
+    description: 'Latitud WGS84 desde donde medir distancia (va con lng)',
+  })
+  @ApiQuery({
+    name: 'lng',
+    required: false,
+    description: 'Longitud WGS84 desde donde medir distancia (va con lat)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope del listado (por defecto 50)',
+  })
+  @ApiOkResponse({ type: PharmacySiteListResponseDto })
+  listSites(
+    @Query('search') search?: string,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PharmacySiteListResponseDto> {
+    return this.readService.listSites(
+      { search, origin: parseOrigin(lat, lng) },
+      limit ?? 50,
+    );
   }
 
   /** E2: precios públicos vigentes de una sede. */
@@ -102,4 +162,33 @@ export class PharmacyReadController {
   ): Promise<PharmacySitePricesResponseDto> {
     return this.readService.getSitePrices(siteId, productId);
   }
+}
+
+/**
+ * Valida el punto de origen: `lat` y `lng` van juntos o no van, igual que en
+ * `PharmacyInventoryReadController.availability` (misma regla, mismo mensaje).
+ */
+function parseOrigin(
+  lat: string | undefined,
+  lng: string | undefined,
+): GeoPoint | undefined {
+  if (lat === undefined && lng === undefined) return undefined;
+  if (lat === undefined || lng === undefined) {
+    throw new BadRequestException(
+      'lat y lng van juntos: mande ambos para ordenar por distancia, o ninguno',
+    );
+  }
+  const parsedLat = Number(lat);
+  const parsedLng = Number(lng);
+  if (
+    !Number.isFinite(parsedLat) ||
+    !Number.isFinite(parsedLng) ||
+    Math.abs(parsedLat) > 90 ||
+    Math.abs(parsedLng) > 180
+  ) {
+    throw new BadRequestException(
+      'lat/lng deben ser coordenadas WGS84 válidas (lat en [-90, 90], lng en [-180, 180])',
+    );
+  }
+  return { lat: parsedLat, lng: parsedLng };
 }

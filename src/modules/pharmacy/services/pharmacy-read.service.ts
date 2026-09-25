@@ -14,6 +14,7 @@ import type {
   PharmacyDirectoryItemDto,
   PharmacyDirectoryResponseDto,
   PharmacyProductSearchResponseDto,
+  PharmacySiteListResponseDto,
   PharmacySitePricesResponseDto,
   PharmacySiteReadDto,
 } from '../dto';
@@ -21,6 +22,15 @@ import {
   PharmacyReadRepository,
   type ProductSearchFilter,
 } from '../repositories';
+import { type GeoPoint, haversineKm } from '../../pharmacy_inventory/services';
+
+/** Acotaciones de `listSites`: texto libre y origen para ordenar. El tope viaja aparte, como en `searchProducts`. */
+export interface SiteListFilter {
+  /** Texto a buscar en el nombre de la farmacia o de la sede. */
+  search?: string;
+  /** Con origen, el listado sale ordenado por distancia. */
+  origin?: GeoPoint;
+}
 
 /**
  * Lecturas del directorio de farmacias del tenant activo (carril E2).
@@ -264,6 +274,7 @@ export class PharmacyReadService {
           strengthText: product.strengthText ?? null,
           packageSizeText: product.packageSizeText ?? null,
           medication: optionalConcept(conceptById, product.medicationConceptId),
+          requiresPrescription: product.requiresPrescription ?? null,
           priceListId: list.id,
           priceListCode: list.code,
           currency: optionalConcept(conceptById, list.currencyConceptId),
@@ -290,6 +301,83 @@ export class PharmacyReadService {
       items,
       count: items.length,
     };
+  }
+
+  /**
+   * Las sedes publicadas del tenant activo, sueltas — sin acotar a una
+   * farmacia concreta. Mismo criterio de publicación que {@link listPharmacies}
+   * (activa y verificada) y el mismo Haversine que `pharmacy_inventory`
+   * ({@link haversineKm}, ya redondeado a un decimal): las dos pantallas no
+   * pueden discrepar en la distancia de la misma sede.
+   *
+   * `productCount` es el catálogo activo de la farmacia dueña de la sede: el
+   * modelo no liga un producto a una sede concreta (ver `pharmacy_products`),
+   * así que todas las sedes de una misma farmacia comparten el número, igual
+   * que en {@link getPharmacy}.
+   *
+   * @param filter - Texto libre y origen para ordenar por distancia.
+   * @param limit - Tope del listado, aplicado después de ordenar.
+   */
+  async listSites(
+    filter: SiteListFilter,
+    limit: number,
+  ): Promise<PharmacySiteListResponseDto> {
+    const tenantId = requireTenantId();
+    const em = this.em.fork();
+    const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
+    if (pharmacies.length === 0) return { items: [], count: 0 };
+
+    const pharmacyIds = pharmacies.map((pharmacy) => pharmacy.id);
+    const [sites, productOwners] = await Promise.all([
+      this.readRepo.findActiveSites(em, pharmacyIds),
+      this.readRepo.findActiveProductOwners(em, pharmacyIds),
+    ]);
+    const { addressBySite } = await this.resolveSiteContext(em, sites, []);
+
+    const pharmacyById = new Map(
+      pharmacies.map((pharmacy) => [pharmacy.id, pharmacy]),
+    );
+    const productCount = countBy(productOwners, (row) => row.pharmacyId);
+    const term = filter.search?.trim().toLowerCase();
+
+    const items = sites
+      .map((site) => {
+        const pharmacy = pharmacyById.get(site.pharmacyId)!;
+        const address = addressBySite.get(site.id);
+        const latitude = coordinate(address?.latitude);
+        const longitude = coordinate(address?.longitude);
+        return {
+          siteId: site.id,
+          siteName: site.name,
+          pharmacyId: pharmacy.id,
+          pharmacyName: displayName(pharmacy),
+          addressText: address ? addressText(address) : null,
+          latitude,
+          longitude,
+          distanceKm:
+            filter.origin && latitude !== null && longitude !== null
+              ? haversineKm(filter.origin, { lat: latitude, lng: longitude })
+              : null,
+          homeDeliveryAvailable: site.homeDeliveryAvailable ?? null,
+          pickupAvailable: site.pickupAvailable ?? null,
+          productCount: productCount.get(pharmacy.id) ?? 0,
+        };
+      })
+      .filter(
+        (item) =>
+          term === undefined ||
+          term === '' ||
+          item.siteName.toLowerCase().includes(term) ||
+          item.pharmacyName.toLowerCase().includes(term),
+      )
+      .sort(
+        (a, b) =>
+          (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) ||
+          a.pharmacyName.localeCompare(b.pharmacyName, 'es'),
+      )
+      .slice(0, limit);
+
+    return { items, count: items.length };
   }
 
   /**

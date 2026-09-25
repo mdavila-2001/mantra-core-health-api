@@ -18,6 +18,12 @@ export interface ProductSearchFilter {
   search?: string;
   /** Medicamento del vademécum (`medication_concept_id`). */
   conceptId?: string;
+  /**
+   * H5 (carril Marcelo, 2026-09-25): sólo el catálogo de esta farmacia. Se
+   * intersecta con `pharmacyIds` (ya acotado a las publicadas del tenant): un
+   * `pharmacyId` de otro tenant o no publicado no filtra nada, no filtra de más.
+   */
+  pharmacyId?: string;
 }
 
 /**
@@ -98,12 +104,17 @@ export class PharmacyReadRepository {
     filter: ProductSearchFilter,
     limit: number,
   ): Promise<PharmacyProducts[]> {
-    if (pharmacyIds.length === 0) return Promise.resolve([]);
+    // La intersección, no un reemplazo: un pharmacyId ajeno al tenant o no
+    // publicado no se cuela por venir en la query — simplemente no devuelve nada.
+    const scopedIds = filter.pharmacyId
+      ? pharmacyIds.filter((id) => id === filter.pharmacyId)
+      : pharmacyIds;
+    if (scopedIds.length === 0) return Promise.resolve([]);
     const term = filter.search?.trim();
     return em.find(
       PharmacyProducts,
       {
-        pharmacyId: { $in: [...pharmacyIds] },
+        pharmacyId: { $in: [...scopedIds] },
         statusConceptId: PHARM.PRODUCT_ACTIVE,
         ...(filter.conceptId ? { medicationConceptId: filter.conceptId } : {}),
         ...(term

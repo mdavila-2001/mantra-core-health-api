@@ -361,4 +361,186 @@ describe('PharmacyReadService', () => {
     expect(result.count).toBe(1);
     expect(result.items[0].priceListCode).toBe('PUBLICA');
   });
+
+  it('serves current prices carrying requiresPrescription from the product', async () => {
+    const d = build();
+    d.repo.findActiveSiteById.mockResolvedValue({
+      id: 'site-1',
+      pharmacyId: '1',
+    });
+    d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+    d.repo.findCurrentPublicPriceLists.mockResolvedValue([
+      {
+        id: 'list-1',
+        code: 'PUBLICO',
+        pharmacySiteId: null,
+        insurerTenantId: null,
+      },
+    ]);
+    d.repo.findCurrentPrices.mockResolvedValue([
+      {
+        pharmacyProductId: 'prod-1',
+        pharmacyPriceListId: 'list-1',
+        unitAmount: '68.00',
+      },
+    ]);
+    d.repo.findActiveProductsByIds.mockResolvedValue([
+      {
+        id: 'prod-1',
+        productCode: 'AMOX-500',
+        genericName: 'Amoxicilina',
+        requiresPrescription: true,
+      },
+    ]);
+
+    const result = await runWithTenant('tenant-a', () =>
+      d.service.getSitePrices('site-1'),
+    );
+
+    expect(result.items[0].requiresPrescription).toBe(true);
+  });
+
+  describe('listSites', () => {
+    it('lists sites of every published pharmacy with distance null without an origin', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          code: 'S1',
+          name: 'Sede Centro',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          code: 'S2',
+          name: 'Sede Sur',
+        },
+      ]);
+      d.repo.findPracticeSites.mockResolvedValue([
+        { id: 'ps-1', addressId: 'addr-1' },
+        { id: 'ps-2', addressId: 'addr-2' },
+      ]);
+      d.repo.findAddresses.mockResolvedValue([
+        {
+          id: 'addr-1',
+          lines: 'Calle Libertad 245',
+          city: 'Santa Cruz',
+          latitude: '-17.7833',
+          longitude: '-63.1821',
+        },
+        {
+          id: 'addr-2',
+          lines: 'Av. Paurito',
+          city: 'Santa Cruz',
+          latitude: '-17.8300',
+          longitude: '-63.1200',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([
+        { id: 'p1', pharmacyId: '1' },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({}, 50),
+      );
+
+      expect(result.count).toBe(2);
+      expect(result.items.every((item) => item.distanceKm === null)).toBe(true);
+      expect(result.items[0].productCount).toBe(1);
+    });
+
+    it('orders by distance and rounds to one decimal when an origin is given', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-far',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          code: 'S1',
+          name: 'Lejos',
+        },
+        {
+          id: 'site-near',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          code: 'S2',
+          name: 'Cerca',
+        },
+      ]);
+      d.repo.findPracticeSites.mockResolvedValue([
+        { id: 'ps-1', addressId: 'addr-1' },
+        { id: 'ps-2', addressId: 'addr-2' },
+      ]);
+      d.repo.findAddresses.mockResolvedValue([
+        { id: 'addr-1', latitude: '-17.9000', longitude: '-63.3000' },
+        { id: 'addr-2', latitude: '-17.7834', longitude: '-63.1822' },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({ origin: { lat: -17.7833, lng: -63.1821 } }, 50),
+      );
+
+      expect(result.items.map((i) => i.siteId)).toEqual([
+        'site-near',
+        'site-far',
+      ]);
+      expect(result.items[0].distanceKm).not.toBeNull();
+      expect(result.items[0].distanceKm!).toBeLessThan(
+        result.items[1].distanceKm!,
+      );
+    });
+
+    it('filters by pharmacy or site name, case-insensitively', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          code: 'S1',
+          name: 'Sede Centro',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          code: 'S2',
+          name: 'Sede Sur',
+        },
+      ]);
+      d.repo.findPracticeSites.mockResolvedValue([]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({ search: 'centro' }, 50),
+      );
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].siteId).toBe('site-1');
+    });
+
+    it('returns empty without published pharmacies, without querying sites', async () => {
+      const d = build();
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({}, 50),
+      );
+
+      expect(result).toEqual({ items: [], count: 0 });
+      expect(d.repo.findActiveSites).not.toHaveBeenCalled();
+    });
+  });
 });
