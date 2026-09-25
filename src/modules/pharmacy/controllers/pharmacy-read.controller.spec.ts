@@ -20,26 +20,26 @@ describe('PharmacyReadController', () => {
   describe('listSites (carril A, H4)', () => {
     it('rejects lat without lng, and lng without lat', () => {
       const d = build();
-      expect(() => d.controller.listSites(undefined, '-16.5', undefined, undefined)).toThrow(
-        BadRequestException,
-      );
-      expect(() => d.controller.listSites(undefined, undefined, '-68.15', undefined)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        d.controller.listSites(undefined, '-16.5', undefined, undefined),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        d.controller.listSites(undefined, undefined, '-68.15', undefined),
+      ).toThrow(BadRequestException);
       expect(d.readService.listSites).not.toHaveBeenCalled();
     });
 
     it('rejects coordinates that are not real WGS84 numbers', () => {
       const d = build();
-      expect(() => d.controller.listSites(undefined, 'cerca', '-68.15', undefined)).toThrow(
-        BadRequestException,
-      );
-      expect(() => d.controller.listSites(undefined, '91', '0', undefined)).toThrow(
-        BadRequestException,
-      );
-      expect(() => d.controller.listSites(undefined, '0', '181', undefined)).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        d.controller.listSites(undefined, 'cerca', '-68.15', undefined),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        d.controller.listSites(undefined, '91', '0', undefined),
+      ).toThrow(BadRequestException);
+      expect(() =>
+        d.controller.listSites(undefined, '0', '181', undefined),
+      ).toThrow(BadRequestException);
       expect(d.readService.listSites).not.toHaveBeenCalled();
     });
 
@@ -77,7 +77,12 @@ describe('PharmacyReadController', () => {
   describe('searchProducts (carril A, H5)', () => {
     it('forwards pharmacyId to the service', async () => {
       const d = build();
-      await d.controller.searchProducts(undefined, undefined, 'ph-1', undefined);
+      await d.controller.searchProducts(
+        undefined,
+        undefined,
+        'ph-1',
+        undefined,
+      );
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
         { search: undefined, conceptId: undefined, pharmacyId: 'ph-1' },
         50,
@@ -86,7 +91,12 @@ describe('PharmacyReadController', () => {
 
     it('works without pharmacyId, same as before', async () => {
       const d = build();
-      await d.controller.searchProducts('amox', undefined, undefined, undefined);
+      await d.controller.searchProducts(
+        'amox',
+        undefined,
+        undefined,
+        undefined,
+      );
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
         { search: 'amox', conceptId: undefined, pharmacyId: undefined },
         50,

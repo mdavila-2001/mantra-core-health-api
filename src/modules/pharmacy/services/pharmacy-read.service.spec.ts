@@ -370,8 +370,18 @@ describe('PharmacyReadService', () => {
         pharmacy('2', { tradeName: 'Farmacia Lejos' }),
       ]);
       d.repo.findActiveSites.mockResolvedValue([
-        { id: 'site-1', pharmacyId: '1', practiceSiteId: 'ps-1', name: 'Sede Cerca' },
-        { id: 'site-2', pharmacyId: '2', practiceSiteId: 'ps-2', name: 'Sede Lejos' },
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Cerca',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sede Lejos',
+        },
       ]);
       d.repo.findActiveProductOwners.mockResolvedValue([]);
       d.repo.findPracticeSites.mockResolvedValue([
@@ -384,11 +394,19 @@ describe('PharmacyReadService', () => {
       ]);
 
       const result = await runWithTenant('tenant-a', () =>
-        d.service.listSites({ origin: { lat: -17.78, lng: -63.18 }, limit: 50 }),
+        d.service.listSites({
+          origin: { lat: -17.78, lng: -63.18 },
+          limit: 50,
+        }),
       );
 
-      expect(result.items.map((item) => item.siteId)).toEqual(['site-1', 'site-2']);
-      expect(result.items[0].distanceKm).toBeLessThan(result.items[1].distanceKm!);
+      expect(result.items.map((item) => item.siteId)).toEqual([
+        'site-1',
+        'site-2',
+      ]);
+      expect(result.items[0].distanceKm).toBeLessThan(
+        result.items[1].distanceKm!,
+      );
       expect(result.items[0].distanceKm).not.toBeNull();
     });
 
@@ -399,8 +417,18 @@ describe('PharmacyReadService', () => {
         pharmacy('2', { tradeName: 'Alfa Farmacia' }),
       ]);
       d.repo.findActiveSites.mockResolvedValue([
-        { id: 'site-1', pharmacyId: '1', practiceSiteId: 'ps-1', name: 'Sede Z' },
-        { id: 'site-2', pharmacyId: '2', practiceSiteId: 'ps-2', name: 'Sede A' },
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Z',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sede A',
+        },
       ]);
       d.repo.findActiveProductOwners.mockResolvedValue([]);
 
@@ -419,7 +447,12 @@ describe('PharmacyReadService', () => {
       const d = build();
       d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
       d.repo.findActiveSites.mockResolvedValue([
-        { id: 'site-1', pharmacyId: '1', practiceSiteId: 'ps-sin-direccion', name: 'Sede sin dirección' },
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-sin-direccion',
+          name: 'Sede sin dirección',
+        },
       ]);
       d.repo.findActiveProductOwners.mockResolvedValue([]);
       // El repo no encuentra un practice_site para 'ps-sin-direccion': la
@@ -427,7 +460,10 @@ describe('PharmacyReadService', () => {
       d.repo.findPracticeSites.mockResolvedValue([]);
 
       const result = await runWithTenant('tenant-a', () =>
-        d.service.listSites({ origin: { lat: -17.78, lng: -63.18 }, limit: 50 }),
+        d.service.listSites({
+          origin: { lat: -17.78, lng: -63.18 },
+          limit: 50,
+        }),
       );
 
       expect(result.items[0].distanceKm).toBeNull();
@@ -441,8 +477,18 @@ describe('PharmacyReadService', () => {
         pharmacy('2', { tradeName: 'Farmacia del Sur' }),
       ]);
       d.repo.findActiveSites.mockResolvedValue([
-        { id: 'site-1', pharmacyId: '1', practiceSiteId: 'ps-1', name: 'Sucursal Centro' },
-        { id: 'site-2', pharmacyId: '2', practiceSiteId: 'ps-2', name: 'Sucursal Plan Tres Mil' },
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sucursal Centro',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sucursal Plan Tres Mil',
+        },
       ]);
       d.repo.findActiveProductOwners.mockResolvedValue([]);
 
@@ -457,7 +503,12 @@ describe('PharmacyReadService', () => {
       const d = build();
       d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
       d.repo.findActiveSites.mockResolvedValue([
-        { id: 'site-1', pharmacyId: '1', practiceSiteId: 'ps-1', name: 'Sede Centro' },
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Centro',
+        },
       ]);
       d.repo.findActiveProductOwners.mockResolvedValue([
         { id: 'prod-1', pharmacyId: '1' },
@@ -475,7 +526,10 @@ describe('PharmacyReadService', () => {
   describe('searchProducts con pharmacyId (carril A, H5)', () => {
     it('acota a esa sola farmacia cuando pharmacyId es visible', async () => {
       const d = build();
-      d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1'), pharmacy('2')]);
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
 
       await runWithTenant('tenant-a', () =>
         d.service.searchProducts({ pharmacyId: '2' }, 50),
@@ -498,7 +552,10 @@ describe('PharmacyReadService', () => {
 
     it('sin pharmacyId sigue consultando todas las farmacias visibles, como antes', async () => {
       const d = build();
-      d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1'), pharmacy('2')]);
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
 
       await runWithTenant('tenant-a', () => d.service.searchProducts({}, 50));
 
@@ -533,7 +590,11 @@ describe('PharmacyReadService', () => {
         },
       ]);
       d.repo.findActiveProductsByIds.mockResolvedValue([
-        { id: 'prod-con-receta', productCode: 'AMX-500', requiresPrescription: true },
+        {
+          id: 'prod-con-receta',
+          productCode: 'AMX-500',
+          requiresPrescription: true,
+        },
         { id: 'prod-sin-declarar', productCode: 'IBU-400' },
       ]);
 

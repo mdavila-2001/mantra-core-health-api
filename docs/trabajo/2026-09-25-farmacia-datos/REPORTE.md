@@ -121,7 +121,9 @@ de esta sesión — ver la tabla de cierre.
 | Hito | Estado | Comando de regresión final | Resultado |
 |---|---|---|---|
 | Typecheck | HECHO | `yarn typecheck` | EXIT 0 |
-| Lint | A MEDIAS | `yarn lint --max-warnings=0` | corriendo desde el inicio de H7, sin terminar al cierre de esta sesion (proceso confirmado activo por CPU, no colgado); el baseline de H1 ya habia confirmado 0 errores en pharmacy antes de estos cambios, y CI corre este mismo lint como gate del PR |
+| Lint | HECHO | `yarn lint --max-warnings=0` (repo completo) + `npx eslint` acotado a los 5 archivos de farmacia | el lint completo del repo tardo ~8 minutos y encontro 22 errores REALES de formato Prettier en mis specs nuevos (no colgado: confirmado con CPU activo); corregidos con `--fix` + 5 ediciones manuales, reverificados con eslint acotado a farmacia: EXIT 0 — `evidencia/h7/lint-scoped-pharmacy-exit0.txt` |
+| Test (post-fix) | HECHO | `yarn test src/modules/pharmacy` | 17 suites / 197 tests PASS — `evidencia/h7/test-final-17-197.txt` |
+| Typecheck (post-fix) | HECHO | `yarn typecheck` | EXIT 0 — `evidencia/h7/typecheck-final-exit0.txt` |
 | Test del módulo | HECHO | `yarn test src/modules/pharmacy` | 17 suites / 197 tests PASS |
 | `git status` | HECHO | `git status --short` | limpio tras los dos commits |
 | PR | HECHO (abierto, sin mergear) | `gh pr view --json mergeable` | ver número abajo |
