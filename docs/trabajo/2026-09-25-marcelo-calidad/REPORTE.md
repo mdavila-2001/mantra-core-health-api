@@ -22,7 +22,7 @@
 | H7.S3 | `xlsx-parser.ts` idéntico al `CsvParser` real de Itzan sobre los 12 fixtures gemelos, con tope `MAX_FILAS_XLSX`, hoja preferida y celdas numéricas/fórmulas | `yarn test src/modules/terminology/import/xlsx-parser` | PASS — 18/18 |
 | Cierre | Los 8 archivos traídos de Itzan (@ `d99ff9e7`, pineado y verificado sin diff contra el tip actual de su rama) + los propios, todos juntos | `yarn test src/modules/terminology/import` | PASS — 59/59, 5 suites |
 | PR | Rebasado sobre `origin/dev` actualizado (avanzó con merges de farmacia mientras se trabajaba), sin conflictos | `git rebase origin/dev` | PASS — limpio |
-| PR | `MERGEABLE`, checks `pending` sin runner tomando trabajos (ningún `fail`) | `gh pr view` / `gh pr checks` | `evidencia/pr/api-view.json`, `api-checks.txt` |
+| PR | `reviewDecision: APPROVED`; checks `pending` sin runner tomando trabajos (ningún `fail`) | `gh pr view` / `gh pr checks` | `evidencia/pr/api-view.json`, `api-checks.txt` |
 
 ## A medias
 
