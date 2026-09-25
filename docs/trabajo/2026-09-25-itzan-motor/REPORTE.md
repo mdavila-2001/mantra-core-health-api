@@ -75,7 +75,7 @@
 | H4.S1.M2–M6 | TODO | Escribir las pruebas de integración del importador. El comportamiento ya está comprobado a mano; falta dejarlo protegido |
 | H4.S2.M5 | TODO | Si la terminología es global o tiene dueño organizacional; la respuesta decide si el caso existe |
 | H7.S1.M3 | TODO | Correr la suite de integración completa |
-| H7.S2 | TODO | El PR. Depende de qué se decida sobre el contrato publicado (abajo) **y** de que se corrija el defecto ajeno que impide arrancar la aplicación en la rama de integración |
+| H7.S2 | TODO | El PR se puede abrir; **en verde no puede quedar**, y por una causa que no es de acá: el gate del repositorio no llega a compilar (abajo, punto 3). Además, el contrato publicado espera a que se corrija el arranque y se regenere en la rama de integración |
 
 ## Evidencia
 
@@ -138,7 +138,7 @@ $ el endpoint contra la aplicación atendiendo peticiones
 - **La plantilla en formato de planilla no se genera.** Necesita la misma dependencia que el parseador, que
   llega por otro carril; pedirla hoy se rechaza con su código, igual que importar una.
 
-## Lo que el arranque destapó — dos defectos en la rama de integración, ninguno de este carril
+## Lo que el arranque destapó — tres cosas que frenan a todo el repositorio, ninguna de este carril
 
 Verificar exigía arrancar la aplicación. No arrancaba, y el motivo no era de acá.
 
@@ -171,10 +171,12 @@ insurance-catalog.service.js:                design:paramtypes", [postgresql_1.E
 **Alcance:** el archivo es **idéntico en `origin/dev`** (`git diff origin/dev` sobre él sale vacío), así que
 el fallo es de la rama de integración, no de esta rama. Y el paso del gate que genera el contrato OpenAPI
 arranca la aplicación exactamente igual: **ese paso está en rojo para todo PR** hasta que se corrija.
-Se corrige quitando una palabra. **No se tocó**: es de otro carril.
+Se corrige quitando una palabra. **No se tocó**: es de otro carril, y además **ya hay un PR abierto con
+exactamente esa corrección** (`#460`, de una línea). Para poder verificar, el defecto se neutralizó **en
+local**, sin commitearlo: el árbol de esta rama no lo contiene (`git status` sobre ese módulo sale limpio).
 
-Para poder verificar, el defecto se neutralizó **en local**, sin commitearlo: el árbol de esta rama no lo
-contiene (`git status` sobre ese módulo sale limpio).
+Lo que ese PR **no** trae es la consecuencia de abajo: corregir el arranque sin regenerar los artefactos
+mueve el rojo un paso más adelante, al que los compara.
 
 ### 2. Los artefactos generados están atrasados en `dev`
 
@@ -191,6 +193,22 @@ resultado está guardado en `evidencia/h6/`, pero **no viaja en la entrega**: co
 el contrato de otros cinco carriles y cuatro rupturas ajenas que además lo dejarían en rojo. El orden
 correcto es al revés: corregir el defecto de arriba en la rama de integración, regenerar ahí, y entonces
 este PR trae sólo lo suyo.
+
+### 3. Antes que todo eso, el gate no llega a correr
+
+El trabajo `docs` muere a los 90 segundos, en el paso que levanta el almacenamiento de objetos, mucho antes
+de compilar nada:
+
+```text
+Unable to find image 'quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z' locally
+docker: Error response from daemon: unauthorized: access to the requested resource is not authorized
+##[error]Process completed with exit code 125.
+```
+
+Pasa en **las últimas corridas de cuatro personas distintas**, desde la madrugada: el registro de imágenes
+dejó de servir esa etiqueta sin credenciales. No es de ningún carril, y mientras siga así **ningún PR de
+este repositorio puede quedar en verde**, porque el primer paso en rojo corta los que siguen y todos los
+gates quedan sin medir. Se clasifica `EXTERNAL`.
 
 ## Desvíos del plan
 
