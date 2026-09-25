@@ -223,6 +223,29 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
     },
     VARIANCE_NONE: { code: 'VARIANCE_NONE', display: 'Sin variación' },
 
+    // Lotes periódicos de liquidación al profesional (Tarea 3 · H8,
+    // contrato docs/contracts/insurer-practitioner-settlement-batches.md §9).
+    // Reutilizan las tablas de conciliación UC-26-13 con estados propios,
+    // distintos de RECON_BATCH_*/RECON_ITEM_MATCHED de arriba.
+    SETTLEMENT_BATCH_ISSUED: {
+      code: 'SETTLEMENT_BATCH_ISSUED',
+      display: 'Lote de liquidación emitido',
+    },
+    SETTLEMENT_ITEM_INCLUDED: {
+      code: 'SETTLEMENT_ITEM_INCLUDED',
+      display: 'Reclamo incluido en lote',
+    },
+    /**
+     * Ajuste por reversión (contrato §10, v1.1): cuando un reclamo ya incluido
+     * en un lote se revierte después del corte, el lote SIGUIENTE del mismo
+     * par aseguradora/prestador registra este ítem con `expected_amount`
+     * negativo — nunca se edita el lote original.
+     */
+    SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT: {
+      code: 'SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT',
+      display: 'Ajuste por reversión',
+    },
+
     // Brokers
     BROKER_ACTIVE: { code: 'BROKER_ACTIVE', display: 'Broker activo' },
     EMPLOYER_GROUP_ACTIVE: {

@@ -21,10 +21,33 @@ totalApprovedAmount + totalPatientAmount + totalDeniedAmount`, con
 sin cláusula, una línea sin adjudicar o un descuadre degradan `availability` a
 `UNDER_REVIEW` en vez de publicarse como liquidación firme.
 
-El lote periódico de liquidación al profesional
-(`POST /practitioner-settlement-batches`, CA-3.2 del contrato) está
-especificado en el documento de arriba y **todavía no implementado**; queda
-pendiente en `docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/`.
+El lote periódico de liquidación al profesional (CA-3.2 del contrato,
+v1.1) tiene tres rutas, sin `@Roles` de clase (la autorización la resuelve el
+servicio por pertenencia):
+
+- `POST /practitioner-settlement-batches` — genera el lote de un período
+  (`insuranceCarrierId`, `providerEntityId`, `cadence`, `periodStart`); sólo
+  la administración activa de la aseguradora. `201` si es nuevo, `200` con
+  `replayed: true` si la clave natural (aseguradora, prestador, período) ya
+  se había generado (idempotencia, §9 del contrato). Nunca escribe un importe
+  pagado: `PractitionerSettlementBatchesService` (`services/practitioner-settlement-batches.service.ts`)
+  y el dominio puro `services/practitioner-settlement-batch.ts` (elegibilidad,
+  calendario, ajustes por reversión).
+- `GET /practitioner-settlement-batches/:id` — la administración de la
+  aseguradora dueña, o el tenant del prestador (prácticas activas, unidades
+  diagnósticas activas o farmacias del tenant).
+- `GET /practitioner-settlement-batches?providerEntityId&from&to` — listado
+  acotado al mismo alcance.
+
+Evidencia: `services/practitioner-settlement-batch.spec.ts` (dominio puro,
+18 pruebas correcto/límite/inválido), `services/practitioner-settlement-batches.service.spec.ts`
+(servicio con dobles de `EntityManager`, 8 pruebas) y las aserciones de
+`controllers/insurance-controllers.spec.ts` sobre roles y ausencia de
+propiedades de pago en los DTOs. La prueba de integración HTTP end-to-end
+queda **bloqueada** por un defecto ajeno a este carril (MikroORM/`ts-morph`
+no resuelve los metadatos de `terminology.catalog_concepts` en este entorno);
+ver el contrato §12 y el `REPORTE.md` de
+`docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/`.
 
 ## Administración de planes y coberturas
 

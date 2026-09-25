@@ -13,3 +13,4 @@ export * from './claims-read.service';
 export * from './insurance-analytics.service';
 export * from './insurance-portability.service';
 export * from './insurance-portability-pdf.service';
+export * from './practitioner-settlement-batches.service';
