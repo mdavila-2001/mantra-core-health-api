@@ -6,3 +6,4 @@ export * from './concept-maps.service';
 export * from './tenant-catalog.service';
 export * from './concept-file-import.service';
 export * from './code-systems-read.service';
+export * from './import-parsers.provider';
