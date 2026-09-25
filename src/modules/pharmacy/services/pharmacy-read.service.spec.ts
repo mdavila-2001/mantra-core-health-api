@@ -361,4 +361,255 @@ describe('PharmacyReadService', () => {
     expect(result.count).toBe(1);
     expect(result.items[0].priceListCode).toBe('PUBLICA');
   });
+
+  describe('listSites (carril A, H4)', () => {
+    it('computes distanceKm and sorts sites by proximity when an origin is given', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1', { tradeName: 'Farmacia Cerca' }),
+        pharmacy('2', { tradeName: 'Farmacia Lejos' }),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Cerca',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sede Lejos',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([]);
+      d.repo.findPracticeSites.mockResolvedValue([
+        { id: 'ps-1', addressId: 'addr-1' },
+        { id: 'ps-2', addressId: 'addr-2' },
+      ]);
+      d.repo.findAddresses.mockResolvedValue([
+        { id: 'addr-1', latitude: '-17.7833', longitude: '-63.1821' },
+        { id: 'addr-2', latitude: '-18.5000', longitude: '-64.0000' },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({
+          origin: { lat: -17.78, lng: -63.18 },
+          limit: 50,
+        }),
+      );
+
+      expect(result.items.map((item) => item.siteId)).toEqual([
+        'site-1',
+        'site-2',
+      ]);
+      expect(result.items[0].distanceKm).toBeLessThan(
+        result.items[1].distanceKm!,
+      );
+      expect(result.items[0].distanceKm).not.toBeNull();
+    });
+
+    it('serves distanceKm null and sorts by pharmacy name when there is no origin', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1', { tradeName: 'Zeta Farmacia' }),
+        pharmacy('2', { tradeName: 'Alfa Farmacia' }),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Z',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sede A',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({ limit: 50 }),
+      );
+
+      expect(result.items.every((item) => item.distanceKm === null)).toBe(true);
+      expect(result.items.map((item) => item.pharmacyName)).toEqual([
+        'Alfa Farmacia',
+        'Zeta Farmacia',
+      ]);
+    });
+
+    it('serves distanceKm null for a site without a resolved address', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-sin-direccion',
+          name: 'Sede sin dirección',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([]);
+      // El repo no encuentra un practice_site para 'ps-sin-direccion': la
+      // sede queda sin dirección resuelta.
+      d.repo.findPracticeSites.mockResolvedValue([]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({
+          origin: { lat: -17.78, lng: -63.18 },
+          limit: 50,
+        }),
+      );
+
+      expect(result.items[0].distanceKm).toBeNull();
+      expect(result.items[0].latitude).toBeNull();
+    });
+
+    it('filters by pharmacy name or site name', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1', { tradeName: 'Farmacia Andina' }),
+        pharmacy('2', { tradeName: 'Farmacia del Sur' }),
+      ]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sucursal Centro',
+        },
+        {
+          id: 'site-2',
+          pharmacyId: '2',
+          practiceSiteId: 'ps-2',
+          name: 'Sucursal Plan Tres Mil',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({ search: 'andina', limit: 50 }),
+      );
+
+      expect(result.items.map((item) => item.siteId)).toEqual(['site-1']);
+    });
+
+    it('counts products by pharmacy, not by site', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
+      d.repo.findActiveSites.mockResolvedValue([
+        {
+          id: 'site-1',
+          pharmacyId: '1',
+          practiceSiteId: 'ps-1',
+          name: 'Sede Centro',
+        },
+      ]);
+      d.repo.findActiveProductOwners.mockResolvedValue([
+        { id: 'prod-1', pharmacyId: '1' },
+        { id: 'prod-2', pharmacyId: '1' },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.listSites({ limit: 50 }),
+      );
+
+      expect(result.items[0].productCount).toBe(2);
+    });
+  });
+
+  describe('searchProducts con pharmacyId (carril A, H5)', () => {
+    it('acota a esa sola farmacia cuando pharmacyId es visible', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
+
+      await runWithTenant('tenant-a', () =>
+        d.service.searchProducts({ pharmacyId: '2' }, 50),
+      );
+
+      expect(d.repo.findActiveProducts.mock.calls[0][1]).toEqual(['2']);
+    });
+
+    it('devuelve vacío sin consultar productos cuando pharmacyId no es visible', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([pharmacy('1')]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.searchProducts({ pharmacyId: 'ajena' }, 50),
+      );
+
+      expect(result).toEqual({ items: [], limit: 50, truncated: false });
+      expect(d.repo.findActiveProducts).not.toHaveBeenCalled();
+    });
+
+    it('sin pharmacyId sigue consultando todas las farmacias visibles, como antes', async () => {
+      const d = build();
+      d.repo.findVisibleByTenant.mockResolvedValue([
+        pharmacy('1'),
+        pharmacy('2'),
+      ]);
+
+      await runWithTenant('tenant-a', () => d.service.searchProducts({}, 50));
+
+      expect(d.repo.findActiveProducts.mock.calls[0][1]).toEqual(['1', '2']);
+    });
+  });
+
+  describe('getSitePrices sirve requiresPrescription (carril A, H4)', () => {
+    it('mapea requiresPrescription desde el producto, null si no está declarado', async () => {
+      const d = build();
+      d.repo.findActiveSiteById.mockResolvedValue({
+        id: 'site-1',
+        pharmacyId: '1',
+        name: 'Sede Centro',
+      });
+      d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+      d.repo.findCurrentPublicPriceLists.mockResolvedValue([
+        { id: 'list-1', pharmacyId: '1', code: 'PUBLICA' },
+      ]);
+      d.repo.findCurrentPrices.mockResolvedValue([
+        {
+          pharmacyPriceListId: 'list-1',
+          pharmacyProductId: 'prod-con-receta',
+          unitAmount: '17.50',
+          effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
+        },
+        {
+          pharmacyPriceListId: 'list-1',
+          pharmacyProductId: 'prod-sin-declarar',
+          unitAmount: '9.00',
+          effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
+        },
+      ]);
+      d.repo.findActiveProductsByIds.mockResolvedValue([
+        {
+          id: 'prod-con-receta',
+          productCode: 'AMX-500',
+          requiresPrescription: true,
+        },
+        { id: 'prod-sin-declarar', productCode: 'IBU-400' },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getSitePrices('site-1'),
+      );
+
+      expect(
+        result.items.find((item) => item.productId === 'prod-con-receta')
+          ?.requiresPrescription,
+      ).toBe(true);
+      expect(
+        result.items.find((item) => item.productId === 'prod-sin-declarar')
+          ?.requiresPrescription,
+      ).toBeNull();
+    });
+  });
 });

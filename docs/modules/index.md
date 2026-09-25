@@ -1,14 +1,14 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 66 módulos, de los cuales 61 tienen entidades propias (ver
+> mano. 68 módulos, de los cuales 63 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 13 | 28 | 18 | 40 | 32 |
-| [`insurance`](insurance.md) | 13 | 16 | 11 | 29 | 14 |
+| [`insurance`](insurance.md) | 14 | 17 | 11 | 29 | 15 |
+| [`community`](community.md) | 13 | 29 | 18 | 40 | 32 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
 | [`consent`](consent.md) | 9 | 9 | 9 | 10 | 15 |
@@ -32,18 +32,20 @@
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
+| [`telemetry`](telemetry.md) | 4 | 5 | 15 | 14 | 12 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 2 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`pharmacy`](pharmacy.md) | 3 | 8 | 11 | 9 | 11 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
-| [`profiles`](profiles.md) | 3 | 8 | 14 | 19 | 25 |
+| [`profiles`](profiles.md) | 3 | 8 | 14 | 19 | 26 |
+| [`qa_lab`](qa_lab.md) | 3 | 3 | 2 | 13 | 1 |
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`surveys`](surveys.md) | 3 | 3 | 4 | 7 | 7 |
-| [`telemetry`](telemetry.md) | 3 | 4 | 14 | 14 | 12 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
-| [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
+| [`cross_store_consistency`](cross_store_consistency.md) | 2 | 5 | 3 | 20 | 1 |
+| [`data_catalog`](data_catalog.md) | 2 | 3 | 2 | 8 | 1 |
 | [`directory`](directory.md) | 2 | 9 | 5 | 7 | 18 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
@@ -54,7 +56,6 @@
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
 | [`procedures_perioperative`](procedures_perioperative.md) | 2 | 4 | 5 | 37 | 2 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
-| [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
 | [`vector_rag`](vector_rag.md) | 2 | 4 | 3 | 14 | 1 |
 | [`ads`](ads.md) | 1 | 4 | 5 | 73 | 1 |
@@ -67,10 +68,11 @@
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
 | [`platform_ops`](platform_ops.md) | 1 | 4 | 5 | 38 | 1 |
+| [`qa_execution`](qa_execution.md) | 1 | 1 | 0 | 4 | 1 |
 | [`quotations`](quotations.md) | 1 | 1 | 2 | 0 | 2 |
 | [`redis_runtime`](redis_runtime.md) | 1 | 1 | 0 | 0 | 3 |
 | [`reporting`](reporting.md) | 1 | 2 | 2 | 12 | 1 |
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **248** | **375** | **399** | **1246** | **478** |
+| **Total** | **254** | **384** | **402** | **1258** | **482** |

@@ -41,8 +41,9 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 | --- | --- |
 | `GET /pharmacy/pharmacies` | Directorio de farmacias publicadas del tenant activo |
 | `GET /pharmacy/pharmacies/{id}` | Perfil de una farmacia: ficha y sedes con dirección y coordenadas |
-| `GET /pharmacy/products?search=&conceptId=&limit=` | Búsqueda de productos por texto o por medicamento del vademécum |
-| `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede |
+| `GET /pharmacy/sites?search=&lat=&lng=&limit=` | Sedes publicadas, sueltas, con distancia Haversine si hay origen (carril A) |
+| `GET /pharmacy/products?search=&conceptId=&pharmacyId=&limit=` | Búsqueda de productos por texto, medicamento del vademécum o farmacia (`pharmacyId`: carril A) |
+| `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede, con `requiresPrescription` por producto (carril A) |
 
 Visible = farmacia `ACTIVE` **y** `VERIFIED` del tenant del contexto (mismo
 criterio que el directorio de unidades diagnósticas); sedes y productos,

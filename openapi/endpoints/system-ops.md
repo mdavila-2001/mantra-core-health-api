@@ -3004,8 +3004,8 @@ Content-Type: application/json
 | `tenantId` | Sí | `string` | formato `uuid` | Tenant de la política | `00000000-0000-4000-8000-000000000001` |
 | `resourceScopeConceptId` | Sí | `string` | formato `uuid` | Alcance del recurso (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `backupTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de backup (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `rpoSeconds` | Sí | `number` | mínimo 0 | RPO objetivo en segundos | `1` |
-| `rtoSeconds` | Sí | `number` | mínimo 0 | RTO objetivo en segundos | `1` |
+| `rpoSeconds` | Sí | `number` | mínimo 0; máximo 31536000 | RPO objetivo en segundos: cuántos datos se tolera perder. Independiente del RTO (MCH-022); 0 es válido y significa no perder ningún dato | `1` |
+| `rtoSeconds` | Sí | `number` | mínimo 1; máximo 31536000 | RTO objetivo en segundos: cuánto tiempo se tolera estar fuera de servicio. Independiente del RPO (MCH-022); al menos 1 segundo | `1` |
 | `retentionDays` | No | `number` | mínimo 0 | Días de retención de copias | `1` |
 | `immutableCopyRequired` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `encryptionRequired` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -3072,6 +3072,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | fueraDeRango.map((v) => v.mensaje).join('; ') | Excepción explícita en src/modules/system_ops/services/backup.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3327,7 +3328,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "outcomeConceptId": "00000000-0000-4000-8000-000000000001",
-  "objectiveStatus": "MET"
+  "objectiveStatus": "PASSED",
+  "objectiveStatusReason": "Texto descriptivo de ejemplo",
+  "objectiveBreached": true
 }
 ```
 
@@ -3337,7 +3340,9 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `outcomeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a outcome concept. | `00000000-0000-4000-8000-000000000001` |
-| `objectiveStatus` | Sí | `string` | valores: `MET`, `BREACHED`, `NOT_MEASURED` | Resultado contra los objetivos de la política (MCH-023). `NOT_MEASURED` no es un incumplimiento: es la falta de evidencia para afirmar cumplimiento. Un consumidor no puede leerlo como «aprobado» — el propio nombre lo obliga a distinguirlo. | `MET` |
+| `objectiveStatus` | Sí | `string` | valores: `PASSED`, `FAILED`, `NOT_MEASURED` | PASSED sólo con mediciones e integridad suficientes; FAILED si se incumplió; NOT_MEASURED si falta evidencia | `PASSED` |
+| `objectiveStatusReason` | Sí | `string` | Sin restricción adicional declarada | Por qué la corrida quedó en ese estado | `Texto descriptivo de ejemplo` |
+| `objectiveBreached` | Sí | `boolean` | Sin restricción adicional declarada | true si el RPO/RTO medido supera el objetivo. Obsoleto: un false también cubre NOT_MEASURED | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

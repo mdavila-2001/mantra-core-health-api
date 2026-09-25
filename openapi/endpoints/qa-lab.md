@@ -2,32 +2,591 @@
 
 # Endpoints del módulo `qa_lab`
 
-Referencia exhaustiva de 13 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `qa`, `qa-internal`
-- **Controladores:** `QaLabController`, `QaLabInternalController`
+- **Etiquetas OpenAPI:** `qa`, `qa-internal`, `qa-lab-read`
+- **Controladores:** `QaLabController`, `QaLabInternalController`, `QaLabReadController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /internal/qa/schedules/run-due](#1-post-internal-qa-schedules-run-due) — Evaluar programaciones vencidas y encolar sus corridas
-2. [POST /qa/case-results/{resultId}/evaluate](#2-post-qa-case-results-resultid-evaluate) — Evaluar las aserciones y fijar el resultado del caso
-3. [POST /qa/defects](#3-post-qa-defects) — Registrar un defecto detectado
-4. [PATCH /qa/defects/{defectId}](#4-patch-qa-defects-defectid) — Triage y transición de estado del defecto
-5. [POST /qa/environments](#5-post-qa-environments) — Registrar un entorno de pruebas gobernado
-6. [POST /qa/runs](#6-post-qa-runs) — Disparar una corrida de pruebas
-7. [POST /qa/runs/{runId}/artifacts](#7-post-qa-runs-runid-artifacts) — Adjuntar un artefacto de evidencia a la corrida
-8. [POST /qa/runs/{runId}/cases/{caseId}/execute](#8-post-qa-runs-runid-cases-caseid-execute) — Registrar la ejecución del caso con sus payloads
-9. [POST /qa/runs/{runId}/finalize](#9-post-qa-runs-runid-finalize) — Cerrar la corrida y consolidar totales
-10. [POST /qa/runs/{runId}/link-release](#10-post-qa-runs-runid-link-release) — Enlazar la evidencia de la corrida a un release
-11. [POST /qa/schedules](#11-post-qa-schedules) — Programar la ejecución automática de la suite
-12. [POST /qa/suites/{suiteId}/cases](#12-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
-13. [POST /qa/suites/{suiteId}/publish](#13-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
+1. [GET /admin/qa/defects](#1-get-admin-qa-defects) — Defectos deduplicados por firma
+2. [GET /admin/qa/environments](#2-get-admin-qa-environments) — Entornos de prueba
+3. [GET /admin/qa/runs](#3-get-admin-qa-runs) — Corridas recientes
+4. [GET /admin/qa/runs/{runId}](#4-get-admin-qa-runs-runid) — Corrida con resultados por caso y veredicto por aserción (valor observado)
+5. [GET /admin/qa/suites](#5-get-admin-qa-suites) — Suites con conteo de casos y última corrida
+6. [GET /admin/qa/suites/{suiteId}](#6-get-admin-qa-suites-suiteid) — Suite con casos y aserciones
+7. [POST /internal/qa/schedules/run-due](#7-post-internal-qa-schedules-run-due) — Evaluar programaciones vencidas y encolar sus corridas
+8. [POST /qa/case-results/{resultId}/evaluate](#8-post-qa-case-results-resultid-evaluate) — Evaluar las aserciones y fijar el resultado del caso
+9. [POST /qa/defects](#9-post-qa-defects) — Registrar un defecto detectado
+10. [PATCH /qa/defects/{defectId}](#10-patch-qa-defects-defectid) — Triage y transición de estado del defecto
+11. [POST /qa/environments](#11-post-qa-environments) — Registrar un entorno de pruebas gobernado
+12. [POST /qa/runs](#12-post-qa-runs) — Disparar una corrida de pruebas
+13. [POST /qa/runs/{runId}/artifacts](#13-post-qa-runs-runid-artifacts) — Adjuntar un artefacto de evidencia a la corrida
+14. [POST /qa/runs/{runId}/cases/{caseId}/execute](#14-post-qa-runs-runid-cases-caseid-execute) — Registrar la ejecución del caso con sus payloads
+15. [POST /qa/runs/{runId}/finalize](#15-post-qa-runs-runid-finalize) — Cerrar la corrida y consolidar totales
+16. [POST /qa/runs/{runId}/link-release](#16-post-qa-runs-runid-link-release) — Enlazar la evidencia de la corrida a un release
+17. [POST /qa/schedules](#17-post-qa-schedules) — Programar la ejecución automática de la suite
+18. [POST /qa/suites/{suiteId}/cases](#18-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
+19. [POST /qa/suites/{suiteId}/publish](#19-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
 
 ---
 
-## 1. POST /internal/qa/schedules/run-due
+## 1. GET /admin/qa/defects
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Defectos deduplicados por firma
+- **Operation ID:** `QaLabReadController_defects`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.defects](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Defectos deduplicados por firma. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/defects` en `QaLabReadController_defects`. El controlador delega en `QaLabReadService.listDefects`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | Sin restricción adicional declarada | Código: DEFECT_OPEN, DEFECT_TRIAGED, … | `ok` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/defects HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/defects?status=ok HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/defects"
+}
+```
+
+---
+
+## 2. GET /admin/qa/environments
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Entornos de prueba
+- **Operation ID:** `QaLabReadController_environments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.environments](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Entornos de prueba. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/environments` en `QaLabReadController_environments`. El controlador delega en `QaLabReadService.listEnvironments`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/environments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/environments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/environments"
+}
+```
+
+---
+
+## 3. GET /admin/qa/runs
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Corridas recientes
+- **Operation ID:** `QaLabReadController_runs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.runs](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Corridas recientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/runs` en `QaLabReadController_runs`. El controlador delega en `QaLabReadService.listRuns`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `suiteId` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/runs?suiteId=00000000-0000-4000-8000-000000000001&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/runs"
+}
+```
+
+---
+
+## 4. GET /admin/qa/runs/{runId}
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Corrida con resultados por caso y veredicto por aserción (valor observado)
+- **Operation ID:** `QaLabReadController_run`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.run](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Corrida con resultados por caso y veredicto por aserción (valor observado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/runs/{runId}` en `QaLabReadController_run`. El controlador delega en `QaLabReadService.getRun`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `runId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/runs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Deben ser UUID válidos: `runId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/runs/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-lab-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/runs/{runId}"
+}
+```
+
+---
+
+## 5. GET /admin/qa/suites
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Suites con conteo de casos y última corrida
+- **Operation ID:** `QaLabReadController_suites`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.suites](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Suites con conteo de casos y última corrida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/suites` en `QaLabReadController_suites`. El controlador delega en `QaLabReadService.listSuites`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/suites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/suites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/suites"
+}
+```
+
+---
+
+## 6. GET /admin/qa/suites/{suiteId}
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-read`
+- **Nombre:** Suite con casos y aserciones
+- **Operation ID:** `QaLabReadController_suite`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabReadController.suite](../../src/modules/qa_lab/controllers/qa-lab-read.controller.ts)
+
+### Descripción de negocio
+
+Suite con casos y aserciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/qa/suites/{suiteId}` en `QaLabReadController_suite`. El controlador delega en `QaLabReadService.getSuite`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `suiteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/qa/suites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...QA_LAB_READ_ROLES`.
+- Deben ser UUID válidos: `suiteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/qa/suites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_LAB_READ_ROLES. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-lab-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/qa/suites/{suiteId}"
+}
+```
+
+---
+
+## 7. POST /internal/qa/schedules/run-due
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa-internal`
@@ -165,7 +724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /qa/case-results/{resultId}/evaluate
+## 8. POST /qa/case-results/{resultId}/evaluate
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -287,7 +846,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /qa/defects
+## 9. POST /qa/defects
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -434,7 +993,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. PATCH /qa/defects/{defectId}
+## 10. PATCH /qa/defects/{defectId}
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -575,7 +1134,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /qa/environments
+## 11. POST /qa/environments
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -716,7 +1275,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /qa/runs
+## 12. POST /qa/runs
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -860,7 +1419,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /qa/runs/{runId}/artifacts
+## 13. POST /qa/runs/{runId}/artifacts
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -997,7 +1556,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /qa/runs/{runId}/cases/{caseId}/execute
+## 14. POST /qa/runs/{runId}/cases/{caseId}/execute
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -1149,7 +1708,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /qa/runs/{runId}/finalize
+## 15. POST /qa/runs/{runId}/finalize
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -1271,7 +1830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /qa/runs/{runId}/link-release
+## 16. POST /qa/runs/{runId}/link-release
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -1405,7 +1964,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /qa/schedules
+## 17. POST /qa/schedules
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -1556,7 +2115,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /qa/suites/{suiteId}/cases
+## 18. POST /qa/suites/{suiteId}/cases
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -1732,7 +2291,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /qa/suites/{suiteId}/publish
+## 19. POST /qa/suites/{suiteId}/publish
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`

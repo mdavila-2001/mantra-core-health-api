@@ -1,0 +1,6 @@
+MISSING MODULE DOC: docs/modules/ops_console.md (real module src/modules/ops_console)
+MODULE NOT IN CATALOG: ops_console missing from docs/modules/index.md
+
+Verificados: 265 páginas de docs/, 69 módulos reales.
+2 problemas de cobertura documental.
+EXIT:1

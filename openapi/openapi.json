@@ -2589,7 +2589,7 @@
           "iam-auth"
         ],
         "security": [],
-        "description": "Pre-cargar un PDF para un registro de organización o una credencial profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Pre-cargar un PDF para un registro de organización o profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/iam/auth/register-practitioner": {
@@ -4982,58 +4982,6 @@
       }
     },
     "/profiles/practitioners/me/credentials/{credentialId}": {
-      "delete": {
-        "description": "`404` si no existe o es de otro profesional. `422` si ya fue verificado o rechazado.",
-        "operationId": "ProfilesPractitionersController_removeOwnCredential",
-        "parameters": [
-          {
-            "name": "credentialId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Retirar un título propio pendiente",
-        "tags": [
-          "profiles-practitioners"
-        ]
-      },
       "patch": {
         "description": "Sólo permite cambiar tipo, número, institución, fecha y documento de una credencial pendiente perteneciente al usuario autenticado. Los documentos deben haberse subido por ese mismo usuario.",
         "operationId": "ProfilesPractitionersController_updateOwnCredential",
@@ -5097,6 +5045,58 @@
           }
         ],
         "summary": "Editar un título propio pendiente de verificación",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      },
+      "delete": {
+        "description": "`404` si no existe o es de otro profesional. `422` si ya fue verificado o rechazado.",
+        "operationId": "ProfilesPractitionersController_removeOwnCredential",
+        "parameters": [
+          {
+            "name": "credentialId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar un título propio pendiente",
         "tags": [
           "profiles-practitioners"
         ]
@@ -15345,6 +15345,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "department",
+            "required": false,
+            "in": "query",
+            "description": "concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "municipality",
+            "required": false,
+            "in": "query",
+            "description": "concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -15402,6 +15420,24 @@
             "name": "limit",
             "required": true,
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "department",
+            "required": false,
+            "in": "query",
+            "description": "concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "municipality",
+            "required": false,
+            "in": "query",
+            "description": "concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422",
             "schema": {
               "type": "string"
             }
@@ -20968,6 +21004,171 @@
           "insurance-portability-public"
         ],
         "security": []
+      }
+    },
+    "/practitioner-settlement-batches": {
+      "post": {
+        "operationId": "PractitionerSettlementBatchesController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratePractitionerSettlementBatchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generar (o repetir) el lote de liquidación del período",
+        "tags": [
+          "insurance-practitioner-settlement"
+        ],
+        "description": "Generar (o repetir) el lote de liquidación del período. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "get": {
+        "operationId": "PractitionerSettlementBatchesController_list",
+        "parameters": [
+          {
+            "name": "providerEntityId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los lotes de liquidación del alcance del actor",
+        "tags": [
+          "insurance-practitioner-settlement"
+        ],
+        "description": "Listar los lotes de liquidación del alcance del actor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioner-settlement-batches/{id}": {
+      "get": {
+        "operationId": "PractitionerSettlementBatchesController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar un lote de liquidación",
+        "tags": [
+          "insurance-practitioner-settlement"
+        ],
+        "description": "Consultar un lote de liquidación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/practices": {
@@ -59168,6 +59369,86 @@
         "description": "Consultar el perfil de una farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/pharmacy/sites": {
+      "get": {
+        "operationId": "PharmacyReadController_listSites",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar en el nombre de la farmacia o la sede",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 desde donde medir distancia (va con lng)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 desde donde medir distancia (va con lat)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacySiteListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar sedes publicadas, sueltas",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Listar sedes publicadas, sueltas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/pharmacy/products": {
       "get": {
         "operationId": "PharmacyReadController_searchProducts",
@@ -59186,6 +59467,16 @@
             "required": false,
             "in": "query",
             "description": "Medicamento del vademécum (medication_concept_id)",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "pharmacyId",
+            "required": false,
+            "in": "query",
+            "description": "Sólo lo publicado por esta farmacia (carril A, H5)",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -59233,11 +59524,11 @@
             "bearer": []
           }
         ],
-        "summary": "Buscar productos publicados por texto o por medicamento",
+        "summary": "Buscar productos publicados por texto, medicamento o farmacia",
         "tags": [
           "pharmacy-directory"
         ],
-        "description": "Buscar productos publicados por texto o por medicamento. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Buscar productos publicados por texto, medicamento o farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/pharmacy/sites/{siteId}/prices": {
@@ -82386,6 +82677,10 @@
       "description": "Operaciones del dominio funcional insurance portability public. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "insurance-practitioner-settlement",
+      "description": "Operaciones del dominio funcional insurance practitioner settlement. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "insurance-prior-auth",
       "description": "Operaciones del dominio funcional insurance prior auth. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -83346,13 +83641,19 @@
         "properties": {
           "email": {
             "type": "string",
-            "description": "Correo de trabajo; es la identidad de login del profesional",
+            "description": "Correo de acceso del profesional",
             "format": "email",
             "maxLength": 320
           },
           "personalEmail": {
             "type": "string",
             "description": "Correo personal; no sirve para iniciar sesión",
+            "format": "email",
+            "maxLength": 320
+          },
+          "workEmail": {
+            "type": "string",
+            "description": "Correo de trabajo, distinto del correo de acceso",
             "format": "email",
             "maxLength": 320
           },
@@ -83423,13 +83724,13 @@
           },
           "nationalId": {
             "type": "string",
-            "description": "Documento de identidad (se guarda como identificador oficial)",
+            "description": "Documento de identidad obligatorio; se guarda como identificador oficial",
             "maxLength": 40
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
             "format": "uuid",
-            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId`"
+            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)"
           },
           "residenceMunicipalityConceptId": {
             "type": "string",
@@ -83447,6 +83748,21 @@
             "maximum": 90
           },
           "homeLongitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "workAddressLines": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Calle y número de la dirección laboral"
+          },
+          "workLatitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "workLongitude": {
             "type": "number",
             "minimum": -180,
             "maximum": 180
@@ -83579,6 +83895,8 @@
         "required": [
           "email",
           "licenseNumber",
+          "nationalId",
+          "issuerAdministrativeAreaConceptId",
           "reason"
         ]
       },
@@ -84446,13 +84764,19 @@
         "properties": {
           "email": {
             "type": "string",
-            "description": "Correo de trabajo; es la identidad de login del profesional",
+            "description": "Correo de acceso del profesional",
             "format": "email",
             "maxLength": 320
           },
           "personalEmail": {
             "type": "string",
             "description": "Correo personal; no sirve para iniciar sesión",
+            "format": "email",
+            "maxLength": 320
+          },
+          "workEmail": {
+            "type": "string",
+            "description": "Correo de trabajo, distinto del correo de acceso",
             "format": "email",
             "maxLength": 320
           },
@@ -84528,13 +84852,13 @@
           },
           "nationalId": {
             "type": "string",
-            "description": "Documento de identidad (se guarda como identificador oficial)",
+            "description": "Documento de identidad obligatorio; se guarda como identificador oficial",
             "maxLength": 40
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
             "format": "uuid",
-            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId`"
+            "description": "Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)"
           },
           "residenceMunicipalityConceptId": {
             "type": "string",
@@ -84552,6 +84876,21 @@
             "maximum": 90
           },
           "homeLongitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "workAddressLines": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Calle y número de la dirección laboral"
+          },
+          "workLatitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "workLongitude": {
             "type": "number",
             "minimum": -180,
             "maximum": 180
@@ -84668,7 +85007,9 @@
         "required": [
           "email",
           "password",
-          "licenseNumber"
+          "licenseNumber",
+          "nationalId",
+          "issuerAdministrativeAreaConceptId"
         ]
       },
       "ResendVerificationDto": {
@@ -85641,6 +85982,442 @@
           }
         }
       },
+      "PractitionerSpecialtyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specialtyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "boardCertified": {
+            "type": "boolean"
+          },
+          "practiceScopeText": {
+            "type": "string"
+          },
+          "verificationStatusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "specialtyConceptId",
+          "isPrimary",
+          "boardCertified",
+          "verificationStatusConceptId"
+        ]
+      },
+      "PractitionerCredentialDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "credentialTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string"
+          },
+          "fileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sólo en la lectura propia; permite descargar el diploma adjunto"
+          },
+          "issuingInstitutionText": {
+            "type": "string"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stateConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verificationSourceUri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "credentialTypeConceptId",
+          "number",
+          "stateConceptId"
+        ]
+      },
+      "PractitionerLicenseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "licenseNumber": {
+            "type": "string"
+          },
+          "regulatoryAuthority": {
+            "type": "string"
+          },
+          "stateConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "jurisdictionConceptId",
+          "licenseNumber",
+          "stateConceptId"
+        ]
+      },
+      "PractitionerLanguageDto": {
+        "type": "object",
+        "properties": {
+          "languageConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proficiencyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clinicalInterpretationAllowed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "languageConceptId",
+          "clinicalInterpretationAllowed"
+        ]
+      },
+      "AffiliationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practitionerProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organizationName": {
+            "type": "string"
+          },
+          "roleTitle": {
+            "type": "object",
+            "nullable": true
+          },
+          "practiceSiteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "affiliationTypeConceptId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "current": {
+            "type": "boolean",
+            "description": "Derivado de `endDate`: sin fin declarado, sigue vigente"
+          },
+          "status": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statusKind": {
+            "type": "string",
+            "enum": [
+              "pendiente",
+              "declarado",
+              "aprobado",
+              "rechazado",
+              "revocado",
+              "desconocido"
+            ]
+          },
+          "decisionReasonText": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "practitionerProfileId",
+          "organizationName",
+          "startDate",
+          "current",
+          "status",
+          "statusKind",
+          "createdAt"
+        ]
+      },
+      "PractitionerActivityDto": {
+        "type": "object",
+        "properties": {
+          "encounters": {
+            "type": "number"
+          },
+          "medicationRequests": {
+            "type": "number"
+          },
+          "clinicalNotes": {
+            "type": "number"
+          },
+          "documents": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "encounters",
+          "medicationRequests",
+          "clinicalNotes",
+          "documents"
+        ]
+      },
+      "PractitionerProfileSummaryDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practitionerCode": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "professionalTitle": {
+            "type": "string"
+          },
+          "professionalBio": {
+            "type": "string"
+          },
+          "photoFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "workEmail": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "personalEmail": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "mobilePhone": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "workMobilePhone": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "workLandline": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "name": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "motherLastName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationalId": {
+            "type": "string"
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Departamento emisor (VS_BO_DEPARTMENT)"
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "taxHolderName": {
+            "type": "string",
+            "description": "Sólo en la lectura propia"
+          },
+          "residenceMunicipalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Municipio de residencia (VS_BO_MUNICIPALITY)"
+          },
+          "homeAddress": {
+            "$ref": "#/components/schemas/OwnAddressDto"
+          },
+          "workAddress": {
+            "$ref": "#/components/schemas/OwnAddressDto"
+          },
+          "occupationConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Ocupación elegida del catálogo (VS_BO_OCCUPATION)"
+          },
+          "occupationFreeText": {
+            "type": "string",
+            "description": "Ocupación declarada en texto libre"
+          },
+          "workEmployerConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)"
+          },
+          "workEmployerFreeText": {
+            "type": "string",
+            "description": "Empresa declarada en texto libre"
+          },
+          "practitionerCategoryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "verificationStatusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceStatusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "acceptsNewPatients": {
+            "type": "boolean"
+          },
+          "telehealthAvailable": {
+            "type": "boolean"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PractitionerSpecialtyDto"
+            }
+          },
+          "credentials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PractitionerCredentialDto"
+            }
+          },
+          "licenses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PractitionerLicenseDto"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PractitionerLanguageDto"
+            }
+          },
+          "affiliations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliationResponseDto"
+            }
+          },
+          "activity": {
+            "$ref": "#/components/schemas/PractitionerActivityDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "profileId",
+          "personId",
+          "practitionerCode",
+          "practitionerCategoryConceptId",
+          "verificationStatusConceptId",
+          "practiceStatusConceptId",
+          "acceptsNewPatients",
+          "telehealthAvailable",
+          "specialties",
+          "credentials",
+          "licenses",
+          "languages",
+          "affiliations",
+          "activity",
+          "createdAt"
+        ]
+      },
       "UpdateOwnPractitionerProfileDto": {
         "type": "object",
         "properties": {
@@ -85689,6 +86466,11 @@
             "description": "Forma anterior de declarar el teléfono. Preferí workMobilePhone.",
             "deprecated": true
           },
+          "workEmail": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 320
+          },
           "personalEmail": {
             "type": "string",
             "format": "email",
@@ -85732,6 +86514,21 @@
             "maximum": 90
           },
           "homeLongitude": {
+            "type": "object",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "workAddressLines": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Dirección del lugar de trabajo. Vacío para quitarla."
+          },
+          "workLatitude": {
+            "type": "object",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "workLongitude": {
             "type": "object",
             "minimum": -180,
             "maximum": 180
@@ -86023,6 +86820,34 @@
           "credentialTypeConceptId",
           "number"
         ]
+      },
+      "UpdateOwnCredentialDto": {
+        "type": "object",
+        "properties": {
+          "credentialTypeConceptId": {
+            "type": "string",
+            "description": "Concept id de tipo de credencial profesional",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "issuingInstitutionText": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "fileId": {
+            "type": "string",
+            "description": "Archivo del diploma (debe haberlo subido el mismo usuario)",
+            "format": "uuid"
+          }
+        }
       },
       "AddSpecialtyDto": {
         "type": "object",
@@ -92351,6 +93176,102 @@
           "filingDeadline"
         ]
       },
+      "ClaimExclusionDto": {
+        "type": "object",
+        "properties": {
+          "claimLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemName": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string",
+            "description": "Importe decimal exacto excluido"
+          },
+          "policyClauseReference": {
+            "type": "string"
+          },
+          "denialRationale": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "claimLineId",
+          "itemName",
+          "amount",
+          "policyClauseReference",
+          "denialRationale"
+        ]
+      },
+      "ClaimSettlementBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "availability": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "PENDING_PUBLICATION",
+              "UNDER_REVIEW",
+              "NOT_AVAILABLE"
+            ]
+          },
+          "totalBilledAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalApprovedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalPatientAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalDeniedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "reconciled": {
+            "type": "boolean"
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimExclusionDto"
+            }
+          }
+        },
+        "required": [
+          "availability",
+          "totalBilledAmount",
+          "totalApprovedAmount",
+          "totalPatientAmount",
+          "totalDeniedAmount",
+          "reconciled",
+          "exclusions"
+        ]
+      },
+      "ClaimEobDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "publishedAt"
+        ]
+      },
       "ClaimDetailDto": {
         "type": "object",
         "properties": {
@@ -92395,6 +93316,18 @@
             "items": {
               "$ref": "#/components/schemas/ClaimDisputeSummaryDto"
             }
+          },
+          "settlement": {
+            "$ref": "#/components/schemas/ClaimSettlementBreakdownDto"
+          },
+          "eob": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClaimEobDto"
+              }
+            ]
           }
         },
         "required": [
@@ -92404,7 +93337,9 @@
           "lineApprovedTotal",
           "adjudication",
           "adjudicationHistory",
-          "disputes"
+          "disputes",
+          "settlement",
+          "eob"
         ]
       },
       "CreateAppealDecisionDto": {
@@ -93793,6 +94728,40 @@
           "recordCount",
           "algorithm",
           "issuer"
+        ]
+      },
+      "GeneratePractitionerSettlementBatchDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "billing_provider_entity_id"
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "WEEKLY",
+              "BIWEEKLY",
+              "MONTHLY"
+            ]
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-01",
+            "description": "Día 1 (MONTHLY), día 1 o 16 (BIWEEKLY), o cualquiera (WEEKLY)"
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "providerEntityId",
+          "cadence",
+          "periodStart"
         ]
       },
       "CreatePracticeDto": {
@@ -114741,6 +115710,77 @@
           "sites"
         ]
       },
+      "PharmacySiteListItemDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "object",
+            "nullable": true
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "productCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "pharmacyId",
+          "pharmacyName",
+          "productCount"
+        ]
+      },
+      "PharmacySiteListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacySiteListItemDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
       "PharmacyProductReadDto": {
         "type": "object",
         "properties": {
@@ -114862,6 +115902,10 @@
                 "$ref": "#/components/schemas/PharmacyConceptDto"
               }
             ]
+          },
+          "requiresPrescription": {
+            "type": "object",
+            "nullable": true
           },
           "priceListId": {
             "type": "string",
@@ -127232,467 +128276,6 @@
             "type": "string"
           }
         }
-      },
-      "UpdateOwnCredentialDto": {
-        "type": "object",
-        "properties": {
-          "credentialTypeConceptId": {
-            "type": "string",
-            "description": "Concept id de tipo de credencial profesional",
-            "format": "uuid"
-          },
-          "number": {
-            "type": "string",
-            "maxLength": 100,
-            "pattern": "\\S"
-          },
-          "issuingInstitutionText": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "issueDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "fileId": {
-            "type": "string",
-            "description": "Archivo del diploma (debe haberlo subido el mismo usuario)",
-            "format": "uuid"
-          }
-        }
-      },
-      "PractitionerSpecialtyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "specialtyConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "isPrimary": {
-            "type": "boolean"
-          },
-          "boardCertified": {
-            "type": "boolean"
-          },
-          "practiceScopeText": {
-            "type": "string"
-          },
-          "verificationStatusConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "validTo": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "specialtyConceptId",
-          "isPrimary",
-          "boardCertified",
-          "verificationStatusConceptId"
-        ]
-      },
-      "PractitionerCredentialDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "credentialTypeConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "number": {
-            "type": "string"
-          },
-          "fileId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Sólo en la lectura propia; permite descargar el diploma adjunto"
-          },
-          "issuingInstitutionText": {
-            "type": "string"
-          },
-          "issueDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "expiryDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "stateConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "verifiedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "verificationSourceUri": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "credentialTypeConceptId",
-          "number",
-          "stateConceptId"
-        ]
-      },
-      "PractitionerLicenseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "jurisdictionConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "licenseNumber": {
-            "type": "string"
-          },
-          "regulatoryAuthority": {
-            "type": "string"
-          },
-          "stateConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "validTo": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "jurisdictionConceptId",
-          "licenseNumber",
-          "stateConceptId"
-        ]
-      },
-      "PractitionerLanguageDto": {
-        "type": "object",
-        "properties": {
-          "languageConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "proficiencyConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "clinicalInterpretationAllowed": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "languageConceptId",
-          "clinicalInterpretationAllowed"
-        ]
-      },
-      "AffiliationResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "practitionerProfileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "organizationName": {
-            "type": "string"
-          },
-          "roleTitle": {
-            "type": "object",
-            "nullable": true
-          },
-          "practiceSiteId": {
-            "type": "object",
-            "format": "uuid",
-            "nullable": true
-          },
-          "affiliationTypeConceptId": {
-            "type": "object",
-            "format": "uuid",
-            "nullable": true
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "current": {
-            "type": "boolean",
-            "description": "Derivado de `endDate`: sin fin declarado, sigue vigente"
-          },
-          "status": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "statusKind": {
-            "type": "string",
-            "enum": [
-              "pendiente",
-              "declarado",
-              "aprobado",
-              "rechazado",
-              "revocado",
-              "desconocido"
-            ]
-          },
-          "decisionReasonText": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "practitionerProfileId",
-          "organizationName",
-          "startDate",
-          "current",
-          "status",
-          "statusKind",
-          "createdAt"
-        ]
-      },
-      "PractitionerActivityDto": {
-        "type": "object",
-        "properties": {
-          "encounters": {
-            "type": "number"
-          },
-          "medicationRequests": {
-            "type": "number"
-          },
-          "clinicalNotes": {
-            "type": "number"
-          },
-          "documents": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "encounters",
-          "medicationRequests",
-          "clinicalNotes",
-          "documents"
-        ]
-      },
-      "PractitionerProfileSummaryDto": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "personId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "practitionerCode": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "professionalTitle": {
-            "type": "string"
-          },
-          "professionalBio": {
-            "type": "string"
-          },
-          "photoFileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "phone": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "workEmail": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "personalEmail": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "mobilePhone": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "workMobilePhone": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "workLandline": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "name": {
-            "type": "string"
-          },
-          "middleName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "motherLastName": {
-            "type": "string"
-          },
-          "birthDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "nationalId": {
-            "type": "string"
-          },
-          "issuerAdministrativeAreaConceptId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Departamento emisor (VS_BO_DEPARTMENT)"
-          },
-          "taxId": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "taxHolderName": {
-            "type": "string",
-            "description": "Sólo en la lectura propia"
-          },
-          "residenceMunicipalityConceptId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Municipio de residencia (VS_BO_MUNICIPALITY)"
-          },
-          "homeAddress": {
-            "$ref": "#/components/schemas/OwnAddressDto"
-          },
-          "occupationConceptId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Ocupación elegida del catálogo (VS_BO_OCCUPATION)"
-          },
-          "occupationFreeText": {
-            "type": "string",
-            "description": "Ocupación declarada en texto libre"
-          },
-          "workEmployerConceptId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER)"
-          },
-          "workEmployerFreeText": {
-            "type": "string",
-            "description": "Empresa declarada en texto libre"
-          },
-          "practitionerCategoryConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "verificationStatusConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "practiceStatusConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "acceptsNewPatients": {
-            "type": "boolean"
-          },
-          "telehealthAvailable": {
-            "type": "boolean"
-          },
-          "specialties": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PractitionerSpecialtyDto"
-            }
-          },
-          "credentials": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PractitionerCredentialDto"
-            }
-          },
-          "licenses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PractitionerLicenseDto"
-            }
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PractitionerLanguageDto"
-            }
-          },
-          "affiliations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AffiliationResponseDto"
-            }
-          },
-          "activity": {
-            "$ref": "#/components/schemas/PractitionerActivityDto"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "profileId",
-          "personId",
-          "practitionerCode",
-          "practitionerCategoryConceptId",
-          "verificationStatusConceptId",
-          "practiceStatusConceptId",
-          "acceptsNewPatients",
-          "telehealthAvailable",
-          "specialties",
-          "credentials",
-          "licenses",
-          "languages",
-          "affiliations",
-          "activity",
-          "createdAt"
-        ]
       }
     },
     "responses": {

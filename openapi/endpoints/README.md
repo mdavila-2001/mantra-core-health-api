@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **67 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **70 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -62,6 +62,7 @@ Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `open
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
+| [data_catalog](data-catalog.md) | 22 | `data-catalog`, `data-catalog-internal` | 2 |
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 27 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens` | 6 |
@@ -76,7 +77,7 @@ Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `open
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 31 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 27 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 40 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 13 |
+| [insurance](insurance.md) | 43 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 14 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
@@ -84,18 +85,20 @@ Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `open
 | [medical_groups](medical-groups.md) | 8 | `medical-groups` | 1 |
 | [messaging](messaging.md) | 17 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
 | [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
+| [ops_console](ops-console.md) | 7 | `ops-console` | 1 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
 | [payments](payments.md) | 14 | `payments`, `payments-intents`, `payments-transactions` | 3 |
 | [pharma_lab](pharma-lab.md) | 76 | `pharma-lab-catalog`, `pharma-lab-notices`, `pharma-lab-pharmacovigilance`, `pharma-lab-reference`, `pharma-lab-regulatory`, `pharma-lab-social-accounting`, `pharma-lab-visit-agenda`, `pharma-lab-visit-records`, `pharma-lab-visit-requests`, `pharma-lab-visit-surveys`, `pharma-lab-visitors`, `pharma-labs` | 12 |
-| [pharmacy](pharmacy.md) | 17 | `pharmacy`, `pharmacy-directory`, `pharmacy-public` | 3 |
+| [pharmacy](pharmacy.md) | 18 | `pharmacy`, `pharmacy-directory`, `pharmacy-public` | 3 |
 | [pharmacy_inventory](pharmacy-inventory.md) | 29 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 28 | `practice` | 6 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 43 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
+| [profiles](profiles.md) | 44 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 3 |
 | [promotions](promotions.md) | 18 | `loyalty`, `promotions` | 2 |
-| [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
+| [qa_execution](qa-execution.md) | 9 | `qa-execution`, `qa-execution-internal` | 2 |
+| [qa_lab](qa-lab.md) | 19 | `qa`, `qa-internal`, `qa-lab-read` | 3 |
 | [quotations](quotations.md) | 3 | `quotations` | 1 |
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
@@ -105,7 +108,7 @@ Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `open
 | [surveys](surveys.md) | 13 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
-| [telemetry](telemetry.md) | 13 | `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 3 |
+| [telemetry](telemetry.md) | 21 | `telemetry-analytics`, `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 4 |
 | [terminology](terminology.md) | 20 | `terminology` | 6 |
 | [time_series](time-series.md) | 14 | `time_series` | 2 |
 | [tracking](tracking.md) | 11 | `tracking` | 1 |
@@ -118,4 +121,4 @@ Esta referencia documenta **1308 de 1308 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1308 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1365 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

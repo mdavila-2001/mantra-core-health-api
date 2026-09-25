@@ -9,7 +9,7 @@
 # Módulo `cross_store_consistency`
 
 **Fuente:** [`src/modules/cross_store_consistency/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/cross_store_consistency/README.md)
-· 2 controllers · 4 services · 3 repositories · 20 entidades · 1 DTO
+· 2 controllers · 5 services · 3 repositories · 20 entidades · 1 DTO
 
 ---
 

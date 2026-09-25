@@ -23,7 +23,7 @@ Referencia exhaustiva de 31 operación(es) del módulo `iam`, derivada del contr
 10. [POST /iam/auth/reset-password](#10-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
 11. [POST /iam/auth/sessions/purge](#11-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
 12. [POST /iam/auth/token/refresh](#12-post-iam-auth-token-refresh) — Rotar el refresh token
-13. [POST /iam/auth/upload-registration-document](#13-post-iam-auth-upload-registration-document) — Pre-cargar un documento legal (PDF) del registro de organización
+13. [POST /iam/auth/upload-registration-document](#13-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
 14. [POST /iam/auth/verify-email](#14-post-iam-auth-verify-email) — Verificar el correo con el token recibido
 15. [GET /iam/users](#15-get-iam-users) — Listado paginado de usuarios
 16. [POST /iam/users](#16-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
@@ -1277,7 +1277,9 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "password": "ClaveSegura2026!",
-  "licenseNumber": "valor-ejemplo"
+  "licenseNumber": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1290,8 +1292,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de trabajo; es la identidad de login del profesional | `usuario@example.com` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de acceso del profesional | `usuario@example.com` |
 | `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo personal; no sirve para iniciar sesión | `usuario@example.com` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo de trabajo, distinto del correo de acceso | `usuario@example.com` |
 | `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
 | `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
@@ -1304,13 +1307,16 @@ Content-Type: application/json
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `specialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 3 elemento(s) | Especialidades declaradas (hasta 3). La primera queda como principal. | `["00000000-0000-4000-8000-000000000001"]` |
-| `nationalId` | No | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad (se guarda como identificador oficial) | `00000000-0000-4000-8000-000000000001` |
-| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId` | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
+| `nationalId` | Sí | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `homeAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
 | `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
+| `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `+59170000000` |
 | `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Celular personal en formato E.164 o nacional | `+59170000000` |
 | `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Celular de trabajo en formato E.164 o nacional | `+59170000000` |
@@ -1339,10 +1345,11 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo"}]` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1356,6 +1363,7 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "personalEmail": "usuario@example.com",
+  "workEmail": "usuario@example.com",
   "password": "ClaveSegura2026!",
   "name": "Ana",
   "middleName": "Lucía",
@@ -1377,6 +1385,9 @@ Content-Type: application/json
   "homeAddressLines": "valor-ejemplo",
   "homeLatitude": 1,
   "homeLongitude": 1,
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": 1,
+  "workLongitude": 1,
   "phone": "+59170000000",
   "mobilePhone": "+59170000000",
   "workMobilePhone": "+59170000000",
@@ -1413,7 +1424,8 @@ Content-Type: application/json
     {
       "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "number": "valor-ejemplo",
-      "issuingInstitutionText": "valor-ejemplo"
+      "issuingInstitutionText": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ]
 }
@@ -1483,7 +1495,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio cuando se declara el documento | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
@@ -1494,6 +1506,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
@@ -1980,16 +1997,16 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
-- **Nombre:** Pre-cargar un documento legal (PDF) del registro de organización
+- **Nombre:** Pre-cargar un PDF para un registro de organización o profesional
 - **Operation ID:** `IamAuthController_uploadRegistrationDocument`
 - **Autenticación:** Pública
 - **Implementación:** [IamAuthController.uploadRegistrationDocument](../../src/modules/iam/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
-Pre-cargar un documento legal (PDF) del registro de organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+Pre-cargar un PDF para un registro de organización o profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Pre-carga pública de un documento legal en PDF para el alta de organización (subtarea 1.2). El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y queda inutilizable hasta que `POST /iam/auth/register-organization` lo reclama por su `fileId` dentro de `organization.legalDocuments`, en la misma transacción que crea el tenant. Límite de 30/min y no el estándar de 10: un alta legítima de aseguradora sube hasta 5 PDF y puede reintentar alguno, y sigue diez veces por debajo del backstop global (300/min, `app.module.ts`). Deuda conocida, declarada y no resuelta acá: nada purga las subidas anónimas que nunca se reclaman (abandono del formulario, rechazo del alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
+Contexto declarado en el controlador: Pre-carga pública de un PDF para un registro que todavía no tiene sesión: documento legal de organización o respaldo de credencial profesional. El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y queda inutilizable hasta que el alta correspondiente lo reclama por su `fileId` en la misma transacción que crea la organización o al profesional. Límite de 30/min y no el estándar de 10: un alta legítima puede subir varios PDF y reintentar alguno, y sigue diez veces por debajo del backstop global (300/min, `app.module.ts`). Deuda conocida, declarada y no resuelta acá: nada purga las subidas anónimas que nunca se reclaman (abandono del formulario, rechazo del alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
 
 ### Descripción del sistema
 
@@ -4153,6 +4170,8 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "licenseNumber": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "reason": "Texto descriptivo de ejemplo"
 }
 ```
@@ -4167,8 +4186,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de trabajo; es la identidad de login del profesional | `usuario@example.com` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de acceso del profesional | `usuario@example.com` |
 | `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo personal; no sirve para iniciar sesión | `usuario@example.com` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo de trabajo, distinto del correo de acceso | `usuario@example.com` |
 | `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
 | `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
@@ -4180,13 +4200,16 @@ Content-Type: application/json
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `specialtyConceptIds` | No | `array<string>` | máximo 3 elemento(s) | Especialidades declaradas (hasta 3). La primera queda como principal. | `["00000000-0000-4000-8000-000000000001"]` |
-| `nationalId` | No | `string` | longitud máxima 40 | Documento de identidad (se guarda como identificador oficial) | `00000000-0000-4000-8000-000000000001` |
-| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT); obligatorio si se envía `nationalId` | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptIds` | No | `array<string>` | máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
+| `nationalId` | Sí | `string` | longitud máxima 40 | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `homeAddressLines` | No | `string` | longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
 | `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workAddressLines` | No | `string` | longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
+| `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `phone` | No | `string` | longitud máxima 40 | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `+59170000000` |
 | `mobilePhone` | No | `string` | longitud máxima 40 | Celular personal en formato E.164 o nacional | `+59170000000` |
 | `workMobilePhone` | No | `string` | longitud máxima 40 | Celular de trabajo en formato E.164 o nacional | `+59170000000` |
@@ -4215,10 +4238,11 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo"}]` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
 
@@ -4235,6 +4259,7 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "personalEmail": "usuario@example.com",
+  "workEmail": "usuario@example.com",
   "name": "Ana",
   "middleName": "Lucía",
   "lastName": "Rojas",
@@ -4255,6 +4280,9 @@ Content-Type: application/json
   "homeAddressLines": "valor-ejemplo",
   "homeLatitude": 1,
   "homeLongitude": 1,
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": 1,
+  "workLongitude": 1,
   "phone": "+59170000000",
   "mobilePhone": "+59170000000",
   "workMobilePhone": "+59170000000",
@@ -4291,7 +4319,8 @@ Content-Type: application/json
     {
       "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "number": "valor-ejemplo",
-      "issuingInstitutionText": "valor-ejemplo"
+      "issuingInstitutionText": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "reason": "Texto descriptivo de ejemplo",
@@ -4354,7 +4383,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio cuando se declara el documento | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
@@ -4365,6 +4394,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
