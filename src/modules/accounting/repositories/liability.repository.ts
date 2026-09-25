@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode } from '@mikro-orm/core';
 import {
   Liabilities,
   LiabilitySchedules,
   LiabilityPayments,
   LiabilityPostings,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Acceso a pasivos, cuotas, pagos y sus posteos (UC-16-12). */
 @Injectable()
@@ -32,8 +33,21 @@ export class LiabilityRepository {
   findScheduleById(
     em: EntityManager,
     id: string,
+    options: {
+      /**
+       * Bloquea la fila (`FOR UPDATE`) hasta que cierre la transacción: es lo
+       * que impide que dos pagos simultáneos de la misma cuota la lean ambos
+       * como pendiente (T26 · AC-26-13). Sólo tiene sentido dentro de
+       * `em.transactional`.
+       */
+      forUpdate?: boolean;
+    } = {},
   ): Promise<LiabilitySchedules | null> {
-    return em.findOne(LiabilitySchedules, { id });
+    return em.findOne(
+      LiabilitySchedules,
+      { id },
+      options.forUpdate ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
+    );
   }
 
   /**
@@ -66,11 +80,13 @@ export class LiabilityRepository {
     em: EntityManager,
     id: string,
     automated: boolean,
+    actorUserId?: string,
   ): Promise<Liabilities | null> {
     const liability = await em.findOne(Liabilities, { id });
     if (!liability) return null;
     liability.automated = automated;
-    liability.updatedAt = new Date();
+    // Quién y cuándo (T26 · AC-26-8), igual que en activos.
+    touch(liability, actorUserId);
     await em.flush();
     return liability;
   }

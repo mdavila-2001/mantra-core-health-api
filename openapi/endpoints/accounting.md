@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 44 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
 - **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingSubledgerController`
@@ -53,8 +53,9 @@ Referencia exhaustiva de 44 operación(es) del módulo `accounting`, derivada de
 40. [POST /accounting/practitioner/liabilities](#40-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
 41. [PATCH /accounting/practitioner/liabilities/{id}/automation](#41-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
 42. [POST /accounting/practitioner/liabilities/{id}/progress](#42-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
-43. [GET /accounting/practitioner/paid-consultations](#43-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
-44. [GET /accounting/trial-balance](#44-get-accounting-trial-balance) — Balance de sumas y saldos
+43. [GET /accounting/practitioner/liabilities/{id}/schedule](#43-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
+44. [GET /accounting/practitioner/paid-consultations](#44-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
+45. [GET /accounting/trial-balance](#45-get-accounting-trial-balance) — Balance de sumas y saldos
 
 ---
 
@@ -4374,6 +4375,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El pago debe ser positivo | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El pasivo no está ACTIVO | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El pasivo no tiene cuenta contable | Excepción explícita en src/modules/accounting/services/liability.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuota ya está pagada | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El asiento generado no balancea (debe != haber) | Excepción explícita en src/modules/accounting/services/posting.helper.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6140,6 +6142,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El pago debe ser positivo | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El pasivo no está ACTIVO | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El pasivo no tiene cuenta contable | Excepción explícita en src/modules/accounting/services/liability.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuota ya está pagada | Excepción explícita en src/modules/accounting/services/liability.service.ts |
 | 422 | `PRECONDITION_FAILED` | El asiento generado no balancea (debe != haber) | Excepción explícita en src/modules/accounting/services/posting.helper.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6158,7 +6161,129 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /accounting/practitioner/paid-consultations
+## 43. GET /accounting/practitioner/liabilities/{id}/schedule
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Cronograma de cuotas de un pasivo propio
+- **Operation ID:** `AccountingPractitionerController_readLiabilitySchedule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerController.readLiabilitySchedule](../../src/modules/accounting/controllers/accounting-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Capital e interés separados por cuota, en orden de vencimiento. Sólo el profesional vinculado a la práctica del pasivo; un pasivo ajeno responde 422, no un cronograma vacío.
+
+Contexto declarado en el controlador: El cronograma cuota por cuota de un pasivo propio (T26 · AC-26-10).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/liabilities/{id}/schedule` en `AccountingPractitionerController_readLiabilitySchedule`. El controlador delega en `PractitionerAccountingService.readLiabilitySchedule`. No recibe body. El tipo de retorno estático es `Promise<LiabilityScheduleResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/liabilities/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/liabilities/00000000-0000-4000-8000-000000000001/schedule HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LiabilityScheduleResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LiabilityScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "liabilityId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "principalAmount": 5000,
+  "outstandingAmount": 3200,
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "schedule": [
+    {}
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `liabilityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `principalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `5000` |
+| `outstandingAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `3200` |
+| `currencyConceptId` | No | `string` | formato `uuid`; admite null | Moneda de la cuenta contable del pasivo, si la declara. | `00000000-0000-4000-8000-000000000001` |
+| `schedule` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Pasivo no encontrado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/liabilities/{id}/schedule"
+}
+```
+
+---
+
+## 44. GET /accounting/practitioner/paid-consultations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6286,7 +6411,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /accounting/trial-balance
+## 45. GET /accounting/trial-balance
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`

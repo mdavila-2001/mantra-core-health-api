@@ -15,6 +15,7 @@ import { LiabilityService } from './liability.service';
 import { buildAmortizationSchedule } from './liability-amortization';
 import { ACCT } from '../accounting.concepts';
 import {
+  AccountsRepository,
   AssetRepository,
   LiabilityRepository,
   FiscalRepository,
@@ -22,7 +23,9 @@ import {
 import { PracticeTenantLookupService } from '../../practice/services';
 import { LedgerService as BillingLedgerService } from '../../billing/services';
 import { NotificationsService } from '../../messaging/services';
-import { Liabilities } from '../entities';
+import { Liabilities, type Accounts } from '../entities';
+import { AuditTrailService } from '../../audit/services';
+import { toCents, fromCents } from './money';
 import { Appointments, Encounters } from '../../clinical/entities';
 import { Invoices } from '../../billing/entities';
 import { BILL } from '../../billing/billing.concepts';
@@ -41,9 +44,19 @@ import {
   LiabilityCreatedResponseDto,
   LiabilitySummaryDto,
   LiabilityScheduleDto,
+  LiabilityScheduleResponseDto,
   RegisterLiabilityProgressDto,
   ProgressRegisteredResponseDto,
 } from '../dto';
+
+/** Recursos sellados en la cadena WORM cuando cambia su interruptor (T26 · AC-26-8). */
+const ASSET_AUDIT_ENTITY = 'asset';
+const LIABILITY_AUDIT_ENTITY = 'liability';
+
+/** `YYYY-MM-DD` de una fecha de la base, o `null` si no la hay. */
+function toIsoDate(value: Date | undefined): string | null {
+  return value ? value.toISOString().slice(0, 10) : null;
+}
 
 /**
  * Carril 18 — auto-servicio contable del doctor. Es una capa fina sobre
@@ -65,6 +78,8 @@ export class PractitionerAccountingService {
     private readonly assetRepo: AssetRepository,
     private readonly liabilityRepo: LiabilityRepository,
     private readonly fiscalRepo: FiscalRepository,
+    private readonly accountsRepo: AccountsRepository,
+    private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerAccountingService.name);
@@ -378,6 +393,21 @@ export class PractitionerAccountingService {
     return { practiceId: liability.practiceId, code: liability.code };
   }
 
+  /**
+   * La moneda de cada cuenta pedida, en una sola consulta (T26 · AC-26-18).
+   * `assets` y `liabilities` no declaran moneda propia en el modelo canónico
+   * (`diagram_16_accounting.puml`, entidades `assets`/`liabilities`); la que
+   * les corresponde es la de su cuenta contable, `accounts.currency_concept_id`.
+   */
+  private async currencyByAccount(
+    em: EntityManager,
+    accountIds: readonly (string | undefined)[],
+  ): Promise<ReadonlyMap<string, string | null>> {
+    const ids = accountIds.filter((id): id is string => Boolean(id));
+    const cuentas: Accounts[] = await this.accountsRepo.findByIds(em, ids);
+    return new Map(cuentas.map((c) => [c.id, c.currencyConceptId ?? null]));
+  }
+
   /** Los activos de la práctica, para el listado del auto-servicio. */
   async listAssets(
     practiceId: string,
@@ -386,13 +416,27 @@ export class PractitionerAccountingService {
     await this.assertOwnsPractice(actor, practiceId);
     const em = this.em.fork();
     const assets = await this.assetRepo.listByPractice(em, practiceId);
+    const monedas = await this.currencyByAccount(
+      em,
+      assets.map((a) => a.accountId),
+    );
     return assets.map((asset) => ({
       id: asset.id,
       code: asset.code,
       name: asset.name,
       statusConceptId: asset.statusConceptId,
-      bookValue: asset.bookValue,
-      acquisitionCost: asset.acquisitionCost,
+      assetTypeConceptId: asset.assetTypeConceptId ?? null,
+      depreciationMethodConceptId: asset.depreciationMethodConceptId ?? null,
+      accountId: asset.accountId ?? null,
+      currencyConceptId: asset.accountId
+        ? (monedas.get(asset.accountId) ?? null)
+        : null,
+      acquisitionDate: toIsoDate(asset.acquisitionDate),
+      acquisitionCost: asset.acquisitionCost ?? null,
+      usefulLifeMonths: asset.usefulLifeMonths ?? null,
+      salvageValue: asset.salvageValue ?? null,
+      accumulatedDepreciation: asset.accumulatedDepreciation ?? null,
+      bookValue: asset.bookValue ?? null,
       automated: asset.automated,
     }));
   }
@@ -406,18 +450,39 @@ export class PractitionerAccountingService {
     return this.assetService.capitalize(dto, actor);
   }
 
-  /** Prende o apaga la automatización de un activo propio. */
+  /**
+   * Prende o apaga la automatización de un activo propio. Persistente y
+   * auditable (T26 · AC-26-8): la fila guarda quién y cuándo
+   * (`updated_by_user_id`, `updated_at`) y la cadena de auditoría WORM
+   * (CAN-AUDIT-001, la misma que sella cada transición contable en
+   * `LedgerService`) recibe un evento con el valor nuevo en el verbo.
+   */
   async setAssetAutomation(
     assetId: string,
     dto: SetAutomationDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.assertOwnsAsset(actor, assetId);
-    const em = this.em.fork();
-    const asset = await this.assetRepo.setAutomated(em, assetId, dto.automated);
-    if (!asset) {
-      throw new ResourceNotFoundException('Activo no encontrado', { assetId });
-    }
+    await this.em.transactional(async (tx) => {
+      const asset = await this.assetRepo.setAutomated(
+        tx,
+        assetId,
+        dto.automated,
+        actor.id,
+      );
+      if (!asset) {
+        throw new ResourceNotFoundException('Activo no encontrado', {
+          assetId,
+        });
+      }
+      await this.auditTrail.record(tx, actor, {
+        action: dto.automated
+          ? 'ASSET_AUTOMATION_ENABLED'
+          : 'ASSET_AUTOMATION_DISABLED',
+        entity: ASSET_AUDIT_ENTITY,
+        entityId: assetId,
+      });
+    });
   }
 
   /**
@@ -493,16 +558,69 @@ export class PractitionerAccountingService {
     await this.assertOwnsPractice(actor, practiceId);
     const em = this.em.fork();
     const liabilities = await this.liabilityRepo.listByPractice(em, practiceId);
+    const monedas = await this.currencyByAccount(
+      em,
+      liabilities.map((l) => l.accountId),
+    );
     return liabilities.map((liability) => ({
       id: liability.id,
       code: liability.code,
       name: liability.name,
-      creditorName: liability.creditorName,
-      principalAmount: liability.principalAmount,
-      outstandingAmount: liability.outstandingAmount,
+      creditorName: liability.creditorName ?? null,
+      liabilityTypeConceptId: liability.liabilityTypeConceptId ?? null,
+      accountId: liability.accountId ?? null,
+      currencyConceptId: liability.accountId
+        ? (monedas.get(liability.accountId) ?? null)
+        : null,
+      principalAmount: liability.principalAmount ?? null,
+      outstandingAmount: liability.outstandingAmount ?? null,
+      interestRate: liability.interestRate ?? null,
+      startDate: toIsoDate(liability.startDate),
+      dueDate: toIsoDate(liability.dueDate),
       statusConceptId: liability.statusConceptId,
       automated: liability.automated,
     }));
+  }
+
+  /**
+   * El cronograma cuota por cuota de un pasivo propio (T26 · AC-26-10). La
+   * consulta existía en el repositorio (`listSchedules`) y ninguna ruta la
+   * publicaba: era una falta de contrato, no de modelo.
+   */
+  async readLiabilitySchedule(
+    liabilityId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LiabilityScheduleResponseDto> {
+    await this.assertOwnsLiability(actor, liabilityId);
+    const em = this.em.fork();
+    const liability = await this.liabilityRepo.findById(em, liabilityId);
+    if (!liability) {
+      throw new ResourceNotFoundException('Pasivo no encontrado', {
+        liabilityId,
+      });
+    }
+    const [monedas, filas] = await Promise.all([
+      this.currencyByAccount(em, [liability.accountId]),
+      this.liabilityRepo.listSchedules(em, liabilityId),
+    ]);
+    return {
+      liabilityId: liability.id,
+      code: liability.code,
+      principalAmount: liability.principalAmount ?? null,
+      outstandingAmount: liability.outstandingAmount ?? null,
+      currencyConceptId: liability.accountId
+        ? (monedas.get(liability.accountId) ?? null)
+        : null,
+      schedule: filas.map((fila) => ({
+        id: fila.id,
+        installmentNumber: fila.installmentNumber,
+        dueDate: toIsoDate(fila.dueDate) ?? undefined,
+        principalDue: fila.principalDue,
+        interestDue: fila.interestDue,
+        paidAmount: fila.paidAmount ?? '0.00',
+        statusConceptId: fila.statusConceptId,
+      })),
+    };
   }
 
   /**
@@ -582,24 +700,33 @@ export class PractitionerAccountingService {
     });
   }
 
-  /** Prende o apaga la automatización de un pasivo propio. */
+  /** Prende o apaga la automatización de un pasivo propio. Auditable como en activos (AC-26-8). */
   async setLiabilityAutomation(
     liabilityId: string,
     dto: SetAutomationDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.assertOwnsLiability(actor, liabilityId);
-    const em = this.em.fork();
-    const liability = await this.liabilityRepo.setAutomated(
-      em,
-      liabilityId,
-      dto.automated,
-    );
-    if (!liability) {
-      throw new ResourceNotFoundException('Pasivo no encontrado', {
+    await this.em.transactional(async (tx) => {
+      const liability = await this.liabilityRepo.setAutomated(
+        tx,
         liabilityId,
+        dto.automated,
+        actor.id,
+      );
+      if (!liability) {
+        throw new ResourceNotFoundException('Pasivo no encontrado', {
+          liabilityId,
+        });
+      }
+      await this.auditTrail.record(tx, actor, {
+        action: dto.automated
+          ? 'LIABILITY_AUTOMATION_ENABLED'
+          : 'LIABILITY_AUTOMATION_DISABLED',
+        entity: LIABILITY_AUDIT_ENTITY,
+        entityId: liabilityId,
       });
-    }
+    });
   }
 
   /**
@@ -629,9 +756,11 @@ export class PractitionerAccountingService {
 
     const principalComponent = schedule.principalDue ?? '0.00';
     const interestComponent = schedule.interestDue ?? '0.00';
-    const amount = (
-      Number(principalComponent) + Number(interestComponent)
-    ).toFixed(2);
+    // Centésimas enteras, nunca `float`: es la misma aritmética con la que
+    // `payLiability` valida principal + interés == importe (AC-26-12).
+    const amount = fromCents(
+      toCents(principalComponent) + toCents(interestComponent),
+    );
 
     const resultado = await this.liabilityService.payLiability(
       liabilityId,

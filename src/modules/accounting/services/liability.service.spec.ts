@@ -104,5 +104,108 @@ describe('LiabilityService', () => {
       // 1 posteo principal + 1 posteo interés
       expect(d.liabilityRepo.createPosting).toHaveBeenCalledTimes(2);
     });
+
+    it('el pago de una cuota reduce el saldo exactamente en su componente de capital (AC-26-12)', async () => {
+      const d = build();
+      const liability = {
+        id: 'l1',
+        code: 'LIAB-1',
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        accountId: 'liab-acc',
+        outstandingAmount: '1200.00',
+        updatedAt: new Date(),
+      };
+      d.liabilityRepo.findById.mockResolvedValue(liability);
+      const schedule = {
+        id: 's1',
+        liabilityId: 'l1',
+        installmentNumber: 1,
+        paidAmount: undefined,
+        statusConceptId: ACCT.LIAB_SCHEDULE_PENDING,
+        updatedAt: new Date(),
+      };
+      d.liabilityRepo.findScheduleById.mockResolvedValue(schedule);
+
+      const dto = {
+        practiceId: 'p1',
+        amount: '412.00',
+        principalComponent: '400.00',
+        interestComponent: '12.00',
+        bankAccountId: 'bank',
+        interestExpenseAccountId: 'int-exp',
+        liabilityScheduleId: 's1',
+      };
+      const res = await d.service.payLiability('l1', dto as any, actor);
+
+      // 1200.00 - 400.00 (capital), no - 412.00 (importe total).
+      expect(res.outstandingAmount).toBe('800.00');
+      expect(res.liabilityStatus).toBe(ACCT.LIABILITY_ACTIVE);
+      expect(schedule.paidAmount).toBe('412.00');
+      expect(schedule.statusConceptId).toBe(ACCT.LIAB_SCHEDULE_PAID);
+      // La cuota se lee bloqueada (FOR UPDATE) dentro de la transacción.
+      expect(d.liabilityRepo.findScheduleById).toHaveBeenCalledWith(
+        d.tx,
+        's1',
+        { forUpdate: true },
+      );
+    });
+
+    it('no paga dos veces la misma cuota: la segunda vez responde 422 y no crea pago ni asiento (AC-26-13)', async () => {
+      const d = build();
+      d.liabilityRepo.findById.mockResolvedValue({
+        id: 'l1',
+        code: 'LIAB-1',
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        accountId: 'liab-acc',
+        outstandingAmount: '800.00',
+        updatedAt: new Date(),
+      });
+      d.liabilityRepo.findScheduleById.mockResolvedValue({
+        id: 's1',
+        liabilityId: 'l1',
+        installmentNumber: 1,
+        paidAmount: '412.00',
+        statusConceptId: ACCT.LIAB_SCHEDULE_PAID,
+      });
+      await expect(
+        d.service.payLiability(
+          'l1',
+          {
+            ...payDto,
+            amount: '412.00',
+            principalComponent: '400.00',
+            interestComponent: '12.00',
+            liabilityScheduleId: 's1',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.posting.post).not.toHaveBeenCalled();
+      expect(d.liabilityRepo.createPayment).not.toHaveBeenCalled();
+    });
+
+    it('rechaza (404) una cuota que pertenece a otro pasivo', async () => {
+      const d = build();
+      d.liabilityRepo.findById.mockResolvedValue({
+        id: 'l1',
+        code: 'LIAB-1',
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        accountId: 'liab-acc',
+        outstandingAmount: '800.00',
+      });
+      d.liabilityRepo.findScheduleById.mockResolvedValue({
+        id: 's9',
+        liabilityId: 'otro',
+        statusConceptId: ACCT.LIAB_SCHEDULE_PENDING,
+      });
+      await expect(
+        d.service.payLiability(
+          'l1',
+          { ...payDto, liabilityScheduleId: 's9' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.posting.post).not.toHaveBeenCalled();
+    });
   });
 });

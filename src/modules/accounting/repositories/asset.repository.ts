@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode } from '@mikro-orm/core';
 import {
   Assets,
   AssetComponents,
@@ -8,7 +9,7 @@ import {
   AssetPostings,
   AssetDepreciations,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Acceso a activos fijos y sus dependientes (UC-16-10 / UC-16-11). */
 @Injectable()
@@ -41,19 +42,34 @@ export class AssetRepository {
   }
 
   /**
-   * Ejecuta la operación active assets.
+   * Los activos activos de una práctica, para la corrida de depreciación.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practiceId - Identificador de practice.
    * @param statusConceptId - Identificador de status concept.
+   * @param options - `assetId` acota a un solo activo (avance manual de FT-26);
+   *   `forUpdate` bloquea las filas (`SELECT … FOR UPDATE`) hasta que cierre la
+   *   transacción, que es lo que serializa dos corridas concurrentes sobre el
+   *   mismo (activo, periodo): la segunda espera acá, y cuando sigue ya ve la
+   *   depreciación que la primera confirmó (T26 · AC-26-5). Sólo tiene sentido
+   *   dentro de `em.transactional`.
    * @returns Resultado de active assets conforme al contrato `Promise<Assets[]>`.
    */
   activeAssets(
     em: EntityManager,
     practiceId: string,
     statusConceptId: string,
+    options: { assetId?: string; forUpdate?: boolean } = {},
   ): Promise<Assets[]> {
-    return em.find(Assets, { practiceId, statusConceptId });
+    return em.find(
+      Assets,
+      {
+        practiceId,
+        statusConceptId,
+        ...(options.assetId ? { id: options.assetId } : {}),
+      },
+      options.forUpdate ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
+    );
   }
 
   /**
@@ -69,21 +85,25 @@ export class AssetRepository {
   }
 
   /**
-   * Enciende o apaga la automatización de un activo (FT-26).
+   * Enciende o apaga la automatización de un activo (FT-26). Deja quién y
+   * cuándo en `updated_by_user_id` / `updated_at` (T26 · AC-26-8): el
+   * interruptor es un hecho contable, no una preferencia del navegador.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador del activo.
    * @param automated - El nuevo valor del interruptor.
+   * @param actorUserId - Quien lo cambia.
    */
   async setAutomated(
     em: EntityManager,
     id: string,
     automated: boolean,
+    actorUserId?: string,
   ): Promise<Assets | null> {
     const asset = await em.findOne(Assets, { id });
     if (!asset) return null;
     asset.automated = automated;
-    asset.updatedAt = new Date();
+    touch(asset, actorUserId);
     await em.flush();
     return asset;
   }

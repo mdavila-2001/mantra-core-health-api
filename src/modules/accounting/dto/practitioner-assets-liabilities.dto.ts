@@ -31,7 +31,14 @@ export class SetAutomationDto {
   automated!: boolean;
 }
 
-/** Una fila del activo o del pasivo, tal como los lista el auto-servicio. */
+/**
+ * Una fila del activo, tal como la lista el auto-servicio (T26 · AC-26-1,
+ * AC-26-14, AC-26-18). Publica lo que se guardó al dar de alta —cuenta, costo,
+ * fecha, vida útil, valor residual— y el avance —depreciación acumulada y
+ * valor en libros— tal como están en `accounting.assets`; nada se calcula
+ * acá. La moneda es la de la cuenta de adquisición (`accounts.currency_concept_id`):
+ * `assets` no declara moneda propia en el modelo canónico.
+ */
 export class AssetSummaryDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
@@ -42,19 +49,51 @@ export class AssetSummaryDto {
   @ApiProperty()
   name!: string;
 
-  @ApiProperty()
+  @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
-  @ApiPropertyOptional({ example: '8500.00' })
-  bookValue?: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  assetTypeConceptId!: string | null;
 
-  @ApiPropertyOptional({ example: '10000.00' })
-  acquisitionCost?: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  depreciationMethodConceptId!: string | null;
+
+  /** La cuenta de adquisición elegida al dar de alta. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  accountId!: string | null;
+
+  /** Moneda de la cuenta de adquisición; `null` si la cuenta no la declara. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  currencyConceptId!: string | null;
+
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  acquisitionDate!: string | null;
+
+  @ApiPropertyOptional({ example: '10000.00', nullable: true })
+  acquisitionCost!: string | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  usefulLifeMonths!: number | null;
+
+  @ApiPropertyOptional({ example: '0.00', nullable: true })
+  salvageValue!: string | null;
+
+  /** Avance: lo ya depreciado, decimal como texto. */
+  @ApiPropertyOptional({ example: '1500.00', nullable: true })
+  accumulatedDepreciation!: string | null;
+
+  @ApiPropertyOptional({ example: '8500.00', nullable: true })
+  bookValue!: string | null;
 
   @ApiProperty()
   automated!: boolean;
 }
 
+/**
+ * Una fila del pasivo (T26 · AC-26-10, AC-26-14, AC-26-18). El avance es
+ * `outstandingAmount` contra `principalAmount`, ambos de `accounting.liabilities`.
+ * La moneda es la de la cuenta contable del pasivo.
+ */
 export class LiabilitySummaryDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
@@ -65,16 +104,36 @@ export class LiabilitySummaryDto {
   @ApiProperty()
   name!: string;
 
-  @ApiPropertyOptional()
-  creditorName?: string;
+  @ApiPropertyOptional({ nullable: true })
+  creditorName!: string | null;
 
-  @ApiPropertyOptional({ example: '5000.00' })
-  principalAmount?: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  liabilityTypeConceptId!: string | null;
 
-  @ApiPropertyOptional({ example: '3200.00' })
-  outstandingAmount?: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  accountId!: string | null;
 
-  @ApiProperty()
+  /** Moneda de la cuenta contable del pasivo; `null` si no la declara. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  currencyConceptId!: string | null;
+
+  @ApiPropertyOptional({ example: '5000.00', nullable: true })
+  principalAmount!: string | null;
+
+  @ApiPropertyOptional({ example: '3200.00', nullable: true })
+  outstandingAmount!: string | null;
+
+  /** Tasa anual, en por ciento, decimal como texto. */
+  @ApiPropertyOptional({ example: '12.00', nullable: true })
+  interestRate!: string | null;
+
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  startDate!: string | null;
+
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  dueDate!: string | null;
+
+  @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
   @ApiProperty()
@@ -171,6 +230,34 @@ export class LiabilityCreatedResponseDto {
   code!: string;
 
   @ApiProperty()
+  schedule!: readonly LiabilityScheduleDto[];
+}
+
+/**
+ * Respuesta de `GET /accounting/practitioner/liabilities/:id/schedule`
+ * (T26 · AC-26-10): el cronograma cuota por cuota, con capital e interés
+ * separados, en orden de `installmentNumber`. El resumen del pasivo viaja
+ * junto para que la pantalla pueda contrastar la suma de `principalDue` con
+ * `principalAmount` (AC-26-11) sin una segunda lectura.
+ */
+export class LiabilityScheduleResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  liabilityId!: string;
+
+  @ApiProperty()
+  code!: string;
+
+  @ApiPropertyOptional({ example: '5000.00', nullable: true })
+  principalAmount!: string | null;
+
+  @ApiPropertyOptional({ example: '3200.00', nullable: true })
+  outstandingAmount!: string | null;
+
+  /** Moneda de la cuenta contable del pasivo, si la declara. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  currencyConceptId!: string | null;
+
+  @ApiProperty({ type: [LiabilityScheduleDto] })
   schedule!: readonly LiabilityScheduleDto[];
 }
 
