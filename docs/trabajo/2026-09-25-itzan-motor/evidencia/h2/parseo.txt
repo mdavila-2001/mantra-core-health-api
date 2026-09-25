@@ -1,0 +1,104 @@
+=== lint (acotado a lo tocado)
+2026-09-25T09:53:54-04:00
+
+src/modules/terminology/import/format-detector.ts
+  1:9  error  Replace `⏎··FormatoNoAdmitidoError,⏎··type·FormatoDeArchivo,⏎` with `·FormatoNoAdmitidoError,·type·FormatoDeArchivo·`  prettier/prettier
+
+src/modules/terminology/import/ndjson-parser.ts
+  59:27  error  Replace `·fila:·numero,·motivo:·'la·línea·no·es·un·JSON·válido'` with `⏎············fila:·numero,⏎············motivo:·'la·línea·no·es·un·JSON·válido',⏎·········`  prettier/prettier
+
+src/modules/terminology/services/row-validator.spec.ts
+   8:45  error  Replace `Buffer.from(csv,·'utf8'),·CONCEPTOS` with `⏎····Buffer.from(csv,·'utf8'),⏎····CONCEPTOS,⏎··`                                                                                   prettier/prettier
+  47:12  error  Replace `problemas.map((problema)·=>·[problema.fila,·problema.columna])).toEqual(⏎······` with `⏎······problemas.map((problema)·=>·[problema.fila,·problema.columna]),⏎····).toEqual(`  prettier/prettier
+  49:1   error  Delete `··`                                                                                                                                                                             prettier/prettier
+  50:1   error  Delete `··`                                                                                                                                                                             prettier/prettier
+  51:7   error  Delete `··`                                                                                                                                                                             prettier/prettier
+  52:1   error  Delete `··`                                                                                                                                                                             prettier/prettier
+  53:1   error  Replace `········` with `······`                                                                                                                                                        prettier/prettier
+  54:5   error  Replace `··],⏎····` with `]`                                                                                                                                                            prettier/prettier
+
+✖ 10 problems (10 errors, 0 warnings)
+  10 errors and 0 warnings potentially fixable with the `--fix` option.
+
+exit=1
+
+=== lint (acotado, tras --fix)
+2026-09-25T09:54:55-04:00
+exit=0
+
+=== typecheck
+2026-09-25T09:55:23-04:00
+exit=0
+
+=== pruebas de lectura de archivos y validación
+2026-09-25T09:56:51-04:00
+(node:23308) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:26512) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 6 passed, 6 total
+Tests:       59 passed, 59 total
+Snapshots:   0 total
+Time:        4.74 s
+Ran all test suites matching src/modules/terminology/import|src/modules/terminology/services/row-validator.
+exit=0
+
+=== regresión del módulo de terminología
+2026-09-25T09:57:12-04:00
+(node:15376) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11240) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 20 passed, 20 total
+Tests:       218 passed, 218 total
+Snapshots:   0 total
+Time:        34.819 s, estimated 116 s
+Ran all test suites matching src/modules/terminology.
+exit=0
+
+=== build
+2026-09-25T09:58:19-04:00
+exit=0
+
+=== registro de parseadores y perfiles
+2026-09-25T10:05:20-04:00
+(node:25220) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        1.096 s
+Ran all test suites matching src/modules/terminology/services/import-parsers.provider.
+exit=0
+
+=== regresión del módulo de terminología (cierre de H2)
+2026-09-25T10:05:51-04:00
+(node:19036) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:23928) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 21 passed, 21 total
+Tests:       224 passed, 224 total
+Snapshots:   0 total
+Time:        14.252 s, estimated 35 s
+Ran all test suites matching src/modules/terminology.
+exit=0
+
+=== cierre de H2: lint de lo tocado, tipos y módulo completo
+2026-09-25T10:06:40-04:00
+lint exit=0
+typecheck exit=0
+(node:42064) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15604) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 21 passed, 21 total
+Tests:       224 passed, 224 total
+Snapshots:   0 total
+Time:        15.162 s
+Ran all test suites matching src/modules/terminology.
+test exit=0
