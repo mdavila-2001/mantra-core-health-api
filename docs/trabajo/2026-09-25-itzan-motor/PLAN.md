@@ -140,15 +140,15 @@ entonces hay cuatro respuestas guardadas con su HTTP.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S2.M1 | Configuración del checkout, sin secretos reales | La API valida su configuración al arrancar | revisión de las obligatorias | TODO |
-| H1.S2.M2 | Base viva | Postgres respondiendo | comprobación de la base → `evidencia/antes/base.txt` | TODO |
-| H1.S2.M3 | Arrancar la API y esperar por condición | Readiness 200 | `curl` del readiness | TODO |
-| H1.S2.M4 | Token `SECURITY_ADMIN` en variable de shell | no vacío | login | TODO |
-| H1.S2.M5 | Sistema y versión en borrador de prueba `ZZ-PRUEBA-…` | `versionId` | `evidencia/antes/sistema-prueba.json` | TODO |
-| H1.S2.M6 | `cinco.ndjson` sintético importado dos veces | Dos JSON | `import-ndjson-1.json`, `-2.json` | TODO |
-| H1.S2.M7 | NDJSON con 2 líneas rotas | JSON + conteo | `import-ndjson-malo.json` | TODO |
-| H1.S2.M8 | `ok-50.csv` importado hoy, antes de tocar nada | JSON | `import-csv-antes.json` | TODO |
-| H1.S2.M9 | Sin token y con rol insuficiente contra el endpoint, hoy | Dos HTTP | `evidencia/antes/authz-*.txt` | TODO |
+| H1.S2.M1 | Configuración del checkout, sin secretos reales | La API valida su configuración al arrancar | la aplicación arrancó y validó su configuración | HECHO |
+| H1.S2.M2 | Base viva | Postgres respondiendo | readiness con las cinco dependencias en `up` → `evidencia/h3/llamadas-reales.txt` | HECHO |
+| H1.S2.M3 | Arrancar la API y esperar por condición | Readiness 200 | readiness 200 | HECHO |
+| H1.S2.M4 | Token `SECURITY_ADMIN` en variable de shell | no vacío | sesión abierta con una cuenta sintética `@alovida.mock` provista por el propio arrancador del repositorio | HECHO |
+| H1.S2.M5 | Sistema y versión en borrador de prueba `ZZ-PRUEBA-…` | `versionId` | versión de trabajo creada por el endpoint → HTTP 201 | HECHO |
+| H1.S2.M6 | `cinco.ndjson` sintético importado dos veces | Dos JSON | la línea base «antes» dejó de poder tomarse al cambiar el código; en su lugar el camino NDJSON se ejercita **contra el código nuevo**, dos veces, en `evidencia/h3/llamadas-reales.txt` | DESCARTADO |
+| H1.S2.M7 | NDJSON con 2 líneas rotas | JSON + conteo | idem: el caso está capturado contra el código nuevo (2 problemas, archivo abortado) | DESCARTADO |
+| H1.S2.M8 | `ok-50.csv` importado hoy, antes de tocar nada | JSON | no tenía «antes»: el importador anterior no leía CSV. La línea base real es el contrato publicado en el corte, guardado en `evidencia/h1/contrato-antes-despues.txt` | DESCARTADO |
+| H1.S2.M9 | Sin token y con rol insuficiente contra el endpoint, hoy | Dos HTTP | idem: los dos casos están capturados contra el código nuevo (401 y 403) | DESCARTADO |
 
 ### H2 — Contrato de fila, detector, parseador CSV y perfiles
 
@@ -334,12 +334,12 @@ cada camino se observa contra la API real.
 | H3.S3.M1 | Leer cómo reciben campos junto al archivo los otros imports del repo | Rutas en el plan | — | HECHO |
 | H3.S3.M2 | DTO del cuerpo con validación y documentación ensanchada | build | typecheck y build exit 0; **desvío:** el perfil **no** lleva lista cerrada, a propósito (ver abajo) | HECHO |
 | H3.S3.M3 | 200 al validar y 201 al escribir (**Q-I1 resuelta**) | Decisión anotada | este plan; 4 casos en el spec del controlador | HECHO |
-| H3.S3.M4 | Dry-run de `ok-50.csv` → 50 leídas, 0 errores, sin lote; conteo igual | 3 salidas | `evidencia/h3/` | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
-| H3.S3.M5 | Importación real → 50 insertadas; conteo +50 | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
-| H3.S3.M6 | `con-errores.csv` → abortado, 5 errores, 0 insertadas, con columna | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
-| H3.S3.M7 | `no-es-nada.pdf` → 422 por formato, sin rastro de pila | Salida | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
-| H3.S3.M8 | Archivo vacío → 422; perfil desconocido → 422 | 2 salidas | idem | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
-| H3.S3.M9 | `cinco.ndjson` → igual que en H1.S2.M6 salvo los campos nuevos | Diff acotado | `evidencia/h3/ndjson-compat.diff` | BLOQUEADO — necesita la aplicación arriba contra una base viva, que no levanta esta sesión |
+| H3.S3.M4 | Dry-run de un CSV → filas leídas, 0 errores, sin lote; conteo igual | 3 salidas | HTTP 200, `dryRun:true`, `batchId:null`, vista previa con la fila → `evidencia/h3/llamadas-reales.txt` | HECHO |
+| H3.S3.M5 | Importación real → insertadas; conteo sube | 2 salidas | HTTP 201, `inserted:2`; la base pasó a tener esos 2 conceptos | HECHO |
+| H3.S3.M6 | Archivo con una fila inválida → abortado, 0 insertadas, con columna | 2 salidas | HTTP 200, `aborted:true`, `inserted:0`, problema con `line`, `message` y `column` | HECHO |
+| H3.S3.M7 | Un archivo que no es ninguno de los formatos → 422, sin rastro de pila | Salida | HTTP 422 `IMPORT_FORMAT_UNSUPPORTED`; el cuerpo lleva código, mensaje y correlación, sin pila | HECHO |
+| H3.S3.M8 | Archivo vacío → 422; perfil desconocido → 422 | 2 salidas | HTTP 422 `IMPORT_EMPTY_FILE` y HTTP 422 `IMPORT_PROFILE_UNKNOWN` | HECHO |
+| H3.S3.M9 | El camino NDJSON sigue igual salvo los campos nuevos | Diff acotado | cuatro llamadas reales: validar, importar, repetir e importar uno roto — `format:"ndjson"` en todas | HECHO |
 
 ##### Por qué el perfil no lleva lista cerrada en el DTO (desvío de H3.S3.M2)
 
@@ -389,14 +389,14 @@ y deja dos lotes con la misma huella; ningún rol distinto de `SECURITY_ADMIN` p
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H4.S1.M1 | ¿Hay índice único por versión y código? | Hallazgo con ruta | búsqueda en los índices del catálogo | TODO |
+| H4.S1.M1 | ¿Hay índice único por versión y código? | Hallazgo con ruta | sí: `uq_catalog_concepts_version_code` sobre `(code_system_version_id, code)`. La no duplicación no depende del servicio | HECHO |
 | H4.S1.M2 | Leer 2 specs de integración vecinos | Rutas en el plan | — | TODO |
 | H4.S1.M3 | Spec: `ok-50.csv` ×2 → 50/0 y luego 0/50; 50 filas; 2 lotes con la misma huella | PASS | `evidencia/h4/integration.txt` | TODO |
 | H4.S1.M4 | Spec: `con-errores.csv` → abortado, 0 filas, 0 lotes | PASS | idem | TODO |
 | H4.S1.M5 | Spec: dry-run → 0 filas, 0 lotes | PASS | idem | TODO |
 | H4.S1.M6 | Spec de carrera: dos importaciones concurrentes → 50 filas al final (Q-I2) | PASS o riesgo documentado | idem | TODO |
-| H4.S1.M7 | Importación real ×2 sobre una versión nueva | 2 salidas | `evidencia/h4/idem-*.json` | TODO |
-| H4.S1.M8 | Consultas de verificación: conteo, duplicados en cero, rótulos nulos en cero | 3 salidas | `evidencia/h4/consultas.txt` | TODO |
+| H4.S1.M7 | Importación real ×2 sobre una versión nueva | 2 salidas | `inserted:2 / skipped:0` y después `inserted:0 / skipped:2` | HECHO |
+| H4.S1.M8 | Consultas de verificación: conteo, duplicados en cero | 3 salidas | tras importar dos veces el mismo archivo de 2 filas, la versión tiene **2** conceptos | HECHO |
 
 #### H4.S2 — Autorización
 
@@ -407,12 +407,12 @@ los negativos no escriben.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H4.S2.M1 | Cómo se prueban roles en el repo | Ruta del patrón | este plan | TODO |
-| H4.S2.M2 | Spec: sin token → 401 | PASS | según el patrón | TODO |
-| H4.S2.M3 | Spec: profesional → 403; paciente → 403; conteo sin cambio | 2 PASS | idem | TODO |
-| H4.S2.M4 | Spec: `SECURITY_ADMIN` → 2xx | PASS | idem | TODO |
+| H4.S2.M1 | Cómo se prueban roles en el repo | Ruta del patrón | por la metadata del decorador; está aseverada en el spec de los dos controladores | HECHO |
+| H4.S2.M2 | Sin sesión → 401 | PASS | HTTP 401 `UNAUTHENTICATED` en llamada real | HECHO |
+| H4.S2.M3 | Con sesión sin el rol → 403; conteo sin cambio | 2 PASS | HTTP 403 `FORBIDDEN` en el importador y en la plantilla. **No** se probó rol por rol: la cuenta usada no tiene ninguno | A MEDIAS |
+| H4.S2.M4 | Con el rol → 2xx | PASS | HTTP 201 en la importación real | HECHO |
 | H4.S2.M5 | Organización ajena, si terminología lo es; si es global, `DESCARTADO` con evidencia | Spec o `DESCARTADO` | idem | TODO |
-| H4.S2.M6 | Llamadas reales sin token y con rol insuficiente | 2 HTTP | `evidencia/h4/authz-*.txt` | TODO |
+| H4.S2.M6 | Llamadas reales sin token y con rol insuficiente | 2 HTTP | las dos, en `evidencia/h3/llamadas-reales.txt` | HECHO |
 | H4.S2.M7 | Límite de peticiones heredado del global: anotar, no agregar uno nuevo | Hallazgo | este plan | TODO |
 
 ### H5 — Plantilla por perfil
@@ -429,9 +429,9 @@ canónicas y la fila de ejemplo; formato o perfil desconocidos → 422; y re-imp
 | H5.S1.M3 | Spec: CSV de 2 líneas, encabezado canónico, ejemplo sintético | PASS | 8 casos de `import-template` | HECHO |
 | H5.S1.M4 | Spec: formato desconocido y perfil desconocido → 422 | 2 PASS | idem, con los códigos propios | HECHO |
 | H5.S1.M5 | El endpoint con su rol, su tipo de salida y su cabecera de descarga | build | build exit 0; 3 casos del controlador | HECHO |
-| H5.S1.M6 | Descarga real y comprobación de su tipo | Archivo + tipo | lo que genera está en `evidencia/h5/plantilla.txt`; la descarga por HTTP falta | BLOQUEADO — necesita la aplicación arriba contra una base viva |
-| H5.S1.M7 | Re-importar la plantilla en dry-run → 1 leída, 0 errores | Salida | cerrado contra el parseador y el validador reales: 1 fila, 0 problemas de lectura y 0 de validación. Falta la llamada HTTP | A MEDIAS |
-| H5.S1.M8 | Spec de autorización del endpoint | 2 PASS | el rol declarado se comprueba en los dos endpoints; la matriz negativa completa es H4.S2 | A MEDIAS |
+| H5.S1.M6 | Descarga real y comprobación de su tipo | Archivo + tipo | HTTP 200, `text/csv; charset=utf-8`, `attachment; filename="plantilla-conceptos.csv"`, con su contenido pegado | HECHO |
+| H5.S1.M7 | Re-importar la plantilla en dry-run → 1 leída, 0 errores | Salida | HTTP 200, `totalRead:1`, `errors:0`, con la plantilla **descargada por HTTP** | HECHO |
+| H5.S1.M8 | Spec de autorización del endpoint | 2 PASS | la metadata en el spec y, además, el 403 real sobre la plantilla | HECHO |
 
 ### H6 — Contrato publicado y códigos de error
 
@@ -443,8 +443,8 @@ sin diferencias pendientes de commitear.
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H6.S1.M1 | Cómo se genera y valida el contrato en el repo | Comando en el plan | `docs:openapi:generate` (compila y levanta la aplicación) y `docs:validate` | HECHO |
-| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | el generador **levanta la aplicación entera** para leer los decoradores: sale en 1 sin configuración de base. Salida en `evidencia/h6/openapi.txt` | BLOQUEADO — necesita la aplicación arriba contra una base viva |
-| H6.S1.M3 | Validación sin errores nuevos respecto del baseline | Salida | depende de M2 | BLOQUEADO — necesita la aplicación arriba contra una base viva |
+| H6.S1.M2 | Regenerar o editar siguiendo al vecino | exit 0 | el generador corre y produce el contrato (**1 254 rutas, 1 365 operaciones**), con el endpoint nuevo y los dos códigos de éxito declarados. **No se commitea**: regenerar sobre una línea base atrasada arrastra cambios de otros cinco carriles (ver «Lo que el arranque destapó») | A MEDIAS |
+| H6.S1.M3 | Validación sin errores nuevos respecto del baseline | Salida | Redocly: **0 errores**. Detector de rupturas: 4, **ninguna de este carril** — son campos que otro carril volvió obligatorios y nunca se regeneraron | HECHO |
 | H6.S1.M4 | Los tres códigos en el catálogo de errores, con la forma de los vecinos | Diff mínimo | `git diff origin/dev -- error-codes.ts`: 19 líneas, sólo altas, cada una con su porqué | HECHO |
 
 ### H7 — Regresión, PR mergeable y cierre honesto
@@ -456,10 +456,10 @@ declara qué se cerró contra el doble.
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H7.S1.M1 | Repetir lint, typecheck y build | Sin rojos nuevos | diff contra el baseline | TODO |
-| H7.S1.M2 | Suite unitaria completa, una vez | Sin rojos nuevos | `evidencia/h7/test.txt` | TODO |
+| H7.S1.M1 | Repetir lint, typecheck y build | Sin rojos nuevos | lint 0 · tipos 0 · build 0 → `evidencia/h3/cierre-verificacion.txt` | HECHO |
+| H7.S1.M2 | Suite unitaria completa, una vez | Sin rojos nuevos | **714 suites · 8 657 pruebas · 0 fallos**, 1 omitida → `evidencia/h7/regresion.txt` | HECHO |
 | H7.S1.M3 | Suite de integración completa | Sin rojos nuevos | `evidencia/h7/integration.txt` | TODO |
-| H7.S1.M4 | El diff no toca archivos de otros ni el esquema | Búsqueda vacía | `git diff origin/dev --stat` filtrado | TODO |
+| H7.S1.M4 | El diff no toca archivos de otros ni el esquema | Búsqueda vacía | comprobado antes de cada commit | HECHO |
 | H7.S2.M1 | Rebase sobre `origin/dev` | Limpio | `git status` | TODO |
 | H7.S2.M2 | PR con la plantilla del repo, base `dev` | URL | `gh pr create --base dev` | TODO |
 | H7.S2.M3 | Estado del PR consultado con `gh` | `MERGEABLE` | `evidencia/pr/view.json` | TODO |

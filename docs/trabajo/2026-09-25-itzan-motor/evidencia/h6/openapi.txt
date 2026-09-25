@@ -1,9 +1,9 @@
 === docs:openapi:generate
 2026-09-25T10:38:26-04:00
 Fallo generando OpenAPI: Error: Configuración de base de datos inválida: "DB_HOST" is required. "DB_PORT" is required. "DB_USER" is required. "DB_PASSWORD" is required. "DB_NAME" is required
-    at loadOrmEnv (C:\wt\api-carga-masiva\dist\src\orm\config\orm.env.js:64:15)
-    at buildOrmConfig (C:\wt\api-carga-masiva\dist\src\orm\config\orm.config.js:12:56)
-    at Object.<anonymous> (C:\wt\api-carga-masiva\dist\src\orm\config\orm.config.js:54:19)
+    at loadOrmEnv (dist\src\orm\config\orm.env.js:64:15)
+    at buildOrmConfig (dist\src\orm\config\orm.config.js:12:56)
+    at Object.<anonymous> (dist\src\orm\config\orm.config.js:54:19)
     at Module._compile (node:internal/modules/cjs/loader:1929:14)
     at Object..js (node:internal/modules/cjs/loader:2060:10)
     at Module.load (node:internal/modules/cjs/loader:1651:32)

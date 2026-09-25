@@ -1,13 +1,17 @@
 # Reporte — Motor de la carga masiva de terminología
 
-> **AVANCE: 60 / 110 — 54,5 %.**
+> **AVANCE: 85 / 110 — 77,3 %.**
 
 - Fecha: 2026-09-25 · Plan: [PLAN.md](./PLAN.md) · Rama: `itzan/carga-masiva-motor-2026-09-25` · Base: `dev`
 - Corte: `origin/dev` @ `343795cc2d08745692f491c50e81427215043315`
-- Peldaño de evidencia alcanzado (regla 30): **`TESTED`** para el trabajo en conjunto, que es el más bajo de
-  sus áreas. Todo lo escrito tiene pruebas dirigidas en verde —21 suites y 240 pruebas del módulo, con lint y
-  comprobación de tipos en 0 y la compilación en 0—, y **ninguna área llegó a `VERIFIED`**: nada se ejercitó todavía contra la
-  aplicación atendiendo peticiones, que es lo único que prueba el camino completo.
+- Peldaño de evidencia alcanzado (regla 30): **`VERIFIED`** para el motor y la plantilla. El endpoint se
+  ejercitó contra la aplicación atendiendo peticiones, con la base respondiendo: **18 comprobaciones, todas
+  en verde**, incluidas la no duplicación contada en base y la matriz de autorización. Debajo: lint 0, tipos
+  0, compilación 0, **23 suites y 252 pruebas** del módulo, y la suite completa del repositorio en **714
+  suites · 8 657 pruebas · 0 fallos**.
+- **No llega a `REGRESSION_VERIFIED`**, y por dos motivos distintos: no se escribieron las pruebas de
+  integración que harían que una regresión futura se note sola, y **el contrato publicado no viaja en la
+  entrega** (abajo, «Lo que el arranque destapó»).
 
 > Reporte en curso: el trabajo sigue abierto y este archivo se actualiza al cerrar cada microtarea.
 
@@ -27,7 +31,11 @@
 | H3.S3.M1–M3 | El endpoint recibe `dryRun` y `profile` del formulario y decide su estado: 201 si escribió, 200 si validó o si rechazó | pruebas del controlador | PASS · 4 casos de estado y delegación |
 | H5 | Plantilla descargable por perfil, generada desde el mismo perfil que después lee el importador | pruebas de `import-template` y del controlador | PASS · 11 casos, incluida la que vuelve a leer la plantilla con el parseador real y exige cero problemas |
 | H6.S1.M4 | Los tres códigos de error en el catálogo, con la forma de los vecinos | `git diff origin/dev -- error-codes.ts` | PASS · 19 líneas, sólo altas, cada una con su porqué |
-| Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h5/plantilla.txt` |
+| H3.S3 · H4 · H5 | El endpoint ejercitado de verdad: importa, valida sin escribir, aborta entero, rechaza lo que no puede leer, no duplica, y sólo lo atiende quien tiene el rol | llamadas reales contra la aplicación | PASS · **18 comprobaciones en verde** · `evidencia/h3/llamadas-reales.txt` |
+| H4.S1 | La no duplicación no depende del servicio: la base tiene `uq_catalog_concepts_version_code` sobre (versión, código) | consulta de índices | PASS · importar dos veces el mismo archivo de 2 filas deja **2** conceptos |
+| H6.S1.M2–M3 | El contrato se regenera desde el código y valida | generador del repositorio y Redocly | PASS · 1 254 rutas · **0 errores** de Redocly · los dos códigos de éxito del endpoint declarados |
+| H7.S1 | Regresión completa del repositorio | suite unitaria entera | PASS · **714 suites · 8 657 pruebas · 0 fallos** · `evidencia/h7/regresion.txt` |
+| Cierre | Las cuatro etapas sobre todo lo escrito | lint del módulo, tipos del proyecto, compilación, pruebas del módulo | PASS · 0 · 0 · 0 · **23 suites, 252 pruebas** · `evidencia/h3/cierre-verificacion.txt` |
 
 ## A medias
 
@@ -38,33 +46,36 @@
   reconoce pero todavía no tiene quien lo lea— y no confunde una propiedad heredada del prototipo con un
   perfil.
 - **Qué no anda:** nada observado.
-- **Qué falta exactamente:** verlo resuelto por la aplicación al arrancar. La compilación sale en 0; el
-  arranque se observa en H3.S3.
+- **Qué falta exactamente:** nada. La aplicación arrancó y resolvió el módulo entero, y el endpoint
+  respondió usando ese registro: quedó observado.
 - **Dónde quedó:** `terminology.module.ts` y `services/import-parsers.provider.ts`, commiteados.
 
-### H3.S3 — el endpoint contra la aplicación viva
+### H4 — la protección contra la regresión
 
-- **Qué anda:** el controlador recibe los dos campos del formulario, los pasa al importador y fija el estado
-  de la respuesta. Los cuatro casos del spec cubren los tres niveles del contrato: escribió (201), validó
-  (200), rechazó (200) y sin archivo (rechazo sin llamar al importador).
+- **Qué anda:** la idempotencia y la matriz de autorización están **comprobadas contra la aplicación viva**,
+  y el conteo en base lo confirma.
 - **Qué no anda:** nada observado.
-- **Qué falta exactamente:** las seis llamadas reales —validación, importación, archivo con errores, formato
-  no admitido, archivo vacío y perfil inexistente— con el conteo de filas antes y después de cada una. Y con
-  ellas, tres cosas que un doble no puede mostrar: el estado que termina escribiendo el marco, la conversión
-  del campo de formulario a booleano, y el tope de tamaño de la subida.
-- **Dónde quedó:** `controllers/terminology-versions.controller.ts` y su spec, commiteados. Compila y las
-  pruebas del módulo pasan enteras.
+- **Qué falta exactamente:** escribir esas mismas comprobaciones como pruebas de integración del
+  repositorio. Sin ellas, lo verificado hoy no queda protegido: una regresión futura no se nota sola.
+- **Dónde quedó:** la evidencia de las llamadas, en `evidencia/h3/llamadas-reales.txt`.
+
+### H4.S2.M3 — la matriz negativa, rol por rol
+
+- **Qué anda:** una sesión **sin** el rol recibe 403, tanto en la importación como en la descarga de la
+  plantilla.
+- **Qué no anda:** nada observado.
+- **Qué falta exactamente:** probarlo con un rol concreto de cada clase —profesional y paciente—, no con una
+  cuenta sin ningún rol.
+- **Dónde quedó:** en la misma evidencia.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S2 completo | BLOQUEADO | La aplicación arriba contra una base viva, para guardar cómo responde el endpoint **antes** del cambio. El corte es inmutable, así que esa captura no se pierde: se toma desde `343795cc` cuando se pueda |
-| H3.S3.M4–M9 | BLOQUEADO | Lo mismo. Cerrado contra un doble en los tres niveles mientras tanto (ver el plan, «Lo que quedó BLOQUEADO») |
-| H5.S1.M6–M7 | BLOQUEADO / A MEDIAS | La descarga por HTTP. Lo que la plantilla genera ya está guardado, y que el importador la vuelva a leer sin un problema está probado contra el parseador real |
-| H6.S1.M2–M3 | BLOQUEADO | El generador del contrato publicado **levanta la aplicación entera** para leer los decoradores; sin configuración de base sale en 1 |
-| H4 completo | BLOQUEADO | Postgres y la aplicación: la idempotencia y la matriz negativa de autorización sólo se miden ejecutándolas |
-| H7 | TODO | La regresión completa se puede correr ya. El PR **no puede quedar en verde antes que H6**: el contrato publicado se regenera y se compara en el propio gate del repo, así que un cambio de contrato sin regenerar lo deja en rojo |
+| H4.S1.M2–M6 | TODO | Escribir las pruebas de integración del importador. El comportamiento ya está comprobado a mano; falta dejarlo protegido |
+| H4.S2.M5 | TODO | Si la terminología es global o tiene dueño organizacional; la respuesta decide si el caso existe |
+| H7.S1.M3 | TODO | Correr la suite de integración completa |
+| H7.S2 | TODO | El PR. Depende de qué se decida sobre el contrato publicado (abajo) **y** de que se corrija el defecto ajeno que impide arrancar la aplicación en la rama de integración |
 
 ## Evidencia
 
@@ -76,9 +87,17 @@ $ comprobación de tipos del proyecto entero
 exit=0
 
 $ pruebas del módulo de terminología
-Test Suites: 21 passed, 21 total
-Tests:       240 passed, 240 total
+Test Suites: 23 passed, 23 total
+Tests:       252 passed, 252 total
 exit=0
+
+$ suite completa del repositorio
+Test Suites: 1 skipped, 714 passed, 714 of 715 total
+Tests:       1 skipped, 8657 passed, 8658 total
+exit=0
+
+$ el endpoint contra la aplicación atendiendo peticiones
+18 comprobaciones · 18 PASS · 0 FAIL
 ```
 
 Índice de `evidencia/`:
@@ -91,25 +110,87 @@ exit=0
 | `h2/parseo.txt` | Las cuatro etapas sobre la lectura por formato y la validación |
 | `h3/servicio.txt` | Las tres etapas sobre el servicio ensanchado y el endpoint |
 | `h5/plantilla.txt` | Las cuatro etapas de la plantilla, y el archivo exacto que genera |
-| `h6/openapi.txt` | Por qué el contrato publicado no se pudo regenerar, con la salida literal |
+| `h6/openapi.txt` | El primer intento de regenerar el contrato, y por qué falló |
+| `h1/contrato-antes-despues.txt` | El contrato publicado del endpoint en el corte y ahora: qué códigos y qué campos gana |
+| `h3/llamadas-reales.txt` | Las 18 comprobaciones contra la aplicación viva, con su código y su cuerpo |
+| `h3/cierre-verificacion.txt` | Lint, tipos y pruebas del módulo al cerrar |
+| `h6/openapi-generado.txt` | La regeneración del contrato: qué la impedía y su salida al lograrlo |
+| `h6/validacion.txt` | Redocly y el detector de cambios incompatibles, con su salida literal |
+| `h6/artefactos.txt` | El resto de los artefactos generados que el gate compara |
+| `h7/regresion.txt` | La suite completa del repositorio |
 
 ## No cubierto
 
-- **Nada se ejercitó contra la aplicación atendiendo peticiones.** Todo lo medido son pruebas dirigidas con
-  el contexto de persistencia doblado: prueban el comportamiento del servicio, no que el camino HTTP
-  completo funcione.
-- **El estado HTTP no está observado.** El spec comprueba que el controlador lo pide; que el marco lo
-  escriba en la respuesta es otra cosa.
-- **La conversión del campo de formulario no está observada.** En `multipart/form-data` todo campo viaja
-  como texto y hay una transformación que lo lee como booleano; sólo una petición real la ejercita.
-- **La idempotencia contra Postgres no se midió.** El mismo archivo dos veces se prueba en H4.
-- **El rechazo por rol no se midió.** La matriz negativa de autorización es H4.S2.
+- **Lo verificado no quedó protegido.** Las 18 comprobaciones se hicieron contra la aplicación viva, a mano.
+  No están escritas como pruebas de integración del repositorio, así que una regresión futura no se nota
+  sola. Es lo que falta para `REGRESSION_VERIFIED`.
+- **La suite de integración completa no se corrió.**
+- **La matriz negativa no se probó rol por rol.** Se probó que una sesión sin el rol recibe 403; con un
+  profesional y con un paciente concretos, no.
+- **Dos importaciones a la vez no se probaron.** La no duplicación está garantizada por el índice único de
+  la base, no por una carrera observada.
+- **El tope de tamaño de la subida no se ejercitó.** Está declarado y es el mismo que el resto del
+  repositorio; no se mandó un archivo que lo supere.
 - **El formato de planilla se reconoce pero no se lee.** El parseador llega por otro carril y se suma a la
   lista sin tocar nada de lo entregado.
 - **El perfil `designaciones` queda fuera de este carril** (Q-9, resuelta en el plan con su evidencia).
-- **El contrato publicado no se regeneró**, así que todavía no muestra los campos nuevos ni los tres códigos.
+- **El contrato publicado no viaja en la entrega**, por lo que se explica abajo.
 - **La plantilla en formato de planilla no se genera.** Necesita la misma dependencia que el parseador, que
   llega por otro carril; pedirla hoy se rechaza con su código, igual que importar una.
+
+## Lo que el arranque destapó — dos defectos en la rama de integración, ninguno de este carril
+
+Verificar exigía arrancar la aplicación. No arrancaba, y el motivo no era de acá.
+
+### 1. La aplicación no arranca desde `dev`
+
+`src/modules/insurance/services/practitioner-settlement-batches.service.ts:2` importa el
+`EntityManager` **como tipo**:
+
+```ts
+import type { EntityManager } from '@mikro-orm/postgresql';
+```
+
+Un `import type` se borra al compilar, así que el primer parámetro del constructor queda anotado como
+`Function` y el contenedor de dependencias no tiene qué inyectar. La aplicación muere al instanciar el
+módulo, antes de atender nada:
+
+```text
+Nest can't resolve dependencies of the PractitionerSettlementBatchesService
+(?, SettlementRepository, CatalogRepository, LinkedClaimAccessService, PracticeTenantLookupService).
+Please make sure that the argument Function at index [0] is available in the InsuranceModule module.
+```
+
+Se ve en lo compilado, comparado con un vecino sano del mismo módulo:
+
+```text
+practitioner-settlement-batches.service.js:  design:paramtypes", [Function, repositories_1.SettlementRepository, …
+insurance-catalog.service.js:                design:paramtypes", [postgresql_1.EntityManager]
+```
+
+**Alcance:** el archivo es **idéntico en `origin/dev`** (`git diff origin/dev` sobre él sale vacío), así que
+el fallo es de la rama de integración, no de esta rama. Y el paso del gate que genera el contrato OpenAPI
+arranca la aplicación exactamente igual: **ese paso está en rojo para todo PR** hasta que se corrija.
+Se corrige quitando una palabra. **No se tocó**: es de otro carril.
+
+Para poder verificar, el defecto se neutralizó **en local**, sin commitearlo: el árbol de esta rama no lo
+contiene (`git status` sobre ese módulo sale limpio).
+
+### 2. Los artefactos generados están atrasados en `dev`
+
+Con la aplicación arriba, regenerar el contrato produce mucho más que este carril: aparecen **dos rutas** de
+otra línea de trabajo y una docena de esquemas suyos, más cambios en la documentación generada de seis
+módulos. Es consecuencia de lo anterior: sin poder arrancar la aplicación, nadie pudo regenerarlos.
+
+El detector de cambios incompatibles lo confirma, con la misma base y el mismo archivo de excepciones que
+usa el gate: **4 rupturas, ninguna de este carril** — dos campos que se volvieron obligatorios en el alta de
+profesional y en su alta asistida.
+
+**Qué se hizo con eso:** el contrato de este carril se regeneró, se validó (Redocly, 0 errores) y su
+resultado está guardado en `evidencia/h6/`, pero **no viaja en la entrega**: commitearlo metería en este PR
+el contrato de otros cinco carriles y cuatro rupturas ajenas que además lo dejarían en rojo. El orden
+correcto es al revés: corregir el defecto de arriba en la rama de integración, regenerar ahí, y entonces
+este PR trae sólo lo suyo.
 
 ## Desvíos del plan
 
