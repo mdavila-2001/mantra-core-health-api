@@ -129,6 +129,42 @@ describe('DeclaredCoveragesReader', () => {
     },
   );
 
+  it('exposes both WhatsApp and call center when the carrier registered them (Tarea 2)', async () => {
+    const { reader, em } = build();
+    const execute = mockFn(async (sql: string) => {
+      if (sql.includes('from insurance.patient_coverages'))
+        return [
+          {
+            coverage_id: 'coverage-both',
+            carrier_id: 'carrier',
+            carrier_name: 'Seguros Andina S.A.',
+            plan_name: 'Integral',
+            insurance_plan_id: 'plan',
+            coverage_order: 1,
+            policy_identifier: 'POL-0',
+            member_identifier: 'DECLARED',
+            verification_status_concept_id: INS.VERIFY_PENDING,
+            status_code: 'COVERAGE_ACTIVE',
+            status_concept_id: INS.COVERAGE_ACTIVE,
+            currency_code: 'USD',
+            currency_concept_id: CONCEPTS.CURRENCY_USD,
+            whatsapp_number: '+59171548278',
+            call_center_phone: '800-10-6060',
+          },
+        ];
+      if (sql.includes('from insurance.insurance_plan_benefits')) return [];
+      return [];
+    });
+    em.getConnection.mockReturnValue({ execute });
+
+    const coverages = await reader.read(em as any, 'pat-1');
+
+    expect(coverages[0]).toMatchObject({
+      carrierWhatsappNumber: '+59171548278',
+      carrierCallCenterPhone: '800-10-6060',
+    });
+  });
+
   it.each([
     {
       label: 'several policies sharing one plan',

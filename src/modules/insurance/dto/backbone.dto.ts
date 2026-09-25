@@ -374,7 +374,10 @@ export class UpdateCarrierContactChannelsDto {
    * Número de WhatsApp con el que la aseguradora atiende reclamos y dudas
    * de cobertura. Formato internacional E.164, con el signo "+": sin el
    * código de país el enlace `wa.me` no sabe a qué número abrir el chat.
-   * `null` quita el canal ya cargado.
+   * Mínimo 8 dígitos después del "+" (código de país incluido; Tarea 2,
+   * CA-2.4) — un número más corto no puede ser una línea real de ningún
+   * país y `wa.me` lo tomaría de todos modos. `null` quita el canal ya
+   * cargado.
    */
   @ApiProperty({
     nullable: true,
@@ -388,7 +391,7 @@ export class UpdateCarrierContactChannelsDto {
   )
   @IsString()
   @MaxLength(32)
-  @Matches(/^\+[1-9]\d{6,14}$/, {
+  @Matches(/^\+[1-9]\d{7,14}$/, {
     message:
       'El número de WhatsApp debe tener formato internacional E.164 (ej. +59171234567)',
   })
