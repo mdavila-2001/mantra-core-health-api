@@ -64,6 +64,7 @@ function repo(over: Record<string, unknown> = {}) {
     findAdjudicationsByClaimIds: mockFn().mockResolvedValue([]),
     findLineAdjudications: mockFn().mockResolvedValue([]),
     findDisputesByClaimIds: mockFn().mockResolvedValue([]),
+    findEobsByVersionIds: mockFn().mockResolvedValue([]),
     ...over,
   };
 }
@@ -499,6 +500,148 @@ describe('ClaimsReadService', () => {
       expect(detalle.header.carrierWhatsappNumber).toBeNull();
       expect(detalle.header.carrierCallCenterPhone).toBeNull();
       expect(detalle.header.carrierSupportEmail).toBeNull();
+    });
+  });
+
+  /** Desglose conciliado de liquidación (Tarea 3 · H8, CA-3.1/CA-3.3/CA-3.4). */
+  describe('desglose de liquidación (Tarea 3 · H8)', () => {
+    it('un reclamo parcialmente aprobado con EOB publicada concilia los tres importes', async () => {
+      const r = repo({
+        findClaimInScope: mockFn().mockResolvedValue(
+          reclamo({
+            statusConceptId: INS.CLAIM_ADJUDICATED,
+            totalAmount: '300.00',
+          }),
+        ),
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '180.00',
+          },
+          {
+            id: 'l2',
+            insuranceClaimId: CLAIM,
+            lineSequence: 2,
+            billedAmount: '120.00',
+          },
+        ]),
+        findAdjudicationsByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'v1',
+            insuranceClaimId: CLAIM,
+            adjudicationVersion: 1,
+            supersedesVersionId: null,
+            adjudicatedAt: new Date('2026-09-01T00:00:00.000Z'),
+            totalApprovedAmount: '150.00',
+            totalPatientAmount: '30.00',
+            totalDeniedAmount: '120.00',
+          },
+        ]),
+        findLineAdjudications: mockFn().mockResolvedValue([
+          {
+            insuranceClaimLineId: 'l1',
+            decisionConceptId: INS.LINE_DECISION_APPROVED,
+            approvedAmount: '150.00',
+            patientAmount: '30.00',
+            deniedAmount: '0.00',
+          },
+          {
+            insuranceClaimLineId: 'l2',
+            decisionConceptId: INS.LINE_DECISION_DENIED,
+            approvedAmount: '0.00',
+            patientAmount: '0.00',
+            deniedAmount: '120.00',
+            policyClauseReference:
+              'Cláusula 12.3: estudios complementarios sin autorización previa',
+          },
+        ]),
+        findEobsByVersionIds: mockFn().mockResolvedValue([
+          {
+            id: 'eob-1',
+            claimAdjudicationVersionId: 'v1',
+            statusConceptId: INS.EOB_PUBLISHED,
+            publishedAt: new Date('2026-09-02T00:00:00.000Z'),
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.settlement.availability).toBe('AVAILABLE');
+      expect(detalle.settlement.reconciled).toBe(true);
+      expect(detalle.settlement.totalBilledAmount).toBe('300.00');
+      expect(detalle.settlement.totalApprovedAmount).toBe('150.00');
+      expect(detalle.settlement.totalPatientAmount).toBe('30.00');
+      expect(detalle.settlement.totalDeniedAmount).toBe('120.00');
+      expect(detalle.settlement.exclusions).toHaveLength(1);
+      expect(detalle.settlement.exclusions[0]?.policyClauseReference).toBe(
+        'Cláusula 12.3: estudios complementarios sin autorización previa',
+      );
+      expect(detalle.eob).toEqual({
+        id: 'eob-1',
+        publishedAt: '2026-09-02T00:00:00.000Z',
+      });
+    });
+
+    it('sin versión de adjudicación, la liquidación está pendiente de publicación', async () => {
+      const r = repo();
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.settlement.availability).toBe('PENDING_PUBLICATION');
+      expect(detalle.settlement.totalApprovedAmount).toBeNull();
+      expect(detalle.eob).toBeNull();
+    });
+
+    it('una exclusión sin cláusula degrada la liquidación a revisión', async () => {
+      const r = repo({
+        findLinesByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'l1',
+            insuranceClaimId: CLAIM,
+            lineSequence: 1,
+            billedAmount: '100.00',
+          },
+        ]),
+        findAdjudicationsByClaimIds: mockFn().mockResolvedValue([
+          {
+            id: 'v1',
+            insuranceClaimId: CLAIM,
+            adjudicationVersion: 1,
+            supersedesVersionId: null,
+            adjudicatedAt: new Date('2026-09-01T00:00:00.000Z'),
+            totalApprovedAmount: '0.00',
+            totalPatientAmount: '0.00',
+            totalDeniedAmount: '100.00',
+          },
+        ]),
+        findLineAdjudications: mockFn().mockResolvedValue([
+          {
+            insuranceClaimLineId: 'l1',
+            decisionConceptId: INS.LINE_DECISION_DENIED,
+            approvedAmount: '0.00',
+            patientAmount: '0.00',
+            deniedAmount: '100.00',
+            policyClauseReference: '   ',
+          },
+        ]),
+        findEobsByVersionIds: mockFn().mockResolvedValue([
+          {
+            id: 'eob-1',
+            claimAdjudicationVersionId: 'v1',
+            statusConceptId: INS.EOB_PUBLISHED,
+            publishedAt: new Date('2026-09-02T00:00:00.000Z'),
+          },
+        ]),
+      });
+
+      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+
+      expect(detalle.settlement.availability).toBe('UNDER_REVIEW');
+      expect(detalle.settlement.reconciled).toBe(false);
+      expect(detalle.settlement.exclusions).toHaveLength(0);
     });
   });
 
