@@ -140,11 +140,19 @@ x-app-env: &app-env
   FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
   FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
   FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  # Escaneo antimalware APAGADO de forma explícita (TX-33): en Coolify no corre
+  # `worker-files` ni clamd, así que ninguna versión pasa a SCAN_CLEAN. Las lecturas
+  # por contexto (resultado del paciente, documento del expediente) no lo exigen;
+  # la URL firmada sí y responde 422 `details.reason = SCAN_PENDING`. Encenderlo
+  # exige sumar `clamav` y `worker-files` (ver docker-compose.yml).
+  MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-false}
   FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
   FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
   FILE_STORAGE_S3_ENDPOINT: http://minio:9000
   FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
-  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  # Prefijo propio de los archivos: `audio-assets` es el del módulo de audio y no
+  # se comparte (TX-34).
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-uploads}
   FILE_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
 
@@ -183,7 +191,14 @@ x-app-env: &app-env
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
 
   # --- Postura de seguridad ----------------------------------------------
+  # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
+  # del front (docs/progress/DECISIONS.md, D-I): con un solo lado la sesión se pierde.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_NAME: ${AUTH_REFRESH_COOKIE_NAME:-redesa_refresh}
+  AUTH_REFRESH_COOKIE_PATH: ${AUTH_REFRESH_COOKIE_PATH:-/iam/auth/token/refresh}
+  AUTH_REFRESH_COOKIE_SAMESITE: ${AUTH_REFRESH_COOKIE_SAMESITE:-strict}
+  # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
+  AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   # El bypass de verificación aborta el arranque si llega en `true` con

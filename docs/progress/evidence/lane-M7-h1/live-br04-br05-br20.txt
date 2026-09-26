@@ -1,0 +1,49 @@
+MARK M7H1-1790405757
+registrados A y B (pid presentes): True True
+
+== BR-04 · sesion y cuenta ==
+PASS TX-10 login en modo cookie: refreshToken vacio y Set-Cookie httpOnly SameSite=Strict :: redesa_refresh=<masked>; Max-Age=2592000; Path=/iam/auth/token/refresh; Expires=Mon, 26 Oct 2026 06:55:58 GMT; HttpOnly; SameSite=Strict
+PASS TX-10 F5: refresh SIN cuerpo con la cookie -> 200 y cookie rotada
+PASS TX-10 refresh con el token anterior a la rotacion -> 401 :: {"code": "UNAUTHENTICATED", "message": "Reuso de refresh token detectado", "correlationId": "8", "timestamp": "2026-09-26T06:55:58.615Z", "path": "/iam/auth/token/refresh"}
+PASS TX-10 la detección de reuso revoca la sesión (la cookie vigente ya no sirve) :: {"code": "UNAUTHENTICATED", "message": "Reuso de refresh token detectado", "correlationId": "9", "timestamp": "2026-09-26T06:55:58.647Z", "path": "/iam/auth/token/refresh"}
+PASS TX-10 cerrar sesion: la API limpia la cookie y el refresh anterior da 401 :: logout=200 refresh=401
+PASS ID-24 GET /iam/me/sessions lista las sesiones abiertas y marca la actual :: sesiones=5 actual=1
+PASS ID-24 contraseña actual incorrecta -> 422 CURRENT_PASSWORD_INVALID (no 401) :: {"code": "PRECONDITION_FAILED", "message": "La contraseña actual no coincide", "correlationId": "18", "details": {"reason": "CURRENT_PASSWORD_INVALID"}, "timestamp": "2026-09-26T06:55:59.166Z", "path": "/iam/auth/change-password"}
+PASS ID-24 cambio de contraseña con la actual correcta -> 200 y revoca las otras sesiones :: {"revokedSessions": 4}
+PASS ID-24 la otra sesión recibe 401 en su próximo refresh; la actual sigue viva :: otra=401 actual=200
+PASS ID-24 la contraseña vieja ya no entra y la nueva sí :: vieja=401 nueva=200
+(esperando 62 s: limite de login por cuenta)
+PASS CV-22 «cerrar sesión en todos lados»: la otra sesión recibe 401 :: logout-all=200 otra=401
+PASS ID-24 revocar una sesión propia -> 200; la de otro usuario -> 404 :: dueño=200 otro=404
+
+== BR-05 · archivos ==
+archivo subido por el laboratorio (admin): adb5016d-431f-47ba-b06f-c2458027572d
+PASS CL-40 el informe liberado aparece en «Mis resultados» con su archivo; el no liberado no
+PASS CL-40 paciente A baja su PDF por la ruta del resultado: 200 application/pdf + Cache-Control private, no-store :: status=200 content-type=application/pdf cache-control=private, no-store bytes=77
+PASS CL-40 la vía genérica sigue cerrada para el titular: 403 en /common/files/:id/content :: {"code": "FORBIDDEN", "message": "No tiene acceso a este archivo", "correlationId": "37", "timestamp": "2026-09-26T06:57:02.726Z", "path": "/common/files/adb5016d-431f-47ba-b06f-c2458027572d/content"}
+PASS CL-40 el paciente B pide el informe de A: 404 (no revela si existe) :: {"code": "NOT_FOUND", "message": "Archivo no encontrado", "correlationId": "38", "details": {"reportId": "9dd73947-5bb3-4ab2-999d-49a35d149753", "fileId": "adb5016d-431f-47ba-b06f-c2458027572d"}, "timestamp": "2026-09-26T06:57:02.732Z", "path": "/diagnostic-results/me/9dd73947-5bb3-4ab2-999d-49a35d149753/files/adb5016d-431f-47ba-b06f-c2458027572d/content"}
+PASS CL-40 informe no liberado: 404 :: {"code": "NOT_FOUND", "message": "Archivo no encontrado", "correlationId": "39", "details": {"reportId": "7420cba9-8da9-4c34-a93e-843cbe9aac01", "fileId": "adb5016d-431f-47ba-b06f-c2458027572d"}, "timestamp": "2026-09-26T06:57:02.740Z", "path": "/diagnostic-results/me/7420cba9-8da9-4c34-a93e-843cbe9aac01/files/adb5016d-431f-47ba-b06f-c2458027572d/content"}
+PASS CL-40 fileId que no cuelga del informe: 404 :: {"code": "NOT_FOUND", "message": "Archivo no encontrado", "correlationId": "40", "details": {"reportId": "9dd73947-5bb3-4ab2-999d-49a35d149753", "fileId": "4ec864e1-57ac-4e7e-b2ef-11953ed6ae37"}, "timestamp": "2026-09-26T06:57:02.761Z", "path": "/diagnostic-results/me/9dd73947-5bb3-4ab2-999d-49a35d149753/files/4ec864e1-57ac-4e7e-b2ef-11953ed6ae37/content"}
+PASS TX-33 archivo recién subido: URL firmada -> 422 con details.reason SCAN_PENDING :: {"code": "PRECONDITION_FAILED", "message": "La versión vigente no ha superado el escaneo antimalware", "correlationId": "41", "details": {"reason": "SCAN_PENDING"}, "timestamp": "2026-09-26T06:57:02.767Z", "path": "/common/files/adb5016d-431f-47ba-b06f-c2458027572d/download-url"}
+PASS TX-09 la URL firmada emitida se acepta (con sesión): 200 :: status=200
+PASS TX-09 firma alterada -> 403 :: {"code": "FORBIDDEN", "message": "La firma de la URL no es válida", "correlationId": "44", "timestamp": "2026-09-26T06:57:02.944Z", "path": "/common/files/adb5016d-431f-47ba-b06f-c2458027572d/content?versionId=16e2ac23-ec72-4a09-8036-6e22cd433737&expires=1790406722899&signature=000000004f7832e1be1a85afc3e06063d966001498d45af31631b5bc763094b5"}
+PASS TX-09 URL firmada vencida (firma válida, expires en el pasado) -> 410 :: {"code": "INTERNAL", "message": "La URL de descarga venció", "correlationId": "45", "details": {"reason": "URL_EXPIRED"}, "timestamp": "2026-09-26T06:57:02.975Z", "path": "/common/files/adb5016d-431f-47ba-b06f-c2458027572d/content?versionId=16e2ac23-ec72-4a09-8036-6e22cd433737&expires=1790405762944&signature=e9943f716bb57368d96435730863f7e6485fa51fab3d05953ac55eeca2dca103"}
+PASS TX-09 la URL firmada no habilita al paciente a leer lo que no subió (sigue exigiendo titularidad): 403 :: {"code": "FORBIDDEN", "message": "No tiene acceso a este archivo", "correlationId": "46", "timestamp": "2026-09-26T06:57:02.981Z", "path": "/common/files/adb5016d-431f-47ba-b06f-c2458027572d/content?versionId=16e2ac23-ec72-4a09-8036-6e22cd433737&expires=1790406722899&signature=f581d3314f7832e1be1a85afc3e06063d966001498d45af31631b5bc763094b5"}
+
+== BR-20 · consentimiento y accesos ==
+PASS CL-78 el paciente ve su consentimiento vigente en /consent/me/consents :: [{"id": "d0dc78ee-1124-4d6c-bde8-0d8eb3830e9e", "state": "ACTIVE", "purpose": {"id": "48b87987-5363-5e45-a6cf-f35ad1ac10ed", "code": "GENERAL_CARE", "name": "General care"}, "validFrom": "2026-09-26T06:57:03.441Z", "validTo": null, "withdrawnAt": null, "policyVersion": null, "createdAt": "2026-09-26T06:57:03.441Z"}]
+PASS CL-78 el paciente B no ve los consentimientos de A
+PASS CL-78 B intenta retirar el consentimiento de A -> 404
+PASS CL-78 retirar: 200, la fila NO se borra (SELECT) y al releer figura WITHDRAWN con vigencia cerrada :: SELECT consent.consents -> da029a82-fbcd-5028-8c4d-b20ed444f91e|t|t
+care-relationship create: 201 ok
+PASS CV-19 «Quién ve mi historia»: la relación con el profesional figura con nombre, desde cuándo y estado :: [{"id": "bfd5b885-731a-4610-9089-6f4c8329da55", "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840", "practitionerProfileId": "d124a63f-6486-41aa-a6e6-03d4d06193d7", "practitionerName": "TEST_1", "state": "ACTIVE", "validFrom": "2026-09-26T06:57:03.796Z"}]
+PASS CV-19 revocar el vínculo: B recibe 404; A 200; la fila queda (SELECT) y figura REVOKED :: SELECT authz.care_relationships -> 8d56de1d-f25e-54eb-bc54-3ab2fbc70249|t
+PASS CV-19 emergencia sin justificación -> 400 y no se crea ningún grant :: status=400 grants antes=0 despues=0
+PASS CV-19 emergencia con justificación -> 201, sesión break-glass auditada y el titular la ve como emergencia :: break_glass_sessions=1
+PASS CV-19 el titular revoca el acceso de emergencia: B 404, A 200, figura REVOKED
+check-in: 201 ok
+PASS CL-77 el consentimiento informado se registra desde el encuentro: fila en consent.treatment_informed_consents ligada al paciente y al encuentro, y el paciente la ve :: SELECT -> t|t|t
+PASS CL-77 un paciente no puede registrarlo (rol) -> 403 :: status=403
+
+== RESUMEN ==
+34 pruebas, 34 PASS, 0 FAIL

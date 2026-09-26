@@ -21,6 +21,8 @@ import {
   DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,
   platformPermissionId,
 } from '../../authz/authz.seed';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
 import { CATEGORIAS_DIAGNOSTICAS, DIAG } from '../diagnostics.concepts';
 import type {
@@ -87,6 +89,7 @@ export class DiagnosticsPatientResultsService {
    * @param patientProfilesRepo - Perfil de paciente de esa persona.
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
    * @param logger - Registro estructurado.
+   * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
     private readonly em: EntityManager,
@@ -97,6 +100,7 @@ export class DiagnosticsPatientResultsService {
     private readonly grantsRepo: ResourceScopeGrantsRepository,
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
+    private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
   }
@@ -325,6 +329,73 @@ export class DiagnosticsPatientResultsService {
       );
     }
     return item;
+  }
+
+  /**
+   * Los bytes de un archivo de un resultado del titular (CL-40).
+   *
+   * La vía genérica `GET /common/files/:id/content` sigue siendo «lo tuyo o
+   * revisor» (`canActorReadOwnFile`) y no se afloja: el PDF lo subió el
+   * laboratorio, no el paciente. Acá autoriza el contexto —el informe es del
+   * titular, tiene una versión liberada y visible, y el archivo cuelga de esa
+   * versión— y recién entonces se piden los bytes con
+   * `downloadForAuthorizedContext`.
+   *
+   * Todo lo que no cumpla es **404**, no 403 ni 401: no se revela si el
+   * informe o el archivo existen, y un 401 haría que el cliente cierre la
+   * sesión.
+   *
+   * @param actor - Usuario autenticado (el paciente).
+   * @param reportId - Informe.
+   * @param fileId - Archivo del informe.
+   * @returns Bytes y tipo MIME.
+   * @throws ResourceNotFoundException si no es suyo, no está liberado o el
+   *   archivo no pertenece a la versión visible.
+   */
+  async getOwnResultFileContent(
+    actor: AuthenticatedUser,
+    reportId: string,
+    fileId: string,
+  ): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const patientProfileId = await this.resolveOwnPatientProfileId(em, actor);
+    const report = await this.ordersRepo.findReportById(em, reportId);
+    if (!report || report.patientProfileId !== patientProfileId) {
+      if (report) {
+        this.logger.warn(
+          { operation: 'diagnostics.patient-results.file.denied', reportId },
+          'Intento de leer el archivo de un informe de otra persona',
+        );
+      }
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    const [item] = await this.projectReleasedResults(em, [report]);
+    if (!item?.files.some((file) => file.fileId === fileId)) {
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    if (!this.fileUpload) {
+      throw new PreconditionFailedException(
+        'La descarga de archivos no está disponible',
+      );
+    }
+    this.logger.info(
+      {
+        operation: 'diagnostics.patient-results.file.content',
+        reportId,
+        fileId,
+      },
+      'El titular descarga un archivo de su resultado',
+    );
+    return this.fileUpload.downloadForAuthorizedContext(
+      fileId,
+      'diagnostics.patient-result.file.content',
+    );
   }
 
   /**
