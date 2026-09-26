@@ -5,3 +5,4 @@ export * from './authz-grants.controller';
 export * from './authz-clinical.controller';
 export * from './authz-care-relationships.controller';
 export * from './authz-pdp.controller';
+export * from './authz-me.controller';

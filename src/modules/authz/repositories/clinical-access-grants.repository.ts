@@ -94,6 +94,18 @@ export class ClinicalAccessGrantsRepository {
     });
   }
 
+  /** Todos los accesos clínicos sobre la historia de un paciente (vigentes e históricos). */
+  findAllByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<ClinicalAccessGrants[]> {
+    return em.find(
+      ClinicalAccessGrants,
+      { patientProfileId },
+      { orderBy: { validFrom: 'DESC' }, limit: 200 },
+    );
+  }
+
   /** Grants ACTIVOS que se apoyan en un consentimiento concreto (C-20). */
   findActiveByConsent(
     em: EntityManager,
