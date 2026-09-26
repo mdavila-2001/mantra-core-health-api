@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -14,7 +15,13 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { isUUID } from 'class-validator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
@@ -60,6 +67,9 @@ import {
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
 const DEFAULT_PAGE_LIMIT = 50;
+
+/** Tope de publicaciones por lectura en lote (TX-27). */
+const MAX_POSTS_BATCH = 50;
 
 /**
  * Endpoints sociales del módulo Community: perfiles públicos, posts, comentarios,
@@ -345,6 +355,40 @@ export class CommunitySocialController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
+  }
+
+  /**
+   * Lectura en lote (TX-27): las publicaciones de `ids` (uuid separados por
+   * coma, hasta 50) con el mismo detalle que `posts/:postId`. Las que no
+   * existen o no son visibles no aparecen.
+   */
+  @Get('posts')
+  @ApiOperation({
+    summary: 'Publicaciones por ids, con media, hashtags y menciones',
+  })
+  @ApiQuery({
+    name: 'ids',
+    required: true,
+    description: 'Uuid separados por coma (hasta 50)',
+  })
+  getPosts(
+    @Query('ids') ids: string | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('actorProfileId') actorProfileId?: string,
+  ): Promise<PostDetailDto[]> {
+    const parsed = [
+      ...new Set((ids ?? '').split(',').map((id) => id.trim())),
+    ].filter((id) => id !== '');
+    if (
+      parsed.length === 0 ||
+      parsed.length > MAX_POSTS_BATCH ||
+      !parsed.every((id) => isUUID(id))
+    ) {
+      throw new BadRequestException(
+        `ids debe traer entre 1 y ${MAX_POSTS_BATCH} uuid separados por coma`,
+      );
+    }
+    return this.readService.getPostsBatch(parsed, actor, actorProfileId);
   }
 
   /** Publicación con sus adjuntos, etiquetas y menciones. */

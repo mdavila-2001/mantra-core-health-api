@@ -416,6 +416,8 @@ export class SchedulingBookingsRepository {
       patientProfileId?: string;
       /** Recurso (agenda) al que pertenece. */
       resourceId?: string;
+      /** Varios recursos a la vez (TX-27): una sola lectura en vez de una por agenda. */
+      resourceIds?: readonly string[];
       /** Inicio de la ventana sobre el instante del slot. */
       from?: Date;
       /** Fin de la ventana sobre el instante del slot. */
@@ -435,6 +437,9 @@ export class SchedulingBookingsRepository {
       where.patientProfileId = filters.patientProfileId;
     }
     if (filters.resourceId) where.resourceId = filters.resourceId;
+    else if (filters.resourceIds && filters.resourceIds.length > 0) {
+      where.resourceId = { $in: [...filters.resourceIds] };
+    }
     if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {
       where.statusConceptId = { $in: filters.statusConceptIds };
     }

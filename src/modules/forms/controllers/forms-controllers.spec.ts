@@ -380,10 +380,27 @@ describe('FormsMeController', () => {
     };
   }
 
+  it('listMyInstances con include=values lo delega y con otro valor responde 400', async () => {
+    const d = build();
+    await d.controller.listMyInstances(paciente, undefined, 'values');
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(
+      paciente,
+      50,
+      true,
+    );
+    expect(() =>
+      d.controller.listMyInstances(paciente, undefined, 'todo'),
+    ).toThrow('include admite sólo: values');
+  });
+
   it('delegates listMyInstances with the actor and the default limit', async () => {
     const d = build();
     await d.controller.listMyInstances(paciente, undefined);
-    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(
+      paciente,
+      50,
+      false,
+    );
   });
 
   it('delegates getMyInstance with the actor of the session', async () => {

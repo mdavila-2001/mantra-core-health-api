@@ -463,6 +463,33 @@ describe('FormsReadService', () => {
       expect(res.truncated).toBe(true);
     });
 
+    it('con includeValues trae los valores vigentes de cada instancia en la misma respuesta (TX-27)', async () => {
+      const d = build();
+      d.emFork.find.mockResolvedValue([{ id: 'enc-1' }]);
+      d.instancesRepo.findByResourceIds.mockResolvedValue([
+        { id: 'i1', resourceId: 'enc-1', createdAt: new Date() },
+        { id: 'i2', resourceId: 'enc-1', createdAt: new Date() },
+      ]);
+      const res = await runWithTenant(TENANT, () =>
+        d.service.listMyInstances(PACIENTE, 50, true),
+      );
+      expect(d.valuesRepo.findCurrentByInstance).toHaveBeenCalledTimes(2);
+      expect(res.items.map((i) => i.values)).toEqual([[], []]);
+    });
+
+    it('sin includeValues no lee valores', async () => {
+      const d = build();
+      d.emFork.find.mockResolvedValue([{ id: 'enc-1' }]);
+      d.instancesRepo.findByResourceIds.mockResolvedValue([
+        { id: 'i1', resourceId: 'enc-1', createdAt: new Date() },
+      ]);
+      const res = await runWithTenant(TENANT, () =>
+        d.service.listMyInstances(PACIENTE, 50),
+      );
+      expect(d.valuesRepo.findCurrentByInstance).not.toHaveBeenCalled();
+      expect(res.items[0].values).toBeUndefined();
+    });
+
     it('a patient without encounters gets an empty list, not an error', async () => {
       const d = build();
       const res = await runWithTenant(TENANT, () =>
