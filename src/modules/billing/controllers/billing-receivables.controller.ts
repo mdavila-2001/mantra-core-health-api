@@ -1,14 +1,27 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   InvoicesService,
   PaymentsReceivedService,
@@ -27,6 +40,9 @@ import {
   PaymentPlanResponseDto,
   ReimbursementResponseDto,
   PatientStatementResponseDto,
+  ListInvoicesResponseDto,
+  InvoiceDetailDto,
+  ListPatientStatementsResponseDto,
 } from '../dto';
 
 /**
@@ -52,6 +68,86 @@ export class BillingReceivablesController {
     private readonly reimbursementsService: ReimbursementsService,
     private readonly statementsService: PatientStatementsService,
   ) {}
+
+  /**
+   * CV-12 — facturación deja de ser el único placeholder del menú: listado
+   * de facturas de la práctica, sin ninguna acción de cobro.
+   */
+  @Get('invoices')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar las facturas de la práctica' })
+  @ApiQuery({
+    name: 'practiceId',
+    required: true,
+    description: 'Práctica (uuid)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Facturas por página',
+  })
+  listInvoices(
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListInvoicesResponseDto> {
+    return this.invoicesService.listByPractice(practiceId, requireTenantId(), {
+      cursor,
+      limit,
+    });
+  }
+
+  /** CV-12 — detalle de una factura con sus líneas. */
+  @Get('invoices/:id')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Detalle de una factura, con sus líneas' })
+  @ApiQuery({
+    name: 'practiceId',
+    required: true,
+    description: 'Práctica (uuid)',
+  })
+  getInvoice(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+  ): Promise<InvoiceDetailDto> {
+    return this.invoicesService.getDetail(id, practiceId, requireTenantId());
+  }
+
+  /** CV-12 — estados de cuenta de la práctica, sólo lectura. */
+  @Get('patient-statements')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar los estados de cuenta de la práctica' })
+  @ApiQuery({
+    name: 'practiceId',
+    required: true,
+    description: 'Práctica (uuid)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Estados de cuenta por página',
+  })
+  listStatements(
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPatientStatementsResponseDto> {
+    return this.statementsService.listByPractice(
+      practiceId,
+      requireTenantId(),
+      { cursor, limit },
+    );
+  }
 
   /** UC-17-01. */
   @Post('invoices\\:issue-from-encounter')
