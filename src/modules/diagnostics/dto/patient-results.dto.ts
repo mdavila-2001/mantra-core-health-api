@@ -4,13 +4,7 @@ import {
 } from '../../insurance/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsDate, IsUUID } from 'class-validator';
 
 /**
  * Un archivo del informe: lo que se descarga.
@@ -205,30 +199,43 @@ export class PatientOwnOrdersResponseDto {
  * siempre» no es lo que pide el requisito —dice *temporalmente*— y elegir un
  * vencimiento por la persona sería inventar una política de retención que el
  * producto no fijó.
+ *
+ * ## Por qué `practitionerProfileId` y no un id de cuenta (CL-48)
+ *
+ * El paciente nunca tipea un identificador: elige a alguien de la lista que ya
+ * expone `GET /authz/me/access` (BR-20), que es «mis relaciones asistenciales
+ * reales» y trae `practitionerProfileId` — nunca un buscador global de
+ * usuarios. El servidor resuelve la cuenta (`iam.users.id`) del profesional a
+ * partir de ese perfil y exige que la relación esté vigente; aceptar
+ * directamente un `userId` hubiera dejado que el cliente compartiera con
+ * cualquier cuenta de la plataforma, vinculada o no al paciente.
+ *
+ * ## Por qué no lleva `reason` (CL-50)
+ *
+ * `authz.resource_scope_grants` no tiene una columna para el motivo y este
+ * carril no hace DDL. Un campo que se validaba pero no se guardaba en ningún
+ * lado era peor que no tenerlo: quien lo mandaba creía que había quedado
+ * registrado. Si el producto necesita el motivo, es un pedido a M1 para que lo
+ * agregue al modelo (ver `docs/progress/DECISIONS.md`).
  */
 export class ShareDiagnosticResultDto {
   /**
-   * Cuenta del profesional con quien se comparte.
+   * Perfil del profesional con quien se comparte.
    *
-   * Es el `iam.users.id`, que es el sujeto que el grant entiende y contra el
-   * que se resuelve el acceso cuando esa persona abre el informe.
+   * Es `profiles.persons.id` del profesional (mismo id que trae
+   * `practitionerProfileId` en `GET /authz/me/access`). El servidor exige una
+   * relación asistencial `ACTIVE` entre el paciente y este perfil antes de
+   * resolver la cuenta y crear el grant.
    */
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  practitionerUserId!: string;
+  practitionerProfileId!: string;
 
   /** Hasta cuándo puede verlo. Pasado ese instante, el grant deja de valer. */
   @ApiProperty({ type: String, format: 'date-time' })
   @Type(() => Date)
   @IsDate()
   validUntil!: Date;
-
-  /** Por qué se comparte. Queda en el registro, no en el grant. */
-  @ApiPropertyOptional({ maxLength: 500 })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  reason?: string;
 }
 
 /** Un resultado compartido: con quién y hasta cuándo. */
@@ -241,6 +248,12 @@ export class DiagnosticResultShareDto {
 
   /** Cuenta del profesional con quien se compartió. */
   @ApiProperty({ format: 'uuid' }) practitionerUserId!: string;
+
+  /**
+   * Nombre del profesional, para que «Compartido con» no muestre un uuid.
+   * Ausente si la cuenta perdió su vínculo con la persona.
+   */
+  @ApiPropertyOptional() practitionerName?: string;
 
   /** Desde cuándo vale. */
   @ApiProperty({ type: String, format: 'date-time' }) validFrom!: Date;

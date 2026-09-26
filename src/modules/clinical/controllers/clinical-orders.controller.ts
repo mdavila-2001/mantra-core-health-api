@@ -92,10 +92,22 @@ export class ClinicalOrdersController {
     return this.diagnosticReportsService.create(dto, actor);
   }
 
-  /** UC-08-07. */
+  /**
+   * UC-08-07. **Obsoleta (D-E, BR-17/CL-46):** no escribe el evento de
+   * liberación que lee «Mis resultados». Se conserva sin borrar por decisión
+   * de producto (Q-02); ver el `@deprecated` en
+   * `DiagnosticReportsService.release`. Usar
+   * `POST /diagnostics/reports/:reportId/versions/:versionId/release`.
+   */
   @Post('diagnostic-reports/:id/release')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Liberar los resultados de un reporte diagnóstico' })
+  @ApiOperation({
+    summary: 'Liberar los resultados de un reporte diagnóstico',
+    deprecated: true,
+    description:
+      'Obsoleta (D-E): no escribe diagnostic_release_events y el paciente no ' +
+      've lo liberado por acá. Usar diagnostics/reports/:reportId/versions/:versionId/release.',
+  })
   releaseDiagnosticReport(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReleaseDiagnosticReportDto,

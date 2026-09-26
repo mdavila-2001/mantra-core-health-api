@@ -118,6 +118,10 @@ import {
   exports: [
     AuthzEffectiveRolesService,
     ResourceScopeGrantsRepository,
+    // BR-17 (CL-48): diagnostics.DiagnosticsPatientResultsService la necesita
+    // para exigir una relación asistencial ACTIVE antes de compartir un
+    // resultado con un profesional.
+    CareRelationshipsRepository,
     AuthzPdpService,
   ],
 })
