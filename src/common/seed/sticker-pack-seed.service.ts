@@ -59,6 +59,13 @@ export class StickerPackSeedService {
         },
         { partial: true },
       );
+      // `FileVersions.fileId` es una columna cruda (sin `@ManyToOne`, igual
+      // que declara la entidad): MikroORM no conoce la FK y no puede ordenar
+      // el insert solo. Sin este flush intermedio, `file_versions` se
+      // insertaba ANTES que `files` en el mismo batch y violaba
+      // `fk_file_versions_file_id` — se reprodujo contra Postgres real
+      // (legion-h5-pg) antes de este fix.
+      await em.flush();
 
       const versionId = deterministicId(
         `seed:sticker-pack:version:${sticker.clave}:v1`,
