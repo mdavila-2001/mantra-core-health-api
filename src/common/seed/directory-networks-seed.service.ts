@@ -25,6 +25,7 @@ import {
 import { CatalogConcepts } from '../../modules/terminology/entities';
 import { ValueSetsRepository } from '../../modules/terminology/repositories';
 import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/services/medical-specialty-catalog.service';
+import { recordSeedProvenance } from './seed-provenance';
 import { SPANISH_DESIGNATIONS } from './terminology-designations.es';
 import {
   syntheticBirthDate,
@@ -45,6 +46,7 @@ export interface DirectoryNetworksResult {
   sitesCreated: number;
   membershipsCreated: number;
   workplacesCreated: number;
+  provenanceWritten: number;
   networksCreated: number;
   /** Especialidades del dataset que no mapean a `VS_MEDICAL_SPECIALTY`. */
   unmappedSpecialties: string[];
@@ -123,6 +125,7 @@ export class DirectoryNetworksSeedService {
       sitesCreated: 0,
       membershipsCreated: 0,
       workplacesCreated: 0,
+      provenanceWritten: 0,
       networksCreated: 0,
       unmappedSpecialties: [],
       failed: [],
@@ -182,6 +185,19 @@ export class DirectoryNetworksSeedService {
           userId = alta.userId;
           profileId = alta.practitionerProfileId;
           practiceId = alta.ownPracticeId;
+        }
+
+        const primeraFila = ficha.sedes[0];
+        if (primeraFila) {
+          resultado.provenanceWritten += await recordSeedProvenance(
+            this.orm.em.fork(),
+            {
+              externalSubject: email,
+              sourceName: SOURCE_NAME,
+              sourceFile: primeraFila.source_file,
+              sourceRow: primeraFila.source_row,
+            },
+          );
         }
 
         const existentes = await runWithTenant(SEED.tenantId, () =>

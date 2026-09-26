@@ -23,7 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, loadStorageEnv } from '../../../common';
+import { CurrentUser, loadStorageEnv, Public } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { FileUploadService, FilesService } from '../services';
 import type { UploadedFileBytes } from '../services';
@@ -40,6 +40,7 @@ import {
   FileVersionResponseDto,
   LinkedFilePageDto,
   ListFileLinksQueryDto,
+  PublicSignedDownloadQueryDto,
   SignedDownloadQueryDto,
   UploadFileDto,
 } from '../dto';
@@ -132,6 +133,37 @@ export class CommonFilesController {
     res.setHeader('Content-Type', content.mimeType);
     if (content.originalName) {
       // Se codifica el nombre para que no pueda inyectar cabeceras ni comillas.
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
+      );
+    }
+    res.send(content.buffer);
+  }
+
+  /**
+   * H4.S1.M3: descarga con la URL de `publicUrl`, **sin sesión**. Pública a
+   * propósito: `window.open()` no manda `Authorization`. La credencial es la
+   * firma, atada al actor que la pidió (`uid`); esa persona pasó
+   * `canActorReadOwnFile` al emitirla, y la lectura queda registrada a su
+   * nombre. Corta vida (15 min) y de un solo archivo/versión.
+   */
+  @Get(':id/signed-content')
+  @Public()
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Descargar con una URL firmada, sin sesión' })
+  async downloadSignedContent(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: PublicSignedDownloadQueryDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const actorId = this.filesService.verifyPublicDownload(id, query);
+    const content = await this.uploadService.downloadForAuthorizedContext(
+      id,
+      `common.file.signed-download actor=${actorId}`,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
       res.setHeader(
         'Content-Disposition',
         `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,

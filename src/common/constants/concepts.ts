@@ -436,6 +436,20 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // paquete de seeds para el NIT de las aseguradoras (v4.1.4); acá debe existir
   // con la misma clave o el id determinista no coincidiría entre ambos lados.
   ID_TYPE_TAX: def('common:id-type:tax', 'TAX_ID', 'Tax identification number'),
+  // Procedencia de una persona sembrada (regla 97.4): de qué archivo y fila del
+  // origen salió (`system` = nombre de la fuente), y si sus datos personales son
+  // inventados. Es el mecanismo genérico de `common.identifiers`: el esquema no
+  // tiene columnas `source_*` en los perfiles y agregarlas es DDL del modelo.
+  ID_TYPE_SEED_SOURCE: def(
+    'common:id-type:seed-source',
+    'SEED_SOURCE',
+    'Seed source (file#row)',
+  ),
+  ID_TYPE_SYNTHETIC: def(
+    'common:id-type:synthetic',
+    'SYNTHETIC_DATA',
+    'Synthetic personal data marker',
+  ),
   USE_OFFICIAL: def('common:use:official', 'OFFICIAL', 'Official'),
   USE_SECONDARY: def('common:use:secondary', 'SECONDARY', 'Secondary'),
 

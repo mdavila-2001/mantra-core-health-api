@@ -664,7 +664,16 @@ export class FilesService {
       { operation: 'common.file.downloadUrl', fileId, versionId: version.id },
       'Download URL generated',
     );
-    return { url, expiresAt };
+    // H4.S1.M3: variante sin sesión. Otro dominio de firma (`public:`) para
+    // que la firma de `content` no sirva acá ni al revés, y atada al actor.
+    const publicSignature = createHmac('sha256', downloadUrlSecret())
+      .update(`public:${file.id}:${version.id}:${expiry}:${actor.id}`)
+      .digest('hex');
+    const publicUrl =
+      `/common/files/${file.id}/signed-content` +
+      `?versionId=${version.id}&expires=${expiry}&uid=${actor.id}` +
+      `&signature=${publicSignature}`;
+    return { url, expiresAt, publicUrl };
   }
 
   /**
@@ -680,6 +689,44 @@ export class FilesService {
    * @throws ForbiddenException si falta un campo o la firma no coincide.
    * @throws GoneException si la URL venció.
    */
+  /**
+   * Valida la URL sin sesión de {@link generateDownloadUrl} (H4.S1.M3).
+   * Devuelve el actor que la pidió, para dejar la lectura a su nombre. Firma
+   * ajena o alterada, 403; vencida, 410 (mismo contrato que TX-09).
+   */
+  verifyPublicDownload(
+    fileId: string,
+    query: {
+      versionId: string;
+      uid: string;
+      expires: string;
+      signature: string;
+    },
+  ): string {
+    const expiry = Number(query.expires);
+    if (!Number.isFinite(expiry) || !/^[0-9a-f]+$/i.test(query.signature)) {
+      throw new ForbiddenException('La firma de la URL no es válida');
+    }
+    const expected = createHmac('sha256', downloadUrlSecret())
+      .update(`public:${fileId}:${query.versionId}:${expiry}:${query.uid}`)
+      .digest();
+    const presented = Buffer.from(query.signature, 'hex');
+    if (
+      presented.length !== expected.length ||
+      !timingSafeEqual(presented, expected)
+    ) {
+      throw new ForbiddenException('La firma de la URL no es válida');
+    }
+    if (expiry < Date.now()) {
+      throw new GoneException({
+        code: ErrorCode.PRECONDITION_FAILED,
+        message: 'La URL de descarga venció',
+        details: { reason: 'URL_EXPIRED' },
+      });
+    }
+    return query.uid;
+  }
+
   assertDownloadSignature(
     fileId: string,
     query: { versionId?: string; expires?: string; signature?: string },

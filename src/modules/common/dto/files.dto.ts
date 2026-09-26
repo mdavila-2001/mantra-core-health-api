@@ -577,4 +577,34 @@ export class DownloadUrlResponseDto {
    */
   @ApiProperty()
   expiresAt!: Date;
+
+  /**
+   * H4.S1.M3: la misma descarga **sin sesión**, para `window.open()` o un
+   * `<a href>`, que no pueden mandar `Authorization`. La firma va atada al
+   * actor que la pidió (`uid`), así que la lectura queda registrada a su
+   * nombre y no se puede reusar en nombre de otro.
+   */
+  @ApiProperty({ description: 'URL firmada que no exige sesión' })
+  publicUrl!: string;
+}
+
+/** Query de `GET /common/files/:id/signed-content` (H4.S1.M3). */
+export class PublicSignedDownloadQueryDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  versionId!: string;
+
+  @ApiProperty({ format: 'uuid', description: 'Actor que pidió la URL.' })
+  @IsUUID()
+  uid!: string;
+
+  @ApiProperty({ description: 'Vencimiento, en milisegundos epoch' })
+  @IsString()
+  @MaxLength(20)
+  expires!: string;
+
+  @ApiProperty({ description: 'HMAC-SHA256 en hexadecimal' })
+  @IsString()
+  @MaxLength(128)
+  signature!: string;
 }

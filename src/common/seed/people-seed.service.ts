@@ -14,6 +14,7 @@ import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
 } from '../../modules/iam/dto';
+import { recordSeedProvenance } from './seed-provenance';
 import { filasDeTabla, columna, type MarkdownTableRow } from './markdown-table';
 import {
   syntheticNationalId,
@@ -37,6 +38,8 @@ export interface PeopleSeedResult {
   practitionersExisting: number;
   patientsCreated: number;
   patientsExisting: number;
+  /** Filas de procedencia (`common.identifiers`) escritas en esta pasada. */
+  provenanceWritten: number;
   /** Filas del padrón con nombre, que no alcanzaron a darse de alta. */
   skipped: string[];
   /** Por qué no se hizo nada, si se saltó todo el paso. */
@@ -124,6 +127,7 @@ export class PeopleSeedService {
       practitionersExisting: 0,
       patientsCreated: 0,
       patientsExisting: 0,
+      provenanceWritten: 0,
       skipped: [],
     };
     if (!enabled || !password) {
@@ -184,6 +188,13 @@ export class PeopleSeedService {
       if (creado === 'created') resultado.practitionersCreated++;
       else if (creado === 'existing') resultado.practitionersExisting++;
       else resultado.skipped.push(`${ARCHIVO_MEDICOS}#${i}: ${creado}`);
+      if (creado === 'created' || creado === 'existing') {
+        resultado.provenanceWritten += await this.procedencia(
+          dto.email,
+          ARCHIVO_MEDICOS,
+          i,
+        );
+      }
     }
 
     for (const [i, fila] of filasDeTabla(pacientesTexto).entries()) {
@@ -215,6 +226,13 @@ export class PeopleSeedService {
       if (creado === 'created') resultado.patientsCreated++;
       else if (creado === 'existing') resultado.patientsExisting++;
       else resultado.skipped.push(`${ARCHIVO_PACIENTES}#${i}: ${creado}`);
+      if (creado === 'created' || creado === 'existing') {
+        resultado.provenanceWritten += await this.procedencia(
+          dto.nationalId,
+          ARCHIVO_PACIENTES,
+          i,
+        );
+      }
     }
 
     this.logger.info(
@@ -224,6 +242,7 @@ export class PeopleSeedService {
         practitionersExisting: resultado.practitionersExisting,
         patientsCreated: resultado.patientsCreated,
         patientsExisting: resultado.patientsExisting,
+        provenanceWritten: resultado.provenanceWritten,
         skippedCount: resultado.skipped.length,
       },
       'Padrón de personas sembrado',
@@ -253,6 +272,21 @@ export class PeopleSeedService {
       motherLastName,
       email: syntheticEmail(name, lastName, String(indice)),
     };
+  }
+
+  /** Procedencia de la persona (`archivo#fila`, sintética); ver `seed-provenance.ts`. */
+  private procedencia(
+    externalSubject: string,
+    sourceFile: string,
+    indice: number,
+  ): Promise<number> {
+    return recordSeedProvenance(this.orm.em.fork(), {
+      externalSubject,
+      sourceName: 'padrón del stakeholder',
+      sourceFile,
+      // Ordinal de la fila de datos dentro del archivo (1 = primera fila).
+      sourceRow: indice + 1,
+    });
   }
 
   /**

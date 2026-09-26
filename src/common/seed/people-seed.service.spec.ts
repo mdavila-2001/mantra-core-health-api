@@ -127,6 +127,8 @@ describe('PeopleSeedService', () => {
     const { service, orm, practitionerRegistration } = build();
     (orm.em.fork as jest.Mock).mockReturnValue({
       findOne: fn().mockResolvedValue({ id: 'ya-existe' }),
+      create: fn(),
+      flush: fn().mockResolvedValue(undefined),
     });
 
     const resultado = await service.run(true, '12345678', dir);
@@ -168,5 +170,34 @@ describe('PeopleSeedService', () => {
 
     expect(resultado.practitionersCreated).toBe(0);
     expect(resultado.skipped).toContainEqual(expect.stringContaining('boom'));
+  });
+
+  it('deja la procedencia (archivo#fila + marca sintética) de cada persona sembrada', async () => {
+    const { service, orm } = build();
+    const creadas: any[] = [];
+    const em: any = {};
+    (orm.em.fork as jest.Mock).mockReturnValue(em);
+    em.findOne = fn((entidad: { name: string }) => {
+      if (entidad.name === 'AuthenticationCredentials')
+        return Promise.resolve({ userId: 'u-1' });
+      if (entidad.name === 'PersonAccountLinks')
+        return Promise.resolve({ personId: 'p-1' });
+      return Promise.resolve(null);
+    });
+    em.create = fn((_e: unknown, datos: unknown) => creadas.push(datos));
+    em.flush = fn().mockResolvedValue(undefined);
+
+    const r = await service.run(true, '12345678', dir);
+
+    expect(r.provenanceWritten).toBeGreaterThan(0);
+    const fuentes = creadas.filter(
+      (c) => c.system === 'padrón del stakeholder',
+    );
+    expect(fuentes.map((c) => c.value)).toContain('USUARIO_MEDICOS_1.md#1');
+    expect(fuentes.map((c) => c.value)).toContain('USUARIO_PACIENTES_1.md#1');
+    expect(creadas.filter((c) => c.value === 'true').length).toBe(
+      fuentes.length,
+    );
+    for (const c of creadas) expect(c.ownerId).toBe('p-1');
   });
 });

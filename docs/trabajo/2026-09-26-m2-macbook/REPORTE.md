@@ -1,9 +1,6 @@
 # Reporte — M2 · MacBook: roles, cuentas y directorio de médicos (preproducción 2026-09-26)
 
-> **AVANCE: 15 / 17 microtareas — 88,2 %.** (`HECHO / total`, contado fila por fila en `PLAN.md`.)
-> Las otras 2 no suman y cada una tiene su motivo: **H2.S1.M3** `BLOQUEADO` (procedencia por fila: no hay
-> columnas —DDL, de `mantra-core-health-model`— ni actor de auditoría en el autorregistro), **H4.S1.M3**
-> `DESCARTADO` (TX-09, ya mergeado en `test`, resolvió la firma de otra forma; ver «Decisiones»).
+> **AVANCE: 17 / 17 microtareas — 100 %.** (`HECHO / total`, contado fila por fila en `PLAN.md`.) Ninguna bloqueada, ninguna a medias.
 
 - Fecha: 2026-09-26 · Plan: [PLAN.md](./PLAN.md) · Rama: `pablo/test-m2-macbook-roles-cuentas-directorio`
   (worktree `../wt-m2-macbook`, sobre `origin/test@016caaa1`)
@@ -25,6 +22,8 @@
 | H3.S1–S2 (5) | `DirectoryNetworksSeedService`: 763 personas (454+507 menos 198 en las dos redes), 1 sede + 1 afiliación por dirección, 1 membresía por red | `SEED_DIRECTORY_NETWORKS_ENABLED=true yarn seed:boot` ×3; guía con `DEV_VERIFICATION_BYPASS=false` | 3ra corrida en 0 (idempotente); membresías 454 + 507; guía: 765 médicos de red, 337 con ≥2 sedes, 0 repetidos; «Jose Alberto Dalence Romero» aparece 1 vez con 2 direcciones; login `PRACTITIONER` 200 |
 | CL-68 (pedido de M3) | `@Roles('CLINICIAN','PRACTITIONER','SECURITY_ADMIN')` en las 3 rutas de `forms` que no tenían | `jest forms-controllers.spec.ts` | 3 casos nuevos en verde |
 | H4.S1.M2 | El paciente baja el PDF de su resultado liberado: **ya existía en `test`** (`/diagnostic-results/me/...`), verificado en vivo; se descartó una ruta paralela que había empezado | `curl` con informe/archivo/versión reales | antes de liberar 404 · liberado 200 con bytes · otro paciente 404 · sin token 401 |
+| H2.S1.M3 | Procedencia por persona en `common.identifiers` (`SEED_SOURCE` `archivo#fila` + `SYNTHETIC_DATA`), sin DDL | `yarn seed:boot` ×2 + consulta | 864 personas con procedencia; 2da pasada en 0 |
+| H4.S1.M3 | `publicUrl` + `GET /:id/signed-content` sin sesión, firma atada al actor; TX-09 intacto | `curl` sin `Authorization` | 200 con bytes; `expires` alterado 403; `/content` sin sesión 401 |
 | Integración | `origin/test` (101 commits) integrado a la rama; 4 conflictos resueltos | `yarn typecheck` 0 · `jest common forms iam authz seed auth` · `yarn seed:boot` | 943/944 (1 rojo preexistente en `test`, ver «Riesgos») · 24/24 pasos de seed ok
 
 ## A medias
@@ -34,8 +33,6 @@ respuestas) o se traspasó explícitamente (H3).
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H2.S1.M3 | BLOQUEADO | Procedencia por fila (`source_file`/`source_row`/`synthetic`) no tiene dónde vivir: no existen las columnas (DDL, fuera de alcance) ni un actor de auditoría (el autorregistro público no acepta uno sin tocar `iam-*-self-registration.service.ts` más allá de lo mínimo). Decisión del propietario: ¿bloquea el cierre de H2, o el requisito funcional alcanza? |
-| Decisión abierta (ex H4.S1.M3) | Abierta | TX-09 exige sesión en `:id/content?signature`; `window.open()` no manda `Authorization`. O el front baja con `fetch`+blob, o se decide una firma sin sesión. No es de este carril |
 
 ## Evidencia
 ```text
@@ -142,3 +139,6 @@ Todo pegado, sin PHI ni credenciales reales — las cuentas usadas son sintétic
   inventado. Ampliar el value set es un cambio del modelo, no de la API.
 - **Riesgo residual:** las sedes existen como `practice_sites` **y** como afiliaciones (la guía publica las
   afiliaciones); no están enlazadas entre sí (`practiceSiteId` omitido). Una agenda real por sede requeriría enlazarlas.
+
+## Cierre
+Las dos que había dejado pendientes se resolvieron: la procedencia no necesitaba DDL (usa `common.identifiers`) y la descarga sin token se resolvió atando la firma al actor en vez de contradecir TX-09.

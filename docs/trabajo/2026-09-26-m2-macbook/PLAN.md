@@ -120,7 +120,7 @@ existen; y al re-correrlo, inserta 0 filas nuevas.
 |---|---|---|---|---|
 | H2.S1.M1 | Crear el seed con su compuerta `SEED_PEOPLE_ENABLED` | sin la variable no hace nada | salida de las dos pasadas pegada | HECHO |
 | H2.S1.M2 | Inventar datos personales deterministas (uuid5) | dos corridas dan los mismos valores | diff de dos corridas pegado | HECHO |
-| H2.S1.M3 | Marcar cada fila sintética con procedencia (`source_file`, `source_row`) | toda fila lleva procedencia | consulta pegada | BLOQUEADO (ver AMB-04) |
+| H2.S1.M3 | Marcar cada fila sintética con procedencia (`source_file`, `source_row`) | toda fila lleva procedencia | consulta pegada | HECHO (procedencia por `common.identifiers`, ver abajo) |
 | H2.S1.M4 | Comprobar login de una muestra por rol | 200 con el rol correcto | respuesta pegada | HECHO |
 
 ## H2 — cómo se cerró
@@ -246,7 +246,7 @@ decenas con dirección real.
 |---|---|---|---|---|
 | H4.S1.M1 | Cerrar el IDOR de `files/links` (falta actor + `@Roles`/guard) | una sesión ajena recibe 403 | respuesta pegada | HECHO |
 | H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | HECHO (ya resuelto en `test`, verificado en vivo) |
-| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | DESCARTADO (superado por TX-09, ver abajo) |
+| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | HECHO (URL sin sesión atada al actor, ver abajo) |
 
 **H4.S1.M1 — cómo se cerró.** `FilesService.listLinkedFiles` no recibía actor ni comprobaba nada:
 `GET /common/files/links?ownerType=X&ownerId=Y` con **cualquier** `ownerId` devolvía sus adjuntos a
@@ -392,3 +392,31 @@ LIBERADO          -> otro paciente:   404   (no confirma que exista)
 LIBERADO          -> sin token:       401
 ```
 Nota: la CA decía «otro actor recibe 403»; el diseño elegido responde 404 (no filtra existencia), que es más estricto.
+
+
+## Cierre final de H2.S1.M3 y H4.S1.M3 (los dos que había dejado pendientes)
+
+**H2.S1.M3 — procedencia por fila, sin DDL.** No hacía falta tocar el modelo: el esquema ya tiene el
+mecanismo genérico `common.identifiers` (`owner`, `type`, `system`, `value`, `created_at`). Se agregaron los
+conceptos `SEED_SOURCE` y `SYNTHETIC_DATA` y `seed-provenance.ts`: por persona sembrada, una fila
+`SEED_SOURCE` (`system` = fuente, `value` = `archivo#fila`; la fecha de importación es su `created_at`) y una
+`SYNTHETIC_DATA` (`true`). Aplica a las dos siembras (padrón y redes) y **converge** sobre lo ya sembrado.
+```
+1ra pasada   padrón: provenanceWritten 202 (=101×2) · redes: 1526 (=763×2)
+2da pasada   0 y 0 (idempotente)
+consulta     SEED_SOURCE 864 · SYNTHETIC_DATA 864 · personas con procedencia 864 (=101+763)
+muestra      red de aseguradora | Alianza_Medicos_Habilitados.md#1 | 2026-09-26
+```
+
+**H4.S1.M3 — descarga sin token en la URL, respetando TX-09.** TX-09 exige sesión en `:id/content` para que
+«cada lectura quede con su actor»; eso no se toca (verificado: sin sesión 401, con sesión 200). Se agrega, sin
+romper nada, `publicUrl` en la respuesta de `download-url` y `GET /:id/signed-content` (`@Public()`): la firma
+va en **otro dominio** (`public:`) y **atada al actor que la pidió** (`uid`), así que la lectura se registra a su
+nombre, no sirve para otro archivo, otra versión ni otra persona, y vence a los 15 min. 6 tests nuevos.
+```
+publicUrl lleva token de sesión?     False
+SIN header Authorization             -> 200, bytes «%PDF-1.4 tokenless»
+expires alterado                     -> 403
+uid alterado                         -> rechazado (400 por formato en la prueba en vivo; 403 en el unitario)
+/content sin sesión (TX-09 intacto)  -> 401 · con sesión -> 200
+```
