@@ -187,6 +187,40 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     expectedStatus: 404,
   },
 
+  // ---- Lecturas (CL-47): antes sólo había POST en el circuito ---------------
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/accessions/{id}',
+    name: 'happy: detalle de acesión (especímenes, contenedor, custodia)',
+    method: 'get',
+    path: (c) => `/diagnostics/accessions/${c.vars.diagAccessionId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/accessions/{id}',
+    name: 'límite: acesión inexistente',
+    method: 'get',
+    path: () => `/diagnostics/accessions/${UUID_ABSENT}`,
+    expectedStatus: 404,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/specimens/{id}',
+    name: 'happy: detalle de espécimen (con su custodia)',
+    method: 'get',
+    path: (c) => `/diagnostics/specimens/${c.vars.diagSpecimenId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/specimens/{id}',
+    name: 'límite: espécimen inexistente',
+    method: 'get',
+    path: () => `/diagnostics/specimens/${UUID_ABSENT}`,
+    expectedStatus: 404,
+  },
+
   // ---- UC-20-04: orden de trabajo -------------------------------------------
   {
     module: 'Diagnostics',
