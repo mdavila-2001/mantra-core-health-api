@@ -1,0 +1,14 @@
+Mapped {/authz/me/access, GET}
+Mapped {/authz/me/care-relationships/:id/revoke, POST}
+Mapped {/authz/me/clinical-access-grants/:grantId/revoke, POST}
+Mapped {/consent/encounters/:encounterId/informed-consent, GET}
+Mapped {/consent/encounters/:encounterId/informed-consent, POST}
+Mapped {/consent/me/consents, GET}
+Mapped {/consent/me/consents/:id/withdraw, POST}
+Mapped {/consent/me/hipaa-authorizations, GET}
+Mapped {/consent/me/objections, GET}
+Mapped {/consent/me/treatment-informed-consents, GET}
+Mapped {/diagnostic-results/me/:reportId/files/:fileId/content, GET}
+Mapped {/iam/auth/change-password, POST}
+Mapped {/iam/me/sessions, GET}
+Mapped {/iam/me/sessions/:id/revoke, POST}

@@ -62,3 +62,20 @@ fase — confirmar caso por caso al documentar cada módulo.
 No existe todavía una política de deprecación de endpoints (sin cabecera `Deprecation`, sin campo
 `deprecated: true` usado en el contrato OpenAPI generado). Se define cuando exista el primer caso
 real que la requiera — no se documenta una política hipotética sin evidencia de uso.
+
+## Errores con `details.reason` (BR-04)
+
+El status no cambia; `details.reason` deja al cliente distinguir subcasos:
+
+| `reason` | Status | Cuándo | Qué hace el cliente |
+| --- | --- | --- | --- |
+| `TENANT_REQUIRED` | 403 / 422 | Hay que indicar `X-Tenant-Id` y el actor no tiene uno resoluble | Abre el selector de organización |
+| `TENANT_AMBIGUOUS` | 403 | El actor pertenece a varios tenants y no indicó cuál | Abre el selector de organización |
+| `MFA_REQUIRED` | 401 | Login de una cuenta con MFA verificado sin `mfaCode` (con `AUTH_MFA_CHALLENGE_ENABLED=true`) | Pide el código y reintenta el login |
+| `MFA_INVALID` | 401 | `mfaCode` que no valida | Vuelve a pedir el código |
+| `CURRENT_PASSWORD_INVALID`, `PASSWORD_UNCHANGED` | 422 | `POST /iam/auth/change-password` | Muestra el error en el formulario |
+
+Un `429` lleva `code: RATE_LIMITED` y `Retry-After` (segundos).
+
+Front y API van bajo **el mismo origen** (TX-20): no se abre CORS. Ver
+`src/common/auth/README.md`.

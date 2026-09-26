@@ -339,7 +339,7 @@ export class IamAuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<TokenResponseDto> {
     const presented = this.cookieEnv.enabled
-      ? readRefreshCookie(req)
+      ? readRefreshCookie(req, this.cookieEnv.name)
       : dto.refreshToken;
     if (!presented) {
       // Con la cookie encendida el DTO ya no exige el campo, así que la
