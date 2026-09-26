@@ -1,15 +1,14 @@
 # Reporte — M2 · MacBook: roles, cuentas y directorio de médicos (preproducción 2026-09-26)
 
-> **AVANCE: 10 / 17 microtareas — 58,8 %.** (`HECHO / total`, contado fila por fila en `PLAN.md`;
-> `BLOQUEADO` y `TODO` no suman, aunque las dos `BLOQUEADO` de acá tienen contrato de solución
-> escrito, no son un signo de interrogación vacío.) H1 y H4.S1.M1/M3 cerrados. H2 cerrado salvo
-> procedencia por fila (bloqueada, no DDL). H3 (5 microtareas) pasó a otra máquina (Mac Mini,
-> worktree/rama propios) por indicación explícita del propietario a mitad de turno — no cuenta como
-> hecho ni como pendiente de este carril, se documenta el traspaso.
+> **AVANCE: 14 / 17 microtareas — 82,4 %.** (`HECHO / total`, contado fila por fila en `PLAN.md`.)
+> Las otras 3 no suman y cada una tiene su motivo: **H2.S1.M3** `BLOQUEADO` (procedencia por fila: no hay
+> columnas —DDL— ni actor de auditoría en el autorregistro), **H4.S1.M2** `BLOQUEADO` (el paciente lee su
+> PDF: el servicio contextual vive en `clinical`, fuera de alcance; contrato escrito), **H4.S1.M3**
+> `DESCARTADO` (TX-09, ya mergeado en `test`, resolvió la firma de otra forma; ver «Decisiones»).
 
 - Fecha: 2026-09-26 · Plan: [PLAN.md](./PLAN.md) · Rama: `pablo/test-m2-macbook-roles-cuentas-directorio`
   (worktree `../wt-m2-macbook`, sobre `origin/test@016caaa1`)
-- Peldaño de evidencia alcanzado: **`VERIFIED`** para H1, H2 y H4 (camino real ejercitado contra
+- Peldaño de evidencia alcanzado: **`VERIFIED`** para H1, H2, H3 y H4.S1.M1 (camino real ejercitado contra
   Postgres/API en vivo, sin mocks) — no `REGRESSION_VERIFIED` porque falta la regresión cruzada con
   el resto de los 36 carriles (no corrida por otras máquinas todavía) y el PR mergeable (rama no
   pusheada, ver "Riesgos residuales").
@@ -24,7 +23,9 @@
 | H2.S1.M1–M2 | `PeopleSeedService` + `synthetic-person.ts` + `markdown-table.ts` | `SEED_PEOPLE_ENABLED=true SEED_PEOPLE_PASSWORD=12345678 yarn start` | 1ra corrida: 9 médicos + 92 pacientes creados. 2da corrida (`yarn seed:boot`): 0 nuevos, 9+92 "existing" |
 | H2.S1.M4 | Login real de una muestra por rol | `curl /iam/auth/login` con `nationalId` sintético | 200, `roles:["USER","PATIENT"]`; médico ya verificado en H1.S2 con `PRACTITIONER` |
 | H4.S1.M1 | IDOR de `GET /common/files/links` cerrado (`canActorReadOwnFile` + 403 si no hay nada visible) | `curl` con token de dueño y de extraño sobre el mismo `ownerId` | Dueño: 200 con su adjunto. Extraño: 403 exacto, no lista vacía |
-| H4.S1.M3 | `GET /:id/signed-content` (`@Public()`, firma HMAC verificada) reemplaza el token-en-URL | `curl` sin ningún header `Authorization`; y con `expires` forjado | Sin token: 200 con los bytes reales subidos. Forjado: 403 "Firma de descarga inválida" |
+| H3.S1–S2 (5) | `DirectoryNetworksSeedService`: 763 personas (454+507 menos 198 en las dos redes), 1 sede + 1 afiliación por dirección, 1 membresía por red | `SEED_DIRECTORY_NETWORKS_ENABLED=true yarn seed:boot` ×3; guía con `DEV_VERIFICATION_BYPASS=false` | 3ra corrida en 0 (idempotente); membresías 454 + 507; guía: 765 médicos de red, 337 con ≥2 sedes, 0 repetidos; «Jose Alberto Dalence Romero» aparece 1 vez con 2 direcciones; login `PRACTITIONER` 200 |
+| CL-68 (pedido de M3) | `@Roles('CLINICIAN','PRACTITIONER','SECURITY_ADMIN')` en las 3 rutas de `forms` que no tenían | `jest forms-controllers.spec.ts` | 3 casos nuevos en verde |
+| Integración | `origin/test` (101 commits) integrado a la rama; 4 conflictos resueltos | `yarn typecheck` 0 · `jest common forms iam authz seed auth` · `yarn seed:boot` | 943/944 (1 rojo preexistente en `test`, ver «Riesgos») · 24/24 pasos de seed ok
 
 ## A medias
 Ninguna — todo lo que se abrió esta sesión se cerró como `HECHO`, `BLOQUEADO` (con las cuatro
@@ -34,8 +35,8 @@ respuestas) o se traspasó explícitamente (H3).
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H2.S1.M3 | BLOQUEADO | Procedencia por fila (`source_file`/`source_row`/`synthetic`) no tiene dónde vivir: no existen las columnas (DDL, fuera de alcance) ni un actor de auditoría (el autorregistro público no acepta uno sin tocar `iam-*-self-registration.service.ts` más allá de lo mínimo). Decisión del propietario: ¿bloquea el cierre de H2, o el requisito funcional alcanza? |
-| H4.S1.M2 | BLOQUEADO | El paciente lee su propio PDF de resultado exige autorización **contextual** (`diagnostic_report` liberado + pertenece al paciente), que vive en `clinical` (dueño: M3), explícitamente OUT de este carril. Contrato exacto del método a escribir, documentado en `PLAN.md` |
-| H3 (los 8 restantes) | Traspasado | Mac Mini, worktree `wt-m2-h3`, rama propia sobre `origin/test`. Recibió por chat: los hallazgos de AMB-02/AMB-03 (no existen `normalize_padron.py` ni `observed-specialties.dataset.json`) y aviso de que `synthetic-person.ts`/`markdown-table.ts` viven en esta rama, todavía sin pushear |
+| H4.S1.M2 | BLOQUEADO | El paciente lee su propio PDF exige autorización **contextual** (`diagnostic_report` liberado + pertenece al paciente), que vive en `clinical` (dueño: M3), OUT de este carril. M3 ya expuso `GET /clinical/.../attachments` para tres tipos; falta el de resultados. Contrato del método en `PLAN.md` |
+| Decisión abierta (ex H4.S1.M3) | Abierta | TX-09 exige sesión en `:id/content?signature`; `window.open()` no manda `Authorization`. O el front baja con `fetch`+blob, o se decide una firma sin sesión. No es de este carril |
 
 ## Evidencia
 ```text
@@ -86,7 +87,7 @@ Todo pegado, sin PHI ni credenciales reales — las cuentas usadas son sintétic
   (no una decisión mía): pasó a la máquina Mac Mini con su propio worktree y rama.
 
 ## Riesgos residuales
-- **La rama no está pusheada.** `git push` fue denegado por el clasificador de permisos del entorno
+- **(Resuelto)** La rama ya está pusheada. `git push` fue denegado por el clasificador de permisos del entorno
   ("Out-of-Place Publication") en el primer intento de este turno; no se reintentó por otra vía
   (instrucción explícita de no rodear la denegación). Los cuatro commits (`c986315f`, `573b8818`,
   `7b32b2a8`, `356702a2`) existen sólo en el worktree local. **Acción pendiente del usuario:**
@@ -129,3 +130,16 @@ Todo pegado, sin PHI ni credenciales reales — las cuentas usadas son sintétic
   sesión, se traspasó.
 - Pendiente de acción humana: aprobar/ejecutar el `git push` de la rama (bloqueado por el
   clasificador de permisos), y decidir las dos ambigüedades bloqueantes (AMB-04, H4.S1.M2).
+
+
+## Actualización tras integrar `test` (lo que ya habían hecho las otras máquinas)
+- **Ninguna otra máquina había hecho H3 ni tocado esta rama**: la Mac Mini no dejó rama en el remoto. Lo que sí
+  estaba mergeado y cambió el trabajo: M6 (`provider-networks.dataset.json`, `observed-specialties.dataset.json`
+  → AMB-02/AMB-03 resueltas), TX-09 (firma de descarga → H4.S1.M3 descartado) y M3 (pedido CL-68 → hecho).
+- **Riesgo residual nuevo:** `terminology-designations.es.spec.ts` está en rojo **en `test`** (conceptos de
+  conjuntos de valores sin traducción al castellano; ningún archivo mío toca eso). No se corrigió: no es de este carril.
+- **Riesgo residual nuevo:** 117 nombres de especialidad del dataset de redes no mapean a `VS_MEDICAL_SPECIALTY`
+  (p. ej. «CIRUGIA CARDIOVASCULAR», «ALERGIA E INMUNOLOGIA»); esos médicos quedan sin esa especialidad, sin código
+  inventado. Ampliar el value set es un cambio del modelo, no de la API.
+- **Riesgo residual:** las sedes existen como `practice_sites` **y** como afiliaciones (la guía publica las
+  afiliaciones); no están enlazadas entre sí (`practiceSiteId` omitido). Una agenda real por sede requeriría enlazarlas.

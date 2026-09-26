@@ -33,6 +33,7 @@ const PASOS = [
   'bootstrapAdmin',
   'providerAccounts',
   'people',
+  'directoryNetworks',
   'practiceDefaultServices',
 ] as const;
 
@@ -94,6 +95,7 @@ function armar(fallan: Paso[] = []) {
     dobles.clinicalForms as never,
     dobles.practiceDefaultServices as never,
     dobles.people as never,
+    dobles.directoryNetworks as never,
     logger as never,
   );
 
@@ -111,6 +113,7 @@ const CONTENIDO: readonly Paso[] = [
   'clinicalForms',
   'providerAccounts',
   'people',
+  'directoryNetworks',
   'practiceDefaultServices',
 ];
 

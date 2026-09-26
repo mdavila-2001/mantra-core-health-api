@@ -217,9 +217,9 @@ entonces aparece una vez, con sus dos direcciones.
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Normalizar nombres y deduplicar (`normalize_padron.py`) | 455 + 508 distintos | conteos pegados | TODO |
-| H3.S1.M2 | Sembrar una sede por fila | un médico con 2 filas tiene 2 sedes | respuesta de la API pegada | TODO |
-| H3.S1.M3 | Alta de membresía en la red de cada aseguradora | usa el endpoint existente | respuesta pegada | TODO |
+| H3.S1.M1 | Normalizar nombres y deduplicar (`normalize_padron.py`) | 455 + 508 distintos | conteos pegados | HECHO |
+| H3.S1.M2 | Sembrar una sede por fila | un médico con 2 filas tiene 2 sedes | respuesta de la API pegada | HECHO |
+| H3.S1.M3 | Alta de membresía en la red de cada aseguradora | usa el endpoint existente | respuesta pegada | HECHO |
 
 ### H3.S2 — Que se vean en la guía pública sin trampas
 **CA:** Dado `GET /public/.../practitioners?specialty=…` sin `DEV_VERIFICATION_BYPASS`, devuelve
@@ -229,8 +229,8 @@ decenas con dirección real.
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H3.S2.M1 | Verificar con procedencia «red de aseguradora» en vez del bypass | la guía los muestra sin la variable | respuesta pegada | TODO |
-| H3.S2.M2 | Mapear especialidades contra `VS_MEDICAL_SPECIALTY`, dejar sin código lo que no mapea | ningún código inventado | lista de no mapeadas pegada | TODO |
+| H3.S2.M1 | Verificar con procedencia «red de aseguradora» en vez del bypass | la guía los muestra sin la variable | respuesta pegada | HECHO |
+| H3.S2.M2 | Mapear especialidades contra `VS_MEDICAL_SPECIALTY`, dejar sin código lo que no mapea | ningún código inventado | lista de no mapeadas pegada | HECHO |
 
 ## H4 — El paciente puede bajar el PDF de su propio resultado
 **CA:** Dado un paciente con un resultado liberado, cuando pide su PDF, lo recibe; otro actor recibe 403.
@@ -246,7 +246,7 @@ decenas con dirección real.
 |---|---|---|---|---|
 | H4.S1.M1 | Cerrar el IDOR de `files/links` (falta actor + `@Roles`/guard) | una sesión ajena recibe 403 | respuesta pegada | HECHO |
 | H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | BLOQUEADO (conflicto de alcance, ver abajo) |
-| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | HECHO |
+| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | DESCARTADO (superado por TX-09, ver abajo) |
 
 **H4.S1.M1 — cómo se cerró.** `FilesService.listLinkedFiles` no recibía actor ni comprobaba nada:
 `GET /common/files/links?ownerType=X&ownerId=Y` con **cualquier** `ownerId` devolvía sus adjuntos a
@@ -317,3 +317,62 @@ misma URL (forjar) devolvió 403 `"Firma de descarga inválida"`. Los tres, con 
 | `db:vendor` borra 4 patches | rompe la API si se corre | no se corre hasta que M1 cierre su H3 |
 | Volumen real: 105 personas + ~960 médicos por HTTP de login/API es lento | tiempo de verificación | verificar por muestra + conteo SQL directo, no 1065 logins HTTP |
 | Datasets del padrón/redes (los doce markdown) puede que M6 aún no los haya publicado | bloquea H2/H3 si no hay fuente | aislar: usar los datasets ya presentes en el repo/tools si existen; si no, simular con generador determinista propio declarando el doble (regla 65) |
+
+
+## Cierre tras integrar `test` (todo lo demás ya estaba mergeado)
+
+Al integrar `origin/test` (101 commits) en esta rama aparecieron cuatro hechos que cambiaron el plan:
+
+1. **H4.S1.M3 → DESCARTADO por TX-09 (ya mergeado).** `:id/content` ahora valida `versionId`/`expires`/
+   `signature` (HMAC en tiempo constante, 410 si venció) **y sigue exigiendo sesión**, decisión del
+   equipo para que «cada lectura quede con su actor». Mi endpoint público `signed-content` contradecía
+   esa decisión y duplicaba la verificación: se eliminó. Queda **abierto como decisión**: `window.open()`
+   no manda `Authorization`, así que el front debe bajar el archivo con `fetch` + blob (o TX-09 tendría
+   que aceptar una firma sin sesión). Sigue en el IDOR de `/links`, que TX-09 no tocaba: se conserva
+   aplicado sólo al listado genérico; `listLinkedFilesOf` (rutas clínicas de M3, que autorizan por el
+   paciente de la fila) no filtra por autoría.
+2. **CL-68 (pedido de M3 a M2) → HECHO.** `POST /forms/field-definitions`, `POST /forms/fields/:id/dependencies`
+   y `PUT /forms/fields/:id/localizations/:lang` ahora llevan `@Roles('CLINICIAN','PRACTITIONER','SECURITY_ADMIN')`.
+   Test: `forms-controllers.spec.ts` (3 casos, `PATIENT` excluido).
+3. **B13 (pedido de M4 a M2)**: `ACCOUNTING_APPROVER` sembrado (H1.S1.M2). «Emitirlo» es asignarlo por
+   `POST /authz/users/:id/role-assignments`; no se asigna a nadie por defecto.
+4. **M6 entregó** `provider-networks.dataset.json` (ya normalizado, con `source_file`/`source_row` por sede)
+   y `observed-specialties.dataset.json`: **AMB-02 y AMB-03 quedan resueltas** (existían en `test`, no en
+   el checkout local viejo). Con eso H3 se hizo acá; el traspaso a la Mac Mini no dejó ninguna rama en
+   el remoto, así que no había nada que integrar de esa máquina.
+
+## H3 — cómo se cerró
+
+`DirectoryNetworksSeedService` (`SEED_DIRECTORY_NETWORKS_ENABLED` + `SEED_PEOPLE_PASSWORD`), en la
+cadena de seeds. Plegado por nombre normalizado: **763 personas distintas** (Alianza 454 + Nacional 507
+menos 198 en las dos; el encargo decía 455/508, el dataset trae 454/507). Por persona: alta con el
+autorregistro (cuenta `<nombre>.<apellido>.<hash>@alovida.test`, clave por variable), una **sede de
+práctica por dirección** (`PractitionerSitesService.createOwnSite`, teléfonos en la dirección), una
+**afiliación por dirección** (es lo que la guía publica como «dónde atiende») y una **membresía por red**
+(`addMembership`, con `contractReference = red de aseguradora: archivo#fila`). Converge: sobre médicos ya
+existentes completa lo que falte (la primera corrida murió a mitad en 335 fichas por falta de tenant en
+`createOwnSite`; la segunda las completó sin duplicar).
+
+Evidencia (Postgres real, sin mocks):
+```
+1ra corrida  practitionersCreated 763 · membershipsCreated 429 · failed 335 (X-Tenant-Id)   → bug real, corregido
+2da corrida  practitionersExisting 763 · sitesCreated 519 · membershipsCreated 532 · failed 0
+3ra corrida  todo en 0 (idempotente)
+membresías   RED_BO_ASEG_ALIANZA_VIDA_S_A 454 · RED_BO_ASEG_NACIONAL_SEGUROS_VIDA_Y_SALUD_S_A 507
+guía (DEV_VERIFICATION_BYPASS=false)  927 filas · 765 médicos de red con sedes · 337 con >=2 sedes · 0 nombres repetidos
+ejemplo      «Jose Alberto Dalence Romero» aparece 1 vez, con 2 direcciones (Clínica de las Américas / Centro Médico Sirani)
+filtro       por su especialidad devuelve 84 médicos, los 84 de red
+login        alcoba.zuna.836969@alovida.test / 12345678 → 200, roles [USER, PRACTITIONER]
+```
+
+Decisiones (a confirmar por el propietario):
+- **Quedan `PENDIENTE`, no «verificados».** El encargo pedía verificarlos «con procedencia red de aseguradora»,
+  pero (a) `test` ya cambió la guía para **mostrar** a los pendientes con `verified:false` en vez de excluirlos
+  (bloque «La verificación se MUESTRA, no excluye»), así que la CA («se ven sin el bypass») se cumple sin
+  afirmar nada, y (b) `verifyCredential` exige declarar contra QUÉ se verificó: una lista de aseguradora no es
+  una verificación de matrícula. Se prefirió no marcar `VERIFIED` algo que nadie verificó.
+- **Matrícula `SINT-<7 dígitos>`**: la red no publica matrícula y el alta la exige; D-3 autoriza inventar lo
+  obligatorio que falte salvo nombres. Es visiblemente sintética y el perfil sigue pendiente.
+- **Especialidades**: mapeo por nombre en castellano contra `VS_MEDICAL_SPECIALTY`; **117 nombres del dataset
+  no mapean y quedan sin código** (la lista sale en el detalle del paso). Ningún código inventado. No hubo
+  decisión de negocio que tomar acá (Q-03).

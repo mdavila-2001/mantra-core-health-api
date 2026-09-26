@@ -23,6 +23,7 @@ import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
+import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -150,6 +151,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   sin catálogo.
    * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
    *   opt-in por `SEED_PEOPLE_ENABLED`.
+   * @param directoryNetworks - Médicos de las redes de Alianza y Nacional, con
+   *   sus sedes y membresías (H3), opt-in por `SEED_DIRECTORY_NETWORKS_ENABLED`.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -176,6 +179,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly people: PeopleSeedService,
+    private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -432,6 +436,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'padrón de personas',
         kind: 'content',
         run: () => this.people.run(),
+      },
+      // H3: después de `people` sólo por orden de lectura; depende de las
+      // aseguradoras (`boliviaInsurance`) y del actor de arranque.
+      {
+        name: 'directorio de redes de aseguradoras',
+        kind: 'content',
+        run: () => this.directoryNetworks.run(),
       },
       // El último, y no por importancia: es el único paso que siembra **sobre
       // filas de negocio que ya existen** —una por práctica— en vez de
