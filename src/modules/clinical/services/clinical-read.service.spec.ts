@@ -171,12 +171,21 @@ function build() {
   // devuelven vacío: estas pruebas miran el gate y la auditoría, no el mapeo.
   const dataAccessLogRepo = { record: mockFn(() => ({ id: 'dal-1' })) };
   const vacio = { findByPatient: mockFn().mockResolvedValue([]) };
+  // BR-14 (CL-11 / CL-10): por defecto sin reacciones ni historia — estas
+  // pruebas miran el gate y la auditoría, no el mapeo de campos nuevos.
+  const allergyReactionsRepo = {
+    findByAllergyIds: mockFn().mockResolvedValue([]),
+  };
+  const historyRepo = {
+    latestBySource: mockFn().mockResolvedValue(new Map()),
+  };
   em.flush = mockFn().mockResolvedValue(undefined);
 
   const service = new ClinicalReadService(
     em as any,
     vacio as any,
     vacio as any,
+    allergyReactionsRepo as any,
     vacio as any,
     vacio as any,
     vacio as any,
@@ -190,6 +199,7 @@ function build() {
     logger as any,
     representation as any,
     dataAccessLogRepo as any,
+    historyRepo as any,
   );
 
   return {
@@ -209,6 +219,9 @@ function build() {
     iniciarConsulta,
     vincular,
     logger,
+    vacio,
+    allergyReactionsRepo,
+    historyRepo,
   };
 }
 
@@ -274,6 +287,120 @@ describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
     await expect(
       d.service.getPatientSummary(PERSONA_DEL_TITULAR, 50, medica),
     ).rejects.toThrow('audit down');
+  });
+});
+
+/**
+ * BR-14 (CL-11 / CL-10): el resumen traía menos de lo que el modelo ya
+ * guardaba. Estas pruebas fijan los cuatro campos que antes faltaban.
+ */
+describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tiene (BR-14)', () => {
+  const medica = {
+    id: 'user-medica',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-1',
+  } as any;
+
+  it('CL-11: la receta trae encounterId, la condición trae lateralidad, el encuentro trae rowVersion', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([
+        {
+          id: 'cond-1',
+          codeConceptId: 'code-1',
+          lateralityConceptId: 'lat-1',
+          createdAt: new Date(),
+        },
+      ]) // conditions
+      .mockResolvedValueOnce([]) // allergies
+      .mockResolvedValueOnce([
+        {
+          id: 'mr-1',
+          medicationConceptId: 'med-1',
+          statusConceptId: 'status-1',
+          encounterId: 'enc-1',
+          createdAt: new Date(),
+        },
+      ]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([
+        { id: 'enc-1', statusConceptId: 'status-1', rowVersion: 3 },
+      ]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+
+    const resumen = await d.service.getPatientSummary(
+      PERSONA_DEL_TITULAR,
+      50,
+      medica,
+    );
+
+    expect(resumen.conditions[0].lateralityConceptId).toBe('lat-1');
+    expect(resumen.medicationRequests[0].encounterId).toBe('enc-1');
+    expect(resumen.encounters[0].rowVersion).toBe(3);
+  });
+
+  it('CL-11: la alergia trae sus reacciones', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([]) // conditions
+      .mockResolvedValueOnce([
+        { id: 'all-1', substanceConceptId: 'sub-1', createdAt: new Date() },
+      ]) // allergies
+      .mockResolvedValueOnce([]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+    d.allergyReactionsRepo.findByAllergyIds.mockResolvedValue([
+      { id: 'r1', allergyId: 'all-1', manifestationConceptId: 'manif-1' },
+    ]);
+
+    const resumen = await d.service.getPatientSummary(
+      PERSONA_DEL_TITULAR,
+      50,
+      medica,
+    );
+
+    expect(resumen.allergies[0].reactions).toEqual([
+      {
+        id: 'r1',
+        manifestationConceptId: 'manif-1',
+        severityConceptId: undefined,
+        description: undefined,
+      },
+    ]);
+  });
+
+  it('CL-10: expone el motivo del último cambio de estado desde la historia, no del log', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([
+        { id: 'cond-1', codeConceptId: 'code-1', createdAt: new Date() },
+      ]) // conditions
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    d.historyRepo.latestBySource.mockResolvedValue(
+      new Map([
+        [
+          'cond-1',
+          {
+            dataSnapshot: { statusChangeReasonText: 'Ya no presenta síntomas' },
+          },
+        ],
+      ]),
+    );
+
+    const resumen = await d.service.getPatientSummary(
+      PERSONA_DEL_TITULAR,
+      50,
+      medica,
+    );
+
+    expect(resumen.conditions[0].lastStatusChangeReasonText).toBe(
+      'Ya no presenta síntomas',
+    );
   });
 });
 

@@ -39,6 +39,7 @@ import {
   CareEpisodesService,
   EncountersService,
   EncounterSealService,
+  EncounterSealGuardService,
   ObservationsService,
   ServiceRequestsService,
   DiagnosticReportsService,
@@ -67,6 +68,9 @@ import {
   DiagnosticReportsRepository,
   ConditionsRepository,
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones para el resumen; independiente de
+  // `AllergyIntolerancesRepository` (de M3).
+  AllergyReactionsReadRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
   PatientReportedHealthStatementsRepository,
@@ -181,6 +185,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     DiagnosticReportsRepository,
     ConditionsRepository,
     AllergyIntolerancesRepository,
+    AllergyReactionsReadRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
     PatientReportedHealthStatementsRepository,
@@ -200,6 +205,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     CareEpisodesService,
     EncountersService,
     EncounterSealService,
+    EncounterSealGuardService,
     ObservationsService,
     ServiceRequestsService,
     DiagnosticReportsService,
@@ -237,6 +243,9 @@ import { DataAccessLogRepository } from '../audit/repositories';
   // interno de este módulo. Sin esto, el arranque revienta con
   // `UnknownDependenciesException` apenas `ChartModule` intenta instanciar el
   // guard (confirmado reproduciendo el arranque real, no sólo leyendo el DI).
+  // `EncounterSealGuardService` se exporta por lo mismo (BR-14/CL-07):
+  // `ChartModule` la usa desde `chart-care-plans.service.ts` y
+  // `chart-documents.service.ts`.
   exports: [
     ConditionsService,
     ProceduresService,
@@ -244,6 +253,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     EncountersRepository,
     ClinicalReadService,
     ClinicalRecordAccessGuard,
+    EncounterSealGuardService,
     DuplicateStudyDetector,
   ],
 })

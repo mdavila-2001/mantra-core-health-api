@@ -1296,6 +1296,24 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: CONCEPTS.COUNTRY_BO,
     targets: ['directory.tenants.country_concept_id'],
   },
+  /* --- BR-16 (CL-36) ---------------------------------------------------------
+     `chart-documents.service.ts` ya acepta y persiste `patientVisibilityConceptId`
+     (default `VISIBILITY_PROVIDER_ONLY`) desde antes de este carril; lo que
+     faltaba era publicarlo para que una pantalla pudiera ofrecerlo como
+     selector en vez de tener que adivinar el uuid. Sin columna ni tabla nueva:
+     los dos conceptos ya existen en `chart.concepts.ts`. */
+  {
+    code: 'chart-document-patient-visibility',
+    name: 'Visibilidad del documento para el paciente',
+    description:
+      'Si el titular puede ver este documento del expediente en su propia historia.',
+    concepts: [
+      CHART.VISIBILITY_PATIENT_VISIBLE,
+      CHART.VISIBILITY_PROVIDER_ONLY,
+    ],
+    defaultConceptId: CHART.VISIBILITY_PROVIDER_ONLY,
+    targets: ['chart.document_records.patient_visibility_concept_id'],
+  },
 ];
 
 /**

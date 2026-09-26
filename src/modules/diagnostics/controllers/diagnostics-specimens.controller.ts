@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -8,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DiagnosticsSpecimensService } from '../services';
 import {
   CreateSpecimenDto,
@@ -18,6 +24,8 @@ import {
   ContainerCustodyEventDto,
   ResourceCreatedDto,
   AccessionCreatedDto,
+  AccessionDetailDto,
+  SpecimenDetailDto,
 } from '../dto';
 
 /**
@@ -46,6 +54,35 @@ export class DiagnosticsSpecimensController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     return this.service.createSpecimen(dto, actor);
+  }
+
+  /**
+   * Lectura (CL-47): detalle de una acesión con sus especímenes, contenedores
+   * y cadena de custodia. Antes de esta ruta, `diagnostics` sólo tenía `POST`
+   * para el circuito de especímenes: abrir el detalle de una acesión concreta
+   * no tenía dónde ir.
+   */
+  @Get('accessions/:id')
+  @ApiOperation({
+    summary: 'Detalle de una acesión (especímenes, contenedores y custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getAccession(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AccessionDetailDto> {
+    return this.service.getAccession(id, requireTenantId());
+  }
+
+  /** Lectura (CL-47): detalle de un espécimen con su cadena de custodia. */
+  @Get('specimens/:id')
+  @ApiOperation({
+    summary: 'Detalle de un espécimen (con su cadena de custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getSpecimen(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SpecimenDetailDto> {
+    return this.service.getSpecimen(id, requireTenantId());
   }
 
   /** UC-20-01. */

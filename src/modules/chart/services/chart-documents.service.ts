@@ -11,7 +11,12 @@ import {
   FileUploadService,
 } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
-import { ClinicalReadService } from '../../clinical/services';
+import {
+  ClinicalReadService,
+  // BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
+  // referencien. Servicio nuevo, independiente, exportado por `ClinicalModule`.
+  EncounterSealGuardService,
+} from '../../clinical/services';
 import { DocumentsRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
@@ -33,6 +38,7 @@ export class ChartDocumentsService {
    * @param attachableFiles - Comprueba que un archivo referenciado es usable.
    * @param clinicalRead - Resuelve si el actor puede leer la historia del paciente dueño del documento.
    * @param fileUpload - Sirve los bytes de un archivo ya autorizado por contexto.
+   * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
    */
   constructor(
     private readonly em: EntityManager,
@@ -41,6 +47,7 @@ export class ChartDocumentsService {
     private readonly attachableFiles: AttachableFileService,
     private readonly clinicalRead: ClinicalReadService,
     private readonly fileUpload: FileUploadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ChartDocumentsService.name);
   }
@@ -59,6 +66,14 @@ export class ChartDocumentsService {
       'Attaching patient document',
     );
     return this.em.transactional(async (tx) => {
+      // BR-14 (CL-07): un documento no puede nacer contra un encuentro ya
+      // sellado.
+      if (dto.encounterId) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+      }
       // El vínculo se gobierna acá: cada archivo referenciado tiene que
       // existir, ser del actor y de un tipo admitido para un documento del
       // expediente. En serie (no `Promise.all`) para que el primer rechazo

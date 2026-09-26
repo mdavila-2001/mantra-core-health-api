@@ -1,5 +1,36 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/**
+ * Una reacción registrada de una alergia (BR-14/CL-11): la tabla
+ * `clinical.allergy_reactions` existe y se escribe al crear la alergia
+ * (`AllergyIntolerancesService.create`), pero el resumen nunca la leía.
+ */
+export class AllergyReactionItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a manifestation concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  manifestationConceptId!: string;
+
+  /**
+   * Identificador asociado a severity concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  severityConceptId?: string;
+
+  /**
+   * Descripción libre de la reacción.
+   */
+  @ApiPropertyOptional()
+  description?: string;
+}
+
 /** Una condición registrada del paciente. */
 export class ConditionItemDto {
   /**
@@ -51,6 +82,12 @@ export class ConditionItemDto {
   clinicalCourseConceptId?: string;
 
   /**
+   * Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  lateralityConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
@@ -73,6 +110,17 @@ export class ConditionItemDto {
    */
   @ApiPropertyOptional()
   noteText?: string;
+
+  /**
+   * Motivo del último cambio de estado clínico (BR-14/CL-10). Decisión (b) —
+   * D-BR14-04: no vive en una columna de `clinical.conditions`, sino en el
+   * último `data_snapshot` de `audit.conditions_history`. Ausente si la
+   * condición nunca cambió de estado.
+   */
+  @ApiPropertyOptional({
+    description: 'Motivo del último cambio de estado clínico, si hubo alguno',
+  })
+  lastStatusChangeReasonText?: string;
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -126,6 +174,13 @@ export class AllergyItemDto {
   clinicalStatusConceptId?: string;
 
   /**
+   * Reacciones registradas de esta alergia (BR-14/CL-11: la tabla existe y
+   * se escribía; el resumen no la leía).
+   */
+  @ApiProperty({ type: [AllergyReactionItemDto] })
+  reactions!: AllergyReactionItemDto[];
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })
@@ -157,6 +212,14 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   prescriberProfileId?: string;
+
+  /**
+   * Encuentro en el que se prescribió (columna existente en el modelo;
+   * BR-14/CL-11: `ConditionItemDto` y `ObservationItemDto` ya lo exponían,
+   * la receta no).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
 
   /**
    * Valor de dose text mantenido por la instancia.
@@ -343,6 +406,14 @@ export class EncounterItemDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   endAt?: Date;
+
+  /**
+   * Versión de fila para bloqueo optimista (BR-14/CL-16): el cierre concurrente
+   * ya compara `expectedRowVersion` contra esta columna; el resumen no la
+   * exponía, así que el cliente no tenía con qué mandar el cierre.
+   */
+  @ApiProperty()
+  rowVersion!: number;
 }
 
 /**

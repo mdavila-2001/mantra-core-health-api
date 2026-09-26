@@ -40,13 +40,18 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // BR-14 (CL-07): por defecto no rechaza nada.
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartCarePlansService(
     em as any,
     carePlansRepo,
     logger as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
-  return { service, tx, carePlansRepo, clinicalRead };
+  return { service, tx, carePlansRepo, clinicalRead, encounterSealGuard };
 }
 
 describe('ChartCarePlansService', () => {
@@ -72,6 +77,20 @@ describe('ChartCarePlansService', () => {
           statusConceptId: CHART.ACTIVITY_SCHEDULED,
         }),
       );
+    });
+
+    it('BR-14 (CL-07): rejects a plan against a sealed encounter', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.createCarePlan(
+          { patientProfileId: 'p1', encounterId: 'enc-1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
     });
 
     // CL-29 (BR-13) — el autor del plan sale de la sesión.
