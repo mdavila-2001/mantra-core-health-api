@@ -9,8 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import type { FileLinkResponseDto } from '../../common/dto';
 import { CareEpisodesService, EncountersService } from '../services';
 import {
+  AttachFileToEncounterDto,
   CreateCareEpisodeDto,
   CareEpisodeResponseDto,
   CheckInEncounterDto,
@@ -96,5 +98,22 @@ export class ClinicalEncountersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<EncounterResponseDto> {
     return this.encountersService.close(id, dto, actor);
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a este encuentro. Subí el archivo
+   * antes con `POST /common/files/upload`. Reemplaza, para el encuentro, al
+   * genérico `POST /common/files/:id/links`: acá el paciente sale de la fila y
+   * la escritura pasa por la política de la historia (MCH-007).
+   */
+  @Post('encounters/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a un encuentro' })
+  attachFileToEncounter(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToEncounterDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.encountersService.attachFile(id, dto, actor);
   }
 }

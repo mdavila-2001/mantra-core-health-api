@@ -25,6 +25,7 @@ import {
 import { canActorReadOwnFile } from './file-access';
 import { FileVersions, Files } from '../entities';
 import {
+  CLINICAL_RECORD_OWNER_TYPES,
   CreateFileDerivativeDto,
   CreateFileDto,
   CreateFileLinkDto,
@@ -678,6 +679,16 @@ export class FilesService {
   async listLinkedFiles(
     query: ListFileLinksQueryDto,
   ): Promise<LinkedFilePageDto> {
+    // BR-11 §1.C: este listado no recibe al actor y no puede evaluar la
+    // política de la historia clínica. Para los tipos clínicos nuevos (P25)
+    // se cierra acá, antes de leer nada: el front los lista por la ruta del
+    // recurso. Sumar tres tipos clínicos a un listado sin control sería
+    // ampliar el IDOR, no cerrarlo.
+    if (CLINICAL_RECORD_OWNER_TYPES.has(query.ownerType)) {
+      throw new ForbiddenException(
+        'Los adjuntos de la historia clínica se listan por la ruta clínica del recurso, no por el listado genérico.',
+      );
+    }
     this.logger.info(
       {
         operation: 'common.fileLink.list',

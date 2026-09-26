@@ -614,6 +614,7 @@ export class ClinicalReadService {
         (row) => ({
           id: row.id,
           substanceConceptId: row.substanceConceptId,
+          encounterId: row.encounterId,
           typeConceptId: row.typeConceptId,
           categoryConceptId: row.categoryConceptId,
           criticalityConceptId: row.criticalityConceptId,
@@ -637,6 +638,7 @@ export class ClinicalReadService {
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
         indicationConditionId: row.indicationConditionId,
+        indicationText: row.indicationText,
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,

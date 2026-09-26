@@ -188,6 +188,13 @@ export class CheckInEncounterDto {
 }
 
 /** Cuerpo de `POST /clinical/encounters/{id}/close` (UC-08-14). */
+/** Cuerpo de `POST /clinical/encounters/:id/attachments` (P25). */
+export class AttachFileToEncounterDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
+
 export class CloseEncounterDto {
   /**
    * Valor de expected row version mantenido por la instancia.

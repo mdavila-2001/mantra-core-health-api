@@ -22,7 +22,9 @@ import {
 } from '../services';
 import {
   AllergyIntoleranceResponseDto,
+  AttachFileToAllergyIntoleranceDto,
   AttachFileToConditionDto,
+  AttachFileToMedicationRequestDto,
   AttachFileToProcedureDto,
   ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
@@ -128,6 +130,18 @@ export class ClinicalRecordsController {
     return this.allergyService.create(dto, actor);
   }
 
+  /** P25 (BR-11): liga un archivo ya subido a esta alergia puntual. */
+  @Post('allergy-intolerances/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una alergia' })
+  attachFileToAllergy(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToAllergyIntoleranceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.allergyService.attachFile(id, dto, actor);
+  }
+
   /** UC-08-10. */
   @Post('medication-requests')
   @UseGuards(ClinicalRecordAccessGuard)
@@ -138,6 +152,21 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicationRequestResponseDto> {
     return this.medicationsService.prescribe(dto, actor);
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a esta receta puntual. Adjuntar no
+   * reabre la inmutabilidad: el contenido sellado y su `content_hash` no cambian.
+   */
+  @Post('medication-requests/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una receta' })
+  attachFileToMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToMedicationRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.medicationsService.attachFile(id, dto, actor);
   }
 
   /** UC-08-11. */

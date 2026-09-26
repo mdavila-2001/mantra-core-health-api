@@ -15,6 +15,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { ForbiddenException } from '@nestjs/common';
+import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -54,6 +55,10 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // P25: adjuntos del encuentro.
+  const filesService = {
+    createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -62,6 +67,7 @@ function build() {
     seal as any,
     logger as any,
     clinicalRead as any,
+    filesService as any,
   );
   return {
     service,
@@ -71,6 +77,7 @@ function build() {
     clinicalNotifications,
     seal,
     clinicalRead,
+    filesService,
   };
 }
 
@@ -92,6 +99,35 @@ const encounter = () => ({
 });
 
 describe('EncountersService', () => {
+  // P25 / CL-05 — adjuntos del encuentro por su ruta clínica.
+  describe('attachFile (P25)', () => {
+    it('liga el archivo con OWNER_ENCOUNTER tras autorizar por el paciente de la fila', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      const res = await d.service.attachFile('enc1', { fileId: 'f1' }, actor);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.createLink).toHaveBeenCalledWith(
+        'f1',
+        { ownerType: OwnerType.ENCOUNTER, ownerId: 'enc1' },
+        actor,
+      );
+      expect(res).toEqual({ id: 'link-1' });
+    });
+
+    it('responde 404 antes de autorizar cuando el encuentro no existe', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.attachFile('nope', { fileId: 'f1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(d.filesService.createLink).not.toHaveBeenCalled();
+    });
+  });
+
   describe('checkIn (UC-08-02)', () => {
     it('opens an encounter without participants', async () => {
       const d = build();

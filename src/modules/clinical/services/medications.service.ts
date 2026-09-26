@@ -15,6 +15,7 @@ import {
   MedicationRequestsRepository,
 } from '../repositories';
 import {
+  AttachFileToMedicationRequestDto,
   CreateMedicationRecordDto,
   CreateMedicationRequestDto,
   EditMedicationRequestDraftDto,
@@ -31,6 +32,10 @@ import { PrescriptionSignaturePoliciesService } from './prescription-signature-p
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
+// P25 (BR-11): adjuntar un archivo ya subido a una receta puntual, calcado de
+// `ProceduresService.attachFile`.
+import { FilesService } from '../../common/services';
+import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
 
 /** Recurso sellado en la cadena WORM para cada evento de receta (CAN-AUDIT-001). */
 const RX_AUDIT_ENTITY = 'medication_request';
@@ -66,6 +71,7 @@ export class MedicationsService {
    * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param filesService - Vincula archivos ya subidos a una receta puntual (P25).
    */
   constructor(
     private readonly em: EntityManager,
@@ -78,8 +84,92 @@ export class MedicationsService {
     private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly filesService: FilesService,
   ) {
     this.logger.setContext(MedicationsService.name);
+  }
+
+  /**
+   * CL-02 (BR-10): el prescriptor sale de la sesión, nunca del cuerpo.
+   *
+   * El DTO conserva `prescriberProfileId` por compatibilidad, pero si declara
+   * un perfil distinto del de la sesión es 403: nadie prescribe en nombre de
+   * otro profesional. Sin perfil profesional en la sesión tampoco se prescribe
+   * (403), porque la receta saldría sin médico ni matrícula. `SUPERADMIN` pasa
+   * con lo que declare, igual que en `assertFirmaElPrescriptor`.
+   *
+   * @param declared - Lo que trajo el cuerpo, si trajo algo.
+   * @param actor - La sesión que prescribe.
+   * @returns El perfil profesional que queda como prescriptor.
+   */
+  private resolvePrescriber(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes('SUPERADMIN')) {
+      const elegido = declared ?? actor.practitionerProfileId;
+      if (!elegido) {
+        throw new ForbiddenException(
+          'Una receta necesita un profesional prescriptor.',
+        );
+      }
+      return elegido;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que prescribir.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'El prescriptor es el profesional de la sesión: no se prescribe en nombre de otro.',
+      );
+    }
+    return actor.practitionerProfileId;
+  }
+
+  /**
+   * P24: el motivo escrito a mano sólo se guarda cuando no hay condición
+   * codificada. Si llegan los dos, gana el concepto y el texto se descarta.
+   */
+  private indicationTextFor(dto: {
+    indicationConditionId?: string;
+    indicationText?: string;
+  }): string | undefined {
+    if (dto.indicationConditionId !== undefined) return undefined;
+    const texto = dto.indicationText?.trim();
+    return texto ? texto : undefined;
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a esta receta puntual. Calcado de
+   * `ProceduresService.attachFile`: 404 antes de autorizar, y el paciente
+   * sale de la fila (MCH-007). Adjuntar no toca el contenido sellado ni su
+   * `content_hash`: el vínculo vive en `common.file_links`.
+   */
+  async attachFile(
+    requestId: string,
+    dto: AttachFileToMedicationRequestDto,
+    actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    const request = await this.loadRequestOrThrow(this.em, requestId);
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      request.patientProfileId,
+      actor,
+    );
+    this.logger.info(
+      {
+        operation: 'clinical.medication.attach_file',
+        requestId,
+        fileId: dto.fileId,
+      },
+      'Attaching file to medication request',
+    );
+    return this.filesService.createLink(
+      dto.fileId,
+      { ownerType: OwnerType.MEDICATION_REQUEST, ownerId: request.id },
+      actor,
+    );
   }
 
   /**
@@ -119,6 +209,7 @@ export class MedicationsService {
       validTo: request.validTo ?? null,
       patientInstructionsText: request.patientInstructionsText ?? null,
       indicationConditionId: request.indicationConditionId ?? null,
+      indicationText: request.indicationText ?? null,
       issuedAt: request.issuedAt ?? null,
       statusReasonText: request.statusReasonText ?? null,
     };
@@ -215,6 +306,11 @@ export class MedicationsService {
       'Prescribing medication (draft)',
     );
     return this.em.transactional(async (tx) => {
+      // CL-02: se resuelve antes de tocar nada; un 403 no deja fila.
+      const prescriberProfileId = this.resolvePrescriber(
+        dto.prescriberProfileId,
+        actor,
+      );
       if (dto.indicationConditionId !== undefined) {
         await this.assertIndicationBelongsToPatient(
           tx,
@@ -230,7 +326,7 @@ export class MedicationsService {
         substanceAtcConceptId: dto.substanceAtcConceptId,
         intentConceptId: CLIN.MEDICATION_INTENT_ORDER,
         statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
-        prescriberProfileId: dto.prescriberProfileId,
+        prescriberProfileId,
         doseText: dto.doseText,
         routeConceptId: dto.routeConceptId,
         frequencyText: dto.frequencyText,
@@ -243,6 +339,7 @@ export class MedicationsService {
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
         patientInstructionsText: dto.patientInstructionsText,
         indicationConditionId: dto.indicationConditionId,
+        indicationText: this.indicationTextFor(dto),
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -282,8 +379,12 @@ export class MedicationsService {
         request.medicationConceptId = dto.medicationConceptId;
       if (dto.substanceAtcConceptId !== undefined)
         request.substanceAtcConceptId = dto.substanceAtcConceptId;
+      // CL-02: el cuerpo no cambia al prescriptor por otro; sólo lo confirma.
       if (dto.prescriberProfileId !== undefined)
-        request.prescriberProfileId = dto.prescriberProfileId;
+        request.prescriberProfileId = this.resolvePrescriber(
+          dto.prescriberProfileId,
+          actor,
+        );
       if (dto.doseText !== undefined) request.doseText = dto.doseText;
       if (dto.routeConceptId !== undefined)
         request.routeConceptId = dto.routeConceptId;
@@ -306,6 +407,13 @@ export class MedicationsService {
         );
         request.indicationConditionId = dto.indicationConditionId;
       }
+      // P24: el texto libre se reemplaza entero cuando viaja; con condición
+      // codificada (previa o recién puesta) gana el concepto y el texto cae.
+      if (dto.indicationText !== undefined) {
+        const texto = dto.indicationText.trim();
+        request.indicationText = texto ? texto : undefined;
+      }
+      if (request.indicationConditionId) request.indicationText = undefined;
       touch(request, actor.id);
       await tx.flush();
 
@@ -566,6 +674,7 @@ export class MedicationsService {
         // La indicación se arrastra: reemplazar una receta corrige la prescripción,
         // no cambia para qué era.
         indicationConditionId: original.indicationConditionId,
+        indicationText: original.indicationText,
         replacesRequestId: original.id,
         actorUserId: actor.id,
       });
@@ -651,6 +760,7 @@ export class MedicationsService {
         patientInstructionsText: source.patientInstructionsText,
         // Renovar es seguir tratando lo mismo: la indicación viaja con la receta.
         indicationConditionId: source.indicationConditionId,
+        indicationText: source.indicationText,
         renewedFromRequestId: source.id,
         actorUserId: actor.id,
       });

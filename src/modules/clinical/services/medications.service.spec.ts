@@ -14,9 +14,12 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { ForbiddenException } from '@nestjs/common';
+import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
 
-const actor = { id: 'user-1', roles: [] } as any;
+// CL-02 (BR-10): el prescriptor sale de la sesión, así que quien prescribe en
+// estas pruebas tiene perfil profesional. Sin él, prescribir es 403.
+const actor = { id: 'user-1', roles: [], practitionerProfileId: 'hp-1' } as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -56,6 +59,10 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // P25: adjuntos de la receta.
+  const filesService = {
+    createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
@@ -67,9 +74,11 @@ function build() {
     clinicalNotifications as any,
     logger as any,
     clinicalRead as any,
+    filesService as any,
   );
   return {
     clinicalRead,
+    filesService,
     clinicalNotifications,
     service,
     requestsRepo,
@@ -168,6 +177,160 @@ describe('MedicationsService', () => {
       ).rejects.toThrow(PreconditionFailedException);
       expect(d.requestsRepo.create).not.toHaveBeenCalled();
     });
+
+    // CL-02 (BR-10) — el prescriptor sale de la sesión, nunca del cuerpo.
+    describe('prescriptor por sesión (CL-02)', () => {
+      const alta = {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        medicationConceptId: 'm1',
+      };
+      const creada = () => ({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+
+      it('sin prescriptor en el cuerpo, queda el perfil de la sesión', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe(alta, actor);
+        expect(d.requestsRepo.create).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ prescriberProfileId: 'hp-1' }),
+        );
+      });
+
+      it('con el propio perfil en el cuerpo, lo confirma', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe(
+          { ...alta, prescriberProfileId: 'hp-1' },
+          actor,
+        );
+        expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
+          'hp-1',
+        );
+      });
+
+      it('con otro perfil en el cuerpo responde 403 y no crea la fila', async () => {
+        const d = build();
+        await expect(
+          d.service.prescribe({ ...alta, prescriberProfileId: 'hp-otro' }, actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.requestsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('una sesión sin perfil profesional no prescribe (403)', async () => {
+        const d = build();
+        await expect(
+          d.service.prescribe(alta, { id: 'u', roles: [] } as any),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.requestsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('SUPERADMIN pasa con el perfil que declare', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe(
+          { ...alta, prescriberProfileId: 'hp-otro' },
+          { id: 'root', roles: ['SUPERADMIN'] } as any,
+        );
+        expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
+          'hp-otro',
+        );
+      });
+    });
+
+    // P24 / CL-03 — «otro motivo» escrito a mano.
+    describe('indicationText (P24)', () => {
+      const alta = {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        medicationConceptId: 'm1',
+      };
+      const creada = () => ({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+
+      it('persiste el motivo escrito cuando no hay condición codificada', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe(
+          { ...alta, indicationText: '  control de ansiedad  ' },
+          actor,
+        );
+        expect(d.requestsRepo.create.mock.calls[0][1].indicationText).toBe(
+          'control de ansiedad',
+        );
+      });
+
+      it('con condición y texto juntos gana el concepto: el texto no se guarda', async () => {
+        const d = build();
+        d.conditionsRepo.findById.mockResolvedValue({
+          id: 'condition-1',
+          patientProfileId: 'p1',
+        });
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe(
+          {
+            ...alta,
+            indicationConditionId: 'condition-1',
+            indicationText: 'control de ansiedad',
+          },
+          actor,
+        );
+        const datos = d.requestsRepo.create.mock.calls[0][1];
+        expect(datos.indicationConditionId).toBe('condition-1');
+        expect(datos.indicationText).toBeUndefined();
+      });
+
+      it('un texto vacío no se guarda como cadena vacía', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada());
+        await d.service.prescribe({ ...alta, indicationText: '   ' }, actor);
+        expect(
+          d.requestsRepo.create.mock.calls[0][1].indicationText,
+        ).toBeUndefined();
+      });
+    });
+  });
+
+  // P25 / CL-05 — adjuntos de la receta, calcados de `procedures`.
+  describe('attachFile (P25)', () => {
+    it('liga el archivo con OWNER_MEDICATION_REQUEST tras autorizar por el paciente de la fila', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+      });
+      const res = await d.service.attachFile('mr1', { fileId: 'f1' }, actor);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.createLink).toHaveBeenCalledWith(
+        'f1',
+        { ownerType: OwnerType.MEDICATION_REQUEST, ownerId: 'mr1' },
+        actor,
+      );
+      expect(res).toEqual({ id: 'link-1' });
+    });
+
+    it('responde 404 antes de autorizar cuando la receta no existe', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.attachFile('nope', { fileId: 'f1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(d.filesService.createLink).not.toHaveBeenCalled();
+    });
   });
 
   describe('editDraft (immutability guard)', () => {
@@ -184,6 +347,51 @@ describe('MedicationsService', () => {
       await d.service.editDraft('mr1', { doseText: '500mg' }, actor);
       expect(request.statusConceptId).toBe(CLIN.MEDICATION_REQUEST_DRAFT);
       expect((request as any).doseText).toBe('500mg');
+    });
+
+    // CL-02: el cuerpo no cambia al prescriptor por otro.
+    it('rechaza (403) cambiar el prescriptor por otro perfil', async () => {
+      const d = build();
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        prescriberProfileId: 'hp-1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await expect(
+        d.service.editDraft('mr1', { prescriberProfileId: 'hp-otro' }, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(request.prescriberProfileId).toBe('hp-1');
+    });
+
+    // P24: el texto se reemplaza entero; con condición codificada cae.
+    it('guarda el motivo escrito en el borrador y lo descarta si hay condición', async () => {
+      const d = build();
+      d.conditionsRepo.findById.mockResolvedValue({
+        id: 'condition-1',
+        patientProfileId: 'p1',
+      });
+      const request: any = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await d.service.editDraft('mr1', { indicationText: 'dolor lumbar' }, actor);
+      expect(request.indicationText).toBe('dolor lumbar');
+
+      await d.service.editDraft(
+        'mr1',
+        { indicationConditionId: 'condition-1' },
+        actor,
+      );
+      expect(request.indicationConditionId).toBe('condition-1');
+      expect(request.indicationText).toBeUndefined();
     });
 
     it('rejects editing an issued (immutable) request', async () => {

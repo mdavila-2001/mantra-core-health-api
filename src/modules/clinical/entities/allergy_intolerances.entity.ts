@@ -25,6 +25,17 @@ export class AllergyIntolerances {
   patientProfileId!: string;
 
   /**
+   * Encuentro en el que se detectó la alergia (P26 / CL-01). Nullable: hay
+   * alergias declaradas fuera de una atención, igual que en `conditions`.
+   *
+   * Columna pendiente en el modelo (`diagram_08_clinical.puml`): la agrega M1
+   * junto con `ix_allergy_intolerances_encounter_id`; ver
+   * `docs/trabajo/2026-09-26-m3-api-clinica/REPORTE.md` §«Pedidos a M1».
+   */
+  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
+  encounterId?: string;
+
+  /**
    * Identificador asociado a substance concept.
    */
   @Property({ fieldName: 'substance_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

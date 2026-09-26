@@ -1,0 +1,7 @@
+$ corepack yarn test --testPathPatterns="allergy|medications.service|medication.dto|encounters.service|files.service|clinical-read.service"   # tras H1
+Test Suites: 19 passed, 19 total
+Tests:       515 passed, 515 total
+Time:        10.305 s, estimated 17 s
+exit=0
+
+--- casos nuevos de H1 (extracto) ---

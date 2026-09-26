@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { ForbiddenException } from '@nestjs/common';
 import { FilesService } from './files.service';
 import {
   CONCEPTS,
@@ -431,6 +432,24 @@ describe('FilesService', () => {
     );
   });
   describe('listLinkedFiles', () => {
+    /**
+     * BR-11 §1.C: el listado genérico no recibe al actor, así que no puede
+     * evaluar la política de la historia. Los tres tipos clínicos nuevos (P25)
+     * se rechazan acá antes de leer nada; el front los lista por la ruta del
+     * recurso. Sumarlos a un listado sin control ampliaría el IDOR.
+     */
+    it.each([
+      OwnerType.MEDICATION_REQUEST,
+      OwnerType.ALLERGY_INTOLERANCE,
+      OwnerType.ENCOUNTER,
+    ])('rechaza (403) listar adjuntos de %s por el genérico sin leer nada', async (ownerType) => {
+      const { service, fileLinksRepo } = build();
+      await expect(
+        service.listLinkedFiles({ ownerType, ownerId: 'x-1' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(fileLinksRepo.findByOwner).not.toHaveBeenCalled();
+    });
+
     /**
      * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca
      * `file_links`. Sin este filtro la ficha seguiría ofreciendo adjuntos que
