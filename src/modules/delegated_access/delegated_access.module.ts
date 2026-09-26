@@ -7,6 +7,7 @@ import {
   PractitionerDelegatesController,
   AccessRequestsController,
   DelegatedAccessAuthzController,
+  DelegatedAccessListingController,
 } from './controllers';
 import {
   OrgUserAssignmentsService,
@@ -14,6 +15,7 @@ import {
   PractitionerDelegatesService,
   AccessRequestsService,
   DelegatedAccessEvaluationService,
+  DelegatedAccessListingService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -40,6 +42,7 @@ import {
     PractitionerDelegatesController,
     AccessRequestsController,
     DelegatedAccessAuthzController,
+    DelegatedAccessListingController,
   ],
   providers: [
     // Repositorios
@@ -56,6 +59,7 @@ import {
     PractitionerDelegatesService,
     AccessRequestsService,
     DelegatedAccessEvaluationService,
+    DelegatedAccessListingService,
   ],
 })
 export class DelegatedAccessModule {}

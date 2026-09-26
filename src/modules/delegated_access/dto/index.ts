@@ -10,3 +10,4 @@ export * from './create-grant.dto';
 export * from './revoke-delegation.dto';
 export * from './evaluate-actor.dto';
 export * from './responses.dto';
+export * from './listings.dto';

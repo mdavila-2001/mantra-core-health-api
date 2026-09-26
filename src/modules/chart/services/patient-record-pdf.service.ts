@@ -268,6 +268,10 @@ export class PatientRecordPdfService {
     if (!profile) return 'Sin identificar';
     const person = await this.personsRepo.findById(em, profile.profileId);
     if (!person) return 'Sin identificar';
-    return person.displayName ?? composePersonDisplayName(person);
+    return (
+      person.displayName ??
+      composePersonDisplayName(person) ??
+      'Sin identificar'
+    );
   }
 }
