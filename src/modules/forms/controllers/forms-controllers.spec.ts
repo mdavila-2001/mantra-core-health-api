@@ -176,6 +176,24 @@ describe('FormsFieldsController', () => {
   });
 });
 
+describe('FormsFieldsController · CL-68 roles', () => {
+  it.each([
+    'createFieldDefinition',
+    'addDependency',
+    'upsertLocalization',
+  ] as const)(
+    '%s exige personal de salud o SECURITY_ADMIN, no cualquier sesión',
+    (metodo) => {
+      const roles = Reflect.getMetadata(
+        ROLES_KEY,
+        FormsFieldsController.prototype[metodo],
+      );
+      expect(roles).toEqual(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN']);
+      expect(roles).not.toContain('PATIENT');
+    },
+  );
+});
+
 describe('FormsAssignmentsController', () => {
   /**
    * Construye el sistema bajo prueba con dependencias controladas.

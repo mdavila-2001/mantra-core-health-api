@@ -733,10 +733,19 @@ export class FilesService {
    * se pueden descargar.
    *
    * @param query - De qué recurso son los adjuntos. Los dos campos obligatorios.
+   * @param actor - Sesión que pide la lista (N-01): sin este parámetro, este
+   *   endpoint no tenía `@Roles` ni comprobación de propiedad y cualquier
+   *   sesión autenticada podía listar los adjuntos de cualquier condición o
+   *   procedimiento cambiando `ownerId`. Se filtra por el mismo criterio que
+   *   `FileUploadService.download` (`canActorReadOwnFile`): dueño del archivo,
+   *   o rol de revisión. Un `ownerId` con adjuntos, todos ajenos al actor,
+   *   responde 403 en vez de una lista vacía — silenciarlo sería indistinguible
+   *   de «este recurso no tiene adjuntos», que no es lo que pasó.
    * @returns Los adjuntos vigentes, del más reciente al más antiguo.
    */
   async listLinkedFiles(
     query: ListFileLinksQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
     // BR-11 §1.C: este listado no recibe al actor y no puede evaluar la
     // política de la historia clínica. Para los tipos clínicos nuevos (P25)
@@ -749,7 +758,7 @@ export class FilesService {
         'Los adjuntos de la historia clínica se listan por la ruta clínica del recurso, no por el listado genérico.',
       );
     }
-    return this.listLinkedFilesOf(query.ownerType, query.ownerId);
+    return this.listLinkedFilesOf(query.ownerType, query.ownerId, actor);
   }
 
   /**
@@ -766,6 +775,7 @@ export class FilesService {
   async listLinkedFilesOf(
     ownerType: OwnerType,
     ownerId: string,
+    actor?: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
     this.logger.info(
       {
@@ -799,18 +809,31 @@ export class FilesService {
       vivos.push({ link, file });
     }
 
+    // N-01: con `actor` (el listado genérico) se exige propiedad o rol de
+    // revisión por archivo. Sin él, lo llama una ruta que ya autorizó por el
+    // contexto (p. ej. la historia del paciente): ahí «puede verlo» no significa
+    // «lo subió».
+    const visibles = actor
+      ? vivos.filter(({ file }) => canActorReadOwnFile(file, actor))
+      : vivos;
+    if (vivos.length > 0 && visibles.length === 0) {
+      throw new ForbiddenException(
+        'No tiene acceso a los adjuntos de este recurso',
+      );
+    }
+
     // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
     // resuelven **todas juntas, en una consulta**, y no una por adjunto: diez
     // adjuntos no pueden costar diez lecturas más de las que ya costaban.
     const versiones = await this.fileVersionsRepo.findByIds(
       forked,
-      vivos
+      visibles
         .map(({ file }) => file.currentVersionId)
         .filter((id): id is string => typeof id === 'string'),
     );
     const versionPorId = new Map(versiones.map((v) => [v.id, v]));
 
-    const items: LinkedFileResponseDto[] = vivos.map(({ link, file }) => ({
+    const items: LinkedFileResponseDto[] = visibles.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
       ownerType,

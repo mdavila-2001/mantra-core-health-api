@@ -108,8 +108,11 @@ export class CommonFilesController {
   @ApiOperation({
     summary: 'Listar los archivos adjuntos a un recurso (UC-02-08)',
   })
-  listLinks(@Query() query: ListFileLinksQueryDto): Promise<LinkedFilePageDto> {
-    return this.filesService.listLinkedFiles(query);
+  listLinks(
+    @Query() query: ListFileLinksQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    return this.filesService.listLinkedFiles(query, actor);
   }
 
   /** Devuelve el contenido de la versión vigente de un archivo. */
