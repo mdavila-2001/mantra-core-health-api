@@ -10,6 +10,11 @@ import {
 } from '../../../common';
 import { ReferralsRepository } from '../repositories';
 import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../../profiles/repositories';
+import type { Referrals } from '../entities';
+import {
   CreateReferralDto,
   RespondReferralDto,
   ReferralResponseDto,
@@ -34,6 +39,8 @@ export class ReferralsService {
   constructor(
     private readonly em: EntityManager,
     private readonly referralsRepo: ReferralsRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReferralsService.name);
@@ -148,5 +155,25 @@ export class ReferralsService {
   async listByPatient(patientProfileId: string, limit = 50) {
     const em = this.em.fork();
     return this.referralsRepo.findByPatient(em, patientProfileId, limit);
+  }
+
+  /**
+   * CV-10 — las derivaciones del paciente autenticado, nunca de un
+   * `patientProfileId` de la ruta o el query: la persona sale de la cuenta
+   * (`person_account_links`), igual que {@link ConsentMeService}. Sin perfil
+   * de paciente vinculado, la respuesta es una lista vacía, no un error: es
+   * lo que corresponde a "todavía no tengo historia", no a una falla.
+   *
+   * @param actor - Usuario autenticado.
+   * @param limit - Tope de filas.
+   * @returns Sus derivaciones, de la más reciente a la más antigua.
+   */
+  async listMine(actor: AuthenticatedUser, limit = 50): Promise<Referrals[]> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) return [];
+    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    if (!patient) return [];
+    return this.referralsRepo.findByPatient(em, patient.profileId, limit);
   }
 }
