@@ -167,13 +167,28 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
   it('sin token, el socket no queda conectado', async () => {
     const socket = connect(undefined);
     try {
-      const desconectado = await waitFor(socket, 'disconnect');
-      const conectoError = await new Promise<boolean>((resolve) => {
-        socket.once('connect_error', () => resolve(true));
-        setTimeout(() => resolve(false), 100);
-      });
+      // La autenticación corre como middleware del namespace (ver
+      // `CommunityMessagingGateway.afterInit`), antes del handshake: un socket
+      // sin token nunca llega a `connect` y sólo dispara `connect_error`. Antes
+      // corría en `handleConnection` (después de conectar) y el rechazo salía
+      // como `connect` seguido de `disconnect`. Los dos listeners se declaran
+      // ANTES de esperar nada, y en la misma promesa, porque cuál de los dos
+      // dispara depende de esa carrera y ya no se puede asumir un orden.
+      const resultado = await new Promise<'disconnect' | 'connect_error' | null>(
+        (resolve) => {
+          const timer = setTimeout(() => resolve(null), 4000);
+          socket.once('disconnect', () => {
+            clearTimeout(timer);
+            resolve('disconnect');
+          });
+          socket.once('connect_error', () => {
+            clearTimeout(timer);
+            resolve('connect_error');
+          });
+        },
+      );
       expect(socket.connected).toBe(false);
-      expect(desconectado !== null || conectoError).toBe(true);
+      expect(resultado).not.toBeNull();
     } finally {
       socket.disconnect();
     }
