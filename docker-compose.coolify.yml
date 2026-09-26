@@ -640,6 +640,26 @@ services:
     command: ["node", "dist/src/main.js"]
     environment:
       <<: *app-env
+      # El montón de V8 por debajo del techo del contenedor (1536M, abajo).
+      #
+      # V8 puede autoajustar su techo por encima de lo que
+      # `deploy.resources.limits.memory` permite: cuando eso pasa el recolector
+      # nunca llega a actuar y el kernel mata el proceso por OOM en vez de que
+      # Node libere memoria. El contenedor vuelve a arrancar solo, así que desde
+      # fuera no se ve un error: se ve un 502 durante un minuto y después todo
+      # normal. Es el mismo patrón que el compose del frontend ya documenta y
+      # corrige para su renderizador (`NODE_OPTIONS` en
+      # `deploy/docker-compose.coolify.yml` de `mantra-core-health`).
+      #
+      # 1024 sobre 1536 deja ~500M para lo que no es montón: buffers, los
+      # metadatos de las 1 179 entidades de MikroORM y las conexiones.
+      #
+      # OJO: que esto sea la causa del reinicio observado el 26/09/2026 es una
+      # hipótesis, no una medición — el token de la API de Coolify no tiene
+      # permiso para leer los logs del contenedor, así que no se pudo confirmar
+      # que el reinicio fuera un OOM. Acotar el montón es correcto de todos
+      # modos: hoy no hay ningún límite.
+      NODE_OPTIONS: '--max-old-space-size=1024'
     deploy:
       resources: *api-resources
     volumes:
