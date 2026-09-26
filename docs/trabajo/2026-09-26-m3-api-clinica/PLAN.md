@@ -95,7 +95,7 @@
 | C.5 | PR contra `test` abierto y mergeable | `mergeable=MERGEABLE`, `isDraft=false` | `gh pr view 473 --json isDraft,mergeable,mergeStateStatus` → `evidencia/pr-mergeable.txt` | HECHO |
 | C.6 | Daily de M3 y Daily de máquinas actualizados en `AlovidaPromptManager` por PR | tabla de cierre con carriles, peldaño y PR | `gh pr view` en el PM | A MEDIAS |
 
-**C.5:** el propietario abrió el PR con el comando de `evidencia/pr-body.md` (el clasificador del modo automático había denegado `gh pr create` desde la sesión): **PR #473**, `isDraft=false`, `mergeable=MERGEABLE`, `mergeStateStatus=CLEAN`, sin checks reportados (runners propios apagados; la compuerta es la verificación local). Salida literal en `evidencia/pr-mergeable.txt`.
+**C.5:** el propietario abrió el PR con el comando de `evidencia/pr-body.md` (el clasificador del modo automático había denegado `gh pr create` desde la sesión): **PR #473**, `isDraft=false`, `mergeable=MERGEABLE`, `mergeStateStatus=CLEAN`, sin checks reportados (runners propios apagados; la compuerta es la verificación local). Salida literal en `evidencia/pr-mergeable.txt`. **Mergeado en `test`** por `Jsaldias39` (merge `f5c8c11c`, 2026-09-26 07:05 UTC). ⚠️ `test` tiene el código y no el DDL de M1: no desplegar antes del patch.
 
 **C.6 — qué anda, qué no anda, qué falta, dónde quedó:** el daily de M3 y la fila de M3 en el daily de máquinas están actualizados en la rama `justin/m3-daily-2026-09-26` de `AlovidaPromptManager`, pusheada. Lo que no anda: el PR contra `main` del PM sigue sin abrir (misma denegación). Lo que falta: `gh pr create --base main --head justin/m3-daily-2026-09-26` en el PM, por el propietario.
 

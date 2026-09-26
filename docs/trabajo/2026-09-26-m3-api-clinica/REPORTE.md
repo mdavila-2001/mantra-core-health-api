@@ -46,7 +46,7 @@ Sólo lo que tiene CA cumplido y DoD demostrado con salida literal (en `evidenci
 | C.2 lint | HECHO · exit 0 (tras prettier sobre los archivos del carril; 42 avisos de formato corregidos, sin cambios de comportamiento) | `evidencia/lint.txt` |
 | C.3 specs dirigidos de los módulos tocados | HECHO · 90 suites / 1168 pruebas, 0 fallos | `evidencia/test-dirigido.txt` |
 | C.4 este reporte | HECHO | — |
-| C.5 PR contra `test` mergeable | **HECHO** · PR #473 · `MERGEABLE` · `CLEAN` · `isDraft=false` · sin checks reportados (runners propios apagados) · consultado tras el push `ba7ff18b` | `evidencia/pr-mergeable.txt` |
+| C.5 PR contra `test` mergeable | **HECHO** · PR #473 · `MERGEABLE` · `CLEAN` · `isDraft=false` · sin checks reportados (runners propios apagados) · consultado tras el push `ba7ff18b` · **mergeado en `test`** (`f5c8c11c`, `Jsaldias39`) | `evidencia/pr-mergeable.txt` |
 | C.6 daily de M3 y de máquinas en el PM | **A MEDIAS** · ver §«A medias» | rama pusheada en `AlovidaPromptManager` |
 
 ## A medias
@@ -205,5 +205,6 @@ Sugerido:  BR-13: la cofirma inserta en clinical_note_signatures y releaseVersio
 ## Entrega
 
 - Commits en la rama, uno por hito más plan, formato y reporte: `9e3731aa` (plan + decisiones) · `1356cc39` (H1) · `741ed19d` (H2) · `1f18b25b` (H3.S1) · `1965fb95` (H3.S2) · `b9a90110` (prettier + plan) · `c1174f59` (H1.S1.M5) · `6406d4f3` (reporte). Rama pusheada: `origin/justin/test-m3-api-clinica-2026-09-26`.
-- PR contra `test`: **#473** — https://github.com/mdavila-2001/mantra-core-health-api/pull/473 — `MERGEABLE` · `CLEAN` · `isDraft=false` · sin checks reportados (runners propios apagados), consultado tras el push `ba7ff18b`; revisores `jsaldias39` y `PabloArauzCaballero`. Lo abrió el propietario con el comando de `evidencia/pr-body.md`. El estado tras el push de este mismo commit se re-consulta y queda en el daily de M3 del Prompt Manager (regla 35.2.6).
+- PR contra `test`: **#473** — https://github.com/mdavila-2001/mantra-core-health-api/pull/473 — abierto por el propietario con el comando de `evidencia/pr-body.md`; consultado tras el push `ba7ff18b`: `MERGEABLE` · `CLEAN` · `isDraft=false` · sin checks reportados (runners propios apagados). **MERGEADO en `test`** por `Jsaldias39` el 2026-09-26 07:05 UTC, merge `f5c8c11c` (`origin/test` @ `f5c8c11c` contiene `ba7ff18b`). Este commit de cierre (`ffe4ee22`+) es sólo documentación y quedó **en la rama, no en `test`**; si se quiere en `test`, va en un PR de docs aparte.
+- **`test` ya tiene el código de M3 y todavía no tiene el DDL de M1**: hasta que entren `encounter_id`, `indication_text` y la tabla D-B, **no desplegar `test`** (alergias, recetas y aspectos médicos responderían 500). Ver «Riesgos residuales» y «Pedidos a M1».
 - Procesos que quedaron corriendo al cerrar: ninguno.
