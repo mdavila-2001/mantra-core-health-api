@@ -85,11 +85,10 @@ describe('IamMfaService (UC-01-03)', () => {
     const factor: any = { id: 'f2', stateConceptId: CONCEPTS.STATE_PENDING };
     d.mfaRepo.create.mockReturnValue(factor);
 
-    const res = await d.service.enrollOrVerify(
-      'u2',
-      { factorType: 'TOTP' },
-      { id: 'admin', roles: ['SECURITY_ADMIN'] } as any,
-    );
+    const res = await d.service.enrollOrVerify('u2', { factorType: 'TOTP' }, {
+      id: 'admin',
+      roles: ['SECURITY_ADMIN'],
+    } as any);
     expect(res.userId).toBe('u2');
     expect(d.mfaRepo.create).toHaveBeenCalled();
   });
