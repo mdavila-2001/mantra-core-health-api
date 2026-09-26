@@ -68,6 +68,19 @@ type RefreshOutcome =
   | { kind: 'expired' }
   | { kind: 'invalid' };
 
+/**
+ * Roles administrativos de plataforma que exigen MFA cuando
+ * `AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED` está encendida (TX-29).
+ */
+const ADMINISTRATIVE_ROLES: ReadonlySet<string> = new Set([
+  'SUPERADMIN',
+  'SECURITY_ADMIN',
+  'PLATFORM_ADMIN',
+  'IDENTITY_ADMIN',
+  'HEALTH_DATA_ADMIN',
+  'SOURCE_ADMIN',
+]);
+
 @Injectable()
 export class IamAuthService {
   /**
@@ -401,7 +414,14 @@ export class IamAuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
+    await this.assertMfaChallenge(
+      readEm,
+      user.id,
+      dto.mfaCode,
+      span,
+      ip,
+      await this.mustChallengeAdministrator(readEm, user.id),
+    );
 
     return this.em.transactional(async (tx) => {
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
@@ -475,6 +495,23 @@ export class IamAuthService {
   }
 
   /**
+   * TX-29: ¿la cuenta tiene un rol administrativo y el desafío para
+   * administradores está encendido? Con la bandera apagada no se consulta nada:
+   * el login no cambia.
+   */
+  private async mustChallengeAdministrator(
+    em: EntityManager,
+    userId: string,
+  ): Promise<boolean> {
+    if (process.env.AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED !== 'true') {
+      return false;
+    }
+    const globalRoles = await this.rolesRepo.findActiveForUser(em, userId);
+    const { roles } = await this.mergeRoleCodes(em, userId, globalRoles);
+    return roles.some((role) => ADMINISTRATIVE_ROLES.has(role));
+  }
+
+  /**
    * Desafío MFA del login (TX-29), detrás de `AUTH_MFA_CHALLENGE_ENABLED`
    * (apagada por defecto: el cliente que no sabe pedir el código quedaría fuera).
    *
@@ -489,6 +526,9 @@ export class IamAuthService {
    * @param mfaCode - Código TOTP presentado, si vino.
    * @param span - Span de autenticación.
    * @param ip - Origen de la petición.
+   * @param administrator - Cuenta administrativa con
+   *   `AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED`: el desafío aplica aunque la bandera
+   *   general esté apagada.
    * @throws UnauthorizedException con `details.reason` si falta o no valida.
    */
   private async assertMfaChallenge(
@@ -497,14 +537,30 @@ export class IamAuthService {
     mfaCode: string | undefined,
     span: TraceSpan,
     ip?: string,
+    administrator = false,
   ): Promise<void> {
-    if (process.env.AUTH_MFA_CHALLENGE_ENABLED !== 'true' || !this.mfaRepo) {
+    if (
+      (process.env.AUTH_MFA_CHALLENGE_ENABLED !== 'true' && !administrator) ||
+      !this.mfaRepo
+    ) {
       return;
     }
     const factors = (await this.mfaRepo.findVerifiedByUser(em, userId)).filter(
       (factor) => !!factor.secretEncrypted,
     );
-    if (factors.length === 0) return;
+    if (factors.length === 0) {
+      if (administrator) {
+        // No se bloquea: enrolar un factor exige una sesión, y sin ella el
+        // administrador quedaría fuera sin cómo darse de alta. Se deja rastro
+        // para que otro SECURITY_ADMIN le enrole el factor.
+        span.addEvent('auth.admin-without-mfa');
+        this.logger.warn(
+          { operation: 'iam.auth.login', userId },
+          'Administrador sin factor MFA verificado: entra sin desafío',
+        );
+      }
+      return;
+    }
 
     if (!mfaCode) {
       span.addEvent('auth.rejected', { reason: 'mfa-required' });

@@ -52,6 +52,14 @@ export const authEnvSchema = Joi.object({
     .falsy('false')
     .empty('')
     .default(false),
+  // MFA obligatorio para los roles administrativos (TX-29). Apagado por
+  // defecto: con `true`, un administrador con factor verificado siempre recibe
+  // el desafío, aunque `AUTH_MFA_CHALLENGE_ENABLED` esté apagada.
+  AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty('')
+    .default(false),
   AUTH_REFRESH_COOKIE_NAME: Joi.string().default('redesa_refresh'),
   AUTH_REFRESH_COOKIE_PATH: Joi.string().default('/iam/auth/token/refresh'),
   AUTH_REFRESH_COOKIE_SAMESITE: Joi.string()
