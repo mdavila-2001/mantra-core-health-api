@@ -91560,6 +91560,11 @@
             "description": "Encuentro en curso",
             "format": "uuid"
           },
+          "formInstanceId": {
+            "type": "string",
+            "description": "Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)",
+            "format": "uuid"
+          },
           "codeConceptId": {
             "type": "string",
             "description": "Código del servicio pedido (concept id)",
@@ -91882,6 +91887,11 @@
           "encounterId": {
             "type": "string",
             "description": "Encuentro en curso",
+            "format": "uuid"
+          },
+          "formInstanceId": {
+            "type": "string",
+            "description": "Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la receta. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)",
             "format": "uuid"
           },
           "medicationConceptId": {
@@ -104244,6 +104254,11 @@
             "type": "string",
             "format": "uuid",
             "description": "Encuentro clínico asociado"
+          },
+          "formInstanceId": {
+            "type": "string",
+            "description": "Instancia CERRADA del formulario médico (forms.form_instances) de la que sale el plan. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)",
+            "format": "uuid"
           },
           "intentConceptId": {
             "type": "string",
@@ -124526,6 +124541,27 @@
           }
         }
       },
+      "FollowUpOriginDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "encounterId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "formInstanceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "bookingId"
+        ]
+      },
       "CreateDirectAppointmentDto": {
         "type": "object",
         "properties": {
@@ -124558,6 +124594,9 @@
               "DOMICILIO"
             ],
             "description": "Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva."
+          },
+          "followUpOf": {
+            "$ref": "#/components/schemas/FollowUpOriginDto"
           }
         },
         "required": [

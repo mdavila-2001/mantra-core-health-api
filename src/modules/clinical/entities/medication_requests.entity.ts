@@ -31,6 +31,13 @@ export class MedicationRequests {
   encounterId?: string;
 
   /**
+   * P43: instancia (cerrada) del formulario médico de la que sale el registro.
+   * Nula cuando se emite desde la historia del paciente, sin formulario.
+   */
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  formInstanceId?: string;
+
+  /**
    * Identificador asociado a medication concept.
    */
   @Property({ fieldName: 'medication_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

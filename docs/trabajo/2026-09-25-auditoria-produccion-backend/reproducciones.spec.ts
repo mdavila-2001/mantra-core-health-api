@@ -65,12 +65,14 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const service = new SchedulingBookingsService({ fork: () => ({}) } as any,
       { findBookings: async () => ({ rows: [{ booking, slot: null }], fetchCapReached: false }),
         latestRescheduleOrigins: async () => new Map(), findPatientNames: async () => new Map(),
-        findPaymentStatesForBookings: async () => new Map() } as any,
+        findPaymentStatesForBookings: async () => new Map(),
+        findBookingsWithSlotsByIds: async () => [], findFollowUpsOf: async () => [] } as any,
       {} as any, { latestBySource: async () => new Map() } as any,
       { findTypesByIds: async () => new Map() } as any, {} as any, {} as any, log as any,
       {} as any, {} as any, { findActiveCarriersByPatients: async () => new Map() } as any,
       {} as any, { findLatestIdsByAppointmentIds: async () => new Map() } as any, {} as any,
-      { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership } as any);
+      { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership } as any,
+      {} as any);
     const user = { ...actor('PATIENT'), patientProfileId: P1 };
     const result: any = await guarded(SchedulingBookingsController, 'searchBookings',
       { headers: { 'x-tenant-id': T1 }, user, params: {}, query: { resourceId: ID }, body: {} },

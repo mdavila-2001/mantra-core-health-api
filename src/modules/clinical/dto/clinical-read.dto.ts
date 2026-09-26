@@ -153,6 +153,12 @@ export class MedicationRequestItemDto {
   prescriberProfileId?: string;
 
   /**
+   * P43: instancia del formulario médico de la que salió la receta, si salió de uno.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  formInstanceId?: string;
+
+  /**
    * Valor de dose text mantenido por la instancia.
    */
   @ApiPropertyOptional()

@@ -20,6 +20,10 @@ export interface CreateMedicationRequestData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a medication concept.
    */
   medicationConceptId: string;
@@ -191,6 +195,7 @@ export class MedicationRequestsRepository {
         custodianTenantId: data.custodianTenantId,
         patientProfileId: data.patientProfileId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         medicationConceptId: data.medicationConceptId,
         substanceAtcConceptId: data.substanceAtcConceptId,
         intentConceptId: data.intentConceptId,

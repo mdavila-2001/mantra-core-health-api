@@ -60,6 +60,10 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { PatientProfilesRepository } from '../profiles/repositories/patient-profiles.repository';
 import { HealthPractitionerProfilesRepository } from '../profiles/repositories/health-practitioner-profiles.repository';
 import { PersonsRepository } from '../profiles/repositories/persons.repository';
+// P43 — el plan de cuidado puede declarar de qué formulario médico cerrado
+// sale. Clase sin estado de `forms`, provista suelta (no se importa
+// `FormsModule` entero).
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -93,6 +97,7 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
     PatientProfilesRepository,
     HealthPractitionerProfilesRepository,
     PersonsRepository,
+    FormInstanceOriginValidator,
     // Servicios
     ChartNotesService,
     ChartDocumentsService,

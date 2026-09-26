@@ -125,6 +125,10 @@ import {
 // que se provee directo acá y en `InsuranceModule` sin importar ese módulo
 // entero — mismo criterio que el resto de este archivo.
 import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
+// P43 — receta y orden pueden declarar de qué formulario médico cerrado salen.
+// La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
+// se provee suelta, sin importar `FormsModule` entero, igual que el resto.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -153,6 +157,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
   ],
   providers: [
     // Repositorios
+    FormInstanceOriginValidator,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,

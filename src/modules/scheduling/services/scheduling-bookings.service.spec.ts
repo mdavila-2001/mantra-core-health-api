@@ -79,6 +79,10 @@ function build() {
     recordReschedule: mockFn(),
     createCancellation: mockFn(),
     createReminder: mockFn(),
+    // P42: el vínculo de reconsulta. Por omisión ninguna cita es reconsulta ni
+    // tiene reconsultas: las pruebas que lo comprueban devuelven filas.
+    findBookingsWithSlotsByIds: mockFn().mockResolvedValue([]),
+    findFollowUpsOf: mockFn().mockResolvedValue([]),
   };
   const catalogRepo = {
     findTemplateById: mockFn(),
@@ -169,6 +173,10 @@ function build() {
     representsPatient: mockFn().mockResolvedValue(false),
     findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
   };
+  // P43: el origen en formulario de una reconsulta. Por defecto, válido.
+  const formOrigin = {
+    assertUsableOrigin: mockFn().mockResolvedValue(undefined),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -185,8 +193,10 @@ function build() {
     encountersRepo as any,
     claimReadRepo as any,
     representation as any,
+    formOrigin as any,
   );
   return {
+    formOrigin,
     claimReadRepo,
     representation,
     service,
@@ -1480,6 +1490,230 @@ describe('SchedulingBookingsService', () => {
           d.service.createDirectAppointment(dto as never, medico),
         ).rejects.toThrow(/no está vigente/);
       });
+
+      /**
+       * P42 · la reconsulta: la misma cita directa con `followUpOf`, y sus
+       * cuatro rechazos en el orden del contrato (403 → 404 → 422 → 409). P43:
+       * `followUpOf.formInstanceId` se valida contra el encuentro de la
+       * consulta de origen, que resuelve el servidor.
+       */
+      describe('la reconsulta — P42 / P43', () => {
+        const FUTURO = new Date(Date.now() + 7 * 86_400_000).toISOString();
+        const reconsulta = {
+          ...dto,
+          startAt: FUTURO,
+          followUpOf: { bookingId: 'bk-origen', encounterId: 'enc-cliente' },
+        };
+        const origen = {
+          id: 'bk-origen',
+          patientProfileId: 'pp-ana',
+          appointmentId: 'appt-origen',
+        };
+
+        function conOrigen(d: ReturnType<typeof build>) {
+          listoParaAsignar(d);
+          d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(origen);
+          d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
+            new Map([['appt-origen', 'enc-origen']]),
+          );
+          return d;
+        }
+
+        it('crea la reconsulta atada al origen, tipada ACT_FOLLOW_UP, bloqueando el origen', async () => {
+          const d = conOrigen(build());
+
+          const res = await d.service.createDirectAppointment(
+            reconsulta as never,
+            medico,
+          );
+
+          expect(res.bookingId).toBe('bk-directa');
+          // La unicidad es de la escritura: el origen se lee FOR UPDATE.
+          expect(d.bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalledWith(
+            d.tx,
+            'bk-origen',
+          );
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.followUpOfBookingId).toBe('bk-origen');
+          expect(reserva.formInstanceId).toBeUndefined();
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.typeConceptId).toBe(CLIN.ACTIVITY_FOLLOW_UP);
+          expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
+        });
+
+        it('sin followUpOf nada de esto corre y la cita no se tipa', async () => {
+          const d = listoParaAsignar(build());
+
+          await d.service.createDirectAppointment(dto as never, medico);
+
+          expect(
+            d.bookingsRepo.findBookingByIdForUpdate,
+          ).not.toHaveBeenCalled();
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.followUpOfBookingId).toBeUndefined();
+          const cita = d.appointmentsRepo.create.mock.calls[0][1];
+          expect(cita.typeConceptId).toBeUndefined();
+        });
+
+        it('403 si la agenda no es del profesional de la sesión (también para el mostrador)', async () => {
+          const d = conOrigen(build());
+          const mostrador = {
+            id: 'user-mostrador',
+            roles: ['SCHEDULING_AGENT'],
+            tenantIds: ['ten-1'],
+          } as never;
+
+          await expect(
+            runWithTenant('ten-1', () =>
+              d.service.createDirectAppointment(reconsulta as never, mostrador),
+            ),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(
+            d.bookingsRepo.findBookingByIdForUpdate,
+          ).not.toHaveBeenCalled();
+          expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+        });
+
+        it('404 si la cita de origen no existe', async () => {
+          const d = conOrigen(build());
+          d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(null);
+
+          await expect(
+            d.service.createDirectAppointment(reconsulta as never, medico),
+          ).rejects.toBeInstanceOf(ResourceNotFoundException);
+          expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+        });
+
+        it('422 si el paciente no es el de la cita de origen', async () => {
+          const d = conOrigen(build());
+          d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+            ...origen,
+            patientProfileId: 'pp-otro',
+          });
+
+          const error = await d.service
+            .createDirectAppointment(reconsulta as never, medico)
+            .catch((e: unknown) => e);
+          expect(error).toBeInstanceOf(PreconditionFailedException);
+          expect((error as any).getResponse().details.reason).toBe(
+            'FOLLOW_UP_PATIENT_MISMATCH',
+          );
+          expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+        });
+
+        it('422 si startAt no es futuro', async () => {
+          const d = conOrigen(build());
+
+          const error = await d.service
+            .createDirectAppointment(
+              { ...reconsulta, startAt: '2020-01-01T10:00:00Z' } as never,
+              medico,
+            )
+            .catch((e: unknown) => e);
+          expect(error).toBeInstanceOf(PreconditionFailedException);
+          expect((error as any).getResponse().details.reason).toBe(
+            'FOLLOW_UP_NOT_FUTURE',
+          );
+        });
+
+        it('409 si la consulta ya tiene una reconsulta por venir', async () => {
+          const d = conOrigen(build());
+          d.bookingsRepo.findFollowUpsOf.mockResolvedValue([
+            {
+              booking: { id: 'bk-ya' },
+              slot: { startAt: new Date(Date.now() + 86_400_000) },
+            },
+          ]);
+
+          const error = await d.service
+            .createDirectAppointment(reconsulta as never, medico)
+            .catch((e: unknown) => e);
+          expect(error).toBeInstanceOf(ConflictException);
+          expect((error as any).getResponse().details.bookingId).toBe('bk-ya');
+          expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+        });
+
+        it('una reconsulta ya pasada no bloquea', async () => {
+          const d = conOrigen(build());
+          d.bookingsRepo.findFollowUpsOf.mockResolvedValue([
+            {
+              booking: { id: 'bk-pasada' },
+              slot: { startAt: new Date('2020-01-01T10:00:00Z') },
+            },
+          ]);
+
+          const res = await d.service.createDirectAppointment(
+            reconsulta as never,
+            medico,
+          );
+          expect(res.bookingId).toBe('bk-directa');
+        });
+
+        it('P43: valida formInstanceId contra el encuentro del ORIGEN (no el del cliente) y lo guarda', async () => {
+          const d = conOrigen(build());
+
+          await d.service.createDirectAppointment(
+            {
+              ...reconsulta,
+              followUpOf: {
+                ...reconsulta.followUpOf,
+                formInstanceId: 'form-1',
+              },
+            } as never,
+            medico,
+          );
+
+          expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
+            d.tx,
+            'form-1',
+            'enc-origen',
+          );
+          const reserva = d.bookingsRepo.createBooking.mock.calls[0][1];
+          expect(reserva.formInstanceId).toBe('form-1');
+        });
+
+        it('P43: el origen sin encuentro valida sólo existencia y cierre (encounterId null)', async () => {
+          const d = conOrigen(build());
+          d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
+            new Map(),
+          );
+
+          await d.service.createDirectAppointment(
+            {
+              ...reconsulta,
+              followUpOf: { bookingId: 'bk-origen', formInstanceId: 'form-1' },
+            } as never,
+            medico,
+          );
+
+          expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
+            d.tx,
+            'form-1',
+            null,
+          );
+        });
+
+        it('P43: si el formulario no sirve (422), no se crea la reconsulta', async () => {
+          const d = conOrigen(build());
+          d.formOrigin.assertUsableOrigin.mockRejectedValue(
+            new PreconditionFailedException('no cerrada'),
+          );
+
+          await expect(
+            d.service.createDirectAppointment(
+              {
+                ...reconsulta,
+                followUpOf: {
+                  bookingId: 'bk-origen',
+                  formInstanceId: 'form-1',
+                },
+              } as never,
+              medico,
+            ),
+          ).rejects.toBeInstanceOf(PreconditionFailedException);
+          expect(d.bookingsRepo.createBooking).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('la regla madre — AG-1', () => {
@@ -2310,6 +2544,100 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    describe('P42 · el vínculo de reconsulta en la lectura', () => {
+      function conRecurso(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'perfil-medico',
+        });
+        return d;
+      }
+
+      it('la reconsulta trae followUpOf con el startAt y el encuentro del origen', async () => {
+        const d = conRecurso(build());
+        d.bookingsRepo.findBookings.mockResolvedValue({
+          rows: [
+            {
+              booking: {
+                ...guardada,
+                id: 'bk-reconsulta',
+                resourceId: 'res-1',
+                followUpOfBookingId: 'bk-origen',
+                formInstanceId: 'form-1',
+              },
+              slot: null,
+            },
+          ],
+          fetchCapReached: false,
+        });
+        d.bookingsRepo.findBookingsWithSlotsByIds.mockResolvedValue([
+          {
+            booking: { id: 'bk-origen', appointmentId: 'appt-origen' },
+            slot: { startAt: new Date('2026-09-12T14:00:00Z') },
+          },
+        ]);
+        d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
+          new Map([['appt-origen', 'enc-origen']]),
+        );
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(d.bookingsRepo.findBookingsWithSlotsByIds).toHaveBeenCalledWith(
+          expect.anything(),
+          ['bk-origen'],
+        );
+        expect(res.items[0].followUpOf).toEqual({
+          bookingId: 'bk-origen',
+          encounterId: 'enc-origen',
+          startAt: new Date('2026-09-12T14:00:00Z'),
+          formInstanceId: 'form-1',
+        });
+        expect(res.items[0].followUpBookingId).toBeNull();
+      });
+
+      it('el origen trae followUpBookingId derivado; una cita cualquiera, null en los dos', async () => {
+        const d = conRecurso(build());
+        d.bookingsRepo.findBookings.mockResolvedValue(
+          pagina(['bk-origen', 'bk-suelta']),
+        );
+        d.bookingsRepo.findFollowUpsOf.mockResolvedValue([
+          {
+            booking: { id: 'bk-reconsulta', followUpOfBookingId: 'bk-origen' },
+            slot: null,
+          },
+        ]);
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(res.items[0].followUpBookingId).toBe('bk-reconsulta');
+        expect(res.items[0].followUpOf).toBeNull();
+        expect(res.items[1].followUpBookingId).toBeNull();
+        expect(res.items[1].followUpOf).toBeNull();
+      });
+
+      it('misma compuerta que el nombre: el profesional de otra agenda no los recibe (ausentes)', async () => {
+        const d = conRecurso(build());
+        d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('otro-medico') as any,
+        );
+
+        expect('followUpOf' in res.items[0]).toBe(false);
+        expect('followUpBookingId' in res.items[0]).toBe(false);
+      });
     });
 
     it('ALV-021 · con cobertura activa, la fila dice el nombre de la aseguradora', async () => {
