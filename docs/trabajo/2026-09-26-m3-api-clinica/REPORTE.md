@@ -46,12 +46,22 @@ Sólo lo que tiene CA cumplido y DoD demostrado con salida literal (en `evidenci
 | C.2 lint | HECHO · exit 0 (tras prettier sobre los archivos del carril; 42 avisos de formato corregidos, sin cambios de comportamiento) | `evidencia/lint.txt` |
 | C.3 specs dirigidos de los módulos tocados | HECHO · 90 suites / 1168 pruebas, 0 fallos | `evidencia/test-dirigido.txt` |
 | C.4 este reporte | HECHO | — |
-| C.5 PR contra `test` mergeable | ver §«Entrega» | `evidencia/pr-mergeable.txt` |
-| C.6 daily de M3 y de máquinas en el PM | ver §«Entrega» | PR en `AlovidaPromptManager` |
+| C.5 PR contra `test` mergeable | **A MEDIAS** · ver §«A medias» | `evidencia/pr-body.md` (cuerpo y comando listos) |
+| C.6 daily de M3 y de máquinas en el PM | **A MEDIAS** · ver §«A medias» | rama pusheada en `AlovidaPromptManager` |
 
 ## A medias
 
-Ninguna.
+### C.5 — PR contra `test` abierto y mergeable
+- Qué anda: la rama `justin/test-m3-api-clinica-2026-09-26` está pusheada a `origin` con los ocho commits del carril; el cuerpo del PR (título, orden de despliegue, compuertas, fuera de alcance) está escrito en `evidencia/pr-body.md`; los revisores pedidos por el encargo son `jsaldias39` y `PabloArauzCaballero`.
+- Qué no anda: el PR **no está abierto**. `gh pr create` fue denegado por el clasificador del modo automático de Claude Code («Out-of-Place Publication»), que no permite publicar desde esta sesión, y la regla de esa denegación prohíbe buscar el mismo resultado por otra vía.
+- Qué falta exactamente: (1) correr el comando que está al pie de `evidencia/pr-body.md` desde el worktree; (2) pegar la salida de `gh pr view <n> --json number,url,isDraft,mergeable,mergeStateStatus` y de `gh pr checks <n>` en `evidencia/pr-mergeable.txt`; (3) si `mergeStateStatus` sale `BEHIND`, `git merge origin/test` al final y re-consultar.
+- Dónde quedó: rama remota `origin/justin/test-m3-api-clinica-2026-09-26` @ `6406d4f3` (+ este commit); compila, lint 0, 1168 specs dirigidos en verde.
+
+### C.6 — Daily de M3 y Daily de máquinas en el Prompt Manager
+- Qué anda: el daily de M3 y la fila de M3 en `Daily-Maquinas-2026-09-26.md` están actualizados (hitos, bitácora, salida de la instalación, pedidos) en la rama `justin/m3-daily-2026-09-26` de `AlovidaPromptManager`, pusheada.
+- Qué no anda: el PR contra `main` del PM no está abierto, por la misma denegación.
+- Qué falta exactamente: `gh pr create --base main --head justin/m3-daily-2026-09-26` en `AlovidaPromptManager` y, cuando exista el PR de la API, pegar su número en la tabla de cierre del daily.
+- Dónde quedó: `AlovidaPromptManager`, rama `justin/m3-daily-2026-09-26`.
 
 ## Pendiente
 
@@ -200,6 +210,6 @@ Sugerido:  BR-13: la cofirma inserta en clinical_note_signatures y releaseVersio
 
 ## Entrega
 
-- Commits en la rama, uno por hito más plan y formato: `9e3731aa` (plan + decisiones) · `1356cc39` (H1) · `741ed19d` (H2) · `1f18b25b` (H3.S1) · `1965fb95` (H3.S2) · `b9a90110` (prettier + plan) · `c1174f59` (H1.S1.M5).
-- PR contra `test`: **se completa al abrir el PR** (número, `mergeable`, `mergeStateStatus`, checks) en `evidencia/pr-mergeable.txt` y en el daily de M3 del Prompt Manager.
+- Commits en la rama, uno por hito más plan, formato y reporte: `9e3731aa` (plan + decisiones) · `1356cc39` (H1) · `741ed19d` (H2) · `1f18b25b` (H3.S1) · `1965fb95` (H3.S2) · `b9a90110` (prettier + plan) · `c1174f59` (H1.S1.M5) · `6406d4f3` (reporte). Rama pusheada: `origin/justin/test-m3-api-clinica-2026-09-26`.
+- PR contra `test`: **sin abrir** (C.5 `A MEDIAS`, ver arriba). Comando y cuerpo listos en `evidencia/pr-body.md`.
 - Procesos que quedaron corriendo al cerrar: ninguno.
