@@ -2,6 +2,7 @@ import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -31,6 +32,7 @@ export class AuthProvidersListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListIdentityProvidersResponseDto })
   list(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -43,6 +45,7 @@ export class AuthProvidersListingController {
   @ApiOperation({
     summary: 'Ficha de un proveedor de identidad (sin secretos)',
   })
+  @ApiOkResponse({ type: IdentityProviderDetailDto })
   @ApiNotFoundResponse({
     description: 'El proveedor no existe o es de otro tenant',
   })

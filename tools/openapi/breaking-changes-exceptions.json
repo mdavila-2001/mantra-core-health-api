@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "id": "new_required_request_field:POST /diagnostic-results/me/{reportId}/shares:practitionerProfileId",
+    "reason": "CL-48 (BR-17, hito H4): compartir un resultado se hace por perfil de profesional con relación asistencial vigente, nunca por un id de cuenta tipeado. El contrato anterior (practitionerUserId) permitía compartir con cualquier cuenta de la plataforma.",
+    "migrationNote": "Mandar practitionerProfileId (el mismo id que devuelve GET /authz/me/access) en vez de practitionerUserId. El front ya migró en el hito H4."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/o/{slug}/services:401",
+    "reason": "Corrección de documentación: la ruta lleva @Public() y responde sin sesión; el contrato anterior declaraba 401 por no estar en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs. El comportamiento en runtime no cambia.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en una ruta pública nunca los recibió."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/o/{slug}/services:403",
+    "reason": "Corrección de documentación: la ruta lleva @Public() y responde sin sesión; el contrato anterior declaraba 403 por no estar en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs. El comportamiento en runtime no cambia.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en una ruta pública nunca los recibió."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/f/{slug}/products:401",
+    "reason": "Corrección de documentación: la ruta lleva @Public() y responde sin sesión; el contrato anterior declaraba 401 por no estar en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs. El comportamiento en runtime no cambia.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en una ruta pública nunca los recibió."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/f/{slug}/products:403",
+    "reason": "Corrección de documentación: la ruta lleva @Public() y responde sin sesión; el contrato anterior declaraba 403 por no estar en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs. El comportamiento en runtime no cambia.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en una ruta pública nunca los recibió."
+  }
+]

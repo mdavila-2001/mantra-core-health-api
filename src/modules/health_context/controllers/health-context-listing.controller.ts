@@ -1,6 +1,7 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -32,6 +33,7 @@ export class HealthContextListingController {
   @ApiOperation({ summary: 'Listar las fuentes de contexto de salud' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListHealthContextSourcesResponseDto })
   listSources(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -46,6 +48,7 @@ export class HealthContextListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListContextAgentsResponseDto })
   listAgents(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -58,6 +61,7 @@ export class HealthContextListingController {
   @ApiOperation({ summary: 'Listar las programaciones de recolección' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListContextSchedulesResponseDto })
   listSchedules(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -70,6 +74,7 @@ export class HealthContextListingController {
   @ApiOperation({ summary: 'Listar los contextos de salud por país' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListCountryHealthContextsResponseDto })
   listContexts(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -77,15 +82,18 @@ export class HealthContextListingController {
     return this.service.listContexts({ cursor, limit });
   }
 
-  @Get('contexts/:contextId/versions')
+  // El parámetro se llama `id` como en `POST contexts/:id/versions`: dos rutas
+  // que difieren sólo en el nombre del parámetro rompen `no-identical-paths`.
+  @Get('contexts/:id/versions')
   @Roles('CONTEXT_CURATOR', 'QUALITY_REVIEWER', 'PLATFORM_ADMIN')
   @ApiOperation({
     summary: 'Listar las versiones de un contexto (sin payload)',
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListCountryHealthContextVersionsResponseDto })
   listContextVersions(
-    @Param('contextId', ParseUUIDPipe) contextId: string,
+    @Param('id', ParseUUIDPipe) contextId: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ListCountryHealthContextVersionsResponseDto> {
@@ -97,6 +105,7 @@ export class HealthContextListingController {
   @ApiOperation({ summary: 'Listar las corridas de recolección' })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListContextCollectionRunsResponseDto })
   listCollectionRuns(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,

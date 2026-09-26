@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -31,6 +32,7 @@ export class DelegatedAccessListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListOrgUserAssignmentsResponseDto })
   listOrgUserAssignments(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -48,6 +50,7 @@ export class DelegatedAccessListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListPractitionerDelegatesResponseDto })
   listPractitionerDelegates(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -65,6 +68,7 @@ export class DelegatedAccessListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListAccessRequestsResponseDto })
   listAccessRequests(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,

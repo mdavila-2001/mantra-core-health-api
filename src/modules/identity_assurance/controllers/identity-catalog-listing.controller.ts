@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -30,6 +31,7 @@ export class IdentityCatalogListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListIdentityAuthoritiesResponseDto })
   listAuthorities(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
@@ -44,6 +46,7 @@ export class IdentityCatalogListingController {
   })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiOkResponse({ type: ListIdentityPoliciesResponseDto })
   listPolicies(
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
