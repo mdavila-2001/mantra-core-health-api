@@ -50,6 +50,20 @@ export class CreateMedicationRequestDto {
   encounterId?: string;
 
   /**
+   * P43: instancia del formulario médico (cerrada) de la que sale el registro.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia CERRADA del formulario médico (forms.form_instances) de la que ' +
+      'sale la receta. Opcional: desde la historia se emite sin formulario. Si viaja, ' +
+      'debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  formInstanceId?: string;
+
+  /**
    * Identificador asociado a medication concept.
    */
   @ApiProperty({ description: 'Medicamento (concept id)', format: 'uuid' })
@@ -581,6 +595,17 @@ export class MedicationRequestResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
+
+  /**
+   * P43: instancia de formulario de origen (nula si no salió de un formulario).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia del formulario médico de la que salió la receta (nulo = sin formulario)',
+    format: 'uuid',
+    nullable: true,
+  })
+  formInstanceId?: string | null;
 
   /**
    * Valor de status mantenido por la instancia.
