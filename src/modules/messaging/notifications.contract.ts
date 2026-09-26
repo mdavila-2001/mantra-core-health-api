@@ -107,7 +107,22 @@ export type NotificationDestinationType =
    * mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su ruta
    * (la lista de órdenes del paciente) al conectar.
    */
-  | 'SERVICE_REQUEST';
+  | 'SERVICE_REQUEST'
+  /**
+   * Un turno concreto (AG-06/BR-22): lo que en verdad emite
+   * `scheduling/notices/agenda-notices.ts` (`RECURSO_CITA`) para confirmación,
+   * recordatorio, cancelación y cambio de cita. `APPOINTMENT` (arriba) no lo
+   * emite ningún módulo hoy — se declaró antes de que la agenda tuviera
+   * avisos propios y quedó como aspiracional; se deja tal cual (diff mínimo,
+   * decisión D-Notif en `DECISIONS.md`) y este es el literal real.
+   */
+  | 'scheduling.appointment_bookings'
+  /**
+   * Un cupo que se liberó (AG-06/AG-07): lo que emite
+   * `scheduling-agenda-notices.service.ts` vía `RECURSO_CUPO` cuando
+   * `scheduling-waitlist.service.ts` promueve la lista de espera.
+   */
+  | 'scheduling.bookable_slots';
 
 /**
  * A dónde lleva la notificación al abrirla.
@@ -167,6 +182,17 @@ export interface EmitInAppResult {
 
   /** La fila de la bandeja, sólo si efectivamente se entregó. */
   readonly inAppNotificationId?: string;
+
+  /**
+   * Cuándo empieza a contar para el destinatario (ISO 8601), sólo si se creó
+   * la fila de bandeja.
+   *
+   * Normalmente es «ahora», salvo que el silencio nocturno (carril P9) la
+   * haya aplazado a la mañana siguiente: la fila existe igual, pero todavía
+   * no es «nueva» para nadie. Quien empuje el aviso en tiempo real (AG-22) lo
+   * usa para no despertar la campana antes de horario.
+   */
+  readonly availableAt?: string;
 
   /** `true` si la preferencia del destinatario la detuvo. */
   readonly suppressed: boolean;

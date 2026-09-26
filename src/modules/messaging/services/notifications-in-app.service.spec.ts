@@ -73,12 +73,14 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const gateway: any = { notifyUser: mockFn() };
   const service = new NotificationsService(
     em,
     notificationsRepo,
     logger as any,
+    gateway,
   );
-  return { service, tx, notificationsRepo, logger };
+  return { service, tx, notificationsRepo, logger, gateway };
 }
 
 /**
@@ -215,6 +217,102 @@ describe('NotificationsService · carril P1 (campana)', () => {
 
       expect(res.failed).toBe(true);
       expect(d.logger.error).toHaveBeenCalled();
+    });
+
+    it('AG-22: empuja notification:new por el gateway después del commit', async () => {
+      const d = build();
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Tu receta está lista',
+        bodyText: 'Podés verla en tu historia clínica.',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+
+      expect(d.gateway.notifyUser).toHaveBeenCalledTimes(1);
+      const [recipientUserId, payload] = d.gateway.notifyUser.mock
+        .calls[0] as any[];
+      expect(recipientUserId).toBe(RECIPIENT);
+      expect(payload).toMatchObject({
+        id: 'in-app-1',
+        category: 'CLINICAL',
+        subject: 'Tu receta está lista',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+    });
+
+    it('AG-22: no empuja nada cuando la preferencia suprime el aviso', async () => {
+      const d = build();
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
+          optedIn: false,
+          quietHoursJson: null,
+        },
+      ]);
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'SOCIAL',
+        subject: 'Nueva reacción',
+      });
+
+      expect(d.gateway.notifyUser).not.toHaveBeenCalled();
+    });
+
+    it('AG-22: no rompe la emisión si el gateway no está disponible (specs sin socket)', async () => {
+      const tx = { flush: mockFn() };
+      const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+      const notificationsRepo: any = {
+        findActiveChannelByType: mockFn(() =>
+          Promise.resolve({
+            id: CHANNEL,
+            stateConceptId: CONCEPTS.STATE_ACTIVE,
+            channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+          }),
+        ),
+        findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+        findPreferences: mockFn(() => Promise.resolve([])),
+        createNotificationRequest: mockFn((_em: any, data: any) => ({
+          id: REQUEST,
+          ...data,
+        })),
+        findChannelConfigs: mockFn(() =>
+          Promise.resolve([{ id: CONFIG, providerId: 'provider-1' }]),
+        ),
+        findProviderById: mockFn(() =>
+          Promise.resolve({
+            id: 'provider-1',
+            adapterCode: 'IN_APP_DIRECT',
+            adapterVersion: '1',
+          }),
+        ),
+        createDelivery: mockFn(() => ({ id: 'delivery-1' })),
+        createInAppNotification: mockFn(() => ({ id: 'in-app-1' })),
+      };
+      const logger = {
+        setContext: mockFn(),
+        info: mockFn(),
+        warn: mockFn(),
+        error: mockFn(),
+      };
+      // Sin cuarto argumento, tal como los specs de este archivo antes de
+      // AG-22: `emitInApp` no puede asumir que el gateway existe.
+      const service = new NotificationsService(
+        em,
+        notificationsRepo,
+        logger as any,
+      );
+
+      const res = await service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Tu receta está lista',
+      });
+
+      expect(res.suppressed).toBe(false);
+      expect(res.inAppNotificationId).toBe('in-app-1');
     });
   });
 
