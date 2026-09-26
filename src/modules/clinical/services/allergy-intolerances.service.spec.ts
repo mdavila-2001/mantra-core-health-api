@@ -47,6 +47,9 @@ function build() {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
     assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
   };
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new AllergyIntolerancesService(
     em as any,
     allergyRepo as any,
@@ -54,8 +57,10 @@ function build() {
     encountersRepo as any,
     filesService as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
   return {
+    encounterSealGuard,
     service,
     tx,
     allergyRepo,
@@ -115,6 +120,27 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
   });
 
   // P26 / CL-01 — la alergia atada a la consulta en curso.
+  describe('encuentro sellado (BR-14 / CL-07)', () => {
+    it('rechaza (422) una alergia contra un encuentro sellado y no crea nada', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            substanceConceptId: 's1',
+            encounterId: 'enc-1',
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.allergyRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('encounterId (P26 / CL-01)', () => {
     it('persiste el encuentro cuando es del mismo paciente y lo devuelve', async () => {
       const d = build();

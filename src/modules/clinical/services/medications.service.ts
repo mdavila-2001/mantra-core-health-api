@@ -35,6 +35,8 @@ import { AUD } from '../../audit/audit.concepts';
 // P25 (BR-11): adjuntar un archivo ya subido a una receta puntual, calcado de
 // `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
+// BR-14 (CL-07): un encuentro sellado no admite más recetas contra él.
+import { EncounterSealGuardService } from './encounter-seal-guard.service';
 import {
   OwnerType,
   type FileLinkResponseDto,
@@ -89,6 +91,7 @@ export class MedicationsService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(MedicationsService.name);
   }
@@ -343,6 +346,13 @@ export class MedicationsService {
           dto.patientProfileId,
         );
       }
+      // BR-14 (CL-07): no se prescribe contra un encuentro ya sellado.
+      if (dto.encounterId !== undefined) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+      }
       const request = this.requestsRepo.create(tx, {
         custodianTenantId: dto.custodianTenantId,
         patientProfileId: dto.patientProfileId,
@@ -399,7 +409,13 @@ export class MedicationsService {
         );
       }
 
-      if (dto.encounterId !== undefined) request.encounterId = dto.encounterId;
+      if (dto.encounterId !== undefined) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+        request.encounterId = dto.encounterId;
+      }
       if (dto.medicationConceptId !== undefined)
         request.medicationConceptId = dto.medicationConceptId;
       if (dto.substanceAtcConceptId !== undefined)
