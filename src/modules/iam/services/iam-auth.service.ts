@@ -7,9 +7,11 @@ import {
   type TraceSpan,
 } from '../../../observability';
 import * as argon2 from 'argon2';
+import { verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
   TokenService,
+  decryptSecret,
   loadAuthEnv,
   touch,
   type AuthEnv,
@@ -23,6 +25,7 @@ import {
   UserGlobalRolesRepository,
   AccountLockoutsRepository,
   SecurityEventsRepository,
+  MfaFactorsRepository,
 } from '../repositories';
 import {
   LoginDto,
@@ -88,6 +91,7 @@ export class IamAuthService {
    * @param accountLinksRepo - Vínculo cuenta-persona del titular.
    * @param patientProfilesRepo - Perfil de paciente del titular.
    * @param logger - Valor de logger requerido por la operación.
+   * @param mfaRepo - Factores MFA, para el desafío de `AUTH_MFA_CHALLENGE_ENABLED`.
    */
   constructor(
     private readonly em: EntityManager,
@@ -105,6 +109,7 @@ export class IamAuthService {
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
+    private readonly mfaRepo?: MfaFactorsRepository,
   ) {
     this.logger.setContext(IamAuthService.name);
   }
@@ -396,6 +401,8 @@ export class IamAuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    await this.assertMfaChallenge(readEm, user.id, dto.mfaCode, span, ip);
+
     return this.em.transactional(async (tx) => {
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
       const { roles, scopedRoles } = await this.mergeRoleCodes(
@@ -464,6 +471,60 @@ export class IamAuthService {
         refreshToken: issued.refreshToken,
         expiresAt: issued.expiresAt,
       };
+    });
+  }
+
+  /**
+   * Desafío MFA del login (TX-29), detrás de `AUTH_MFA_CHALLENGE_ENABLED`
+   * (apagada por defecto: el cliente que no sabe pedir el código quedaría fuera).
+   *
+   * Sólo aplica a cuentas con un factor VERIFICADO. Sin `mfaCode` responde 401 con
+   * `details.reason = MFA_REQUIRED` para que el cliente pida el código; con un
+   * código que no valida, 401 `MFA_INVALID` y cuenta como intento fallido. Se
+   * corre DESPUÉS de comprobar la contraseña: sin ella no se revela si la cuenta
+   * tiene MFA.
+   *
+   * @param em - Contexto de lectura.
+   * @param userId - Titular que se autentica.
+   * @param mfaCode - Código TOTP presentado, si vino.
+   * @param span - Span de autenticación.
+   * @param ip - Origen de la petición.
+   * @throws UnauthorizedException con `details.reason` si falta o no valida.
+   */
+  private async assertMfaChallenge(
+    em: EntityManager,
+    userId: string,
+    mfaCode: string | undefined,
+    span: TraceSpan,
+    ip?: string,
+  ): Promise<void> {
+    if (process.env.AUTH_MFA_CHALLENGE_ENABLED !== 'true' || !this.mfaRepo) {
+      return;
+    }
+    const factors = (await this.mfaRepo.findVerifiedByUser(em, userId)).filter(
+      (factor) => !!factor.secretEncrypted,
+    );
+    if (factors.length === 0) return;
+
+    if (!mfaCode) {
+      span.addEvent('auth.rejected', { reason: 'mfa-required' });
+      throw new UnauthorizedException({
+        message: 'Se requiere el código de verificación en dos pasos',
+        details: { reason: 'MFA_REQUIRED' },
+      });
+    }
+    for (const factor of factors) {
+      const secret = decryptSecret(factor.secretEncrypted as string);
+      const result = await verifyTotp({ token: mfaCode, secret }).catch(() => ({
+        valid: false,
+      }));
+      if (result.valid) return;
+    }
+    span.addEvent('auth.rejected', { reason: 'bad-mfa' });
+    await this.recordLoginFailure(userId, ip, 'bad-mfa');
+    throw new UnauthorizedException({
+      message: 'El código de verificación no es válido',
+      details: { reason: 'MFA_INVALID' },
     });
   }
 

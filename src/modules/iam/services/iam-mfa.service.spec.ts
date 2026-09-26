@@ -37,6 +37,7 @@ function build() {
     create: mockFn(),
     findByIdAndUser: mockFn(),
     findByUser: mockFn(),
+    findVerifiedByUser: mockFn(),
   };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
