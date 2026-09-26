@@ -170,6 +170,58 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: INS.BENEFIT_CATEGORY_GENERAL,
     targets: ['insurance.insurance_plan_benefits.benefit_category_concept_id'],
   },
+  {
+    code: 'insurance-campaign-status',
+    name: 'Estado de la campaña preventiva',
+    description: 'Ciclo de vida de una campaña preventiva de la aseguradora (Tarea 4).',
+    concepts: [
+      INS.CAMPAIGN_DRAFT,
+      INS.CAMPAIGN_ACTIVE,
+      INS.CAMPAIGN_PAUSED,
+      INS.CAMPAIGN_EXPIRED,
+    ],
+    defaultConceptId: INS.CAMPAIGN_DRAFT,
+    targets: ['insurance.insurance_campaigns.status_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-type',
+    name: 'Tipo de campaña preventiva',
+    description: 'Con qué tipo de prestador se hace la campaña preventiva.',
+    concepts: [
+      INS.CAMPAIGN_TYPE_LABORATORY,
+      INS.CAMPAIGN_TYPE_PHARMACY,
+      INS.CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING,
+      INS.CAMPAIGN_TYPE_VACCINATION,
+    ],
+    defaultConceptId: INS.CAMPAIGN_TYPE_LABORATORY,
+    targets: ['insurance.insurance_campaigns.campaign_type_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-partner-role',
+    name: 'Rol del aliado de la campaña',
+    description:
+      'Si el aliado auspicia la campaña (SPONSOR) o presta el servicio (PROVIDER).',
+    concepts: [
+      INS.CAMPAIGN_PARTNER_ROLE_SPONSOR,
+      INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    ],
+    defaultConceptId: INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    targets: ['insurance.insurance_campaign_partners.partner_role_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-partner-type',
+    name: 'Tipo de aliado de la campaña',
+    description: 'Qué clase de organización es el aliado de la campaña preventiva.',
+    concepts: [
+      INS.CAMPAIGN_PARTNER_TYPE_IMPORTER,
+      INS.CAMPAIGN_PARTNER_TYPE_MANUFACTURER,
+      INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+      INS.CAMPAIGN_PARTNER_TYPE_PHARMACY,
+      INS.CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER,
+    ],
+    defaultConceptId: INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+    targets: ['insurance.insurance_campaign_partners.partner_type_concept_id'],
+  },
 
   // --- profiles: persona y paciente ---
   {

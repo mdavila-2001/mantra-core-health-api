@@ -4026,6 +4026,126 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'Medicamentos que el plan cubre cuando se retiran con receta.',
     },
   ],
+
+  // --- Campañas preventivas de la aseguradora (Tarea 4 · M-06) --------------
+  [
+    INS.CAMPAIGN_DRAFT,
+    {
+      display: 'Campaña en borrador',
+      definition:
+        'La aseguradora todavía está armando la campaña: sus afiliados no la ven.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_ACTIVE,
+    {
+      display: 'Campaña activa',
+      definition:
+        'La campaña está vigente y sus afiliados con cobertura vigente la ven en su portal.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PAUSED,
+    {
+      display: 'Campaña pausada',
+      definition:
+        'La aseguradora suspendió temporalmente la campaña; puede reactivarla o finalizarla.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_EXPIRED,
+    {
+      display: 'Campaña finalizada',
+      definition:
+        'La campaña se cerró de forma definitiva; no se reabre, se crea otra con otro código.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_LABORATORY,
+    {
+      display: 'Campaña de laboratorio',
+      definition:
+        'Bonifica análisis clínicos de laboratorio, de la mano de un laboratorio aliado.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_PHARMACY,
+    {
+      display: 'Campaña de farmacia',
+      definition:
+        'Bonifica medicamentos de prevención, de la mano de una farmacia aliada.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING,
+    {
+      display: 'Campaña de diagnóstico por imagen',
+      definition:
+        'Bonifica estudios de imagen (mamografía, ecografía, radiografía), de la mano de un centro de diagnóstico aliado.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_VACCINATION,
+    {
+      display: 'Campaña de vacunación',
+      definition: 'Bonifica una o más vacunas de prevención.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_ROLE_SPONSOR,
+    {
+      display: 'Aliado auspiciante',
+      definition:
+        'Financia la campaña sin prestar el servicio: una importadora o un fabricante de medicamentos.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    {
+      display: 'Aliado prestador',
+      definition:
+        'Presta el servicio bonificado de la campaña: un laboratorio, una farmacia o un centro de diagnóstico.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_IMPORTER,
+    {
+      display: 'Importadora de medicamentos',
+      definition:
+        'Empresa que importa medicamentos y auspicia la campaña preventiva.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_MANUFACTURER,
+    {
+      display: 'Fabricante de medicamentos',
+      definition:
+        'Empresa que fabrica medicamentos y auspicia la campaña preventiva.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition:
+        'Laboratorio de análisis clínicos que presta el servicio de la campaña.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_PHARMACY,
+    {
+      display: 'Farmacia aliada',
+      definition: 'Farmacia que dispensa el beneficio de la campaña.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER,
+    {
+      display: 'Centro de diagnóstico',
+      definition:
+        'Centro de diagnóstico por imagen o de otro estudio que presta el servicio de la campaña.',
+    },
+  ],
 ];
 
 /**
