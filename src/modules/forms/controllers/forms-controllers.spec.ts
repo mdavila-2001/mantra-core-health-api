@@ -103,6 +103,7 @@ describe('FormsFieldsController', () => {
   function build() {
     const fieldsService = {
       createFieldDefinition: mockFn(),
+      updateFieldDefinition: mockFn(),
       addDependency: mockFn(),
       upsertLocalization: mockFn(),
       createAccessRule: mockFn(),
@@ -112,6 +113,27 @@ describe('FormsFieldsController', () => {
       fieldsService,
     };
   }
+
+  // CL-61 / CL-69 — la ruta que el generador llamaba para renombrar y daba 404.
+  it('delegates updateFieldDefinition y la abre a quien atiende (CL-69)', async () => {
+    const d = build();
+    await d.controller.updateFieldDefinition('f1', { name: 'x' }, actor);
+    expect(d.fieldsService.updateFieldDefinition).toHaveBeenCalledWith(
+      'f1',
+      { name: 'x' },
+      actor,
+    );
+    const roles = Reflect.getMetadata(
+      ROLES_KEY,
+      Object.getOwnPropertyDescriptor(
+        FormsFieldsController.prototype,
+        'updateFieldDefinition',
+      )!.value,
+    ) as string[];
+    expect(roles).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+    );
+  });
 
   it('delegates createFieldDefinition (UC-09-02)', async () => {
     const d = build();
@@ -160,7 +182,12 @@ describe('FormsAssignmentsController', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const assignmentsService = { createAssignment: mockFn() };
+    const assignmentsService = {
+      createAssignment: mockFn(),
+      updateAssignment: mockFn(),
+      retireAssignment: mockFn(),
+      reorderAssignments: mockFn(),
+    };
     const readService = {
       listAssignments: mockFn(),
       getExtensionBudget: mockFn(),
@@ -174,6 +201,48 @@ describe('FormsAssignmentsController', () => {
       readService,
     };
   }
+
+  // CL-61 — las tres rutas que el generador ya llamaba y daban 404.
+  it('delegates updateAssignment, retireAssignment y reorderAssignments (CL-61)', async () => {
+    const d = build();
+    await d.controller.updateAssignment('as1', { required: true }, actor);
+    expect(d.assignmentsService.updateAssignment).toHaveBeenCalledWith(
+      'as1',
+      { required: true },
+      actor,
+    );
+    await d.controller.retireAssignment('as1', actor);
+    expect(d.assignmentsService.retireAssignment).toHaveBeenCalledWith(
+      'as1',
+      actor,
+    );
+    const orden = { targetResourceConceptId: 'rt', assignmentIds: ['as1'] };
+    await d.controller.reorderAssignments(orden, actor);
+    expect(d.assignmentsService.reorderAssignments).toHaveBeenCalledWith(
+      orden,
+      actor,
+    );
+  });
+
+  it('las rutas de edición abren la puerta a quien atiende (CL-61)', () => {
+    const rolesDe = (handler: string): string[] =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          FormsAssignmentsController.prototype,
+          handler,
+        )!.value,
+      ) as string[];
+    for (const handler of [
+      'updateAssignment',
+      'retireAssignment',
+      'reorderAssignments',
+    ]) {
+      expect(rolesDe(handler)).toEqual(
+        expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+      );
+    }
+  });
 
   it('delegates createAssignment (UC-09-06)', async () => {
     const d = build();

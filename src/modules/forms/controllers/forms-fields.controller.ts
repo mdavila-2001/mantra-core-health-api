@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import {
   UpsertLocalizationDto,
   CreateAccessRuleDto,
   IdResponseDto,
+  OkResultDto,
+  UpdateFieldDefinitionDto,
 } from '../dto';
 
 /**
@@ -46,6 +49,23 @@ export class FormsFieldsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.fieldsService.createFieldDefinition(dto, actor);
+  }
+
+  /**
+   * CL-61 / CL-69: corrige nombre o tipo de un campo **propio**. Sólo lo que
+   * el modelo ya tiene (D-D registra el resto). Cambiar el tipo con valores
+   * capturados es 409: no se reescribe la historia clínica.
+   */
+  @Patch('field-definitions/:id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir el nombre o el tipo de un campo propio' })
+  updateFieldDefinition(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateFieldDefinitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.fieldsService.updateFieldDefinition(id, dto, actor);
   }
 
   /** UC-09-04. */

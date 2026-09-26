@@ -16,6 +16,10 @@ export interface CreateAllergyData {
    */
   patientProfileId: string;
   /**
+   * Encuentro en el que se detectó (opcional).
+   */
+  encounterId?: string;
+  /**
    * Identificador asociado a substance concept.
    */
   substanceConceptId: string;
@@ -142,6 +146,7 @@ export class AllergyIntolerancesRepository {
       {
         custodianTenantId: data.custodianTenantId,
         patientProfileId: data.patientProfileId,
+        encounterId: data.encounterId,
         substanceConceptId: data.substanceConceptId,
         typeConceptId: data.typeConceptId,
         categoryConceptId: data.categoryConceptId,

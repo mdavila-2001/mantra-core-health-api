@@ -96,6 +96,12 @@ export class AllergyItemDto {
   substanceConceptId!: string;
 
   /**
+   * Encuentro en el que se detectó, si se registró dentro de una atención (P26).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
+
+  /**
    * Identificador asociado a type concept.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -187,6 +193,12 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   indicationConditionId?: string;
+
+  /**
+   * Motivo escrito a mano cuando no hay condición codificada (P24).
+   */
+  @ApiPropertyOptional({ nullable: true })
+  indicationText?: string;
 
   /**
    * Valor de signed at mantenido por la instancia.

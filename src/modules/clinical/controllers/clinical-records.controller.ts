@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Headers,
   HttpCode,
   HttpStatus,
@@ -11,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import type { FileLinkResponseDto } from '../../common/dto';
+import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { ClinicalRecordAccessGuard } from '../guards';
 import {
   AllergyIntolerancesService,
@@ -22,7 +23,9 @@ import {
 } from '../services';
 import {
   AllergyIntoleranceResponseDto,
+  AttachFileToAllergyIntoleranceDto,
   AttachFileToConditionDto,
+  AttachFileToMedicationRequestDto,
   AttachFileToProcedureDto,
   ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
@@ -128,6 +131,32 @@ export class ClinicalRecordsController {
     return this.allergyService.create(dto, actor);
   }
 
+  /** P25 (BR-11): liga un archivo ya subido a esta alergia puntual. */
+  @Post('allergy-intolerances/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una alergia' })
+  attachFileToAllergy(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToAllergyIntoleranceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.allergyService.attachFile(id, dto, actor);
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de una alergia. El titular también los lee
+   * (`PATIENT` en el handler): la política de lectura la aplica el servicio.
+   */
+  @Get('allergy-intolerances/:id/attachments')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'Listar los adjuntos de una alergia' })
+  listAllergyAttachments(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    return this.allergyService.listAttachments(id, actor);
+  }
+
   /** UC-08-10. */
   @Post('medication-requests')
   @UseGuards(ClinicalRecordAccessGuard)
@@ -138,6 +167,35 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicationRequestResponseDto> {
     return this.medicationsService.prescribe(dto, actor);
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a esta receta puntual. Adjuntar no
+   * reabre la inmutabilidad: el contenido sellado y su `content_hash` no cambian.
+   */
+  @Post('medication-requests/:id/attachments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una receta' })
+  attachFileToMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AttachFileToMedicationRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    return this.medicationsService.attachFile(id, dto, actor);
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de una receta. El titular también los lee
+   * (`PATIENT` en el handler): la política de lectura la aplica el servicio.
+   */
+  @Get('medication-requests/:id/attachments')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'Listar los adjuntos de una receta' })
+  listMedicationRequestAttachments(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    return this.medicationsService.listAttachments(id, actor);
   }
 
   /** UC-08-11. */

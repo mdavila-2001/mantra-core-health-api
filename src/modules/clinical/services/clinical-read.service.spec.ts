@@ -167,14 +167,20 @@ function build() {
     findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
   };
 
+  // N-04 — el asiento de lectura. Por defecto los seis repositorios de bloques
+  // devuelven vacío: estas pruebas miran el gate y la auditoría, no el mapeo.
+  const dataAccessLogRepo = { record: mockFn(() => ({ id: 'dal-1' })) };
+  const vacio = { findByPatient: mockFn().mockResolvedValue([]) };
+  em.flush = mockFn().mockResolvedValue(undefined);
+
   const service = new ClinicalReadService(
     em as any,
-    {} as any,
-    {} as any,
-    {} as any,
-    {} as any,
-    {} as any,
-    {} as any,
+    vacio as any,
+    vacio as any,
+    vacio as any,
+    vacio as any,
+    vacio as any,
+    vacio as any,
     accountLinksRepo as any,
     patientProfilesRepo as any,
     practitionerProfilesRepo as any,
@@ -183,10 +189,13 @@ function build() {
     careRelationshipsRepo as any,
     logger as any,
     representation as any,
+    dataAccessLogRepo as any,
   );
 
   return {
     service,
+    em,
+    dataAccessLogRepo,
     representation,
     accountLinksRepo,
     patientProfilesRepo,
@@ -202,6 +211,71 @@ function build() {
     logger,
   };
 }
+
+/**
+ * N-04 (BR-13): hasta este cambio ninguna lectura clínica escribía en
+ * `audit.data_access_log`; sólo el break-the-glass. Leer el resumen es leer
+ * PHI, y tiene que dejar quién, qué paciente y con qué propósito — sin el
+ * contenido leído.
+ */
+describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
+  const medica = {
+    id: 'user-medica',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-1',
+  } as any;
+
+  it('asienta la lectura en audit.data_access_log con el actor y el paciente', async () => {
+    const d = build();
+
+    const resumen = await d.service.getPatientSummary(
+      PERSONA_DEL_TITULAR,
+      50,
+      medica,
+    );
+
+    expect(resumen.patientProfileId).toBe(PERSONA_DEL_TITULAR);
+    expect(d.dataAccessLogRepo.record).toHaveBeenCalledTimes(1);
+    expect(d.dataAccessLogRepo.record).toHaveBeenCalledWith(
+      d.em,
+      expect.objectContaining({
+        userId: 'user-medica',
+        patientProfileId: PERSONA_DEL_TITULAR,
+        resourceType: 'PATIENT_CLINICAL_SUMMARY',
+        resourceId: PERSONA_DEL_TITULAR,
+        purpose: 'TREATMENT',
+        recordedByUserId: 'user-medica',
+      }),
+    );
+    expect(d.em.flush).toHaveBeenCalled();
+  });
+
+  it('el asiento no lleva contenido clínico: sólo identificadores', async () => {
+    const d = build();
+    await d.service.getPatientSummary(PERSONA_DEL_TITULAR, 50, medica);
+    const asiento = d.dataAccessLogRepo.record.mock.calls[0][1];
+    expect(Object.keys(asiento).sort()).toEqual(
+      [
+        'actionConceptId',
+        'patientProfileId',
+        'purpose',
+        'recordedByUserId',
+        'resourceId',
+        'resourceType',
+        'tenantId',
+        'userId',
+      ].sort(),
+    );
+  });
+
+  it('si el asiento no se puede escribir, el resumen no se sirve (fail-closed)', async () => {
+    const d = build();
+    d.em.flush.mockRejectedValue(new Error('audit down'));
+    await expect(
+      d.service.getPatientSummary(PERSONA_DEL_TITULAR, 50, medica),
+    ).rejects.toThrow('audit down');
+  });
+});
 
 describe('ClinicalReadService · assertOwnRecord', () => {
   /**
