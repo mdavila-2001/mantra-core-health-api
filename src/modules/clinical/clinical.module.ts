@@ -128,6 +128,12 @@ import {
 // que se provee directo acá y en `InsuranceModule` sin importar ese módulo
 // entero — mismo criterio que el resto de este archivo.
 import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
+// N-04 (M3) — la lectura del resumen clínico asienta su acceso en
+// `audit.data_access_log`. `AuditModule` exporta sólo la cadena WORM de
+// mutaciones (`AuditTrailService`, `AuditLogRepository`, `HistoryRepository`),
+// así que el repositorio del log de acceso se provee acá con el mismo
+// criterio del resto del archivo: clase sin estado por `EntityManager`.
+import { DataAccessLogRepository } from '../audit/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -189,6 +195,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     PractitionerSpecialtiesRepository,
     JurisdictionAuthorizationsRepository,
     DeclaredCoveragesReader,
+    DataAccessLogRepository,
     // Servicios
     CareEpisodesService,
     EncountersService,

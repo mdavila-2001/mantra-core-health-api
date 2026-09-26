@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../common';
+import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/repositories';
@@ -35,7 +35,18 @@ import { AuthzPdpService } from '../../authz/services';
 // parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
 import { CareRelationshipsRepository } from '../../authz/repositories';
 import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
+// N-04 (BR-13 / M3): toda lectura del resumen clínico deja su fila en
+// `audit.data_access_log`, como ya hace el break-the-glass. Repositorio sin
+// estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de
+// `AuditModule` (que sólo exporta la cadena WORM de mutaciones).
+import { DataAccessLogRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
+
+/** Recurso que se asienta en `audit.data_access_log` al leer el resumen. */
+const SUMMARY_RESOURCE_TYPE = 'PATIENT_CLINICAL_SUMMARY';
+/** Propósito de uso que respalda la lectura del resumen: la atención. */
+const SUMMARY_PURPOSE = 'TREATMENT';
 
 /**
  * Cara de lectura del registro clínico (UC-39-20).
@@ -130,6 +141,8 @@ export class ClinicalReadService {
     // B.1 — la historia de un menor la lee también quien lo representa. Quién
     // representa a quién lo sabe `profiles`; acá sólo se pregunta.
     private readonly representation: PatientRepresentationService,
+    // N-04 — la lectura del resumen se asienta en `audit.data_access_log`.
+    private readonly dataAccessLogRepo: DataAccessLogRepository,
   ) {
     this.logger.setContext(ClinicalReadService.name);
   }
@@ -556,14 +569,22 @@ export class ClinicalReadService {
   /**
    * UC-39-20: historial clínico del paciente.
    *
+   * N-04 (BR-13): la lectura **deja rastro** en `audit.data_access_log` —quién,
+   * qué paciente, con qué propósito—, en el mismo `EntityManager` de la
+   * lectura y **antes** de devolver nada: si el asiento no se puede escribir,
+   * el resumen no se sirve (fail-closed, mismo criterio que el break-the-glass
+   * de `authz`). El asiento lleva identificadores, nunca contenido clínico.
+   *
    * @param patientProfileId - Paciente cuyo historial se lee.
    * @param limit - Tope por bloque.
+   * @param actor - Quién lee; ya autorizado por `ClinicalRecordAccessGuard`.
    * @returns Condiciones, alergias, medicación, observaciones, encuentros y
    *          episodios de cuidado.
    */
   async getPatientSummary(
     patientProfileId: string,
     limit: number,
+    actor: AuthenticatedUser,
   ): Promise<PatientClinicalSummaryResponseDto> {
     this.logger.info(
       { operation: 'clinical.patient.read', patientProfileId, limit },
@@ -572,6 +593,18 @@ export class ClinicalReadService {
 
     const em = this.em.fork();
     const over = limit + 1;
+
+    this.dataAccessLogRepo.record(em, {
+      userId: actor.id,
+      actionConceptId: AUD.ACTION_READ,
+      patientProfileId,
+      tenantId: getCurrentTenantId(),
+      purpose: SUMMARY_PURPOSE,
+      resourceType: SUMMARY_RESOURCE_TYPE,
+      resourceId: patientProfileId,
+      recordedByUserId: actor.id,
+    });
+    await em.flush();
 
     const [
       conditions,

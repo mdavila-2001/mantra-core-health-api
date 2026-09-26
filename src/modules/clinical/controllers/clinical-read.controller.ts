@@ -12,7 +12,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { ParseOptionalLimitPipe, Roles } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalReadService } from '../services';
 import { ClinicalRecordAccessGuard } from '../guards';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
@@ -71,8 +76,14 @@ export class ClinicalReadController {
   })
   getPatientSummary(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PatientClinicalSummaryResponseDto> {
-    return this.readService.getPatientSummary(patientProfileId, limit ?? 50);
+    // N-04: el actor viaja al servicio para que la lectura deje su asiento.
+    return this.readService.getPatientSummary(
+      patientProfileId,
+      limit ?? 50,
+      actor,
+    );
   }
 }

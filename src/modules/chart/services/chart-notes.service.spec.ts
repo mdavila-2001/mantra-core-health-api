@@ -85,7 +85,7 @@ describe('ChartNotesService', () => {
       const res = await d.service.createNote(
         {
           patientProfileId: 'p1',
-          authorProfileId: 'a1',
+          authorProfileId: 's1',
           subjectiveText: 's',
         },
         actor,
@@ -103,6 +103,114 @@ describe('ChartNotesService', () => {
     });
   });
 
+  // CL-20 (BR-13) — el autor sale de la sesión, nunca del cuerpo.
+  describe('autor por sesión (CL-20)', () => {
+    const cabecera = () => ({
+      id: 'h1',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+      updatedAt: new Date(),
+    });
+    const version = () => ({
+      id: 'v2',
+      versionNumber: 2,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+
+    it('createNote sin autor en el cuerpo usa el perfil de la sesión', async () => {
+      const d = build();
+      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createVersion.mockReturnValue({
+        id: 'v1',
+        versionNumber: 1,
+        statusConceptId: CHART.VERSION_DRAFT,
+      });
+      await d.service.createNote({ patientProfileId: 'p1' }, actor);
+      expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ authorProfileId: 's1' }),
+      );
+    });
+
+    it('createNote con otro autor responde 403 y no crea la cabecera', async () => {
+      const d = build();
+      await expect(
+        d.service.createNote(
+          { patientProfileId: 'p1', authorProfileId: 'hp-otro' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
+    });
+
+    it('createNote sin perfil profesional en la sesión responde 403', async () => {
+      const d = build();
+      await expect(
+        d.service.createNote(
+          { patientProfileId: 'p1' },
+          { id: 'u', roles: [] } as any,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
+    });
+
+    it('addVersion con otro autor responde 403 y no crea la versión', async () => {
+      const d = build();
+      d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+      await expect(
+        d.service.addVersion('h1', { authorProfileId: 'hp-otro' }, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createVersion).not.toHaveBeenCalled();
+    });
+
+    it('addVersion sin autor en el cuerpo usa el perfil de la sesión', async () => {
+      const d = build();
+      const header = cabecera();
+      d.notesRepo.findHeaderById.mockResolvedValue(header);
+      d.notesRepo.maxVersionNumber.mockResolvedValue(1);
+      d.notesRepo.createVersion.mockReturnValue(version());
+      await d.service.addVersion('h1', { subjectiveText: 's' }, actor);
+      expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ authorProfileId: 's1' }),
+      );
+    });
+
+    it('amendNote con otro autor responde 403 y no crea la enmienda', async () => {
+      const d = build();
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        ...cabecera(),
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
+      });
+      await expect(
+        d.service.amendNote(
+          'h1',
+          { authorProfileId: 'hp-otro', amendmentReasonText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createVersion).not.toHaveBeenCalled();
+    });
+
+    it('SUPERADMIN escribe con el perfil que declare', async () => {
+      const d = build();
+      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createVersion.mockReturnValue({
+        id: 'v1',
+        versionNumber: 1,
+        statusConceptId: CHART.VERSION_DRAFT,
+      });
+      await d.service.createNote(
+        { patientProfileId: 'p1', authorProfileId: 'hp-otro' },
+        { id: 'root', roles: ['SUPERADMIN'] } as any,
+      );
+      expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ authorProfileId: 'hp-otro' }),
+      );
+    });
+  });
+
   describe('addVersion (UC-15-02)', () => {
     it('rejects when the note is no longer a draft (must amend)', async () => {
       const d = build();
@@ -111,7 +219,7 @@ describe('ChartNotesService', () => {
         lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
       });
       await expect(
-        d.service.addVersion('h1', { authorProfileId: 'a1' } as any, actor),
+        d.service.addVersion('h1', { authorProfileId: 's1' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -131,7 +239,7 @@ describe('ChartNotesService', () => {
         statusConceptId: CHART.VERSION_DRAFT,
       });
 
-      await d.service.addVersion('h1', { authorProfileId: 'a1' }, actor);
+      await d.service.addVersion('h1', { authorProfileId: 's1' }, actor);
       expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -328,7 +436,7 @@ describe('ChartNotesService', () => {
       await expect(
         d.service.amendNote(
           'h1',
-          { authorProfileId: 'a1', amendmentReasonText: 'typo' } as any,
+          { authorProfileId: 's1', amendmentReasonText: 'typo' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -352,7 +460,7 @@ describe('ChartNotesService', () => {
 
       await d.service.amendNote(
         'h1',
-        { authorProfileId: 'a1', amendmentReasonText: 'clarify' },
+        { authorProfileId: 's1', amendmentReasonText: 'clarify' },
         actor,
       );
       expect(d.notesRepo.createVersion).toHaveBeenCalledWith(

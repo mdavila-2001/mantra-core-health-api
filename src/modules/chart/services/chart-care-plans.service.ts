@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,6 +8,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { CarePlansRepository } from '../repositories';
+
+/** Rol comodín que puede escribir en nombre de cualquier perfil profesional. */
+const SUPERADMIN_ROLE = 'SUPERADMIN';
 import { CHART } from '../chart.concepts';
 import {
   ActivityResponseDto,
@@ -51,6 +54,38 @@ export class ChartCarePlansService {
     this.logger.setContext(ChartCarePlansService.name);
   }
 
+  /**
+   * CL-29 (BR-13): el autor del plan es el profesional de la sesión, con la
+   * misma regla que `ChartNotesService.resolveAuthor`: si el cuerpo declara
+   * otro perfil, 403; si no declara nada, el perfil de la sesión; sin perfil
+   * profesional, 403. `SUPERADMIN` pasa con lo que declare.
+   */
+  private resolveAuthor(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const elegido = declared ?? actor.practitionerProfileId;
+      if (!elegido) {
+        throw new ForbiddenException(
+          'Un plan de cuidados necesita un profesional autor.',
+        );
+      }
+      return elegido;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que crear el plan.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'El autor del plan es el profesional de la sesión: no se crea en nombre de otro perfil.',
+      );
+    }
+    return actor.practitionerProfileId;
+  }
+
   /** UC-15-10: crea un plan de cuidado activo con sus actividades iniciales. */
   async createCarePlan(
     dto: CreateCarePlanDto,
@@ -64,6 +99,8 @@ export class ChartCarePlansService {
       },
       'Creating care plan',
     );
+    // CL-29 (BR-13): el autor del plan sale de la sesión, nunca del cuerpo.
+    const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
       const plan = this.carePlansRepo.createPlan(tx, {
         patientProfileId: dto.patientProfileId,
@@ -74,7 +111,7 @@ export class ChartCarePlansService {
         goalText: dto.goalText,
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         actorUserId: actor.id,
       });
       // FK planas: persistir el plan antes de sus actividades.

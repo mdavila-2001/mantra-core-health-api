@@ -1,0 +1,5 @@
+$ corepack yarn test --testPathPatterns="chart-notes|chart-care-plans|clinical-read|clinical.module|encounter-pdf|chart-read"   # tras H3.S1
+Test Suites: 9 passed, 9 total
+Tests:       124 passed, 124 total
+Time:        8.902 s, estimated 23 s
+exit=0
