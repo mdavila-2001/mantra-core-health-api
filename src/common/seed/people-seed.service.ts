@@ -283,7 +283,7 @@ export class PeopleSeedService {
 
   private async altaPractitioner(
     dto: RegisterPractitionerDto,
-  ): Promise<'created' | 'existing' | string> {
+  ): Promise<string> {
     if (await this.existeCredencial(dto.email)) return 'existing';
     try {
       await this.practitionerRegistration.registerPractitioner(dto);
@@ -299,9 +299,7 @@ export class PeopleSeedService {
     }
   }
 
-  private async altaPatient(
-    dto: RegisterPatientDto,
-  ): Promise<'created' | 'existing' | string> {
+  private async altaPatient(dto: RegisterPatientDto): Promise<string> {
     if (await this.existeCredencial(dto.nationalId)) return 'existing';
     try {
       await this.patientRegistration.registerPatient(dto);
