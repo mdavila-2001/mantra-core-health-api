@@ -3,6 +3,7 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   AppointmentBookings,
+  BookingReschedules,
   SlotHolds,
   SchedulableResources,
   BookingPolicies,
@@ -889,9 +890,22 @@ export class SchedulingCatalogRepository {
         { bookableSlotId: { $in: ids } },
         { fields: ['bookableSlotId'] },
       );
-      const intocables = new Set(
-        conHistoria.map((booking) => booking.bookableSlotId),
+      // Un cupo del que se reprogramó una cita ya no tiene cita (se fue a otro
+      // cupo), pero `booking_reschedules` lo sigue referenciando como origen o
+      // destino: borrarlo rompía `fk_booking_reschedules_from_slot_id` y el
+      // retiro entero respondía 422. Es historia igual que una cita: se
+      // conserva (defecto destapado al verificar M4 · B10 contra una base real).
+      const reprogramaciones = await em.find(
+        BookingReschedules,
+        {
+          $or: [{ fromSlotId: { $in: ids } }, { toSlotId: { $in: ids } }],
+        },
+        { fields: ['fromSlotId', 'toSlotId'] },
       );
+      const intocables = new Set([
+        ...conHistoria.map((booking) => booking.bookableSlotId),
+        ...reprogramaciones.flatMap((r) => [r.fromSlotId, r.toSlotId]),
+      ]);
       const libres = ids.filter((id) => !intocables.has(id));
       keptSlots = ids.length - libres.length;
 
