@@ -97,8 +97,8 @@ export class AuthzMeService {
       practitionerName: practitionerNames.get(row.practitionerProfileId),
       state: this.state(row.statusConceptId, row.validTo, now),
       validFrom: row.validFrom,
-      validTo: row.validTo,
-      purposeConceptId: row.purposeConceptId,
+      validTo: row.validTo ?? undefined,
+      purposeConceptId: row.purposeConceptId ?? undefined,
     }));
 
     const grantedNames = await this.namesByUserId(
@@ -200,7 +200,8 @@ export class AuthzMeService {
     if (statusConceptId === CONCEPTS.STATE_REVOKED) return 'REVOKED';
     if (statusConceptId === CONCEPTS.STATE_EXPIRED) return 'EXPIRED';
     if (statusConceptId === CONCEPTS.STATE_ACTIVE) {
-      return validTo !== undefined && validTo <= now ? 'EXPIRED' : 'ACTIVE';
+      // `valid_to` viene como `null` de la base cuando no hay fin: no es «ya venció».
+      return validTo != null && validTo <= now ? 'EXPIRED' : 'ACTIVE';
     }
     return 'OTHER';
   }

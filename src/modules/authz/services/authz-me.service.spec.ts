@@ -106,6 +106,24 @@ describe('AuthzMeService (BR-20)', () => {
     });
   });
 
+  it('una relación sin fin (valid_to null de la base) figura ACTIVE y no EXPIRED', async () => {
+    const d = build();
+    d.careRepo.findAllByPatient.mockResolvedValue([
+      {
+        id: 'r-abierta',
+        tenantId: 't1',
+        practitionerProfileId: 'doc1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        validFrom: new Date(Date.now() - 86_400_000),
+        validTo: null,
+        purposeConceptId: null,
+      },
+    ]);
+    const out = await d.service.listMyAccess(ACTOR);
+    expect(out.careRelationships[0]?.state).toBe('ACTIVE');
+    expect(out.careRelationships[0]?.validTo).toBeUndefined();
+  });
+
   it('revoca la relación propia con el caso de uso de siempre', async () => {
     const d = build();
     d.careRepo.findById.mockResolvedValue({
