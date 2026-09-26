@@ -55,6 +55,14 @@ export class CareRelationshipView {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   validTo?: Date;
+
+  /**
+   * Nombre a mostrar del profesional (TX-27): sólo lo resuelve la bandeja de
+   * solicitudes pendientes del paciente, para que la pantalla no tenga que
+   * pedir la ficha de cada profesional por separado.
+   */
+  @ApiPropertyOptional()
+  practitionerName?: string;
 }
 
 /** Vista de una representación legal (listado por paciente). */

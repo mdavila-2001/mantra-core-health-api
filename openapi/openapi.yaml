@@ -3711,6 +3711,164 @@ paths:
       summary: Marcar una especialidad propia como la principal
       tags:
         - profiles-practitioners
+  /profiles/practitioners/me/specialties/{specialtyId}:
+    patch:
+      description: >-
+        `404` si no existe o es ajena. `422` si ya no está pendiente o el concepto no es una especialidad del catálogo.
+        `409` si ya tiene esa especialidad vigente.
+      operationId: ProfilesPractitionersController_updateOwnSpecialty
+      parameters:
+        - name: specialtyId
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnSpecialtyDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir una especialidad propia pendiente de verificación
+      tags:
+        - profiles-practitioners
+    delete:
+      description: '`404` si no existe o es ajena. `422` si ya no está pendiente.'
+      operationId: ProfilesPractitionersController_removeOwnSpecialty
+      parameters:
+        - name: specialtyId
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Retirar una especialidad propia pendiente de verificación
+      tags:
+        - profiles-practitioners
+  /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}:
+    patch:
+      description: '`404` si no existe o es ajena. `422` si no está pendiente o tiene una verificación en curso.'
+      operationId: ProfilesPractitionersController_updateOwnLicense
+      parameters:
+        - name: licenseId
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnLicenseDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir una matrícula propia pendiente de verificación
+      tags:
+        - profiles-practitioners
+    delete:
+      description: >-
+        `404` si no existe o es ajena. `422` si no está pendiente, tiene una verificación en curso o ya tiene historial
+        de auditoría.
+      operationId: ProfilesPractitionersController_removeOwnLicense
+      parameters:
+        - name: licenseId
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Retirar una matrícula propia pendiente de verificación
+      tags:
+        - profiles-practitioners
   /profiles/credentials:
     get:
       operationId: ProfilesPractitionersController_listPendingCredentials
@@ -8425,6 +8583,41 @@ paths:
       description: >-
         Ficha de un perfil público. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /community/posts:
+    get:
+      operationId: CommunitySocialController_getPosts
+      parameters:
+        - name: actorProfileId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: ids
+          required: true
+          in: query
+          description: Uuid separados por coma (hasta 50)
+          schema: {}
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Publicaciones por ids, con media, hashtags y menciones
+      tags:
+        - community-social
+      description: >-
+        Publicaciones por ids, con media, hashtags y menciones. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /community/posts/{postId}:
     get:
       operationId: CommunitySocialController_getPost
@@ -9351,6 +9544,51 @@ paths:
       description: >-
         Cola de moderación con filtros y cursor. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /community/moderation/decisions/mine:
+    get:
+      operationId: CommunityModerationController_listMyDecisions
+      parameters:
+        - name: profileId
+          required: true
+          in: query
+          description: Perfil propio
+          schema:
+            format: uuid
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor de la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Tope de filas
+          schema:
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis propias decisiones de moderación
+      tags:
+        - community-moderation
+      description: >-
+        Mis propias decisiones de moderación. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /community/moderation/decisions:
     get:
       operationId: CommunityModerationController_listDecisions
@@ -11666,6 +11904,10 @@ paths:
         Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/diagnostic-reports/{id}/release:
     post:
+      deprecated: true
+      description: >-
+        Obsoleta (D-E): no escribe diagnostic_release_events y el paciente no ve lo liberado por acá. Usar
+        diagnostics/reports/:reportId/versions/:versionId/release.
       operationId: ClinicalOrdersController_releaseDiagnosticReport
       parameters:
         - name: id
@@ -11705,9 +11947,6 @@ paths:
       summary: Liberar los resultados de un reporte diagnóstico
       tags:
         - clinical-orders
-      description: >-
-        Liberar los resultados de un reporte diagnóstico. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/prescription-signature-policies:
     post:
       operationId: ClinicalPrescriptionPoliciesController_create
@@ -22300,6 +22539,44 @@ paths:
       summary: Registrar un proveedor de identidad
       tags:
         - auth-providers
+    get:
+      operationId: AuthProvidersListingController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIdentityProvidersResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los proveedores de identidad visibles para el tenant
+      tags:
+        - auth-providers
+      description: >-
+        Listar los proveedores de identidad visibles para el tenant. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /auth-providers/identity-providers/{id}/protocol-configs:
     post:
       description: 'Reconfigurar reemplaza: sólo hay una configuración activa por entorno.'
@@ -22749,6 +23026,42 @@ paths:
       summary: Desvincular una identidad federada
       tags:
         - auth-providers
+  /auth-providers/identity-providers/{providerId}:
+    get:
+      operationId: AuthProvidersListingController_get
+      parameters:
+        - name: providerId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityProviderDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: El proveedor no existe o es de otro tenant
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ficha de un proveedor de identidad (sin secretos)
+      tags:
+        - auth-providers
+      description: >-
+        Ficha de un proveedor de identidad (sin secretos). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /automation/agents:
     post:
       description: Agente y versión 1 nacen en borrador, en la misma transacción.
@@ -24236,6 +24549,170 @@ paths:
       summary: Descargar el PDF oficial de un encuentro cerrado
       tags:
         - chart-encounters
+  /charts/me/notes:
+    get:
+      operationId: ChartMeController_listMyNotes
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Tope del listado (por defecto 50)
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ver mis evoluciones liberadas
+      tags:
+        - chart-me
+      description: >-
+        Ver mis evoluciones liberadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /charts/me/documents:
+    get:
+      operationId: ChartMeController_listMyDocuments
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Tope del listado (por defecto 50)
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ver mis documentos visibles
+      tags:
+        - chart-me
+      description: >-
+        Ver mis documentos visibles. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /charts/me/documents/{documentId}/files/{fileId}/content:
+    get:
+      operationId: ChartMeController_getMyDocumentFileContent
+      parameters:
+        - name: documentId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bytes del archivo
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: El documento no existe, no es del titular, no es visible, o el archivo no cuelga de él
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el archivo de un documento propio
+      tags:
+        - chart-me
+      description: >-
+        Descargar el archivo de un documento propio. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /charts/me/encounters/{id}/pdf:
+    get:
+      description: Sólo lo liberado y visible. 404 si el encuentro no es del titular; 422 si no está cerrado.
+      operationId: ChartMeController_getMyEncounterPdf
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF oficial de la atención
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 'No aplica: usa 404 en su lugar'
+        '404':
+          description: El encuentro no existe o no es del titular
+        '422':
+          description: El encuentro no está cerrado
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar el PDF oficial de una atención propia
+      tags:
+        - chart-me
+  /charts/me/record/pdf:
+    get:
+      description: Sólo lo liberado y visible; sellado y auditado. 422 si la sesión no tiene perfil de paciente.
+      operationId: ChartMeController_getMyRecordPdf
+      parameters: []
+      responses:
+        '200':
+          description: PDF oficial de la historia del titular
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar mi historia completa en PDF oficial
+      tags:
+        - chart-me
   /care-teams:
     post:
       operationId: CareTeamsController_create
@@ -26721,6 +27198,44 @@ paths:
       description: >-
         Crear asignación de delegado de practitioner. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: DelegatedAccessListingController_listPractitionerDelegates
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPractitionerDelegatesResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las delegaciones de profesional del tenant
+      tags:
+        - delegated-access
+      description: >-
+        Listar las delegaciones de profesional del tenant. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /practitioner-delegates/{id}/access-requests:
     post:
       operationId: PractitionerDelegatesController_requestAccess
@@ -26963,6 +27478,120 @@ paths:
       description: >-
         Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /org/user-assignments:
+    get:
+      operationId: DelegatedAccessListingController_listOrgUserAssignments
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOrgUserAssignmentsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las asignaciones de usuario de organización del tenant
+      tags:
+        - delegated-access
+      description: >-
+        Listar las asignaciones de usuario de organización del tenant. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /delegated-permission-sets/{id}/items:
+    get:
+      operationId: DelegatedAccessListingController_listPermissionSetItems
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPermissionSetItemsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los permisos de un set delegado del tenant
+      tags:
+        - delegated-access
+      description: >-
+        Listar los permisos de un set delegado del tenant. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /access-requests:
+    get:
+      operationId: DelegatedAccessListingController_listAccessRequests
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAccessRequestsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las solicitudes de acceso delegado del tenant
+      tags:
+        - delegated-access
+      description: >-
+        Listar las solicitudes de acceso delegado del tenant. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostics/specimens:
     post:
       operationId: DiagnosticsSpecimensController_createSpecimen
@@ -27000,6 +27629,66 @@ paths:
       description: >-
         Registrar un espécimen (soporte para acesión). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/accessions/{id}:
+    get:
+      description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.'
+      operationId: DiagnosticsSpecimensController_getAccession
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Detalle de una acesión (especímenes, contenedores y custodia)
+      tags:
+        - diagnostics-specimens
+  /diagnostics/specimens/{id}:
+    get:
+      description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.'
+      operationId: DiagnosticsSpecimensController_getSpecimen
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Detalle de un espécimen (con su cadena de custodia)
+      tags:
+        - diagnostics-specimens
   /diagnostics/accessions:
     post:
       operationId: DiagnosticsSpecimensController_accession
@@ -30197,6 +30886,14 @@ paths:
           description: Tope del listado (por defecto 50)
           schema:
             type: number
+        - name: include
+          required: false
+          in: query
+          description: Con `values` cada instancia trae sus valores vigentes (lectura en lote, TX-27)
+          schema:
+            enum:
+              - values
+            type: string
       responses:
         '200':
           description: ''
@@ -31320,6 +32017,44 @@ paths:
       description: >-
         Registrar un agente recolector gobernado. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: HealthContextListingController_listAgents
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListContextAgentsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los agentes recolectores (de plataforma y del tenant)
+      tags:
+        - health-context
+      description: >-
+        Listar los agentes recolectores (de plataforma y del tenant). Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /health-context/sources:
     post:
       description: El nivel de confianza gobierna qué observaciones se aceptan.
@@ -31355,6 +32090,44 @@ paths:
       summary: Registrar una fuente de contexto de salud
       tags:
         - health-context
+    get:
+      operationId: HealthContextListingController_listSources
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListHealthContextSourcesResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las fuentes de contexto de salud
+      tags:
+        - health-context
+      description: >-
+        Listar las fuentes de contexto de salud. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /health-context/schedules:
     post:
       operationId: HealthContextController_createSchedule
@@ -31392,6 +32165,44 @@ paths:
       description: >-
         Programar la recolección de contexto de un país. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: HealthContextListingController_listSchedules
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListContextSchedulesResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las programaciones de recolección
+      tags:
+        - health-context
+      description: >-
+        Listar las programaciones de recolección. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /health-context/internal/schedules/run-due:
     post:
       description: Toma el lote con SKIP LOCKED; avanza next_run_at siempre.
@@ -31462,6 +32273,44 @@ paths:
       summary: Crear el contexto de salud de un país
       tags:
         - health-context
+    get:
+      operationId: HealthContextListingController_listContexts
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCountryHealthContextsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los contextos de salud por país
+      tags:
+        - health-context
+      description: >-
+        Listar los contextos de salud por país. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /health-context/collection-runs:
     post:
       description: 'Idempotente por clave: el mismo disparo no se ejecuta dos veces.'
@@ -31497,6 +32346,44 @@ paths:
       summary: Disparar una corrida de recolección
       tags:
         - health-context
+    get:
+      operationId: HealthContextListingController_listCollectionRuns
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListContextCollectionRunsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las corridas de recolección
+      tags:
+        - health-context
+      description: >-
+        Listar las corridas de recolección. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /health-context/collection-runs/{id}/observations:
     post:
       description: Sólo agregado de país; se deduplica por hash dentro de la corrida.
@@ -31581,6 +32468,51 @@ paths:
       summary: Materializar una versión borrador con hechos y evidencia
       tags:
         - health-context
+    get:
+      operationId: HealthContextListingController_listContextVersions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCountryHealthContextVersionsResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las versiones de un contexto (sin payload)
+      tags:
+        - health-context
+      description: >-
+        Listar las versiones de un contexto (sin payload). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /health-context/versions/{id}/quality-reviews:
     post:
       description: El desenlace mueve la versión a aprobada o rechazada.
@@ -32443,6 +33375,44 @@ paths:
       description: >-
         Registrar una autoridad de identidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: IdentityCatalogListingController_listAuthorities
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIdentityAuthoritiesResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las autoridades de identidad del tenant
+      tags:
+        - identity-assurance
+      description: >-
+        Listar las autoridades de identidad del tenant. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /identity/authorities/{id}/endpoints:
     post:
       operationId: IdentityAuthoritiesController_addEndpoint
@@ -32523,6 +33493,44 @@ paths:
         - identity-policies
       description: >-
         Crear una política de verificación de identidad (IAL/AAL). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: IdentityCatalogListingController_listPolicies
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIdentityPoliciesResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las políticas de verificación de identidad
+      tags:
+        - identity-assurance
+      description: >-
+        Listar las políticas de verificación de identidad. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /identity/verification-cases:
     get:
@@ -43627,6 +44635,10 @@ paths:
       responses:
         '200':
           description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseDetailDto'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -45566,10 +46578,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -45579,6 +46587,7 @@ paths:
       summary: Servicios que ofrece una organización, desde su ficha pública
       tags:
         - public-catalog
+      security: []
   /public/profiles/f/{slug}/products:
     get:
       description: >-
@@ -45610,10 +46619,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -45623,6 +46628,7 @@ paths:
       summary: Productos que ofrece una farmacia, desde su ficha pública
       tags:
         - public-catalog
+      security: []
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -48529,6 +49535,12 @@ paths:
           in: query
           schema:
             format: uuid
+            type: string
+        - name: resourceIds
+          required: false
+          in: query
+          description: 'Varios recursos, uuid separados por coma (hasta 20): una lectura en lote (TX-27)'
+          schema:
             type: string
         - name: from
           required: false
@@ -55940,6 +56952,10 @@ tags:
     description: >-
       Operaciones del dominio funcional chart encounters. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: chart-me
+    description: >-
+      Operaciones del dominio funcional chart me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: chart-notes
     description: >-
       Operaciones del dominio funcional chart notes. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -56136,6 +57152,10 @@ tags:
     description: >-
       Operaciones del dominio funcional data catalog internal. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: delegated-access
+    description: >-
+      Operaciones del dominio funcional delegated access. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: delegated-access-authz
     description: >-
       Operaciones del dominio funcional delegated access authz. Consulte el catálogo Markdown de endpoints para payloads
@@ -56295,6 +57315,10 @@ tags:
   - name: identity-assertions
     description: >-
       Operaciones del dominio funcional identity assertions. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: identity-assurance
+    description: >-
+      Operaciones del dominio funcional identity assurance. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: identity-authorities
     description: >-
@@ -57260,6 +58284,12 @@ components:
         issuingInstitutionText:
           type: string
           maxLength: 200
+        issuingCityText:
+          type: string
+          maxLength: 100
+        issuingCountryConceptId:
+          type: string
+          format: uuid
         fileId:
           type: string
           description: fileId del PDF subido por POST /iam/auth/upload-registration-document
@@ -57755,7 +58785,9 @@ components:
         constitutionFileId:
           type: string
           format: uuid
-          description: Escritura de constitución (fileId de POST /iam/auth/upload-registration-document)
+          description: >-
+            Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para
+            UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante
         taxIdentifierFileId:
           type: string
           format: uuid
@@ -57772,8 +58804,11 @@ components:
           type: string
           format: uuid
           description: Certificado de la autoridad sanitaria (SEDES en Bolivia)
+        radioprotectionCertificateFileId:
+          type: string
+          format: uuid
+          description: Certificado de radioprotección (centros de imagenología)
       required:
-        - constitutionFileId
         - taxIdentifierFileId
         - commerceRegistryFileId
         - operatingLicenseFileId
@@ -57821,12 +58856,13 @@ components:
           example: +591 70012345
         powerOfAttorneyFileId:
           type: string
-          description: Id del archivo del poder notariado (PDF ya pre-cargado)
+          description: >-
+            Id del archivo del poder notariado (PDF ya pre-cargado). Obligatorio salvo para UNIPERSONAL, donde el
+            titular actúa por sí; el servicio responde 422 si falta
           format: uuid
       required:
         - idNumber
         - email
-        - powerOfAttorneyFileId
     RegisterOrganizationExecutiveContactDto:
       type: object
       properties:
@@ -59146,6 +60182,11 @@ components:
           description: Sólo en la lectura propia; permite descargar el diploma adjunto
         issuingInstitutionText:
           type: string
+        issuingCityText:
+          type: string
+        issuingCountryConceptId:
+          type: string
+          format: uuid
         issueDate:
           type: string
           format: date-time
@@ -59187,6 +60228,10 @@ components:
         validTo:
           type: string
           format: date-time
+        fileId:
+          type: string
+          format: uuid
+          description: Sólo en la lectura propia
       required:
         - id
         - jurisdictionConceptId
@@ -59221,6 +60266,10 @@ components:
           type: object
           nullable: true
         practiceSiteId:
+          type: object
+          format: uuid
+          nullable: true
+        healthFacilityConceptId:
           type: object
           format: uuid
           nullable: true
@@ -59333,6 +60382,14 @@ components:
         birthDate:
           type: string
           format: date
+        sexAtBirth:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - INTERSEX
+            - UNKNOWN
+          description: Sólo en la lectura propia
         nationalId:
           type: string
         issuerAdministrativeAreaConceptId:
@@ -59454,6 +60511,18 @@ components:
           type: object
           format: date
           nullable: true
+        sexAtBirth:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - INTERSEX
+            - UNKNOWN
+          description: Sexo asignado al nacer
+        issuerAdministrativeAreaConceptId:
+          type: string
+          format: uuid
+          description: Departamento emisor del documento (VS_BO_DEPARTMENT)
         phone:
           type: string
           maxLength: 40
@@ -59724,6 +60793,12 @@ components:
         issuingInstitutionText:
           type: string
           maxLength: 200
+        issuingCityText:
+          type: string
+          maxLength: 100
+        issuingCountryConceptId:
+          type: string
+          format: uuid
         issueDate:
           type: string
           format: date
@@ -59748,6 +60823,12 @@ components:
         issuingInstitutionText:
           type: string
           maxLength: 200
+        issuingCityText:
+          type: string
+          maxLength: 100
+        issuingCountryConceptId:
+          type: string
+          format: uuid
         issueDate:
           type: string
           format: date
@@ -59776,6 +60857,32 @@ components:
         boardCertified:
           type: boolean
           description: Certificada por junta (board certified)
+    UpdateOwnSpecialtyDto:
+      type: object
+      properties:
+        specialtyConceptId:
+          type: string
+          description: Concept id de la especialidad (VS_MEDICAL_SPECIALTY)
+          format: uuid
+        boardCertified:
+          type: boolean
+          description: Certificada por junta
+    UpdateOwnLicenseDto:
+      type: object
+      properties:
+        licenseNumber:
+          type: string
+          maxLength: 100
+          pattern: \S
+        regulatoryAuthority:
+          type: string
+          maxLength: 200
+        validFrom:
+          type: string
+          format: date
+        fileId:
+          type: string
+          format: uuid
     VerifyCredentialDto:
       type: object
       properties:
@@ -63042,7 +64149,8 @@ components:
           format: uuid
         reasonText:
           type: string
-          description: Motivo del cambio de estado (obligatorio)
+          description: Motivo del cambio de estado (obligatorio, hasta 500 caracteres)
+          maxLength: 500
       required:
         - newClinicalStatusConceptId
         - reasonText
@@ -66602,6 +67710,13 @@ components:
         minAmount:
           type: object
           nullable: true
+        minAmountCurrency:
+          type: object
+          nullable: true
+        cities:
+          type: array
+          items:
+            type: string
       required:
         - id
         - code
@@ -66612,6 +67727,7 @@ components:
         - studyCount
         - tenantId
         - ratingCount
+        - cities
     SearchDiagnosticUnitsResponseDto:
       type: object
       properties:
@@ -71362,6 +72478,237 @@ components:
           description: Por qué se desvincula
       required:
         - reason
+    IdentityProviderSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        protocolConceptId:
+          type: string
+          format: uuid
+        providerCategoryConceptId:
+          type: string
+          format: uuid
+        issuer:
+          type: string
+        isGlobal:
+          type: boolean
+        stateConceptId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - code
+        - name
+        - protocolConceptId
+        - providerCategoryConceptId
+        - stateConceptId
+        - createdAt
+    ListIdentityProvidersResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityProviderSummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
+    ProviderProtocolConfigViewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        environmentConceptId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        authorizeUrl:
+          type: string
+        tokenUrl:
+          type: string
+        userinfoUrl:
+          type: string
+        jwksUri:
+          type: string
+        metadataUrl:
+          type: string
+        scopes:
+          type: string
+        pkceRequired:
+          type: boolean
+        stateConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - environmentConceptId
+        - stateConceptId
+    ProviderPublicKeyViewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        keyId:
+          type: string
+        algorithm:
+          type: string
+        publicKey:
+          type: string
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+        stateConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - keyId
+        - algorithm
+        - publicKey
+        - stateConceptId
+    ProviderAttributeMappingViewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sourceClaim:
+          type: string
+        targetAttribute:
+          type: string
+        isIdentifier:
+          type: boolean
+        required:
+          type: boolean
+      required:
+        - id
+        - sourceClaim
+        - targetAttribute
+    ProviderTenantBindingViewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        isEnabled:
+          type: boolean
+        autoProvision:
+          type: boolean
+        allowedEmailDomains:
+          type: string
+        stateConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - isEnabled
+        - stateConceptId
+    ProviderProvisioningRuleViewDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        priority:
+          type: number
+        isActive:
+          type: boolean
+        assignRoleConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - priority
+        - isActive
+    IdentityProviderDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        protocolConceptId:
+          type: string
+          format: uuid
+        providerCategoryConceptId:
+          type: string
+          format: uuid
+        issuer:
+          type: string
+        isGlobal:
+          type: boolean
+        stateConceptId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        protocolConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderProtocolConfigViewDto'
+        publicKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderPublicKeyViewDto'
+        attributeMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderAttributeMappingViewDto'
+        tenantBindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderTenantBindingViewDto'
+        provisioningRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderProvisioningRuleViewDto'
+      required:
+        - id
+        - code
+        - name
+        - protocolConceptId
+        - providerCategoryConceptId
+        - stateConceptId
+        - createdAt
+        - protocolConfigs
+        - publicKeys
+        - attributeMappings
+        - tenantBindings
+        - provisioningRules
     RegisterAgentDto:
       type: object
       properties:
@@ -73798,6 +75145,204 @@ components:
       required:
         - practitionerDelegateAssignmentId
         - purpose
+    OrgUserAssignmentSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantMembershipId:
+          type: string
+          format: uuid
+        practiceId:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        assignmentRoleConceptId:
+          type: string
+          format: uuid
+        accessScopeConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenantMembershipId
+        - assignmentRoleConceptId
+        - accessScopeConceptId
+        - statusConceptId
+        - createdAt
+    ListOrgUserAssignmentsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrgUserAssignmentSummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
+    PractitionerDelegateSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerRoleAssignmentId:
+          type: string
+          format: uuid
+        delegateUserAssignmentId:
+          type: string
+          format: uuid
+        delegatedPermissionSetId:
+          type: string
+          format: uuid
+        delegateRoleConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date-time
+        validTo:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - practitionerRoleAssignmentId
+        - delegateUserAssignmentId
+        - delegatedPermissionSetId
+        - delegateRoleConceptId
+        - statusConceptId
+        - createdAt
+    ListPractitionerDelegatesResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerDelegateSummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
+    PermissionSetItemSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        permissionId:
+          type: string
+          format: uuid
+        requiresStepUpAuthentication:
+          type: boolean
+        constraint:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - permissionId
+    ListPermissionSetItemsResponseDto:
+      type: object
+      properties:
+        permissionSetId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionSetItemSummaryDto'
+      required:
+        - permissionSetId
+        - items
+    AccessRequestSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerDelegateAssignmentId:
+          type: string
+          format: uuid
+        requestedPermissionId:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        decisionConceptId:
+          type: string
+          format: uuid
+        requestedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - practitionerDelegateAssignmentId
+        - requestedPermissionId
+        - statusConceptId
+        - decisionConceptId
+    ListAccessRequestsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessRequestSummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
     CreateSpecimenDto:
       type: object
       properties:
@@ -74625,7 +76170,7 @@ components:
     ShareDiagnosticResultDto:
       type: object
       properties:
-        practitionerUserId:
+        practitionerProfileId:
           type: string
           format: uuid
         validUntil:
@@ -74635,7 +76180,7 @@ components:
           type: string
           maxLength: 500
       required:
-        - practitionerUserId
+        - practitionerProfileId
         - validUntil
     LessonDto:
       type: object
@@ -76940,6 +78485,301 @@ components:
       required:
         - mode
         - reason
+    HealthContextSourceSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        sourceTypeConceptId:
+          type: string
+          format: uuid
+        ownerName:
+          type: string
+        canonicalUrl:
+          type: string
+        countryConceptId:
+          type: string
+          format: uuid
+        trustTierConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - code
+        - name
+        - sourceTypeConceptId
+        - statusConceptId
+    ListHealthContextSourcesResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthContextSourceSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
+    ContextAgentSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        agentTypeConceptId:
+          type: string
+          format: uuid
+        ownerTenantId:
+          type: string
+          format: uuid
+        lastHeartbeatAt:
+          type: string
+          format: date-time
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - code
+        - name
+        - agentTypeConceptId
+        - statusConceptId
+    ListContextAgentsResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextAgentSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
+    ContextScheduleSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        countryConceptId:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        scheduleExpression:
+          type: string
+        nextRunAt:
+          type: string
+          format: date-time
+        lastSuccessAt:
+          type: string
+          format: date-time
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - countryConceptId
+        - agentId
+        - scheduleExpression
+        - statusConceptId
+    ListContextSchedulesResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextScheduleSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
+    CountryHealthContextSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        countryConceptId:
+          type: string
+          format: uuid
+        contextDomainConceptId:
+          type: string
+          format: uuid
+        contextKey:
+          type: string
+        title:
+          type: string
+        currentVersionId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - countryConceptId
+        - contextDomainConceptId
+        - contextKey
+        - title
+        - statusConceptId
+    ListCountryHealthContextsResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryHealthContextSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
+    CountryHealthContextVersionSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        versionNumber:
+          type: number
+        summary:
+          type: string
+        observedAt:
+          type: string
+          format: date-time
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveTo:
+          type: string
+          format: date-time
+        contentHash:
+          type: string
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - versionNumber
+        - observedAt
+        - effectiveFrom
+        - contentHash
+        - statusConceptId
+    ListCountryHealthContextVersionsResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountryHealthContextVersionSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
+    ContextCollectionRunSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scheduleId:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        countryConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+        errorSummary:
+          type: string
+      required:
+        - id
+        - agentId
+        - countryConceptId
+        - statusConceptId
+        - startedAt
+    ListContextCollectionRunsResponseDto:
+      type: object
+      properties:
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextCollectionRunSummaryDto'
+      required:
+        - count
+        - limit
+        - nextCursor
+        - items
     CreateSourceConnectionDto:
       type: object
       properties:
@@ -77828,6 +79668,114 @@ components:
           description: Matrícula a verificar. Si se omite se usa la única del profesional.
       required:
         - evidenceFileId
+    IdentityAuthoritySummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        authorityCode:
+          type: string
+        name:
+          type: string
+        authorityTypeConceptId:
+          type: string
+          format: uuid
+        jurisdictionConceptId:
+          type: string
+          format: uuid
+        verificationStatusConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - authorityCode
+        - name
+        - authorityTypeConceptId
+        - verificationStatusConceptId
+        - statusConceptId
+        - createdAt
+    ListIdentityAuthoritiesResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityAuthoritySummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
+    IdentityPolicySummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        policyCode:
+          type: string
+        subjectTypeConceptId:
+          type: string
+          format: uuid
+        transactionRiskConceptId:
+          type: string
+          format: uuid
+        requiredIdentityAssuranceLevelConceptId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: number
+        effectiveFrom:
+          type: string
+          format: date-time
+        effectiveTo:
+          type: string
+          format: date-time
+        statusConceptId:
+          type: string
+          format: uuid
+      required:
+        - id
+        - policyCode
+        - subjectTypeConceptId
+        - transactionRiskConceptId
+        - requiredIdentityAssuranceLevelConceptId
+        - versionNumber
+        - effectiveFrom
+        - statusConceptId
+    ListIdentityPoliciesResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityPolicySummaryDto'
+        count:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - count
+        - limit
+        - nextCursor
     IntegrationContractsCreateContractDto:
       type: object
       properties:
@@ -84226,6 +86174,155 @@ components:
         - egressBytes
         - estimatedCost
         - currencyCode
+    CaseSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseNumber:
+          type: string
+        patientProfileId:
+          type: string
+          format: uuid
+        primarySurgeonProfileId:
+          type: string
+          format: uuid
+        operatingRoomId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        scheduledStartAt:
+          type: string
+          format: date-time
+        scheduledEndAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - caseNumber
+        - patientProfileId
+        - statusConceptId
+    TeamMemberSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practitionerProfileId:
+          type: string
+          format: uuid
+        teamRoleConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+          description: Asignado o aceptado
+      required:
+        - id
+        - practitionerProfileId
+        - teamRoleConceptId
+        - statusConceptId
+    OperativeStepItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        stepNumber:
+          type: number
+        stepCodeConceptId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        performedByProfileId:
+          type: string
+          format: uuid
+        bodySiteConceptId:
+          type: string
+          format: uuid
+        lateralityConceptId:
+          type: string
+          format: uuid
+        statusConceptId:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - stepNumber
+        - stepCodeConceptId
+        - description
+        - statusConceptId
+    CaseDetailDto:
+      type: object
+      properties:
+        case:
+          $ref: '#/components/schemas/CaseSummaryDto'
+        diagnoses:
+          description: Diagnósticos del caso con su papel y orden
+          type: array
+          items:
+            type: array
+        team:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberSummaryDto'
+        milestones:
+          description: Hitos del caso
+          type: array
+          items:
+            type: array
+        preoperativeOrders:
+          description: Órdenes preoperatorias
+          type: array
+          items:
+            type: array
+        preoperativeAssessment:
+          type: object
+          description: Valoración preoperatoria, si ya se hizo
+        anesthesiaPlan:
+          type: object
+          description: Plan anestésico, si ya se redactó
+        operativeReports:
+          description: Versiones del informe operatorio, de la última a la primera
+          type: array
+          items:
+            type: array
+        operativeSteps:
+          description: Pasos de la intervención, en orden
+          type: array
+          items:
+            $ref: '#/components/schemas/OperativeStepItemDto'
+        findings:
+          description: Hallazgos registrados durante la intervención
+          type: array
+          items:
+            type: array
+        implants:
+          description: Implantes colocados, con sus identificadores
+          type: array
+          items:
+            type: array
+      required:
+        - case
+        - diagnoses
+        - team
+        - milestones
+        - preoperativeOrders
+        - operativeReports
+        - operativeSteps
+        - findings
+        - implants
     ScheduleCaseDto:
       type: object
       properties:

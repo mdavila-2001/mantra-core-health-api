@@ -122,4 +122,6 @@
 \ir 65_surveys/90_fk_deferred.sql
 \echo >>> 66_medical_groups/90_fk_deferred.sql
 \ir 66_medical_groups/90_fk_deferred.sql
+\echo >>> 69_pharma_lab/90_fk_deferred.sql
+\ir 69_pharma_lab/90_fk_deferred.sql
 \echo === apply_deferred completado ===

@@ -344,6 +344,33 @@ export class CommunitySocialReadService {
   }
 
   /**
+   * Lectura en lote de publicaciones (TX-27): lo mismo que {@link getPost} para
+   * cada id, en una sola petición. Las que no existen o el lector no puede ver
+   * se omiten sin distinguirlas (mismo criterio que el 404 individual: no
+   * confirmar que un perfil publicó algo). Conserva el orden pedido.
+   *
+   * @param postIds - Publicaciones a leer (sin repetir).
+   * @param requestedProfileId - Perfil del lector propuesto.
+   */
+  async getPostsBatch(
+    postIds: readonly string[],
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
+  ): Promise<PostDetailDto[]> {
+    const details = await Promise.all(
+      postIds.map((postId) =>
+        this.getPost(postId, actor, requestedProfileId).catch(
+          (error: unknown) => {
+            if (error instanceof ResourceNotFoundException) return null;
+            throw error;
+          },
+        ),
+      ),
+    );
+    return details.filter((detail): detail is PostDetailDto => detail !== null);
+  }
+
+  /**
    * Hilo de comentarios de una publicación.
    *
    * @param postId - Publicación comentada.

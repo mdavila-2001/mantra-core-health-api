@@ -75,6 +75,13 @@ export class ResourceScopeGrants {
   validTo?: Date;
 
   /**
+   * Motivo del grant en texto libre (CL-50, v4.2.30): por qué el paciente
+   * compartió el recurso.
+   */
+  @Property({ fieldName: 'reason_text', columnType: 'text', nullable: true })
+  reasonText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

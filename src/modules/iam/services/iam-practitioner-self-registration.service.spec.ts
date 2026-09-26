@@ -536,6 +536,32 @@ describe('IamPractitionerSelfRegistrationService', () => {
       );
     });
 
+    it('la ciudad y el país de emisión llegan a la fila del título (ID-10)', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [
+          {
+            ...titulo,
+            issuingCityText: ' La Paz ',
+            issuingCountryConceptId: 'pais-1',
+          },
+        ],
+      });
+
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          issuingCityText: 'La Paz',
+          issuingCountryConceptId: 'pais-1',
+        }),
+      );
+    });
+
     it('crea una fila por título, incluidos dos del mismo tipo', async () => {
       const d = build();
 

@@ -32,6 +32,7 @@ function build() {
     getProfile: mockFn(),
     listProfilePosts: mockFn(),
     getPost: mockFn(),
+    getPostsBatch: mockFn(),
     listPostComments: mockFn(),
     getPostReactions: mockFn(),
     listFollows: mockFn(),
@@ -151,5 +152,43 @@ describe('CommunitySocialController', () => {
     const query = { blockerProfileId: 'p1', blockedProfileId: 'p2' };
     await d.controller.unblock(query as any, actor);
     expect(d.service.unblock).toHaveBeenCalledWith(query, actor);
+  });
+
+  describe('getPosts (TX-27)', () => {
+    const uuid = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
+
+    it('delega la lectura en lote sin repetidos', () => {
+      const d = build();
+      const actor = { id: 'u' } as any;
+      void d.controller.getPosts(
+        `${uuid(1)}, ${uuid(2)},${uuid(1)}`,
+        actor,
+        'p-1',
+      );
+      expect(d.readService.getPostsBatch).toHaveBeenCalledWith(
+        [uuid(1), uuid(2)],
+        actor,
+        'p-1',
+      );
+    });
+
+    it.each([
+      ['sin ids', undefined],
+      ['vacío', ' , '],
+      ['uno que no es uuid', `${uuid(1)},no-es-uuid`],
+      [
+        'más de 50',
+        Array.from(
+          { length: 51 },
+          (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+        ).join(','),
+      ],
+    ])('400 %s', (_label, ids) => {
+      const d = build();
+      expect(() => d.controller.getPosts(ids, { id: 'u' } as any)).toThrow(
+        'ids debe traer entre 1 y 50 uuid',
+      );
+      expect(d.readService.getPostsBatch).not.toHaveBeenCalled();
+    });
   });
 });

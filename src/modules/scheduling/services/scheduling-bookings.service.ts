@@ -2718,6 +2718,8 @@ export class SchedulingBookingsService {
       patientProfileId?: string;
       /** Recurso (agenda). */
       resourceId?: string;
+      /** Varios recursos (TX-27); alternativa a `resourceId`. */
+      resourceIds?: readonly string[];
       /** Inicio de la ventana. */
       from?: Date;
       /** Fin de la ventana. */
@@ -2728,7 +2730,11 @@ export class SchedulingBookingsService {
     limit: number,
     actor?: AuthenticatedUser,
   ): Promise<SearchBookingsResponseDto> {
-    if (!filters.patientProfileId && !filters.resourceId) {
+    if (
+      !filters.patientProfileId &&
+      !filters.resourceId &&
+      !(filters.resourceIds && filters.resourceIds.length > 0)
+    ) {
       throw new PreconditionFailedException(
         'Indique al menos patientProfileId o resourceId para listar citas',
       );
@@ -2759,6 +2765,7 @@ export class SchedulingBookingsService {
       {
         patientProfileId: filters.patientProfileId,
         resourceId: filters.resourceId,
+        resourceIds: filters.resourceIds,
         from: filters.from,
         to: filters.to,
         // Sin esto una agenda mostraría como ocupados los huecos de citas que

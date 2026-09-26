@@ -16,6 +16,7 @@ import {
 import { AuditTrailService } from '../../audit/services';
 import { NotificationsService, OutboxService } from '../../messaging/services';
 import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { Persons } from '../../profiles/entities';
 import {
   CreateCareRelationshipDto,
   CreateLegalRepresentationDto,
@@ -406,10 +407,25 @@ export class AuthzCareRelationshipsService {
       em,
       actor.patientProfileId,
     );
+    // TX-27: los nombres de todos los profesionales en una sola lectura
+    // (`profile_id` es FK directa a `persons.id`), en vez de una ficha por fila.
+    const persons =
+      rows.length === 0
+        ? []
+        : await em.find(Persons, {
+            id: { $in: [...new Set(rows.map((r) => r.practitionerProfileId))] },
+          });
+    const nameById = new Map(
+      persons.map((p) => [
+        p.id,
+        p.displayName ?? [p.name, p.lastName].filter(Boolean).join(' '),
+      ]),
+    );
     return rows.map((r) => ({
       id: r.id,
       patientProfileId: r.patientProfileId,
       practitionerProfileId: r.practitionerProfileId,
+      practitionerName: nameById.get(r.practitionerProfileId) || undefined,
       relationshipTypeConceptId: r.relationshipTypeConceptId,
       statusConceptId: r.statusConceptId,
       purposeConceptId: r.purposeConceptId,

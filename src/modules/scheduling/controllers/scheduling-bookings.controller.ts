@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -10,6 +11,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { isUUID } from 'class-validator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -50,6 +52,33 @@ import {
   DelayNoticeResponseDto,
 } from '../dto';
 
+/** Tope de recursos por lectura en lote de citas (TX-27). */
+const MAX_RESOURCE_IDS = 20;
+
+/**
+ * `resourceIds` llega como uuid separados por coma. Un valor que no es uuid o
+ * una lista más larga que el tope es un error del cliente (400), no un filtro
+ * que se ignora en silencio.
+ */
+export function parseResourceIds(
+  raw: string | undefined,
+): string[] | undefined {
+  if (raw === undefined) return undefined;
+  const ids = [...new Set(raw.split(',').map((id) => id.trim()))].filter(
+    (id) => id !== '',
+  );
+  if (
+    ids.length === 0 ||
+    ids.length > MAX_RESOURCE_IDS ||
+    !ids.every((id) => isUUID(id))
+  ) {
+    throw new BadRequestException(
+      `resourceIds debe traer entre 1 y ${MAX_RESOURCE_IDS} uuid separados por coma`,
+    );
+  }
+  return ids;
+}
+
 /** Operaciones sobre una cita ya confirmada. */
 @ApiTags('scheduling-bookings')
 @ApiBearerAuth()
@@ -89,6 +118,12 @@ export class SchedulingBookingsController {
   })
   @ApiQuery({ name: 'patientProfileId', required: false, format: 'uuid' })
   @ApiQuery({ name: 'resourceId', required: false, format: 'uuid' })
+  @ApiQuery({
+    name: 'resourceIds',
+    required: false,
+    description:
+      'Varios recursos, uuid separados por coma (hasta 20): una lectura en lote (TX-27)',
+  })
   @ApiQuery({ name: 'from', required: false, description: 'Instante ISO 8601' })
   @ApiQuery({ name: 'to', required: false, description: 'Instante ISO 8601' })
   @ApiQuery({
@@ -100,6 +135,7 @@ export class SchedulingBookingsController {
   searchBookings(
     @Query('patientProfileId') patientProfileId?: string,
     @Query('resourceId') resourceId?: string,
+    @Query('resourceIds') resourceIds?: string,
     @Query('from', new ParseOptionalDatePipe()) from?: Date,
     @Query('to', new ParseOptionalDatePipe()) to?: Date,
     @Query('includeCancelled') includeCancelled?: string,
@@ -110,6 +146,7 @@ export class SchedulingBookingsController {
       {
         patientProfileId,
         resourceId,
+        resourceIds: parseResourceIds(resourceIds),
         from,
         to,
         includeCancelled: includeCancelled === 'true',

@@ -77,6 +77,28 @@ describe('PeopleSeedService', () => {
     expect(resultado.reason).toBe('not-configured');
   });
 
+  it('apagado y sin directorio no evalúa el directorio por defecto (Jest ESM no tiene __dirname)', async () => {
+    // Antes el directorio por defecto era un parámetro con `__dirname`: bajo
+    // Jest ESM eso lanzaba ReferenceError en el arranque de TODA suite de
+    // integración, aunque el seed estuviera apagado.
+    const { service } = build();
+    await expect(service.run(false, undefined)).resolves.toMatchObject({
+      reason: 'not-configured',
+    });
+  });
+
+  it('habilitado y sin directorio explícito no lanza ReferenceError: resuelve el padrón o dice que no lo encontró', async () => {
+    const original = process.env.SEED_PEOPLE_SOURCE_DIR;
+    delete process.env.SEED_PEOPLE_SOURCE_DIR;
+    try {
+      const { service } = build();
+      const resultado = await service.run(true, '12345678');
+      expect(['source-not-found', undefined]).toContain(resultado.reason);
+    } finally {
+      if (original !== undefined) process.env.SEED_PEOPLE_SOURCE_DIR = original;
+    }
+  });
+
   it('si no encuentra el padrón, lo dice y no falla', async () => {
     const { service } = build();
     const resultado = await service.run(true, '12345678', '/no/existe');

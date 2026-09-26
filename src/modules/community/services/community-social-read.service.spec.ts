@@ -251,6 +251,34 @@ describe('CommunitySocialReadService', () => {
     });
   });
 
+  describe('getPostsBatch (TX-27)', () => {
+    it('devuelve el detalle de cada post visible y omite lo inexistente o no visible, en orden', async () => {
+      const d = build();
+      d.postsRepo.findById.mockImplementation(async (_em: any, id: string) =>
+        id === 'post-x' ? null : { ...post, id },
+      );
+      d.visibility.canViewPost.mockImplementation(
+        async (_em: any, p: { id: string }) => p.id !== 'post-hidden',
+      );
+
+      const res = await d.service.getPostsBatch(
+        ['post-2', 'post-x', 'post-hidden', 'post-1'],
+        actor,
+        'p-1',
+      );
+
+      expect(res.map((p) => p.id)).toEqual(['post-2', 'post-1']);
+    });
+
+    it('un error que no es 404 no se traga', async () => {
+      const d = build();
+      d.postsRepo.findById.mockRejectedValue(new Error('boom'));
+      await expect(
+        d.service.getPostsBatch(['post-1'], actor, 'p-1'),
+      ).rejects.toThrow('boom');
+    });
+  });
+
   describe('listPostComments', () => {
     it('anida las respuestas bajo su comentario raíz', async () => {
       const d = build();

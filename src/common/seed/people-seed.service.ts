@@ -53,6 +53,22 @@ interface CandidatoComun {
 }
 
 /**
+ * Dónde está el padrón por defecto: el hermano `mantra-core-health-model` del
+ * worktree. `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
+ * `dist/`), así que hacen falta cinco `..` para salir del worktree entero —
+ * cuatro sólo llegan a la raíz del propio repo. Donde `__dirname` no existe
+ * (Jest ESM) se parte de `process.cwd()`, que en esa corrida es la raíz del
+ * repo. `SEED_PEOPLE_SOURCE_DIR` existe para no depender de esta cuenta en un
+ * entorno con otro layout.
+ */
+function defaultSourceDir(): string {
+  const modelo = ['mantra-core-health-model', 'markdown_convertidos'];
+  return typeof __dirname === 'undefined'
+    ? join(process.cwd(), '..', ...modelo)
+    : join(__dirname, '..', '..', '..', '..', '..', ...modelo);
+}
+
+/**
  * Siembra las cuentas del padrón (H2 del carril M2 · MacBook, 2026-09-26).
  *
  * ## Qué toma del markdown, y qué inventa
@@ -101,23 +117,11 @@ export class PeopleSeedService {
   async run(
     enabled = process.env.SEED_PEOPLE_ENABLED === 'true',
     password = process.env.SEED_PEOPLE_PASSWORD,
-    // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
-    // `dist/`, no corre desde `src/`), así que hacen falta cinco `..` para
-    // salir del worktree entero y llegar al hermano `mantra-core-health-model`
-    // — cuatro sólo llegan a la raíz del propio repo. `SEED_PEOPLE_SOURCE_DIR`
-    // existe justamente para no depender de esta cuenta en un entorno con otro
-    // layout (p. ej. bajo test con `ts-node`, donde no hay `dist/`).
-    sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR ??
-      join(
-        __dirname,
-        '..',
-        '..',
-        '..',
-        '..',
-        '..',
-        'mantra-core-health-model',
-        'markdown_convertidos',
-      ),
+    // Sin valor, el directorio se calcula sólo cuando el paso está habilitado
+    // (ver `defaultSourceDir`): evaluarlo como valor por defecto rompía todo
+    // arranque bajo Jest ESM, donde `__dirname` no existe, aunque el seed
+    // estuviera apagado.
+    sourceDir?: string,
   ): Promise<PeopleSeedResult> {
     const vacio: PeopleSeedResult = {
       practitionersCreated: 0,
@@ -129,18 +133,20 @@ export class PeopleSeedService {
     if (!enabled || !password) {
       return { ...vacio, reason: 'not-configured' };
     }
+    const directory =
+      sourceDir ?? process.env.SEED_PEOPLE_SOURCE_DIR ?? defaultSourceDir();
 
     let medicosTexto: string;
     let pacientesTexto: string;
     try {
-      medicosTexto = readFileSync(join(sourceDir, ARCHIVO_MEDICOS), 'utf-8');
+      medicosTexto = readFileSync(join(directory, ARCHIVO_MEDICOS), 'utf-8');
       pacientesTexto = readFileSync(
-        join(sourceDir, ARCHIVO_PACIENTES),
+        join(directory, ARCHIVO_PACIENTES),
         'utf-8',
       );
     } catch (error) {
       this.logger.warn(
-        { operation: 'seed.people', sourceDir, err: error },
+        { operation: 'seed.people', sourceDir: directory, err: error },
         'No se encontró el padrón; SEED_PEOPLE_ENABLED no tiene efecto sin él',
       );
       return { ...vacio, reason: 'source-not-found' };
@@ -277,7 +283,7 @@ export class PeopleSeedService {
 
   private async altaPractitioner(
     dto: RegisterPractitionerDto,
-  ): Promise<'created' | 'existing' | string> {
+  ): Promise<string> {
     if (await this.existeCredencial(dto.email)) return 'existing';
     try {
       await this.practitionerRegistration.registerPractitioner(dto);
@@ -293,9 +299,7 @@ export class PeopleSeedService {
     }
   }
 
-  private async altaPatient(
-    dto: RegisterPatientDto,
-  ): Promise<'created' | 'existing' | string> {
+  private async altaPatient(dto: RegisterPatientDto): Promise<string> {
     if (await this.existeCredencial(dto.nationalId)) return 'existing';
     try {
       await this.patientRegistration.registerPatient(dto);

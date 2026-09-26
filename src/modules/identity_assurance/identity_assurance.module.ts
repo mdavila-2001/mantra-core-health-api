@@ -15,6 +15,7 @@ import {
   IdentityAssertionsController,
   IdentityWorkerController,
   IdentitySelfServiceController,
+  IdentityCatalogListingController,
 } from './controllers';
 import {
   IdentityAuthoritiesService,
@@ -25,6 +26,7 @@ import {
   IdentityAssertionsService,
   IdentityVerificationEffectsService,
   IdentitySelfServiceService,
+  IdentityCatalogListingService,
 } from './services';
 import {
   IdentityAuthoritiesRepository,
@@ -71,6 +73,7 @@ import {
     IdentityAssertionsController,
     IdentityWorkerController,
     IdentitySelfServiceController,
+    IdentityCatalogListingController,
   ],
   providers: [
     // Repositorios
@@ -94,6 +97,7 @@ import {
     IdentityAssertionsService,
     IdentityVerificationEffectsService,
     IdentitySelfServiceService,
+    IdentityCatalogListingService,
   ],
 })
 export class IdentityAssuranceModule {}

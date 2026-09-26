@@ -44,6 +44,10 @@ export interface CreateCredentialData {
    * Valor de issuing institution text mantenido por la instancia.
    */
   issuingInstitutionText?: string;
+  /** Ciudad de emisión, en texto libre (ID-10). */
+  issuingCityText?: string;
+  /** País de emisión (concepto de `VS_COUNTRY`, ID-10). */
+  issuingCountryConceptId?: string;
   /**
    * Cuándo se emitió. Sin ella, una línea de tiempo de formación no se puede
    * ordenar y se lee como una lista de títulos sueltos.
@@ -118,6 +122,8 @@ export class ProfessionalCredentialsRepository {
         credentialTypeConceptId: data.credentialTypeConceptId,
         number: data.number,
         issuingInstitutionText: data.issuingInstitutionText,
+        issuingCityText: data.issuingCityText,
+        issuingCountryConceptId: data.issuingCountryConceptId,
         issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,

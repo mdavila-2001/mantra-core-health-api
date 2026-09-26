@@ -629,6 +629,17 @@ export class FieldValueItemDto {
 }
 
 /**
+ * Una instancia del listado del autoservicio. Con `?include=values` trae
+ * además sus valores vigentes (los mismos que el detalle), para que la
+ * pantalla no pida cada formulario por separado (TX-27).
+ */
+export class MyFormInstanceItemDto extends FormInstanceItemDto {
+  /** Valores vigentes; sólo con `include=values`. */
+  @ApiPropertyOptional({ type: [FieldValueItemDto] })
+  values?: FieldValueItemDto[];
+}
+
+/**
  * Listado del autoservicio del paciente: sus instancias, de todos sus
  * encuentros del tenant activo. Sin `encounterId`: acá no se filtra por un
  * encuentro elegido sino por la titularidad de la sesión.
@@ -637,8 +648,8 @@ export class MyFormInstanceListResponseDto {
   /**
    * Valor de items mantenido por la instancia.
    */
-  @ApiProperty({ type: [FormInstanceItemDto] })
-  items!: FormInstanceItemDto[];
+  @ApiProperty({ type: [MyFormInstanceItemDto] })
+  items!: MyFormInstanceItemDto[];
 
   /**
    * Tope aplicado a la consulta.

@@ -92,6 +92,19 @@ export class RegisterOrganizationLegalDocumentsDto {
   })
   @IsUUID()
   healthAuthorityCertificateFileId!: string;
+
+  /**
+   * Certificado de radioprotección (D-BR09-1): sólo lo presenta un centro de
+   * imagenología. Opcional; con un catálogo sin el tipo de documento (base
+   * sembrada antes de v4.2.30) el alta responde 412 nombrando el código.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Certificado de radioprotección (centros de imagenología)',
+  })
+  @IsOptional()
+  @IsUUID()
+  radioprotectionCertificateFileId?: string;
 }
 
 /**

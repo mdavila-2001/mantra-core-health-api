@@ -22,11 +22,13 @@ function build() {
     getMyDocumentFileContent: mockFn(),
   };
   const encounterPdfService = { renderForPatient: mockFn() };
+  const recordPdfService = { renderForPatient: mockFn() };
   const controller = new ChartMeController(
     readService as any,
     encounterPdfService as any,
+    recordPdfService as any,
   );
-  return { controller, readService, encounterPdfService };
+  return { controller, readService, encounterPdfService, recordPdfService };
 }
 
 describe('ChartMeController (BR-15)', () => {
@@ -83,5 +85,25 @@ describe('ChartMeController (BR-15)', () => {
       'enc-1',
       actor,
     );
+  });
+
+  it('getMyRecordPdf sirve el PDF de la historia sin caché', async () => {
+    const d = build();
+    d.recordPdfService.renderForPatient.mockResolvedValue({
+      buffer: Buffer.from('pdf'),
+      fileName: 'historia-pat-1.pdf',
+    });
+    const res = { setHeader: mockFn(), send: mockFn() };
+    await d.controller.getMyRecordPdf(res as any, actor);
+    expect(d.recordPdfService.renderForPatient).toHaveBeenCalledWith(actor);
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Cache-Control',
+      'private, no-store',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/pdf',
+    );
+    expect(res.send).toHaveBeenCalledWith(Buffer.from('pdf'));
   });
 });

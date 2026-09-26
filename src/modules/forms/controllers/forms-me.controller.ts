@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -50,11 +57,26 @@ export class FormsMeController {
     required: false,
     description: 'Tope del listado (por defecto 50)',
   })
+  @ApiQuery({
+    name: 'include',
+    required: false,
+    enum: ['values'],
+    description:
+      'Con `values` cada instancia trae sus valores vigentes (lectura en lote, TX-27)',
+  })
   listMyInstances(
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('include') include?: string,
   ): Promise<MyFormInstanceListResponseDto> {
-    return this.readService.listMyInstances(actor, limit ?? 50);
+    if (include !== undefined && include !== 'values') {
+      throw new BadRequestException('include admite sólo: values');
+    }
+    return this.readService.listMyInstances(
+      actor,
+      limit ?? 50,
+      include === 'values',
+    );
   }
 
   /** Un formulario propio, con sus valores vigentes. */

@@ -10,7 +10,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
   Roles,
@@ -127,6 +132,9 @@ export class PeriopController {
     'PERIOP_ADMIN',
   )
   @ApiOperation({ summary: 'Detalle completo del caso quirúrgico' })
+  // Sin este decorador `CaseDetailDto` (y su `operativeSteps`) no llegaba al
+  // contrato publicado: `nest-cli.json` no usa el plugin de swagger (CL-55/TX-23).
+  @ApiOkResponse({ type: CaseDetailDto })
   getCase(@Param('id', ParseUUIDPipe) id: string): Promise<CaseDetailDto> {
     return this.casesService.getCaseDetail(id);
   }

@@ -32,6 +32,7 @@ function build() {
     createTemplateFieldAssignment: mockFn(),
     findFieldAssignmentsBySection: mockFn().mockResolvedValue([]),
     findFieldDefinitionsByIds: mockFn().mockResolvedValue([]),
+    findLocalizationsByFieldIds: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new ChartTemplatesService(
@@ -279,6 +280,48 @@ describe('ChartTemplatesService', () => {
           own: false,
         },
       ]);
+    });
+    it('expone cardinalidad y ayuda del campo en un solo lote (CL-24)', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        code: 'C1',
+        name: 'N1',
+        version: 1,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: 'sec1',
+      });
+      d.templatesRepo.findFieldAssignmentsBySection.mockResolvedValue([
+        { id: 'a1', fieldId: 'f1', required: false, ordinal: 0 },
+        { id: 'a2', fieldId: 'f2', required: false, ordinal: 1 },
+      ]);
+      d.templatesRepo.findFieldDefinitionsByIds.mockResolvedValue([
+        {
+          id: 'f1',
+          code: 'c1',
+          name: 'n1',
+          dataType: 'string',
+          cardinalityMin: 0,
+          cardinalityMax: 3,
+        },
+        { id: 'f2', code: 'c2', name: 'n2', dataType: 'string' },
+      ]);
+      d.templatesRepo.findLocalizationsByFieldIds.mockResolvedValue([
+        { fieldId: 'f1', helpText: 'Hasta tres valores' },
+      ]);
+
+      const res = await d.service.getTemplate('tpl1');
+
+      expect(d.templatesRepo.findLocalizationsByFieldIds).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(res.fields[0]).toMatchObject({
+        cardinalityMin: 0,
+        cardinalityMax: 3,
+        helpText: 'Hasta tres valores',
+      });
+      expect(res.fields[1].helpText).toBeUndefined();
     });
     it('pide a la sección sólo lo global y lo del tenant de la sesión', async () => {
       // El campo que una organización agrega a la ficha de su especialidad es

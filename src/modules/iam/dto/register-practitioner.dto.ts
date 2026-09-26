@@ -721,6 +721,19 @@ export class RegisterPractitionerCredentialDto {
   @MaxLength(200)
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se emitió el título. Texto libre (ID-10). */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  issuingCityText?: string;
+
+  /** País de emisión: un concepto de `VS_COUNTRY` (ID-10). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  issuingCountryConceptId?: string;
+
   /**
    * PDF precargado anónimamente por `POST /iam/auth/upload-registration-document`.
    * El alta lo reclama para el usuario recién creado dentro de la misma

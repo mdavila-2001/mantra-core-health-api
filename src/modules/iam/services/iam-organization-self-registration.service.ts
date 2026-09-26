@@ -343,6 +343,9 @@ export class IamOrganizationSelfRegistrationService {
               HEALTH_AUTHORITY_CERT_DOC:
                 dto.organization.legalDocuments
                   .healthAuthorityCertificateFileId,
+              RADIOPROTECTION_CERT_DOC:
+                dto.organization.legalDocuments
+                  .radioprotectionCertificateFileId,
             },
           })
         : undefined;

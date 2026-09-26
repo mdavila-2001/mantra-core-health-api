@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import { SEED } from '../../src/common';
 import { PERIOP } from '../../src/modules/procedures_perioperative/procedures_perioperative.concepts';
 
 /**
@@ -29,7 +30,11 @@ describe('Histórico odontológico (integración)', () => {
   });
 
   const http = () => request(ctx.app.getHttpServer());
-  const auth = () => bearer(ctx.adminToken);
+  // Las rutas de `dental-procedures` exigen el tenant del contexto (TENANT_REQUIRED).
+  const auth = () => ({
+    ...bearer(ctx.adminToken),
+    'X-Tenant-Id': SEED.tenantId,
+  });
 
   /** Da de alta un paciente y devuelve su `profileId`. */
   async function createPatient(suffix: string): Promise<string> {
