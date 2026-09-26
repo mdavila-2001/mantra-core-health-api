@@ -245,7 +245,7 @@ decenas con dirección real.
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H4.S1.M1 | Cerrar el IDOR de `files/links` (falta actor + `@Roles`/guard) | una sesión ajena recibe 403 | respuesta pegada | HECHO |
-| H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | BLOQUEADO (conflicto de alcance, ver abajo) |
+| H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | HECHO (ya resuelto en `test`, verificado en vivo) |
 | H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | DESCARTADO (superado por TX-09, ver abajo) |
 
 **H4.S1.M1 — cómo se cerró.** `FilesService.listLinkedFiles` no recibía actor ni comprobaba nada:
@@ -376,3 +376,19 @@ Decisiones (a confirmar por el propietario):
 - **Especialidades**: mapeo por nombre en castellano contra `VS_MEDICAL_SPECIALTY`; **117 nombres del dataset
   no mapean y quedan sin código** (la lista sale en el detalle del paso). Ningún código inventado. No hubo
   decisión de negocio que tomar acá (Q-03).
+
+
+## H4.S1.M2 — cierre (corrige lo que escribí antes)
+Antes lo dejé `BLOQUEADO` afirmando que faltaba un servicio contextual en `clinical`. **Era falso**: `test` ya trae
+`GET /diagnostic-results/me/:reportId/files/:fileId/content` (`DiagnosticsPatientResultsService.getOwnResultFileContent`,
+`@Roles('PATIENT')`, 404 si el informe no es del titular o no está liberado, bytes por `downloadForAuthorizedContext`).
+Empecé a escribir una ruta paralela y la descarté al descubrirlo (habría sido un segundo camino para lo mismo).
+Verificado en vivo (informe real, archivo real subido, versión creada y liberada por el camino canónico
+`/diagnostics/reports/:id/versions/:vid/release`):
+```
+ANTES de liberar  -> paciente propio: 404
+LIBERADO          -> paciente propio: 200, bytes «%PDF-1.4 resultado sin…»
+LIBERADO          -> otro paciente:   404   (no confirma que exista)
+LIBERADO          -> sin token:       401
+```
+Nota: la CA decía «otro actor recibe 403»; el diseño elegido responde 404 (no filtra existencia), que es más estricto.
