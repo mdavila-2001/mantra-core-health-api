@@ -27,6 +27,7 @@ const ROLE_LABEL_ES: Readonly<Record<AffiliationDocumentRole, string>> = {
   OPERATING_LICENSE_DOC: 'la licencia de funcionamiento',
   HEALTH_AUTHORITY_CERT_DOC: 'el certificado del SEDES',
   POWER_OF_ATTORNEY_DOC: 'el poder del representante legal',
+  RADIOPROTECTION_CERT_DOC: 'el certificado de radioprotección',
 };
 
 /** Los cinco archivos que el autorregistro público exige, por rol canónico. */
@@ -34,6 +35,8 @@ export type RegistrationDocumentFiles = Readonly<
   Record<Exclude<RegistrationDocumentRole, 'CONSTITUTION_DOC'>, string> & {
     /** Una unipersonal no tiene escritura de constitución: la regla la decide el llamador. */
     CONSTITUTION_DOC?: string;
+    /** Sólo un centro de imagenología lo presenta (D-BR09-1); el resto del alta no lo pide. */
+    RADIOPROTECTION_CERT_DOC?: string;
   }
 >;
 
@@ -142,6 +145,22 @@ export class TenantAffiliationDocumentsService {
           role === 'TAX_IDENTIFIER_DOC' ? input.taxIdentifier : undefined,
       });
       createdIds.push(created);
+    }
+
+    // Opcional: sólo lo declara un centro de imagenología (D-BR09-1). Si el
+    // catálogo no tiene el código (base sembrada antes de v4.2.30) responde 412
+    // nombrándolo, en vez de tirar el documento en silencio.
+    const radioprotection = input.documents.RADIOPROTECTION_CERT_DOC;
+    if (radioprotection !== undefined) {
+      createdIds.push(
+        await this.attachOne(tx, 'RADIOPROTECTION_CERT_DOC', radioprotection, {
+          tenantId: input.tenantId,
+          ownerUserId: input.ownerUserId,
+          countryIso,
+          concepts,
+          today,
+        }),
+      );
     }
 
     return createdIds;
@@ -279,6 +298,12 @@ export class TenantAffiliationDocumentsService {
       const roles = seen.get(fileId) ?? [];
       roles.push(role);
       seen.set(fileId, roles);
+    }
+    const radioprotection = documents.RADIOPROTECTION_CERT_DOC;
+    if (radioprotection !== undefined) {
+      const roles = seen.get(radioprotection) ?? [];
+      roles.push('RADIOPROTECTION_CERT_DOC');
+      seen.set(radioprotection, roles);
     }
     for (const [fileId, roles] of seen) {
       if (roles.length > 1) {

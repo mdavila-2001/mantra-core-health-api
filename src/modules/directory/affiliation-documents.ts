@@ -53,7 +53,20 @@ export const AFFILIATION_DOCUMENT_ROLES = [
   // Reservado para el hito 1.4 (representante legal); el autorregistro de
   // organización de la subtarea 1.2 no lo pide.
   'POWER_OF_ATTORNEY_DOC',
+  // Certificado de radioprotección de un centro de imagenología (D-BR09-1).
+  // Es opcional en el alta: el tipo lo agrega el paquete del modelo v4.2.30
+  // (`vs_affiliation_document_type` gana `CERTIFICADO_RADIOPROTECCION`).
+  'RADIOPROTECTION_CERT_DOC',
 ] as const;
+
+/**
+ * Roles cuyo código puede faltar en una base sembrada antes de v4.2.30: no
+ * se exigen al resolver el catálogo (que hace fallar el alta entera con un 412),
+ * sólo cuando un alta los declara.
+ */
+export const OPTIONAL_DOCUMENT_ROLES: readonly AffiliationDocumentRole[] = [
+  'RADIOPROTECTION_CERT_DOC',
+];
 
 export type AffiliationDocumentRole =
   (typeof AFFILIATION_DOCUMENT_ROLES)[number];
@@ -67,7 +80,7 @@ export type AffiliationDocumentRole =
  */
 export type RegistrationDocumentRole = Exclude<
   AffiliationDocumentRole,
-  'POWER_OF_ATTORNEY_DOC'
+  'POWER_OF_ATTORNEY_DOC' | 'RADIOPROTECTION_CERT_DOC'
 >;
 
 export const REGISTRATION_DOCUMENT_ROLES: readonly RegistrationDocumentRole[] =
@@ -89,6 +102,7 @@ export const DOCUMENT_TYPE_CODE_BY_ROLE: Readonly<
   OPERATING_LICENSE_DOC: 'LICENCIA_FUNCIONAMIENTO',
   HEALTH_AUTHORITY_CERT_DOC: 'CERTIFICADO_SEDES',
   POWER_OF_ATTORNEY_DOC: 'PODER_REPRESENTANTE_LEGAL',
+  RADIOPROTECTION_CERT_DOC: 'CERTIFICADO_RADIOPROTECCION',
 };
 
 /**
@@ -105,6 +119,9 @@ export const BOLIVIAN_ISSUING_AUTHORITY_BY_ROLE: Readonly<
   OPERATING_LICENSE_DOC: 'GOBIERNO_MUNICIPAL',
   HEALTH_AUTHORITY_CERT_DOC: 'SEDES',
   POWER_OF_ATTORNEY_DOC: 'NOTARIA',
+  // Sin fuente citada para el organismo regulador de radioprotección: queda
+  // `OTRO`, el mismo criterio que fuera de Bolivia (D-BR09-1).
+  RADIOPROTECTION_CERT_DOC: 'OTRO',
 };
 
 /** Código de `vs_issuing_authority` para una jurisdicción sin autoridad nombrada. */
