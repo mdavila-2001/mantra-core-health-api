@@ -34,6 +34,7 @@ function build() {
     flush: mockFn().mockResolvedValue(undefined),
     remove: mockFn(),
     find: mockFn().mockResolvedValue([]),
+    count: mockFn().mockResolvedValue(0),
   };
   // `fork` devuelve el mismo doble: las lecturas usan un contexto propio y las
   // escrituras una transacción, pero para la prueba es el mismo objeto. `count`
@@ -64,6 +65,8 @@ function build() {
   const authorizationsRepo = {
     create: mockFn(),
     findById: mockFn(),
+    findByIdForUpdate: mockFn(),
+    remove: mockFn(),
     findByPractitioner: mockFn().mockResolvedValue([]),
   };
   const credentialsRepo = {
@@ -85,6 +88,8 @@ function build() {
     findCurrentSpecialtyPairs: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
     findById: mockFn(),
+    findByIdForUpdate: mockFn(),
+    remove: mockFn(),
   };
   const languagesRepo = {
     create: mockFn(),
@@ -93,6 +98,7 @@ function build() {
   const affiliationsRepo = {
     findByPractitioner: mockFn().mockResolvedValue([]),
     findSame: mockFn().mockResolvedValue(null),
+    findSameFacility: mockFn().mockResolvedValue(null),
     // TP-2: por defecto no hay una solicitud previa a la misma sede.
     findByPractitionerAndSite: mockFn().mockResolvedValue(null),
     findByPractitionerInStatus: mockFn().mockResolvedValue([]),
@@ -191,6 +197,15 @@ function build() {
     create: mockFn(),
   };
 
+  // El departamento se valida contra `VS_BO_DEPARTMENT` en su propio servicio.
+  const administrativeAreas = {
+    assertIsAdministrativeArea: mockFn(() => Promise.resolve()),
+  };
+  // Y el establecimiento del historial laboral, contra `VS_BO_HEALTH_FACILITY`.
+  const healthFacilities = {
+    assertIsHealthFacility: mockFn(() => Promise.resolve()),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -217,10 +232,14 @@ function build() {
     effectiveRoles as any,
     verificationBypass as any,
     specialtyCatalog as any,
+    administrativeAreas as any,
+    healthFacilities as any,
     logger as any,
   );
   return {
     service,
+    administrativeAreas,
+    healthFacilities,
     specialtyCatalog,
     contactPointsRepo,
     em,
@@ -1093,6 +1112,66 @@ describe('ProfilesPractitionersService', () => {
         }),
       );
       expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+
+    /* ---- establecimiento del padrón (ID-16) ---------------------------- */
+
+    it('guarda el establecimiento del padrón elegido y lo valida contra su value set', async () => {
+      const d = build();
+      d.affiliationsRepo.create.mockReturnValue(fila({ id: 'af-7' }));
+
+      await d.service.addOwnAffiliation(
+        {
+          organizationName: 'Hospital Japonés',
+          healthFacilityConceptId: 'HF-1',
+          startDate: '2020-03-01',
+        } as any,
+        actor,
+      );
+
+      expect(d.healthFacilities.assertIsHealthFacility).toHaveBeenCalledWith(
+        d.tx,
+        'HF-1',
+      );
+      expect(d.affiliationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ healthFacilityConceptId: 'HF-1' }),
+      );
+    });
+
+    it('un concepto fuera del padrón responde 422 y no escribe', async () => {
+      const d = build();
+      d.healthFacilities.assertIsHealthFacility.mockRejectedValue(
+        new PreconditionFailedException('fuera del padrón'),
+      );
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'X',
+            healthFacilityConceptId: 'NO-ES',
+            startDate: '2020-03-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo establecimiento, cargo e inicio responde 409 antes de tocar el índice', async () => {
+      const d = build();
+      d.affiliationsRepo.findSameFacility.mockResolvedValue(fila());
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'Hospital Japonés',
+            roleTitle: 'Médico de planta',
+            healthFacilityConceptId: 'HF-1',
+            startDate: '2020-03-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
     });
 
     /* ---- corregir (UC-05-16·E) ---------------------------------------- */
@@ -3559,6 +3638,265 @@ describe('ProfilesPractitionersService', () => {
         d.service.removeOwnCredential('cred-1', { id: 'u-1' } as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.credentialsRepo.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('especialidad propia: corregir y retirar (ID-07)', () => {
+    const propia = (over: Record<string, unknown> = {}) => ({
+      id: 'esp-1',
+      practitionerProfileId: 'pp1',
+      specialtyConceptId: CARDIO,
+      isPrimary: false,
+      boardCertified: false,
+      verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+      ...over,
+    });
+
+    it('corrige la especialidad y la certificación de una pendiente propia', async () => {
+      const d = build();
+      const fila = propia();
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(fila);
+      d.specialtiesRepo.findActive.mockResolvedValue(null);
+
+      await d.service.updateOwnSpecialty(
+        'esp-1',
+        { specialtyConceptId: 'OTRA-ESP', boardCertified: true },
+        actor,
+      );
+
+      expect(d.specialtyCatalog.assertIsMedicalSpecialty).toHaveBeenCalledWith(
+        d.tx,
+        'OTRA-ESP',
+      );
+      expect(fila).toMatchObject({
+        specialtyConceptId: 'OTRA-ESP',
+        boardCertified: true,
+        isPrimary: false,
+      });
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('ajena e inexistente responden 404, indistinguibles', async () => {
+      const d = build();
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(
+        propia({ practitionerProfileId: 'OTRO' }),
+      );
+      await expect(
+        d.service.updateOwnSpecialty('esp-1', { boardCertified: true }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(null);
+      await expect(
+        d.service.removeOwnSpecialty('esp-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('una especialidad ya verificada no se corrige ni se retira: 422', async () => {
+      const d = build();
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(
+        propia({ verificationStatusConceptId: 'VERIFICADA' }),
+      );
+      await expect(
+        d.service.updateOwnSpecialty('esp-1', { boardCertified: true }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.removeOwnSpecialty('esp-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.specialtiesRepo.remove).not.toHaveBeenCalled();
+    });
+
+    it('cambiar a una especialidad que ya tiene vigente responde 409', async () => {
+      const d = build();
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(propia());
+      d.specialtiesRepo.findActive.mockResolvedValue({ id: 'otra' });
+      await expect(
+        d.service.updateOwnSpecialty(
+          'esp-1',
+          { specialtyConceptId: 'OTRA-ESP' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('un concepto que no es especialidad del catálogo no se acepta', async () => {
+      const d = build();
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(propia());
+      d.specialtyCatalog.assertIsMedicalSpecialty.mockRejectedValue(
+        new PreconditionFailedException('no es especialidad'),
+      );
+      await expect(
+        d.service.updateOwnSpecialty(
+          'esp-1',
+          { specialtyConceptId: 'NO-ES' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('retirar la principal deja el perfil sin principal: no promueve otra', async () => {
+      const d = build();
+      const fila = propia({ isPrimary: true });
+      d.specialtiesRepo.findByIdForUpdate.mockResolvedValue(fila);
+
+      await d.service.removeOwnSpecialty('esp-1', actor);
+
+      expect(d.specialtiesRepo.remove).toHaveBeenCalledWith(d.tx, fila);
+      expect(d.specialtiesRepo.demotePrimary).not.toHaveBeenCalled();
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+      );
+    });
+  });
+
+  describe('matrícula propia: corregir y retirar (ID-08)', () => {
+    const matricula = (over: Record<string, unknown> = {}) => ({
+      id: 'lic-1',
+      practitionerProfileId: 'pp1',
+      licenseNumber: 'MP-1',
+      stateConceptId: PROF.AUTH_PENDING,
+      ...over,
+    });
+
+    it('corrige el número de una matrícula pendiente sin verificación abierta', async () => {
+      const d = build();
+      const fila = matricula();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(fila);
+
+      await d.service.updateOwnLicense(
+        'lic-1',
+        { licenseNumber: ' MP-9 ', regulatoryAuthority: 'SEDES' },
+        actor,
+      );
+
+      expect(fila).toMatchObject({
+        licenseNumber: 'MP-9',
+        regulatoryAuthority: 'SEDES',
+      });
+    });
+
+    it('con archivo nuevo lo valida como el alta de la matrícula', async () => {
+      const d = build();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      d.filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateOwnLicense('lic-1', { fileId: 'no-existe' }, actor),
+      ).rejects.toBeDefined();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('ajena e inexistente responden 404', async () => {
+      const d = build();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(
+        matricula({ practitionerProfileId: 'OTRO' }),
+      );
+      await expect(
+        d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(null);
+      await expect(
+        d.service.removeOwnLicense('lic-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('una matrícula activa no se corrige ni se retira: 422', async () => {
+      const d = build();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(
+        matricula({ stateConceptId: PROF.AUTH_ACTIVE }),
+      );
+      await expect(
+        d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.removeOwnLicense('lic-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.authorizationsRepo.remove).not.toHaveBeenCalled();
+    });
+
+    it('con un caso de verificación abierto no se toca: 422', async () => {
+      const d = build();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      d.tx.count.mockResolvedValueOnce(1);
+      await expect(
+        d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('retira una pendiente sin historia de auditoría', async () => {
+      const d = build();
+      const fila = matricula();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(fila);
+
+      await d.service.removeOwnLicense('lic-1', actor);
+
+      expect(d.authorizationsRepo.remove).toHaveBeenCalledWith(d.tx, fila);
+    });
+
+    it('con historia de auditoría no la borra: 422 sin capturar un 23503 a ciegas', async () => {
+      const d = build();
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      // 1.ª cuenta: casos abiertos (0). 2.ª: filas de historia (1).
+      d.tx.count.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
+
+      await expect(
+        d.service.removeOwnLicense('lic-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.authorizationsRepo.remove).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('P28: sexo al nacer y departamento emisor del médico (ID-13)', () => {
+    function conPerfilPropio(d: ReturnType<typeof build>) {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'p1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'p1',
+        practitionerCode: 'X',
+      });
+      const persona = { id: 'p1', displayName: 'Ana' };
+      d.personsRepo.findById.mockResolvedValue(persona);
+      return persona;
+    }
+
+    it('guarda el sexo al nacer como concepto y valida el departamento contra su catálogo', async () => {
+      const d = build();
+      const persona: Record<string, unknown> = conPerfilPropio(d);
+      const documento = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        issuerAdministrativeAreaConceptId: 'LP',
+      };
+      d.tx.find.mockResolvedValue([documento]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { sexAtBirth: 'FEMALE', issuerAdministrativeAreaConceptId: 'SCZ' },
+        actor,
+      );
+
+      expect(persona.sexAtBirthConceptId).toBeDefined();
+      expect(
+        d.administrativeAreas.assertIsAdministrativeArea,
+      ).toHaveBeenCalledWith(d.tx, 'SCZ');
+      expect(documento.issuerAdministrativeAreaConceptId).toBe('SCZ');
+    });
+
+    it('un departamento fuera de VS_BO_DEPARTMENT responde 422 y no escribe', async () => {
+      const d = build();
+      conPerfilPropio(d);
+      const documento = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        issuerAdministrativeAreaConceptId: 'LP',
+      };
+      d.tx.find.mockResolvedValue([documento]);
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValue(
+        new PreconditionFailedException('no es departamento'),
+      );
+
+      await expect(
+        d.service.updateOwnPractitionerProfile(
+          { issuerAdministrativeAreaConceptId: 'MUNI' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(documento.issuerAdministrativeAreaConceptId).toBe('LP');
     });
   });
 
