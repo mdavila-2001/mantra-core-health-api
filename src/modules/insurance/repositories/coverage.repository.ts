@@ -85,6 +85,27 @@ export class CoverageRepository {
   }
 
   /**
+   * Todas las coberturas del paciente (privada y pública), para «Mi cobertura»
+   * (CV-11). A diferencia de {@link findActiveByPatientAndOrder}, que resuelve
+   * una sola por orden para no duplicarla al dar de alta, ésta es la lectura
+   * completa que el titular necesita para verse a sí mismo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente.
+   * @returns Sus coberturas, por orden (1 = privada, 2 = pública) y luego alta.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<PatientCoverages[]> {
+    return em.find(
+      PatientCoverages,
+      { patientProfileId },
+      { orderBy: { coverageOrder: 'ASC', createdAt: 'ASC' } },
+    );
+  }
+
+  /**
    * Ejecuta la operación count active by patient.
    *
    * @param em - Contexto de persistencia o transacción activa.
