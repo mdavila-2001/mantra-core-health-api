@@ -1,0 +1,63 @@
+MARK M7H5-2026-09-26
+Stack: legion-h5-pg (postgres:16-alpine, puerto 5450, efímero) + API en contenedor node:24
+(legion-h5-api-install), dist compilado del worktree, sin db:vendor. Ambos removidos al cerrar
+(docker rm -f legion-h5-pg legion-h5-api-install; docker volume rm mch-h5-node-modules).
+
+== Esquema (database/SQL, sin db:vendor) ==
+PASS apply_all.sql aplica limpio contra una base nueva (=== apply_all completado ===)
+PASS apply_deferred.sql aplica limpio (=== apply_deferred completado ===)
+PASS 49/51 patches de database/SQL/patches/ aplican limpios; 2 fallan por depender de
+     extensiones/datos fuera de alcance de este stack mínimo (vector_rag sin pgvector,
+     aseguradoras_codigo_unico exige 17 aseguradoras que este stack no siembra) — ninguno
+     de los dos toca messaging/community/pharma_lab/authz.
+
+== Arranque de la API contra Postgres real ==
+PASS `node dist/src/main.js` con ORM_SCHEMA_SYNC=off: "Nest application successfully started"
+PASS Seeds: 13/13 ok (arranque normal, SEED_CONTENT_ON_BOOT=false) y 22/22 ok (con contenido)
+PASS GET /community/moderation/decisions/mine se mapea ANTES que GET /community/moderation/decisions
+     (log: "Mapped {/community/moderation/decisions/mine, GET} route" antes que
+     "Mapped {/community/moderation/decisions, GET} route")
+
+== AG-17: seed del pack de stickers — BUG ENCONTRADO Y CORREGIDO CONTRA LA BASE VIVA ==
+FAIL (antes del fix) `node dist/src/seed-cli.js` con SEED_CONTENT_ON_BOOT=true:
+     ForeignKeyConstraintViolationException en fk_file_versions_file_id — "Key
+     (file_id)=(a7c1f0e2-0001-4a00-9000-5713ca110001) is not present in table files".
+     Causa: FileVersions.fileId es columna cruda (sin @ManyToOne); MikroORM insertaba
+     file_versions ANTES que files en el mismo batch. El spec unitario (EntityManager
+     mockeado) no lo detectaba.
+FIX  StickerPackSeedService: flush() de Files antes de crear FileVersions (commit
+     "fix(seed): StickerPackSeedService flushea Files antes de crear FileVersions").
+     Se reforzó el doble del spec para simular la FK real y se agregó el caso de
+     regresión correspondiente.
+PASS (después del fix) seed.step "pack de stickers": inserted=24, failed=false
+PASS SELECT count(*) FROM common.files WHERE id LIKE 'a7c1f0e2-%' -> 24
+PASS SELECT count(*) FROM common.file_versions JOIN common.files ... -> 24
+
+== AG-18: «Mis sanciones» (decisions/mine) y appeal() restringido al sancionado ==
+PASS login admin de arranque (BOOTSTRAP_ADMIN_EMAIL/PASSWORD) -> 200, accessToken con
+     roles SECURITY_ADMIN, SUPERADMIN
+PASS GET /community/moderation/decisions/mine?profileId=<uuid inválido> -> 400
+     VALIDATION_FAILED "profileId must be a UUID"
+PASS GET /community/moderation/decisions/mine?profileId=<uuid válido, sin perfil real> -> 200
+     {"items":[],"count":0,"limit":50,"nextCursor":null} (SUPERADMIN, bypass de titularidad
+     por rol de plataforma; sin 500)
+PASS POST /community/moderation/decisions/<id>/appeal con un perfil que no es del actor
+     -> 403 FORBIDDEN "No se puede escribir en el grafo social con un perfil ajeno"
+
+== NO CUBIERTO en esta corrida (documentado, no simulado) ==
+- El camino completo reporte -> decisión -> strike -> «Mis sanciones» -> apelar -> 201 no se
+  ejercitó de punta a punta: exige dar de alta dos perfiles públicos, una publicación y pasar
+  por report()/decide(), que no entraba en el tiempo de esta verificación puntual. Cubierto por
+  el int-spec unitario (43 specs) y por el smoke de arriba (ruta mapeada, valida, autoriza).
+- AG-31 (asignación de MEDICAL_VISITOR): NO se pudo verificar contra HTTP real porque
+  `pharma_lab.*` no existe en ningún Postgres del pipeline (AG-30, D-PharmaLab-2 — pedido a M1,
+  sin DDL en este carril). `MedicalVisitorsService.createVisitor` llama primero
+  `access.requireActiveLab` (lee `pharma_lab.labs`), así que cualquier intento HTTP contra este
+  stack habría dado 500 "relation pharma_lab.labs does not exist" — el mismo síntoma que AG-30
+  describe, no un fallo de AG-31. Queda en TESTED (15 specs unitarios en verde).
+- notification:new por el gateway (AG-22): no se abrió un socket.io real contra esta corrida
+  (exige un cliente WS aparte); queda en TESTED (specs del gateway + del servicio).
+- Sticker adjuntado a un mensaje real (POST de mensaje con attachmentFileId del pack): no se
+  ejercitó — exige dos perfiles públicos y una conversación. La fila del pack se verificó
+  existente y bien formada (arriba); la lógica de la allowlist está unit-testeada contra la
+  forma real de `assertUsableBy`.

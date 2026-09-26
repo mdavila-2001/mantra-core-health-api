@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { UserRoleAssignments } from '../entities';
-import { CONCEPTS, createdBy } from '../../../common';
+import { CONCEPTS, createdBy, touch } from '../../../common';
 
 /** Datos de asignación de un rol a un usuario con vigencia y ámbito. */
 export interface CreateRoleAssignmentData {
@@ -136,5 +136,34 @@ export class UserRoleAssignmentsRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Corta la vigencia de una asignación ya concedida (AG-31, BR-26).
+   *
+   * No borra la fila —es evidencia de que el acceso existió y por cuánto—:
+   * pone `valid_to` en `at` (por defecto ahora), que es exactamente lo que
+   * {@link findActiveForUser} ya usa para decidir si una asignación sigue
+   * vigente. No toca `status_concept_id`: una asignación con `valid_to`
+   * vencido y `STATE_ACTIVE` sigue siendo «una asignación que existió y ya no
+   * aplica», el mismo criterio que una guardia con fecha de fin.
+   *
+   * Idempotente: revocar una asignación ya vencida no le acorta más la
+   * vigencia.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param assignment - La asignación a cerrar.
+   * @param actorUserId - Quién la revoca.
+   * @param at - Instante de corte; por defecto, ahora.
+   */
+  revoke(
+    em: EntityManager,
+    assignment: UserRoleAssignments,
+    actorUserId: string,
+    at: Date = new Date(),
+  ): void {
+    if (assignment.validTo && assignment.validTo <= at) return;
+    assignment.validTo = at;
+    touch(assignment, actorUserId);
   }
 }

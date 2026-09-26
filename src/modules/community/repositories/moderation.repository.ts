@@ -336,6 +336,52 @@ export class ModerationRepository {
     );
   }
 
+  /**
+   * El strike de esa decisión cuyo sujeto es este perfil, si existe (AG-18).
+   *
+   * Es el vínculo que faltaba entre «quién apela» y «a quién sancionó la
+   * decisión»: sin esto, `assertActsAsProfile` sólo comprobaba que el
+   * `appellantProfileId` fuera del actor, nunca que fuera el sancionado. Una
+   * decisión `DISMISSED` no genera strike (`decide()` no lo crea si
+   * `dto.decision === 'DISMISSED'`) y por lo tanto no tiene nada adverso que
+   * apelar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param moderationDecisionId - La decisión que se quiere apelar.
+   * @param subjectProfileId - El perfil que dice ser el sancionado.
+   * @returns El strike, o `null` si esa decisión no lo sancionó a él.
+   */
+  findStrikeByDecisionAndSubject(
+    em: EntityManager,
+    moderationDecisionId: string,
+    subjectProfileId: string,
+  ): Promise<ModerationStrikes | null> {
+    return em.findOne(ModerationStrikes, {
+      moderationDecisionId,
+      subjectProfileId,
+    });
+  }
+
+  /**
+   * Todos los strikes de un perfil, sin importar la decisión (BR-27, «Mis
+   * sanciones»).
+   *
+   * Un perfil acumula pocos —son sanciones, no actividad— así que se trae la
+   * lista entera y la paginación de `listMyDecisions` corta en memoria, en vez
+   * de escribir una consulta con `JOIN` sólo para un puñado de filas por
+   * persona.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectProfileId - El perfil sancionado.
+   * @returns Los strikes de ese perfil, sin orden garantizado.
+   */
+  listStrikesBySubject(
+    em: EntityManager,
+    subjectProfileId: string,
+  ): Promise<ModerationStrikes[]> {
+    return em.find(ModerationStrikes, { subjectProfileId });
+  }
+
   // --- Appeals ---
   /**
    * Crea create appeal.
