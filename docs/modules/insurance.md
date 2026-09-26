@@ -9,7 +9,7 @@
 # Módulo `insurance`
 
 **Fuente:** [`src/modules/insurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/README.md)
-· 14 controllers · 17 services · 11 repositories · 29 entidades · 15 DTO
+· 15 controllers · 18 services · 12 repositories · 31 entidades · 16 DTO
 
 ---
 
@@ -156,6 +156,31 @@ Lectura: `carrierWhatsappNumber`/`carrierCallCenterPhone` viajan en la
 cabecera de cada solicitud de seguro (`GET /insurance-claims`, `GET
 /insurance-claims/:id`) y en las coberturas propias del paciente (`GET
 /profiles/patients/me`), `null`/ausentes cuando la aseguradora no los cargó.
+
+## Campañas preventivas de la aseguradora
+
+Proceso 4 del cliente, «MODULO DE PROMOCIONES» (Tarea 4 · M-06): la aseguradora
+publica campañas de prevención junto a importadoras, fabricantes y laboratorios,
+y el afiliado las ve en su portal. El contrato —actores, decisión D4, estados,
+errores, qué ve el afiliado y los desvíos— vive en
+[`docs/contracts/insurer-preventive-campaigns.md`](../../../docs/contracts/insurer-preventive-campaigns.md).
+
+Cinco rutas bajo `/insurance-campaigns`, todas con `@Roles()` vacío: la
+autorización la resuelve `InsuranceCampaignsService` por membresía en el tenant
+activo (aseguradora) o por titularidad del perfil (afiliado).
+
+- `POST /` y `PATCH /:id/status` — sólo OWNER/ADMIN de la aseguradora o
+  plataforma. Estados `DRAFT → ACTIVE ⇄ PAUSED → EXPIRED`; `EXPIRED` es terminal.
+- `GET /` y `GET /:id` — cualquier miembro activo de la aseguradora.
+- `GET /patient/:patientProfileId` — sólo el titular del perfil (403 y auditoría
+  `INSURANCE_CAMPAIGN_ACCESS_DENIED` si no). Devuelve campañas `ACTIVE` dentro de
+  su vigencia, de la aseguradora de una cobertura vigente propia, sin ningún
+  identificador interno. La patología CIE-10 describe la campaña y nunca filtra
+  afiliados (D4).
+
+Tablas: `insurance.insurance_campaigns` e `insurance.insurance_campaign_partners`
+(parche `v4223` del modelo). Acceso a datos en
+`repositories/insurance-campaigns.repository.ts`.
 
 ## Contenido
 

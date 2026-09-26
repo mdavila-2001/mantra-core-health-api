@@ -7,7 +7,7 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`insurance`](insurance.md) | 14 | 17 | 11 | 29 | 15 |
+| [`insurance`](insurance.md) | 15 | 18 | 12 | 31 | 16 |
 | [`community`](community.md) | 13 | 29 | 18 | 40 | 32 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
@@ -17,6 +17,7 @@
 | [`identity_assurance`](identity_assurance.md) | 8 | 11 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`authz`](authz.md) | 7 | 8 | 14 | 15 | 19 |
+| [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 17 |
 | [`chart`](chart.md) | 6 | 7 | 4 | 11 | 5 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`diagnostics`](diagnostics.md) | 6 | 7 | 6 | 36 | 8 |
@@ -24,7 +25,6 @@
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 16 |
 | [`practice`](practice.md) | 6 | 10 | 12 | 11 | 17 |
 | [`scheduling`](scheduling.md) | 6 | 11 | 6 | 17 | 7 |
-| [`terminology`](terminology.md) | 6 | 8 | 9 | 15 | 16 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 8 | 12 | 10 | 13 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
@@ -75,4 +75,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **254** | **384** | **402** | **1258** | **482** |
+| **Total** | **256** | **386** | **403** | **1260** | **484** |

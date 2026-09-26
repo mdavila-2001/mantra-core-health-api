@@ -2,11 +2,11 @@
 
 # Documentación de endpoints
 
-Se documentan **1365 de 1365 endpoints** en **70 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1372 de 1372 endpoints** en **70 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
-| `accounting` | 44 | [Abrir referencia](endpoints/accounting.md) |
+| `accounting` | 45 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |
@@ -39,7 +39,7 @@ Se documentan **1365 de 1365 endpoints** en **70 módulos**. La referencia compl
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 31 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 27 | [Abrir referencia](endpoints/identity-assurance.md) |
-| `insurance` | 43 | [Abrir referencia](endpoints/insurance.md) |
+| `insurance` | 48 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
@@ -71,7 +71,7 @@ Se documentan **1365 de 1365 endpoints** en **70 módulos**. La referencia compl
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
 | `telemetry` | 21 | [Abrir referencia](endpoints/telemetry.md) |
-| `terminology` | 20 | [Abrir referencia](endpoints/terminology.md) |
+| `terminology` | 21 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |
 | `vector_rag` | 16 | [Abrir referencia](endpoints/vector-rag.md) |

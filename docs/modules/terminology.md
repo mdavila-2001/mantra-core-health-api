@@ -9,7 +9,7 @@
 # Módulo `terminology`
 
 **Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/terminology/README.md)
-· 6 controllers · 8 services · 9 repositories · 15 entidades · 16 DTO
+· 7 controllers · 9 services · 9 repositories · 15 entidades · 17 DTO
 
 ---
 

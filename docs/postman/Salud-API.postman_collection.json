@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1365 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1365 requests en 143 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1372 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1372 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -1739,7 +1739,7 @@
       ]
     },
     {
-      "name": "accounting (44)",
+      "name": "accounting (45)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -4324,6 +4324,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.progressId);",
                       "  if (id) pm.environment.set('progressId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/liabilities/{id}/schedule · Cronograma de cuotas de un pasivo propio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/liabilities/:id/schedule",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "liabilities",
+                    ":id",
+                    "schedule"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{liabilityId}}",
+                      "description": "Identificador de ruta · variable `{{liabilityId}}`"
+                    }
+                  ]
+                },
+                "description": "Capital e interés separados por cuota, en orden de vencimiento. Sólo el profesional vinculado a la práctica del pasivo; un pasivo ajeno responde 422, no un cronograma vacío.\n\n`GET /accounting/practitioner/liabilities/{id}/schedule`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AccountingPractitionerController_readLiabilitySchedule`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.liabilities || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('liabilityId', first.id);",
                       "}"
                     ]
                   }
@@ -43003,6 +43060,310 @@
       ]
     },
     {
+      "name": "insurance-campaigns (5)",
+      "item": [
+        {
+          "name": "GET /insurance-campaigns · Listar las campañas de la aseguradora activa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-campaigns",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-campaigns"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "LABORATORY",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "DRAFT",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "25",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar las campañas de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-campaigns`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `InsuranceCampaignsController_list`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.insuranceCampaigns || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('insuranceCampaignId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /insurance-campaigns · Crear una campaña preventiva de la aseguradora",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-campaigns",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-campaigns"
+              ]
+            },
+            "description": "Crear una campaña preventiva de la aseguradora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-campaigns`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `InsuranceCampaignsController_create`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CMP-CARDIO-2026\",\n  \"title\": \"Chequeo Preventivo Cardiovascular y Perfil Lipídico\",\n  \"description\": \"description-ejemplo\",\n  \"campaignType\": \"LABORATORY\",\n  \"targetConditionCode\": \"I10\",\n  \"copayBonusPercentage\": 100,\n  \"validFrom\": \"2026-09-25\",\n  \"validTo\": \"2026-11-24\",\n  \"partners\": [\n    {\n      \"role\": \"SPONSOR\",\n      \"type\": \"IMPORTER\",\n      \"name\": \"Laboratorio Central AloVida\",\n      \"partnerTenantId\": \"<partnerTenantId: uuid existente>\",\n      \"networkProviderMembershipId\": \"<networkProviderMembershipId: uuid existente>\"\n    }\n  ],\n  \"activate\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{insuranceCampaignId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.insuranceCampaignId);",
+                  "  if (id) pm.environment.set('insuranceCampaignId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /insurance-campaigns/patient/{patientProfileId} · Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-campaigns/patient/:patientProfileId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-campaigns",
+                "patient",
+                ":patientProfileId"
+              ],
+              "variable": [
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                }
+              ]
+            },
+            "description": "Campañas vigentes de la aseguradora del afiliado (sólo el titular). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-campaigns/patient/{patientProfileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `InsuranceCampaignsController_listForPatient`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.insuranceCampaigns || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('insuranceCampaignId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /insurance-campaigns/{id} · Consultar una campaña de la aseguradora activa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-campaigns/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-campaigns",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{insuranceCampaignId}}",
+                  "description": "Identificador de ruta · variable `{{insuranceCampaignId}}`"
+                }
+              ]
+            },
+            "description": "Consultar una campaña de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /insurance-campaigns/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `InsuranceCampaignsController_getById`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.insuranceCampaigns || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('insuranceCampaignId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /insurance-campaigns/{id}/status · Activar, pausar o finalizar una campaña (transiciones cerradas)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-campaigns/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-campaigns",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{insuranceCampaignId}}",
+                  "description": "Identificador de ruta · variable `{{insuranceCampaignId}}`"
+                }
+              ]
+            },
+            "description": "Activar, pausar o finalizar una campaña (transiciones cerradas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /insurance-campaigns/{id}/status`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsuranceCampaignsController_changeStatus`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "insurance-carrier-catalog (1)",
       "item": [
         {
@@ -80939,7 +81300,7 @@
       ]
     },
     {
-      "name": "terminology (20)",
+      "name": "terminology (21)",
       "item": [
         {
           "name": "GET /terminology/CodeSystem/$lookup · UC-03-11: resuelve un concepto por sistema y código",
@@ -81135,6 +81496,67 @@
                   "  const list = Array.isArray(body) ? body : (body.concepts || body.items || body.data || body.results);",
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('conceptId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /terminology/import-template · UC-03-03: descarga la plantilla de importación de un perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/terminology/import-template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "terminology",
+                "import-template"
+              ],
+              "query": [
+                {
+                  "key": "profile",
+                  "value": "conceptos",
+                  "description": "Qué se va a cargar",
+                  "disabled": true
+                },
+                {
+                  "key": "format",
+                  "value": "csv",
+                  "description": "Formato de la plantilla",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "UC-03-03: descarga la plantilla de importación de un perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/import-template`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyImportTemplateController_descargarPlantilla`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('importTemplateId', first.id);",
                   "}"
                 ]
               }
@@ -81860,7 +82282,7 @@
           ]
         },
         {
-          "name": "POST /terminology/versions/{versionId}/import-file · UC-03-03: importa conceptos desde un archivo NDJSON",
+          "name": "POST /terminology/versions/{versionId}/import-file · UC-03-03: importa filas desde un archivo, o las valida sin escribir",
           "request": {
             "method": "POST",
             "header": [
@@ -81894,10 +82316,10 @@
                 }
               ]
             },
-            "description": "UC-03-03: importa conceptos desde un archivo NDJSON. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /terminology/versions/{versionId}/import-file`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `TerminologyVersionsController_importConceptsFile`",
+            "description": "UC-03-03: importa filas desde un archivo, o las valida sin escribir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /terminology/versions/{versionId}/import-file`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `TerminologyVersionsController_importConceptsFile`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"file\": \"<binario>\"\n}",
+              "raw": "{\n  \"file\": \"<binario>\",\n  \"dryRun\": false,\n  \"profile\": \"conceptos\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81912,8 +82334,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
                   "});",
                   "",
                   "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{versionId}}.",
