@@ -44,7 +44,7 @@ const encounterFinished = () => ({
  * @returns Resultado de build.
  */
 function build() {
-  const em = { fork: mockFn(() => em) };
+  const em = { fork: mockFn(() => em), flush: mockFn() };
   const encountersRepo = { findById: mockFn() };
   const clinicalRead = { assertPuedeLeerHistoria: mockFn() };
   const notesRepo = {
@@ -76,6 +76,7 @@ function build() {
     ),
   };
   const filesRepo = { findById: mockFn() };
+  const dataAccessLogRepo = { record: mockFn() };
 
   const service = new EncounterPdfService(
     em as any,
@@ -91,10 +92,12 @@ function build() {
     practitionerProfilesRepo as any,
     personsRepo as any,
     filesRepo as any,
+    dataAccessLogRepo as any,
   );
 
   return {
     service,
+    dataAccessLogRepo,
     encountersRepo,
     clinicalRead,
     patientProfilesRepo,
@@ -238,6 +241,35 @@ describe('EncounterPdfService.renderForPatient (BR-15/CL-31)', () => {
       expect.anything(),
       ['released-v1'],
     );
+  });
+
+  it('la descarga del titular deja rastro en data_access_log (TX-32)', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue(encounterFinished());
+
+    await d.service.renderForPatient('enc1', titular);
+
+    expect(d.dataAccessLogRepo.record).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        userId: 'user-pat',
+        patientProfileId: 'pat-1',
+        resourceType: 'PATIENT_ENCOUNTER_PDF',
+        resourceId: 'enc1',
+      }),
+    );
+  });
+
+  it('un 404 o un 422 no dejan rastro de descarga', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...encounterFinished(),
+      patientProfileId: 'otro-paciente',
+    });
+    await expect(
+      d.service.renderForPatient('enc1', titular),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.dataAccessLogRepo.record).not.toHaveBeenCalled();
   });
 
   it('el PDF del titular excluye documentos sólo para el profesional', async () => {

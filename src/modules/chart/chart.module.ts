@@ -19,6 +19,7 @@ import {
   ChartReadService,
   ChartNotesReadService,
   EncounterPdfService,
+  PatientRecordPdfService,
   ChartMeReadService,
 } from './services';
 import {
@@ -41,6 +42,7 @@ import { ClinicalModule } from '../clinical/clinical.module';
 // repositorios de otros módulos: son clases sin estado que reciben el
 // `EntityManager` por parámetro.
 import {
+  AllergyIntolerancesRepository,
   ConditionsRepository,
   EncountersRepository,
   MedicationRequestsRepository,
@@ -96,6 +98,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     CarePlansRepository,
     DocumentsRepository,
     ChartTemplatesRepository,
+    AllergyIntolerancesRepository,
     ConditionsRepository,
     EncountersRepository,
     MedicationRequestsRepository,
@@ -111,6 +114,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     ChartReadService,
     ChartNotesReadService,
     EncounterPdfService,
+    PatientRecordPdfService,
     ChartMeReadService,
   ],
 })
