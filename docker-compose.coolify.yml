@@ -140,11 +140,19 @@ x-app-env: &app-env
   FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
   FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
   FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  # Escaneo antimalware APAGADO de forma explícita (TX-33): en Coolify no corre
+  # `worker-files` ni clamd, así que ninguna versión pasa a SCAN_CLEAN. Las lecturas
+  # por contexto (resultado del paciente, documento del expediente) no lo exigen;
+  # la URL firmada sí y responde 422 `details.reason = SCAN_PENDING`. Encenderlo
+  # exige sumar `clamav` y `worker-files` (ver docker-compose.yml).
+  MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-false}
   FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
   FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
   FILE_STORAGE_S3_ENDPOINT: http://minio:9000
   FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
-  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  # Prefijo propio de los archivos: `audio-assets` es el del módulo de audio y no
+  # se comparte (TX-34).
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-uploads}
   FILE_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
 
