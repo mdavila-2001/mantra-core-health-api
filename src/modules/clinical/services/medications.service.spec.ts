@@ -217,7 +217,10 @@ describe('MedicationsService', () => {
       it('con otro perfil en el cuerpo responde 403 y no crea la fila', async () => {
         const d = build();
         await expect(
-          d.service.prescribe({ ...alta, prescriberProfileId: 'hp-otro' }, actor),
+          d.service.prescribe(
+            { ...alta, prescriberProfileId: 'hp-otro' },
+            actor,
+          ),
         ).rejects.toBeInstanceOf(ForbiddenException);
         expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });
@@ -233,10 +236,10 @@ describe('MedicationsService', () => {
       it('SUPERADMIN pasa con el perfil que declare', async () => {
         const d = build();
         d.requestsRepo.create.mockReturnValue(creada());
-        await d.service.prescribe(
-          { ...alta, prescriberProfileId: 'hp-otro' },
-          { id: 'root', roles: ['SUPERADMIN'] } as any,
-        );
+        await d.service.prescribe({ ...alta, prescriberProfileId: 'hp-otro' }, {
+          id: 'root',
+          roles: ['SUPERADMIN'],
+        } as any);
         expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
           'hp-otro',
         );
@@ -382,7 +385,11 @@ describe('MedicationsService', () => {
         createdAt: new Date(),
       };
       d.requestsRepo.findById.mockResolvedValue(request);
-      await d.service.editDraft('mr1', { indicationText: 'dolor lumbar' }, actor);
+      await d.service.editDraft(
+        'mr1',
+        { indicationText: 'dolor lumbar' },
+        actor,
+      );
       expect(request.indicationText).toBe('dolor lumbar');
 
       await d.service.editDraft(

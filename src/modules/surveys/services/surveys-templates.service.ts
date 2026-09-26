@@ -284,7 +284,9 @@ export class SurveysTemplatesService {
 
       const answerType =
         dto.answerType ?? ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId];
-      const changedType = dto.answerType !== undefined && dto.answerType !== ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId];
+      const changedType =
+        dto.answerType !== undefined &&
+        dto.answerType !== ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId];
       const needsOptions = ANSWER_TYPES_REQUIRING_OPTIONS.includes(answerType);
 
       // Lo que no viaja se conserva, salvo que el tipo nuevo no lo use.
@@ -302,7 +304,8 @@ export class SurveysTemplatesService {
 
       this.validateQuestionShape({ answerType, options, scaleMin, scaleMax });
 
-      if (dto.questionText !== undefined) question.questionText = dto.questionText;
+      if (dto.questionText !== undefined)
+        question.questionText = dto.questionText;
       if (dto.required !== undefined) question.required = dto.required;
       question.answerTypeConceptId = ANSWER_TYPE_BY_CODE[answerType];
       question.options = options;
@@ -601,10 +604,7 @@ export class SurveysTemplatesService {
     em: EntityManager,
     template: SurveyTemplates,
   ): Promise<SurveyVersions> {
-    const version = await this.templatesRepo.findLatestVersion(
-      em,
-      template.id,
-    );
+    const version = await this.templatesRepo.findLatestVersion(em, template.id);
     if (!version) {
       throw new ResourceNotFoundException('La plantilla no tiene versiones', {
         templateId: template.id,

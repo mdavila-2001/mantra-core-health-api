@@ -197,7 +197,11 @@ export class FormsAssignmentsService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const assignment = await this.loadOwnedAssignment(tx, assignmentId, actor);
+      const assignment = await this.loadOwnedAssignment(
+        tx,
+        assignmentId,
+        actor,
+      );
       if (dto.required !== undefined) assignment.required = dto.required;
       if (dto.visible !== undefined) assignment.visible = dto.visible;
       if (dto.editable !== undefined) assignment.editable = dto.editable;
@@ -222,7 +226,11 @@ export class FormsAssignmentsService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const assignment = await this.loadOwnedAssignment(tx, assignmentId, actor);
+      const assignment = await this.loadOwnedAssignment(
+        tx,
+        assignmentId,
+        actor,
+      );
       if (assignment.stateConceptId === FORMS.ASSIGNMENT_RETIRED) {
         throw new ConflictException('La asignación ya fue retirada', {
           assignmentId,
@@ -252,11 +260,12 @@ export class FormsAssignmentsService {
   ): Promise<OkResultDto> {
     const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const current = await this.assignmentsRepo.findActiveOwnAssignmentsForTarget(
-        tx,
-        dto.targetResourceConceptId,
-        tenantId,
-      );
+      const current =
+        await this.assignmentsRepo.findActiveOwnAssignmentsForTarget(
+          tx,
+          dto.targetResourceConceptId,
+          tenantId,
+        );
       const byId = new Map(current.map((a) => [a.id, a]));
       const unknown = dto.assignmentIds.filter((id) => !byId.has(id));
       if (unknown.length > 0) {

@@ -146,10 +146,10 @@ describe('ChartNotesService', () => {
     it('createNote sin perfil profesional en la sesión responde 403', async () => {
       const d = build();
       await expect(
-        d.service.createNote(
-          { patientProfileId: 'p1' },
-          { id: 'u', roles: [] } as any,
-        ),
+        d.service.createNote({ patientProfileId: 'p1' }, {
+          id: 'u',
+          roles: [],
+        } as any),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
     });

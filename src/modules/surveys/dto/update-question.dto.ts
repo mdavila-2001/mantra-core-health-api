@@ -27,7 +27,10 @@ export class UpdateQuestionDto {
   /**
    * Enunciado que lee el paciente.
    */
-  @ApiPropertyOptional({ description: 'Enunciado de la pregunta', maxLength: 500 })
+  @ApiPropertyOptional({
+    description: 'Enunciado de la pregunta',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)

@@ -106,10 +106,10 @@ describe('ChartCarePlansService', () => {
       it('una sesión sin perfil profesional no crea planes (403)', async () => {
         const d = build();
         await expect(
-          d.service.createCarePlan(
-            { patientProfileId: 'p1' },
-            { id: 'u', roles: [] } as any,
-          ),
+          d.service.createCarePlan({ patientProfileId: 'p1' }, {
+            id: 'u',
+            roles: [],
+          } as any),
         ).rejects.toBeInstanceOf(ForbiddenException);
         expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
       });

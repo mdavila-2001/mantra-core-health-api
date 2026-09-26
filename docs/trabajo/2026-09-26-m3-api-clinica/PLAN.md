@@ -18,71 +18,71 @@
 ## H1 — La receta y la alergia dejan de rebotar con 400
 **CA:** Dado el registro de una alergia desde la consulta, cuando se envía con `encounterId`, entonces la API la acepta en vez de devolver 400.
 **DoD:** Las microtareas de H1 en `HECHO`, con DTO, servicio y unitarias en verde (`corepack yarn test --testPathPatterns="allergy|medications.service|encounters.service|files.service"` → todos PASS, salida en `evidencia/`).
-**Estado:** TODO
+**Estado:** HECHO
 
 ### H1.S1 — Alergia desde la consulta y sus adjuntos
 **CA:** Dado el DTO de alergia, cuando declara `encounterId`, entonces la petición completa del front pasa la validación; y dados receta, alergia y encuentro existentes, cuando se hace `POST …/:id/attachments`, entonces responde 201 con el vínculo.
 **DoD:** Las cuatro microtareas en `HECHO` con la salida de las unitarias pegada.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | Declarar `encounterId?` en `CreateAllergyIntoleranceDto`, mapearlo en la entidad (`encounter_id`, nullable) y validar en el servicio que el encuentro sea del mismo paciente (422 si no) | el cuerpo de `allergy-block.ts` con `encounterId` valida sin `property encounterId should not exist`; encuentro ajeno → 422 | `corepack yarn test --testPathPatterns="allergy"` → PASS (spec de DTO con `validate()` + spec de servicio) | TODO |
-| H1.S1.M2 | Pedir a M1 los cinco bindings de catálogo de alergia (`substance`, `type`, `category`, `criticality`, `manifestation`) y la columna `encounter_id` | el pedido queda escrito con su forma exacta (`.puml`, índice, relación, fuente clínica pendiente) | sección «Pedidos a M1» del REPORTE.md | TODO |
-| H1.S1.M3 | Aceptar adjuntos: `OwnerType.MEDICATION_REQUEST/ALLERGY_INTOLERANCE/ENCOUNTER` + `CONCEPTS.OWNER_*`, DTO `AttachFileTo*Dto`, `attachFile()` en `MedicationsService`, `AllergyIntolerancesService` y `EncountersService` calcado de `ProceduresService.attachFile`, rutas `POST medication-requests/:id/attachments`, `allergy-intolerances/:id/attachments`, `encounters/:id/attachments` | 404 si el recurso no existe, `assertPuedeEscribirHistoria` con el paciente de la fila, `createLink` con el `OwnerType` correcto | `corepack yarn test --testPathPatterns="allergy-intolerances.service|medications.service|encounters.service"` → PASS | TODO |
-| H1.S1.M4 | El listado genérico `GET /common/files/links` rechaza los tres tipos clínicos nuevos (403, «use la ruta clínica»), para no ampliar el IDOR de BR-11 §1.C | `listLinkedFiles({ownerType: MEDICATION_REQUEST})` → `ForbiddenException`; `CONDITION` sigue igual que hoy | `corepack yarn test --testPathPatterns="files.service"` → PASS | TODO |
+| H1.S1.M1 | Declarar `encounterId?` en `CreateAllergyIntoleranceDto`, mapearlo en la entidad (`encounter_id`, nullable) y validar en el servicio que el encuentro sea del mismo paciente (422 si no) | el cuerpo de `allergy-block.ts` con `encounterId` valida sin `property encounterId should not exist`; encuentro ajeno → 422 | `corepack yarn test --testPathPatterns="allergy"` → PASS (spec de DTO con `validate()` + spec de servicio) | HECHO |
+| H1.S1.M2 | Pedir a M1 los cinco bindings de catálogo de alergia (`substance`, `type`, `category`, `criticality`, `manifestation`) y la columna `encounter_id` | el pedido queda escrito con su forma exacta (`.puml`, índice, relación, fuente clínica pendiente) | sección «Pedidos a M1» del REPORTE.md | HECHO |
+| H1.S1.M3 | Aceptar adjuntos: `OwnerType.MEDICATION_REQUEST/ALLERGY_INTOLERANCE/ENCOUNTER` + `CONCEPTS.OWNER_*`, DTO `AttachFileTo*Dto`, `attachFile()` en `MedicationsService`, `AllergyIntolerancesService` y `EncountersService` calcado de `ProceduresService.attachFile`, rutas `POST medication-requests/:id/attachments`, `allergy-intolerances/:id/attachments`, `encounters/:id/attachments` | 404 si el recurso no existe, `assertPuedeEscribirHistoria` con el paciente de la fila, `createLink` con el `OwnerType` correcto | `corepack yarn test --testPathPatterns="allergy-intolerances.service|medications.service|encounters.service"` → PASS | HECHO |
+| H1.S1.M4 | El listado genérico `GET /common/files/links` rechaza los tres tipos clínicos nuevos (403, «use la ruta clínica»), para no ampliar el IDOR de BR-11 §1.C | `listLinkedFiles({ownerType: MEDICATION_REQUEST})` → `ForbiddenException`; `CONDITION` sigue igual que hoy | `corepack yarn test --testPathPatterns="files.service"` → PASS | HECHO |
 
 ### H1.S2 — La receta completa
 **CA:** Dada una receta sin diagnóstico previo, cuando el médico escribe el motivo, entonces se guarda en `indication_text` y se lee en el resumen; y dado un cuerpo con otro prescriptor, cuando se prescribe, entonces la API responde 403 y no crea la fila.
 **DoD:** Las dos microtareas en `HECHO` con las unitarias en verde.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S2.M1 | Tomar el prescriptor de la sesión en `prescribe()` y `editDraft()`: default `actor.practitionerProfileId`; sin perfil → 403; distinto del actor → 403 (`SUPERADMIN` pasa, como `assertFirmaElPrescriptor`) | un cuerpo con otro prescriptor no lo pisa: 403 y sin `create` | `corepack yarn test --testPathPatterns="medications.service"` → PASS | TODO |
-| H1.S2.M2 | Aceptar `indicationText?` (`@MaxLength(200)`) en alta y edición; entidad `indication_text`; excluyente con `indicationConditionId` (gana el concepto); proyectado en `MedicationRequestItemDto` y en el snapshot | se persiste (`create` recibe `indicationText`) y se lee (`getPatientSummary` lo devuelve); con condición y texto juntos se guarda sólo la condición; 201 caracteres → 400 | `corepack yarn test --testPathPatterns="medications.service|clinical-read.service|medication.dto"` → PASS | TODO |
+| H1.S2.M1 | Tomar el prescriptor de la sesión en `prescribe()` y `editDraft()`: default `actor.practitionerProfileId`; sin perfil → 403; distinto del actor → 403 (`SUPERADMIN` pasa, como `assertFirmaElPrescriptor`) | un cuerpo con otro prescriptor no lo pisa: 403 y sin `create` | `corepack yarn test --testPathPatterns="medications.service"` → PASS | HECHO |
+| H1.S2.M2 | Aceptar `indicationText?` (`@MaxLength(200)`) en alta y edición; entidad `indication_text`; excluyente con `indicationConditionId` (gana el concepto); proyectado en `MedicationRequestItemDto` y en el snapshot | se persiste (`create` recibe `indicationText`) y se lee (`getPatientSummary` lo devuelve); con condición y texto juntos se guarda sólo la condición; 201 caracteres → 400 | `corepack yarn test --testPathPatterns="medications.service|clinical-read.service|medication.dto"` → PASS | HECHO |
 
 ## H2 — El paciente puede declarar y leer sus aspectos médicos
 **CA:** Dado `GET|PUT /clinical/me/medical-aspects`, cuando el paciente los consulta y los guarda, entonces la API responde 200 en vez de 404.
 **DoD:** Las microtareas de H2 en `HECHO`, con D-B registrada y las unitarias en verde.
-**Estado:** TODO
+**Estado:** HECHO
 
 ### H2.S1 — Elegir dónde vive el dato, y registrarlo
 **CA:** Dada la decisión D-B, cuando se toma, entonces queda escrita en `docs/progress/DECISIONS.md` con sus cuatro opciones, pros, contras y la propuesta; y dadas las dos rutas, cuando el titular llama sin id, entonces responden 200 (primera vez `{}`), ausente = no tocar, `''` = borrar, sin perfil de paciente → 403, clave desconocida → 400.
 **DoD:** Las dos microtareas en `HECHO` con la decisión registrada y el spec del servicio en verde.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | Proponer y registrar D-B (opción A, tabla `clinical.patient_reported_health_statements`) y N-09 (sin `custodian_tenant_id`) en `DECISIONS.md` | queda en `DECISIONS.md` con enlace | `grep -n "D-B" docs/progress/DECISIONS.md` | TODO |
-| H2.S1.M2 | Entidad + repositorio + DTO (`UpdateOwnMedicalAspectsDto`, `MedicalAspectsResponseDto`) + `MedicalAspectsService.getOwn/updateOwn` + `ClinicalMedicalAspectsController` (`clinical/me/medical-aspects`, sin `@Roles`, titular por vínculo de cuenta) + registro en `ClinicalModule` + `clinical.module.spec.ts` | `getOwn` sin declaración → `{}`; `updateOwn({habitsText})` no toca los demás; `''` → null; sin perfil → 403; el módulo publica el controlador | `corepack yarn test --testPathPatterns="medical-aspects|clinical.module"` → PASS | TODO |
+| H2.S1.M1 | Proponer y registrar D-B (opción A, tabla `clinical.patient_reported_health_statements`) y N-09 (sin `custodian_tenant_id`) en `DECISIONS.md` | queda en `DECISIONS.md` con enlace | `grep -n "D-B" docs/progress/DECISIONS.md` | HECHO |
+| H2.S1.M2 | Entidad + repositorio + DTO (`UpdateOwnMedicalAspectsDto`, `MedicalAspectsResponseDto`) + `MedicalAspectsService.getOwn/updateOwn` + `ClinicalMedicalAspectsController` (`clinical/me/medical-aspects`, sin `@Roles`, titular por vínculo de cuenta) + registro en `ClinicalModule` + `clinical.module.spec.ts` | `getOwn` sin declaración → `{}`; `updateOwn({habitsText})` no toca los demás; `''` → null; sin perfil → 403; el módulo publica el controlador | `corepack yarn test --testPathPatterns="medical-aspects|clinical.module"` → PASS | HECHO |
 
 ## H3 — Las notas clínicas se firman, se enmiendan y se liberan
 **CA:** Dada una nota firmada, cuando se intenta modificar su versión, entonces el sistema lo impide sin romper `signVersion`; y dado un cuerpo con otro autor, cuando se crea, versiona o enmienda una nota o se crea un plan, entonces la API responde 403.
 **DoD:** Las microtareas de H3 en `HECHO`, con las unitarias en verde.
-**Estado:** TODO
+**Estado:** HECHO
 
 ### H3.S1 — Firma, enmienda y autor por sesión
 **CA:** Dada una nota, cuando se crea/versiona/enmienda, entonces el autor sale de la sesión (403 si el cuerpo trae otro); y dada una lectura del resumen clínico, cuando se sirve, entonces queda una fila en `audit.data_access_log`.
 **DoD:** Las tres microtareas en `HECHO` con las unitarias pegadas.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | `authorProfileId` opcional en `CreateNoteDto`/`AddVersionDto`/`AmendNoteDto`; `ChartNotesService` y `ChartCarePlansService` resuelven el autor con la misma regla que `assertFirmaConPerfilPropio` | un cuerpo con otro autor no lo pisa (403, sin `createVersion`); sin cuerpo → autor = perfil de la sesión | `corepack yarn test --testPathPatterns="chart-notes.service|chart-care-plans.service"` → PASS | TODO |
-| H3.S1.M2 | Plantear y registrar la barrera WORM de CL-33 (`clinical_note_versions`: DELETE prohibido + UPDATE sólo desde DRAFT; `clinical_note_signatures` y `note_release_events`: UPDATE/DELETE prohibidos) | queda en `DECISIONS.md` con enlace | `grep -n "CL-33" docs/progress/DECISIONS.md` | TODO |
-| H3.S1.M3 | `ClinicalReadService.getPatientSummary` recibe al actor y escribe `audit.data_access_log` (`AUD.ACTION_READ`, `resourceType = 'PATIENT_CLINICAL_SUMMARY'`, `purpose = 'TREATMENT'`) en el mismo `em` de la lectura, con `DataAccessLogRepository` provisto en `ClinicalModule` | la lectura escribe su registro (`record` llamado con el actor y el paciente; `flush` posterior) | `corepack yarn test --testPathPatterns="clinical-read.service"` → PASS | TODO |
+| H3.S1.M1 | `authorProfileId` opcional en `CreateNoteDto`/`AddVersionDto`/`AmendNoteDto`; `ChartNotesService` y `ChartCarePlansService` resuelven el autor con la misma regla que `assertFirmaConPerfilPropio` | un cuerpo con otro autor no lo pisa (403, sin `createVersion`); sin cuerpo → autor = perfil de la sesión | `corepack yarn test --testPathPatterns="chart-notes.service|chart-care-plans.service"` → PASS | HECHO |
+| H3.S1.M2 | Plantear y registrar la barrera WORM de CL-33 (`clinical_note_versions`: DELETE prohibido + UPDATE sólo desde DRAFT; `clinical_note_signatures` y `note_release_events`: UPDATE/DELETE prohibidos) | queda en `DECISIONS.md` con enlace | `grep -n "CL-33" docs/progress/DECISIONS.md` | HECHO |
+| H3.S1.M3 | `ClinicalReadService.getPatientSummary` recibe al actor y escribe `audit.data_access_log` (`AUD.ACTION_READ`, `resourceType = 'PATIENT_CLINICAL_SUMMARY'`, `purpose = 'TREATMENT'`) en el mismo `em` de la lectura, con `DataAccessLogRepository` provisto en `ClinicalModule` | la lectura escribe su registro (`record` llamado con el actor y el paciente; `flush` posterior) | `corepack yarn test --testPathPatterns="clinical-read.service"` → PASS | HECHO |
 
 ### H3.S2 — Formularios y encuestas editables
 **CA:** Dado un formulario o una encuesta, cuando se edita, se reordena o se quita un campo/pregunta, entonces la operación ocurre en una transacción, sólo sobre lo propio/borrador, y responde con la forma que el cliente del front ya usa.
 **DoD:** Las tres microtareas en `HECHO` con las unitarias pegadas.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H3.S2.M1 | Registrar D-D en `DECISIONS.md` (tres opciones, propuesta (a) value set local por campo) y dejar constancia de que «`options` se ignora» es falso: da 400 | queda en `DECISIONS.md` con enlace | `grep -n "D-D" docs/progress/DECISIONS.md` | TODO |
-| H3.S2.M2 | `forms`: `PATCH /forms/assignments/:id {required?, visible?, editable?}`, `DELETE /forms/assignments/:id` (baja lógica: `valid_to = now`, estado `ASSIGNMENT_RETIRED`), `PUT /forms/assignments/order {targetResourceConceptId, assignmentIds[]}` (lista parcial → las no nombradas al final), `PATCH /forms/field-definitions/:id {name?, dataType?}` (409 si cambia el tipo con valores capturados); sólo sobre lo del tenant del actor (estándar → 403; `SECURITY_ADMIN`/`SUPERADMIN` sin techo); todo en una transacción | las cuatro rutas responden `{ ok: true }`; estándar → 403; id ajeno al target → 422 | `corepack yarn test --testPathPatterns="forms-assignments.service|forms-fields.service|forms-controllers"` → PASS | TODO |
-| H3.S2.M3 | `surveys`: `PATCH :id` (título, consigna, plazo del borrador), `PATCH :id/questions/:questionId` (opciones y escala enteras; al cambiar de tipo se descarta lo que no usa), `DELETE :id/questions/:questionId` (renumera 1..n), `PUT :id/questions/order {questionIds}` (parcial → las no nombradas al final; id ajeno → 422); todas 422 sobre versión publicada, 200 `{ ok: true }`, `loadOwnedTemplate` en todas | las cuatro rutas responden; publicada → 422; borrar renumera; parcial conserva | `corepack yarn test --testPathPatterns="surveys-templates.service"` → PASS | TODO |
+| H3.S2.M1 | Registrar D-D en `DECISIONS.md` (tres opciones, propuesta (a) value set local por campo) y dejar constancia de que «`options` se ignora» es falso: da 400 | queda en `DECISIONS.md` con enlace | `grep -n "D-D" docs/progress/DECISIONS.md` | HECHO |
+| H3.S2.M2 | `forms`: `PATCH /forms/assignments/:id {required?, visible?, editable?}`, `DELETE /forms/assignments/:id` (baja lógica: `valid_to = now`, estado `ASSIGNMENT_RETIRED`), `PUT /forms/assignments/order {targetResourceConceptId, assignmentIds[]}` (lista parcial → las no nombradas al final), `PATCH /forms/field-definitions/:id {name?, dataType?}` (409 si cambia el tipo con valores capturados); sólo sobre lo del tenant del actor (estándar → 403; `SECURITY_ADMIN`/`SUPERADMIN` sin techo); todo en una transacción | las cuatro rutas responden `{ ok: true }`; estándar → 403; id ajeno al target → 422 | `corepack yarn test --testPathPatterns="forms-assignments.service|forms-fields.service|forms-controllers"` → PASS | HECHO |
+| H3.S2.M3 | `surveys`: `PATCH :id` (título, consigna, plazo del borrador), `PATCH :id/questions/:questionId` (opciones y escala enteras; al cambiar de tipo se descarta lo que no usa), `DELETE :id/questions/:questionId` (renumera 1..n), `PUT :id/questions/order {questionIds}` (parcial → las no nombradas al final; id ajeno → 422); todas 422 sobre versión publicada, 200 `{ ok: true }`, `loadOwnedTemplate` en todas | las cuatro rutas responden; publicada → 422; borrar renumera; parcial conserva | `corepack yarn test --testPathPatterns="surveys-templates.service"` → PASS | HECHO |
 
 ## Cierre — compuertas y entrega
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |

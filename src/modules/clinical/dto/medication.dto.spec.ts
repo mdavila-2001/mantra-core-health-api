@@ -39,7 +39,8 @@ function cuerpoDelFront(over: Record<string, unknown> = {}) {
 }
 
 async function validar(
-  clase: typeof CreateMedicationRequestDto | typeof EditMedicationRequestDraftDto,
+  clase:
+    typeof CreateMedicationRequestDto | typeof EditMedicationRequestDraftDto,
   cuerpo: Record<string, unknown>,
 ): Promise<string[]> {
   const dto = plainToInstance(clase, cuerpo);

@@ -1,0 +1,2 @@
+$ corepack yarn typecheck   # final, tras prettier
+exit=0

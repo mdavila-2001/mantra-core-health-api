@@ -53,7 +53,11 @@ function build() {
 }
 
 /** Una asignación propia del tenant A, activa, en la posición dada. */
-function propia(id: string, ordinal: number, over: Record<string, unknown> = {}) {
+function propia(
+  id: string,
+  ordinal: number,
+  over: Record<string, unknown> = {},
+) {
   return {
     id,
     tenantId: 'tenant-a',
@@ -181,7 +185,10 @@ describe('FormsAssignmentsService', () => {
       );
       await enTenantA(() =>
         d.service.reorderAssignments(
-          { targetResourceConceptId: 'rt-1', assignmentIds: ['D', 'C', 'B', 'A'] },
+          {
+            targetResourceConceptId: 'rt-1',
+            assignmentIds: ['D', 'C', 'B', 'A'],
+          },
           doctora,
         ),
       );
@@ -217,7 +224,10 @@ describe('FormsAssignmentsService', () => {
       await expect(
         enTenantA(() =>
           d.service.reorderAssignments(
-            { targetResourceConceptId: 'rt-1', assignmentIds: ['A', 'as-global'] },
+            {
+              targetResourceConceptId: 'rt-1',
+              assignmentIds: ['A', 'as-global'],
+            },
             doctora,
           ),
         ),

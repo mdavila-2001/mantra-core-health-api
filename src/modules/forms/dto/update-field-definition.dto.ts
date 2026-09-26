@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import {
   TECHNICAL_DATA_TYPES,
   type TechnicalDataType,
@@ -20,7 +26,10 @@ export class UpdateFieldDefinitionDto {
   /**
    * Nombre legible del campo.
    */
-  @ApiPropertyOptional({ description: 'Nombre legible del campo', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Nombre legible del campo',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)
@@ -32,7 +41,8 @@ export class UpdateFieldDefinitionDto {
    */
   @ApiPropertyOptional({
     enum: TECHNICAL_DATA_TYPES,
-    description: 'Tipo de dato técnico; con valores capturados no se cambia (409)',
+    description:
+      'Tipo de dato técnico; con valores capturados no se cambia (409)',
   })
   @IsOptional()
   @IsIn(TECHNICAL_DATA_TYPES)

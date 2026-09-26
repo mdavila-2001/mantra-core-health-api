@@ -442,13 +442,16 @@ describe('FilesService', () => {
       OwnerType.MEDICATION_REQUEST,
       OwnerType.ALLERGY_INTOLERANCE,
       OwnerType.ENCOUNTER,
-    ])('rechaza (403) listar adjuntos de %s por el genérico sin leer nada', async (ownerType) => {
-      const { service, fileLinksRepo } = build();
-      await expect(
-        service.listLinkedFiles({ ownerType, ownerId: 'x-1' }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(fileLinksRepo.findByOwner).not.toHaveBeenCalled();
-    });
+    ])(
+      'rechaza (403) listar adjuntos de %s por el genérico sin leer nada',
+      async (ownerType) => {
+        const { service, fileLinksRepo } = build();
+        await expect(
+          service.listLinkedFiles({ ownerType, ownerId: 'x-1' }),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(fileLinksRepo.findByOwner).not.toHaveBeenCalled();
+      },
+    );
 
     /**
      * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca

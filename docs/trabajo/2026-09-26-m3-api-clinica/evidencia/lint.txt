@@ -1,0 +1,2 @@
+$ corepack yarn lint   # final, tras prettier
+exit=0

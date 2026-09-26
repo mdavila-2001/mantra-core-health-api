@@ -20,7 +20,10 @@ export class UpdateTemplateDto {
   /**
    * Título del instrumento.
    */
-  @ApiPropertyOptional({ description: 'Título del instrumento', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Título del instrumento',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)

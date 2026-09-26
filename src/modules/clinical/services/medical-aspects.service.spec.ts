@@ -109,10 +109,16 @@ describe('MedicalAspectsService (FT-22 / D-B)', () => {
   describe('updateOwn', () => {
     it('crea la fila del titular la primera vez y la guarda en una transacción', async () => {
       const d = build();
-      const res = await d.service.updateOwn({ habitsText: 'camina 30 min' }, titular);
+      const res = await d.service.updateOwn(
+        { habitsText: 'camina 30 min' },
+        titular,
+      );
       expect(d.statementsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ patientProfileId: 'per-1', actorUserId: 'user-1' }),
+        expect.objectContaining({
+          patientProfileId: 'per-1',
+          actorUserId: 'user-1',
+        }),
       );
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
       expect(res.habitsText).toBe('camina 30 min');
@@ -164,10 +170,10 @@ describe('MedicalAspectsService (FT-22 / D-B)', () => {
     it('una sesión sin perfil de paciente no escribe nada (403)', async () => {
       const d = build();
       await expect(
-        d.service.updateOwn(
-          { habitsText: 'x' },
-          { id: 'user-sin-perfil', roles: [] } as any,
-        ),
+        d.service.updateOwn({ habitsText: 'x' }, {
+          id: 'user-sin-perfil',
+          roles: [],
+        } as any),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.statementsRepo.create).not.toHaveBeenCalled();
       expect(d.tx.flush).not.toHaveBeenCalled();

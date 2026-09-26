@@ -8,10 +8,7 @@ import {
 } from '../../profiles/repositories';
 import { PatientReportedHealthStatementsRepository } from '../repositories';
 import type { PatientReportedHealthStatements } from '../entities';
-import {
-  MedicalAspectsResponseDto,
-  UpdateOwnMedicalAspectsDto,
-} from '../dto';
+import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';
 
 /** Mismo texto para «sin perfil» y «sin vínculo»: no se distingue por qué. */
 const SIN_PERFIL_DE_PACIENTE =

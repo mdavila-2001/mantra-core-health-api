@@ -1,11 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Put,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { MedicalAspectsService } from '../services';
-import {
-  MedicalAspectsResponseDto,
-  UpdateOwnMedicalAspectsDto,
-} from '../dto';
+import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';
 
 /**
  * Autoservicio del paciente sobre `/clinical/me/medical-aspects` (FT-22, D-B).

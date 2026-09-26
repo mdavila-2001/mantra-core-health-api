@@ -53,7 +53,14 @@ function build() {
     filesService as any,
     clinicalRead as any,
   );
-  return { service, tx, allergyRepo, encountersRepo, filesService, clinicalRead };
+  return {
+    service,
+    tx,
+    allergyRepo,
+    encountersRepo,
+    filesService,
+    clinicalRead,
+  };
 }
 
 /** La alergia que devuelve `create` por defecto. */
