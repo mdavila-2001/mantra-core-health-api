@@ -285,8 +285,8 @@ export class SchedulingController {
    * dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el
    * borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó.
    *
-   * Responde **409 con la lista** cuando el horario tiene citas comprometidas:
-   * no lo retira y nombra lo que hay que resolver primero.
+   * Con citas comprometidas **también retira** (M4 · H1.S2.M2): conserva sus
+   * cupos, no toca ninguna cita, y devuelve cuántas siguen vivas y sus ids.
    */
   @Delete('templates/:id')
   // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
@@ -295,7 +295,7 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
     description:
-      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Rechaza con 409 si tiene citas confirmadas o presentadas.',
+      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.',
   })
   retireTemplate(
     @Param('id', ParseUUIDPipe) id: string,
