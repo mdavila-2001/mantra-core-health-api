@@ -246,6 +246,61 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       display: 'Ajuste por reversión',
     },
 
+    // Campañas preventivas de la aseguradora (Tarea 4 · M-06, contrato
+    // docs/contracts/insurer-preventive-campaigns.md). Son valores internos de
+    // columnas `*_concept_id`; el front los rotula con su propio mapa cerrado.
+    CAMPAIGN_DRAFT: { code: 'CAMPAIGN_DRAFT', display: 'Campaña en borrador' },
+    CAMPAIGN_ACTIVE: { code: 'CAMPAIGN_ACTIVE', display: 'Campaña activa' },
+    CAMPAIGN_PAUSED: { code: 'CAMPAIGN_PAUSED', display: 'Campaña pausada' },
+    CAMPAIGN_EXPIRED: {
+      code: 'CAMPAIGN_EXPIRED',
+      display: 'Campaña finalizada',
+    },
+    CAMPAIGN_TYPE_LABORATORY: {
+      code: 'CAMPAIGN_TYPE_LABORATORY',
+      display: 'Campaña de laboratorio',
+    },
+    CAMPAIGN_TYPE_PHARMACY: {
+      code: 'CAMPAIGN_TYPE_PHARMACY',
+      display: 'Campaña de farmacia',
+    },
+    CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING: {
+      code: 'CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING',
+      display: 'Campaña de diagnóstico por imagen',
+    },
+    CAMPAIGN_TYPE_VACCINATION: {
+      code: 'CAMPAIGN_TYPE_VACCINATION',
+      display: 'Campaña de vacunación',
+    },
+    CAMPAIGN_PARTNER_ROLE_SPONSOR: {
+      code: 'CAMPAIGN_PARTNER_ROLE_SPONSOR',
+      display: 'Aliado auspiciante',
+    },
+    CAMPAIGN_PARTNER_ROLE_PROVIDER: {
+      code: 'CAMPAIGN_PARTNER_ROLE_PROVIDER',
+      display: 'Aliado prestador',
+    },
+    CAMPAIGN_PARTNER_TYPE_IMPORTER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_IMPORTER',
+      display: 'Importadora de medicamentos',
+    },
+    CAMPAIGN_PARTNER_TYPE_MANUFACTURER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_MANUFACTURER',
+      display: 'Fabricante de medicamentos',
+    },
+    CAMPAIGN_PARTNER_TYPE_LABORATORY: {
+      code: 'CAMPAIGN_PARTNER_TYPE_LABORATORY',
+      display: 'Laboratorio clínico',
+    },
+    CAMPAIGN_PARTNER_TYPE_PHARMACY: {
+      code: 'CAMPAIGN_PARTNER_TYPE_PHARMACY',
+      display: 'Farmacia aliada',
+    },
+    CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER',
+      display: 'Centro de diagnóstico',
+    },
+
     // Brokers
     BROKER_ACTIVE: { code: 'BROKER_ACTIVE', display: 'Broker activo' },
     EMPLOYER_GROUP_ACTIVE: {
