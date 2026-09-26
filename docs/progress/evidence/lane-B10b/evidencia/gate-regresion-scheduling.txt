@@ -1,0 +1,4 @@
+$ corepack yarn test --testPathPatterns="scheduling"
+Suites: 25 passed, 0 failed, 25 total
+Tests:  511 passed, 0 failed, 0 skipped, 511 total
+exit=0

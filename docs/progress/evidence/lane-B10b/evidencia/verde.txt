@@ -1,0 +1,8 @@
+$ corepack yarn test --testPathPatterns="scheduling-catalog.repository"
+PASS SchedulingCatalogRepository · retireTemplate conserva el cupo del que se reprogramó una cita, aunque ya no tenga cita
+PASS SchedulingCatalogRepository · retireTemplate conserva también el cupo DESTINO de una reprogramación
+PASS SchedulingCatalogRepository · retireTemplate sin citas ni reprogramaciones suelta todos los cupos y sus holds
+PASS SchedulingCatalogRepository · retireTemplate si todos los cupos tienen historia no borra nada
+Suites: 1 passed, 0 failed, 1 total
+Tests:  4 passed, 0 failed, 0 skipped, 4 total
+exit=0

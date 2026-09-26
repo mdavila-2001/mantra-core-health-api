@@ -18,6 +18,10 @@ export interface CreateAffiliationData {
    */
   roleTitle?: string;
   /**
+   * Establecimiento del padrón oficial (`VS_BO_HEALTH_FACILITY`), si se eligió.
+   */
+  healthFacilityConceptId?: string;
+  /**
    * Identificador asociado a practice site.
    */
   practiceSiteId?: string;
@@ -256,6 +260,27 @@ export class PractitionerAffiliationsRepository {
   }
 
   /**
+   * El mismo establecimiento del padrón, con el mismo cargo y la misma fecha de
+   * inicio: lo que protege `ux_practitioner_affiliations_same_health_facility`.
+   * Se mira antes de insertar para responder 409 en vez de dejar que la base
+   * tire un error de índice.
+   */
+  findSameFacility(
+    em: EntityManager,
+    practitionerProfileId: string,
+    healthFacilityConceptId: string,
+    roleTitle: string | null,
+    startDate: Date,
+  ): Promise<PractitionerAffiliations | null> {
+    return em.findOne(PractitionerAffiliations, {
+      practitionerProfileId,
+      healthFacilityConceptId,
+      roleTitle,
+      startDate,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -272,6 +297,7 @@ export class PractitionerAffiliationsRepository {
         practitionerProfileId: data.practitionerProfileId,
         organizationName: data.organizationName,
         roleTitle: data.roleTitle,
+        healthFacilityConceptId: data.healthFacilityConceptId,
         practiceSiteId: data.practiceSiteId,
         affiliationTypeConceptId: data.affiliationTypeConceptId,
         startDate: data.startDate,
