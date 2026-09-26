@@ -203,3 +203,126 @@ y quedó registrada acá con su porqué. Ninguna detuvo el resto del hito.
 - `AuthzCareRelationshipsService.revokeCareRelationship` marcaba **EXPIRED** (y no cerraba la vigencia) a una relación
   sin fin porque `valid_to` llega como `null` y `null <= now` es verdadero. Corregido (`!= null`) con spec de
   regresión. Encontrado reproduciendo contra la base viva.
+
+## D-E — Un solo camino de liberación de diagnósticos (BR-17, CV-02, CL-46, Q-02)
+
+- **Elegido:** la decisión ya venía tomada por el reparto (Q-02): la canónica es
+  `POST /diagnostics/reports/:reportId/versions/:versionId/release`
+  (`DiagnosticsReportsService.releaseVersion`) — es la que registra
+  `diagnostics.diagnostic_release_events` con `patient_visibility_concept_id` en la
+  misma transacción que la versión y el informe, y la única que
+  `GET /diagnostic-results/me` puede ver. El camino clínico
+  (`POST /clinical/diagnostic-reports/:id/release`,
+  `DiagnosticReportsService.release`) **no** escribe ese evento: verificado
+  leyendo el código (nunca llamaba a `recordReleaseEvent`) y confirmado en
+  runtime (ver evidencia abajo).
+- **Cómo se marcó obsoleto sin borrarlo:** el método y la ruta siguen existiendo
+  (nadie que integró contra UC-08-07 ve un 404 de golpe), pero `release()` ya no
+  cambia ningún estado: valida permiso sobre el paciente (MCH-007, sin
+  regresión) y siempre devuelve `422 PRECONDITION_FAILED` con
+  `details.canonicalEndpoint` apuntando a la ruta vigente. `@ApiOperation` quedó
+  `deprecated: true` con la misma explicación. Se prefirió esto a **delegar**
+  (opción a del prompt) porque delegar exige resolver "cuál es la versión
+  actual del informe" desde el lado clínico — un dato que hoy no tiene, y que
+  inventarlo (tomar la última versión sin más criterio) sería una decisión de
+  negocio no pedida. Se prefirió a **mantener el 200 sin escribir nada** porque
+  eso es exactamente el bug que hay que cerrar: un cliente que ve 200 y cree
+  que liberó.
+- **Impacto medido:** `diagnostic-reports.service.spec.ts` (clínico) tenía un
+  test `'releases a report (partial -> final, held -> released)'` que probaba
+  el bug como si fuera el comportamiento correcto; se reescribió para afirmar
+  el nuevo contrato (422, sin tocar el estado). El smoke
+  `test/smoke/modules/clinical.smoke.ts` (`UC-08-07: liberar resultados`)
+  pasó de esperar `200` a esperar `422`.
+- **Verificado en runtime** (API real en `:3400` + Postgres efímero
+  `legion-h4-pg:5440`, esquema aplicado desde `database/SQL/apply_all.sql` +
+  `apply_deferred.sql`, seed completo vía `seed-cli`): se creó un informe, se
+  liberó VISIBLE por el camino canónico y apareció en `GET
+  /diagnostic-results/me`; liberado HIDDEN no apareció; una segunda liberación
+  de la misma versión dio `409` y `SELECT count(*) FROM
+  diagnostics.diagnostic_release_events GROUP BY diagnostic_report_version_id`
+  mostró exactamente 1 fila por versión (ninguna duplicada); el camino clínico
+  sobre un informe recién creado dio `422` con el endpoint canónico en el
+  mensaje. Detalle completo en
+  `docs/progress/evidence/lane-M7-h4/REPORT.md`.
+
+## CL-48/CL-50 — Compartir un resultado: por perfil, nunca por un id tipeado
+
+- **Elegido (variante intermedia entre las dos del prompt):** `ShareDiagnosticResultDto`
+  no pide `practitionerUserId` (una cuenta) sino `practitionerProfileId` (el
+  mismo id que ya devuelve `GET /authz/me/access` — BR-20/H1 — en
+  `practitionerProfileId`, con `practitionerName` resuelto). El servidor: (1)
+  exige que exista una `authz.care_relationships` `ACTIVE` entre el paciente y
+  ese perfil (`CareRelationshipsRepository.findActive`, ya existente, sin
+  endpoint nuevo); (2) resuelve la cuenta con
+  `PersonAccountLinksRepository.findActiveByPerson`; (3) crea el grant con esa
+  cuenta, igual que antes. Así "nunca un buscador global de usuarios" se
+  cumple del lado servidor y no sólo por convención del front: aunque el
+  cliente mande un `practitionerProfileId` ajeno, sin relación vigente da
+  `422`.
+  - **Por qué no un endpoint nuevo:** `GET /authz/me/access` (BR-20) ya es
+    exactamente "mis relaciones asistenciales reales, con nombre" — construir
+    otro para lo mismo hubiera sido la duplicación que la regla de "buscar el
+    equivalente antes de crear" prohíbe.
+  - **`CareRelationshipsRepository`** se agregó a los `exports` de
+    `AuthzModule` (antes sólo exportaba `ResourceScopeGrantsRepository`,
+    `AuthzEffectiveRolesService` y `AuthzPdpService`): es el único cambio de
+    superficie de módulo que este hallazgo necesitó.
+- **`reason` se retiró del DTO (CL-50), no se inventó columna:** `authz.resource_scope_grants`
+  no tiene una columna para el motivo (verificado contra `database/SQL/06_authz/02_tables.sql`
+  y la entidad `ResourceScopeGrants`) y el servicio ya lo ignoraba en silencio —
+  quien mandaba `reason` creía que había quedado registrado y no era cierto.
+  Con `forbidNonWhitelisted` activo, mandarlo ahora da `400` (verificado en
+  runtime), que es el comportamiento que el Gherkin del prompt acepta como
+  alternativa explícita. **Pedido a M1:** si el producto necesita persistir el
+  motivo de un compartido, `authz.resource_scope_grants` necesita una columna
+  nueva (DDL fuera de este carril).
+
+## CL-45/CL-51 — El buscador de centros: ciudades y moneda real
+
+- **Elegido:** `DiagnosticUnitSearchItemDto` suma `cities: string[]` (ciudades
+  de las sedes activas, vía `DiagnosticUnitSites.practiceSiteId → PracticeSites.addressId
+  → Addresses.city`, deduplicadas y ordenadas) y `minAmountCurrency: string | null`
+  (el `code` del concepto de moneda del `price_schedule` dueño del precio
+  mínimo ya calculado). No se tocó el directorio (`DiagnosticUnitDirectoryItemDto`):
+  el prompt y el archivo a modificar (`catalog.dto.ts` + servicio de búsqueda)
+  son específicos del buscador (`/diagnostic-units/search`), que es lo que
+  consume `laboratory-directory` del front.
+  - `DiagnosticUnitsReadRepository.findPracticeSites` ya existía (lo usa
+    `DiagnosticUnitsReadService.getById` y el admin-read); sólo faltaba
+    `findAddresses` (mismo patrón que `PharmacyReadRepository.findAddresses`).
+- **Verificado en runtime:** `GET /diagnostic-units/search` con `X-Tenant-Id`
+  responde 200 y el DTO trae `cities`/`minAmountCurrency` en el esquema
+  (`/docs-json`); sin centros sembrados en la corrida de prueba no se pudo
+  observar un valor no vacío — queda **NO CUBIERTO** con datos reales (ver
+  reporte).
+
+## CL-47 — Lecturas del circuito del laboratorio
+
+- **Elegido:** `GET /diagnostics/accessions/:id` y `GET /diagnostics/specimens/:id`,
+  acotadas al tenant del contexto (`requireTenantId()`, mismo patrón que
+  `GET /diagnostics/work-orders`) y **404 —no 403— para otro tenant**, tal como
+  pide el prompt (no confirmar que el id existe). No hizo falta
+  `GET /diagnostics/work-orders/:id` adicional: la cola ya alcanza para abrir
+  el detalle de una orden vía la acesión.
+- **Verificado en runtime:** acesionar un espécimen y leer
+  `GET /diagnostics/accessions/:id` devuelve el espécimen con su contenedor y
+  su custodia; un id inexistente da 404.
+
+## CL-55 — `operativeSteps` en OpenAPI (procedures_perioperative)
+
+- **Elegido:** se creó `OperativeStepItemDto` (clase con `@ApiProperty` en cada
+  campo) y `CaseDetailDto.operativeSteps` pasó de un tipo TS inline a
+  `type: () => [OperativeStepItemDto]`. Verificado con `typecheck`.
+- **Hallazgo fuera de alcance, para BR-30/M6:** `GET /procedure-cases/:id`
+  (`PeriopController.getCase`) no tiene `@ApiOkResponse({ type: CaseDetailDto })`
+  y `nest-cli.json` no tiene el plugin de `@nestjs/swagger`, así que
+  `CaseDetailDto` (con o sin este fix) **no aparece todavía** en
+  `/docs-json` ni en `openapi/openapi.json`: el `200` de esa ruta no tiene
+  ningún esquema. Es exactamente lo que "BR-30: OpenAPI regenerado" (H6) tiene
+  que resolver; este fix deja el DTO correcto para cuando eso pase.
+
+## CL-56 — Mock del front: sin `studyInstanceUid` inventado
+
+- Ver `docs/progress/DECISIONS.md` del repo `mantra-core-health` (front): el
+  cambio es enteramente de mock/handlers, este repo no lo toca.
