@@ -17,6 +17,7 @@ import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
   CONCEPTS,
+  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
@@ -698,6 +699,10 @@ export class FilesService {
     }
     if (expiry < Date.now()) {
       throw new GoneException({
+        // Sin `code` propio el filtro global lo dejaba como INTERNAL (no hay un
+        // código estable para 410): PRECONDITION_FAILED es el más cercano y el
+        // cliente distingue el caso por `details.reason`.
+        code: ErrorCode.PRECONDITION_FAILED,
         message: 'La URL de descarga venció',
         details: { reason: 'URL_EXPIRED' },
       });

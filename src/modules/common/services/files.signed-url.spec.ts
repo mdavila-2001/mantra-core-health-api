@@ -69,7 +69,10 @@ describe('FilesService: URL firmada', () => {
     Date.now = () => realNow() + 16 * 60 * 1000;
     try {
       expect(() => service.assertDownloadSignature('file-1', params)).toThrow(
-        expect.objectContaining({ status: 410 }),
+        expect.objectContaining({
+          status: 410,
+          response: expect.objectContaining({ code: 'PRECONDITION_FAILED' }),
+        }),
       );
     } finally {
       Date.now = realNow;
