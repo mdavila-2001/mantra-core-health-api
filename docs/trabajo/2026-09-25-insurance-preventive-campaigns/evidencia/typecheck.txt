@@ -1,0 +1,2 @@
+# yarn typecheck (worktree api, f78b241a+cambios)
+exit=0

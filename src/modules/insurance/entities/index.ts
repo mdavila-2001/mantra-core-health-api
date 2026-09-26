@@ -12,6 +12,8 @@ export * from './coverage_eligibility_requests.entity';
 export * from './coverage_eligibility_responses.entity';
 export * from './employer_groups.entity';
 export * from './insurance_brokers.entity';
+export * from './insurance_campaign_partners.entity';
+export * from './insurance_campaigns.entity';
 export * from './insurance_carriers.entity';
 export * from './insurance_claim_lines.entity';
 export * from './insurance_claims.entity';

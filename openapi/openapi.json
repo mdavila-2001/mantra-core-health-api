@@ -21253,6 +21253,344 @@
         "description": "Consultar un lote de liquidación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/insurance-campaigns": {
+      "post": {
+        "operationId": "InsuranceCampaignsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInsuranceCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una campaña preventiva de la aseguradora",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Crear una campaña preventiva de la aseguradora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "get": {
+        "operationId": "InsuranceCampaignsController_list",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LABORATORY",
+                "PHARMACY",
+                "DIAGNOSTIC_IMAGING",
+                "VACCINATION"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "PAUSED",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las campañas de la aseguradora activa",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Listar las campañas de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/patient/{patientProfileId}": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_listForPatient",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de la aseguradora del afiliado (sólo el titular). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/{id}": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar una campaña de la aseguradora activa",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Consultar una campaña de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/{id}/status": {
+      "patch": {
+        "operationId": "InsuranceCampaignsController_changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInsuranceCampaignStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Activar, pausar o finalizar una campaña (transiciones cerradas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/practices": {
       "get": {
         "operationId": "PracticesController_listPractices",
@@ -82783,6 +83121,10 @@
       "description": "Operaciones del dominio funcional insurance broker commission. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "insurance-campaigns",
+      "description": "Operaciones del dominio funcional insurance campaigns. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "insurance-catalog",
       "description": "Operaciones del dominio funcional insurance catalog. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -94999,6 +95341,407 @@
           "providerEntityId",
           "cadence",
           "periodStart"
+        ]
+      },
+      "InsuranceCampaignPartnerInputDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "SPONSOR",
+              "PROVIDER"
+            ],
+            "description": "SPONSOR = importadora o fabricante que financia; PROVIDER = donde el afiliado se atiende"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IMPORTER",
+              "MANUFACTURER",
+              "LABORATORY",
+              "PHARMACY",
+              "MEDICAL_CENTER"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "example": "Laboratorio Central AloVida"
+          },
+          "partnerTenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Referencia blanda al tenant del aliado, si es un tenant del sistema. Sin FK física."
+          },
+          "networkProviderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Membresía de la red de prestadores de la aseguradora, si aplica."
+          }
+        },
+        "required": [
+          "role",
+          "type",
+          "name"
+        ]
+      },
+      "CreateInsuranceCampaignDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "CMP-CARDIO-2026",
+            "description": "Único por aseguradora; mayúsculas, dígitos y guiones."
+          },
+          "title": {
+            "type": "string",
+            "example": "Chequeo Preventivo Cardiovascular y Perfil Lipídico"
+          },
+          "description": {
+            "type": "string"
+          },
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "LABORATORY",
+              "PHARMACY",
+              "DIAGNOSTIC_IMAGING",
+              "VACCINATION"
+            ]
+          },
+          "targetConditionCode": {
+            "type": "string",
+            "example": "I10",
+            "description": "Código CIE-10 de la patología que se previene. Sólo descriptivo: no filtra afiliados (D4)."
+          },
+          "copayBonusPercentage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 100,
+            "description": "Porcentaje del copago que la aseguradora bonifica. 100 = copago Bs. 0."
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-25"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-24"
+          },
+          "partners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceCampaignPartnerInputDto"
+            }
+          },
+          "activate": {
+            "type": "boolean",
+            "default": false,
+            "description": "Si es true, la campaña nace ACTIVE en vez de DRAFT."
+          }
+        },
+        "required": [
+          "code",
+          "title",
+          "campaignType",
+          "copayBonusPercentage",
+          "validFrom",
+          "validTo",
+          "partners"
+        ]
+      },
+      "InsuranceCampaignConditionDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "I10"
+          },
+          "display": {
+            "type": "string",
+            "nullable": true,
+            "example": "Hipertensión esencial"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "InsuranceCampaignPartnerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SPONSOR",
+              "PROVIDER"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IMPORTER",
+              "MANUFACTURER",
+              "LABORATORY",
+              "PHARMACY",
+              "MEDICAL_CENTER"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "networkProviderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "type",
+          "name",
+          "networkProviderMembershipId"
+        ]
+      },
+      "InsuranceCampaignResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "LABORATORY",
+              "PHARMACY",
+              "DIAGNOSTIC_IMAGING",
+              "VACCINATION"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "PAUSED",
+              "EXPIRED"
+            ]
+          },
+          "targetCondition": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceCampaignConditionDto"
+              }
+            ]
+          },
+          "copayBonusPercentage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "partners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceCampaignPartnerDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "description",
+          "campaignType",
+          "status",
+          "targetCondition",
+          "copayBonusPercentage",
+          "validFrom",
+          "validTo",
+          "activatedAt",
+          "partners",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "InsuranceCampaignPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
+      "PatientCampaignPartnerDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "SPONSOR",
+              "PROVIDER"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IMPORTER",
+              "MANUFACTURER",
+              "LABORATORY",
+              "PHARMACY",
+              "MEDICAL_CENTER"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "type",
+          "name"
+        ]
+      },
+      "PatientCampaignDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "LABORATORY",
+              "PHARMACY",
+              "DIAGNOSTIC_IMAGING",
+              "VACCINATION"
+            ]
+          },
+          "targetCondition": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceCampaignConditionDto"
+              }
+            ]
+          },
+          "copayBonusPercentage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "carrierName": {
+            "type": "string",
+            "description": "Nombre de la aseguradora que ofrece la campaña."
+          },
+          "partners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientCampaignPartnerDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "title",
+          "description",
+          "campaignType",
+          "targetCondition",
+          "copayBonusPercentage",
+          "validFrom",
+          "validTo",
+          "carrierName",
+          "partners"
+        ]
+      },
+      "UpdateInsuranceCampaignStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "PAUSED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "CreatePracticeDto": {

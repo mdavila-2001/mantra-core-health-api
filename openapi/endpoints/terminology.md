@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 20 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
-- **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
+- **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -23,14 +23,15 @@ Referencia exhaustiva de 20 operación(es) del módulo `terminology`, derivada d
 10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
 11. [POST /terminology/concepts/{conceptId}/properties](#11-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
 12. [POST /terminology/concepts/{conceptId}/relationships](#12-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-13. [PUT /terminology/tenants/{tenantId}/catalog-policies](#13-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-14. [GET /terminology/value-sets](#14-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-15. [POST /terminology/value-sets](#15-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-16. [GET /terminology/value-sets/{id}/$expand](#16-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-17. [POST /terminology/ValueSet/{id}/$expand](#17-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-18. [POST /terminology/versions/{versionId}/import](#18-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-19. [POST /terminology/versions/{versionId}/import-file](#19-post-terminology-versions-versionid-import-file) — UC-03-03: importa conceptos desde un archivo NDJSON
-20. [POST /terminology/versions/{versionId}/publish](#20-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+13. [GET /terminology/import-template](#13-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
+14. [PUT /terminology/tenants/{tenantId}/catalog-policies](#14-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+15. [GET /terminology/value-sets](#15-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+16. [POST /terminology/value-sets](#16-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+17. [GET /terminology/value-sets/{id}/$expand](#17-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+18. [POST /terminology/ValueSet/{id}/$expand](#18-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+19. [POST /terminology/versions/{versionId}/import](#19-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+20. [POST /terminology/versions/{versionId}/import-file](#20-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+21. [POST /terminology/versions/{versionId}/publish](#21-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -1772,7 +1773,101 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 13. GET /terminology/import-template
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** UC-03-03: descarga la plantilla de importación de un perfil
+- **Operation ID:** `TerminologyImportTemplateController_descargarPlantilla`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyImportTemplateController.descargarPlantilla](../../src/modules/terminology/controllers/terminology-import-template.controller.ts)
+
+### Descripción de negocio
+
+UC-03-03: descarga la plantilla de importación de un perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Descarga la plantilla del perfil pedido.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/import-template` en `TerminologyImportTemplateController_descargarPlantilla`. El controlador delega en `ImportTemplateService.generar`. No recibe body. El tipo de retorno estático es `StreamableFile`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profile` | query | No | `string` | Sin restricción adicional declarada | Qué se va a cargar | `conceptos` |
+| `format` | query | No | `string` | Sin restricción adicional declarada | Formato de la plantilla | `csv` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/import-template HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/import-template?profile=conceptos&format=csv HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `StreamableFile` | No |
+| 400 | Consulta completada correctamente. | `StreamableFile` | No |
+| 401 | Consulta completada correctamente. | `StreamableFile` | No |
+| 403 | Consulta completada correctamente. | `StreamableFile` | No |
+| 429 | Consulta completada correctamente. | `StreamableFile` | No |
+| 500 | Consulta completada correctamente. | `StreamableFile` | No |
+
+El controlador declara `StreamableFile`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/import-template"
+}
+```
+
+---
+
+## 14. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1939,7 +2034,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /terminology/value-sets
+## 15. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2071,7 +2166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /terminology/value-sets
+## 16. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2217,7 +2312,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /terminology/value-sets/{id}/$expand
+## 17. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2363,7 +2458,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /terminology/ValueSet/{id}/$expand
+## 18. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2505,7 +2600,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /terminology/versions/{versionId}/import
+## 19. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2649,20 +2744,20 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /terminology/versions/{versionId}/import-file
+## 20. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
-- **Nombre:** UC-03-03: importa conceptos desde un archivo NDJSON
+- **Nombre:** UC-03-03: importa filas desde un archivo, o las valida sin escribir
 - **Operation ID:** `TerminologyVersionsController_importConceptsFile`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [TerminologyVersionsController.importConceptsFile](../../src/modules/terminology/controllers/terminology-versions.controller.ts)
 
 ### Descripción de negocio
 
-UC-03-03: importa conceptos desde un archivo NDJSON. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+UC-03-03: importa filas desde un archivo, o las valida sin escribir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Importa conceptos desde un archivo NDJSON ya subido (UC-03-03, por archivo). Es la cara sin techo del import de arriba: aquél recibe los conceptos en el cuerpo, y el cuerpo está limitado a 1 MB —unos diez mil conceptos—. Un sistema de codificación real tiene cien mil. El archivo llega **acá** y no por `common/files`: aquella superficie valida el tipo por bytes mágicos y sólo admite PDF e imágenes, porque existe para evidencia clínica. Un archivo de texto no tiene firma binaria. Acá el tipo se comprueba por parseo, que para NDJSON es una prueba más fuerte. El contenido no se almacena: se convierte en filas y se descarta. Lo que queda es el lote en `terminology.catalog_import_batches`, con la huella del contenido y los contadores.
+Contexto declarado en el controlador: Importa conceptos desde un archivo ya subido (UC-03-03, por archivo). Es la cara sin techo del import de arriba: aquél recibe los conceptos en el cuerpo, y el cuerpo está limitado a 1 MB —unos diez mil conceptos—. Un sistema de codificación real tiene cien mil. El archivo llega **acá** y no por `common/files`: aquella superficie valida el tipo por bytes mágicos y sólo admite PDF e imágenes, porque existe para evidencia clínica. Un archivo de texto no tiene firma binaria. Acá el tipo se comprueba por parseo, que para NDJSON es una prueba más fuerte. El contenido no se almacena: se convierte en filas y se descarta. Lo que queda es el lote en `terminology.catalog_import_batches`, con la huella del contenido y los contadores.
 
 ### Descripción del sistema
 
@@ -2701,6 +2796,8 @@ Content-Type: multipart/form-data
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `file` | Sí | `string` | formato `binary` | Sin descripción específica en el contrato OpenAPI. | `<contenido-binario>` |
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `profile` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `conceptos` |
 
 ### Payload completo de ejemplo
 
@@ -2713,7 +2810,9 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: multipart/form-data
 
 {
-  "file": "<contenido-binario>"
+  "file": "<contenido-binario>",
+  "dryRun": false,
+  "profile": "conceptos"
 }
 ```
 
@@ -2721,7 +2820,8 @@ Content-Type: multipart/form-data
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 201 | Recurso creado o acción registrada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 200 | No se escribió nada: o se pidió validar sin escribir (`dryRun`), o el archivo se rechazó entero por errores de fila (`aborted`) | `Promise<ImportConceptsFileResponseDto>` | Sí |
+| 201 | El archivo entró entero: los conceptos quedaron escritos | `Promise<ImportConceptsFileResponseDto>` | Sí |
 | 400 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 401 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 403 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
@@ -2736,7 +2836,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "batchId": "00000000-0000-4000-8000-000000000001",
+  "batchId": {},
+  "format": "ndjson",
+  "profile": "valor-ejemplo",
+  "dryRun": true,
+  "aborted": true,
   "totalRead": 1,
   "inserted": 1,
   "skipped": 1,
@@ -2744,7 +2848,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "errorSamples": [
     {
       "line": 1,
+      "column": "valor-ejemplo",
       "message": "valor-ejemplo"
+    }
+  ],
+  "preview": [
+    {
+      "line": 1
     }
   ]
 }
@@ -2754,14 +2864,21 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `batchId` | Sí | `string` | formato `uuid` | Lote de importación registrado | `00000000-0000-4000-8000-000000000001` |
-| `totalRead` | Sí | `number` | Sin restricción adicional declarada | Líneas con contenido leídas | `1` |
+| `batchId` | Sí | `object` | formato `uuid`; admite null | Lote de importación registrado; nulo si no se escribió nada | `{}` |
+| `format` | Sí | `string` | valores: `ndjson`, `csv`, `xlsx` | Formato reconocido en el contenido del archivo | `ndjson` |
+| `profile` | Sí | `string` | Sin restricción adicional declarada | Perfil con el que se leyeron las columnas | `valor-ejemplo` |
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | La importación fue una validación sin escribir | `true` |
+| `aborted` | Sí | `boolean` | Sin restricción adicional declarada | El archivo se rechazó entero por tener errores | `true` |
+| `totalRead` | Sí | `number` | Sin restricción adicional declarada | Filas con contenido leídas | `1` |
 | `inserted` | Sí | `number` | Sin restricción adicional declarada | Conceptos creados | `1` |
 | `skipped` | Sí | `number` | Sin restricción adicional declarada | Códigos que ya existían en la versión | `1` |
-| `errors` | Sí | `number` | Sin restricción adicional declarada | Líneas descartadas | `1` |
-| `errorSamples` | Sí | `array<ImportFileIssueDto>` | Sin restricción adicional declarada | Primeros errores encontrados, como muestra | `[{"line":1,"message":"valor-ejemplo"}]` |
-| `errorSamples[].line` | Sí | `number` | Sin restricción adicional declarada | Línea del archivo, empezando en 1 | `1` |
-| `errorSamples[].message` | Sí | `string` | Sin restricción adicional declarada | Motivo por el que la línea se descartó | `valor-ejemplo` |
+| `errors` | Sí | `number` | Sin restricción adicional declarada | Problemas encontrados | `1` |
+| `errorSamples` | Sí | `array<ImportFileIssueDto>` | Sin restricción adicional declarada | Primeros errores encontrados, como muestra | `[{"line":1,"column":"valor-ejemplo","message":"valor-ejemplo"}]` |
+| `errorSamples[].line` | Sí | `number` | Sin restricción adicional declarada | Fila del archivo, empezando en 1 | `1` |
+| `errorSamples[].column` | No | `string` | Sin restricción adicional declarada | Columna con el problema, si es de una | `valor-ejemplo` |
+| `errorSamples[].message` | Sí | `string` | Sin restricción adicional declarada | Motivo por el que la fila se descartó | `valor-ejemplo` |
+| `preview` | No | `array<ImportPreviewRowDto>` | Sin restricción adicional declarada | Primeras filas válidas, en una validación sin escribir. Cada fila lleva `line` más una clave por columna del perfil: para `conceptos`, `code`, `display` y `definition` | `[{"line":1}]` |
+| `preview[].line` | No | `number` | Sin restricción adicional declarada | Fila del archivo, empezando en 1 | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2775,8 +2892,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Versión no encontrada | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
 | 404 | `NOT_FOUND` | El sistema de codificación de la versión no existe | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El archivo llegó vacío | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
-| 422 | `PRECONDITION_FAILED` | errores.length > 0           ? 'Ninguna línea del archivo es un concepto válido: se esperaba ' +               'NDJSON con «code» y «display» por línea.'           : 'El archivo no tiene ninguna línea con contenido.' | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se puede importar en una versión en borrador | Excepción explícita en src/modules/terminology/services/concept-file-import.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2795,7 +2910,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /terminology/versions/{versionId}/publish
+## 21. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

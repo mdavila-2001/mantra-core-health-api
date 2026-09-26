@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **70 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1372 de 1372 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **70 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -44,7 +44,7 @@ Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `open
 
 | Módulo | Endpoints | Etiquetas OpenAPI | Controladores |
 |---|---:|---|---:|
-| [accounting](accounting.md) | 44 | `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 9 |
+| [accounting](accounting.md) | 45 | `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 9 |
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
@@ -77,7 +77,7 @@ Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `open
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 31 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 27 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 43 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 14 |
+| [insurance](insurance.md) | 48 | `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-campaigns`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 15 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
@@ -109,7 +109,7 @@ Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `open
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
 | [telemetry](telemetry.md) | 21 | `telemetry-analytics`, `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 4 |
-| [terminology](terminology.md) | 20 | `terminology` | 6 |
+| [terminology](terminology.md) | 21 | `terminology` | 7 |
 | [time_series](time-series.md) | 14 | `time_series` | 2 |
 | [tracking](tracking.md) | 11 | `tracking` | 1 |
 | [vector_rag](vector-rag.md) | 16 | `vector_rag` | 2 |
@@ -121,4 +121,4 @@ Esta referencia documenta **1365 de 1365 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1365 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1372 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
