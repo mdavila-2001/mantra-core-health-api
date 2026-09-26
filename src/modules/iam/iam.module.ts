@@ -17,7 +17,11 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // transacción; `practice` no importa `iam`, así que la dependencia no cierra
 // ciclo.
 import { PracticeModule } from '../practice/practice.module';
-import { IamUsersController, IamAuthController } from './controllers';
+import {
+  IamUsersController,
+  IamAuthController,
+  IamAccountSecurityController,
+} from './controllers';
 import {
   IamUsersService,
   IamUsersReadService,
@@ -33,6 +37,7 @@ import {
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
   IamEmailVerificationService,
+  IamAccountSecurityService,
 } from './services';
 import {
   UsersRepository,
@@ -75,7 +80,11 @@ import {
     TerminologyModule,
     PracticeModule,
   ],
-  controllers: [IamUsersController, IamAuthController],
+  controllers: [
+    IamUsersController,
+    IamAuthController,
+    IamAccountSecurityController,
+  ],
   providers: [
     // Repositorios
     UsersRepository,
@@ -106,6 +115,7 @@ import {
     IamPractitionerSelfRegistrationService,
     IamPasswordResetService,
     IamEmailVerificationService,
+    IamAccountSecurityService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.

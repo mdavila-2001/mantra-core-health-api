@@ -108,6 +108,33 @@ export class SessionsRepository {
     );
   }
 
+  /** Sesiones ACTIVAS y vigentes del usuario, de la más reciente a la más antigua. */
+  findActiveByUser(
+    em: EntityManager,
+    userId: string,
+    now: Date = new Date(),
+  ): Promise<Sessions[]> {
+    return em.find(
+      Sessions,
+      {
+        userId,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        expiresAt: { $gt: now },
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /** Revoca en bloque las sesiones indicadas. Devuelve nº afectadas. */
+  revokeByIds(em: EntityManager, ids: string[]): Promise<number> {
+    if (ids.length === 0) return Promise.resolve(0);
+    return em.nativeUpdate(
+      Sessions,
+      { id: { $in: ids }, stateConceptId: CONCEPTS.STATE_ACTIVE },
+      { stateConceptId: CONCEPTS.STATE_REVOKED, updatedAt: new Date() },
+    );
+  }
+
   /** Marca EXPIRED las sesiones ACTIVAS ya vencidas. Devuelve nº afectadas. */
   purgeExpired(em: EntityManager, now: Date): Promise<number> {
     return em.nativeUpdate(
