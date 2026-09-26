@@ -1,0 +1,57 @@
+$ corepack yarn test --testPathPatterns="quotation"
+PASS QuotationInstallmentsRepository.findByQuotationIds pide las cuotas de todas las cotizaciones en una sola consulta, ordenadas
+PASS QuotationInstallmentsRepository.findByQuotationIds sin cotizaciones no va a la base
+PASS CreateQuotationDto (plan flexible, sin interés) acepta un plan flexible con cuotas desparejas
+PASS CreateQuotationDto (plan flexible, sin interés) rechaza el contrato viejo con tasa y método
+PASS CreateQuotationDto (plan flexible, sin interés) valida cada cuota anidada: fecha y monto
+PASS CreateQuotationDto (plan flexible, sin interés) rechaza una frecuencia fuera de las tres y un anticipo negativo
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts correcto: acepta los importes numéricos del front y los entrega como texto exacto
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts correcto: sigue aceptando los importes como texto, sin tocarlos
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts límite: cuotas con centavos que salen de centavos / 100, y anticipo cero
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: un número con más de dos decimales no se redondea en silencio: 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: negativo, NaN o infinito dan 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: un importe que no es número ni texto numérico da 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita correcto: acepta los importes numéricos del front y los entrega como texto exacto
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita correcto: sigue aceptando los importes como texto, sin tocarlos
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita límite: cuotas con centavos que salen de centavos / 100, y anticipo cero
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: un número con más de dos decimales no se redondea en silencio: 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: negativo, NaN o infinito dan 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: un importe que no es número ni texto numérico da 400
+PASS payment-plan (sin interés) cuenta en centavos enteros
+PASS payment-plan (sin interés) acepta un plan cuyo anticipo + cuotas da el precio, aunque las cuotas sean desparejas
+PASS payment-plan (sin interés) suma exacto donde la coma flotante fallaría (0.1 + 0.2)
+PASS payment-plan (sin interés) pagado todo de anticipo, sin cuotas, es válido
+PASS payment-plan (sin interés) rechaza con 422 cuando falta un centavo
+PASS payment-plan (sin interés) rechaza con 422 cuando sobra plata
+PASS payment-plan (sin interés) rechaza con 422 cuando el anticipo pasa el precio
+PASS payment-plan (sin interés) rechaza con 422 cuando la cantidad no coincide
+PASS payment-plan (sin interés) rechaza con 422 cuando numeración fuera de orden
+PASS payment-plan (sin interés) rechaza con 422 cuando una cuota en cero
+PASS QuotationsService.createQuotation copia el nombre del catálogo como snapshot al crear la cotización
+PASS QuotationsService.createQuotation el snapshot persistido no cambia si el catálogo cambia después (no es una referencia dinámica)
+PASS QuotationsService.createQuotation lanza PreconditionFailedException si validUntil no es posterior a attentionDate
+PASS QuotationsService.createQuotation lanza PreconditionFailedException si el actor no tiene perfil profesional
+PASS QuotationsService.createQuotation lanza ResourceNotFoundException si el servicio no existe en el catálogo
+PASS QuotationsService.createQuotation persiste el cronograma tal como llegó —fechas y montos a mano—, sin calcular interés
+PASS QuotationsService.createQuotation rechaza con 422 un plan que no cierra con el precio, antes de tocar la base
+PASS QuotationsService.createQuotation 422 si el profesional no está vinculado a la práctica declarada, sin tocar el catálogo
+PASS QuotationsService.createQuotation un servicio de otra práctica es el MISMO 404 que uno inexistente, y no persiste nada
+PASS QuotationsService.createQuotation la cuenta administradora con perfil profesional cotiza en una práctica de su organización
+PASS QuotationsService.createQuotation la cuenta administradora de otra organización no cotiza en esa práctica: 422
+PASS QuotationsService.getQuotation lanza ResourceNotFoundException si no existe
+PASS QuotationsService.getQuotation una cotización de una práctica ajena es el MISMO 404, no un 403, y no lee sus cuotas
+PASS QuotationsService.getQuotation un paciente autenticado, sin perfil profesional ni rol administrativo, recibe 404
+PASS QuotationsService.getQuotation la cuenta administradora lee lo que cotizó su organización
+PASS QuotationsService.getQuotation la cuenta administradora de otra organización recibe 404
+PASS QuotationsService.getQuotation devuelve la cotización con sus cuotas
+PASS QuotationsService.listQuotationsByPatient trae las cuotas de todas las cotizaciones en UNA consulta, y a cada una las suyas
+PASS QuotationsService.listQuotationsByPatient sin cotizaciones no consulta cuotas
+PASS QuotationsService.listQuotationsByPatient acota la consulta a las prácticas del profesional, no filtra después de leer
+PASS QuotationsService.listQuotationsByPatient sin ninguna práctica alcanzable devuelve vacío sin ir a la base
+PASS QuotationsService.listQuotationsByPatient un paciente autenticado no lista cotizaciones: ni vinculación ni organización
+PASS QuotationsService.listQuotationsByPatient la cuenta administradora acota a las prácticas activas de su organización en contexto
+PASS QuotationsService.listQuotationsByPatient la cuenta administradora sin organización en contexto no tiene contra qué acotar: vacío
+PASS QuotationsService.createQuotation con el body del front (AG-35) guarda la cotización con los importes numéricos del front, como texto exacto
+Suites: 4 passed, 0 failed, 4 total
+Tests:  53 passed, 0 failed, 0 skipped, 53 total
+exit=0

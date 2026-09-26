@@ -227,14 +227,23 @@ export class QuotationsService {
       patientProfileId,
       practiceIds,
     );
-    return Promise.all(
-      quotations.map(async (quotation) => {
-        const installments = await this.installmentsRepo.findByQuotationId(
-          em,
-          quotation.id,
-        );
-        return toResponseDto(quotation, installments);
-      }),
+    if (quotations.length === 0) {
+      return [];
+    }
+    // Una sola lectura de cuotas para todo el listado, no una por cotización
+    // (el N+1 de M4 · H3.S1.M3). Vienen ordenadas por número de cuota.
+    const installments = await this.installmentsRepo.findByQuotationIds(
+      em,
+      quotations.map((quotation) => quotation.id),
+    );
+    const byQuotation = new Map<string, typeof installments>();
+    for (const installment of installments) {
+      const rows = byQuotation.get(installment.quotationId) ?? [];
+      rows.push(installment);
+      byQuotation.set(installment.quotationId, rows);
+    }
+    return quotations.map((quotation) =>
+      toResponseDto(quotation, byQuotation.get(quotation.id) ?? []),
     );
   }
 

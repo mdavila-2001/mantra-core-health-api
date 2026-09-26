@@ -1,0 +1,17 @@
+$ corepack yarn test --testPathPatterns="quotations|create-quotation" -t "AG-35"
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts correcto: acepta los importes numéricos del front y los entrega como texto exacto
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts correcto: sigue aceptando los importes como texto, sin tocarlos
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts límite: cuotas con centavos que salen de centavos / 100, y anticipo cero
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: un número con más de dos decimales no se redondea en silencio: 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: negativo, NaN o infinito dan 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) con el pipe global de main.ts inválido: un importe que no es número ni texto numérico da 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita correcto: acepta los importes numéricos del front y los entrega como texto exacto
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita correcto: sigue aceptando los importes como texto, sin tocarlos
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita límite: cuotas con centavos que salen de centavos / 100, y anticipo cero
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: un número con más de dos decimales no se redondea en silencio: 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: negativo, NaN o infinito dan 400
+PASS CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1) sin conversión implícita inválido: un importe que no es número ni texto numérico da 400
+PASS QuotationsService.createQuotation con el body del front (AG-35) guarda la cotización con los importes numéricos del front, como texto exacto
+Suites: 2 passed, 0 failed, 3 total
+Tests:  13 passed, 0 failed, 36 skipped, 49 total
+exit=0

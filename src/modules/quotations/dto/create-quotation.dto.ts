@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, type TransformFnParams, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -37,6 +37,27 @@ const PRICE_PATTERN_MESSAGE =
   'El precio debe ser un número positivo con hasta dos decimales';
 
 /**
+ * Acepta un importe como texto **o como número JSON** y lo entrega siempre como
+ * texto, sin redondear (AG-35 · M4 H3.S1.M1).
+ *
+ * El front de cotizaciones arma los importes como `number`. Hasta ahora eso
+ * pasaba sólo porque el `ValidationPipe` global de `main.ts` activa
+ * `enableImplicitConversion`, una opción que ningún DTO declara: el contrato
+ * funcionaba por accidente. Con esta transformación el DTO lo dice solo.
+ *
+ * `String(n)` y no `toFixed(2)`: `toFixed` redondea en silencio (`1.005` →
+ * `"1.00"`), y un precio de salud cambiado sin aviso es peor que un 400. Lo
+ * que no cierra en dos decimales sigue cayendo en {@link PRICE_PATTERN}. Un
+ * número no finito (`NaN`, `Infinity`) se deja como está y lo rechaza
+ * `@IsNumberString()`.
+ */
+function amountAsText({ value }: TransformFnParams): unknown {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? String(value)
+    : value;
+}
+
+/**
  * Una cuota del plan de pagos tal como la armó quien atiende: fecha y monto,
  * **sin interés**. Los montos no tienen por qué ser iguales.
  */
@@ -60,6 +81,7 @@ export class QuotationInstallmentInputDto {
    * Monto de la cuota, con hasta dos decimales.
    */
   @ApiProperty({ example: '233.34' })
+  @Transform(amountAsText)
   @IsNumberString()
   @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
   amount!: string;
@@ -119,6 +141,7 @@ export class CreateQuotationDto {
     description: 'Precio ofrecido al paciente (editable respecto del catálogo)',
     example: '1500.00',
   })
+  @Transform(amountAsText)
   @IsNumberString()
   @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
   offeredPrice!: string;
@@ -148,6 +171,7 @@ export class CreateQuotationDto {
     description: 'Anticipo, entre 0 y el precio ofrecido. Sin interés.',
     example: '190.00',
   })
+  @Transform(amountAsText)
   @IsNumberString()
   @Matches(PRICE_PATTERN, { message: PRICE_PATTERN_MESSAGE })
   downPaymentAmount!: string;
