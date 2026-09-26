@@ -1,0 +1,47 @@
+{
+  "url": "https://raw.githubusercontent.com/RedHatProductSecurity/cvss-v4-calculator/b0930b7646be5892492df16ba81cd8d8423eb49a/cvss40.js",
+  "sha256": "f37de2e2f2714df37bf6e9122a7137b8b8d8350028bb3fd76f83fb9fceb5be4e",
+  "note": "Puntuaciones base provisionales; supuestos y límites en REPORTE.md.",
+  "results": [
+    {
+      "id": "F01-clinical",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N",
+      "score": 7.1
+    },
+    {
+      "id": "F01-payments",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+      "score": 7.1
+    },
+    {
+      "id": "F01-scheduling",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "score": 5.3
+    },
+    {
+      "id": "F03-offboarding",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N",
+      "score": 7.6
+    },
+    {
+      "id": "F04-websocket",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "score": 6
+    },
+    {
+      "id": "F05-logging",
+      "vector": "CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "score": 2
+    },
+    {
+      "id": "F07-payment-state",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+      "score": 6.9
+    },
+    {
+      "id": "F08-throttler",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+      "score": 6.3
+    }
+  ]
+}

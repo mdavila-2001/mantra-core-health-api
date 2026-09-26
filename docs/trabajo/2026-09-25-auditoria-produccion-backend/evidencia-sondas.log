@@ -1,0 +1,3 @@
+{"route":"/health","status":200,"cacheControl":"public, max-age=60, stale-while-revalidate=300","bodyStatus":"ok"}
+{"route":"/readiness","status":503,"cacheControl":null,"bodyStatus":"error","checks":{"postgresql":{"status":"up","latencyMs":15},"mongodb":{"status":"down","latencyMs":1},"redis":{"status":"up","latencyMs":2},"opensearch":{"status":"up","latencyMs":4}},"timestamp":"2026-09-26T01:00:03.221Z"}
+{"route":"/health","status":200,"cacheControl":"public, max-age=60, stale-while-revalidate=300","bodyStatus":"ok"}
