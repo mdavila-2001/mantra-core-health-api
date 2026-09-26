@@ -1,0 +1,249 @@
+# H3.S2.M1 — inventario del módulo 16 (contabilidad) antes de tocar nada
+# rama: origin/test @ 016caaa1 · sólo lectura · 2026-09-26
+
+$ ls src/modules/accounting/entities/*.entity.ts | wc -l
+42
+
+$ ls src/modules/accounting/controllers/*.controller.ts
+src/modules/accounting/controllers/accounting-accrual.controller.ts
+src/modules/accounting/controllers/accounting-asset.controller.ts
+src/modules/accounting/controllers/accounting-cockpit.controller.ts
+src/modules/accounting/controllers/accounting-exchange-rate.controller.ts
+src/modules/accounting/controllers/accounting-fiscal.controller.ts
+src/modules/accounting/controllers/accounting-ledger.controller.ts
+src/modules/accounting/controllers/accounting-liability.controller.ts
+src/modules/accounting/controllers/accounting-practitioner.controller.ts
+src/modules/accounting/controllers/accounting-subledger.controller.ts
+
+$ grep -n "@Controller(" src/modules/accounting/controllers/*.controller.ts
+src/modules/accounting/controllers/accounting-accrual.controller.ts:15:@Controller('accounting')
+src/modules/accounting/controllers/accounting-asset.controller.ts:15:@Controller('accounting')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:27:@Controller('accounting')
+src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:10:@Controller('accounting')
+src/modules/accounting/controllers/accounting-fiscal.controller.ts:23:@Controller('accounting')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:50:@Controller('accounting')
+src/modules/accounting/controllers/accounting-liability.controller.ts:18:@Controller('accounting')
+src/modules/accounting/controllers/accounting-practitioner.controller.ts:45:@Controller('accounting/practitioner')
+src/modules/accounting/controllers/accounting-subledger.controller.ts:15:@Controller('accounting')
+
+$ grep -nE "@(Get|Post|Patch|Put|Delete)\(" src/modules/accounting/controllers/*.controller.ts | wc -l
+45
+
+$ grep -nE "@(Get|Post|Patch|Put|Delete)\(|@Roles\(" src/modules/accounting/controllers/*.controller.ts
+accounting-accrual.controller.ts:25:  @Post('accrual-objects')
+accounting-accrual.controller.ts:26:  @Roles('SECURITY_ADMIN')
+accounting-accrual.controller.ts:37:  @Post('accruals/run')
+accounting-accrual.controller.ts:38:  @Roles('SECURITY_ADMIN')
+accounting-asset.controller.ts:25:  @Post('assets/capitalize')
+accounting-asset.controller.ts:26:  @Roles('SECURITY_ADMIN')
+accounting-asset.controller.ts:37:  @Post('depreciation/run')
+accounting-asset.controller.ts:38:  @Roles('SECURITY_ADMIN')
+accounting-cockpit.controller.ts:37:  @Get('fiscal-years')
+accounting-cockpit.controller.ts:38:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-cockpit.controller.ts:53:  @Get('open-items')
+accounting-cockpit.controller.ts:54:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-cockpit.controller.ts:68:  @Get('dimensions')
+accounting-cockpit.controller.ts:69:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-cockpit.controller.ts:84:  @Get('journal-transactions/:id/document-flow')
+accounting-cockpit.controller.ts:85:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-cockpit.controller.ts:99:  @Get('assets')
+accounting-cockpit.controller.ts:100:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-cockpit.controller.ts:115:  @Get('accrual-objects')
+accounting-cockpit.controller.ts:116:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-exchange-rate.controller.ts:20:  @Post('exchange-rates')
+accounting-exchange-rate.controller.ts:21:  @Roles('SECURITY_ADMIN')
+accounting-fiscal.controller.ts:33:  @Post('fiscal-years')
+accounting-fiscal.controller.ts:34:  @Roles('SECURITY_ADMIN')
+accounting-fiscal.controller.ts:45:  @Post('fiscal-periods/:id/lock')
+accounting-fiscal.controller.ts:46:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:72:  @Get('accounts')
+accounting-ledger.controller.ts:73:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:83:  @Get('trial-balance')
+accounting-ledger.controller.ts:84:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:97:  @Get('journal-transactions')
+accounting-ledger.controller.ts:98:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:110:  @Get('general-ledger')
+accounting-ledger.controller.ts:111:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:128:  @Get('income-statement')
+accounting-ledger.controller.ts:129:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:144:  @Get('balance-sheet')
+accounting-ledger.controller.ts:145:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:157:  @Get('journal-transactions/:id')
+accounting-ledger.controller.ts:158:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+accounting-ledger.controller.ts:167:  @Post('accounts')
+accounting-ledger.controller.ts:168:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:179:  @Post('journal-transactions')
+accounting-ledger.controller.ts:180:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:196:  @Post('journal-transactions/drafts')
+accounting-ledger.controller.ts:197:  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
+accounting-ledger.controller.ts:212:  @Post('journal-transactions/:id/classify')
+accounting-ledger.controller.ts:213:  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
+accounting-ledger.controller.ts:225:  @Post('journal-transactions/:id/submit-review')
+accounting-ledger.controller.ts:226:  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
+accounting-ledger.controller.ts:238:  @Post('journal-transactions/:id/approve')
+accounting-ledger.controller.ts:239:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
+accounting-ledger.controller.ts:251:  @Post('journal-transactions/:id/post')
+accounting-ledger.controller.ts:252:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:266:  @Post('postings/determine-accounts')
+accounting-ledger.controller.ts:267:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:279:  @Post('journal-transactions/:id/reverse')
+accounting-ledger.controller.ts:280:  @Roles('SECURITY_ADMIN')
+accounting-ledger.controller.ts:292:  @Post('journal-transactions/:id/files')
+accounting-ledger.controller.ts:293:  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
+accounting-liability.controller.ts:28:  @Post('liabilities/:id/payments')
+accounting-liability.controller.ts:29:  @Roles('SECURITY_ADMIN')
+accounting-practitioner.controller.ts:52:  @Get('paid-consultations')
+accounting-practitioner.controller.ts:53:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:67:  @Post('consultation-income')
+accounting-practitioner.controller.ts:68:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:83:  @Post('entries')
+accounting-practitioner.controller.ts:84:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:103:  @Get('assets')
+accounting-practitioner.controller.ts:104:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:114:  @Post('assets')
+accounting-practitioner.controller.ts:115:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:126:  @Patch('assets/:id/automation')
+accounting-practitioner.controller.ts:127:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:138:  @Post('assets/:id/progress')
+accounting-practitioner.controller.ts:139:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:151:  @Get('liabilities')
+accounting-practitioner.controller.ts:152:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:162:  @Post('liabilities')
+accounting-practitioner.controller.ts:163:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:174:  @Get('liabilities/:id/schedule')
+accounting-practitioner.controller.ts:175:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:189:  @Patch('liabilities/:id/automation')
+accounting-practitioner.controller.ts:190:  @Roles('PRACTITIONER')
+accounting-practitioner.controller.ts:201:  @Post('liabilities/:id/progress')
+accounting-practitioner.controller.ts:202:  @Roles('PRACTITIONER')
+accounting-subledger.controller.ts:25:  @Post('open-items')
+accounting-subledger.controller.ts:26:  @Roles('SECURITY_ADMIN')
+accounting-subledger.controller.ts:37:  @Post('clearing-documents')
+accounting-subledger.controller.ts:38:  @Roles('SECURITY_ADMIN')
+
+$ ls src/modules/accounting/services/
+README.md
+accounting-read.service.spec.ts
+accounting-read.service.ts
+accrual.service.spec.ts
+accrual.service.ts
+asset.service.concurrency.spec.ts
+asset.service.spec.ts
+asset.service.ts
+concept-codes.ts
+exchange-rate.service.spec.ts
+exchange-rate.service.ts
+fiscal.service.spec.ts
+fiscal.service.ts
+index.ts
+journal-classification.spec.ts
+journal-classification.ts
+ledger-read.service.spec.ts
+ledger-read.service.ts
+ledger.service.spec.ts
+ledger.service.ts
+liability-amortization.spec.ts
+liability-amortization.ts
+liability.service.spec.ts
+liability.service.ts
+money.ts
+posting.helper.ts
+practitioner-accounting.service.assets-liabilities.spec.ts
+practitioner-accounting.service.ts
+subledger.service.spec.ts
+subledger.service.ts
+
+# Partida doble (422)
+$ grep -n "no balancea\|no tiene importe" src/modules/accounting/services/*.ts
+src/modules/accounting/services/ledger.service.spec.ts:124:    it('rechaza (422) un asiento que no balancea', async () => {
+src/modules/accounting/services/ledger.service.spec.ts:399:    it('post rechaza (422) si las líneas persistidas no balancean', async () => {
+src/modules/accounting/services/ledger.service.ts:89: * la de créditos (`sum(DEBIT) == sum(CREDIT)`). Si no balancea, el servicio lanza
+src/modules/accounting/services/ledger.service.ts:978:        'El asiento no balancea (debe != haber)',
+src/modules/accounting/services/ledger.service.ts:1003:      throw new PreconditionFailedException('El asiento no tiene importe', {});
+src/modules/accounting/services/ledger.service.ts:1007:        'El asiento no balancea (debe != haber)',
+src/modules/accounting/services/posting.helper.ts:135:        'El asiento generado no balancea (debe != haber)',
+
+# Máquina de estados del asiento
+$ grep -n "ALLOWED_TRANSITIONS\|APPROVAL_ROLES\|Transición de estado inválida" src/modules/accounting/services/ledger.service.ts
+60:const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
+78:const APPROVAL_ROLES: readonly string[] = [
+830:   * esté declarada en `ALLOWED_TRANSITIONS`. Único punto de verdad del flujo.
+833:    const allowed = ALLOWED_TRANSITIONS[from] ?? [];
+835:      throw new PreconditionFailedException('Transición de estado inválida', {
+910:    if (!roles.some((r) => APPROVAL_ROLES.includes(r))) {
+913:        { requiredAnyOf: APPROVAL_ROLES },
+
+# Precisión monetaria
+$ grep -n "^export function" src/modules/accounting/services/money.ts
+11:export function toCents(amount: string | number): number {
+20:export function sumCents(amounts: Array<string | number>): number {
+25:export function fromCents(cents: number): string {
+43:export function importeEnBase(linea: {
+58:export function aCentimos(valor: string | number | null | undefined): bigint {
+70:export function aTexto(centimos: bigint): string {
+
+# Monedas del catálogo contable (Q-04)
+$ grep -n "CURRENCY_" src/modules/accounting/accounting.concepts.ts
+202:    CURRENCY_PEN: { code: 'ACCT_CUR_PEN', display: 'Peruvian Sol' },
+203:    CURRENCY_USD: { code: 'ACCT_CUR_USD', display: 'US Dollar' },
+$ grep -rn "ACCT.CURRENCY_" src | wc -l
+0
+$ grep -rn "CURRENCY_BOB" src --include=*.ts | grep -v spec
+src/common/constants/concepts.ts:888:  CURRENCY_BOB: def('currency:bob', 'BOB', 'Boliviano'),
+src/common/seed/dynamic-enum-catalog.ts:154:    concepts: [CONCEPTS.CURRENCY_BOB, CONCEPTS.CURRENCY_USD],
+src/common/seed/dynamic-enum-catalog.ts:155:    defaultConceptId: CONCEPTS.CURRENCY_BOB,
+src/common/seed/terminology-designations.es.ts:3966:    CONCEPTS.CURRENCY_BOB,
+src/modules/billing/default-services.ts:30:  currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/billing/services/billing-service-catalog.service.ts:47:    [CONCEPTS.CURRENCY_BOB]: CONCEPT_DEFS.CURRENCY_BOB.code,
+src/modules/billing/services/billing-service-catalog.service.ts:352:          CONCEPTS.CURRENCY_BOB;
+src/modules/crm/services/crm-sales.service.ts:294:        currencyConceptId: dto.amount ? CONCEPTS.CURRENCY_BOB : undefined,
+src/modules/crm/services/crm-service.service.ts:201:          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/diagnostic_units/diagnostic_units.concepts.ts:146:    CURRENCY_BOB: { code: 'DU_CUR_BOB', display: 'Boliviano' },
+src/modules/erp/services/erp-contracts.service.ts:256:        currencyConceptId: dto.totalValue ? CONCEPTS.CURRENCY_BOB : undefined,
+src/modules/erp/services/erp-contracts.service.ts:419:          ? CONCEPTS.CURRENCY_BOB
+src/modules/erp/services/erp-contracts.service.ts:481:          ? CONCEPTS.CURRENCY_BOB
+src/modules/erp/services/erp-operations.service.ts:84:        currencyConceptId: dto.baseSalary ? CONCEPTS.CURRENCY_BOB : undefined,
+src/modules/erp/services/erp-operations.service.ts:253:        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/erp/services/erp-operations.service.ts:476:        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/erp/services/erp-operations.service.ts:532:        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/erp/services/erp-operations.service.ts:565:        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+src/modules/insurance/insurance-currency.ts:7:  [CONCEPTS.CURRENCY_BOB, 'BOB'],
+src/modules/insurance/insurance-currency.ts:9:  [DUNIT.CURRENCY_BOB, 'BOB'],
+src/modules/insurance/services/insurance-analytics.service.ts:134:      CONCEPTS.CURRENCY_BOB,
+src/modules/payments/services/payments-intents.service.ts:36:  BOB: CONCEPTS.CURRENCY_BOB,
+src/modules/payments/services/payments-operations.service.ts:26:  BOB: CONCEPTS.CURRENCY_BOB,
+src/modules/promotions/services/promotions-discounts.service.ts:355:          CONCEPTS.CURRENCY_BOB,
+src/modules/promotions/services/promotions-discounts.service.ts:485:          CONCEPTS.CURRENCY_BOB,
+src/modules/scheduling/services/scheduling-bookings.service.ts:1582:          ? (currencyConceptId ?? CONCEPTS.CURRENCY_BOB)
+src/modules/scheduling/services/scheduling-catalog.service.ts:299:          ? CONCEPTS.CURRENCY_BOB
+
+# Rol aprobador (pedido a M2)
+$ grep -rn "ACCOUNTING_APPROVER" src --include=*.ts | grep -v spec
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:38:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:54:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:69:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:85:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:100:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-cockpit.controller.ts:116:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:73:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:84:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:98:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:111:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:129:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:145:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:158:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+src/modules/accounting/controllers/accounting-ledger.controller.ts:239:  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
+src/modules/accounting/controllers/accounting-practitioner.controller.ts:38: * sigue siendo la vía para `SECURITY_ADMIN`/`ACCOUNTING_APPROVER`).
+src/modules/accounting/services/accounting-read.service.ts:179:      actor.roles.includes('ACCOUNTING_APPROVER')
+src/modules/accounting/services/ledger-read.service.ts:86:   * asignación de rol ACTIVE; `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` pasan
+src/modules/accounting/services/ledger-read.service.ts:96:      actor.roles.includes('ACCOUNTING_APPROVER')
+src/modules/accounting/services/ledger.service.ts:79:  'ACCOUNTING_APPROVER',
+src/modules/accounting/services/ledger.service.ts:118:   * `ACCOUNTING_APPROVER`) sólo puede tocar asientos de una práctica a la que
+src/modules/accounting/services/ledger.service.ts:134:      actor.roles.includes('ACCOUNTING_APPROVER')
+src/modules/practice/controllers/practices.controller.ts:104:    'ACCOUNTING_APPROVER',
+src/modules/practice/controllers/practices.controller.ts:132:    'ACCOUNTING_APPROVER',
+
+# ¿El rol ACCOUNTING_APPROVER llega al JWT? role-mapping.ts declara un RoleCode cerrado
+$ grep -n "ACCOUNTING" src/modules/iam/services/role-mapping.ts | wc -l
+0
+# → 0: el rol no existe en el mapeo; el approve sólo lo alcanza SECURITY_ADMIN (pedido a M2).
