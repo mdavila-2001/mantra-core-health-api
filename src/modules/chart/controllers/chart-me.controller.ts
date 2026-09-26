@@ -168,7 +168,7 @@ export class ChartMeController {
   @ApiOperation({
     summary: 'Descargar mi historia completa en PDF oficial',
     description:
-      'Sólo lo liberado y visible; sellado y auditado. 412 si la sesión no tiene perfil de paciente.',
+      'Sólo lo liberado y visible; sellado y auditado. 422 si la sesión no tiene perfil de paciente.',
   })
   @ApiOkResponse({
     description: 'PDF oficial de la historia del titular',

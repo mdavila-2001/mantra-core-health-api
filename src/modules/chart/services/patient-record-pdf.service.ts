@@ -83,7 +83,7 @@ export class PatientRecordPdfService {
   /**
    * Arma el PDF oficial de la historia del titular.
    *
-   * @throws PreconditionFailedException si la sesión no tiene perfil de paciente (412).
+   * @throws PreconditionFailedException si la sesión no tiene perfil de paciente (422).
    */
   async renderForPatient(
     actor: AuthenticatedUser,

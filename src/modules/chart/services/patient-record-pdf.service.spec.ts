@@ -87,7 +87,7 @@ function build() {
 }
 
 describe('PatientRecordPdfService (BR-15, CV-06, TX-32)', () => {
-  it('412 si la sesión no tiene perfil de paciente, sin leer nada', async () => {
+  it('422 si la sesión no tiene perfil de paciente, sin leer nada', async () => {
     const d = build();
     await expect(
       d.service.renderForPatient({ id: 'x', roles: [] } as any),
