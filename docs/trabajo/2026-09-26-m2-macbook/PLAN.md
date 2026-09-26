@@ -37,8 +37,8 @@ cuando lo llama uno sin X, responde 403.
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H1.S1.M1 | Inventariar los roles que los `@Roles` usan y nadie siembra | la lista sale del código | `grep` pegado (ver evidencia) | HECHO |
-| H1.S1.M2 | Sembrar `BILLING`, `FINANCE`, `ACCOUNTING_APPROVER` en `authz.roles` | cada uno existe tras el seed | consulta a la base pegada | TODO |
-| H1.S1.M3 | Un rol de negocio desconocido en `mergeRoleCodes`/`AuthzEffectiveRolesService` falla fuerte (log de advertencia) en vez de descartarse mudo | hay prueba que lo fija | salida del test pegada | TODO |
+| H1.S1.M2 | Sembrar `BILLING`, `FINANCE`, `ACCOUNTING_APPROVER` en `authz.roles` | cada uno existe tras el seed | consulta a la base pegada | HECHO |
+| H1.S1.M3 | Un rol de negocio desconocido en `mergeRoleCodes`/`AuthzEffectiveRolesService` falla fuerte (log de advertencia) en vez de descartarse mudo | hay prueba que lo fija | salida del test pegada | HECHO |
 
 **Hallazgo de M1 (corrige la hipótesis literal del encargo):** `role-mapping.ts`/`RoleCode` (cerrado a
 `USER|SECURITY_ADMIN|SUPERADMIN|PATIENT|PRACTITIONER|CLINICIAN`) sólo gobierna los roles
@@ -78,8 +78,31 @@ del paciente o administra su laboratorio, entonces no recibe 403 por falta de ro
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H1.S2.M1 | Asignar los roles que el alta de médico debe dar (`MEDICAL_VISITOR`/`PHARMA_LAB_ADMIN` no aplican al alta de médico — son roles de otro actor; el alta de `PRACTITIONER` ya asigna ese global role. Verificar qué rol falta realmente para check-in/mostrador/ficha/laboratorio) | los cuatro caminos dan 200 o el 403 se explica con evidencia | salida de integración pegada | TODO |
-| H1.S2.M2 | Dejar el 403 donde corresponde | un actor sin el rol sigue recibiendo 403 | salida pegada | TODO |
+| H1.S2.M1 | Asignar los roles que el alta de médico debe dar | los cuatro caminos dan 200 o el 403 se explica con evidencia | salida de integración pegada | HECHO |
+| H1.S2.M2 | Dejar el 403 donde corresponde | un actor sin el rol sigue recibiendo 403 | salida pegada | HECHO |
+
+**Hallazgo de H1.S2 (corrige otra vez la hipótesis literal del encargo):** `MEDICAL_VISITOR` y
+`PHARMA_LAB_ADMIN` **no** son roles del médico — son del visitador médico/administrador de
+laboratorio farmacéutico (`pharma_lab.roles.ts`), un actor completamente distinto (personal de una
+farmacéutica, no un profesional de salud). El auto-registro de médico
+(`iam-practitioner-self-registration.service.ts:492-508`) ya concede `USER` + `PRACTITIONER`
+(roles globales), y los tres controladores de los cuatro caminos nombrados ya declaran
+`PRACTITIONER` en su `@Roles(...)`:
+- `clinical-encounters.controller.ts:49` → `@Roles('CLINICIAN', 'PRACTITIONER')` (check-in)
+- `scheduling.controller.ts:548` → `@Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')` (mostrador/`appointments/direct`)
+- `clinical-orders.controller.ts:38` → `@Roles('CLINICIAN', 'PRACTITIONER')` (ficha/laboratorio — `service-requests`, `diagnostic-reports`)
+
+Verificado en vivo (API real en `localhost:3000` contra Postgres/Redis del proyecto, no mockeado):
+registré un médico nuevo por `POST /iam/auth/register-practitioner` (201, `verificationStatus:
+PENDING`), inicié sesión, y until pegué los tres endpoints con body vacío — **ninguno devolvió
+403**: los tres dieron 400 por validación de DTO (UUIDs faltantes), que es la prueba de que
+`RolesGuard` los dejó pasar. Sin token: 401 (`UNAUTHENTICATED`), confirmando que el guard de
+autenticación sigue exigiéndolo. `RolesGuard.spec.ts` (7/7 verde, preexistente) ya cubre el caso
+"rol insuficiente → 403" a nivel unitario.
+
+**No hizo falta ningún cambio de código para H1.S2**: el CA ya estaba satisfecho. Se registra así
+en vez de fabricar una corrección — regla 00 §6.2 prohíbe decir "corregido" sin haber corregido
+nada.
 
 ## H2 — Las 105 personas del padrón entran con su cuenta
 **CA:** Dada cada persona sembrada, cuando hace `POST /iam/auth/login` con `12345678`, entonces
