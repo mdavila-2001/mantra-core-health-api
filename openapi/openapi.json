@@ -19734,6 +19734,117 @@
         "description": "Determinar coordinación de beneficios (COB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/prior-authorization-requests/inbox": {
+      "get": {
+        "operationId": "PriorAuthController_inbox",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "DETERMINED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriorAuthListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bandeja de solicitudes de aprobación (aseguradora)",
+        "tags": [
+          "insurance-prior-auth"
+        ],
+        "description": "Bandeja de solicitudes de aprobación (aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/prior-authorization-requests/{id}": {
+      "get": {
+        "operationId": "PriorAuthController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriorAuthDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de una solicitud de aprobación (aseguradora)",
+        "tags": [
+          "insurance-prior-auth"
+        ],
+        "description": "Detalle de una solicitud de aprobación (aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/prior-authorization-requests": {
       "post": {
         "operationId": "PriorAuthController_submit",
@@ -92887,6 +92998,278 @@
           "primaryPatientCoverageId"
         ]
       },
+      "PriorAuthPatientDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "patientCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberIdentifier": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "patientCode",
+          "memberIdentifier"
+        ]
+      },
+      "PriorAuthListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "PHARMACY",
+              "DIAGNOSTIC",
+              "GENERIC"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED",
+              "IN_REVIEW",
+              "DETERMINED"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED",
+              "PARTIAL"
+            ],
+            "nullable": true
+          },
+          "patient": {
+            "$ref": "#/components/schemas/PriorAuthPatientDto"
+          },
+          "planName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "totalRequestedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "origin",
+          "status",
+          "decision",
+          "patient",
+          "planName",
+          "currencyCode",
+          "itemCount",
+          "totalRequestedAmount",
+          "submittedAt"
+        ]
+      },
+      "PriorAuthListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriorAuthListItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "PriorAuthItemDecisionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED"
+            ]
+          },
+          "approvedQuantity": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "policyClauseReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "denialRationale": {
+            "type": "string",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "decision",
+          "approvedQuantity",
+          "approvedAmount",
+          "policyClauseReference",
+          "denialRationale",
+          "decidedAt"
+        ]
+      },
+      "PriorAuthItemViewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "decision": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PriorAuthItemDecisionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "sequence",
+          "description",
+          "requestedQuantity",
+          "requestedAmount",
+          "decision"
+        ]
+      },
+      "PriorAuthDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "PHARMACY",
+              "DIAGNOSTIC",
+              "GENERIC"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUBMITTED",
+              "IN_REVIEW",
+              "DETERMINED"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED",
+              "PARTIAL"
+            ],
+            "nullable": true
+          },
+          "patient": {
+            "$ref": "#/components/schemas/PriorAuthPatientDto"
+          },
+          "planName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "totalRequestedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriorAuthItemViewDto"
+            }
+          },
+          "decidedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "origin",
+          "status",
+          "decision",
+          "patient",
+          "planName",
+          "currencyCode",
+          "itemCount",
+          "totalRequestedAmount",
+          "submittedAt",
+          "items",
+          "decidedAt"
+        ]
+      },
       "PriorAuthItemDto": {
         "type": "object",
         "properties": {
@@ -92962,6 +93345,48 @@
           "items"
         ]
       },
+      "ItemDeterminationDto": {
+        "type": "object",
+        "properties": {
+          "priorAuthorizationItemId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Ítem de la solicitud decidido"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED"
+            ]
+          },
+          "denialReasonConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyClauseReference": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "Cláusula 12.3: medicamento no cubierto en plan ambulatorio"
+          },
+          "denialRationale": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "approvedQuantity": {
+            "type": "string",
+            "example": "1"
+          },
+          "approvedAmount": {
+            "type": "string",
+            "example": "80.00"
+          }
+        },
+        "required": [
+          "priorAuthorizationItemId",
+          "decision"
+        ]
+      },
       "CreateDeterminationDto": {
         "type": "object",
         "properties": {
@@ -92972,6 +93397,12 @@
               "DENIED",
               "PARTIAL"
             ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemDeterminationDto"
+            }
           },
           "approvedQuantity": {
             "type": "string",
@@ -92989,10 +93420,7 @@
             "type": "string",
             "format": "date"
           }
-        },
-        "required": [
-          "decision"
-        ]
+        }
       },
       "ClaimLineDto": {
         "type": "object",

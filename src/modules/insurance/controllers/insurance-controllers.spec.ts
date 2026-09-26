@@ -138,11 +138,19 @@ describe('Insurance controllers (delegación)', () => {
       submitRequest: mockFn().mockResolvedValue({ id: ID }),
       issueDetermination: mockFn().mockResolvedValue({ id: ID }),
     };
-    const c = new PriorAuthController(service as never) as any;
+    const reader = {
+      listInbox: mockFn().mockResolvedValue({ items: [] }),
+      getForInsurer: mockFn().mockResolvedValue({ id: ID }),
+    };
+    const c = new PriorAuthController(service as never, reader as never) as any;
     await c.submit(dto, actor);
     expect(service.submitRequest).toHaveBeenCalledWith(dto, actor);
     await c.determine(ID, dto, actor);
     expect(service.issueDetermination).toHaveBeenCalledWith(ID, dto, actor);
+    await c.inbox({ status: 'PENDING' }, actor);
+    expect(reader.listInbox).toHaveBeenCalledWith({ status: 'PENDING' }, actor);
+    await c.getById(ID, actor);
+    expect(reader.getForInsurer).toHaveBeenCalledWith(ID, actor);
   });
 
   it('ReconciliationController delega en ReconciliationService', async () => {
@@ -268,7 +276,7 @@ describe('Insurance controllers (delegación)', () => {
     for (const escritura of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
       expect(metodo(escritura)).toEqual([]);
     }
-    for (const operation of ['submit', 'determine']) {
+    for (const operation of ['submit', 'determine', 'inbox', 'getById']) {
       expect(
         Reflect.getMetadata(
           'requiredRoles',
