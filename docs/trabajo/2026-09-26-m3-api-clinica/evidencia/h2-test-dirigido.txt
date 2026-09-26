@@ -1,0 +1,5 @@
+$ corepack yarn test --testPathPatterns="medical-aspects|clinical.module"   # tras H2
+Test Suites: 2 passed, 2 total
+Tests:       12 passed, 12 total
+Time:        6.196 s
+exit=0

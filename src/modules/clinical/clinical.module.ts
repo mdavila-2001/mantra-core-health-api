@@ -25,6 +25,7 @@ import { AuthzModule } from '../authz/authz.module';
 import { TerminologyModule } from '../terminology/terminology.module';
 import {
   ClinicalEncountersController,
+  ClinicalMedicalAspectsController,
   ClinicalObservationsController,
   ClinicalOrdersController,
   ClinicalPrescriptionPoliciesController,
@@ -44,6 +45,7 @@ import {
   ConditionsService,
   AllergyIntolerancesService,
   MedicationsService,
+  MedicalAspectsService,
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
@@ -67,6 +69,7 @@ import {
   AllergyIntolerancesRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
+  PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
@@ -143,6 +146,10 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
   ],
   controllers: [
     ClinicalEncountersController,
+    // D-B (FT-22): `GET|PUT /clinical/me/medical-aspects`. Sin `@Roles`, el
+    // titular sale del vínculo de la cuenta. `clinical.module.spec.ts` exige
+    // que esté acá: importarlo no lo publica.
+    ClinicalMedicalAspectsController,
     ClinicalObservationsController,
     ClinicalOrdersController,
     ClinicalPrescriptionPoliciesController,
@@ -170,6 +177,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     AllergyIntolerancesRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
+    PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
@@ -191,6 +199,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     ConditionsService,
     AllergyIntolerancesService,
     MedicationsService,
+    MedicalAspectsService,
     PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
