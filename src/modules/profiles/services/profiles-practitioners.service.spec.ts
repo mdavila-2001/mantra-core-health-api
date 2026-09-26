@@ -442,6 +442,46 @@ describe('ProfilesPractitionersService', () => {
   });
 
   describe('addJurisdictionAuthorization (UC-05-04)', () => {
+    /**
+     * Quién la declara decide con qué estado nace. Visto contra la API real el
+     * 2026-09-26 (recorrido de navegador de H2): la médica agregaba una matrícula
+     * desde su editor, el front decía «queda pendiente de verificación» y la fila
+     * aparecía «Habilitación vigente» con el sello. La verifica la plataforma
+     * (UC-05-05): la del titular nace AUTH_PENDING; la del alta administrativa,
+     * AUTH_ACTIVE, como hasta ahora.
+     */
+    it('la matrícula que agrega el propio profesional nace pendiente; la del administrador, vigente', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
+      d.authorizationsRepo.create.mockImplementation(
+        (_tx: any, datos: any) => ({
+          id: 'auth-1',
+          licenseNumber: datos.licenseNumber,
+          stateConceptId: datos.stateConceptId,
+          createdAt: new Date(),
+        }),
+      );
+
+      const propia = await d.service.addJurisdictionAuthorization(
+        'pp1',
+        { licenseNumber: 'MP-1' } as any,
+        { id: 'medica-1', roles: ['USER', 'PRACTITIONER'] } as any,
+      );
+      expect(d.authorizationsRepo.create.mock.calls[0][1].stateConceptId).toBe(
+        PROF.AUTH_PENDING,
+      );
+      expect(propia.state).toBe(PROF.AUTH_PENDING);
+
+      await d.service.addJurisdictionAuthorization(
+        'pp1',
+        { licenseNumber: 'MP-2' } as any,
+        actor,
+      );
+      expect(d.authorizationsRepo.create.mock.calls[1][1].stateConceptId).toBe(
+        PROF.AUTH_ACTIVE,
+      );
+    });
+
     it('throws when the practitioner does not exist', async () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue(null);

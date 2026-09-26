@@ -1783,6 +1783,21 @@ export class ProfilesPractitionersService {
         );
       }
 
+      // Quién la declara decide con qué estado nace. La ruta no lleva `@Roles` y
+      // el titular administra lo suyo (arriba), pero una matrícula que el propio
+      // profesional agrega desde su editor NO puede nacer vigente: la verifica la
+      // plataforma (UC-05-05), igual que las del alta, que nacen AUTH_PENDING. Se
+      // vio contra la API real el 2026-09-26: la médica agregaba una matrícula, el
+      // front decía «queda pendiente de verificación» y la fila aparecía
+      // «Habilitación vigente» con el sello. Sólo el alta administrativa
+      // (SECURITY_ADMIN / SUPERADMIN) la registra ya vigente.
+      const rolesQueHabilitan: readonly string[] = [
+        'SECURITY_ADMIN',
+        'SUPERADMIN',
+      ];
+      const esAdministrador = actor.roles.some((rol) =>
+        rolesQueHabilitan.includes(rol),
+      );
       const authorization = this.authorizationsRepo.create(tx, {
         practitionerProfileId: profileId,
         jurisdictionConceptId:
@@ -1790,7 +1805,7 @@ export class ProfilesPractitionersService {
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         practiceScopeConceptId: dto.practiceScopeConceptId,
-        stateConceptId: PROF.AUTH_ACTIVE,
+        stateConceptId: esAdministrador ? PROF.AUTH_ACTIVE : PROF.AUTH_PENDING,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
         fileId: dto.fileId,
