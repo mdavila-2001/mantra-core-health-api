@@ -58,6 +58,7 @@ import {
   JurisdictionAuthorizationResponseDto,
   VerifyCredentialDto,
   CredentialResponseDto,
+  ListPendingCredentialsResponseDto,
   AddSpecialtyDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
@@ -1739,6 +1740,52 @@ export class ProfilesPractitionersService {
         createdAt: authorization.createdAt,
       };
     });
+  }
+
+  /**
+   * CV-20 — cola de credenciales pendientes de verificación (títulos y
+   * matrículas cargados por el profesional). `SECURITY_ADMIN`, igual que
+   * {@link verifyCredential}: es una lectura de plataforma, la credencial no
+   * declara tenant propio.
+   */
+  async listPendingCredentials(options: {
+    stateConceptId?: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<ListPendingCredentialsResponseDto> {
+    const em = this.em.fork();
+    const limit = options.limit ?? 50;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+    const stateConceptId = options.stateConceptId ?? PROF.CRED_PENDING;
+
+    const rows = await this.credentialsRepo.findByStatePage(
+      em,
+      stateConceptId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((credential) => ({
+        id: credential.id,
+        practitionerProfileId: credential.practitionerProfileId,
+        credentialTypeConceptId: credential.credentialTypeConceptId,
+        number: credential.number,
+        issuingInstitutionText: credential.issuingInstitutionText,
+        fileId: credential.fileId,
+        state: credential.stateConceptId,
+        createdAt: credential.createdAt,
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
   }
 
   /** UC-05-05: verifica (o rechaza) una credencial; recomputa el estado del profesional. */
