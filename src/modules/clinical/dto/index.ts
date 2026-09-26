@@ -7,6 +7,7 @@ export * from './diagnostic-report.dto';
 export * from './condition.dto';
 export * from './allergy.dto';
 export * from './medication.dto';
+export * from './medical-aspects.dto';
 export * from './prescription-signature-policy.dto';
 export * from './procedure.dto';
 export * from './immunization.dto';

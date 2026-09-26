@@ -79,6 +79,7 @@ import { PolyglotStorageModule } from './modules/polyglot_storage/polyglot_stora
 import { PracticeModule } from './modules/practice/practice.module';
 import { ProceduresPerioperativeModule } from './modules/procedures_perioperative/procedures_perioperative.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { PublicCatalogModule } from './modules/public/public.module';
 import { QaLabModule } from './modules/qa_lab/qa_lab.module';
 import { QuotationsModule } from './modules/quotations/quotations.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
@@ -223,6 +224,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     PracticeModule,
     ProceduresPerioperativeModule,
     PromotionsModule,
+    PublicCatalogModule,
     QaLabModule,
     QuotationsModule,
     ReadModelsModule,

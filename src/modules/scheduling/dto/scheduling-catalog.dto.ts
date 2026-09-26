@@ -869,6 +869,26 @@ export class RetireTemplateResponseDto {
     description: 'Cupos conservados porque tienen una cita detrás',
   })
   keptSlots!: number;
+
+  /**
+   * Citas confirmadas o presentadas que siguen vivas en los cupos conservados.
+   *
+   * No frenan el retiro (M4 · H1.S2.M2): se informan para que la pantalla le
+   * diga al médico qué turnos siguen en pie.
+   */
+  @ApiProperty({
+    description:
+      'Citas confirmadas o presentadas que siguen vivas en cupos conservados',
+  })
+  liveBookings!: number;
+
+  /** Ids (nunca nombres) de esas citas, hasta un tope. */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  liveBookingIds!: string[];
+
+  /** `true` si hay más citas vivas que las listadas en `liveBookingIds`. */
+  @ApiProperty()
+  truncated!: boolean;
 }
 
 /** Un motivo de bloqueo tal como lo ofrece la pantalla. */
@@ -1017,7 +1037,7 @@ export class ShiftSlotsDto {
   @ApiPropertyOptional({ type: [String], format: 'uuid' })
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID(undefined, { each: true })
   slotIds?: string[];
 }
 
@@ -1078,7 +1098,7 @@ export class CloseSlotsDto {
   @ApiProperty({ type: [String], format: 'uuid' })
   @IsArray()
   @ArrayNotEmpty()
-  @IsUUID('4', { each: true })
+  @IsUUID(undefined, { each: true })
   slotIds!: string[];
 }
 

@@ -1,5 +1,8 @@
 export { CreateTemplateDto } from './create-template.dto';
 export { AddQuestionDto } from './add-question.dto';
+export { UpdateQuestionDto } from './update-question.dto';
+export { ReorderQuestionsDto } from './reorder-questions.dto';
+export { UpdateTemplateDto } from './update-template.dto';
 export { PublishVersionDto } from './publish-version.dto';
 export { CreateAssignmentDto } from './create-assignment.dto';
 export { IssueInvitationsDto } from './issue-invitations.dto';

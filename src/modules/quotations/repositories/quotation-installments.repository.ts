@@ -38,6 +38,29 @@ export class QuotationInstallmentsRepository {
   }
 
   /**
+   * Las cuotas de VARIAS cotizaciones en una sola consulta (M4 · H3.S1.M3).
+   *
+   * Es la lectura del listado por paciente: antes se pedían las cuotas de a
+   * una cotización por vez (N+1). Ordenadas por cotización y número de cuota;
+   * quien llama las reparte.
+   *
+   * @param em - Contexto de persistencia.
+   * @param quotationIds - Cotizaciones cuyas cuotas se quieren.
+   * @returns Las cuotas de todas ellas; vacío sin ir a la base si no hay ids.
+   */
+  async findByQuotationIds(
+    em: EntityManager,
+    quotationIds: readonly string[],
+  ): Promise<QuotationInstallments[]> {
+    if (quotationIds.length === 0) return [];
+    return em.find(
+      QuotationInstallments,
+      { quotationId: { $in: [...quotationIds] } },
+      { orderBy: { quotationId: 'ASC', installmentNumber: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea todas las cuotas del plan de pagos de una cotización.
    *
    * @param em - Contexto de persistencia o transacción activa.

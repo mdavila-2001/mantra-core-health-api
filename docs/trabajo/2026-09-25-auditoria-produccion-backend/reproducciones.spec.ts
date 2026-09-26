@@ -92,7 +92,9 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     } };
     const policy = { assertPuedeEscribirHistoria: jest.fn(async () => { throw new Error('must deny'); }) };
     const service = new EncountersService({ transactional: (fn: any) => fn(tx) } as any,
-      new EncountersRepository(), {} as any, {} as any, {} as any, log as any, policy as any);
+      new EncountersRepository(), {} as any, {} as any, {} as any, log as any, policy as any,
+      // P25 (carril M3, 2026-09-26): `FilesService` para los adjuntos del encuentro.
+      {} as any);
     const user = actor('CLINICIAN');
     const dto = { tenantId: T1, patientProfileId: P1, appointmentId: ID };
     const result: any = await guarded(ClinicalEncountersController, 'checkIn',

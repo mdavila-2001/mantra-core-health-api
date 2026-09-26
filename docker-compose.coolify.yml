@@ -508,6 +508,17 @@ services:
 
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # `pull_policy: missing` (M1, 2026-09-26): además de `mc`, quay.io también
+    # bloqueó el acceso público anónimo al repo `minio/minio` — reproducido en
+    # vivo: un `docker pull` fresco de ESTE MISMO tag devuelve 401 hoy. Todo
+    # despliegue hace `docker compose pull` antes de `up`, así que sin esto
+    # cualquier redeploy vuelve a fallar aunque el contenedor viejo siga sano.
+    # La imagen ya está en la cache local del host (se confirmó con
+    # `docker images`) desde antes del bloqueo; `missing` la usa sin volver a
+    # pedirla al registro. Riesgo que esto NO resuelve, documentado aparte: si
+    # la cache local se pierde (host nuevo, `docker system prune -a`), esta
+    # imagen exacta deja de ser obtenible por cualquier medio público conocido.
+    pull_policy: missing
     restart: always
     command: server /data --console-address ":9001"
     environment:
@@ -528,16 +539,34 @@ services:
   # en `src/`). Contra un MinIO recién levantado, la primera subida de audio o
   # de archivo por S3 muere con `NoSuchBucket` — y el worker lo registra como
   # fallo de proveedor, que manda a buscar el problema donde no está.
+  #
+  # Imagen cambiada de `quay.io/minio/mc` a `amazon/aws-cli` (M1, 2026-09-26):
+  # MinIO retiró el acceso público anónimo a sus imágenes en Quay.io. Se
+  # reprodujo en vivo contra el VPS: `docker pull` de CUALQUIER tag de
+  # `quay.io/minio/mc` (incluidas versiones de 2023) devuelve 401 Unauthorized
+  # del registro, no un error de red — y esto tumbaba TODO despliegue de esta
+  # aplicación desde antes del 2026-09-14 (todas las corridas de
+  # `docker compose pull` fallan atómicamente si un solo servicio no resuelve).
+  # El contenedor `minio-init` sólo necesita un cliente S3 para dos comandos
+  # idempotentes; `amazon/aws-cli` es S3-compatible vía `--endpoint-url`, está
+  # pinneado a una versión exacta (mismo criterio que el resto del compose) y
+  # se verificó que SÍ se puede descargar hoy desde este mismo host.
   minio-init:
-    image: quay.io/minio/mc:RELEASE.2024-09-16T17-43-14Z
+    image: amazon/aws-cli:2.19.5
     restart: "no"
     entrypoint:
       - /bin/sh
       - -c
       - |
         set -e
-        mc alias set alovida http://minio:9000 "$$MINIO_ACCESS_KEY" "$$MINIO_SECRET_KEY"
-        mc mb --ignore-existing "alovida/$$MINIO_BUCKET"
+        export AWS_ACCESS_KEY_ID="$$MINIO_ACCESS_KEY"
+        export AWS_SECRET_ACCESS_KEY="$$MINIO_SECRET_KEY"
+        export AWS_DEFAULT_REGION=us-east-1
+        if aws --endpoint-url http://minio:9000 s3api head-bucket --bucket "$$MINIO_BUCKET" 2>/dev/null; then
+          echo "=== minio-init: bucket $$MINIO_BUCKET ya existe"
+        else
+          aws --endpoint-url http://minio:9000 s3 mb "s3://$$MINIO_BUCKET"
+        fi
         echo "=== minio-init: bucket $$MINIO_BUCKET listo"
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}

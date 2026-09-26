@@ -1,0 +1,7 @@
+$ corepack yarn test --testPathPatterns="scheduling-bookings.repository"
+PASS SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping atribuye cada cita al recurso de SU CUPO, no a la columna nulable de la cita
+PASS SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping sigue comparando rangos por el cupo, con bordes estrictos (tocarse no es pisarse)
+PASS SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping sin estados que comprometan no consulta la base
+Suites: 1 passed, 0 failed, 1 total
+Tests:  3 passed, 0 failed, 0 skipped, 3 total
+exit=0

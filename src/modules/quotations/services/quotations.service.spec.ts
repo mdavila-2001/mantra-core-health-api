@@ -3,7 +3,9 @@ import { jest } from '@jest/globals';
 /** Ejecuta la operación mock fn. */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ValidationPipe } from '@nestjs/common';
 import { QuotationsService } from './quotations.service';
+import { CreateQuotationDto } from '../dto/create-quotation.dto';
 import { assertPaymentPlanClosesOnPrice, toCents } from './payment-plan';
 import {
   PreconditionFailedException,
@@ -70,6 +72,8 @@ function build() {
   };
   const installmentsRepo = {
     findByQuotationId: mockFn(),
+    // El listado lee las cuotas de todas sus cotizaciones de una vez (H3.S1.M3).
+    findByQuotationIds: mockFn().mockResolvedValue([]),
     // Devuelve lo que recibe, como `em.create`: el servicio responde con eso.
     createMany: mockFn((_em: unknown, rows: unknown) => rows),
   };
@@ -500,6 +504,64 @@ describe('QuotationsService.getQuotation', () => {
 });
 
 describe('QuotationsService.listQuotationsByPatient', () => {
+  /*
+   * M4 · H3.S1.M3 — el N+1 de cuotas: el listado hacía una consulta de cuotas
+   * POR cotización. Con N cotizaciones, N+1 idas a la base por pedido.
+   */
+  it('trae las cuotas de todas las cotizaciones en UNA consulta, y a cada una las suyas', async () => {
+    const d = build();
+    d.quotationsRepo.findByPatient.mockResolvedValue([
+      quotationRow({ id: 'q-1' }),
+      quotationRow({ id: 'q-2' }),
+      quotationRow({ id: 'q-3' }),
+    ]);
+    d.installmentsRepo.findByQuotationIds.mockResolvedValue([
+      {
+        quotationId: 'q-1',
+        installmentNumber: 1,
+        dueDate: new Date('2026-02-01'),
+        amount: '100.00',
+      },
+      {
+        quotationId: 'q-3',
+        installmentNumber: 1,
+        dueDate: new Date('2026-02-01'),
+        amount: '300.00',
+      },
+      {
+        quotationId: 'q-3',
+        installmentNumber: 2,
+        dueDate: new Date('2026-03-01'),
+        amount: '301.00',
+      },
+    ]);
+
+    const res = await d.service.listQuotationsByPatient('pat-1', actor);
+
+    expect(d.installmentsRepo.findByQuotationIds).toHaveBeenCalledTimes(1);
+    expect(d.installmentsRepo.findByQuotationIds).toHaveBeenCalledWith(
+      expect.anything(),
+      ['q-1', 'q-2', 'q-3'],
+    );
+    expect(d.installmentsRepo.findByQuotationId).not.toHaveBeenCalled();
+    expect(res.map((q) => q.id)).toEqual(['q-1', 'q-2', 'q-3']);
+    expect(res.map((q) => q.installments.map((c) => c.amount))).toEqual([
+      ['100.00'],
+      [],
+      ['300.00', '301.00'],
+    ]);
+  });
+
+  it('sin cotizaciones no consulta cuotas', async () => {
+    const d = build();
+    d.quotationsRepo.findByPatient.mockResolvedValue([]);
+
+    const res = await d.service.listQuotationsByPatient('pat-1', actor);
+
+    expect(res).toEqual([]);
+    expect(d.installmentsRepo.findByQuotationIds).not.toHaveBeenCalled();
+  });
+
   it('acota la consulta a las prácticas del profesional, no filtra después de leer', async () => {
     const d = build();
     d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
@@ -571,5 +633,72 @@ describe('QuotationsService.listQuotationsByPatient', () => {
       d.practiceTenantLookup.findActivePracticeIdsForTenant,
     ).not.toHaveBeenCalled();
     expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
+  });
+});
+
+/*
+ * AG-35 · M4 H3.S1.M1 — de punta a punta de la capa: el body tal como lo arma
+ * el front (importes `number`) pasa por un `ValidationPipe` igual al global de
+ * `main.ts` y lo que sale se guarda. Es el kill-test del encargo («mandar una
+ * cotización con importes tal como la arma el front: si devuelve 400, no está
+ * hecho»), sin base: la persistencia real la verifica M1.
+ */
+describe('QuotationsService.createQuotation con el body del front (AG-35)', () => {
+  const PRACTICA = '11111111-1111-4111-8111-111111111111';
+  const SERVICIO = '33333333-3333-4333-8333-333333333333';
+  const pipe = new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+  });
+
+  it('guarda la cotización con los importes numéricos del front, como texto exacto', async () => {
+    const d = build();
+    d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+      [PRACTICA],
+    );
+    d.serviceCatalogRepo.findById.mockResolvedValue({
+      ...catalogItem,
+      id: SERVICIO,
+      practiceId: PRACTICA,
+    });
+    d.quotationsRepo.create.mockReturnValue(quotationRow({ id: 'q-front' }));
+
+    const dto = (await pipe.transform(
+      {
+        practiceId: PRACTICA,
+        patientProfileId: '22222222-2222-4222-8222-222222222222',
+        attentionDate: '2026-09-20',
+        serviceCatalogId: SERVICIO,
+        offeredPrice: 1500,
+        paymentPlanInstallmentCount: 3,
+        downPaymentAmount: 300,
+        paymentFrequency: 'MONTHLY',
+        installments: [
+          { installmentNumber: 1, dueDate: '2026-10-20', amount: 400 },
+          { installmentNumber: 2, dueDate: '2026-11-20', amount: 400 },
+          { installmentNumber: 3, dueDate: '2026-12-20', amount: 400 },
+        ],
+        validUntil: '2026-10-20',
+      },
+      { type: 'body', metatype: CreateQuotationDto, data: '' },
+    )) as CreateQuotationDto;
+
+    await d.service.createQuotation(dto, actor);
+
+    expect(d.quotationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        offeredPrice: '1500',
+        downPaymentAmount: '300',
+      }),
+    );
+    const cuotas = d.installmentsRepo.createMany.mock.calls[0][1];
+    expect(cuotas.map((c: { amount: string }) => c.amount)).toEqual([
+      '400',
+      '400',
+      '400',
+    ]);
   });
 });
