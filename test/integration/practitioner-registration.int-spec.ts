@@ -269,6 +269,9 @@ describe('registro de profesional (integración)', () => {
         .post('/iam/users/assisted-practitioner-registration')
         .set(bearer(ctx.adminToken))
         .send({
+          // El alta asistida exige documento y departamento emisor, igual que
+          // el autorregistro (BR-07): sin ellos responde 400 antes del rollback.
+          ...identidadProfesional(`p20-${sufijo}@example.test`),
           email: `p20-${sufijo}@example.test`,
           name: 'Elena',
           lastName: 'Salas',
