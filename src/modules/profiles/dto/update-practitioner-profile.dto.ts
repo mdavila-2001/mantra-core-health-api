@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEmail,
+  IsIn,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -15,6 +16,7 @@ import {
 } from 'class-validator';
 // Mismas constantes de longitud que el alta y que el PATCH de paciente: son el
 // mismo dato declarado por la misma persona.
+import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 import {
   EMPLOYER_FREE_TEXT_MAX_LENGTH,
   OCCUPATION_FREE_TEXT_MAX_LENGTH,
@@ -147,6 +149,32 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsISO8601()
   birthDate?: string | null;
+
+  /**
+   * Sexo asignado al nacer, por código legible (P28). Mismo contrato que el
+   * `PATCH` del paciente y que el alta: el formulario manda un código y la
+   * columna guarda el concepto.
+   */
+  @ApiPropertyOptional({
+    enum: BIRTH_SEX_CODES,
+    description: 'Sexo asignado al nacer',
+  })
+  @IsOptional()
+  @IsIn(BIRTH_SEX_CODES)
+  sexAtBirth?: BirthSexCode;
+
+  /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`; uno
+   * ajeno responde 422). Se corrige el departamento, **no** el número: la CI
+   * sigue de solo lectura porque tiene su propio circuito de verificación.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Departamento emisor del documento (VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
 
   @ApiPropertyOptional({
     maxLength: 40,

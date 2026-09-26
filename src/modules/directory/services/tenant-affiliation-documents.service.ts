@@ -31,7 +31,10 @@ const ROLE_LABEL_ES: Readonly<Record<AffiliationDocumentRole, string>> = {
 
 /** Los cinco archivos que el autorregistro público exige, por rol canónico. */
 export type RegistrationDocumentFiles = Readonly<
-  Record<RegistrationDocumentRole, string>
+  Record<Exclude<RegistrationDocumentRole, 'CONSTITUTION_DOC'>, string> & {
+    /** Una unipersonal no tiene escritura de constitución: la regla la decide el llamador. */
+    CONSTITUTION_DOC?: string;
+  }
 >;
 
 /** Datos para vincular los documentos legales de un alta recién creada. */
@@ -122,7 +125,11 @@ export class TenantAffiliationDocumentsService {
 
     const createdIds: string[] = [];
     for (const role of REGISTRATION_DOCUMENT_ROLES) {
-      const created = await this.attachOne(tx, role, input.documents[role], {
+      const fileId = input.documents[role];
+      // Sólo la constitución puede faltar, y sólo si el llamador ya validó que
+      // el tipo societario no la exige (UNIPERSONAL).
+      if (fileId === undefined) continue;
+      const created = await this.attachOne(tx, role, fileId, {
         tenantId: input.tenantId,
         ownerUserId: input.ownerUserId,
         countryIso,
@@ -268,6 +275,7 @@ export class TenantAffiliationDocumentsService {
     const seen = new Map<string, AffiliationDocumentRole[]>();
     for (const role of REGISTRATION_DOCUMENT_ROLES) {
       const fileId = documents[role];
+      if (fileId === undefined) continue;
       const roles = seen.get(fileId) ?? [];
       roles.push(role);
       seen.set(fileId, roles);
