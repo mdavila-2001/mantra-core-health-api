@@ -198,7 +198,13 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const gateway = new CommunityMessagingGateway({ fork: () => ({}) } as any, auth as any,
       { findActiveParticipant: async () => ({ id: ID }) } as any,
       { assertOwnProfile: async () => undefined } as any, {} as any, log as any);
-    await gateway.handleConnection(socket as any);
+    // La autenticación se movió de `handleConnection` a un middleware de
+    // socket.io (`afterInit`, ver community-messaging.gateway.ts) para cerrar
+    // una carrera con los `@SubscribeMessage` del propio socket. Acá se
+    // reproduce a mano lo que ese middleware hace una sola vez, al conectar:
+    // el defecto que documenta AUD-08 —que lo autenticado no se revalida por
+    // mensaje— no cambió de lugar, sólo de método.
+    (socket as any).data.user = await auth.authenticate();
     revoked = true;
     await gateway.handleJoinConversation(socket as any, { conversationId: ID, profileId: P1 });
     expect(auth.authenticate).toHaveBeenCalledTimes(1);

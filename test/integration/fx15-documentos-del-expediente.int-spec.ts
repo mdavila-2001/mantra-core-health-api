@@ -114,6 +114,22 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       })
       .expect(201);
     patientProfileId = paciente.body.profileId;
+
+    // `ClinicalRecordAccessGuard` (commit 604cb64d) exige, para escribir en el
+    // expediente, un turno de hoy o una relación asistencial vigente —A es
+    // quien escribe documentos y notas en los casos de abajo—. B queda a
+    // propósito sin relación: sus casos verifican que sin ella no atiende a
+    // este paciente.
+    await http()
+      .post('/authz/care-relationships')
+      .set(bearer(ctx.adminToken))
+      .send({
+        tenantId: SEED.tenantId,
+        patientProfileId,
+        practitionerProfileId: medicoA.hpid,
+        relationshipType: 'TREATING',
+      })
+      .expect(201);
   });
 
   afterAll(async () => {

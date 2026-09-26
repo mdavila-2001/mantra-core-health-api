@@ -113,7 +113,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
       .set(admin())
       .send({ patientVisibility: 'VISIBLE' })
-      .expect(201);
+      .expect(200);
 
     const res = await resultadosDe(tokenAna).expect(200);
     const encontrado = res.body.items.find(
@@ -130,7 +130,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
       .set(admin())
       .send({ patientVisibility: 'HIDDEN' })
-      .expect(201);
+      .expect(200);
 
     const res = await resultadosDe(tokenAna).expect(200);
     expect(
@@ -147,7 +147,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
       .set(admin())
       .send({ patientVisibility: 'VISIBLE' })
-      .expect(201);
+      .expect(200);
 
     await http()
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
@@ -191,7 +191,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
       .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
       .set(admin())
       .send({ patientVisibility: 'VISIBLE' })
-      .expect(201);
+      .expect(200);
 
     const res = await resultadosDe(tokenBruno).expect(200);
     expect(
@@ -236,7 +236,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
         .set(admin())
         .send({ patientVisibility: 'VISIBLE' })
-        .expect(201);
+        .expect(200);
 
       await http()
         .post(`/diagnostic-results/me/${reportId}/shares`)
@@ -254,7 +254,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
         .set(admin())
         .send({ patientVisibility: 'VISIBLE' })
-        .expect(201);
+        .expect(200);
 
       await http()
         .post(`/diagnostic-results/me/${reportId}/shares`)
@@ -273,7 +273,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
         .set(admin())
         .send({ patientVisibility: 'VISIBLE' })
-        .expect(201);
+        .expect(200);
 
       await http()
         .post('/authz/care-relationships')
@@ -337,14 +337,14 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
       const detalle = await http()
         .get(`/diagnostics/accessions/${acesion.body.id}`)
-        .set(admin())
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(200);
       expect(detalle.body.specimens).toHaveLength(1);
       expect(detalle.body.specimens[0].specimen.id).toBe(especimen.body.id);
 
       const detalleEspecimen = await http()
         .get(`/diagnostics/specimens/${especimen.body.id}`)
-        .set(admin())
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(200);
       expect(detalleEspecimen.body.id).toBe(especimen.body.id);
     });
@@ -352,7 +352,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
     it('inválido: acesión inexistente → 404', async () => {
       await http()
         .get(`/diagnostics/accessions/${randomUUID()}`)
-        .set(admin())
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(404);
     });
   });
