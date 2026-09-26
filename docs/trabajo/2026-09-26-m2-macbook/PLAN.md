@@ -118,10 +118,91 @@ existen; y al re-correrlo, inserta 0 filas nuevas.
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | Crear el seed con su compuerta `SEED_PEOPLE_ENABLED` | sin la variable no hace nada | salida de las dos pasadas pegada | TODO |
-| H2.S1.M2 | Inventar datos personales deterministas (uuid5) | dos corridas dan los mismos valores | diff de dos corridas pegado | TODO |
-| H2.S1.M3 | Marcar cada fila sintética con procedencia (`source_file`, `source_row`) | toda fila lleva procedencia | consulta pegada | TODO |
-| H2.S1.M4 | Comprobar login de una muestra por rol | 200 con el rol correcto | respuesta pegada | TODO |
+| H2.S1.M1 | Crear el seed con su compuerta `SEED_PEOPLE_ENABLED` | sin la variable no hace nada | salida de las dos pasadas pegada | HECHO |
+| H2.S1.M2 | Inventar datos personales deterministas (uuid5) | dos corridas dan los mismos valores | diff de dos corridas pegado | HECHO |
+| H2.S1.M3 | Marcar cada fila sintética con procedencia (`source_file`, `source_row`) | toda fila lleva procedencia | consulta pegada | BLOQUEADO (ver AMB-04) |
+| H2.S1.M4 | Comprobar login de una muestra por rol | 200 con el rol correcto | respuesta pegada | HECHO |
+
+## H2 — cómo se cerró
+
+**Arquitectura:** `PeopleSeedService` (`src/common/seed/people-seed.service.ts`) reusa
+`IamPractitionerSelfRegistrationService.registerPractitioner` /
+`IamPatientSelfRegistrationService.registerPatient` **en proceso** (no HTTP) — la misma alta
+transaccional (persona + perfil + licencia) que usa el autorregistro público, en vez de
+reimplementarla a mano con `EntityManager` (regla 96.1). Estas dos services no estaban exportadas
+de `IamModule`; se agregó una línea a su `exports` (justificado y mínimo, declarado acá porque
+excede `src/modules/authz/**` — el resto de `iam-auth.service.ts` ya estaba tocado por H1.S1.M3).
+
+Dos helpers nuevos, reutilizables por H3 (avisado al Mac Mini): `markdown-table.ts` (puerto de
+`celdas`/`es_separador`/`filas_de_tabla`/`columna` de `tools/bolivia-datasets/load_people.py`, con
+tests) y `synthetic-person.ts` (cédula/celular/nacimiento/correo deterministas por `deterministicId`,
+con tests). El correo sigue el patrón congelado `<nombre>.<apellido>.<índice de fila>@alovida.test`
+(el índice desambigua homónimos, necesario: hay nombres repetidos en el padrón).
+
+**Filtro de candidatos** (medido, no supuesto): de 170 filas de médicos y 165 de pacientes, sólo 13
+y 92 traen `NOMBRE` — el resto son filas en blanco del generador del markdown. De los 13 médicos con
+nombre, sólo 9 traen además matrícula del Ministerio (`licenseNumber` es obligatorio); los otros 4
+quedan en `skipped` con su motivo exacto — **no se inventa una matrícula**, es una credencial
+profesional, no un dato de contacto.
+
+**Bug real encontrado y corregido en el camino:** la primera corrida sembró bien (9 practitioners +
+92 patients, ver Evidencia), pero verificar idempotencia reveló que el chequeo previo
+(`existeCredencial`) comparaba siempre por `email` — correcto para médicos
+(`externalSubject: dto.email`), **pero los pacientes entran con `nationalId`, no con correo**
+(`externalSubject: dto.nationalId`, `iam-patient-self-registration.service.ts:235` — confirmado con
+un login real). Con el chequeo mal apuntado, la segunda pasada reintentaba las 92 altas de paciente
+y las resolvía por la excepción de duplicado del propio servicio — que además mi `catch` no
+reconocía, porque importé `ConflictException` de `@nestjs/common` en vez de la clase propia del
+repo (`src/common/errors/domain.exception.ts`, la que de verdad lanzan los dos servicios de
+autorregistro). Corregido: `existeCredencial` recibe el `externalSubject` correcto por actor, y el
+import de `ConflictException` es el del dominio. Sin este fix la idempotencia (regla 97.4.3) fallaba
+en la práctica aunque no hubiera filas duplicadas — el síntoma era honestidad de reporte, no
+corrupción de datos.
+
+**Evidencia — primera corrida** (API real, Postgres real, `SEED_PEOPLE_ENABLED=true`,
+`SEED_PEOPLE_PASSWORD=12345678`):
+```
+"padrón de personas","inserted":101,"tookMs":13808,
+"detail":{"practitionersCreated":9,"practitionersExisting":0,"patientsCreated":92,"patientsExisting":0,
+"skipped":["USUARIO_MEDICOS_1.md#8: sin matrícula...","...#9...","...#10...","...#19..."]}
+```
+
+**Evidencia — segunda corrida, tras el fix** (idempotencia real, regla 97.4.3):
+```
+"padrón de personas","inserted":0,"tookMs":96,
+"detail":{"practitionersCreated":0,"practitionersExisting":9,"patientsCreated":0,"patientsExisting":92,
+"skipped":["...los mismos 4 médicos sin matrícula, sin cambios..."]}
+```
+
+**Evidencia — login real de una muestra por rol** (H2.S1.M4), sin mocks, contra la API viva:
+```
+$ curl -X POST /iam/auth/login -d '{"nationalId":"2313877","password":"12345678"}'
+→ 200 {"accessToken":"...","roles":["USER","PATIENT"],...,"name":"LICZY PAOLA NUÑEZ CALLEJAS"}
+```
+(médico ya verificado en H1.S2 con la misma vía, login por email + rol `PRACTITIONER`).
+
+**Tests:** `markdown-table.spec.ts` (5), `synthetic-person.spec.ts` (7), `people-seed.service.spec.ts`
+(8, incluida la regresión exacta del bug de arriba). `src/common/seed/`: 191/191 verde.
+
+**AMB-04 (nueva, más seria de lo que pensé al escribirla la primera vez — corregido antes de
+cerrar):** `source_file`/`source_row`/`synthetic`/`imported_at` (§5 del plan) no existen como
+columnas en `profiles.patient_profiles`/`health_practitioner_profiles` (verificado contra el esquema
+real, cero columnas con esos nombres en toda la base). Añadirlas es DDL, fuera de alcance.
+
+**No hay ningún marcador de procedencia, ni siquiera el mecanismo indirecto que usan otros seeds.**
+`registerPractitioner(dto, ip?)`/`registerPatient(dto, ip?)` son el mismo autorregistro público:
+no reciben un actor, y `created_by_user_id` queda apuntando al **propio usuario recién creado**
+(autorregistro real), exactamente igual que si la persona se hubiera registrado sola desde el
+navegador. A diferencia de `provider-accounts-seed.service.ts` (que sí pasa
+`{id: SEED_ACTOR_ID, roles:[...]}` a `IamUsersService.createUser`), estos dos servicios de
+autorregistro no tienen ese parámetro — no se puede distinguir en la base, hoy, una fila sembrada
+por este seed de una persona que se autorregistró de verdad con los mismos datos. Es un gap real, no
+sólo de columnas: haría falta o (a) una migración del modelo con las columnas de procedencia, o (b)
+extender `registerPractitioner`/`registerPatient` para aceptar un actor opcional — ambas exceden el
+alcance de este carril (la (a) es DDL; la (b) toca `iam-practitioner-self-registration.service.ts`/
+`iam-patient-self-registration.service.ts` más allá de lo mínimo). Se registra para el propietario:
+decidir si esto bloquea el cierre de H2 o si el requisito funcional (login real, roles correctos)
+alcanza para esta preproducción sin procedencia por fila.
 
 ## H3 — El directorio muestra médicos reales, con sus varias sedes
 **CA:** Dado un médico que trabaja en dos lugares, cuando se lo busca en el directorio público,
@@ -220,6 +301,15 @@ async getDiagnosticReportFileContent(
 
 Ningún cambio de `common/files` se necesita para esto — el bloqueo es puramente de dónde vive el
 código, no de qué hace falta construir. Registrado para el propietario / M3.
+
+**H4 — verificado en vivo (API real, Postgres real, sin mocks), no sólo con tests unitarios:**
+registré dos médicos (dueño y extraño), subí un archivo real (`POST /common/files/upload`), lo
+vinculé a un owner, y confirmé: (1) el dueño lista su adjunto (200), el extraño recibe 403 exacto
+`"No tiene acceso a los adjuntos de este recurso"` sobre el mismo `ownerId` — no una lista vacía,
+no los adjuntos de otro; (2) `POST /:id/download-url` + `GET /:id/signed-content` **sin ningún
+header `Authorization`** devolvió 200 con los bytes reales subidos; (3) alterar `expires` en la
+misma URL (forjar) devolvió 403 `"Firma de descarga inválida"`. Los tres, con `curl` puro contra
+`localhost:3000`.
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

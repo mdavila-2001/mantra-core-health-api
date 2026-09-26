@@ -109,6 +109,13 @@ import {
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
-  exports: [IamUsersService],
+  // Los dos de autorregistro se exportan por lo mismo (H2, `PeopleSeedService`):
+  // reusan la alta completa (persona + perfil + licencia en una transacción) en
+  // vez de reimplementarla a mano por segunda vez con MikroORM directo.
+  exports: [
+    IamUsersService,
+    IamPractitionerSelfRegistrationService,
+    IamPatientSelfRegistrationService,
+  ],
 })
 export class IamModule {}
