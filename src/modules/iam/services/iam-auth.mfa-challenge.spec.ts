@@ -62,7 +62,10 @@ describe('IamAuthService.assertMfaChallenge', () => {
     process.env.AUTH_MFA_CHALLENGE_ENABLED = 'true';
     const secret = generateSecret();
     const d = build([
-      { secretEncrypted: encryptSecret(secret), stateConceptId: CONCEPTS.STATE_VERIFIED },
+      {
+        secretEncrypted: encryptSecret(secret),
+        stateConceptId: CONCEPTS.STATE_VERIFIED,
+      },
     ]);
     // límite: falta el código
     await expect(d.challenge()).rejects.toMatchObject({

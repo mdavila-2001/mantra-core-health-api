@@ -50,6 +50,8 @@ export class AuthThrottlerGuard extends ThrottlerGuard {
   private readonly cookieName = loadRefreshCookieEnv().name;
 
   /** @inheritdoc */
+  // La firma la fija `ThrottlerGuard`: `req` llega como `Record<string, any>`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected override getTracker(req: Record<string, any>): Promise<string> {
     const ip = String(req.ip ?? 'unknown');
     if (req.method === 'POST') {

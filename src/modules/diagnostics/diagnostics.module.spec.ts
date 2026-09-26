@@ -22,7 +22,10 @@ describe('DiagnosticsModule', () => {
     expect(
       Reflect.getMetadata(
         'path',
-        DiagnosticsPatientResultsController.prototype.getOwnResultFileContent,
+        Reflect.get(
+          DiagnosticsPatientResultsController.prototype,
+          'getOwnResultFileContent',
+        ) as object,
       ),
     ).toBe('me/:reportId/files/:fileId/content');
   });
