@@ -156,9 +156,26 @@ export class IamAuthService {
     userId: string,
     globalRoles: { roleConceptId: string }[],
   ): Promise<{ roles: string[]; scopedRoles: Record<string, string[]> }> {
-    const global = conceptIdsToRoleCodes(
-      globalRoles.map((r) => r.roleConceptId),
-    );
+    const globalConceptIds = globalRoles.map((r) => r.roleConceptId);
+    const global = conceptIdsToRoleCodes(globalConceptIds);
+    // H1.S1.M3: `conceptIdsToRoleCodes` descarta en silencio todo concepto que
+    // `ROLE_CODE_BY_CONCEPT` no declare (rol global agregado a `iam.user_global_roles`
+    // sin agregarlo también a `role-mapping.ts`). El descarte en sí sigue siendo el
+    // comportamiento correcto — no inventamos un código — pero que ocurra sin dejar
+    // rastro es lo que costó el agujero de `PATIENT`/`PRACTITIONER`/`CLINICIAN` antes
+    // de sembrarse. Un conteo divergente es evidencia suficiente sin necesitar mapear
+    // cuál id exacto sobró.
+    if (global.length < globalConceptIds.length) {
+      this.logger.warn(
+        {
+          userId,
+          operation: 'iam.auth.merge-role-codes',
+          globalConceptCount: globalConceptIds.length,
+          mappedCount: global.length,
+        },
+        'iam.user_global_roles referencia un role_concept_id que role-mapping.ts no declara: se descarta en vez de fallar el login, pero queda sin ejercer',
+      );
+    }
     // Una asignación de `authz` rota no debe impedir iniciar sesión: sin ella el
     // sujeto entra con sus roles de plataforma y recibe un 403 explícito al
     // tocar lo clínico, que es un fallo legible. Fallar el login entero

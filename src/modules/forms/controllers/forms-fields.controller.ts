@@ -40,6 +40,8 @@ export class FormsFieldsController {
 
   /** UC-09-02. */
   @Post('field-definitions')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Declarar una definición de campo con reglas de validación',
@@ -70,6 +72,8 @@ export class FormsFieldsController {
 
   /** UC-09-04. */
   @Post('fields/:id/dependencies')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Definir dependencias condicionales entre campos' })
   addDependency(
@@ -82,6 +86,8 @@ export class FormsFieldsController {
 
   /** UC-09-05. */
   @Put('fields/:id/localizations/:lang')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Localizar (i18n) una definición de campo' })
   upsertLocalization(

@@ -176,6 +176,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
   // y `clinical` (el PDF oficial de receta, subtarea B.3): es la misma
   // consulta de coberturas declaradas y no puede tener dos dueños.
   exports: [
+    InsuranceBackboneService,
     CatalogRepository,
     CoverageRepository,
     ClaimReadRepository,

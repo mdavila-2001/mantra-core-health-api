@@ -126,6 +126,7 @@ function build() {
     accountLinksRepo,
     patientProfilesRepo,
     practitionerProfilesRepo,
+    logger,
   };
 }
 
@@ -286,6 +287,46 @@ describe('IamAuthService', () => {
         ['USER', 'SURGEON'],
         expect.anything(),
         expect.anything(),
+      );
+    });
+
+    // H1.S1.M3: un `role_concept_id` que `role-mapping.ts` no declara se sigue
+    // descartando (no se inventa un código), pero deja rastro en el logger en
+    // vez de desaparecer en silencio.
+    it('warns when a global role_concept_id is not declared in role-mapping.ts', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.rolesRepo.findActiveForUser.mockResolvedValue([
+        { roleConceptId: CONCEPTS.ROLE_USER },
+        { roleConceptId: 'concepto:sin-mapear' },
+      ]);
+      d.effectiveRoles.scopedAssignmentsForUser.mockResolvedValue([]);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        ['USER'],
+        expect.anything(),
+        expect.anything(),
+      );
+      expect(d.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'u1',
+          operation: 'iam.auth.merge-role-codes',
+          globalConceptCount: 2,
+          mappedCount: 1,
+        }),
+        expect.stringContaining('role-mapping.ts'),
       );
     });
 
