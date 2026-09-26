@@ -118,7 +118,20 @@ import {
   exports: [
     AuthzEffectiveRolesService,
     ResourceScopeGrantsRepository,
+    // BR-17 (CL-48): diagnostics.DiagnosticsPatientResultsService la necesita
+    // para exigir una relación asistencial ACTIVE antes de compartir un
+    // resultado con un profesional.
+    CareRelationshipsRepository,
     AuthzPdpService,
+    // AG-31 (BR-26): `pharma_lab` necesita asignar/consultar MEDICAL_VISITOR al
+    // vincular o desvincular un visitador, en la misma transacción del caso de
+    // uso. `AuthzGrantsService.assignRole` ya es la escritura correcta (valida
+    // que el rol sea asignable, evita el solape MCH-034); exportar sólo agrega
+    // estos tres al barrel de salida, no toca ningún `@Roles` ni
+    // `role-mapping.ts`.
+    AuthzGrantsService,
+    RolesRepository,
+    UserRoleAssignmentsRepository,
   ],
 })
 export class AuthzModule {}

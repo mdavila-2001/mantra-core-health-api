@@ -273,6 +273,270 @@ modelo (D-BR08-1/3, D-BR09-1).
 
 ---
 
+## D-E — Un solo camino de liberación de diagnósticos (BR-17, CV-02, CL-46, Q-02)
+
+- **Elegido:** la decisión ya venía tomada por el reparto (Q-02): la canónica es
+  `POST /diagnostics/reports/:reportId/versions/:versionId/release`
+  (`DiagnosticsReportsService.releaseVersion`) — es la que registra
+  `diagnostics.diagnostic_release_events` con `patient_visibility_concept_id` en la
+  misma transacción que la versión y el informe, y la única que
+  `GET /diagnostic-results/me` puede ver. El camino clínico
+  (`POST /clinical/diagnostic-reports/:id/release`,
+  `DiagnosticReportsService.release`) **no** escribe ese evento: verificado
+  leyendo el código (nunca llamaba a `recordReleaseEvent`) y confirmado en
+  runtime (ver evidencia abajo).
+- **Cómo se marcó obsoleto sin borrarlo:** el método y la ruta siguen existiendo
+  (nadie que integró contra UC-08-07 ve un 404 de golpe), pero `release()` ya no
+  cambia ningún estado: valida permiso sobre el paciente (MCH-007, sin
+  regresión) y siempre devuelve `422 PRECONDITION_FAILED` con
+  `details.canonicalEndpoint` apuntando a la ruta vigente. `@ApiOperation` quedó
+  `deprecated: true` con la misma explicación. Se prefirió esto a **delegar**
+  (opción a del prompt) porque delegar exige resolver "cuál es la versión
+  actual del informe" desde el lado clínico — un dato que hoy no tiene, y que
+  inventarlo (tomar la última versión sin más criterio) sería una decisión de
+  negocio no pedida. Se prefirió a **mantener el 200 sin escribir nada** porque
+  eso es exactamente el bug que hay que cerrar: un cliente que ve 200 y cree
+  que liberó.
+- **Impacto medido:** `diagnostic-reports.service.spec.ts` (clínico) tenía un
+  test `'releases a report (partial -> final, held -> released)'` que probaba
+  el bug como si fuera el comportamiento correcto; se reescribió para afirmar
+  el nuevo contrato (422, sin tocar el estado). El smoke
+  `test/smoke/modules/clinical.smoke.ts` (`UC-08-07: liberar resultados`)
+  pasó de esperar `200` a esperar `422`.
+- **Verificado en runtime** (API real en `:3400` + Postgres efímero
+  `legion-h4-pg:5440`, esquema aplicado desde `database/SQL/apply_all.sql` +
+  `apply_deferred.sql`, seed completo vía `seed-cli`): se creó un informe, se
+  liberó VISIBLE por el camino canónico y apareció en `GET
+  /diagnostic-results/me`; liberado HIDDEN no apareció; una segunda liberación
+  de la misma versión dio `409` y `SELECT count(*) FROM
+  diagnostics.diagnostic_release_events GROUP BY diagnostic_report_version_id`
+  mostró exactamente 1 fila por versión (ninguna duplicada); el camino clínico
+  sobre un informe recién creado dio `422` con el endpoint canónico en el
+  mensaje. Detalle completo en
+  `docs/progress/evidence/lane-M7-h4/REPORT.md`.
+
+## CL-48/CL-50 — Compartir un resultado: por perfil, nunca por un id tipeado
+
+- **Elegido (variante intermedia entre las dos del prompt):** `ShareDiagnosticResultDto`
+  no pide `practitionerUserId` (una cuenta) sino `practitionerProfileId` (el
+  mismo id que ya devuelve `GET /authz/me/access` — BR-20/H1 — en
+  `practitionerProfileId`, con `practitionerName` resuelto). El servidor: (1)
+  exige que exista una `authz.care_relationships` `ACTIVE` entre el paciente y
+  ese perfil (`CareRelationshipsRepository.findActive`, ya existente, sin
+  endpoint nuevo); (2) resuelve la cuenta con
+  `PersonAccountLinksRepository.findActiveByPerson`; (3) crea el grant con esa
+  cuenta, igual que antes. Así "nunca un buscador global de usuarios" se
+  cumple del lado servidor y no sólo por convención del front: aunque el
+  cliente mande un `practitionerProfileId` ajeno, sin relación vigente da
+  `422`.
+  - **Por qué no un endpoint nuevo:** `GET /authz/me/access` (BR-20) ya es
+    exactamente "mis relaciones asistenciales reales, con nombre" — construir
+    otro para lo mismo hubiera sido la duplicación que la regla de "buscar el
+    equivalente antes de crear" prohíbe.
+  - **`CareRelationshipsRepository`** se agregó a los `exports` de
+    `AuthzModule` (antes sólo exportaba `ResourceScopeGrantsRepository`,
+    `AuthzEffectiveRolesService` y `AuthzPdpService`): es el único cambio de
+    superficie de módulo que este hallazgo necesitó.
+- **`reason` se retiró del DTO (CL-50), no se inventó columna:** `authz.resource_scope_grants`
+  no tiene una columna para el motivo (verificado contra `database/SQL/06_authz/02_tables.sql`
+  y la entidad `ResourceScopeGrants`) y el servicio ya lo ignoraba en silencio —
+  quien mandaba `reason` creía que había quedado registrado y no era cierto.
+  Con `forbidNonWhitelisted` activo, mandarlo ahora da `400` (verificado en
+  runtime), que es el comportamiento que el Gherkin del prompt acepta como
+  alternativa explícita. **Pedido a M1:** si el producto necesita persistir el
+  motivo de un compartido, `authz.resource_scope_grants` necesita una columna
+  nueva (DDL fuera de este carril).
+
+## CL-45/CL-51 — El buscador de centros: ciudades y moneda real
+
+- **Elegido:** `DiagnosticUnitSearchItemDto` suma `cities: string[]` (ciudades
+  de las sedes activas, vía `DiagnosticUnitSites.practiceSiteId → PracticeSites.addressId
+  → Addresses.city`, deduplicadas y ordenadas) y `minAmountCurrency: string | null`
+  (el `code` del concepto de moneda del `price_schedule` dueño del precio
+  mínimo ya calculado). No se tocó el directorio (`DiagnosticUnitDirectoryItemDto`):
+  el prompt y el archivo a modificar (`catalog.dto.ts` + servicio de búsqueda)
+  son específicos del buscador (`/diagnostic-units/search`), que es lo que
+  consume `laboratory-directory` del front.
+  - `DiagnosticUnitsReadRepository.findPracticeSites` ya existía (lo usa
+    `DiagnosticUnitsReadService.getById` y el admin-read); sólo faltaba
+    `findAddresses` (mismo patrón que `PharmacyReadRepository.findAddresses`).
+- **Verificado en runtime:** `GET /diagnostic-units/search` con `X-Tenant-Id`
+  responde 200 y el DTO trae `cities`/`minAmountCurrency` en el esquema
+  (`/docs-json`); sin centros sembrados en la corrida de prueba no se pudo
+  observar un valor no vacío — queda **NO CUBIERTO** con datos reales (ver
+  reporte).
+
+## CL-47 — Lecturas del circuito del laboratorio
+
+- **Elegido:** `GET /diagnostics/accessions/:id` y `GET /diagnostics/specimens/:id`,
+  acotadas al tenant del contexto (`requireTenantId()`, mismo patrón que
+  `GET /diagnostics/work-orders`) y **404 —no 403— para otro tenant**, tal como
+  pide el prompt (no confirmar que el id existe). No hizo falta
+  `GET /diagnostics/work-orders/:id` adicional: la cola ya alcanza para abrir
+  el detalle de una orden vía la acesión.
+- **Verificado en runtime:** acesionar un espécimen y leer
+  `GET /diagnostics/accessions/:id` devuelve el espécimen con su contenedor y
+  su custodia; un id inexistente da 404.
+
+## CL-55 — `operativeSteps` en OpenAPI (procedures_perioperative)
+
+- **Elegido:** se creó `OperativeStepItemDto` (clase con `@ApiProperty` en cada
+  campo) y `CaseDetailDto.operativeSteps` pasó de un tipo TS inline a
+  `type: () => [OperativeStepItemDto]`. Verificado con `typecheck`.
+- **Hallazgo fuera de alcance, para BR-30/M6:** `GET /procedure-cases/:id`
+  (`PeriopController.getCase`) no tiene `@ApiOkResponse({ type: CaseDetailDto })`
+  y `nest-cli.json` no tiene el plugin de `@nestjs/swagger`, así que
+  `CaseDetailDto` (con o sin este fix) **no aparece todavía** en
+  `/docs-json` ni en `openapi/openapi.json`: el `200` de esa ruta no tiene
+  ningún esquema. Es exactamente lo que "BR-30: OpenAPI regenerado" (H6) tiene
+  que resolver; este fix deja el DTO correcto para cuando eso pase.
+
+## CL-56 — Mock del front: sin `studyInstanceUid` inventado
+
+- Ver `docs/progress/DECISIONS.md` del repo `mantra-core-health` (front): el
+  cambio es enteramente de mock/handlers, este repo no lo toca.
+
+---
+
+# Decisiones de producto y de diseño — H5 (BR-22, BR-27, BR-26)
+
+Carril M7 · Lenovo Legion · 2026-09-26. Notificaciones, comunidad y visitadores. Orden ejecutado:
+BR-22, BR-27, BR-26 (BR-26 al final porque toca el modelo).
+
+## D-Notif-1 — El enum del contrato vs. lo que la agenda emite (AG-06)
+
+- **Elegido:** las fuentes se dejan igual (scheduling sigue emitiendo `scheduling.appointment_bookings`
+  y `scheduling.bookable_slots` vía `RECURSO_CITA`/`RECURSO_CUPO`) y el enum de
+  `messaging/notifications.contract.ts` **suma esos dos literales** como aditivos. `APPOINTMENT`
+  se deja tal cual, documentado como aspiracional: hoy ningún módulo lo emite, y renombrarlo o
+  retirarlo tocaría más superficie (cualquier fixture o integración que lo dé por sentado) que
+  agregar los dos que sí son reales.
+- **Por qué no la alternativa (alinear las fuentes al enum):** hubiera significado renombrar
+  `RECURSO_CITA`/`RECURSO_CUPO` en `scheduling/notices/agenda-notices.ts` y todo lo que los
+  consume — mayor diff, mismo resultado observable para el front.
+- El front (`notification-routes.ts`, `notifications.types.ts`) ya mapea los dos literales reales
+  a `/my-account/appointments`, y el mock (`scheduling.handlers.ts`, `horario-liberado.ts`) los usa
+  en vez de `'APPOINTMENT'` inventado.
+
+## D-Notif-2 — Transporte de la campana en tiempo real (AG-22)
+
+- **Elegido:** opción A del prompt — `notification:new` por el socket existente. Se creó
+  `NotificationsGateway` (namespace por defecto, el mismo que ya usa
+  `CommunityMessagingGateway` para el chat): autentica con `WsJwtGuard`, une el socket a
+  `user:{id}` y `NotificationsService.emitInApp` lo llama **después** de que la transacción
+  confirma, nunca desde `writeInApp`. Se agregó `EmitInAppResult.availableAt` para no despertar la
+  campana antes de que el silencio nocturno (P9) la libere.
+- **Por qué namespace compartido y no un socket aparte:** el front ya abre uno para el chat
+  (AG-29); sumar una segunda conexión es otro handshake, otro upgrade de nginx y otro token que
+  vencer, sin necesidad — socket.io permite más de un gateway de Nest escuchando `connection` del
+  mismo namespace.
+- **Hallazgo, no cubierto:** los avisos de agenda (BR-21: confirmación, recordatorio, cancelación,
+  cupo liberado) viajan por `NotificationsService.createRequest()` (`MessagingAgendaNoticeAdapter`),
+  un camino **distinto** de `emitInApp()`. El push de este carril no llega todavía al escenario
+  "aviso de horario liberado navegable" del prompt BR-22. Si cubre, en cambio, prescripción/
+  encuentro (`clinical`), mensajes directos (`community`), pedidos de farmacia
+  (`pharmacy_inventory`) y solicitudes de vínculo (`authz`), que sí usan `emitInApp()`. Pedido a
+  quien tome BR-21/scheduling después: sumar el mismo push a `MessagingAgendaNoticeAdapter`, o
+  migrar la agenda a `emitInApp()` si el debounce de `createRequest()` no hace falta ahí.
+
+## D-Notif-3 — Regla de «horario liberado» (AG-07)
+
+- **Elegido: no se tocó.** El mock sigue con la heurística de 10 minutos
+  (`core/mock/horario-liberado.ts`, opción B del prompt); no se migró a la regla real de la API
+  (sólo lista de espera, opción A) porque eso exige modelar lista de espera en el mock — más
+  superficie de la que el tiempo de este carril alcanzaba.
+- **Consecuencia:** el vocabulario del aviso ya es honesto (D-Notif-1: emite
+  `scheduling.bookable_slots`, no `APPOINTMENT`), pero la **condición** que dispara el aviso en el
+  mock sigue siendo distinta de la condición real (10 min sin iniciar vs. estar en lista de
+  espera). Documentado como pendiente, no simulado como resuelto.
+
+## D-Notif-4 — Stickers: allowlist vs. contrato nuevo (AG-17)
+
+- **Elegido:** allowlist por id fijo (`STICKER_PACK_FILE_IDS`, los 24 uuids que el front ya tenía
+  hardcodeados en `sticker-pack.generated.ts`), no un campo `bodyText` con convención. Es la
+  opción que el prompt recomendaba y no cambia el contrato de `POST` de un mensaje.
+- **Dueño del archivo:** `SEED.systemWorkerUserId` (mismo patrón que avisos automáticos y
+  afiliaciones) — no hay una persona autora de un sticker del catálogo.
+- **Seed sin bytes:** el front pinta el sticker desde su propio `public/stickers/*.svg`; la API
+  nunca sirve esos bytes. `StickerPackSeedService` sólo materializa `common.files` +
+  `common.file_versions` (metadata) para que `attachment_file_id` tenga a qué apuntar y
+  `assertVersionUsable` tenga algo real que comprobar (`storage_uri` documental,
+  `product-assets://...`, `size_bytes = 0`).
+- **Hallazgo, no resuelto por conveniencia:** `assertAttachmentCanBeAssociated` (preexistente, no
+  tocado en su forma) convierte cualquier `ForbiddenException` de `assertUsableBy` en
+  `ResourceNotFoundException` (404) si el archivo no es un reenvío visible, «para no enumerar
+  uuids ajenos». El Gherkin de BR-22 pide **403** para un fileId ajeno al pack. Se dejó el 404
+  preexistente en vez de cambiar ese comportamiento de seguridad por conveniencia — cambiarlo
+  afecta a **todo** adjunto ajeno del chat, no sólo a los stickers, y es una decisión más grande
+  que este hallazgo. Queda para quien decida si 403 vs. 404 en adjuntos ajenos es un contrato a
+  cambiar.
+
+## D-Comunidad-1 — Alcance de AG-23/CV-26 para la demo (BR-27)
+
+- **Elegido: mínimo, y sólo la mitad de lectura.** De las tres opciones del prompt (mínimo,
+  comunidad completa, con grupos médicos), se avanzó **la corrección de seguridad de AG-18**
+  (apelar exige ser el sancionado) y **la lectura `decisions/mine`** completas, con su cliente
+  HTTP en el front. **No** se construyeron las pantallas «Mis sanciones», «Seguir» ni «Responder
+  reseña» — quedaron sólo con su cliente de datos donde hacía falta uno nuevo.
+- **Por qué:** con el tiempo disponible, corregir el hueco de autorización (cualquiera podía
+  apelar una decisión ajena con su propio perfil) es más valioso que una pantalla nueva, y no
+  tiene sentido a medias — una pantalla sin la lectura correcta detrás sería peor que ninguna
+  pantalla. `CV-26` (grupos médicos) no se tocó: es un módulo entero (formulario, ciclo de vida,
+  ventana de 7 días) que no entraba en el tiempo de este carril; queda abierto para quien lo tome
+  después, con el mismo criterio de «confirmar primero si REDESA/grupos médicos está en el
+  alcance de la demo» que ya pedía el prompt.
+- Encuestas (crear/votar) y bloquear tampoco se tocaron: son parte de la opción «comunidad
+  completa», fuera del mínimo elegido.
+
+## D-PharmaLab-1 — Camino de los roles al token (AG-31, BR-26)
+
+- **Elegido: A)** asignación en `authz.user_role_assignments` al vincular/desvincular/revincular,
+  no B) rol derivado de la membresía al tenant del laboratorio en el login. Es lo que recomendaba
+  el prompt («respeta scope tenant») y no exige tocar el servicio de login de `iam`.
+- **Coordinación con BR-06:** si quien tome BR-06 ya resolvió esto por el camino B (rol derivado
+  en el login), **no hacerlo dos veces** — este carril ya lo resolvió por A para `pharma_lab`.
+  Verificar contra `docs/progress/DECISIONS.md` de BR-06 antes de tocar
+  `medical-visitors.service.ts` de nuevo.
+- **Implementación:** `AuthzModule` exporta `AuthzGrantsService`, `RolesRepository` y
+  `UserRoleAssignmentsRepository` (aditivo al `exports: []`, no toca ningún `@Roles` ni
+  `role-mapping.ts` — fuera de la tabla de M2 del encargo). `medical-visitors.service.ts` los
+  inyecta y asigna/revoca `MEDICAL_VISITOR` en la misma transacción del alta/baja/revinculación.
+- **No resuelto:** el `revoke()` nuevo de `UserRoleAssignmentsRepository` corta `valid_to`; no hay
+  todavía un endpoint HTTP de revocación en `authz` (sólo se usa desde `pharma_lab`, server-side).
+  Si otro módulo necesita revocar una asignación por API, falta ese contrato.
+
+## D-PharmaLab-2 — AG-30 (500 en todo `pharma_lab`): pedido a M1
+
+- **No se tocó.** `schemas.catalog.ts:51` sigue con `['pharma_lab', null, 'pharma_lab', 31]` y
+  **sin DDL** (regla del encargo: nada de DDL en la API; el modelo empieza en
+  `mantra-core-health-model`). Cualquier ruta de `pharma_lab` contra una base reconstruida sigue
+  respondiendo 500 `relation "pharma_lab.…" does not exist`.
+- **Pedido explícito a M1:** promover el módulo `pharma_lab` (31 entidades, diagrama **67** — el
+  siguiente libre, que también disputa AG-44/`data_catalog` de BR-30/portal admin; acordar quién
+  se lo queda antes de escribir) por las 4 capas (`.puml` → `gen_ddl.py` → `SQL/` del modelo →
+  `yarn db:vendor` → `schemas.catalog.ts`), más las 4 historias de auditoría
+  (`audit.pharma_lab_staff_history`, `pharma_products_history`, `regulatory_documents_history`,
+  `visit_requests_history`, que ya existen como entidades en `src/modules/audit/entities/` sin
+  tabla). Sin esto, AG-31 (ya resuelto en código) no se puede verificar contra una base
+  reconstruida desde cero, y las 54/76 rutas de `pharma_lab` sin UI (AG-43/CV-17) no tienen sentido
+  de construir del lado del front contra la API real — siguen contra el mock.
+- **Lo que sí avanzó sin DDL:** la asignación/revocación de rol (D-PharmaLab-1), que usa tablas de
+  `authz` que ya existen.
+
+## Verificación contra Postgres efímero (`legion-h5-pg`, puerto 5450)
+
+`database/SQL/apply_all.sql` + `apply_deferred.sql` se aplicaron limpios contra una base nueva
+(`postgres:16-alpine`, sin TimescaleDB/pgvector — no se instalaron esas extensiones porque ningún
+cambio de este hito toca `time_series` ni `vector_rag`). De los 51 patches de
+`database/SQL/patches/`, 49 aplicaron limpios; 2 fallaron por depender de esas extensiones/datos
+que este stack mínimo no tiene (`2026-07-25_v407_nullable_embedding_model_versions.sql` exige el
+schema `vector_rag`; `2026-09-19_v4221_aseguradoras_codigo_unico.sql` exige 17 aseguradoras
+sembradas que este stack no siembra) — ninguno de los dos toca `messaging`, `community`,
+`pharma_lab` ni `authz`. Detalle de qué se pudo verificar contra la API viva (o por qué no) en
+`docs/progress/evidence/lane-M7-h5/REPORT.md`.
+
+---
+
 ## D-BR14-01 · 2026-09-26 · PROPUESTA (tomada por M7, pendiente de confirmación del propietario) · M7 (H3, BR-14)
 
 **Pregunta (CL-07):** ¿qué pasa cuando algo escribe sobre un encuentro ya `FINISHED` y sellado

@@ -888,31 +888,10 @@ export class CaseDetailDto {
    * por ninguna parte de la API.
    */
   @ApiProperty({
-    isArray: true,
+    type: () => [OperativeStepItemDto],
     description: 'Pasos de la intervención, en orden',
   })
-  operativeSteps!: {
-    /** Identificador del paso. */
-    id: string;
-    /** Orden dentro de la intervención. */
-    stepNumber: number;
-    /** Código del paso. */
-    stepCodeConceptId: string;
-    /** Descripción escrita por quien lo registró. */
-    description: string;
-    /** Profesional que lo ejecutó, si se registró. */
-    performedByProfileId?: string;
-    /** Sitio anatómico, si se registró. */
-    bodySiteConceptId?: string;
-    /** Lateralidad, si aplica. */
-    lateralityConceptId?: string;
-    /** Estado del paso. */
-    statusConceptId: string;
-    /** Cuándo empezó, si se cronometró. */
-    startedAt?: Date;
-    /** Cuándo terminó, si se cronometró. */
-    endedAt?: Date;
-  }[];
+  operativeSteps!: OperativeStepItemDto[];
 
   /** Hallazgos intraoperatorios, del más reciente al más antiguo. */
   @ApiProperty({
@@ -1747,6 +1726,56 @@ export class OperativeStepResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
+}
+
+/**
+ * Un paso operatorio dentro de {@link CaseDetailDto.operativeSteps} (CL-55).
+ *
+ * Antes era un tipo TypeScript inline: `@ApiProperty({ isArray: true })` sin
+ * `type` no le da forma a los ítems en el esquema OpenAPI generado, así que un
+ * cliente que regenera tipos desde el contrato veía `operativeSteps: any[]`.
+ * Esta clase es la misma forma que ya devuelve el servicio, con decoradores.
+ */
+export class OperativeStepItemDto {
+  /** Identificador del paso. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Orden dentro de la intervención. */
+  @ApiProperty()
+  stepNumber!: number;
+
+  /** Código del paso. */
+  @ApiProperty({ format: 'uuid' })
+  stepCodeConceptId!: string;
+
+  /** Descripción escrita por quien lo registró. */
+  @ApiProperty()
+  description!: string;
+
+  /** Profesional que lo ejecutó, si se registró. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  performedByProfileId?: string;
+
+  /** Sitio anatómico, si se registró. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  bodySiteConceptId?: string;
+
+  /** Lateralidad, si aplica. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  lateralityConceptId?: string;
+
+  /** Estado del paso. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Cuándo empezó, si se cronometró. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  startedAt?: Date;
+
+  /** Cuándo terminó, si se cronometró. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  endedAt?: Date;
 }
 
 /** Cuerpo de `POST /procedure-cases/{id}/findings` (UC-53-08). */

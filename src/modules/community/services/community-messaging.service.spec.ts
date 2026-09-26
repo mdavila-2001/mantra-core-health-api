@@ -204,6 +204,45 @@ describe('CommunityMessagingService', () => {
       expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
     });
 
+    it('AG-17: un sticker del pack se asocia sin ser dueño del archivo', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+        messageCount: 0,
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part1',
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p1' },
+      ]);
+      // El pack es del sistema, no del remitente: `assertUsableBy` lo acepta
+      // porque la allowlist se lo permite, no porque sea suyo.
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: { id: 'a7c1f0e2-0001-4a00-9000-5713ca110001' },
+        version: { id: 'v1' },
+      });
+      d.conversationsRepo.createMessage.mockReturnValue({ id: 'msg1' });
+
+      await d.service.sendMessage(
+        'conv1',
+        {
+          senderProfileId: 'p1',
+          attachmentFileId: 'a7c1f0e2-0001-4a00-9000-5713ca110001',
+          contentType: 'MEDIA',
+        } as any,
+        actor,
+      );
+
+      const [, , , options] = d.attachableFiles.assertUsableBy.mock
+        .calls[0] as any[];
+      expect(options.allowIfFileIdIn).toContain(
+        'a7c1f0e2-0001-4a00-9000-5713ca110001',
+      );
+      expect(d.conversationsRepo.createMessage).toHaveBeenCalled();
+    });
+
     /**
      * FT-32-R12 · falla cerrado sin actor.
      *

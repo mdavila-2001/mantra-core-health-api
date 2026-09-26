@@ -29,6 +29,8 @@ import {
   ModerationDecisionPageDto,
   ModerationAppealsQueryDto,
   ModerationAppealPageDto,
+  MyModerationDecisionsQueryDto,
+  MyModerationDecisionPageDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -113,6 +115,29 @@ export class CommunityModerationController {
     @Query() query: ModerationQueueQueryDto,
   ): Promise<ModerationQueuePageDto> {
     return this.readService.listQueue(query, query.limit ?? DEFAULT_PAGE_LIMIT);
+  }
+
+  /**
+   * UC-19-10 (AG-18) · «Mis sanciones»: el autor lee sus propias decisiones.
+   *
+   * Sin `@Roles`, a propósito: es la lectura que le falta a cualquier cuenta
+   * para poder apelar — sin ella, el autor sancionado nunca conoce el
+   * `decisionId` que `POST .../appeal` le exige. Declarada **antes** que
+   * `moderation/decisions` (la de `SECURITY_ADMIN`) para que un futuro
+   * `GET moderation/decisions/:id` no la capture primero.
+   */
+  @Get('moderation/decisions/mine')
+  @ApiOperation({ summary: 'Mis propias decisiones de moderación' })
+  listMyDecisions(
+    @Query() query: MyModerationDecisionsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyModerationDecisionPageDto> {
+    return this.readService.listMyDecisions(
+      query.profileId,
+      query,
+      query.limit ?? DEFAULT_PAGE_LIMIT,
+      actor,
+    );
   }
 
   /** Decisiones tomadas, de la más reciente hacia atrás. */
