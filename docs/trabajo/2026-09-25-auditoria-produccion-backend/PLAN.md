@@ -66,18 +66,20 @@ Cambios al plan: cobertura con un worker en lugar de unitarios simples; build, l
 
 **CA:** Dada la auditoría entregada, cuando se publica, entonces existe un commit acotado y un PR hacia `dev`, sin modificaciones funcionales.
 **DoD:** `git show --stat` y `gh pr view --json url,headRefOid,baseRefName,isDraft` identifican los artefactos publicados.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 ### H2.S1 — Commit y PR documental
 
 **CA:** Dado el SHA auditado, cuando la base remota avanzó, entonces el informe conserva su alcance histórico y el PR contiene sólo documentación y diagnósticos.
 **DoD:** `git diff origin/dev...HEAD --name-only` queda limitado a este directorio; PR draft hasta CI verde.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H2.S1.M1 | Preparar publicación | Dadas las evidencias, al revisar, entonces son legibles y no contienen credenciales detectadas | Inspección y escaneo local: 0 coincidencias de credenciales; 12 archivos normalizados a UTF-8 | HECHO |
-| H2.S1.M2 | Crear commit | Dado el contenido revisado, al versionar, entonces queda sólo en rama propia | `git show --stat HEAD` → commit documental | TODO |
-| H2.S1.M3 | Abrir PR | Dada la rama publicada, al crear PR, entonces apunta a dev y declara límites | `gh pr view --json url,headRefOid,baseRefName,isDraft` → URL/base/head/draft | TODO |
+| H2.S1.M2 | Crear commit | Dado el contenido revisado, al versionar, entonces queda sólo en rama propia | Commit `ec472b429e2e5c126b6c3df0398279ba3171a09b`, 25 archivos dentro del directorio, push correcto | HECHO |
+| H2.S1.M3 | Abrir PR | Dada la rama publicada, al crear PR, entonces apunta a dev y declara límites | PR #468 OPEN, base dev, isDraft true; head inicial ec472b42 | HECHO |
 
 Autorización posterior: el usuario pidió explícitamente commit y PR; esto amplía el OUT original sólo para esa publicación. No autoriza merge ni despliegue. Base remota observada al publicar: `52a696b34e56511cf7d67a7549a443f8b0740c29`; evidencia de auditoría permanece en `4dcaa27961588444bcfdeb4cbe8a3aa2d1b71650`.
+
+Publicación: [PR #468](https://github.com/mdavila-2001/mantra-core-health-api/pull/468). H2: 3/3 microtareas, 100 %. Auditoría + publicación: 13/13 microtareas; esto no significa corregir los hallazgos. CI todavía sin resultado al crear el PR; no se hizo merge.

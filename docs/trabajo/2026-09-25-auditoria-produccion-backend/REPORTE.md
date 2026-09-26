@@ -260,3 +260,17 @@ Remediaciones F01–F10; validación en PostgreSQL/RLS real de las reproduccione
 El riesgo prioritario es confundir controles globales, comentarios y miles de pruebas positivas con autorización demostrada por recurso. La documentación del bootstrap reconoce la falta de política, pero reconocerla no vuelve aceptable exponerla en producción.
 
 Decisión: **NO-GO del snapshot**, conservar el código existente y corregir incrementalmente, no reescribir. No se cambiaron permisos remotos, PRs, despliegues ni datos. El reporte no acredita ausencia de otros defectos y no reemplaza las verificaciones pendientes del candidato de release.
+
+## Publicación posterior solicitada por el usuario
+
+Se publicó el commit documental `ec472b429e2e5c126b6c3df0398279ba3171a09b` en `docs/auditoria-backend-produccion-2026-09-25` y se abrió [PR #468](https://github.com/mdavila-2001/mantra-core-health-api/pull/468) contra `dev`. Sólo se versionaron 25 archivos de este directorio. La publicación amplía expresamente el alcance original; no es una corrección ni una repetición de la auditoría contra el nuevo HEAD.
+
+La skill `github-pull-requests` mantuvo el PR en draft hasta disponer de CI verde. Las salidas UTF-16 se normalizaron a UTF-8 y la búsqueda local de patrones de claves privadas, tokens GitHub/AWS y JWT no devolvió coincidencias; no es un escaneo exhaustivo de secretos. Los `.log` de evidencia se añadieron explícitamente aunque el ignore general los excluye.
+
+Evidencia literal de `gh pr view` al crear el PR:
+
+```json
+{"baseRefName":"dev","changedFiles":25,"headRefName":"docs/auditoria-backend-produccion-2026-09-25","headRefOid":"ec472b429e2e5c126b6c3df0398279ba3171a09b","isDraft":true,"number":468,"state":"OPEN","statusCheckRollup":[],"url":"https://github.com/mdavila-2001/mantra-core-health-api/pull/468"}
+```
+
+Completado: commit, push y PR verificados. A medias: ninguna operación de publicación. Pendiente fuera del pedido: CI/revisión, remediaciones y autorización para eventual merge. No hubo merge ni despliegue. Este registro se añade como commit documental posterior sin reescribir el historial publicado.
