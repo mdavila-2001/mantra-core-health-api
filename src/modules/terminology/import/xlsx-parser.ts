@@ -68,13 +68,17 @@ export class XlsxParser implements ParseadorDeArchivo {
     const nombreDeHoja = libro.SheetNames.includes(HOJA_PREFERIDA)
       ? HOJA_PREFERIDA
       : libro.SheetNames[0];
-    const hoja = nombreDeHoja === undefined ? undefined : libro.Sheets[nombreDeHoja];
+    const hoja =
+      nombreDeHoja === undefined ? undefined : libro.Sheets[nombreDeHoja];
 
     if (hoja === undefined) {
       return {
         filas: [],
         problemas: [
-          { fila: FILA_DEL_ENCABEZADO, motivo: 'el archivo no tiene encabezado' },
+          {
+            fila: FILA_DEL_ENCABEZADO,
+            motivo: 'el archivo no tiene encabezado',
+          },
         ],
       };
     }
@@ -105,7 +109,12 @@ export class XlsxParser implements ParseadorDeArchivo {
     // seguir, y el problema que generan viaja aparte porque apunta a una
     // celda concreta, no a la fila entera.
     const registrosCompletos = registros.map((registro, indiceRegistro) =>
-      completarFormulasSinValor(registro, hoja, indiceRegistro, problemasDeCelda),
+      completarFormulasSinValor(
+        registro,
+        hoja,
+        indiceRegistro,
+        problemasDeCelda,
+      ),
     );
 
     const encabezado = registrosCompletos[0];
@@ -113,13 +122,18 @@ export class XlsxParser implements ParseadorDeArchivo {
       return {
         filas: [],
         problemas: [
-          { fila: FILA_DEL_ENCABEZADO, motivo: 'el archivo no tiene encabezado' },
+          {
+            fila: FILA_DEL_ENCABEZADO,
+            motivo: 'el archivo no tiene encabezado',
+          },
         ],
       };
     }
 
     const problemas: ProblemaDeFila[] = [];
-    const columnas = encabezado.map((celda) => resolverColumna(perfil, String(celda)));
+    const columnas = encabezado.map((celda) =>
+      resolverColumna(perfil, String(celda)),
+    );
     encabezado.forEach((celda, indice) => {
       if (columnas[indice] === undefined) {
         problemas.push({
@@ -222,7 +236,11 @@ function completarFormulasSinValor(
  * @param columna - Índice de columna 0-based.
  * @returns La celda, o `undefined` si no hay ninguna en esa posición.
  */
-function leerCelda(hoja: WorkSheet, fila: number, columna: number): CellObject | undefined {
+function leerCelda(
+  hoja: WorkSheet,
+  fila: number,
+  columna: number,
+): CellObject | undefined {
   const datosDensos = (hoja as { '!data'?: CellObject[][] })['!data'];
   if (datosDensos !== undefined) return datosDensos[fila]?.[columna];
   const direccion = XLSX.utils.encode_cell({ r: fila, c: columna });
@@ -246,10 +264,23 @@ function textoDeCelda(valor: unknown): string {
       valor.getUTCMinutes() === 0 &&
       valor.getUTCSeconds() === 0 &&
       valor.getUTCMilliseconds() === 0;
-    return esMedianocheUtc ? valor.toISOString().slice(0, 10) : valor.toISOString();
+    return esMedianocheUtc
+      ? valor.toISOString().slice(0, 10)
+      : valor.toISOString();
   }
   if (typeof valor === 'number') {
     return Number.isInteger(valor) ? BigInt(valor).toString() : String(valor);
   }
-  return String(valor);
+  if (typeof valor === 'bigint') return valor.toString();
+  /*
+   * `sheet_to_json` devuelve cadena, número, booleano o fecha para una celda
+   * con valor, y un **objeto** cuando la celda trae un error de fórmula
+   * (`{ t: 'e', … }`). `String(objeto)` daba «[object Object]», que entraba al
+   * catálogo como si fuera el contenido de la celda: un concepto con ese
+   * display es indistinguible de uno bueno para quien mire la tabla después.
+   * Se serializa para que el error viaje visible y la revisión de la
+   * importación lo encuentre.
+   */
+  if (typeof valor === 'symbol') return valor.toString();
+  return JSON.stringify(valor) ?? '';
 }
