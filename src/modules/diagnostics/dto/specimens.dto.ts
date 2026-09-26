@@ -330,3 +330,125 @@ export class ContainerCustodyEventDto {
   @MaxLength(2000)
   notes?: string;
 }
+
+/* ---- Lecturas (CL-47): la cola sólo tenía POST ------------------------- */
+
+/** Un evento de la cadena de custodia, tal como quedó registrado (append-only). */
+export class SpecimenCustodyEventDto {
+  /** Identificador del evento. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Contenedor al que se refiere el traslado, si el evento fue de un contenedor. */
+  @ApiPropertyOptional({ format: 'uuid' }) specimenContainerId?: string;
+
+  /** Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. */
+  @ApiProperty({ format: 'uuid' }) custodyEventTypeConceptId!: string;
+
+  /** Cuándo ocurrió. */
+  @ApiProperty({ type: String, format: 'date-time' }) occurredAt!: Date;
+
+  /** De qué tipo de parte salió (concept id), si se registró. */
+  @ApiPropertyOptional({ format: 'uuid' }) fromPartyTypeConceptId?: string;
+
+  /** A qué tipo de parte llegó (concept id), si se registró. */
+  @ApiPropertyOptional({ format: 'uuid' }) toPartyTypeConceptId?: string;
+
+  /** Sello de custodia, si se usó uno. */
+  @ApiPropertyOptional() sealIdentifier?: string;
+
+  /** Quién firmó el evento. */
+  @ApiPropertyOptional({ format: 'uuid' }) signedByUserId?: string;
+}
+
+/** Un contenedor del espécimen. */
+export class SpecimenContainerDto {
+  /** Identificador del contenedor. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Identificador físico del contenedor (etiqueta/código). */
+  @ApiProperty() containerIdentifier!: string;
+
+  /** Tipo de contenedor (concept id). */
+  @ApiProperty({ format: 'uuid' }) containerTypeConceptId!: string;
+
+  /** Estado del contenedor (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+}
+
+/** Detalle de un espécimen: sus datos, sus contenedores y su cadena de custodia. */
+export class SpecimenDetailDto {
+  /** Identificador del espécimen. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Paciente dueño del espécimen. */
+  @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
+
+  /** Tipo de espécimen (concept id). */
+  @ApiProperty({ format: 'uuid' }) specimenTypeConceptId!: string;
+
+  /** Estado del espécimen (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+
+  /** Cuándo se recolectó, si ya ocurrió. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  collectedAt?: Date;
+
+  /** Cuándo se recibió en el laboratorio, si ya ocurrió. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  receivedAt?: Date;
+
+  /** Sus contenedores. */
+  @ApiProperty({ type: [SpecimenContainerDto] })
+  containers!: SpecimenContainerDto[];
+
+  /** Su cadena de custodia, del evento más viejo al más nuevo. */
+  @ApiProperty({ type: [SpecimenCustodyEventDto] })
+  custodyEvents!: SpecimenCustodyEventDto[];
+}
+
+/** Un espécimen dentro de una acesión, con su detalle. */
+export class AccessionSpecimenDetailDto {
+  /** Identificador del item de acesión (`accession_specimens`). */
+  @ApiProperty({ format: 'uuid' }) accessionSpecimenId!: string;
+
+  /** Posición dentro de la acesión. */
+  @ApiProperty() sequenceNumber!: number;
+
+  /** Estado del item dentro de la acesión (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+
+  /** El espécimen, con sus contenedores y su custodia. */
+  @ApiProperty({ type: SpecimenDetailDto }) specimen!: SpecimenDetailDto;
+}
+
+/**
+ * Detalle de una acesión de laboratorio (`GET /diagnostics/accessions/{id}`,
+ * CL-47): la única lectura del circuito era `GET /diagnostics/work-orders`, y
+ * abrir el detalle de una acesión concreta no tenía ruta.
+ */
+export class AccessionDetailDto {
+  /** Identificador de la acesión. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Tenant custodio (el laboratorio que la recibió). */
+  @ApiProperty({ format: 'uuid' }) custodianTenantId!: string;
+
+  /** Paciente dueño de la acesión. */
+  @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
+
+  /** Número de acesión. */
+  @ApiProperty() accessionNumber!: string;
+
+  /** Cuándo se recibió. */
+  @ApiProperty({ type: String, format: 'date-time' }) receivedAt!: Date;
+
+  /** Prioridad (concept id). */
+  @ApiProperty({ format: 'uuid' }) priorityConceptId!: string;
+
+  /** Estado de la acesión (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+
+  /** Los especímenes acesionados, con su contenedor y su custodia. */
+  @ApiProperty({ type: [AccessionSpecimenDetailDto] })
+  specimens!: AccessionSpecimenDetailDto[];
+}
