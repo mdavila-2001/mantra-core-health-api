@@ -346,7 +346,10 @@ describe('Flujos de lectura del frontend (integración)', () => {
       await http()
         .post(`/scheduling/bookings/${booking.body.id}/cancel`)
         .set(auth())
-        .send({ cancelledBy: 'PATIENT' })
+        .send({
+          cancelledBy: 'PATIENT',
+          reasonText: 'El paciente no puede asistir',
+        })
         .expect(200);
 
       const active = await http()

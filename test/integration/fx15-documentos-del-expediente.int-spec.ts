@@ -6,7 +6,6 @@ import {
   type TestContext,
   identidadProfesional,
 } from './harness';
-import { SEED } from '../../src/common';
 
 /**
  * FX-15 · Documentos clínicos gobernados y firma propia en el expediente.
@@ -44,6 +43,8 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
     hpid: '',
   };
   let patientProfileId = '';
+  /** El consultorio propio de A: el tenant que el contexto resuelve para su sesión. */
+  let tenantA = '';
 
   /** Descarga binaria: supertest/superagent no bufferiza tipos que no reconoce. */
   function parseBinary(
@@ -100,6 +101,11 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
     const a = await registrarMedico(medicoA.email, 'A');
     medicoA.token = a.token;
     medicoA.hpid = a.hpid;
+    tenantA = (
+      JSON.parse(
+        Buffer.from(a.token.split('.')[1], 'base64url').toString('utf8'),
+      ).tenants as string[]
+    )[0];
     const b = await registrarMedico(medicoB.email, 'B');
     medicoB.token = b.token;
     medicoB.hpid = b.hpid;
@@ -114,6 +120,19 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       })
       .expect(201);
     patientProfileId = paciente.body.profileId;
+
+    // Escribir en la historia exige una relación asistencial vigente (MCH-007):
+    // A atiende a este paciente; B no, y esa diferencia es lo que prueba CA-3.
+    await http()
+      .post('/authz/care-relationships')
+      .set(bearer(ctx.adminToken))
+      .send({
+        tenantId: tenantA,
+        patientProfileId,
+        practitionerProfileId: medicoA.hpid,
+        relationshipType: 'TREATING',
+      })
+      .expect(201);
   });
 
   afterAll(async () => {
@@ -128,7 +147,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       .set(bearer(medicoA.token))
       .send({
         patientProfileId,
-        tenantId: SEED.tenantId,
+        tenantId: tenantA,
         title: 'Informe de laboratorio',
         files: [{ fileId, contentRole: 'PRIMARY', ordinal: 0 }],
       })
@@ -145,7 +164,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       .set(bearer(medicoA.token))
       .send({
         patientProfileId,
-        tenantId: SEED.tenantId,
+        tenantId: tenantA,
         title: 'Documento con archivo ajeno',
         files: [{ fileId: fileDeB }],
       })
@@ -158,7 +177,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       .set(bearer(medicoA.token))
       .send({
         patientProfileId,
-        tenantId: SEED.tenantId,
+        tenantId: tenantA,
         title: 'Documento con archivo inexistente',
         files: [{ fileId: randomUUID() }],
       })
@@ -177,7 +196,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
       .set(bearer(medicoA.token))
       .send({
         patientProfileId,
-        tenantId: SEED.tenantId,
+        tenantId: tenantA,
         title: 'Documento con archivo borrado',
         files: [{ fileId }],
       })
@@ -195,7 +214,7 @@ describe('FX-15 · documentos del expediente y firma propia', () => {
         .set(bearer(medicoA.token))
         .send({
           patientProfileId,
-          tenantId: SEED.tenantId,
+          tenantId: tenantA,
           title: 'Informe leído desde el expediente',
           files: [{ fileId, contentRole: 'PRIMARY', ordinal: 0 }],
         })

@@ -113,6 +113,26 @@ describe('FX-11 · la colección de notas de evolución (P18)', () => {
       .expect(201);
     patientProfileId = paciente.body.profileId;
 
+    // Escribir en la historia exige una relación asistencial vigente (MCH-007):
+    // los dos médicos atienden a este paciente, cada uno desde su consultorio.
+    for (const medico of [medicoA, medicoB]) {
+      const tenantId = (
+        JSON.parse(
+          Buffer.from(medico.token.split('.')[1], 'base64url').toString('utf8'),
+        ).tenants as string[]
+      )[0];
+      await http()
+        .post('/authz/care-relationships')
+        .set(bearer(ctx.adminToken))
+        .send({
+          tenantId,
+          patientProfileId,
+          practitionerProfileId: medico.hpid,
+          relationshipType: 'TREATING',
+        })
+        .expect(201);
+    }
+
     // Primer lote: 3 notas de A, con una marca de tiempo después para poder
     // acotar la ventana entre este lote y el siguiente.
     const primeraNota = await crearNota(medicoA.token, medicoA.hpid, 'Nota A0');
