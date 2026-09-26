@@ -163,9 +163,63 @@ decenas con dirección real.
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H4.S1.M1 | Cerrar el IDOR de `files/links` (falta actor + `@Roles`/guard) | una sesión ajena recibe 403 | respuesta pegada | TODO |
-| H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | TODO |
-| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | TODO |
+| H4.S1.M1 | Cerrar el IDOR de `files/links` (falta actor + `@Roles`/guard) | una sesión ajena recibe 403 | respuesta pegada | HECHO |
+| H4.S1.M2 | Permitir al paciente leer lo suyo (`canActorReadOwnFile`) | recibe su propio PDF | respuesta pegada | BLOQUEADO (conflicto de alcance, ver abajo) |
+| H4.S1.M3 | Resolver la descarga sin token en la URL (`window.open` sale sin token) | el token no viaja en la query | petición pegada | HECHO |
+
+**H4.S1.M1 — cómo se cerró.** `FilesService.listLinkedFiles` no recibía actor ni comprobaba nada:
+`GET /common/files/links?ownerType=X&ownerId=Y` con **cualquier** `ownerId` devolvía sus adjuntos a
+cualquier sesión autenticada. Se agregó `actor: AuthenticatedUser` al método y al controlador
+(`@CurrentUser()`), y se filtra cada adjunto por `canActorReadOwnFile` (mismo criterio que
+`FileUploadService.download` y `FilesService.generateDownloadUrl`, que ya lo tenían). Si el owner
+**tiene** adjuntos pero **ninguno** es visible para el actor, `ForbiddenException` (403) — una lista
+vacía habría sido indistinguible de "este recurso no tiene adjuntos". Si el owner no tiene ningún
+adjunto, sigue siendo 200 vacío. 4 tests nuevos + 9 preexistentes migrados a un actor con rol de
+revisión (no probaban propiedad, así que se preserva su alcance exacto). Suite `common/`: 117/117.
+
+**H4.S1.M3 — cómo se cerró.** `generateDownloadUrl` ya firmaba una URL (`versionId`, `expires`,
+`signature` con HMAC-SHA256) pero apuntaba a `:id/content`, que **nunca leyó esos parámetros**:
+exigía `@CurrentUser` igual que siempre. Un `window.open()` no puede mandar el header
+`Authorization`, así que la única forma de que la descarga funcionara era pegar el token de sesión
+real en la query — exactamente CL-40. Se agregó `GET /:id/signed-content` (`@Public()`), que verifica
+la firma en `FilesService.verifySignedDownload` (comparación en tiempo constante, `timingSafeEqual`)
+contra el archivo, la versión y el vencimiento, y sólo entonces sirve los bytes vía
+`FileUploadService.downloadForAuthorizedContext` (ya existente, "contexto ya autorizado"). El token
+de sesión no viaja: lo que viaja es una credencial de un solo archivo, vencida en 15 minutos.
+`generateDownloadUrl` ahora apunta a `signed-content`, no a `content`. 5 tests nuevos para
+`verifySignedDownload` (firma válida, vencida, forjada/de otra versión, archivo inexistente) + 3
+tests preexistentes actualizados (la URL cambió de forma, no de contrato de seguridad).
+
+**H4.S1.M2 — por qué queda `BLOQUEADO`, no `HECHO`.** `canActorReadOwnFile` autoriza por **quién
+subió el archivo** (`createdByUserId`) o por rol de revisión. El paciente que pide el PDF de **su
+propio** resultado no lo subió él — lo subió el laboratorio/médico —, así que sigue recibiendo 403
+por esta vía; el fix real es una autorización **contextual** ("¿este archivo cuelga de un
+`diagnostic_report` liberado de ESTE paciente?"), exactamente el patrón que ya existe para chat
+(`CommunityMessagingReadService.getAttachmentContent`) y comentarios (`getCommentMedia`) — los dos
+casos que el propio código de `file-access.ts` cita como los únicos llamadores legítimos de
+`downloadForAuthorizedContext`. Escribir ese servicio vive necesariamente en `clinical` (dueño de
+`diagnostic_reports`), que el encargo pone **explícitamente OUT** de este carril («no tocás
+`clinical`... son de M3»). Rule 65 exige simular en vez de bloquearse — pero rule 65 §4.5 también
+prohíbe usar esa regla para justificar tocar código fuera de alcance: aislar el problema no es
+arreglarlo. Se deja el contrato exacto para quien tenga `clinical` en su carril:
+
+```
+// clinical: nuevo método, mismo patrón que community-messaging-read.service.ts
+async getDiagnosticReportFileContent(
+  diagnosticReportId: string,
+  fileId: string,
+  actorPatientProfileId: string,
+  actor: AuthenticatedUser,
+): Promise<FileContentDto> {
+  // 1. el informe existe, pertenece a actorPatientProfileId, y está RELEASED
+  // 2. fileId está vinculado a ese informe (file_links)
+  // 3. si todo lo anterior, return this.uploadService.downloadForAuthorizedContext(fileId, 'clinical.diagnostic-report.download')
+  // 404 (no 403) ante cualquier combinación ajena o inexistente, mismo criterio que chat/comentarios
+}
+```
+
+Ningún cambio de `common/files` se necesita para esto — el bloqueo es puramente de dónde vive el
+código, no de qué hace falta construir. Registrado para el propietario / M3.
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

@@ -34,6 +34,10 @@ function createEmMock() {
 }
 
 const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
+// H4.S1.M1: casos preexistentes de `listLinkedFiles` que no ejercitan la
+// autorización por propiedad usan un actor con rol de revisión, para no
+// enredar lo que ya probaban con el chequeo nuevo (N-01).
+const reviewer: AuthenticatedUser = { id: 'reviewer-1', roles: ['SECURITY_ADMIN'] };
 
 describe('FilesService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -310,7 +314,7 @@ describe('FilesService', () => {
       const result = await service.generateDownloadUrl('file-1', actor);
 
       expect(em.fork).toHaveBeenCalled();
-      expect(result.url).toContain('/common/files/file-1/content');
+      expect(result.url).toContain('/common/files/file-1/signed-content');
       expect(result.url).not.toContain('s3://bucket');
       expect(result.url).toContain('signature=');
       expect(result.expiresAt).toBeInstanceOf(Date);
@@ -378,7 +382,7 @@ describe('FilesService', () => {
           roles: ['SECURITY_ADMIN'],
         }),
       ).resolves.toMatchObject({
-        url: expect.stringContaining('/common/files/file-1/content'),
+        url: expect.stringContaining('/common/files/file-1/signed-content'),
       });
     });
 
@@ -425,11 +429,81 @@ describe('FilesService', () => {
         expect(url).not.toContain('9f2c1ab3');
         // Lo que sí debe llevar: el recurso de la propia API y la firma.
         expect(url).toBe(
-          `/common/files/file-1/content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
+          `/common/files/file-1/signed-content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
         );
       },
     );
   });
+
+  describe('verifySignedDownload', () => {
+    /** Reconstruye la firma real de `generateDownloadUrl` para no repetirla a mano. */
+    async function firmar(fileId: string, versionId: string, expires: number) {
+      const { createHmac } = await import('node:crypto');
+      return createHmac('sha256', 'alovida-dev-download-secret')
+        .update(`${fileId}:${versionId}:${expires}`)
+        .digest('hex');
+    }
+
+    it('acepta una firma válida y no vencida', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
+      const expires = Date.now() + 60_000;
+      const signature = await firmar('file-1', 'ver-1', expires);
+
+      await expect(
+        service.verifySignedDownload('file-1', {
+          versionId: 'ver-1',
+          expires: String(expires),
+          signature,
+        }),
+      ).resolves.toMatchObject({ id: 'file-1' });
+    });
+
+    it('rechaza una firma vencida', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
+      const expires = Date.now() - 1_000;
+      const signature = await firmar('file-1', 'ver-1', expires);
+
+      await expect(
+        service.verifySignedDownload('file-1', {
+          versionId: 'ver-1',
+          expires: String(expires),
+          signature,
+        }),
+      ).rejects.toThrow('La URL de descarga venció');
+    });
+
+    it('rechaza una firma que no corresponde (forjada o de otro archivo/versión)', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
+      const expires = Date.now() + 60_000;
+      // Firmada para `ver-OTRA`, no para `ver-1`: mismo archivo, otra versión.
+      const signature = await firmar('file-1', 'ver-OTRA', expires);
+
+      await expect(
+        service.verifySignedDownload('file-1', {
+          versionId: 'ver-1',
+          expires: String(expires),
+          signature,
+        }),
+      ).rejects.toThrow('Firma de descarga inválida');
+    });
+
+    it('rechaza un archivo inexistente antes de mirar la firma', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        service.verifySignedDownload('missing', {
+          versionId: 'ver-1',
+          expires: String(Date.now() + 60_000),
+          signature: 'lo-que-sea',
+        }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('listLinkedFiles', () => {
     /**
      * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca
@@ -481,7 +555,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       expect(pagina.count).toBe(1);
       expect(pagina.items[0]!.file.id).toBe('f-vivo');
@@ -509,7 +583,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       expect(pagina.items[0]!.file.category).toBe(FileCategory.IMAGE);
       expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
@@ -536,7 +610,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
       expect(pagina.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
@@ -549,7 +623,7 @@ describe('FilesService', () => {
       await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-7',
-      });
+      }, reviewer);
 
       const [, tipo, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
       expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
@@ -595,7 +669,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       const archivo = pagina.items[0]!.file;
       expect(archivo).toMatchObject({
@@ -660,7 +734,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       expect(fileVersionsRepo.findByIds).toHaveBeenCalledTimes(1);
       expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
@@ -707,7 +781,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       for (const item of pagina.items) {
         expect(item.file).not.toHaveProperty('mimeType');
@@ -749,7 +823,7 @@ describe('FilesService', () => {
       const pagina = await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       expect(pagina.items[0]!.file).not.toHaveProperty('mimeType');
       expect(pagina.items[0]!.file).not.toHaveProperty('sizeBytes');
@@ -762,11 +836,95 @@ describe('FilesService', () => {
       await service.listLinkedFiles({
         ownerType: OwnerType.PATIENT,
         ownerId: 'p-1',
-      });
+      }, reviewer);
 
       // El repositorio cortocircuita con la lista vacía; el servicio igual la
       // entrega vacía y no inventa ids.
       expect(fileVersionsRepo.findByIds.mock.calls[0]?.[1] ?? []).toEqual([]);
+    });
+
+    // H4.S1.M1 (N-01): sin actor ni chequeo de propiedad, cualquier sesión
+    // autenticada podía listar los adjuntos de cualquier condición o
+    // procedimiento cambiando `ownerId`. Estos cuatro casos fijan el contrato
+    // nuevo: dueño ve lo suyo, revisor ve todo, ajeno recibe 403 (no una lista
+    // vacía, que sería indistinguible de «sin adjuntos»), y un recurso sin
+    // adjuntos de verdad sigue devolviendo 200 vacío.
+    it('el dueño del archivo ve su propio adjunto', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        createdByUserId: actor.id,
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const pagina = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+        actor,
+      );
+
+      expect(pagina.count).toBe(1);
+    });
+
+    it('un actor sin rol de revisión y ajeno a los archivos recibe 403, no una lista vacía', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-ajeno', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-ajeno',
+        createdByUserId: 'otro-usuario',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await expect(
+        service.listLinkedFiles(
+          { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+          actor,
+        ),
+      ).rejects.toThrow('No tiene acceso a los adjuntos de este recurso');
+    });
+
+    it('un rol de revisión ve los adjuntos aunque no los haya subido', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-ajeno', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-ajeno',
+        createdByUserId: 'otro-usuario',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const pagina = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+        reviewer,
+      );
+
+      expect(pagina.count).toBe(1);
+    });
+
+    it('un recurso sin adjuntos responde 200 vacío, no 403', async () => {
+      const { service, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([]);
+
+      const pagina = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-sin-adjuntos' },
+        actor,
+      );
+
+      expect(pagina).toEqual({ items: [], count: 0 });
     });
   });
 

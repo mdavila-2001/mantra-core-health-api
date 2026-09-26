@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsInt,
+  IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
@@ -484,6 +485,28 @@ export class ListFileLinksQueryDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   ownerId!: string;
+}
+
+/**
+ * Query de `GET /common/files/:id/signed-content` (H4.S1.M3).
+ *
+ * Los tres campos que `FilesService.generateDownloadUrl` firmó. Es **la única
+ * credencial** de esta ruta pública: no hay `@CurrentUser`, así que la
+ * posesión de una firma válida y no vencida es la prueba de autorización, no
+ * un complemento de ella.
+ */
+export class SignedFileDownloadQueryDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  versionId!: string;
+
+  @ApiProperty({ description: 'Epoch ms de vencimiento de la firma.' })
+  @IsNumberString()
+  expires!: string;
+
+  @ApiProperty({ description: 'HMAC-SHA256 de `fileId:versionId:expires`.' })
+  @IsString()
+  signature!: string;
 }
 
 /**

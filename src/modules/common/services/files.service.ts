@@ -7,7 +7,7 @@ import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycl
 import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
@@ -640,8 +640,17 @@ export class FilesService {
       .update(`${file.id}:${version.id}:${expiry}`)
       .digest('hex');
     // Nunca `version.storageUri`: ver el porqué en el encabezado del método.
+    //
+    // H4.S1.M3: apunta a `signed-content`, no a `content`. `content` exige
+    // sesión (`@CurrentUser`) y nunca leyó `versionId`/`expires`/`signature` —
+    // la firma se emitía y nadie la verificaba. Un `window.open()` con esta
+    // URL no puede mandar el header `Authorization`, así que la única forma de
+    // que igual funcionara era pegar el token de sesión real en la query
+    // (CL-40), que es exactamente lo que una URL firmada tiene que evitar: acá
+    // lo que viaja es una credencial de un solo archivo, vencida en
+    // `DOWNLOAD_URL_TTL_MS`, no la sesión completa del actor.
     const url =
-      `/common/files/${file.id}/content` +
+      `/common/files/${file.id}/signed-content` +
       `?versionId=${version.id}&expires=${expiry}&signature=${signature}`;
 
     this.logger.info(
@@ -649,6 +658,54 @@ export class FilesService {
       'Download URL generated',
     );
     return { url, expiresAt };
+  }
+
+  /**
+   * Verifica la firma de `GET /common/files/:id/signed-content` (H4.S1.M3).
+   *
+   * Es la contraparte de {@link generateDownloadUrl}: aquélla firma, ésta
+   * comprueba. No recibe actor porque no lo hay — la ruta es pública y la
+   * firma **es** la autorización, ya decidida por `canActorReadOwnFile` en el
+   * momento en que alguien con acceso llamó a `generateDownloadUrl`.
+   *
+   * Comparación en tiempo constante (`timingSafeEqual`): una firma HMAC no se
+   * compara con `===`, que corta apenas difiere el primer byte y deja un canal
+   * de tiempo para adivinarla byte a byte.
+   *
+   * @param fileId - Archivo de la URL.
+   * @param query - `versionId`, `expires` y `signature` tal como los firmó
+   *   `generateDownloadUrl`.
+   * @returns El archivo, para que el llamador pida sus bytes.
+   * @throws ResourceNotFoundException si el archivo no existe.
+   * @throws ForbiddenException si la firma no corresponde o venció.
+   */
+  async verifySignedDownload(
+    fileId: string,
+    query: { versionId: string; expires: string; signature: string },
+  ): Promise<Files> {
+    const forked = this.em.fork();
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+    }
+
+    const expiry = Number(query.expires);
+    if (!Number.isFinite(expiry) || expiry < Date.now()) {
+      throw new ForbiddenException('La URL de descarga venció');
+    }
+
+    const esperada = createHmac('sha256', downloadUrlSecret())
+      .update(`${fileId}:${query.versionId}:${expiry}`)
+      .digest('hex');
+    const recibida = query.signature;
+    const valida =
+      recibida.length === esperada.length &&
+      timingSafeEqual(Buffer.from(recibida), Buffer.from(esperada));
+    if (!valida) {
+      throw new ForbiddenException('Firma de descarga inválida');
+    }
+
+    return file;
   }
 
   /**
@@ -673,10 +730,19 @@ export class FilesService {
    * se pueden descargar.
    *
    * @param query - De qué recurso son los adjuntos. Los dos campos obligatorios.
+   * @param actor - Sesión que pide la lista (N-01): sin este parámetro, este
+   *   endpoint no tenía `@Roles` ni comprobación de propiedad y cualquier
+   *   sesión autenticada podía listar los adjuntos de cualquier condición o
+   *   procedimiento cambiando `ownerId`. Se filtra por el mismo criterio que
+   *   `FileUploadService.download` (`canActorReadOwnFile`): dueño del archivo,
+   *   o rol de revisión. Un `ownerId` con adjuntos, todos ajenos al actor,
+   *   responde 403 en vez de una lista vacía — silenciarlo sería indistinguible
+   *   de «este recurso no tiene adjuntos», que no es lo que pasó.
    * @returns Los adjuntos vigentes, del más reciente al más antiguo.
    */
   async listLinkedFiles(
     query: ListFileLinksQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
     this.logger.info(
       {
@@ -710,18 +776,23 @@ export class FilesService {
       vivos.push({ link, file });
     }
 
+    const visibles = vivos.filter(({ file }) => canActorReadOwnFile(file, actor));
+    if (vivos.length > 0 && visibles.length === 0) {
+      throw new ForbiddenException('No tiene acceso a los adjuntos de este recurso');
+    }
+
     // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
     // resuelven **todas juntas, en una consulta**, y no una por adjunto: diez
     // adjuntos no pueden costar diez lecturas más de las que ya costaban.
     const versiones = await this.fileVersionsRepo.findByIds(
       forked,
-      vivos
+      visibles
         .map(({ file }) => file.currentVersionId)
         .filter((id): id is string => typeof id === 'string'),
     );
     const versionPorId = new Map(versiones.map((v) => [v.id, v]));
 
-    const items: LinkedFileResponseDto[] = vivos.map(({ link, file }) => ({
+    const items: LinkedFileResponseDto[] = visibles.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
       ownerType: query.ownerType,
