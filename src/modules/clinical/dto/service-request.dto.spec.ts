@@ -140,3 +140,19 @@ describe('CheckDuplicateStudyDto', () => {
     expect(errores).toEqual([]);
   });
 });
+
+describe('CreateServiceRequestDto — formInstanceId (P43)', () => {
+  const FORM = '66666666-6666-4666-8666-666666666666';
+
+  it('acepta formInstanceId uuid (ya no es 400 por forbidNonWhitelisted)', async () => {
+    expect(await validarCreacion(dtoBase({ formInstanceId: FORM }))).toEqual(
+      [],
+    );
+  });
+
+  it('rechaza un formInstanceId que no es uuid', async () => {
+    expect(
+      await validarCreacion(dtoBase({ formInstanceId: 'no-es-uuid' })),
+    ).toEqual(['formInstanceId']);
+  });
+});
