@@ -1,0 +1,5 @@
+Test Suites: 1 passed, 1 total
+Tests:       160 passed, 160 total
+Snapshots:   0 total
+Time:        5.072 s, estimated 12 s
+Ran all test suites matching scheduling-bookings.service.

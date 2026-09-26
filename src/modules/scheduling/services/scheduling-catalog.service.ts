@@ -998,29 +998,13 @@ export class SchedulingCatalogService {
         TOPE_DE_CITAS_EN_EL_AVISO,
       );
 
-      // Sólo las VIVAS frenan. El historial ya no es un obstáculo: retirar no
-      // lo toca, y ése era el motivo por el que el borrado duro estaba
-      // condenado. Una cita cancelada de marzo no puede impedir que el médico
-      // deje de publicar su horario en septiembre.
-      if (citas.live > 0) {
-        throw new ConflictException(
-          'El horario tiene citas comprometidas: resolvelas antes de retirarlo',
-          {
-            templateId,
-            // Las dos cifras, porque son dos situaciones distintas: las vivas
-            // se resuelven cancelando o moviendo; las históricas no se
-            // resuelven con nada.
-            liveBookings: citas.live,
-            totalBookings: citas.total,
-            // Los ids y no los nombres: quien recibe esto es la pantalla, que
-            // ya sabe pedir cada cita con su permiso. Mandar nombres acá
-            // filtraría pacientes a cualquiera que administre agendas.
-            bookingIds: citas.sample.map((booking) => booking.id),
-            truncated: citas.total > citas.sample.length,
-          },
-        );
-      }
-
+      // M4 · H1.S2.M2: las citas VIVAS ya no frenan el retiro. Un médico en
+      // ejercicio siempre tiene citas confirmadas, así que el 409 le impedía
+      // cambiar su horario nunca — y el retiro ya conservaba los cupos con una
+      // cita detrás (`keptSlots`): la cita confirmada sigue en su cupo, que no
+      // se suelta ni se borra. Lo que cambia es que ahora corre, y la
+      // respuesta dice cuáles citas siguen vivas para que la pantalla las
+      // muestre. Contrato fijado por el CA del encargo de M4 (2026-09-26).
       const retiro = await this.catalogRepo.retireTemplate(
         tx,
         templateId,
@@ -1028,11 +1012,19 @@ export class SchedulingCatalogService {
         actor.id,
       );
 
+      // Con citas vivas, la muestra que devuelve el repositorio es de VIVAS.
+      const vivas = citas.live > 0 ? citas.sample : [];
       return {
         id: templateId,
         statusConceptId: CONCEPTS.TEMPLATE_RETIRED,
         releasedSlots: retiro.releasedSlots,
         keptSlots: retiro.keptSlots,
+        liveBookings: citas.live,
+        // Los ids y no los nombres: quien recibe esto es la pantalla, que
+        // ya sabe pedir cada cita con su permiso. Mandar nombres acá
+        // filtraría pacientes a cualquiera que administre agendas.
+        liveBookingIds: vivas.map((booking) => booking.id),
+        truncated: citas.live > vivas.length,
       };
     });
   }
