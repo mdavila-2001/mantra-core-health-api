@@ -493,6 +493,17 @@ services:
 
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # `pull_policy: missing` (M1, 2026-09-26): además de `mc`, quay.io también
+    # bloqueó el acceso público anónimo al repo `minio/minio` — reproducido en
+    # vivo: un `docker pull` fresco de ESTE MISMO tag devuelve 401 hoy. Todo
+    # despliegue hace `docker compose pull` antes de `up`, así que sin esto
+    # cualquier redeploy vuelve a fallar aunque el contenedor viejo siga sano.
+    # La imagen ya está en la cache local del host (se confirmó con
+    # `docker images`) desde antes del bloqueo; `missing` la usa sin volver a
+    # pedirla al registro. Riesgo que esto NO resuelve, documentado aparte: si
+    # la cache local se pierde (host nuevo, `docker system prune -a`), esta
+    # imagen exacta deja de ser obtenible por cualquier medio público conocido.
+    pull_policy: missing
     restart: always
     command: server /data --console-address ":9001"
     environment:
