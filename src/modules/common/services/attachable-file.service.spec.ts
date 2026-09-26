@@ -117,6 +117,39 @@ describe('AttachableFileService', () => {
     expect(d.logger.warn).toHaveBeenCalled();
   });
 
+  it('AG-17: admite un archivo ajeno si su id está en la allowlist', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'sticker-1',
+      createdByUserId: 'system-worker',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableBy(em, 'sticker-1', actor, {
+        allowIfFileIdIn: ['sticker-1', 'sticker-2'],
+      }),
+    ).resolves.toMatchObject({ file: { id: 'sticker-1' } });
+    expect(d.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('AG-17: un archivo ajeno fuera de la allowlist sigue rechazado', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'otro-1',
+      createdByUserId: 'otro-usuario',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableBy(em, 'otro-1', actor, {
+        allowIfFileIdIn: ['sticker-1', 'sticker-2'],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
   it('refuses a soft-deleted file', async () => {
     const d = build();
     d.filesRepo.findById.mockResolvedValue({

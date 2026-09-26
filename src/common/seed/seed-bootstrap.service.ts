@@ -17,6 +17,7 @@ import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
@@ -132,6 +133,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   referencia (`VS_BO_MEDICAL_PROCEDURE`).
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
+   * @param stickerPack - Los 24 stickers del producto (AG-17).
    * @param vademecum - Catálogo de medicamentos para prescribir.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
@@ -156,6 +158,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
+    private readonly stickerPack: StickerPackSeedService,
     private readonly vademecum: VademecumSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
@@ -361,6 +364,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'audio assets',
         kind: 'core',
         run: () => this.audioAssets.run(),
+      },
+      // Contenido, no núcleo: sin el pack la mensajería sigue funcionando
+      // entera, sólo el botón de stickers no tiene qué ofrecer. Depende del
+      // tenant DEFAULT y del `SEED.systemWorkerUserId` que ya materializó el
+      // catálogo de conceptos.
+      {
+        name: 'pack de stickers',
+        kind: 'content',
+        run: () => this.stickerPack.run(),
       },
       {
         name: 'verificación de identidad',
