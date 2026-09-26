@@ -134,6 +134,8 @@ export class ChartReadService {
         endDate: plan.endDate,
         activities: (activitiesByPlan.get(plan.id) ?? []).map((activity) => ({
           id: activity.id,
+          // BR-16 (CL-26): columna existente que la lectura no exponía.
+          activityConceptId: activity.activityConceptId,
           statusConceptId: activity.statusConceptId,
           detailText: activity.detailText,
           scheduledAt: activity.scheduledAt,

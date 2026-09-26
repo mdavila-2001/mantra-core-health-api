@@ -19,7 +19,12 @@ import {
   UpdateActivityDto,
   type ActivityStatus,
 } from '../dto';
-import { ClinicalReadService } from '../../clinical/services';
+import {
+  ClinicalReadService,
+  // BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
+  // referencien. Servicio nuevo, independiente, exportado por `ClinicalModule`.
+  EncounterSealGuardService,
+} from '../../clinical/services';
 
 /** Mapa estado (DTO) → concepto de estado de actividad. */
 const ACTIVITY_STATUS_CONCEPT: Record<ActivityStatus, string> = {
@@ -44,12 +49,14 @@ export class ChartCarePlansService {
    * @param carePlansRepo - Valor de care plans repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly carePlansRepo: CarePlansRepository,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ChartCarePlansService.name);
   }
@@ -102,6 +109,13 @@ export class ChartCarePlansService {
     // CL-29 (BR-13): el autor del plan sale de la sesión, nunca del cuerpo.
     const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
+      // BR-14 (CL-07): un plan no puede nacer contra un encuentro ya sellado.
+      if (dto.encounterId) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+      }
       const plan = this.carePlansRepo.createPlan(tx, {
         patientProfileId: dto.patientProfileId,
         conditionId: dto.conditionId,

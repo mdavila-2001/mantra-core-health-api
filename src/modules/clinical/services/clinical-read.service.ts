@@ -8,6 +8,9 @@ import { SchedulingBookingsRepository } from '../../scheduling/repositories';
 import { diaLocalDe } from '../../scheduling/scheduling-time';
 import {
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones de alergia, independiente del
+  // repositorio de M3.
+  AllergyReactionsReadRepository,
   CareEpisodesRepository,
   ConditionsRepository,
   EncountersRepository,
@@ -40,6 +43,12 @@ import { PatientRepresentationService } from '../../profiles/services/patient-re
 // estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de
 // `AuditModule` (que sólo exporta la cadena WORM de mutaciones).
 import { DataAccessLogRepository } from '../../audit/repositories';
+// BR-14 (CL-10): el motivo del último cambio de estado de una condición vive
+// en `audit.conditions_history.data_snapshot` (decisión D-BR14-04, sin
+// columna nueva). `HistoryRepository.latestBySource` ya resuelve "última
+// revisión por agregado en lote" para cualquier dominio registrado — se
+// reutiliza en vez de escribir la misma consulta de nuevo.
+import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
@@ -127,6 +136,7 @@ export class ClinicalReadService {
     private readonly em: EntityManager,
     private readonly conditionsRepo: ConditionsRepository,
     private readonly allergiesRepo: AllergyIntolerancesRepository,
+    private readonly allergyReactionsRepo: AllergyReactionsReadRepository,
     private readonly medicationRequestsRepo: MedicationRequestsRepository,
     private readonly observationsRepo: ObservationsRepository,
     private readonly encountersRepo: EncountersRepository,
@@ -143,6 +153,8 @@ export class ClinicalReadService {
     private readonly representation: PatientRepresentationService,
     // N-04 — la lectura del resumen se asienta en `audit.data_access_log`.
     private readonly dataAccessLogRepo: DataAccessLogRepository,
+    // BR-14 (CL-10) — el motivo del último cambio de estado de una condición.
+    private readonly historyRepo: HistoryRepository,
   ) {
     this.logger.setContext(ClinicalReadService.name);
   }
@@ -623,11 +635,52 @@ export class ClinicalReadService {
     ]);
 
     const truncated: string[] = [];
+    const cutConditions = this.cut(conditions, limit, 'conditions', truncated);
+    const cutAllergies = this.cut(allergies, limit, 'allergies', truncated);
+
+    // BR-14 (CL-10): última revisión de cada condición, en lote, para leer el
+    // motivo del último cambio de estado desde `data_snapshot` (decisión
+    // D-BR14-04, sin columna nueva).
+    const conditionHistory = await this.historyRepo.latestBySource(
+      em,
+      'conditions',
+      cutConditions.map((c) => c.id),
+    );
+    // BR-14 (CL-11): reacciones de cada alergia, en lote.
+    const reactionsByAllergy = new Map<
+      string,
+      {
+        id: string;
+        manifestationConceptId: string;
+        severityConceptId?: string;
+        description?: string;
+      }[]
+    >();
+    const reactions = await this.allergyReactionsRepo.findByAllergyIds(
+      em,
+      cutAllergies.map((a) => a.id),
+    );
+    for (const reaction of reactions) {
+      const list = reactionsByAllergy.get(reaction.allergyId) ?? [];
+      list.push({
+        id: reaction.id,
+        manifestationConceptId: reaction.manifestationConceptId,
+        severityConceptId: reaction.severityConceptId,
+        description: reaction.description,
+      });
+      reactionsByAllergy.set(reaction.allergyId, list);
+    }
 
     return {
       patientProfileId,
-      conditions: this.cut(conditions, limit, 'conditions', truncated).map(
-        (row) => ({
+      conditions: cutConditions.map((row) => {
+        const snapshot = conditionHistory.get(row.id)?.dataSnapshot as
+          Record<string, unknown> | undefined;
+        const lastStatusChangeReasonText =
+          typeof snapshot?.statusChangeReasonText === 'string'
+            ? snapshot.statusChangeReasonText
+            : undefined;
+        return {
           id: row.id,
           codeConceptId: row.codeConceptId,
           categoryConceptId: row.categoryConceptId,
@@ -636,25 +689,26 @@ export class ClinicalReadService {
           severityConceptId: row.severityConceptId,
           encounterId: row.encounterId,
           clinicalCourseConceptId: row.clinicalCourseConceptId,
+          lateralityConceptId: row.lateralityConceptId,
           onsetAt: row.onsetAt,
           expectedResolutionAt: row.expectedResolutionAt,
           resolvedAt: row.resolvedAt,
           noteText: row.noteText,
+          lastStatusChangeReasonText,
           createdAt: row.createdAt,
-        }),
-      ),
-      allergies: this.cut(allergies, limit, 'allergies', truncated).map(
-        (row) => ({
-          id: row.id,
-          substanceConceptId: row.substanceConceptId,
-          encounterId: row.encounterId,
-          typeConceptId: row.typeConceptId,
-          categoryConceptId: row.categoryConceptId,
-          criticalityConceptId: row.criticalityConceptId,
-          clinicalStatusConceptId: row.clinicalStatusConceptId,
-          createdAt: row.createdAt,
-        }),
-      ),
+        };
+      }),
+      allergies: cutAllergies.map((row) => ({
+        id: row.id,
+        substanceConceptId: row.substanceConceptId,
+        encounterId: row.encounterId,
+        typeConceptId: row.typeConceptId,
+        categoryConceptId: row.categoryConceptId,
+        criticalityConceptId: row.criticalityConceptId,
+        clinicalStatusConceptId: row.clinicalStatusConceptId,
+        reactions: reactionsByAllergy.get(row.id) ?? [],
+        createdAt: row.createdAt,
+      })),
       medicationRequests: this.cut(
         medicationRequests,
         limit,
@@ -665,6 +719,7 @@ export class ClinicalReadService {
         medicationConceptId: row.medicationConceptId,
         statusConceptId: row.statusConceptId,
         prescriberProfileId: row.prescriberProfileId,
+        encounterId: row.encounterId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
         validFrom: row.validFrom,
@@ -705,6 +760,7 @@ export class ClinicalReadService {
           reasonText: row.reasonText,
           startAt: row.startAt,
           endAt: row.endAt,
+          rowVersion: row.rowVersion,
         }),
       ),
       careEpisodes: this.cut(

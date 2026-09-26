@@ -200,6 +200,41 @@ y quedó registrada acá con su porqué. Ninguna detuvo el resto del hito.
   sólo aparece para quien ya tiene el rol.
 - Maquetas de `features/alovida/accesos/` (front): quedan fuera del menú; las reemplazan las pantallas reales.
 
+## D-BR16-01 · 2026-09-26 · BLOQUEADA (falta el repo del modelo) · M7 (H3, BR-16)
+
+**Pregunta (CL-24 §5):** ¿dónde nacen los conceptos de los tres catálogos nuevos (intención del
+plan, clase de actividad, categoría documental) — value sets del modelo (a) o conceptos de módulo
+del lado de la API (b)?
+
+**No se llegó a decidir entre (a) y (b): el carril no tiene con qué construir ninguna de las dos.**
+(a) exige el repo `mch-legion-model` (nota de value set + `gen_seeds.py`), que **no está instalado
+como worktree en esta máquina** — el encargo de M7 sólo trae `mch-legion-api` y `mch-legion-front`.
+(b) exige agregar entradas a `dynamic-enum-catalog.ts` con un `defaultConceptId` real
+(`CP_INTENT_PLAN`, `CPACT_GENERAL`, `DOC_CAT_GENERAL` ya existen como default silencioso en
+`chart.concepts.ts`, pero publicarlos como catálogo navegable en `system_context.dynamic_enum_bindings`
+sigue siendo una decisión de producto (a)/(b) que el prompt pide **tomar primero**, no una que este
+carril pueda tomar por conveniencia (regla 00 §1: "prohibido resolver una ambigüedad por
+conveniencia").
+
+**Pedido a M1:** instalar el worktree de `mch-legion-model` para `M7-Legion` (o reasignar CL-25 a
+una máquina que ya lo tenga), y confirmar la opción (a)/(b) antes de que alguien la implemente.
+
+**Qué se construyó igual, sin depender de esta decisión (CL-26):** `CarePlanActivityItemDto.
+activityConceptId` — la columna ya existe (`chart.care_plan_activities.activity_concept_id`, NOT
+NULL, con default `CPACT_GENERAL`) y el alta ya la guarda; sólo la lectura no la exponía. Esto no
+depende de qué catálogo se elija para poblar el *selector* de esa clase de actividad: el valor
+guardado se relee igual, publicado el catálogo o no.
+
+## D-BR16-02 · 2026-09-26 · CONFIRMADA (verificación de código, no requiere decisión) · M7 (H3, BR-16)
+
+**CL-34 y CL-36 ya están cerrados del lado de la API**, contra lo que el informe de brechas
+asumía: `chart-templates.repository.ts` filtra por `specialtyConceptId` cuando se lo pasan
+(`findManyBySpecialty`, líneas 184-190), y `chart-documents.service.ts` ya acepta y persiste
+`patientVisibilityConceptId`/`confidentialityConceptId` con sus defaults documentados. Los dos
+defectos que el informe describe son del **mock/front** (`clinical.handlers.ts:699` no lee
+`specialtyId` de la query; `document-block.ts` no manda los dos campos) — no hay nada que cambiar
+en la API. Se deja constancia para que el hito de front no repita la investigación.
+
 ## Hallazgo del propio carril
 
 - `AuthzCareRelationshipsService.revokeCareRelationship` marcaba **EXPIRED** (y no cerraba la vigencia) a una relación
@@ -499,3 +534,126 @@ schema `vector_rag`; `2026-09-19_v4221_aseguradoras_codigo_unico.sql` exige 17 a
 sembradas que este stack no siembra) — ninguno de los dos toca `messaging`, `community`,
 `pharma_lab` ni `authz`. Detalle de qué se pudo verificar contra la API viva (o por qué no) en
 `docs/progress/evidence/lane-M7-h5/REPORT.md`.
+
+---
+
+## D-BR14-01 · 2026-09-26 · PROPUESTA (tomada por M7, pendiente de confirmación del propietario) · M7 (H3, BR-14)
+
+**Pregunta (CL-07):** ¿qué pasa cuando algo escribe sobre un encuentro ya `FINISHED` y sellado
+(`content_hash`/`sealed_at`)? El prompt ofrecía (a) 422 al rechazar, o (b) addendum append-only con
+sello nuevo.
+
+**Decisión: (a) rechazar con 422.** El addendum (b) exige una tabla nueva por `.puml` — prohibido
+sin DDL en la API y sin decisión de modelo tomada — y una semántica de «versión enmendada» que
+ningún endpoint expone todavía. (a) es reversible: nada impide migrar a (b) después sin romper el
+contrato (un 422 de hoy puede pasar a 201 con addendum mañana; lo inverso no).
+
+**Qué se construyó:** `EncounterSealGuardService` (nuevo, `src/modules/clinical/services/
+encounter-seal-guard.service.ts`), cableado desde `conditions.service.ts`,
+`observations.service.ts`, `chart-care-plans.service.ts` y `chart-documents.service.ts`.
+**`medications.service.ts`, `allergy-intolerances.service.ts` y `chart-notes.service.ts` (dueño M3)
+no se tocaron** — la guarda queda exportada por `ClinicalModule` para que M3 la invoque desde ahí;
+hasta entonces, CL-07 sigue abierto en esos tres flujos (registrado también en el reporte de M7).
+
+## D-BR14-02 · 2026-09-26 · CONFIRMADA (por lectura de código, no requiere decisión de producto) · M7 (H3, BR-14)
+
+**Pregunta (CL-08):** ¿hace falta agregar `ClinicalRecordAccessGuard` a `POST /clinical/care-episodes`
+y `POST /clinical/encounters/check-in`, y validar que el `tenantId` del cuerpo sea del actor?
+
+**Hallazgo:** las dos piezas que el prompt BR-14 pedía ya estaban resueltas por trabajo posterior a
+la fecha del informe de brechas (2026-09-24), documentado en el propio código:
+- El guard de acceso por relación asistencial sobre esas dos rutas es un residual **abierto a
+  propósito** (`BOOTSTRAP_ACCESS_RESIDUAL`, comentario de `ClinicalEncountersController` y
+  `clinical-record-access.mounting.spec.ts`): exigir una relación previa para el acto que *funda*
+  esa relación es un círculo. Reabrirlo sin la decisión de producto que el propio comentario pide
+  («qué acto funda la relación asistencial») sería deshacer un análisis ya hecho, no cerrarlo.
+- El tenant del cuerpo contra el tenant del actor **ya lo hace** `TenantContextInterceptor` +
+  `resolveOrdinaryTenantId` (MCH-001) para **toda** ruta autenticada no pública: un tenant en el
+  cuerpo (`tenantId`/`custodianTenantId`) que no coincide con el resuelto responde 403
+  (`tenant-scope.ts`, `OWNERSHIP_FIELDS`), y el tenant resuelto tiene que ser membresía del actor.
+  Confirmado leyendo `resolveOrdinaryTenantId` (lanza `ForbiddenException` si el header/único tenant
+  no está en `user.tenantIds`).
+
+**Decisión: no tocar CL-08 en check-in/care-episodes.** No se agrega el guard (reabriría
+`BOOTSTRAP_ACCESS_RESIDUAL` sin la decisión que le falta) ni la validación de tenant (ya existe,
+global). Nada que hacer distinto de lo que el código ya hace.
+
+## D-BR14-03 · 2026-09-26 · PROPUESTA (tomada por M7, criterio más seguro) · M7 (H3, BR-14)
+
+**Pregunta (CL-09):** `checkInteractions` (chequeo previo a prescribir) — ¿calcula y no persiste, o
+persiste sólo al prescribir?
+
+**Decisión: calcula y no persiste, nunca.** Es la opción que el propio Gherkin de BR-14 pide
+literalmente («el chequeo previo no deja basura… no se crea ninguna fila») y la más simple: no hay
+forma de distinguir, desde `check-interactions`, si la llamada es un chequeo exploratorio o el paso
+previo inmediato a una prescripción real, así que no perseguir esa distinción evita adivinar. Si
+más adelante se quiere una alerta persistida al prescribir de verdad, esa persistencia la dispara
+`medications.service.ts` (M3) llamando a `evaluate()` (que sí persiste) con el contexto real de la
+receta — no `check-interactions`.
+
+**Qué se construyó:** `CdsController` con `@Roles('CLINICIAN','PRACTITIONER')` +
+`@UseGuards(ClinicalRecordAccessGuard)` en `cds/evaluate` y `cds/check-interactions`;
+`ClinicalExtModule` importa `ClinicalModule` (mismo patrón que `ChartModule`);
+`CdsService.checkInteractions` ya no persiste (no hay `tx`, no hay `alertsRepo.create`, ids
+efímeros con `randomUUID()`).
+
+## D-BR14-04 · 2026-09-26 · PROPUESTA (tomada por M7, sin DDL disponible) · M7 (H3, BR-14)
+
+**Pregunta (CL-10):** ¿dónde vive el motivo del cambio de estado clínico de una condición —
+columna `status_reason_text` en `clinical.conditions` (opción a), o dentro del registro de
+historia (opción b)?
+
+**Decisión: (b), sin columna nueva.** Este carril **no tiene DDL disponible** (regla del reparto:
+sin `yarn db:vendor`, sin tocar `database/SQL` a mano). El motivo se agrega como clave
+`statusChangeReasonText` en el `data_snapshot` (jsonb de forma libre) que
+`ConditionsService.changeClinicalStatus` ya escribe en `audit.conditions_history` en cada cambio de
+estado — ninguna migración, ninguna tabla nueva. Contra: el prompt señala que esto "mezcla el
+estado con la justificación"; se acepta el trade-off por no poder tocar el modelo desde este
+carril. **Pedido a M1:** si se prefiere la opción (a) — columna simétrica con
+`medication_requests.status_reason_text`, que ya es el precedente —, es una migración de una sola
+columna nullable, aditiva, sin romper lo que este carril entrega hoy (el snapshot seguiría
+existiendo; la lectura pasaría a preferir la columna si está presente).
+
+**Qué se construyó:** `reasonText` con `@IsNotEmpty() @MaxLength(500)`
+(`condition.dto.ts`); `changeClinicalStatus` deja de loguear `reason: dto.reasonText` y en cambio lo
+agrega al `dataSnapshot` de la historia; `ClinicalReadService.getPatientSummary` lee la última
+revisión de cada condición con `HistoryRepository.latestBySource` (existente, no se creó una
+consulta nueva) y expone `lastStatusChangeReasonText` en `ConditionItemDto`.
+
+## D-BR15-01 · 2026-09-26 · PROPUESTA (tomada por M7, pendiente de confirmación del propietario) · M7 (H3, BR-15)
+
+**Pregunta (CV-06):** ¿qué es «descargar mi historia» — (a) documento emitido y verificable armado
+en la API, (b) exportación FHIR/DSAR, o (c) PDF del cliente declarado como vista?
+
+**Decisión: (a).** Es la única que cumple CV-06 y TX-32 de verdad: un documento con valor legal
+necesita nacer en el servidor con un sello verificable, no en el navegador. (b) reutiliza roles de
+privacidad que el paciente no tiene y expone FHIR crudo a alguien que no lo va a leer. (c) es lo que
+hay hoy y es exactamente el defecto que TX-32 señala.
+
+**Qué se construyó contra esta decisión:** el PDF **por atención** (`GET /charts/me/encounters/:id/
+pdf`, CL-31) ya sale de la API, sellado, con sólo lo liberado/visible. **El PDF de la historia
+completa NO se construyó** — es una pieza más grande (agregación de todo el historial, `content_hash`
+propio) que no entró en el tiempo de este carril. Queda `A MEDIAS`, no `DESCARTADO`: la decisión de
+producto está tomada, falta el endpoint. Pedido a quien retome BR-15: `GET /clinical/me/record/pdf`
+(o el path que se prefiera), mismo patrón que `EncounterPdfService.componer()` pero agregando todas
+las atenciones del paciente.
+
+## D-BR15-02 · 2026-09-26 · CONFIRMADA (patrón ya establecido en el repo) · M7 (H3, BR-15)
+
+**Pregunta:** ¿cómo resuelve `charts/me/*` de quién es la sesión — del claim `pid`
+(`actor.patientProfileId`) o resolviendo contra la base como `ClinicalReadService.assertOwnRecord`?
+
+**Decisión: del claim**, siguiendo el patrón que el propio prompt señala (`forms-me.controller.ts`)
+y que `FormsReadService.requirePatientProfile` ya usa en producción. Es una inconsistencia
+preexistente del repo (`ClinicalReadService` no confía en `pid` por escrito, explícitamente, en su
+propio comentario; `forms/me` sí) — no la introduce este carril y no la resuelve: se documenta para
+que quien la note después no la lea como un descuido nuevo.
+
+## D-BR14-05 · 2026-09-26 · CONFIRMADA (lectura completa, sin ambigüedad de producto) · M7 (H3, BR-14)
+
+**CL-11 / CL-16 (lecturas del resumen):** `encounterId` en `MedicationRequestItemDto`,
+`lateralityConceptId` y `rowVersion` en `ConditionItemDto`/`EncounterItemDto` son columnas que ya
+existían en el modelo y el DTO simplemente no las exponía — sin ambigüedad, se agregan. Las
+reacciones de alergia (`AllergyItemDto.reactions[]`) necesitaban una lectura de
+`clinical.allergy_reactions` que no existía: se creó `AllergyReactionsReadRepository` (archivo
+nuevo, independiente del repositorio de M3) sólo para esta lectura.
