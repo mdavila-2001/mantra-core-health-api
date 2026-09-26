@@ -3368,6 +3368,34 @@ describe('ProfilesPractitionersService', () => {
      * compila, pasa los tests de servicio, y la columna queda en NULL. Ya pasó
      * con el canal de teleconsulta. Esta prueba mira el borde.
      */
+    it('la ciudad y el país de emisión llegan hasta el repositorio y a la respuesta (ID-10)', async () => {
+      const d = build();
+      d.credentialsRepo.create.mockReturnValue({
+        id: 'cred-9',
+        credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
+        number: 'DIP-2024-17',
+        issuingCityText: 'Santa Cruz de la Sierra',
+        issuingCountryConceptId: 'pais-1',
+        stateConceptId: PROF.CRED_PENDING,
+        createdAt: new Date(),
+      });
+
+      const creada = await d.service.addOwnCredential(
+        {
+          ...cuerpo,
+          issuingCityText: '  Santa Cruz de la Sierra ',
+          issuingCountryConceptId: 'pais-1',
+        } as any,
+        { id: 'u-1' } as any,
+      );
+
+      const escrito = d.credentialsRepo.create.mock.calls[0][1];
+      expect(escrito.issuingCityText).toBe('Santa Cruz de la Sierra');
+      expect(escrito.issuingCountryConceptId).toBe('pais-1');
+      expect(creada.issuingCityText).toBe('Santa Cruz de la Sierra');
+      expect(creada.issuingCountryConceptId).toBe('pais-1');
+    });
+
     it('el archivo del diploma llega hasta el repositorio, no se pierde', async () => {
       const d = build();
       // El archivo lo subió el mismo que declara el título. Decirlo explícito:
@@ -3484,6 +3512,26 @@ describe('ProfilesPractitionersService', () => {
         ...overrides,
       };
     }
+
+    it('actualiza la ciudad y el país de emisión sin tocar el resto (ID-10)', async () => {
+      const d = build();
+      const credential = credencialPendiente();
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      const request = invocarActualizacionDeCredencial(d.service, 'cred-1', {
+        issuingCityText: ' Trinidad ',
+        issuingCountryConceptId: 'pais-2',
+      });
+      if (request === null) return;
+      await expect(request).resolves.toBeUndefined();
+
+      expect(credential).toMatchObject({
+        issuingCityText: 'Trinidad',
+        issuingCountryConceptId: 'pais-2',
+        number: 'DIP-1',
+        issuingInstitutionText: 'Universidad de origen',
+      });
+    });
 
     it('actualiza sólo los campos enviados y conserva los documentos omitidos', async () => {
       const d = build();

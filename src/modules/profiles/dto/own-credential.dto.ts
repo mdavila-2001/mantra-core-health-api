@@ -53,6 +53,19 @@ export class AddOwnCredentialDto {
   @MaxLength(200)
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se emitió el título. Texto libre. */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  issuingCityText?: string;
+
+  /** País de emisión: un concepto de `VS_COUNTRY`. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  issuingCountryConceptId?: string;
+
   /** Fecha de emisión del título. */
   @ApiPropertyOptional({ format: 'date' })
   @IsOptional()
@@ -88,6 +101,12 @@ export class OwnCredentialResponseDto {
 
   @ApiPropertyOptional()
   issuingInstitutionText?: string;
+
+  @ApiPropertyOptional()
+  issuingCityText?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  issuingCountryConceptId?: string;
 
   @ApiPropertyOptional({ type: String, format: 'date' })
   issueDate?: Date;

@@ -327,8 +327,23 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
   });
 
   it('rechaza una clave que el elemento no declara', async () => {
-    // `forbidNonWhitelisted` también rige adentro del arreglo: la ciudad del
-    // lugar de estudio no tiene dónde guardarse y no se acepta en silencio.
+    // `forbidNonWhitelisted` también rige adentro del arreglo: una clave que el
+    // título no declara no se acepta en silencio.
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'T-1',
+            issuingStreetText: 'Av. Arce 2000',
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.issuingStreetText']);
+  });
+
+  it('acepta la ciudad y el país de emisión del título (ID-10)', async () => {
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,
@@ -337,10 +352,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
             credentialTypeConceptId: TIPO,
             number: 'T-1',
             issuingCityText: 'La Paz',
+            issuingCountryConceptId: '00000000-0000-4000-8000-000000000001',
           },
         ],
       }),
-    ).toEqual(['credentials.0.issuingCityText']);
+    ).toEqual([]);
   });
 });
 

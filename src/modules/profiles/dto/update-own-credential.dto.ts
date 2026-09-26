@@ -38,6 +38,19 @@ export class UpdateOwnCredentialDto {
   @MaxLength(200)
   issuingInstitutionText?: string;
 
+  /** Ciudad de emisión. Un texto vacío permite borrarla. */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(100)
+  issuingCityText?: string;
+
+  /** País de emisión: un concepto de `VS_COUNTRY`. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsUUID()
+  issuingCountryConceptId?: string;
+
   /** Fecha de emisión en formato ISO 8601, como en el alta. */
   @ApiPropertyOptional({ format: 'date' })
   @ValidateIf((_dto, value: unknown) => value !== undefined)

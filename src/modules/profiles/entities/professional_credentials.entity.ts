@@ -51,6 +51,17 @@ export class ProfessionalCredentials {
   issuingInstitutionText?: string;
 
   /**
+   * Ciudad donde se emitió el título, en texto libre (ID-10, v4.2.29). Igual que
+   * la institución: una ciudad del exterior no está en ningún catálogo.
+   */
+  @Property({
+    fieldName: 'issuing_city_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  issuingCityText?: string;
+
+  /**
    * Identificador asociado a issuing country concept.
    */
   @Property({

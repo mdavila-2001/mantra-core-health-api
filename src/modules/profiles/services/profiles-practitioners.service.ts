@@ -1090,6 +1090,8 @@ export class ProfilesPractitionersService {
           ? { fileId: credential.fileId }
           : {}),
         issuingInstitutionText: credential.issuingInstitutionText,
+        issuingCityText: credential.issuingCityText,
+        issuingCountryConceptId: credential.issuingCountryConceptId,
         issueDate: credential.issueDate,
         expiryDate: credential.expiryDate,
         stateConceptId: credential.stateConceptId,
@@ -3033,6 +3035,8 @@ export class ProfilesPractitionersService {
         credentialTypeConceptId: dto.credentialTypeConceptId,
         number: dto.number.trim(),
         issuingInstitutionText: dto.issuingInstitutionText?.trim(),
+        issuingCityText: dto.issuingCityText?.trim(),
+        issuingCountryConceptId: dto.issuingCountryConceptId,
         issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
         fileId: dto.fileId,
         stateConceptId: PROF.CRED_PENDING,
@@ -3047,6 +3051,8 @@ export class ProfilesPractitionersService {
       credentialTypeConceptId: creada.credentialTypeConceptId,
       number: creada.number,
       issuingInstitutionText: creada.issuingInstitutionText,
+      issuingCityText: creada.issuingCityText,
+      issuingCountryConceptId: creada.issuingCountryConceptId,
       issueDate: creada.issueDate,
       stateConceptId: creada.stateConceptId,
       fileId: creada.fileId,
@@ -3119,6 +3125,12 @@ export class ProfilesPractitionersService {
       if (dto.number !== undefined) credential.number = dto.number.trim();
       if (dto.issuingInstitutionText !== undefined) {
         credential.issuingInstitutionText = dto.issuingInstitutionText.trim();
+      }
+      if (dto.issuingCityText !== undefined) {
+        credential.issuingCityText = dto.issuingCityText.trim();
+      }
+      if (dto.issuingCountryConceptId !== undefined) {
+        credential.issuingCountryConceptId = dto.issuingCountryConceptId;
       }
       if (dto.issueDate !== undefined) {
         credential.issueDate = new Date(dto.issueDate);
