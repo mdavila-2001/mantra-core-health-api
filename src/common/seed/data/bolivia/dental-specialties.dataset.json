@@ -1,0 +1,75 @@
+{
+  "_nota": "Las 14 especialidades odontológicas del padrón del stakeholder, por profesión de origen. Origen: LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md — el único de los doce markdown que no tenía extractor (H1 del carril M6, 2026-09-26).",
+  "datos": [
+    {
+      "code": "BO_ESP_ODO_ENDODONCIA",
+      "especialidad": "ENDODONCIA",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 1
+    },
+    {
+      "code": "BO_ESP_ODO_ODONTOLOGIA_GENERAL",
+      "especialidad": "ODONTOLOGIA GENERAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 2
+    },
+    {
+      "code": "BO_ESP_ODO_ORTODONCIA",
+      "especialidad": "ORTODONCIA",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 3
+    },
+    {
+      "code": "BO_ESP_ODO_PERIODONCIA",
+      "especialidad": "PERIODONCIA",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 4
+    },
+    {
+      "code": "BO_ESP_ODO_ESTETICA_DENTAL",
+      "especialidad": "ESTETICA DENTAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 5
+    },
+    {
+      "code": "BO_ESP_ODO_REHABILITACION_ORAL",
+      "especialidad": "REHABILITACION ORAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 6
+    },
+    {
+      "code": "BO_ESP_ODO_CIRUGIA_ORAL_Y_MAXILOFACIAL",
+      "especialidad": "CIRUGIA ORAL Y MAXILOFACIAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 7
+    },
+    {
+      "code": "BO_ESP_ODO_ODONTOPEDIATRIA",
+      "especialidad": "ODONTOPEDIATRIA",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 8
+    },
+    {
+      "code": "BO_ESP_ODO_IMPLANTOLOGIA_ORAL",
+      "especialidad": "IMPLANTOLOGIA ORAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 9
+    },
+    {
+      "code": "BO_ESP_ODO_ARMONIZACION_OROFACIAL",
+      "especialidad": "ARMONIZACION OROFACIAL",
+      "profesion": "CIRUJANO ODONTOLOGO",
+      "source_file": "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md",
+      "source_row": 10
+    }
+  ]
+}
