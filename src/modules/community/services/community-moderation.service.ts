@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -203,6 +203,23 @@ export class CommunityModerationService {
         throw new ResourceNotFoundException('Decisión no encontrada', {
           decisionId,
         });
+
+      // AG-18: el apelante tiene que ser el sancionado, no sólo el dueño del
+      // perfil que declaró. `assertActsAsProfile` de arriba ya probó que el
+      // actor es `dto.appellantProfileId`; esto prueba que esa decisión lo
+      // sancionó A ÉL. Sin este paso, cualquiera podía abrir una apelación
+      // ajena con su propio perfil, y la única apelación abierta por decisión
+      // le quemaba la del sancionado real.
+      const strike = await this.moderationRepo.findStrikeByDecisionAndSubject(
+        tx,
+        decisionId,
+        dto.appellantProfileId,
+      );
+      if (!strike) {
+        throw new ForbiddenException(
+          'Sólo el sancionado por esta decisión puede apelarla',
+        );
+      }
 
       const open = await this.moderationRepo.findOpenAppealForDecision(
         tx,

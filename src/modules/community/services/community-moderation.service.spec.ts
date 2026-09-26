@@ -33,6 +33,12 @@ function build() {
     createAppeal: mockFn(),
     findOpenAppealForDecision: mockFn(),
     findAppealById: mockFn(),
+    // AG-18: por defecto el perfil que apela SÍ es el sancionado, para que
+    // los specs que no prueban esta regla sigan probando lo suyo sin tener
+    // que repetir el doble. Los que sí la prueban lo pisan.
+    findStrikeByDecisionAndSubject: mockFn().mockResolvedValue({
+      id: 'strike-1',
+    }),
   };
   // Por defecto la propiedad se concede; los casos de perfil ajeno hacen que el
   // doble rechace. La regla en sí vive en `CommunityVisibilityService`, que
@@ -179,6 +185,32 @@ describe('CommunityModerationService', () => {
       );
       expect(res).toEqual({ id: 'ap1' });
       expect(d.moderationRepo.createQueue).toHaveBeenCalled();
+    });
+
+    it('AG-18: rechaza apelar una decisión que no lo sancionó a él, aunque el perfil sea suyo', async () => {
+      const d = build();
+      d.moderationRepo.findDecisionById.mockResolvedValue({
+        id: 'dec1',
+        moderationQueueId: 'q1',
+      });
+      // El perfil es del actor (assertActsAsProfile pasa), pero esta decisión
+      // no lo sancionó a él: ningún strike la vincula con su perfil.
+      d.moderationRepo.findStrikeByDecisionAndSubject.mockResolvedValue(null);
+
+      await expect(
+        d.service.appeal(
+          'dec1',
+          {
+            appellantProfileId: 'p-ajeno-a-la-sancion',
+            reasonText: 'no fui yo',
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.moderationRepo.createAppeal).not.toHaveBeenCalled();
+      expect(
+        d.moderationRepo.findStrikeByDecisionAndSubject,
+      ).toHaveBeenCalledWith(expect.anything(), 'dec1', 'p-ajeno-a-la-sancion');
     });
   });
 
