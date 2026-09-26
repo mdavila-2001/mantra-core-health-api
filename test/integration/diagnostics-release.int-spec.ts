@@ -248,58 +248,21 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
         .expect(422);
     });
 
-    it('aceptado: el motivo (CL-50) se guarda y vuelve en el listado de compartidos', async () => {
+    it('inválido: mandar "reason" da 400 (se retiró del contrato, CL-50)', async () => {
       const { reportId, versionId } = await crearInformeConVersion(perfilAna);
       await http()
         .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
         .set(admin())
         .send({ patientVisibility: 'VISIBLE' })
         .expect(200);
-      await http()
-        .post('/authz/care-relationships')
-        .set(admin())
-        .send({
-          tenantId: SEED.tenantId,
-          patientProfileId: perfilAna,
-          practitionerProfileId,
-          relationshipType: 'TREATING',
-        })
-        // 409 si otro caso de esta suite ya la creó: el estado es el mismo.
-        .expect((res) => expect([201, 409]).toContain(res.status));
 
-      const share = await http()
+      await http()
         .post(`/diagnostic-results/me/${reportId}/shares`)
         .set(bearer(tokenAna))
         .send({
           practitionerProfileId,
           validUntil: new Date(Date.now() + 86_400_000).toISOString(),
           reason: 'Segunda opinión',
-        })
-        .expect(201);
-      expect(share.body.reason).toBe('Segunda opinión');
-
-      const compartidos = await http()
-        .get(`/diagnostic-results/me/${reportId}/shares`)
-        .set(bearer(tokenAna))
-        .expect(200);
-      expect(compartidos.body.items[0].reason).toBe('Segunda opinión');
-    });
-
-    it('inválido: un motivo de más de 500 caracteres da 400', async () => {
-      const { reportId, versionId } = await crearInformeConVersion(perfilAna);
-      await http()
-        .post(`/diagnostics/reports/${reportId}/versions/${versionId}/release`)
-        .set(admin())
-        .send({ patientVisibility: 'VISIBLE' })
-        .expect(200);
-
-      await http()
-        .post(`/diagnostic-results/me/${reportId}/shares`)
-        .set(bearer(tokenAna))
-        .send({
-          practitionerProfileId,
-          validUntil: new Date(Date.now() + 86_400_000).toISOString(),
-          reason: 'x'.repeat(501),
         })
         .expect(400);
     });
@@ -321,8 +284,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
           practitionerProfileId,
           relationshipType: 'TREATING',
         })
-        // 409 si otro caso de esta suite ya la creó: el estado es el mismo.
-        .expect((res) => expect([201, 409]).toContain(res.status));
+        .expect(201);
 
       const share = await http()
         .post(`/diagnostic-results/me/${reportId}/shares`)
@@ -375,16 +337,14 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
 
       const detalle = await http()
         .get(`/diagnostics/accessions/${acesion.body.id}`)
-        .set(admin())
-        .set('X-Tenant-Id', SEED.tenantId)
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(200);
       expect(detalle.body.specimens).toHaveLength(1);
       expect(detalle.body.specimens[0].specimen.id).toBe(especimen.body.id);
 
       const detalleEspecimen = await http()
         .get(`/diagnostics/specimens/${especimen.body.id}`)
-        .set(admin())
-        .set('X-Tenant-Id', SEED.tenantId)
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(200);
       expect(detalleEspecimen.body.id).toBe(especimen.body.id);
     });
@@ -392,8 +352,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
     it('inválido: acesión inexistente → 404', async () => {
       await http()
         .get(`/diagnostics/accessions/${randomUUID()}`)
-        .set(admin())
-        .set('X-Tenant-Id', SEED.tenantId)
+        .set({ ...admin(), 'X-Tenant-Id': SEED.tenantId })
         .expect(404);
     });
   });

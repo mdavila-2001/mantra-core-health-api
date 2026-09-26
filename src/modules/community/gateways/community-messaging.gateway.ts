@@ -1,8 +1,8 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -77,13 +77,6 @@ export interface GatewayPinnedPayload {
 /** `client.data` de un socket ya autenticado en este gateway. */
 interface GatewaySocketData {
   user?: AuthenticatedUser;
-  /**
-   * La autenticación del handshake, todavía en curso o ya resuelta. Verificar
-   * que la sesión siga activa va a la base, así que tarda; un cliente que emite
-   * `join:inbox` apenas recibe `connect` llega **antes** de que `user` exista.
-   * Los manejadores esperan esta promesa en vez de descartar el evento.
-   */
-  authenticating?: Promise<void>;
   /** Con qué perfiles se unió este socket (bandeja o hilo), para la presencia. */
   profileIds?: Set<string>;
 }
@@ -114,7 +107,7 @@ const CONVERSACIONES_POR_PRESENCIA = 100;
 @Injectable()
 @WebSocketGateway({ cors: { origin: false } })
 export class CommunityMessagingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayDisconnect
 {
   @WebSocketServer()
   private readonly server!: Server;
@@ -141,19 +134,40 @@ export class CommunityMessagingGateway
   }
 
   /**
-   * Autentica al conectar. Un socket sin token válido nunca llega a poder
-   * unirse a nada — se corta acá, no en cada mensaje.
+   * Autentica **antes** de que exista la conexión, como middleware de
+   * socket.io del namespace (no como `OnGatewayConnection.handleConnection`).
+   *
+   * ## Por qué no alcanza con `handleConnection`
+   *
+   * Nest despacha los `@SubscribeMessage` de un socket apenas socket.io emite
+   * su evento `connection` — no espera a que `handleConnection` (async)
+   * termine. Con la autenticación ahí, un cliente que emitía `join:inbox` en
+   * el mismo tick que el `connect` del lado navegador podía ganarle la
+   * carrera a `await this.wsAuth.authenticate(client)`: el handler corría con
+   * `client.data.user` todavía `undefined`, `usuarioDe()` devolvía nada, y
+   * `handleJoinInbox`/`handleJoinConversation` retornaban en silencio sin
+   * emitir `error` ni loguear nada — el cliente se quedaba esperando un
+   * evento que nunca iba a llegar. Se reprodujo así contra Postgres real
+   * (`community-realtime-chat.int-spec.ts`, intermitente según la carga
+   * concurrente de la corrida) y nunca contra el `EntityManager` simulado:
+   * el doble de `wsAuth.authenticate` resuelve sincrónicamente.
+   *
+   * El middleware de namespace corre durante el *handshake*, antes de que
+   * exista el socket conectado y antes de que socket.io pueda despachar
+   * ningún mensaje suyo: rechazarlo acá dispara `connect_error` del lado
+   * cliente en vez de un `connect` seguido de `disconnect`, pero
+   * `community-realtime-chat.int-spec.ts` ya contemplaba las dos formas.
    */
-  async handleConnection(client: Socket): Promise<void> {
-    const data = client.data as GatewaySocketData;
-    data.authenticating = (async () => {
-      try {
-        data.user = await this.wsAuth.authenticate(client);
-      } catch {
-        client.disconnect(true);
-      }
-    })();
-    await data.authenticating;
+  afterInit(server: Server): void {
+    server.use((client: Socket, next: (err?: Error) => void) => {
+      this.wsAuth
+        .authenticate(client)
+        .then((user) => {
+          (client.data as GatewaySocketData).user = user;
+          next();
+        })
+        .catch(() => next(new Error('Token inválido o expirado')));
+    });
   }
 
   /**
@@ -176,7 +190,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { profileId?: string },
   ): Promise<void> {
-    const user = await this.usuarioListo(client);
+    const user = this.usuarioDe(client);
     if (!user || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -206,7 +220,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
-    const user = await this.usuarioListo(client);
+    const user = this.usuarioDe(client);
     if (!user || !body?.conversationId || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -467,14 +481,6 @@ export class CommunityMessagingGateway
 
   private usuarioDe(client: Socket): AuthenticatedUser | undefined {
     return (client.data as GatewaySocketData).user;
-  }
-
-  /** El usuario del socket, esperando a que termine la autenticación del handshake. */
-  private async usuarioListo(
-    client: Socket,
-  ): Promise<AuthenticatedUser | undefined> {
-    await (client.data as GatewaySocketData).authenticating;
-    return this.usuarioDe(client);
   }
 
   private salaDeConversacion(conversationId: string): string {
