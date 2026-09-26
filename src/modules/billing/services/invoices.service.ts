@@ -6,6 +6,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -13,16 +15,22 @@ import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
 } from '../repositories';
+import { PracticeTenantLookupService } from '../../practice/services';
 import {
   IssueInvoiceFromEncounterDto,
   CreditNoteDto,
   CreatePaymentPlanDto,
   InvoiceResponseDto,
   PaymentPlanResponseDto,
+  ListInvoicesResponseDto,
+  InvoiceDetailDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
 import { fromCents, toCents } from '../money.util';
 import type { Invoices } from '../entities';
+
+/** Tope de facturas por página cuando el cliente no pide uno (CV-12). */
+const DEFAULT_INVOICES_PAGE_SIZE = 50;
 
 /**
  * Casos de uso centrados en la factura de cliente (CxC): emisión desde cargos del
@@ -45,6 +53,7 @@ export class InvoicesService {
     private readonly em: EntityManager,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InvoicesService.name);
@@ -353,6 +362,112 @@ export class InvoicesService {
         })),
       };
     });
+  }
+
+  /**
+   * CV-12 — página de facturas de la práctica, sin acción de cobro.
+   *
+   * Aislamiento: `practiceId` nunca es, por sí solo, un alcance de
+   * autorización — es un parámetro que cualquiera puede escribir en la URL.
+   * Antes de listar nada se confirma que esa práctica es del tenant del
+   * actor (mismo puerto que usa `billing-service-catalog.service.ts`,
+   * `PracticeTenantLookupService.findTenantOfPractice`); si no lo es, 404 sin
+   * distinguir "no existe" de "es de otra organización".
+   *
+   * Proyección liviana (`InvoiceSummaryDto`): no calcula `lineCount` por fila
+   * para no repetir el patrón N+1 que BR-30 pide cerrar (TX-27).
+   */
+  async listByPractice(
+    practiceId: string,
+    tenantId: string,
+    options: { cursor?: string; limit?: number },
+  ): Promise<ListInvoicesResponseDto> {
+    await this.assertPracticeInTenant(practiceId, tenantId);
+    const em = this.em.fork();
+    const limit = options.limit ?? DEFAULT_INVOICES_PAGE_SIZE;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    const rows = await this.invoicesRepo.findByPracticePage(
+      em,
+      practiceId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((invoice) => ({
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        patientProfileId: invoice.patientProfileId,
+        status: invoice.statusConceptId,
+        issueDate: invoice.issueDate,
+        dueDate: invoice.dueDate,
+        total: invoice.total,
+        balance: invoice.balance,
+        createdAt: invoice.createdAt,
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
+  }
+
+  /**
+   * CV-12 — detalle de una factura con sus líneas, acotado al tenant del
+   * actor: una factura de otra práctica (propia o ajena al tenant) es 404, no
+   * 403, para no confirmar que existe.
+   */
+  async getDetail(
+    invoiceId: string,
+    practiceId: string,
+    tenantId: string,
+  ): Promise<InvoiceDetailDto> {
+    await this.assertPracticeInTenant(practiceId, tenantId);
+    const em = this.em.fork();
+    const invoice = await this.invoicesRepo.findById(em, invoiceId);
+    if (!invoice || invoice.practiceId !== practiceId) {
+      throw new ResourceNotFoundException('Factura no encontrada', {
+        invoiceId,
+      });
+    }
+    const lines = await this.invoicesRepo.findLinesByInvoice(em, invoiceId);
+    return {
+      ...this.toResponse(invoice, lines.length),
+      lines: lines.map((line) => ({
+        id: line.id,
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        discount: line.discount,
+        taxAmount: line.taxAmount,
+        lineTotal: line.lineTotal,
+      })),
+    };
+  }
+
+  /**
+   * Confirma que `practiceId` pertenece a `tenantId` antes de leer nada.
+   * 404 sin distinguir "no existe" de "es de otra organización": el
+   * administrador de la clínica A nunca debe poder confirmar, ni por el
+   * código de error, que una práctica de la clínica B existe.
+   */
+  private async assertPracticeInTenant(
+    practiceId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const owner =
+      await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+    if (owner !== tenantId) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
   }
 
   /**

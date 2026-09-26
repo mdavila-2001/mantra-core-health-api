@@ -35,6 +35,7 @@ import {
   JurisdictionAuthorizationResponseDto,
   VerifyCredentialDto,
   CredentialResponseDto,
+  ListPendingCredentialsResponseDto,
   AddSpecialtyDto,
   AddOwnCredentialDto,
   UpdateOwnCredentialDto,
@@ -647,6 +648,37 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     return this.practitionersService.removeOwnLicense(licenseId, actor);
+  }
+
+  /** CV-20: cola de credenciales pendientes de verificación. */
+  @Get('credentials')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar credenciales pendientes de verificación' })
+  @ApiQuery({
+    name: 'state',
+    required: false,
+    description: 'Concepto de estado (por defecto, pendiente)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Credenciales por página',
+  })
+  listPendingCredentials(
+    @Query('state') stateConceptId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPendingCredentialsResponseDto> {
+    return this.practitionersService.listPendingCredentials({
+      stateConceptId,
+      cursor,
+      limit,
+    });
   }
 
   /** UC-05-05. */

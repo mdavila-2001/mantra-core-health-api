@@ -76,14 +76,17 @@ describe('Insurance controllers (delegación)', () => {
       enrollCoverage: mockFn().mockResolvedValue({ id: ID }),
       requestEligibility: mockFn().mockResolvedValue({ id: ID }),
       determineCob: mockFn().mockResolvedValue({ id: ID }),
+      listMine: mockFn().mockResolvedValue([]),
     };
     const c = new CoverageController(service as never);
     await c.enroll(dto, actor);
     await c.requestEligibility(dto, actor);
     await c.determineCob(dto, actor);
+    await c.listMine(actor);
     expect(service.enrollCoverage).toHaveBeenCalledWith(dto, actor);
     expect(service.requestEligibility).toHaveBeenCalledWith(dto, actor);
     expect(service.determineCob).toHaveBeenCalledWith(dto, actor);
+    expect(service.listMine).toHaveBeenCalledWith(actor);
   });
 
   it('InsuranceBackboneController delega en su servicio', async () => {

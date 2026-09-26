@@ -182,6 +182,35 @@ export class ProfessionalCredentialsRepository {
   }
 
   /**
+   * Página de credenciales en un estado dado (típicamente pendientes de
+   * verificación), ordenada por `id` (keyset estable) — CV-20: antes de esto
+   * `POST credentials/:id/verify` existía sin ninguna cola para armar el
+   * listado; el revisor tenía que conseguir el uuid de la credencial por otro
+   * canal.
+   *
+   * Es una lectura de plataforma (`SECURITY_ADMIN`, igual que la propia
+   * verificación): las credenciales no declaran tenant propio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateConceptId - Estado a filtrar.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   */
+  findByStatePage(
+    em: EntityManager,
+    stateConceptId: string,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<ProfessionalCredentials[]> {
+    const where: Record<string, unknown> = { stateConceptId };
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(ProfessionalCredentials, where, {
+      orderBy: { id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Nº de credenciales del profesional que siguen en un estado dado (típicamente
    * "pendiente"), excluyendo una credencial concreta. Sirve para decidir si el
    * profesional pasa a verificado cuando ya no le quedan credenciales pendientes.

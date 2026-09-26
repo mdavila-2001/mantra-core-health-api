@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { BillingReceivablesController } from './billing-receivables.controller';
+import { runWithTenant } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -20,10 +21,12 @@ function build() {
     issueFromEncounter: mockFn(),
     creditNote: mockFn(),
     createPaymentPlan: mockFn(),
+    listByPractice: mockFn(),
+    getDetail: mockFn(),
   };
   const paymentsReceivedService = { apply: mockFn() };
   const reimbursementsService = { link: mockFn() };
-  const statementsService = { generate: mockFn() };
+  const statementsService = { generate: mockFn(), listByPractice: mockFn() };
   const controller = new BillingReceivablesController(
     invoicesService as any,
     paymentsReceivedService as any,
@@ -92,6 +95,48 @@ describe('BillingReceivablesController', () => {
     expect(d.invoicesService.createPaymentPlan).toHaveBeenCalledWith(
       dto,
       actor,
+    );
+  });
+
+  it('delegates listInvoices (CV-12) with the tenant of the context', async () => {
+    const d = build();
+    d.invoicesService.listByPractice.mockResolvedValue({
+      items: [],
+      count: 0,
+      limit: 50,
+      nextCursor: null,
+    });
+    await runWithTenant('tenant-1', () =>
+      d.controller.listInvoices('pr1', 'cur1', 10),
+    );
+    expect(d.invoicesService.listByPractice).toHaveBeenCalledWith(
+      'pr1',
+      'tenant-1',
+      { cursor: 'cur1', limit: 10 },
+    );
+  });
+
+  it('delegates getInvoice (CV-12) with the tenant of the context', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () =>
+      d.controller.getInvoice('inv1', 'pr1'),
+    );
+    expect(d.invoicesService.getDetail).toHaveBeenCalledWith(
+      'inv1',
+      'pr1',
+      'tenant-1',
+    );
+  });
+
+  it('delegates listStatements (CV-12) with the tenant of the context', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () =>
+      d.controller.listStatements('pr1', undefined, undefined),
+    );
+    expect(d.statementsService.listByPractice).toHaveBeenCalledWith(
+      'pr1',
+      'tenant-1',
+      { cursor: undefined, limit: undefined },
     );
   });
 });

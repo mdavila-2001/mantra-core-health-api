@@ -77,6 +77,7 @@ function build() {
     countInStateExcept: mockFn().mockResolvedValue(0),
     hasCurrentCredential: mockFn().mockResolvedValue(false),
     findByPractitioner: mockFn().mockResolvedValue([]),
+    findByStatePage: mockFn().mockResolvedValue([]),
   };
   const specialtiesRepo = {
     create: mockFn(),
@@ -570,6 +571,47 @@ describe('ProfilesPractitionersService', () => {
 
       expect(creada.fileId).toBeUndefined();
       expect(d.filesRepo.findById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listPendingCredentials (CV-20)', () => {
+    it('defaults to the pending state and pages by id', async () => {
+      const d = build();
+      d.credentialsRepo.findByStatePage.mockResolvedValue([
+        {
+          id: 'cred-1',
+          practitionerProfileId: 'pp-1',
+          credentialTypeConceptId: 'ct-1',
+          number: 'MP-123',
+          stateConceptId: PROF.CRED_PENDING,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      const res = await d.service.listPendingCredentials({ limit: 20 });
+      expect(d.credentialsRepo.findByStatePage).toHaveBeenCalledWith(
+        d.em,
+        PROF.CRED_PENDING,
+        undefined,
+        21,
+      );
+      expect(res.items).toEqual([
+        expect.objectContaining({ id: 'cred-1', state: PROF.CRED_PENDING }),
+      ]);
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('honors an explicit state filter', async () => {
+      const d = build();
+      d.credentialsRepo.findByStatePage.mockResolvedValue([]);
+      await d.service.listPendingCredentials({
+        stateConceptId: PROF.CRED_REJECTED,
+      });
+      expect(d.credentialsRepo.findByStatePage).toHaveBeenCalledWith(
+        d.em,
+        PROF.CRED_REJECTED,
+        undefined,
+        51,
+      );
     });
   });
 
