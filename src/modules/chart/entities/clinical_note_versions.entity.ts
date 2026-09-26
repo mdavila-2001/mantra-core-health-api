@@ -79,6 +79,18 @@ export class ClinicalNoteVersions {
   planText?: string;
 
   /**
+   * Filas clave/valor de la nota (P39), `[{ label, value }]`. Viaja con la
+   * versión y queda inmutable con ella. `null` en versiones sin filas.
+   */
+  @Property({
+    fieldName: 'entries_json',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  entriesJson?: Array<{ label: string; value: string }> | null;
+
+  /**
    * Identificador asociado a supersedes version.
    */
   @Property({

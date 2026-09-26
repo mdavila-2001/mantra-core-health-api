@@ -228,5 +228,29 @@ describe('ChartNotesReadService', () => {
       expect(result.items).toHaveLength(0);
       expect(result.count).toBe(0);
     });
+
+    it('cada ítem lleva las filas clave/valor de su versión vigente (P39)', async () => {
+      const d = build();
+      const actor = {
+        id: 'u1',
+        roles: [],
+        practitionerProfileId: 'author-1',
+      } as any;
+      const entries = [{ label: 'Peso', value: '70 kg' }];
+      d.notesRepo.findHeadersPageByAuthor.mockResolvedValue([
+        header({ id: 'n1', currentVersionId: 'v1' }),
+        header({ id: 'n2', currentVersionId: 'v2' }),
+      ]);
+      d.notesRepo.findVersionsByIds.mockResolvedValue(
+        new Map([
+          ['v1', version({ id: 'v1', entriesJson: entries })],
+          ['v2', version({ id: 'v2', entriesJson: null })],
+        ]),
+      );
+
+      const result = await d.service.listNotes({} as any, actor);
+
+      expect(result.items.map((i) => i.entries)).toEqual([entries, []]);
+    });
   });
 });

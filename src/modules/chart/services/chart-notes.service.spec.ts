@@ -677,3 +677,145 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     },
   );
 });
+
+// P39 — filas clave/valor de la nota (`entries` → `entries_json`).
+describe('ChartNotesService · entries (P39)', () => {
+  const entries = [
+    { label: 'Presión arterial', value: '120/80 mmHg' },
+    { label: 'Peso', value: '70 kg' },
+  ];
+
+  /**
+   * Cabecera y versión en borrador para los casos de creación.
+   * @param d - Sistema bajo prueba.
+   * @returns La cabecera creada.
+   */
+  function stubCreate(d: ReturnType<typeof build>) {
+    const header: any = {
+      id: 'h1',
+      lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+      updatedAt: new Date(),
+    };
+    d.notesRepo.createHeader.mockReturnValue(header);
+    d.notesRepo.createVersion.mockReturnValue({
+      id: 'v1',
+      versionNumber: 1,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+    return header;
+  }
+
+  it('createNote guarda las filas en la versión 1, aun sin ningún texto', async () => {
+    const d = build();
+    const header = stubCreate(d);
+
+    await d.service.createNote({ patientProfileId: 'p1', entries }, actor);
+
+    expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ versionNumber: 1, entriesJson: entries }),
+    );
+    expect(header.currentVersionId).toBe('v1');
+  });
+
+  it('createNote sin filas (o con lista vacía) guarda null', async () => {
+    for (const body of [{}, { entries: [] }]) {
+      const d = build();
+      stubCreate(d);
+      await d.service.createNote(
+        { patientProfileId: 'p1', subjectiveText: 's', ...body },
+        actor,
+      );
+      expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ entriesJson: null }),
+      );
+    }
+  });
+
+  it('createNote guarda objetos planos {label, value}, sin propiedades extra', async () => {
+    const d = build();
+    stubCreate(d);
+    const conExtra = [{ label: 'Peso', value: '70 kg', otro: 'x' }] as any;
+
+    await d.service.createNote(
+      { patientProfileId: 'p1', entries: conExtra },
+      actor,
+    );
+
+    const data = d.notesRepo.createVersion.mock.calls[0][1];
+    expect(data.entriesJson).toStrictEqual([{ label: 'Peso', value: '70 kg' }]);
+  });
+
+  it('addVersion guarda las filas en la versión nueva', async () => {
+    const d = build();
+    d.notesRepo.findHeaderById.mockResolvedValue({
+      id: 'h1',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+      updatedAt: new Date(),
+    });
+    d.notesRepo.maxVersionNumber.mockResolvedValue(1);
+    d.notesRepo.createVersion.mockReturnValue({
+      id: 'v2',
+      versionNumber: 2,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+
+    await d.service.addVersion('h1', { entries }, actor);
+
+    expect(d.notesRepo.createVersion).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        versionNumber: 2,
+        supersedesVersionId: 'v1',
+        entriesJson: entries,
+      }),
+    );
+  });
+
+  /**
+   * Firma una versión y devuelve el hash sellado.
+   * @param extra - Campos de la versión además del texto S.
+   * @returns El `contentHash` que quedó en la versión.
+   */
+  async function hashAlFirmar(extra: Record<string, unknown>) {
+    const d = build();
+    const version: any = {
+      id: 'v1',
+      clinicalNoteId: 'h1',
+      statusConceptId: CHART.VERSION_DRAFT,
+      subjectiveText: 's',
+      ...extra,
+    };
+    d.notesRepo.findVersionById.mockResolvedValue(version);
+    d.notesRepo.findHeaderById.mockResolvedValue({
+      id: 'h1',
+      lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+      updatedAt: new Date(),
+    });
+    await d.service.signVersion('h1', 'v1', { signerProfileId: 's1' }, actor);
+    return version.contentHash as string;
+  }
+
+  it('el sello de una versión sin filas no cambia respecto de antes de P39', async () => {
+    const { createHash } = await import('node:crypto');
+    const previo = createHash('sha256')
+      .update(JSON.stringify({ c: null, s: 's', o: null, a: null, p: null }))
+      .digest('hex');
+
+    expect(await hashAlFirmar({})).toBe(previo);
+    expect(await hashAlFirmar({ entriesJson: null })).toBe(previo);
+    expect(await hashAlFirmar({ entriesJson: [] })).toBe(previo);
+  });
+
+  it('el sello cubre las filas: cambiar un valor cambia el hash', async () => {
+    const sin = await hashAlFirmar({});
+    const con = await hashAlFirmar({ entriesJson: entries });
+    const otra = await hashAlFirmar({
+      entriesJson: [entries[0], { label: 'Peso', value: '71 kg' }],
+    });
+    expect(con).not.toBe(sin);
+    expect(otra).not.toBe(con);
+  });
+});

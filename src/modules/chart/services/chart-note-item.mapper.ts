@@ -31,6 +31,7 @@ export function toChartNoteItem(
     objectiveText: version?.objectiveText,
     assessmentText: version?.assessmentText,
     planText: version?.planText,
+    entries: version?.entriesJson ?? [],
     signedAt: version?.signedAt,
     // Liberada al portal es tener una versión liberada, no un estado del
     // encabezado: una nota puede estar firmada y aún así retenida.
