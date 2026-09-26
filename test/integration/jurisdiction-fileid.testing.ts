@@ -174,6 +174,7 @@ export function api(orm: MikroORM): ProfilesPractitionersService {
     unused,
     unused,
     unused,
+    unused,
     logger as never,
   );
 }

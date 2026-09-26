@@ -17,6 +17,7 @@ import { InsuranceModule } from '../insurance/insurance.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
 import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
@@ -82,6 +83,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     PatientRepresentationService,
     MedicalSpecialtyCatalogService,
     AdministrativeAreaCatalogService,
+    HealthFacilityCatalogService,
     ProfilesAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que

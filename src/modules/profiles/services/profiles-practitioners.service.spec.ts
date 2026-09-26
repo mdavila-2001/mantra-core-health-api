@@ -97,6 +97,7 @@ function build() {
   const affiliationsRepo = {
     findByPractitioner: mockFn().mockResolvedValue([]),
     findSame: mockFn().mockResolvedValue(null),
+    findSameFacility: mockFn().mockResolvedValue(null),
     // TP-2: por defecto no hay una solicitud previa a la misma sede.
     findByPractitionerAndSite: mockFn().mockResolvedValue(null),
     findByPractitionerInStatus: mockFn().mockResolvedValue([]),
@@ -199,6 +200,10 @@ function build() {
   const administrativeAreas = {
     assertIsAdministrativeArea: mockFn(() => Promise.resolve()),
   };
+  // Y el establecimiento del historial laboral, contra `VS_BO_HEALTH_FACILITY`.
+  const healthFacilities = {
+    assertIsHealthFacility: mockFn(() => Promise.resolve()),
+  };
 
   const service = new ProfilesPractitionersService(
     em as any,
@@ -227,11 +232,13 @@ function build() {
     verificationBypass as any,
     specialtyCatalog as any,
     administrativeAreas as any,
+    healthFacilities as any,
     logger as any,
   );
   return {
     service,
     administrativeAreas,
+    healthFacilities,
     specialtyCatalog,
     contactPointsRepo,
     em,
@@ -1063,6 +1070,66 @@ describe('ProfilesPractitionersService', () => {
         }),
       );
       expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+
+    /* ---- establecimiento del padrón (ID-16) ---------------------------- */
+
+    it('guarda el establecimiento del padrón elegido y lo valida contra su value set', async () => {
+      const d = build();
+      d.affiliationsRepo.create.mockReturnValue(fila({ id: 'af-7' }));
+
+      await d.service.addOwnAffiliation(
+        {
+          organizationName: 'Hospital Japonés',
+          healthFacilityConceptId: 'HF-1',
+          startDate: '2020-03-01',
+        } as any,
+        actor,
+      );
+
+      expect(d.healthFacilities.assertIsHealthFacility).toHaveBeenCalledWith(
+        d.tx,
+        'HF-1',
+      );
+      expect(d.affiliationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ healthFacilityConceptId: 'HF-1' }),
+      );
+    });
+
+    it('un concepto fuera del padrón responde 422 y no escribe', async () => {
+      const d = build();
+      d.healthFacilities.assertIsHealthFacility.mockRejectedValue(
+        new PreconditionFailedException('fuera del padrón'),
+      );
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'X',
+            healthFacilityConceptId: 'NO-ES',
+            startDate: '2020-03-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo establecimiento, cargo e inicio responde 409 antes de tocar el índice', async () => {
+      const d = build();
+      d.affiliationsRepo.findSameFacility.mockResolvedValue(fila());
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'Hospital Japonés',
+            roleTitle: 'Médico de planta',
+            healthFacilityConceptId: 'HF-1',
+            startDate: '2020-03-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
     });
 
     /* ---- corregir (UC-05-16·E) ---------------------------------------- */

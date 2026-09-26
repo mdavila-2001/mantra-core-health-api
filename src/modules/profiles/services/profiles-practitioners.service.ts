@@ -35,6 +35,7 @@ import {
   PROF,
 } from '../profiles.concepts';
 import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './health-facility-catalog.service';
 // Sólo entidades, como con la actividad: se cuenta si hay un trámite abierto o
 // historia de auditoría antes de retirar una matrícula; no se llama a sus servicios.
 import { IdentityVerificationCases } from '../../identity_assurance/entities';
@@ -221,6 +222,7 @@ export class ProfilesPractitionersService {
     private readonly verificationBypass: VerificationBypassService,
     private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    private readonly healthFacilities: HealthFacilityCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -2585,6 +2587,14 @@ export class ProfilesPractitionersService {
         }
       }
 
+      // ID-16: el establecimiento del padrón se valida contra su value set.
+      if (dto.healthFacilityConceptId !== undefined) {
+        await this.healthFacilities.assertIsHealthFacility(
+          tx,
+          dto.healthFacilityConceptId,
+        );
+      }
+
       const organizationName = dto.organizationName.trim();
       // ALV-007: opcional. `null` explícito -no `undefined`- para que
       // `findSame` busque "sin cargo" y no "cualquier cargo" (ver el
@@ -2603,6 +2613,29 @@ export class ProfilesPractitionersService {
           'Ese vínculo ya está en el historial laboral',
           { organizationName, roleTitle, startDate: dto.startDate },
         );
+      }
+
+      // ID-16: el mismo establecimiento del padrón con el mismo cargo e inicio
+      // es el doble envío que el índice único de la base rechaza; se dice acá.
+      if (dto.healthFacilityConceptId !== undefined) {
+        const mismoEstablecimiento =
+          await this.affiliationsRepo.findSameFacility(
+            tx,
+            profileId,
+            dto.healthFacilityConceptId,
+            roleTitle,
+            startDate,
+          );
+        if (mismoEstablecimiento) {
+          throw new ConflictException(
+            'Ese vínculo con el establecimiento ya está en el historial laboral',
+            {
+              healthFacilityConceptId: dto.healthFacilityConceptId,
+              roleTitle,
+              startDate: dto.startDate,
+            },
+          );
+        }
       }
 
       // TP-2: y pedir dos veces atender en la MISMA sede es lo mismo, aunque el
@@ -2629,6 +2662,7 @@ export class ProfilesPractitionersService {
         practitionerProfileId: profileId,
         organizationName,
         roleTitle: roleTitle ?? undefined,
+        healthFacilityConceptId: dto.healthFacilityConceptId,
         practiceSiteId: dto.practiceSiteId,
         affiliationTypeConceptId:
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
@@ -3112,6 +3146,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     organizationName: row.organizationName,
     roleTitle: row.roleTitle ?? null,
     practiceSiteId: row.practiceSiteId ?? null,
+    healthFacilityConceptId: row.healthFacilityConceptId ?? null,
     affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
     startDate: row.startDate,
     endDate: row.endDate ?? null,
