@@ -515,4 +515,116 @@ describe('IamOrganizationSelfRegistrationService', () => {
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
     });
   });
+
+  describe('documentos exigidos por el tipo societario (CL-43)', () => {
+    const sinConstitucion = {
+      taxIdentifierFileId: 'file-tax',
+      commerceRegistryFileId: 'file-commerce',
+      operatingLicenseFileId: 'file-license',
+      healthAuthorityCertificateFileId: 'file-sedes',
+    };
+    const representante = {
+      firstName: 'Ana',
+      lastName: 'Rojas',
+      idNumber: '4821993',
+      email: 'legal@lab.example.test',
+    };
+
+    it('una UNIPERSONAL sin constitución ni poder se registra y ve los cuatro documentos', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          legalEntityType: 'UNIPERSONAL',
+          legalDocuments: sinConstitucion,
+          legalRepresentative: representante,
+        },
+      } as never);
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          documents: {
+            CONSTITUTION_DOC: undefined,
+            TAX_IDENTIFIER_DOC: 'file-tax',
+            COMMERCE_REGISTRY_DOC: 'file-commerce',
+            OPERATING_LICENSE_DOC: 'file-license',
+            HEALTH_AUTHORITY_CERT_DOC: 'file-sedes',
+          },
+        }),
+      );
+      expect(d.representatives.register).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalDocumentFileIds: [
+            'file-tax',
+            'file-commerce',
+            'file-license',
+            'file-sedes',
+          ],
+        }),
+      );
+    });
+
+    it('una SRL sin constitución responde 422 y no crea ninguna cuenta', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType: 'SRL',
+            legalDocuments: sinConstitucion,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+      expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('una SRL con representante pero sin poder responde 422 antes de escribir', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            legalEntityType: 'SRL',
+            legalDocuments: {
+              ...sinConstitucion,
+              constitutionFileId: 'file-constitution',
+            },
+            legalRepresentative: representante,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('la aseguradora sin tipo societario sigue exigiendo la constitución', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerOrganization({
+          ...dto,
+          organization: {
+            ...dto.organization,
+            tenantType: 'PAYER',
+            legalDocuments: sinConstitucion,
+          },
+        } as never),
+      ).rejects.toThrow(PreconditionFailedException);
+    });
+  });
 });

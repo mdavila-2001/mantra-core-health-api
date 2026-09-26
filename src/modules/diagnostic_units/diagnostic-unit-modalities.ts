@@ -30,6 +30,13 @@ export interface DiagnosticUnitModality {
  */
 export const DIAGNOSTIC_UNIT_MODALITIES: readonly DiagnosticUnitModality[] = [
   {
+    // El alta del laboratorio declara esta modalidad (BR-09): sin ella, la regla
+    // «una modalidad desconocida es 422» dejaría a los laboratorios sin poder darse de alta.
+    conceptId: DUNIT.MODALITY_LABORATORY,
+    studyCode: 'MODALITY_LABORATORY',
+    displayName: 'Laboratorio',
+  },
+  {
     conceptId: DUNIT.MODALITY_XRAY,
     studyCode: 'MODALITY_XRAY',
     displayName: 'Rayos X',
