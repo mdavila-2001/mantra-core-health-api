@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 import { generate, generateSecret } from 'otplib';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
@@ -53,6 +54,46 @@ function build() {
 }
 
 describe('IamMfaService (UC-01-03)', () => {
+  /**
+   * Titularidad. Reproducido contra la API viva el 2026-09-26 (verificación
+   * H1/M7): una paciente enroló un factor TOTP sobre la cuenta de otra y la
+   * API respondió 201. La ruta no lleva `@Roles`, así que la comprobación va
+   * acá: dueño o administrador de seguridad; para el resto, 403 sin tocar la
+   * base ni revelar si la cuenta existe.
+   */
+  it('rechaza con 403 enrolar o verificar un factor sobre la cuenta de otro usuario', async () => {
+    const d = build();
+    d.usersRepo.findById.mockResolvedValue({ id: 'u2', displayName: 'Bea' });
+
+    await expect(
+      d.service.enrollOrVerify('u2', { factorType: 'TOTP' }, actor as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      d.service.enrollOrVerify(
+        'u2',
+        { verify: true, factorId: 'f9', code: '123456' },
+        actor as any,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.em.transactional).not.toHaveBeenCalled();
+    expect(d.mfaRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('deja que un SECURITY_ADMIN enrole un factor sobre otra cuenta', async () => {
+    const d = build();
+    d.usersRepo.findById.mockResolvedValue({ id: 'u2', displayName: 'Bea' });
+    const factor: any = { id: 'f2', stateConceptId: CONCEPTS.STATE_PENDING };
+    d.mfaRepo.create.mockReturnValue(factor);
+
+    const res = await d.service.enrollOrVerify(
+      'u2',
+      { factorType: 'TOTP' },
+      { id: 'admin', roles: ['SECURITY_ADMIN'] } as any,
+    );
+    expect(res.userId).toBe('u2');
+    expect(d.mfaRepo.create).toHaveBeenCalled();
+  });
+
   it('enrolls a new TOTP factor, stores the encrypted secret and returns secret + otpauthUri', async () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue({ id: 'u1', displayName: 'Ana' });
