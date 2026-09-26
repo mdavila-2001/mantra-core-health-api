@@ -104,4 +104,31 @@ describe('ChartReadService', () => {
       );
     });
   });
+
+  describe('getPatientChart · carePlans[].activities[].activityConceptId (BR-16/CL-26)', () => {
+    it('expone la clase de actividad: se guarda al crear el plan y se perdía al releerlo', async () => {
+      const d = build();
+      d.carePlansRepo.findPlansByPatient.mockResolvedValue([
+        {
+          id: 'cp1',
+          statusConceptId: CHART.CAREPLAN_ACTIVE,
+          createdAt: new Date('2026-03-01T12:00:00.000Z'),
+        },
+      ]);
+      d.carePlansRepo.findActivitiesForPlans.mockResolvedValue([
+        {
+          id: 'a1',
+          carePlanId: 'cp1',
+          activityConceptId: 'CPACT_STUDY',
+          statusConceptId: CHART.ACTIVITY_SCHEDULED,
+        },
+      ]);
+
+      const chart = await d.service.getPatientChart('pat-1', 20);
+
+      expect(chart.carePlans[0].activities[0].activityConceptId).toBe(
+        'CPACT_STUDY',
+      );
+    });
+  });
 });
