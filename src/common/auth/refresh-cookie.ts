@@ -31,7 +31,24 @@ export interface RefreshCookieEnv {
    * Vida de la cookie en días; se alinea con `JWT_REFRESH_TTL_DAYS`.
    */
   ttlDays: number;
+  /**
+   * Nombre de la cookie (`AUTH_REFRESH_COOKIE_NAME`). Si falta, se usa
+   * `REFRESH_COOKIE_NAME`.
+   */
+  name?: string;
+  /**
+   * Ruta a la que se acota la cookie (`AUTH_REFRESH_COOKIE_PATH`). Si falta,
+   * se usa `REFRESH_COOKIE_PATH`.
+   */
+  path?: string;
+  /**
+   * Atributo `SameSite` (`AUTH_REFRESH_COOKIE_SAMESITE`). Si falta, `strict`.
+   */
+  sameSite?: 'strict' | 'lax' | 'none';
 }
+
+/** Valores admitidos para `AUTH_REFRESH_COOKIE_SAMESITE`. */
+const SAME_SITE_VALUES = ['strict', 'lax', 'none'] as const;
 
 /**
  * Lee de `process.env` cómo se entrega el refresh token.
@@ -54,7 +71,13 @@ export function loadRefreshCookieEnv(
   source: NodeJS.ProcessEnv = process.env,
 ): RefreshCookieEnv {
   const explicitSecure = source.AUTH_REFRESH_COOKIE_SECURE;
+  const sameSite = SAME_SITE_VALUES.find(
+    (value) => value === source.AUTH_REFRESH_COOKIE_SAMESITE,
+  );
   return {
+    name: source.AUTH_REFRESH_COOKIE_NAME || REFRESH_COOKIE_NAME,
+    path: source.AUTH_REFRESH_COOKIE_PATH || REFRESH_COOKIE_PATH,
+    sameSite: sameSite ?? 'strict',
     enabled: source.AUTH_REFRESH_COOKIE_ENABLED === 'true',
     secure:
       explicitSecure === undefined || explicitSecure === ''
@@ -82,11 +105,11 @@ export function setRefreshCookie(
   refreshToken: string,
   env: RefreshCookieEnv,
 ): void {
-  res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
+  res.cookie(env.name ?? REFRESH_COOKIE_NAME, refreshToken, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: env.sameSite ?? 'strict',
     secure: env.secure,
-    path: REFRESH_COOKIE_PATH,
+    path: env.path ?? REFRESH_COOKIE_PATH,
     maxAge: env.ttlDays * 24 * 60 * 60 * 1000,
   });
 }
@@ -101,11 +124,11 @@ export function setRefreshCookie(
  * @param env - Configuración de la cookie.
  */
 export function clearRefreshCookie(res: Response, env: RefreshCookieEnv): void {
-  res.clearCookie(REFRESH_COOKIE_NAME, {
+  res.clearCookie(env.name ?? REFRESH_COOKIE_NAME, {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: env.sameSite ?? 'strict',
     secure: env.secure,
-    path: REFRESH_COOKIE_PATH,
+    path: env.path ?? REFRESH_COOKIE_PATH,
   });
 }
 
@@ -117,9 +140,13 @@ export function clearRefreshCookie(res: Response, env: RefreshCookieEnv): void {
  * único valor en un único endpoint tiene más superficie que este parseo.
  *
  * @param req - Petición de Express en curso.
+ * @param cookieName - Nombre de la cookie; por defecto `REFRESH_COOKIE_NAME`.
  * @returns El token, o `undefined` si la cookie no viene.
  */
-export function readRefreshCookie(req: Request): string | undefined {
+export function readRefreshCookie(
+  req: Request,
+  cookieName: string = REFRESH_COOKIE_NAME,
+): string | undefined {
   const header = req.headers.cookie;
   if (!header) return undefined;
 
@@ -127,7 +154,7 @@ export function readRefreshCookie(req: Request): string | undefined {
     const separator = part.indexOf('=');
     if (separator === -1) continue;
     const name = part.slice(0, separator).trim();
-    if (name !== REFRESH_COOKIE_NAME) continue;
+    if (name !== cookieName) continue;
     const value = part.slice(separator + 1).trim();
     // Una cookie presente pero vacía es lo que deja un `clearCookie` en algunos
     // navegadores: tratarla como ausente evita mandar la cadena vacía al

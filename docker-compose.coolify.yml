@@ -183,7 +183,14 @@ x-app-env: &app-env
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
 
   # --- Postura de seguridad ----------------------------------------------
+  # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
+  # del front (docs/progress/DECISIONS.md, D-I): con un solo lado la sesión se pierde.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_NAME: ${AUTH_REFRESH_COOKIE_NAME:-redesa_refresh}
+  AUTH_REFRESH_COOKIE_PATH: ${AUTH_REFRESH_COOKIE_PATH:-/iam/auth/token/refresh}
+  AUTH_REFRESH_COOKIE_SAMESITE: ${AUTH_REFRESH_COOKIE_SAMESITE:-strict}
+  # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
+  AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   # El bypass de verificación aborta el arranque si llega en `true` con
