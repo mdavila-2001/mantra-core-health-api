@@ -41503,6 +41503,61 @@
         "description": "Listar las asignaciones de usuario de organización del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/delegated-permission-sets/{id}/items": {
+      "get": {
+        "operationId": "DelegatedAccessListingController_listPermissionSetItems",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPermissionSetItemsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los permisos de un set delegado del tenant",
+        "tags": [
+          "delegated-access"
+        ],
+        "description": "Listar los permisos de un set delegado del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/access-requests": {
       "get": {
         "operationId": "DelegatedAccessListingController_listAccessRequests",
@@ -110594,6 +110649,49 @@
           "count",
           "limit",
           "nextCursor"
+        ]
+      },
+      "PermissionSetItemSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "permissionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requiresStepUpAuthentication": {
+            "type": "boolean"
+          },
+          "constraint": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "permissionId"
+        ]
+      },
+      "ListPermissionSetItemsResponseDto": {
+        "type": "object",
+        "properties": {
+          "permissionSetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionSetItemSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "permissionSetId",
+          "items"
         ]
       },
       "AccessRequestSummaryDto": {

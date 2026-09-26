@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   DEFAULT_KEYSET_PAGE_SIZE,
+  ResourceNotFoundException,
   afterIdOf,
   toKeysetPage,
 } from '../../../common';
 import type {
   ListAccessRequestsResponseDto,
+  ListPermissionSetItemsResponseDto,
   ListOrgUserAssignmentsResponseDto,
   ListPractitionerDelegatesResponseDto,
 } from '../dto';
@@ -138,6 +140,45 @@ export class DelegatedAccessListingService {
       })),
       limit,
     );
+  }
+
+  /**
+   * Los permisos de un set delegado. `delegated_permission_sets` sí tiene
+   * `tenant_id`: el set tiene que ser del tenant del actor, y uno ajeno o
+   * inexistente responde el mismo 404.
+   */
+  async listPermissionSetItems(
+    tenantId: string,
+    setId: string,
+  ): Promise<ListPermissionSetItemsResponseDto> {
+    const [set] = await this.fetch(
+      `select id from delegated_access.delegated_permission_sets
+        where id = ? and tenant_id = ?`,
+      [setId, tenantId],
+    );
+    if (!set) {
+      throw new ResourceNotFoundException('Set de permisos no encontrado', {
+        setId,
+      });
+    }
+    const rows = await this.fetch(
+      `select id, permission_id, requires_step_up_authentication, constraint_json
+         from delegated_access.delegated_permission_set_items
+        where delegated_permission_set_id = ?
+        order by id`,
+      [setId],
+    );
+    return {
+      permissionSetId: setId,
+      items: rows.map((r) => ({
+        id: r.id as string,
+        permissionId: r.permission_id as string,
+        requiresStepUpAuthentication:
+          (r.requires_step_up_authentication as boolean | null) ?? undefined,
+        constraint:
+          (r.constraint_json as Record<string, unknown> | null) ?? undefined,
+      })),
+    };
   }
 
   private fetch(sql: string, params: unknown[]): Promise<Row[]> {

@@ -138,6 +138,38 @@ describe('CV-13 · listados de los hubs de administración', () => {
       }
     });
 
+    it('los ítems de un set salen del tenant dueño y un set ajeno es 404', async () => {
+      const setA = randomUUID();
+      await sql(
+        `insert into delegated_access.delegated_permission_sets
+           (id, tenant_id, code, name, delegate_type_concept_id, status_concept_id,
+            version_number, created_at, updated_at)
+         values (?, ?, ?, ?, ?, ?, 1, now(), now())`,
+        [setA, SEED.tenantId, `CV13-SET-${sufijo}`, 'Set CV13', CID, CID],
+      );
+      const [permiso] = await sql(`select id from authz.permissions limit 1`);
+      await sql(
+        `insert into delegated_access.delegated_permission_set_items
+           (id, delegated_permission_set_id, permission_id, requires_step_up_authentication, created_at)
+         values (?, ?, ?, true, now())`,
+        [randomUUID(), setA, permiso.id],
+      );
+
+      const propio = await http()
+        .get(`/delegated-permission-sets/${setA}/items`)
+        .set(auth())
+        .set('X-Tenant-Id', SEED.tenantId)
+        .expect(200);
+      expect(propio.body.items).toHaveLength(1);
+      expect(propio.body.items[0].requiresStepUpAuthentication).toBe(true);
+
+      await http()
+        .get(`/delegated-permission-sets/${setA}/items`)
+        .set(auth())
+        .set('X-Tenant-Id', tenantB)
+        .expect(404);
+    });
+
     it('un cursor corrupto es 400, no 500', async () => {
       await http()
         .get('/org/user-assignments')

@@ -138,3 +138,29 @@ export class ListAccessRequestsResponseDto {
   /** Cursor opaco de continuación, o `null` si ésta es la última página. */
   @ApiProperty({ nullable: true, type: String }) nextCursor!: string | null;
 }
+
+/** Un permiso de un set delegado, para el detalle del set (CV-13). */
+export class PermissionSetItemSummaryDto {
+  /** Identificador único del ítem. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Permiso que concede el ítem. */
+  @ApiProperty({ format: 'uuid' }) permissionId!: string;
+
+  /** Si usarlo exige autenticación reforzada. */
+  @ApiPropertyOptional() requiresStepUpAuthentication?: boolean;
+
+  /** Restricciones declaradas del ítem, si las hay. */
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  constraint?: Record<string, unknown>;
+}
+
+/** Los permisos de un set delegado del tenant del actor. */
+export class ListPermissionSetItemsResponseDto {
+  /** Set al que pertenecen los ítems. */
+  @ApiProperty({ format: 'uuid' }) permissionSetId!: string;
+
+  /** Ítems del set. */
+  @ApiProperty({ type: [PermissionSetItemSummaryDto] })
+  items!: PermissionSetItemSummaryDto[];
+}

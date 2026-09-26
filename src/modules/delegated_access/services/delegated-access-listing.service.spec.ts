@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { encodeKeysetCursor } from '../../../common';
+import { ResourceNotFoundException, encodeKeysetCursor } from '../../../common';
 import { DelegatedAccessListingService } from './delegated-access-listing.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -32,6 +32,36 @@ describe('DelegatedAccessListingService (CV-13)', () => {
       expect(params[0]).toBe(T);
     },
   );
+
+  it('los ítems de un set salen sólo si el set es del tenant del actor', async () => {
+    const d = build();
+    d.execute.mockResolvedValueOnce([{ id: 'set-1' }]).mockResolvedValueOnce([
+      {
+        id: 'i-1',
+        permission_id: 'perm-1',
+        requires_step_up_authentication: true,
+        constraint_json: { scope: 'ambulatorio' },
+      },
+    ]);
+    const res = await d.service.listPermissionSetItems(T, 'set-1');
+    expect(d.execute.mock.calls[0][1]).toEqual(['set-1', T]);
+    expect(res.items).toEqual([
+      {
+        id: 'i-1',
+        permissionId: 'perm-1',
+        requiresStepUpAuthentication: true,
+        constraint: { scope: 'ambulatorio' },
+      },
+    ]);
+  });
+
+  it('un set ajeno o inexistente es 404 y no se leen sus ítems', async () => {
+    const d = build([]);
+    await expect(
+      d.service.listPermissionSetItems(T, 'set-ajeno'),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.execute).toHaveBeenCalledTimes(1);
+  });
 
   it('pide limit + 1 para saber si hay continuación y devuelve nextCursor', async () => {
     const rows = ['a', 'b', 'c'].map((id, i) => ({

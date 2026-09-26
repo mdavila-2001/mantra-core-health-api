@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -15,6 +15,7 @@ import { DelegatedAccessListingService } from '../services';
 import {
   ListAccessRequestsResponseDto,
   ListOrgUserAssignmentsResponseDto,
+  ListPermissionSetItemsResponseDto,
   ListPractitionerDelegatesResponseDto,
 } from '../dto';
 
@@ -59,6 +60,18 @@ export class DelegatedAccessListingController {
       cursor,
       limit,
     });
+  }
+
+  @Get('delegated-permission-sets/:id/items')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar los permisos de un set delegado del tenant',
+  })
+  @ApiOkResponse({ type: ListPermissionSetItemsResponseDto })
+  listPermissionSetItems(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListPermissionSetItemsResponseDto> {
+    return this.service.listPermissionSetItems(requireTenantId(), id);
   }
 
   @Get('access-requests')
