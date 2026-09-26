@@ -257,6 +257,10 @@ describe('CdsService', () => {
       );
 
       expect(res.count).toBe(1);
+      expect(res.alerts[0].severityConceptId).toBe(CEXT.SEVERITY_HIGH);
+      // BR-14 (CL-09): el chequeo previo detecta pero no persiste — nunca
+      // deja una fila en `clinical_ext.clinical_alerts` aunque haya match.
+      expect(d.alertsRepo.create).not.toHaveBeenCalled();
     });
 
     it('returns no alerts when there are no known interactions', async () => {
