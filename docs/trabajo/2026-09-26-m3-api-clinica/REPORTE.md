@@ -47,15 +47,11 @@ Sólo lo que tiene CA cumplido y DoD demostrado con salida literal (en `evidenci
 | C.3 specs dirigidos de los módulos tocados | HECHO · 90 suites / 1168 pruebas, 0 fallos | `evidencia/test-dirigido.txt` |
 | C.4 este reporte | HECHO | — |
 | C.5 PR contra `test` mergeable | **HECHO** · PR #473 · `MERGEABLE` · `CLEAN` · `isDraft=false` · sin checks reportados (runners propios apagados) · consultado tras el push `ba7ff18b` · **mergeado en `test`** (`f5c8c11c`, `Jsaldias39`) | `evidencia/pr-mergeable.txt` |
-| C.6 daily de M3 y de máquinas en el PM | **A MEDIAS** · ver §«A medias» | rama pusheada en `AlovidaPromptManager` |
+| C.6 daily de M3 y de máquinas en el PM | **HECHO** · PR PabloArauzCaballero/AlovidaPromptManager#58 · `MERGEABLE` · `mergeStateStatus=BLOCKED` sólo por la review humana requerida en `main` (regla 35.2.2) · conflicto con `main` (cabecera del daily de máquinas: entraron M5 y M7) resuelto sumando ambos lados, 29/199 · abierto por el propietario | daily de M3 en el PM |
 
 ## A medias
 
-### C.6 — Daily de M3 y Daily de máquinas en el Prompt Manager
-- Qué anda: el daily de M3 y la fila de M3 en `Daily-Maquinas-2026-09-26.md` están actualizados (hitos, bitácora, salida de la instalación, pedidos) en la rama `justin/m3-daily-2026-09-26` de `AlovidaPromptManager`, pusheada.
-- Qué no anda: el PR contra `main` del PM no está abierto, por la misma denegación (`gh pr create` bloqueado por el clasificador del modo automático; el propietario abrió a mano el de la API).
-- Qué falta exactamente: `gh pr create --base main --head justin/m3-daily-2026-09-26` en `AlovidaPromptManager`.
-- Dónde quedó: `AlovidaPromptManager`, rama `justin/m3-daily-2026-09-26`, con el PR #473 y su estado ya anotados.
+Ninguna.
 
 ## Pendiente
 
