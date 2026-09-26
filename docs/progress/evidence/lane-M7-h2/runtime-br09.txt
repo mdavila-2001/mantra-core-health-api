@@ -1,0 +1,20 @@
+PASS UNIPERSONAL sin constitución ni poder = 201 status=201 
+PASS quedan registrados los cuatro documentos legalDocumentsRegistered=4
+     SELECT tenant: t|t
+     SELECT documentos: 4
+     SELECT unidad: t|1|1
+     SELECT sede con coordenadas: -17.78|-63.18
+     SELECT archivos con dueño: 4|4
+PASS el dueño inicia sesión status=200
+PASS SRL sin constitución = 422 status=422
+PASS el 422 nombra el documento faltante 
+PASS no se creó ningún tenant ni cuenta 
+PASS SRL con representante sin poder = 422 status=422
+PASS SRL con los seis documentos = 201 (sin cambios) status=201 
+PASS SRL registra cinco documentos + poder legalDocumentsRegistered=5
+PASS modalidad desconocida = 422 status=422
+PASS DIAGNOSTIC_CENTER sin país ni jurisdicción = 422 status=422
+PASS matrícula con fileId = 201 status=201 {"id":"4b1d0bd6-4aa2-4fd4-bd53-6e0b34e3fa01","practitionerProfileId":"7f91df93-05d6-430b-ae5c-188af6e2ecb9","licenseNumb
+PASS licenses[i].fileId es ese id fileId=7cc5d253-d4b6-42f4-b3e3-658985aec74e
+     (ficha pública sin sesión: 401 )
+TODO PASS
