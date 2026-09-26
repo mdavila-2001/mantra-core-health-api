@@ -762,13 +762,16 @@ decisión es la de criterio más seguro y queda escrita para que el propietario 
 - **TX-34 — almacenamiento.** `.env.example` ya no hereda el prefijo `audio-assets`; los volúmenes con
   archivos clínicos (`api_storage`, `minio_data`) llevan `com.alovida.backup=required`. Es una declaración
   para la herramienta de respaldo del servidor: **el respaldo en sí sigue siendo de operaciones (M1)**.
-- **CL-25/ID-09/D-BR09-3 (modelo v4.2.28–v4.2.30).** La API declara los conceptos nuevos con la misma clave
-  que `M7_CATALOGS` (mismos ids: `model-shared-concepts.spec.ts` los fija contra los del paquete) y el
-  enum `jurisdiction` publica los 9 SEDES. **No** se declararon en `dynamic-enum-catalog.ts` los tres enums
-  de cuidados/documentos: los publica el paquete del modelo con sus bindings, y declararlos también acá
-  dejaría dos enumeraciones gobernando el mismo campo (el defecto que `dynamic-enum-catalog.spec.ts`
-  prohíbe). Consecuencia: `GET /system-context/dynamic-enums?target=chart.care_plans.intent_concept_id`
-  responde sólo en un entorno con el paquete de seeds cargado.
+- **CL-25/ID-09 (modelo v4.2.28–v4.2.30).** La API declara los conceptos nuevos con la misma clave que
+  `M7_CATALOGS` (mismos ids: `model-shared-concepts.spec.ts` los fija contra los del paquete), el enum
+  `jurisdiction` publica los 9 SEDES y `dynamic-enum-catalog.ts` declara los tres enums de cuidados y
+  documentos. **Hallazgo:** el paquete de seeds del modelo también define `VS_CARE_PLAN_*`/`VS_DOCUMENT_CATEGORY`
+  con su enumeración y su amarre, pero con el estado genérico `ACTIVE` y no con `ENUM_DEF_ACTIVE`/`ENUM_BIND_ACTIVE`,
+  que es lo que filtra `GET /system-context/dynamic-enums`: contra una base con el paquete cargado y sin la
+  declaración de la API, el endpoint respondía 404 (verificado; ocurre con las 48 enumeraciones del paquete, no
+  sólo con éstas). **Pedido a M1/modelo:** que `gen_seeds.py` emita los estados que la API espera, o que el
+  paquete deje de sembrar enumeraciones que la API ya declara. Mientras tanto la declaración de la API es la que
+  responde, y con o sin el paquete el resultado es el mismo.
 - **ID-10.** `issuingCityText` (columna nueva) e `issuingCountryConceptId` (existía sin exponer) en el alta
   propia, la edición, la ficha y el alta del profesional. Sin validación de pertenencia a `VS_COUNTRY`: la FK
   a `catalog_concepts` responde 422 ante un id inexistente.

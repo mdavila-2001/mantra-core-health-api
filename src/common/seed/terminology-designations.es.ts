@@ -4176,6 +4176,129 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
         'El documento queda visible únicamente para el equipo que atiende.',
     },
   ],
+  [
+    CHART.CAREPLAN_INTENT_PLAN,
+    {
+      display: 'Plan',
+      definition: 'El plan de cuidados que se propone seguir.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_PROPOSAL,
+    {
+      display: 'Propuesta',
+      definition:
+        'Un plan sugerido que todavía nadie se comprometió a cumplir.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_ORDER,
+    {
+      display: 'Indicación',
+      definition: 'Un plan que el profesional indica y espera que se cumpla.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_OPTION,
+    {
+      display: 'Opción',
+      definition: 'Un plan posible entre varios, a elección de la persona.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_DEFAULT,
+    {
+      display: 'Actividad general',
+      definition:
+        'Un paso del plan que no encaja en ninguna clase más específica.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_CONTROL,
+    {
+      display: 'Control clínico',
+      definition: 'Un control de seguimiento con el profesional.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_STUDY,
+    {
+      display: 'Estudio o laboratorio',
+      definition: 'Un estudio de laboratorio o de imagen que hay que hacerse.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_TREATMENT,
+    {
+      display: 'Tratamiento',
+      definition: 'Una terapia o medicación que la persona debe seguir.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_EDUCATION,
+    {
+      display: 'Educación de la persona',
+      definition:
+        'Una indicación de cuidado o hábito que la persona debe aprender.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_REFERRAL,
+    {
+      display: 'Derivación',
+      definition: 'Enviar a la persona a otro profesional o servicio.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_GENERAL,
+    {
+      display: 'Documento general',
+      definition: 'Un documento del expediente sin categoría específica.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_REPORT,
+    {
+      display: 'Informe clínico',
+      definition: 'Un informe redactado por un profesional sobre la atención.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_LAB,
+    {
+      display: 'Resultado de laboratorio',
+      definition: 'El resultado de un análisis de laboratorio.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_IMAGING,
+    {
+      display: 'Estudio de imagen',
+      definition: 'Un estudio de imagenología y su informe.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_CONSENT,
+    {
+      display: 'Consentimiento informado',
+      definition:
+        'La constancia de que la persona aceptó un procedimiento tras ser informada.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_CERTIFICATE,
+    {
+      display: 'Certificado',
+      definition: 'Una constancia emitida por el profesional.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_DISCHARGE,
+    {
+      display: 'Epicrisis o alta',
+      definition: 'El resumen de una internación al darse de alta.',
+    },
+  ],
 ];
 
 /**

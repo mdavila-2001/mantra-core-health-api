@@ -1266,6 +1266,62 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: CHART.RELEASE_NOT_RELEASED,
     targets: ['chart.clinical_note_headers.patient_release_status_concept_id'],
   },
+  /* --- BR-16 (CL-25): plan de cuidados y categoría documental ---------------
+     Los tres selectores del expediente. El paquete de seeds del modelo (v4.2.30)
+     también define `VS_CARE_PLAN_INTENT`, `VS_CARE_PLAN_ACTIVITY` y
+     `VS_DOCUMENT_CATEGORY`, pero sus filas de enumeración y de amarre llevan el
+     estado genérico `ACTIVE`, no `ENUM_DEF_ACTIVE`/`ENUM_BIND_ACTIVE` que
+     `GET /system-context/dynamic-enums` filtra: sin esta declaración el endpoint
+     respondía 404 aunque el paquete estuviera cargado (verificado contra una
+     base con el paquete, `cl25-catalogos-de-cuidados.int-spec.ts`). Los
+     conceptos son los mismos ids que el paquete (misma clave). */
+  {
+    code: 'care-plan-intent',
+    name: 'Intención del plan de cuidados',
+    description:
+      'Qué clase de plan es: un plan, una propuesta, una indicación o una opción (subconjunto de CarePlan.intent de HL7 FHIR R4).',
+    concepts: [
+      CHART.CAREPLAN_INTENT_PLAN,
+      CHART.CAREPLAN_INTENT_PROPOSAL,
+      CHART.CAREPLAN_INTENT_ORDER,
+      CHART.CAREPLAN_INTENT_OPTION,
+    ],
+    defaultConceptId: CHART.CAREPLAN_INTENT_PLAN,
+    targets: ['chart.care_plans.intent_concept_id'],
+  },
+  {
+    code: 'care-plan-activity-class',
+    name: 'Clase de actividad del plan de cuidados',
+    description:
+      'Qué clase de paso es: control, estudio, tratamiento, educación o derivación, más la clase general por defecto.',
+    concepts: [
+      CHART.ACTIVITY_DEFAULT,
+      CHART.ACTIVITY_CLASS_CONTROL,
+      CHART.ACTIVITY_CLASS_STUDY,
+      CHART.ACTIVITY_CLASS_TREATMENT,
+      CHART.ACTIVITY_CLASS_EDUCATION,
+      CHART.ACTIVITY_CLASS_REFERRAL,
+    ],
+    defaultConceptId: CHART.ACTIVITY_DEFAULT,
+    targets: ['chart.care_plan_activities.activity_concept_id'],
+  },
+  {
+    code: 'document-category',
+    name: 'Categoría documental',
+    description:
+      'Qué clase de papel es un documento del expediente, más la categoría general por defecto.',
+    concepts: [
+      CHART.DOC_CATEGORY_GENERAL,
+      CHART.DOC_CATEGORY_REPORT,
+      CHART.DOC_CATEGORY_LAB,
+      CHART.DOC_CATEGORY_IMAGING,
+      CHART.DOC_CATEGORY_CONSENT,
+      CHART.DOC_CATEGORY_CERTIFICATE,
+      CHART.DOC_CATEGORY_DISCHARGE,
+    ],
+    defaultConceptId: CHART.DOC_CATEGORY_GENERAL,
+    targets: ['chart.document_records.category_concept_id'],
+  },
   // --- Alta pública de laboratorios y centros de imagenología (BR-09) -------
   // El alta es anónima y sus selectores necesitan los ids de estos conceptos:
   // sin estas enumeraciones el front tendría que hardcodearlos. Se publican por
