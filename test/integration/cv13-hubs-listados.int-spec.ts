@@ -58,19 +58,28 @@ describe('CV-13 · listados de los hubs de administración', () => {
   });
 
   describe('delegated_access', () => {
-    const membershipA = randomUUID();
+    let membershipA = '';
     let membershipB = '';
     const assignmentA = randomUUID();
     const assignmentB = randomUUID();
 
     beforeAll(async () => {
-      await sql(
-        `insert into directory.tenant_memberships
-           (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id,
-            access_scope_concept_id, start_date, created_at, updated_at)
-         values (?, ?, ?, ?, ?, ?, now(), now(), now())`,
-        [membershipA, ctx.adminUserId, SEED.tenantId, CID, CID, CID],
+      // El administrador de pruebas puede tener ya su membresía en el tenant de
+      // la siembra (la suite se puede repetir sobre la misma base).
+      const [existente] = await sql(
+        `select id from directory.tenant_memberships where user_id = ? and tenant_id = ? limit 1`,
+        [ctx.adminUserId, SEED.tenantId],
       );
+      membershipA = existente?.id ?? randomUUID();
+      if (!existente) {
+        await sql(
+          `insert into directory.tenant_memberships
+             (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id,
+              access_scope_concept_id, start_date, created_at, updated_at)
+           values (?, ?, ?, ?, ?, ?, now(), now(), now())`,
+          [membershipA, ctx.adminUserId, SEED.tenantId, CID, CID, CID],
+        );
+      }
       const [row] = await sql(
         `select id from directory.tenant_memberships where tenant_id = ? limit 1`,
         [tenantB],

@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { SEED } from '../../src/common';
+import { CONCEPTS } from '../../src/common';
+import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { PHL } from '../../src/modules/pharma_lab/pharma_lab.concepts';
 
 /**
@@ -16,9 +18,32 @@ describe('BR-26 · pharma_lab existe en la base (AG-30)', () => {
   let ctx: TestContext;
   const http = () => request(ctx.app.getHttpServer());
   let labId = '';
+  let tenantId = '';
+  const sufijo = randomUUID().slice(0, 8);
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    // Un tenant propio por corrida: un tenant sólo puede ser un laboratorio una
+    // vez (409), así que la prueba no puede reusar el de la siembra.
+    const org = await http()
+      .post('/iam/auth/register-organization')
+      .send({
+        organization: {
+          code: `BR26_ORG_${sufijo.toUpperCase()}`,
+          legalName: `Laboratorio BR26 ${sufijo}`,
+          tenantType: 'HOSPITAL',
+          countryConceptId: CONCEPTS.COUNTRY_BO,
+          jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+        },
+        owner: {
+          email: `br26-owner-${sufijo}@example.test`,
+          password: 'S3cret-passw0rd',
+          name: 'Laboratorio',
+          lastName: 'BR26',
+        },
+      })
+      .expect(201);
+    tenantId = org.body.tenantId as string;
   }, 300_000);
 
   afterAll(async () => {
@@ -47,7 +72,7 @@ describe('BR-26 · pharma_lab existe en la base (AG-30)', () => {
       .post('/pharma-labs')
       .set(bearer(ctx.adminToken))
       .send({
-        tenantId: SEED.tenantId,
+        tenantId,
         labTypeConceptId: PHL.LAB_TYPE_PHARMACEUTICAL,
         legalName: 'Laboratorio de prueba BR-26',
       })

@@ -77,6 +77,13 @@ export interface GatewayPinnedPayload {
 /** `client.data` de un socket ya autenticado en este gateway. */
 interface GatewaySocketData {
   user?: AuthenticatedUser;
+  /**
+   * La autenticación del handshake, todavía en curso o ya resuelta. Verificar
+   * que la sesión siga activa va a la base, así que tarda; un cliente que emite
+   * `join:inbox` apenas recibe `connect` llega **antes** de que `user` exista.
+   * Los manejadores esperan esta promesa en vez de descartar el evento.
+   */
+  authenticating?: Promise<void>;
   /** Con qué perfiles se unió este socket (bandeja o hilo), para la presencia. */
   profileIds?: Set<string>;
 }
@@ -138,12 +145,15 @@ export class CommunityMessagingGateway
    * unirse a nada — se corta acá, no en cada mensaje.
    */
   async handleConnection(client: Socket): Promise<void> {
-    try {
-      const user = await this.wsAuth.authenticate(client);
-      (client.data as GatewaySocketData).user = user;
-    } catch {
-      client.disconnect(true);
-    }
+    const data = client.data as GatewaySocketData;
+    data.authenticating = (async () => {
+      try {
+        data.user = await this.wsAuth.authenticate(client);
+      } catch {
+        client.disconnect(true);
+      }
+    })();
+    await data.authenticating;
   }
 
   /**
@@ -166,7 +176,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = await this.usuarioListo(client);
     if (!user || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -196,7 +206,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = await this.usuarioListo(client);
     if (!user || !body?.conversationId || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -457,6 +467,14 @@ export class CommunityMessagingGateway
 
   private usuarioDe(client: Socket): AuthenticatedUser | undefined {
     return (client.data as GatewaySocketData).user;
+  }
+
+  /** El usuario del socket, esperando a que termine la autenticación del handshake. */
+  private async usuarioListo(
+    client: Socket,
+  ): Promise<AuthenticatedUser | undefined> {
+    await (client.data as GatewaySocketData).authenticating;
+    return this.usuarioDe(client);
   }
 
   private salaDeConversacion(conversationId: string): string {

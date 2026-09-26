@@ -160,7 +160,11 @@ describe('CommunitySocialController', () => {
     it('delega la lectura en lote sin repetidos', () => {
       const d = build();
       const actor = { id: 'u' } as any;
-      d.controller.getPosts(`${uuid(1)}, ${uuid(2)},${uuid(1)}`, actor, 'p-1');
+      void d.controller.getPosts(
+        `${uuid(1)}, ${uuid(2)},${uuid(1)}`,
+        actor,
+        'p-1',
+      );
       expect(d.readService.getPostsBatch).toHaveBeenCalledWith(
         [uuid(1), uuid(2)],
         actor,

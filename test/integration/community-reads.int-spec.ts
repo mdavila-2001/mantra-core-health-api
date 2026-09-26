@@ -1,5 +1,11 @@
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  camposObligatoriosDePaciente,
+  identidadProfesional,
+} from './harness';
 import { SEED } from '../../src/common';
 
 /**
@@ -303,13 +309,103 @@ describe('Lecturas de Community (integración)', () => {
 
   describe('reviews', () => {
     it('la review publicada NUNCA arrastra el encuentro clínico ni el paciente', async () => {
-      const profesional = await createProfile('rev-target');
+      // Desde que la reseña exige una atención terminada de quien reseña con
+      // quien se califica, la prueba arma esa atención de verdad: médico,
+      // paciente, relación asistencial, encuentro abierto y cerrado.
+      const PASSWORD = 'S3cret-passw0rd';
+      const claims = (token: string): Record<string, unknown> =>
+        JSON.parse(
+          Buffer.from(token.split('.')[1], 'base64url').toString('utf8'),
+        );
+      const email = `com-rev-med-${u}@example.test`;
+      const alta = await http()
+        .post('/iam/auth/register-practitioner')
+        .send({
+          ...identidadProfesional(email),
+          email,
+          password: PASSWORD,
+          name: 'Reseñado',
+          lastName: 'Prueba',
+          licenseNumber: `LIC-COMREV-${u}`,
+          credentialNumber: `CRED-COMREV-${u}`,
+        })
+        .expect(201);
+      const medicoPerfil = alta.body.practitionerProfileId as string;
+      const loginMedico = await http()
+        .post('/iam/auth/login')
+        .send({ email, password: PASSWORD })
+        .expect(200);
+      const medicoToken = loginMedico.body.accessToken as string;
+      const tenantId = (claims(medicoToken)['tenants'] as string[])[0];
+
+      const nationalId = `COMREV-${u}`;
+      await http()
+        .post('/iam/auth/register-patient')
+        .send({
+          ...(await camposObligatoriosDePaciente(ctx)),
+          nationalId,
+          password: PASSWORD,
+          displayName: 'Paciente que reseña',
+          email: `com-rev-pac-${u}@example.test`,
+        })
+        .expect(201);
+      const loginPaciente = await http()
+        .post('/iam/auth/login')
+        .send({ nationalId, password: PASSWORD })
+        .expect(200);
+      const pacienteToken = loginPaciente.body.accessToken as string;
+      const pacientePerfil = claims(pacienteToken)['pid'] as string;
+
+      const solicitud = await http()
+        .post('/authz/care-relationships/request')
+        .set(bearer(medicoToken))
+        .send({
+          tenantId,
+          patientProfileId: pacientePerfil,
+          relationshipType: 'TREATING',
+          reasonText: 'reseña (integración)',
+        })
+        .expect(201);
+      await http()
+        .post(`/authz/care-relationships/${solicitud.body.id}/respond`)
+        .set(bearer(pacienteToken))
+        .send({ decision: 'ACCEPT' })
+        .expect(200);
+      const checkIn = await http()
+        .post('/clinical/encounters/check-in')
+        .set(bearer(medicoToken))
+        .send({
+          patientProfileId: pacientePerfil,
+          tenantId,
+          // La reseña exige que el encuentro sea con este profesional.
+          primaryPractitionerId: medicoPerfil,
+        })
+        .expect(201);
+      const encounterId = checkIn.body.id as string;
+      await http()
+        .post(`/clinical/encounters/${encounterId}/close`)
+        .set(bearer(medicoToken))
+        .send({})
+        .expect(200);
+
+      // La vitrina del profesional: su `targetId` es el perfil que atendió.
+      const vitrina = await http()
+        .post('/community/public-profiles')
+        .set(auth())
+        .send({
+          tenantId,
+          targetId: medicoPerfil,
+          slug: `int-rev-target-${u}`,
+          displayName: 'Vitrina reseñada',
+        })
+        .expect(201);
+      const profesional = vitrina.body.id as string;
 
       await http()
         .post(`/community/profiles/${profesional}/reviews`)
-        .set(auth())
+        .set(bearer(pacienteToken))
         .send({
-          reviewerPatientProfileId: ctx.patientSubtypeId,
+          verifiedEncounterId: encounterId,
           overallRating: 5,
           reviewText: 'excelente atención',
         })
@@ -320,10 +416,12 @@ describe('Lecturas de Community (integración)', () => {
         .set(auth())
         .expect(200);
 
+      expect(res.body.items).toHaveLength(1);
       const serializado = JSON.stringify(res.body);
       expect(serializado).not.toContain('verifiedEncounterId');
       expect(serializado).not.toContain('reviewerPatientProfileId');
-      expect(serializado).not.toContain(ctx.patientSubtypeId);
+      expect(serializado).not.toContain(pacientePerfil);
+      expect(serializado).not.toContain(encounterId);
     });
   });
 
@@ -347,6 +445,9 @@ describe('Lecturas de Community (integración)', () => {
       // 1. Descubrimiento: es lo que el worker consulta cada tick.
       const pending = await http()
         .get('/internal/community/feed/pending')
+        // La base acumula posts sin repartir de otras corridas: se pide el tope
+        // del endpoint para que el nuestro no quede fuera de la primera página.
+        .query({ limit: 500 })
         .set(auth())
         .expect(200);
       const item = (

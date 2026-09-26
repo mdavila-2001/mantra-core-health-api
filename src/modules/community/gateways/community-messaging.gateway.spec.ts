@@ -79,10 +79,86 @@ function build() {
     conversationsRepo,
     presence,
     visibility,
+    wsAuth,
   };
 }
 
 describe('CommunityMessagingGateway', () => {
+  describe('el primer evento tras conectar (carrera con la autenticación)', () => {
+    /** Un socket recién conectado: sin `user` todavía, con la autenticación en curso. */
+    function socketSinAutenticar() {
+      const { client } = socket();
+      (client.data as { user?: unknown }).user = undefined;
+      return client;
+    }
+
+    it('join:inbox emitido antes de que termine la autenticación no se pierde', async () => {
+      const d = build();
+      let resolver!: (u: unknown) => void;
+      d.wsAuth.authenticate.mockReturnValue(
+        new Promise((resolve) => {
+          resolver = resolve;
+        }),
+      );
+      const client = socketSinAutenticar();
+
+      const conexion = d.gateway.handleConnection(client as any);
+      // El cliente emite apenas recibe `connect`: la verificación de la sesión
+      // (que va a la base) todavía no volvió.
+      const union = d.gateway.handleJoinInbox(client as any, {
+        profileId: 'p-1',
+      });
+      resolver(user);
+      await conexion;
+      await union;
+
+      expect(client.join).toHaveBeenCalledWith('profile:p-1');
+      expect(client.emit).not.toHaveBeenCalledWith('error', expect.anything());
+    });
+
+    it('join:conversation esperando la autenticación responde el error de siempre si el perfil es ajeno', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(new Error('ajeno'));
+      let resolver!: (u: unknown) => void;
+      d.wsAuth.authenticate.mockReturnValue(
+        new Promise((resolve) => {
+          resolver = resolve;
+        }),
+      );
+      const client = socketSinAutenticar();
+
+      const conexion = d.gateway.handleConnection(client as any);
+      const union = d.gateway.handleJoinConversation(client as any, {
+        conversationId: 'c-1',
+        profileId: 'p-ajeno',
+      });
+      resolver(user);
+      await conexion;
+      await union;
+
+      expect(client.emit).toHaveBeenCalledWith('error', {
+        code: 'NOT_OWN_PROFILE',
+        event: 'join:conversation',
+      });
+    });
+
+    it('si la autenticación falla, el socket se corta y el evento no une a nada', async () => {
+      const d = build();
+      d.wsAuth.authenticate.mockRejectedValue(new Error('token inválido'));
+      const client = socketSinAutenticar();
+
+      const conexion = d.gateway.handleConnection(client as any);
+      const union = d.gateway.handleJoinInbox(client as any, {
+        profileId: 'p-1',
+      });
+      await conexion;
+      await union;
+
+      expect(client.disconnect).toHaveBeenCalledWith(true);
+      expect(client.join).not.toHaveBeenCalled();
+    });
+  });
+
   describe('typing (F4.1)', () => {
     it('reemite «escribiendo» a los demás del hilo, sin tocar la base', () => {
       const d = build();
