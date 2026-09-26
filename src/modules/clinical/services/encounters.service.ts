@@ -24,7 +24,11 @@ import { ClinicalReadService } from './clinical-read.service';
 // P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
 // calcado de `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
-import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
+import {
+  OwnerType,
+  type FileLinkResponseDto,
+  type LinkedFilePageDto,
+} from '../../common/dto';
 
 /**
  * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
@@ -98,6 +102,30 @@ export class EncountersService {
       dto.fileId,
       { ownerType: OwnerType.ENCOUNTER, ownerId: encounter.id },
       actor,
+    );
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de un encuentro, por la ruta clínica. 404
+   * antes de autorizar; listar es leer la historia (`assertPuedeLeerHistoria`).
+   */
+  async listAttachments(
+    encounterId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    const encounter = await this.encountersRepo.findById(this.em, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    await this.clinicalRead.assertPuedeLeerHistoria(
+      encounter.patientProfileId,
+      actor,
+    );
+    return this.filesService.listLinkedFilesOf(
+      OwnerType.ENCOUNTER,
+      encounter.id,
     );
   }
 

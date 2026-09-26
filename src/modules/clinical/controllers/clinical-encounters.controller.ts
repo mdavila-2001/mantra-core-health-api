@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import type { FileLinkResponseDto } from '../../common/dto';
+import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { CareEpisodesService, EncountersService } from '../services';
 import {
   AttachFileToEncounterDto,
@@ -115,5 +116,19 @@ export class ClinicalEncountersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<FileLinkResponseDto> {
     return this.encountersService.attachFile(id, dto, actor);
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de un encuentro. El titular también los
+   * lee (`PATIENT` en el handler): la política de lectura la aplica el servicio.
+   */
+  @Get('encounters/:id/attachments')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'Listar los adjuntos de un encuentro' })
+  listEncounterAttachments(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    return this.encountersService.listAttachments(id, actor);
   }
 }

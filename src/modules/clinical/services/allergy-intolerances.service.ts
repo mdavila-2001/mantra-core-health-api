@@ -20,7 +20,11 @@ import { CLIN } from '../clinical.concepts';
 // P25 (BR-11): adjuntar un archivo ya subido a una alergia puntual, calcado de
 // `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
-import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
+import {
+  OwnerType,
+  type FileLinkResponseDto,
+  type LinkedFilePageDto,
+} from '../../common/dto';
 import { ClinicalReadService } from './clinical-read.service';
 
 /** UC-08-09: registro de alergias/intolerancias con reacciones (CDS). */
@@ -180,6 +184,30 @@ export class AllergyIntolerancesService {
       dto.fileId,
       { ownerType: OwnerType.ALLERGY_INTOLERANCE, ownerId: allergy.id },
       actor,
+    );
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de una alergia, por la ruta clínica. 404
+   * antes de autorizar; listar es leer la historia (`assertPuedeLeerHistoria`).
+   */
+  async listAttachments(
+    allergyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    const allergy = await this.allergyRepo.findById(this.em, allergyId);
+    if (!allergy) {
+      throw new ResourceNotFoundException('Alergia no encontrada', {
+        allergyId,
+      });
+    }
+    await this.clinicalRead.assertPuedeLeerHistoria(
+      allergy.patientProfileId,
+      actor,
+    );
+    return this.filesService.listLinkedFilesOf(
+      OwnerType.ALLERGY_INTOLERANCE,
+      allergy.id,
     );
   }
 }

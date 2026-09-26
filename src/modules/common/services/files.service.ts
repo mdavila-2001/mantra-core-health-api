@@ -41,6 +41,7 @@ import {
   LinkedFilePageDto,
   LinkedFileResponseDto,
   ListFileLinksQueryDto,
+  OwnerType,
   PendingScanResponseDto,
   ScanResult,
   ScanResultDto,
@@ -682,29 +683,48 @@ export class FilesService {
     // BR-11 §1.C: este listado no recibe al actor y no puede evaluar la
     // política de la historia clínica. Para los tipos clínicos nuevos (P25)
     // se cierra acá, antes de leer nada: el front los lista por la ruta del
-    // recurso. Sumar tres tipos clínicos a un listado sin control sería
-    // ampliar el IDOR, no cerrarlo.
+    // recurso (`GET /clinical/…/:id/attachments`), que sí autoriza por el
+    // paciente de la fila y llama a `listLinkedFilesOf`. Sumar tres tipos
+    // clínicos a un listado sin control sería ampliar el IDOR, no cerrarlo.
     if (CLINICAL_RECORD_OWNER_TYPES.has(query.ownerType)) {
       throw new ForbiddenException(
         'Los adjuntos de la historia clínica se listan por la ruta clínica del recurso, no por el listado genérico.',
       );
     }
+    return this.listLinkedFilesOf(query.ownerType, query.ownerId);
+  }
+
+  /**
+   * UC-02-08 (lectura), **ya autorizada por quien llama**: los adjuntos de un
+   * recurso cualquiera. Es la mitad sin guarda de {@link listLinkedFiles}, y
+   * existe para que las rutas clínicas puedan listar después de pasar por la
+   * política de la historia (`assertPuedeLeerHistoria`). No se expone en
+   * ningún controlador por sí sola.
+   *
+   * @param ownerType - Tipo de dueño del recurso.
+   * @param ownerId - Identificador del recurso.
+   * @returns Los adjuntos vigentes, del más reciente al más antiguo.
+   */
+  async listLinkedFilesOf(
+    ownerType: OwnerType,
+    ownerId: string,
+  ): Promise<LinkedFilePageDto> {
     this.logger.info(
       {
         operation: 'common.fileLink.list',
-        ownerType: query.ownerType,
-        ownerId: query.ownerId,
+        ownerType,
+        ownerId,
       },
       'Listing linked files',
     );
 
     const forked = this.em.fork();
-    const ownerTypeConceptId = CONCEPTS[`OWNER_${query.ownerType}`];
+    const ownerTypeConceptId = CONCEPTS[`OWNER_${ownerType}`];
 
     const links = await this.fileLinksRepo.findByOwner(
       forked,
       ownerTypeConceptId,
-      query.ownerId,
+      ownerId,
       LINKED_FILES_PAGE_SIZE,
     );
 
@@ -735,7 +755,7 @@ export class FilesService {
     const items: LinkedFileResponseDto[] = vivos.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
-      ownerType: query.ownerType,
+      ownerType,
       linkedAt: link.createdAt,
       file: this.fileToResponse(
         file,

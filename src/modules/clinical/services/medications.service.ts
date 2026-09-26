@@ -35,7 +35,11 @@ import { AUD } from '../../audit/audit.concepts';
 // P25 (BR-11): adjuntar un archivo ya subido a una receta puntual, calcado de
 // `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
-import { OwnerType, type FileLinkResponseDto } from '../../common/dto';
+import {
+  OwnerType,
+  type FileLinkResponseDto,
+  type LinkedFilePageDto,
+} from '../../common/dto';
 
 /** Recurso sellado en la cadena WORM para cada evento de receta (CAN-AUDIT-001). */
 const RX_AUDIT_ENTITY = 'medication_request';
@@ -169,6 +173,27 @@ export class MedicationsService {
       dto.fileId,
       { ownerType: OwnerType.MEDICATION_REQUEST, ownerId: request.id },
       actor,
+    );
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de una receta, por la ruta clínica. Listar
+   * adjuntos es leer la historia: 404 antes de autorizar, y después la misma
+   * política que el resumen (`assertPuedeLeerHistoria`: titular, quien atiende
+   * o relación asistencial vigente).
+   */
+  async listAttachments(
+    requestId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    const request = await this.loadRequestOrThrow(this.em, requestId);
+    await this.clinicalRead.assertPuedeLeerHistoria(
+      request.patientProfileId,
+      actor,
+    );
+    return this.filesService.listLinkedFilesOf(
+      OwnerType.MEDICATION_REQUEST,
+      request.id,
     );
   }
 

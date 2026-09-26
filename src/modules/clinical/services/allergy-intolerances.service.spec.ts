@@ -41,9 +41,11 @@ function build() {
   };
   const filesService = {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+    listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
   };
   const service = new AllergyIntolerancesService(
     em as any,
@@ -177,6 +179,46 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
   });
 
   // P25 / CL-05 — adjuntos de la alergia, calcados de `procedures`.
+  // P25 / BR-11 §1.C — listar adjuntos es leer la historia.
+  describe('listAttachments (P25)', () => {
+    it('lista por la ruta clínica tras la política de lectura del paciente de la fila', async () => {
+      const d = build();
+      d.allergyRepo.findById.mockResolvedValue({
+        id: 'alg1',
+        patientProfileId: 'p1',
+      });
+      const res = await d.service.listAttachments('alg1', actor);
+      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.listLinkedFilesOf).toHaveBeenCalledWith(
+        OwnerType.ALLERGY_INTOLERANCE,
+        'alg1',
+      );
+      expect(res).toEqual({ items: [], count: 0 });
+    });
+
+    it('responde 404 antes de autorizar y no lista nada sin acceso', async () => {
+      const d = build();
+      d.allergyRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.listAttachments('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      d.allergyRepo.findById.mockResolvedValue({
+        id: 'alg1',
+        patientProfileId: 'p1',
+      });
+      d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+        new Error('403'),
+      );
+      await expect(d.service.listAttachments('alg1', actor)).rejects.toThrow(
+        '403',
+      );
+      expect(d.filesService.listLinkedFilesOf).not.toHaveBeenCalled();
+    });
+  });
+
   describe('attachFile (P25)', () => {
     it('liga el archivo a la alergia con OWNER_ALLERGY_INTOLERANCE tras autorizar por el paciente de la fila', async () => {
       const d = build();

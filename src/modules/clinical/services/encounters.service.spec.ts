@@ -54,10 +54,12 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
   };
   // P25: adjuntos del encuentro.
   const filesService = {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+    listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
   const service = new EncountersService(
     em as any,
@@ -100,6 +102,32 @@ const encounter = () => ({
 
 describe('EncountersService', () => {
   // P25 / CL-05 — adjuntos del encuentro por su ruta clínica.
+  // P25 / BR-11 §1.C — listar adjuntos es leer la historia.
+  describe('listAttachments (P25)', () => {
+    it('lista por la ruta clínica tras la política de lectura', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      await d.service.listAttachments('enc1', actor);
+      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.listLinkedFilesOf).toHaveBeenCalledWith(
+        OwnerType.ENCOUNTER,
+        'enc1',
+      );
+    });
+
+    it('responde 404 cuando el encuentro no existe', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.listAttachments('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.filesService.listLinkedFilesOf).not.toHaveBeenCalled();
+    });
+  });
+
   describe('attachFile (P25)', () => {
     it('liga el archivo con OWNER_ENCOUNTER tras autorizar por el paciente de la fila', async () => {
       const d = build();

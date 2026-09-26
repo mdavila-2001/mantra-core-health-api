@@ -58,10 +58,12 @@ function build() {
   };
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
   };
   // P25: adjuntos de la receta.
   const filesService = {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+    listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
   const service = new MedicationsService(
     em as any,
@@ -304,6 +306,35 @@ describe('MedicationsService', () => {
   });
 
   // P25 / CL-05 — adjuntos de la receta, calcados de `procedures`.
+  // P25 / BR-11 §1.C — listar adjuntos es leer la historia.
+  describe('listAttachments (P25)', () => {
+    it('lista por la ruta clínica tras la política de lectura', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+      });
+      await d.service.listAttachments('mr1', actor);
+      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.listLinkedFilesOf).toHaveBeenCalledWith(
+        OwnerType.MEDICATION_REQUEST,
+        'mr1',
+      );
+    });
+
+    it('responde 404 cuando la receta no existe', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.listAttachments('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.filesService.listLinkedFilesOf).not.toHaveBeenCalled();
+    });
+  });
+
   describe('attachFile (P25)', () => {
     it('liga el archivo con OWNER_MEDICATION_REQUEST tras autorizar por el paciente de la fila', async () => {
       const d = build();

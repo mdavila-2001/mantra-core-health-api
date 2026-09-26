@@ -1,5 +1,5 @@
-$ corepack yarn test --testPathPatterns="clinical|chart|forms|surveys|files.service"   # final, tras prettier
+$ corepack yarn test --testPathPatterns="clinical|chart|forms|surveys|files.service"   # final
 Test Suites: 90 passed, 90 total
-Tests:       1162 passed, 1162 total
-Time:        49.954 s, estimated 57 s
+Tests:       1168 passed, 1168 total
+Time:        49.348 s
 exit=0
