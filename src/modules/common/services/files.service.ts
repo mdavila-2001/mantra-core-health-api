@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
+import {
+  ForbiddenException,
+  GoneException,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 import {
   StoragePublicationService,
   type PublicationContext,
@@ -7,7 +12,7 @@ import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycl
 import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
@@ -629,8 +634,16 @@ export class FilesService {
       throw new ResourceNotFoundException('Versión vigente no encontrada');
     }
     if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
+      // `details.reason` deja que la UI distinga «en análisis» de «infectado» y
+      // de «borrado» (TX-33): los tres eran el mismo 422 sin más datos.
       throw new PreconditionFailedException(
         'La versión vigente no ha superado el escaneo antimalware',
+        {
+          reason:
+            version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED
+              ? 'SCAN_INFECTED'
+              : 'SCAN_PENDING',
+        },
       );
     }
 
@@ -649,6 +662,46 @@ export class FilesService {
       'Download URL generated',
     );
     return { url, expiresAt };
+  }
+
+  /**
+   * Valida la firma de una URL emitida por `generateDownloadUrl` (TX-09).
+   *
+   * Sin `signature` ni `expires` no hay nada que validar: es la lectura por
+   * autoría de siempre. Con alguno de los dos, tienen que venir los tres y
+   * coincidir con el HMAC de `archivo:versión:vencimiento`; una firma ajena o
+   * alterada es 403 y una vencida, 410. Se compara en tiempo constante.
+   *
+   * @param fileId - Archivo que se pide.
+   * @param query - `versionId`, `expires` y `signature` de la URL.
+   * @throws ForbiddenException si falta un campo o la firma no coincide.
+   * @throws GoneException si la URL venció.
+   */
+  assertDownloadSignature(
+    fileId: string,
+    query: { versionId?: string; expires?: string; signature?: string },
+  ): void {
+    if (query.signature === undefined && query.expires === undefined) return;
+    const expiry = Number(query.expires);
+    if (!query.versionId || !query.signature || !Number.isFinite(expiry)) {
+      throw new ForbiddenException('La firma de la URL no es válida');
+    }
+    const expected = createHmac('sha256', downloadUrlSecret())
+      .update(`${fileId}:${query.versionId}:${expiry}`)
+      .digest();
+    const presented = Buffer.from(query.signature, 'hex');
+    if (
+      presented.length !== expected.length ||
+      !timingSafeEqual(presented, expected)
+    ) {
+      throw new ForbiddenException('La firma de la URL no es válida');
+    }
+    if (expiry < Date.now()) {
+      throw new GoneException({
+        message: 'La URL de descarga venció',
+        details: { reason: 'URL_EXPIRED' },
+      });
+    }
   }
 
   /**
