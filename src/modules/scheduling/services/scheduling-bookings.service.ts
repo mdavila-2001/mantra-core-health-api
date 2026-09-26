@@ -44,6 +44,8 @@ import { AppointmentPaymentStates } from '../entities';
 import { CoverageRepository } from '../../insurance/repositories/coverage.repository';
 import { ClaimReadRepository } from '../../insurance/repositories/claim-read.repository';
 import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
+// P43: la reconsulta puede declarar de qué formulario médico cerrado sale.
+import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import {
@@ -84,6 +86,7 @@ import {
   CancelBookingResponseDto,
   CheckInResponseDto,
   WorkerBatchResultDto,
+  BookingFollowUpOriginDto,
   BookingInsuranceClaimDto,
   BookingItemDto,
   BookingStatusReasonDto,
@@ -175,6 +178,14 @@ const PENDING_DECISION_STATES: readonly string[] = [
   SCHED.BOOKING_REQUESTED,
   SCHED.BOOKING_PENDING_CONFIRMATION,
 ];
+
+/** P42: cómo se proyectan los dos lados del vínculo de reconsulta de una cita. */
+interface VinculosDeReconsulta {
+  /** La consulta de origen, o `null` si la cita no es una reconsulta. */
+  followUpOf: (booking: AppointmentBookings) => BookingFollowUpOriginDto | null;
+  /** La reconsulta viva que salió de la cita, o `null`. */
+  followUpBookingId: (booking: AppointmentBookings) => string | null;
+}
 
 const VISIBLE_BOOKING_STATES: readonly string[] = [
   SCHED.BOOKING_REQUESTED,
@@ -368,6 +379,9 @@ export class SchedulingBookingsService {
     // en el cuerpo. La regla vive en `profiles` porque la representación es un
     // dato de perfiles, y este módulo ya importa ese módulo.
     private readonly representation: PatientRepresentationService,
+    // P43 — valida la instancia de formulario de origen de una reconsulta.
+    // Clase sin estado de `forms`, provista suelta en `SchedulingModule`.
+    private readonly formOrigin: FormInstanceOriginValidator,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -975,6 +989,108 @@ export class SchedulingBookingsService {
   }
 
   /**
+   * P42 · Las cuatro reglas de la reconsulta, en el orden del contrato, más la
+   * del formulario de origen (P43).
+   *
+   * 1. **403** — la agenda no es del profesional de la sesión. Vale también
+   *    para quien administra agendas: la reconsulta la agenda quien atendió.
+   * 2. **404** — la cita de origen no existe.
+   * 3. **422** — el paciente no es el de esa cita, o `startAt` no es futuro.
+   * 4. **409** — esa consulta ya tiene una reconsulta por venir y no
+   *    cancelada. Una ya pasada no bloquea.
+   * 5. **422** (P43) — `formInstanceId` no existe, no está cerrada o es de
+   *    otro encuentro que el de la consulta de origen.
+   *
+   * La unicidad es de la escritura, no de un `if` previo: la cita de origen se
+   * lee con `SELECT … FOR UPDATE`, así que dos peticiones simultáneas con el
+   * mismo origen se serializan y la segunda ya ve la reconsulta de la primera.
+   *
+   * @param tx - Transacción de la cita directa.
+   * @param dto - Cuerpo con `followUpOf`.
+   * @param startAt - Inicio pedido, ya parseado.
+   * @param esSuAgenda - Si el recurso es la agenda del profesional de la sesión.
+   * @returns La cita de origen (bloqueada) y el encuentro que la atendió.
+   */
+  private async validarReconsulta(
+    tx: EntityManager,
+    dto: CreateDirectAppointmentDto,
+    startAt: Date,
+    esSuAgenda: boolean,
+  ): Promise<{
+    origen: AppointmentBookings;
+    encuentroDeOrigen: string | null;
+  }> {
+    const pedido = dto.followUpOf!;
+    if (!esSuAgenda) {
+      throw new ForbiddenException(
+        'La reconsulta se agenda en tu propia agenda, no en la de otro profesional.',
+      );
+    }
+
+    const origen = await this.bookingsRepo.findBookingByIdForUpdate(
+      tx,
+      pedido.bookingId,
+    );
+    if (!origen) {
+      throw new ResourceNotFoundException(
+        'La cita de la que sale esta reconsulta no existe',
+        { bookingId: pedido.bookingId },
+      );
+    }
+    if (origen.patientProfileId !== dto.patientProfileId) {
+      throw new PreconditionFailedException(
+        'La reconsulta es para el paciente de la cita de origen',
+        { bookingId: origen.id, reason: 'FOLLOW_UP_PATIENT_MISMATCH' },
+      );
+    }
+    const ahora = new Date();
+    if (startAt.getTime() <= ahora.getTime()) {
+      throw new PreconditionFailedException(
+        'Una reconsulta se agenda para más adelante',
+        { startAt: dto.startAt, reason: 'FOLLOW_UP_NOT_FUTURE' },
+      );
+    }
+
+    const vivas = await this.bookingsRepo.findFollowUpsOf(
+      tx,
+      [origen.id],
+      VISIBLE_BOOKING_STATES,
+    );
+    const porVenir = vivas.find(
+      ({ slot }) => slot !== null && slot.startAt.getTime() > ahora.getTime(),
+    );
+    if (porVenir) {
+      throw new ConflictException(
+        'Esta consulta ya tiene una reconsulta agendada',
+        {
+          bookingId: porVenir.booking.id,
+          startAt: porVenir.slot!.startAt.toISOString(),
+        },
+      );
+    }
+
+    // El encuentro de origen lo dice la base (cita → encuentro), no el
+    // cliente: es contra él que se valida el formulario (P43).
+    const encuentroDeOrigen =
+      origen.appointmentId == null
+        ? null
+        : ((
+            await this.encountersRepo.findLatestIdsByAppointmentIds(tx, [
+              origen.appointmentId,
+            ])
+          ).get(origen.appointmentId) ?? null);
+
+    if (pedido.formInstanceId !== undefined) {
+      await this.formOrigin.assertUsableOrigin(
+        tx,
+        pedido.formInstanceId,
+        encuentroDeOrigen,
+      );
+    }
+    return { origen, encuentroDeOrigen };
+  }
+
+  /**
    * El cuerpo transaccional de {@link createDirectAppointment}, para casos de
    * uso que ya abrieron su propia transacción (el mostrador atómico, AC-3.3).
    *
@@ -1032,6 +1148,13 @@ export class SchedulingBookingsService {
         'Un profesional solo puede asignar citas en su propia agenda.',
       );
     }
+
+    // P42 · La reconsulta: sus cuatro rechazos corren SÓLO cuando viene
+    // `followUpOf`; sin él la cita puntual sigue exactamente como antes.
+    const reconsulta =
+      dto.followUpOf === undefined
+        ? undefined
+        : await this.validarReconsulta(tx, dto, startAt, esSuAgenda);
 
     // El gating del vínculo, heredado: comprometer un turno en una
     // organización exige que el vínculo siga vigente — misma regla que
@@ -1125,6 +1248,10 @@ export class SchedulingBookingsService {
       ...(dto.channel === undefined
         ? {}
         : { channelConceptId: APPOINTMENT_CHANNEL_CONCEPT[dto.channel] }),
+      // P42: la reconsulta se clasifica como tal; el resto, como hasta hoy.
+      ...(reconsulta === undefined
+        ? {}
+        : { typeConceptId: CLIN.ACTIVITY_FOLLOW_UP }),
       actorUserId: actor.id,
     });
     await tx.flush();
@@ -1149,6 +1276,12 @@ export class SchedulingBookingsService {
         capturedAt: new Date().toISOString(),
       },
       reasonText: dto.reasonText,
+      ...(reconsulta === undefined
+        ? {}
+        : {
+            followUpOfBookingId: reconsulta.origen.id,
+            formInstanceId: dto.followUpOf?.formInstanceId,
+          }),
       actorUserId: actor.id,
     });
     await tx.flush();
@@ -2883,6 +3016,12 @@ export class SchedulingBookingsService {
         ? await this.solicitudesDeSeguroPorCita(em, idsDeCitas)
         : new Map<string, BookingInsuranceClaimDto>();
 
+    // P42: los dos lados del vínculo de reconsulta, en lote para la página.
+    const reconsultas = await this.vinculosDeReconsulta(
+      em,
+      page.map(({ booking }) => booking),
+    );
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -2906,6 +3045,7 @@ export class SchedulingBookingsService {
             : encuentros.get(booking.appointmentId),
           solicitudes,
           pacientesRepresentados,
+          reconsultas,
         ),
       ),
       count: page.length,
@@ -3025,6 +3165,8 @@ export class SchedulingBookingsService {
         : encuentros.get(booking.appointmentId),
       undefined,
       pacientesRepresentados,
+      // P42: el detalle dice lo mismo que el listado; lote de uno.
+      await this.vinculosDeReconsulta(em, [booking]),
     );
   }
 
@@ -3036,6 +3178,80 @@ export class SchedulingBookingsService {
    * uno y olvidarlo en el otro hacía que el detalle contradijera a la fila que
    * lo abrió.
    */
+  /**
+   * P42 · Los dos lados del vínculo de reconsulta de un lote de citas.
+   *
+   * `followUpOf` sale de la columna de la propia cita, con el instante del
+   * origen y su encuentro resueltos acá —una consulta por salto, no una por
+   * fila—. `followUpBookingId` se DERIVA: la reconsulta viva (estados
+   * visibles: ni cancelada ni ausente) más reciente que apunta a la cita. El
+   * vínculo se guarda en un solo lado para que no haya dos verdades.
+   *
+   * @param em - Contexto de persistencia.
+   * @param bookings - Citas a proyectar.
+   * @returns Dos funciones de proyección por cita.
+   */
+  private async vinculosDeReconsulta(
+    em: EntityManager,
+    bookings: readonly AppointmentBookings[],
+  ): Promise<VinculosDeReconsulta> {
+    const idsDeOrigen = [
+      ...new Set(
+        bookings
+          .map((b) => b.followUpOfBookingId)
+          .filter((id): id is string => id != null),
+      ),
+    ];
+    const origenes = await this.bookingsRepo.findBookingsWithSlotsByIds(
+      em,
+      idsDeOrigen,
+    );
+    const origenPorId = new Map(origenes.map((o) => [o.booking.id, o]));
+    const citasDeOrigen = [
+      ...new Set(
+        origenes
+          .map(({ booking }) => booking.appointmentId)
+          .filter((id): id is string => id != null),
+      ),
+    ];
+    const encuentros = await this.encountersRepo.findLatestIdsByAppointmentIds(
+      em,
+      citasDeOrigen,
+    );
+
+    const hijas = await this.bookingsRepo.findFollowUpsOf(
+      em,
+      bookings.map((b) => b.id),
+      VISIBLE_BOOKING_STATES,
+    );
+    // Vienen de la más reciente a la más antigua: la primera por origen gana.
+    const reconsultaPorOrigen = new Map<string, string>();
+    for (const { booking } of hijas) {
+      const origen = booking.followUpOfBookingId;
+      if (origen != null && !reconsultaPorOrigen.has(origen)) {
+        reconsultaPorOrigen.set(origen, booking.id);
+      }
+    }
+
+    return {
+      followUpOf: (booking) => {
+        if (booking.followUpOfBookingId == null) return null;
+        const origen = origenPorId.get(booking.followUpOfBookingId);
+        const cita = origen?.booking.appointmentId;
+        return {
+          bookingId: booking.followUpOfBookingId,
+          encounterId: cita == null ? null : (encuentros.get(cita) ?? null),
+          startAt: origen?.slot?.startAt ?? null,
+          ...(booking.formInstanceId == null
+            ? {}
+            : { formInstanceId: booking.formInstanceId }),
+        };
+      },
+      followUpBookingId: (booking) =>
+        reconsultaPorOrigen.get(booking.id) ?? null,
+    };
+  }
+
   /**
    * La solicitud de seguro más reciente de cada cita, indexada por `appointmentId`.
    *
@@ -3104,6 +3320,7 @@ export class SchedulingBookingsService {
     encuentroDeLaCita?: string,
     solicitudPorCita?: Map<string, BookingInsuranceClaimDto>,
     pacientesRepresentados?: ReadonlySet<string>,
+    reconsultas?: VinculosDeReconsulta,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -3194,6 +3411,21 @@ export class SchedulingBookingsService {
       // bloque— y sin ella la agenda del día no puede pintar una operación
       // distinto de una consulta. El motivo de consulta, que sí lo es, sigue
       // con su regla de arriba.
+      // P42: el vínculo de reconsulta, con la misma compuerta que el nombre y
+      // el motivo. Ausente = «no te corresponde verlo»; `null` = «se buscó y
+      // no hay».
+      ...(reconsultas !== undefined &&
+      puedeVerElMotivoDeLaCita(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
+        ? {
+            followUpOf: reconsultas.followUpOf(booking),
+            followUpBookingId: reconsultas.followUpBookingId(booking),
+          }
+        : {}),
       ...(tipoDeLaCita === undefined ? {} : { typeConceptId: tipoDeLaCita }),
       ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
       statusReason: aStatusReason(motivo),
@@ -3251,6 +3483,8 @@ export class SchedulingBookingsService {
        * un valor que nadie eligió.
        */
       channelConceptId?: string;
+      /** Tipología (P42: la reconsulta nace `ACT_FOLLOW_UP`). Ausente = NULL. */
+      typeConceptId?: string;
       actorUserId?: string;
     },
   ): Appointments {
@@ -3273,6 +3507,9 @@ export class SchedulingBookingsService {
       ...(datos.channelConceptId === undefined
         ? {}
         : { channelConceptId: datos.channelConceptId }),
+      ...(datos.typeConceptId === undefined
+        ? {}
+        : { typeConceptId: datos.typeConceptId }),
       ...(datos.actorUserId === undefined
         ? {}
         : { actorUserId: datos.actorUserId }),

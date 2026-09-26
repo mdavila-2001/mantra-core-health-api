@@ -19,6 +19,9 @@ export class DiagnosticOrderSummaryDto {
   /** Encuentro en el que se pidió, si se pidió durante uno. */
   @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
 
+  /** P43: instancia del formulario médico de la que salió la orden, si salió de uno. */
+  @ApiPropertyOptional({ format: 'uuid' }) formInstanceId?: string;
+
   /** Qué se pidió (concept id). */
   @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
 

@@ -68,6 +68,9 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
 // criterio que ya usa `ClinicalModule` (no se importa `AuditModule` entero:
 // no exporta este repositorio).
 import { DataAccessLogRepository } from '../audit/repositories';
+// P43 — el plan de cuidado puede declarar de qué formulario médico cerrado
+// sale. Mismo criterio: clase sin estado de `forms`, provista suelta.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -103,6 +106,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     HealthPractitionerProfilesRepository,
     PersonsRepository,
     DataAccessLogRepository,
+    FormInstanceOriginValidator,
     // Servicios
     ChartNotesService,
     ChartDocumentsService,
