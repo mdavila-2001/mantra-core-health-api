@@ -574,6 +574,58 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       await expect(
         c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
       ).rejects.toBeInstanceOf(ForbiddenException);
+      // Se preguntó por los dos propósitos que abren la historia y ninguno concedió.
+      expect(c.pdp.evaluate).toHaveBeenCalledTimes(2);
+    });
+
+    /**
+     * BR-20 / CV-19 · el acceso de emergencia. El grant de `break-the-glass` lleva
+     * propósito EMERGENCY; el PDP compara propósito con propósito, así que la
+     * pregunta por TREATMENT lo deniega. Reproducido contra la API viva el
+     * 2026-09-26 con una médica CLINICAL_APPROVER real: 201 en la emergencia y
+     * 403 al abrir la historia. La lectura tiene que preguntar también por
+     * EMERGENCY.
+     */
+    it('pasa con un acceso de emergencia vigente aunque TREATMENT sea denegado', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
+      c.pdp.evaluate.mockImplementation(async (dto: any) => ({
+        decision: dto.purposeOfUse === 'EMERGENCY' ? 'PERMIT' : 'DENY',
+      }));
+
+      await expect(
+        c.service.assertPuedeLeerHistoria(PACIENTE, actorAutorizado()),
+      ).resolves.toBeUndefined();
+      expect(c.pdp.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientProfileId: PACIENTE,
+          action: 'READ',
+          purposeOfUse: 'EMERGENCY',
+        }),
+        expect.anything(),
+      );
+    });
+
+    it('la escritura también reconoce el acceso de emergencia (el nivel lo decide el PDP)', async () => {
+      const c = build();
+      c.darDeAltaProfesional(MEDICO);
+      c.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: MEDICO,
+      });
+      c.pdp.evaluate.mockImplementation(async (dto: any) => ({
+        decision: dto.purposeOfUse === 'EMERGENCY' ? 'PERMIT' : 'DENY',
+      }));
+
+      await expect(
+        c.service.assertPuedeEscribirHistoria(PACIENTE, actorAutorizado()),
+      ).resolves.toBeUndefined();
+      expect(c.pdp.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'WRITE', purposeOfUse: 'EMERGENCY' }),
+        expect.anything(),
+      );
     });
 
     it('no consulta el PDP sin tenant en el actor', async () => {

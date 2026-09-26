@@ -237,6 +237,26 @@ export class ClinicalReadService {
       return;
     }
 
+    // BR-20 / CV-19: el acceso de emergencia (`break-the-glass`) es un grant con
+    // propósito EMERGENCY y nivel ELEVATED que emite el propio módulo `authz`,
+    // auditado y con ventana corta. El PDP compara propósito con propósito, así
+    // que la pregunta por TREATMENT de arriba lo deja afuera: la médica que
+    // acababa de obtener el 201 de la emergencia seguía recibiendo 403 al abrir
+    // la historia (verificado contra la API viva el 2026-09-26 con una cuenta
+    // CLINICAL_APPROVER real; SUPERADMIN no lo mostraba porque pasa antes). Se
+    // pregunta también por EMERGENCY. No exige `practitionerProfileId`: el grant
+    // se otorga al usuario, no al perfil profesional.
+    if (
+      await this.tieneAccesoAutorizado(
+        patientProfileId,
+        actor,
+        'READ',
+        'EMERGENCY',
+      )
+    ) {
+      return;
+    }
+
     // Sin turno hoy ni autorización vigente no alcanza el rol; queda la
     // titularidad, que además cubre al profesional que lee su propia historia.
     await this.assertOwnRecord(patientProfileId, actor, link);
@@ -300,6 +320,19 @@ export class ClinicalReadService {
       ) {
         return;
       }
+      // Mismo caso que en la lectura: el grant de emergencia (EMERGENCY,
+      // ELEVATED) sólo aparece si se pregunta por su propósito. El nivel lo
+      // sigue decidiendo el PDP (`CLINICAL_LEVEL_RANK`), no este servicio.
+      if (
+        await this.tieneAccesoAutorizado(
+          patientProfileId,
+          actor,
+          'WRITE',
+          'EMERGENCY',
+        )
+      ) {
+        return;
+      }
     }
 
     throw new ForbiddenException(SIN_ACCESO_A_LA_HISTORIA);
@@ -317,6 +350,7 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
     action: 'READ' | 'WRITE' = 'READ',
+    purposeOfUse: 'TREATMENT' | 'EMERGENCY' = 'TREATMENT',
   ): Promise<boolean> {
     const tenantId = actor.tenantIds?.[0];
     if (!tenantId) return false;
@@ -328,7 +362,7 @@ export class ClinicalReadService {
         action,
         patientProfileId,
         practitionerProfileId: actor.practitionerProfileId,
-        purposeOfUse: 'TREATMENT',
+        purposeOfUse,
       },
       actor,
     );
