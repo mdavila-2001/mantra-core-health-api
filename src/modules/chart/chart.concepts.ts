@@ -106,11 +106,46 @@ export const { seeds: CHART_CONCEPT_SEEDS, ids: CHART } = defineModuleConcepts(
       code: 'CP_INTENT_PLAN',
       display: 'Care plan intent: plan',
     },
+    // Las otras tres intenciones del catálogo `VS_CARE_PLAN_INTENT` del modelo
+    // (subconjunto de CarePlan.intent de FHIR R4). Misma clave que el paquete.
+    CAREPLAN_INTENT_PROPOSAL: {
+      code: 'CP_INTENT_PROPOSAL',
+      display: 'Care plan intent: proposal',
+    },
+    CAREPLAN_INTENT_ORDER: {
+      code: 'CP_INTENT_ORDER',
+      display: 'Care plan intent: order',
+    },
+    CAREPLAN_INTENT_OPTION: {
+      code: 'CP_INTENT_OPTION',
+      display: 'Care plan intent: option',
+    },
 
     // --- care_plan_activities: concepto por defecto y estados ------------------
     ACTIVITY_DEFAULT: {
       code: 'CPACT_GENERAL',
       display: 'General care plan activity',
+    },
+    // Clases de actividad del catálogo `VS_CARE_PLAN_ACTIVITY` del modelo.
+    ACTIVITY_CLASS_CONTROL: {
+      code: 'CPACT_CONTROL',
+      display: 'Care plan activity: clinical follow-up',
+    },
+    ACTIVITY_CLASS_STUDY: {
+      code: 'CPACT_STUDY',
+      display: 'Care plan activity: study or laboratory',
+    },
+    ACTIVITY_CLASS_TREATMENT: {
+      code: 'CPACT_TREATMENT',
+      display: 'Care plan activity: treatment',
+    },
+    ACTIVITY_CLASS_EDUCATION: {
+      code: 'CPACT_EDUCATION',
+      display: 'Care plan activity: patient education',
+    },
+    ACTIVITY_CLASS_REFERRAL: {
+      code: 'CPACT_REFERRAL',
+      display: 'Care plan activity: referral',
     },
     ACTIVITY_SCHEDULED: {
       code: 'CPACT_SCHEDULED',
@@ -133,6 +168,31 @@ export const { seeds: CHART_CONCEPT_SEEDS, ids: CHART } = defineModuleConcepts(
     DOC_CATEGORY_GENERAL: {
       code: 'DOC_CAT_GENERAL',
       display: 'General document category',
+    },
+    // Categorías del catálogo `VS_DOCUMENT_CATEGORY` del modelo.
+    DOC_CATEGORY_REPORT: {
+      code: 'DOC_CAT_REPORT',
+      display: 'Document category: clinical report',
+    },
+    DOC_CATEGORY_LAB: {
+      code: 'DOC_CAT_LAB',
+      display: 'Document category: laboratory result',
+    },
+    DOC_CATEGORY_IMAGING: {
+      code: 'DOC_CAT_IMAGING',
+      display: 'Document category: imaging study',
+    },
+    DOC_CATEGORY_CONSENT: {
+      code: 'DOC_CAT_CONSENT',
+      display: 'Document category: informed consent',
+    },
+    DOC_CATEGORY_CERTIFICATE: {
+      code: 'DOC_CAT_CERTIFICATE',
+      display: 'Document category: certificate',
+    },
+    DOC_CATEGORY_DISCHARGE: {
+      code: 'DOC_CAT_DISCHARGE',
+      display: 'Document category: discharge summary',
     },
     DOC_STATUS_ACTIVE: { code: 'DOC_ACTIVE', display: 'Document active' },
     DOC_CONFIDENTIALITY_NORMAL: {

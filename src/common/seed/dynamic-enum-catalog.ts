@@ -373,7 +373,18 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       'Ámbito territorial de la licencia para ejercer. SEDES Santa Cruz es ' +
       'departamental y se suma a la nacional, no la reemplaza: un profesional ' +
       'puede declarar las dos como autorizaciones separadas.',
-    concepts: [PROF.JURISDICTION_NATIONAL, PROF.JURISDICTION_SEDES_SANTA_CRUZ],
+    concepts: [
+      PROF.JURISDICTION_NATIONAL,
+      PROF.JURISDICTION_SEDES_CHUQUISACA,
+      PROF.JURISDICTION_SEDES_LA_PAZ,
+      PROF.JURISDICTION_SEDES_COCHABAMBA,
+      PROF.JURISDICTION_SEDES_ORURO,
+      PROF.JURISDICTION_SEDES_POTOSI,
+      PROF.JURISDICTION_SEDES_TARIJA,
+      PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+      PROF.JURISDICTION_SEDES_BENI,
+      PROF.JURISDICTION_SEDES_PANDO,
+    ],
     defaultConceptId: PROF.JURISDICTION_NATIONAL,
     targets: ['profiles.jurisdiction_authorizations.jurisdiction_concept_id'],
   },

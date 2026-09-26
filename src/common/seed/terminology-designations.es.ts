@@ -4,6 +4,7 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -4024,6 +4025,155 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Farmacia',
       definition:
         'Medicamentos que el plan cubre cuando se retiran con receta.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_CHUQUISACA,
+    {
+      display: 'SEDES Chuquisaca',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Chuquisaca. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_LA_PAZ,
+    {
+      display: 'SEDES La Paz',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de La Paz. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_COCHABAMBA,
+    {
+      display: 'SEDES Cochabamba',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Cochabamba. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_ORURO,
+    {
+      display: 'SEDES Oruro',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Oruro. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_POTOSI,
+    {
+      display: 'SEDES Potosí',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Potosí. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_TARIJA,
+    {
+      display: 'SEDES Tarija',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Tarija. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_BENI,
+    {
+      display: 'SEDES Beni',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Beni. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_PANDO,
+    {
+      display: 'SEDES Pando',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Pando. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition: 'Unidad que procesa análisis de muestras de pacientes.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_IMAGING,
+    {
+      display: 'Centro de imagenología',
+      definition: 'Unidad que realiza estudios de diagnóstico por imágenes.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_LABORATORY,
+    {
+      display: 'Laboratorio',
+      definition: 'Análisis de laboratorio clínico.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_XRAY,
+    {
+      display: 'Rayos X',
+      definition: 'Radiografía convencional.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_ULTRASOUND,
+    {
+      display: 'Ecografía',
+      definition: 'Estudio por ultrasonido.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_CT,
+    {
+      display: 'Tomografía computada',
+      definition: 'Estudio por tomografía axial computada.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MRI,
+    {
+      display: 'Resonancia magnética',
+      definition: 'Estudio por resonancia magnética.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MAMMOGRAPHY,
+    {
+      display: 'Mamografía',
+      definition: 'Estudio por imagen de la mama.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_BONE_DENSITOMETRY,
+    {
+      display: 'Densitometría ósea',
+      definition: 'Medición de la densidad mineral de los huesos.',
+    },
+  ],
+  [
+    CONCEPTS.COUNTRY_BO,
+    {
+      display: 'Bolivia',
+      definition: 'El país donde opera la organización.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PATIENT_VISIBLE,
+    {
+      display: 'Visible para el paciente',
+      definition: 'El titular puede ver este documento en su propia historia.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PROVIDER_ONLY,
+    {
+      display: 'Sólo para el profesional',
+      definition:
+        'El documento queda visible únicamente para el equipo que atiende.',
     },
   ],
 ];
