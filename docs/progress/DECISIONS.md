@@ -203,3 +203,60 @@ y quedó registrada acá con su porqué. Ninguna detuvo el resto del hito.
 - `AuthzCareRelationshipsService.revokeCareRelationship` marcaba **EXPIRED** (y no cerraba la vigencia) a una relación
   sin fin porque `valid_to` llega como `null` y `null <= now` es verdadero. Corregido (`!= null`) con spec de
   regresión. Encontrado reproduciendo contra la base viva.
+
+## H6 (BR-28/BR-29/BR-30) — organización, clínica extendida y contrato de calidad
+
+- **D-BR28-1 (dos caminos de afiliación):** Opción **A** — se mantienen los dos (afiliación por tenant y
+  autoservicio de práctica). No se migró la pantalla existente ni se tocó ningún `@Roles`: es de M2/dueño del
+  carril de organización según el encargo, y unificarlos es un cambio de producto, no un hallazgo de este hito.
+- **D-BR28-2 (quién aprueba la asignación de práctica):** Opción **B** — se mantiene `SECURITY_ADMIN`, el mismo
+  rol que ya exigían `role-assignments.controller.ts:approve/reject/suspend/end`. La lectura nueva
+  (`GET /practices/:practiceId/role-assignments`) hereda ese rol para no abrir un camino de autorización nuevo
+  (administrador de tenant vía membresía) sin que M2 lo revise; documentado como pedido a M2/BR-06 si se quiere
+  D-BR28-2(A).
+- **CV-13/ID-19 (hubs de administración):** cobertura parcial, elegida por presupuesto de la sesión: se cerraron
+  `delegated-permission-sets` (listado acotado a tenant) y `profiles/credentials` (cola de verificación). **NO
+  CUBIERTO** en este hito: `auth-providers` (listado sin secretos), `health-context`, `identity-authorities`/
+  `identity-policies`, y el listado de `practitioner-delegates`/`org-user-assignments`/`access-requests`. Los
+  patrones (repositorio con `findByTenantPage`/`findByStatePage` + cursor keyset por `id`, servicio, DTO,
+  controlador) quedan replicables para quien continúe.
+- **CV-20 (verificación):** se cerró la cola de credenciales (`GET /profiles/credentials?state=`), lectura de
+  plataforma sin tenant (mismo criterio que la propia verificación, `SECURITY_ADMIN`). No se tocó el filtro por
+  tipo de caso de `identity-cases.controller.ts` (fuera del presupuesto de la sesión).
+- **BR-29 §5.1 (`/billing` en la demo):** Opción **(a)** — entra con lecturas (`GET /billing/invoices(/:id)`,
+  `GET /billing/patient-statements`). Ninguna escritura de cobro se tocó ni se expuso.
+- **BR-29 §5.2 (cobertura del paciente):** Opción **(b)** — sólo lectura por el paciente
+  (`GET /patient-coverages/me`) en esta sesión. No se abrió `POST /patient-coverages` al titular: seguiría siendo
+  `BILLING`/`FINANCE` como hoy, porque abrir esa escritura es un cambio de `@Roles` de un endpoint existente sin
+  decisión de producto, y el encargo lo prohíbe sin ese contrato.
+- **BR-29 (rol de facturación/aseguradora):** sin confirmar quién recibe `BILLING`/`FINANCE`/`BILLING_OPERATOR`
+  (nadie los emite hoy, según BR-29 mismo). Las lecturas nuevas de `/billing` se dejaron en `SECURITY_ADMIN` por
+  el mismo motivo que D-BR28-2: no inventar un camino de autorización nuevo. Contrato para M2/BR-06.
+- **D-BR28-3 / CV-25 (geolocalización):** **NO CUBIERTO.** Se investigó ocultar `administration/geolocation` del
+  menú de administración manteniendo la ruta activa detrás de un `canMatch`, y se encontró que
+  `rutasDeSecciones()` (`app.routes.ts`) genera las rutas **desde el mismo array** de `navigation.map.ts`: sacar
+  la sección de ese registro borra la ruta, no sólo el ítem de menú. `SECCIONES_FUERA_DEL_ARBOL`
+  (`access-tree.ts`) no sirve para esto: oculta de un panel de "zonas" del dashboard, no del menú lateral real.
+  Implementar el `canMatch` + una marca "fuera del menú de lanzamiento" que no toque las rutas ya generadas es un
+  cambio de arquitectura de navegación que excede el presupuesto de esta sesión (riesgo real sobre
+  `navigation.service.spec.ts`/`access-tree.spec.ts`, ~4985 pruebas del repo). Se documenta el hallazgo completo
+  para quien lo retome; no se tocó nada de `navigation.map.ts` ni `app.routes.ts`.
+- **TX-24 (CI efectivo):** **BLOQUEADO**, no simulado. El `CLAUDE.md` del propio repo dice "El CI propio está
+  caído; los `check-*.mjs` se corren a mano" — no hay runner self-hosted disponible en este sandbox ni forma de
+  levantar uno sin acceso de infraestructura (dueño M1). No se tocó `.github/workflows/*`.
+- **TX-25 (suite real e2e con SSR + nginx + límite de tasa):** **BLOQUEADO** por presupuesto de RAM (regla 70,
+  ~2 GB compartidos con H4/H5) y de tiempo: requiere un tercer stack completo (build `production-api`, nginx,
+  Postgres con seeds completos) además del ya levantado para H6. No se ejecutó `run-recorrido-real.mjs`.
+- **TX-27 (N+1):** **NO CUBIERTO** en esta sesión (se priorizó el backend de BR-28/BR-29 y el request-id). Ninguna
+  lectura en lote nueva se agregó del lado de la API para las 5 pantallas señaladas.
+- **Hallazgo de seguridad del propio carril (fuera de BR-28/BR-29, corregido en la misma sesión):** un aviso
+  automático de revisión detectó que `InvoicesService.listByPractice`/`getDetail` y
+  `PatientStatementsService.listByPractice` (agregados para CV-12) aceptaban el `practiceId` de la query sin
+  verificar que perteneciera al tenant del actor — cualquier UUID de otra organización devolvía sus facturas o su
+  estado de cuenta (IDOR). Corregido con el mismo patrón que
+  `PracticeWorkforceService.listPracticeAssignments`/`PracticeOrganizationReadService.getConsole`:
+  `PracticeTenantLookupService.findTenantOfPractice` (puerto de lectura ya exportado por `PracticeModule`) antes
+  de cualquier consulta, 404 sin distinguir "no existe" de "es de otro tenant". Verificado con specs unitarios
+  (aislamiento) y con `test/integration/admin-listados.int-spec.ts` contra Postgres real: dos tenants, un
+  administrador cada uno, 404 cruzando de tenant en las tres lecturas nuevas de `practice`/`delegated_access`/
+  `billing`.
