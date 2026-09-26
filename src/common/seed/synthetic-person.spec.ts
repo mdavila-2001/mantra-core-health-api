@@ -19,7 +19,9 @@ describe('synthetic-person', () => {
   });
 
   it('dos keys distintas no chocan (al menos entre estas dos filas de prueba)', () => {
-    expect(syntheticNationalId('fila-1')).not.toBe(syntheticNationalId('fila-2'));
+    expect(syntheticNationalId('fila-1')).not.toBe(
+      syntheticNationalId('fila-2'),
+    );
   });
 
   it('la cédula sintética tiene 7 dígitos, sin cero a la izquierda', () => {
@@ -47,7 +49,9 @@ describe('synthetic-person', () => {
   });
 
   it('el desambiguador separa a dos personas con el mismo nombre y apellido', () => {
-    expect(syntheticEmail('Ana', 'Rojas', '7')).toBe('ana.rojas.7@alovida.test');
+    expect(syntheticEmail('Ana', 'Rojas', '7')).toBe(
+      'ana.rojas.7@alovida.test',
+    );
     expect(syntheticEmail('Ana', 'Rojas', '12')).not.toBe(
       syntheticEmail('Ana', 'Rojas', '7'),
     );

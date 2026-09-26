@@ -39,7 +39,14 @@ function build() {
     patientRegistration as never,
     logger as never,
   );
-  return { service, orm, em, practitionerRegistration, patientRegistration, logger };
+  return {
+    service,
+    orm,
+    em,
+    practitionerRegistration,
+    patientRegistration,
+    logger,
+  };
 }
 
 describe('PeopleSeedService', () => {
@@ -59,7 +66,9 @@ describe('PeopleSeedService', () => {
     const { service, practitionerRegistration } = build();
     const resultado = await service.run(false, '12345678', dir);
     expect(resultado.reason).toBe('not-configured');
-    expect(practitionerRegistration.registerPractitioner).not.toHaveBeenCalled();
+    expect(
+      practitionerRegistration.registerPractitioner,
+    ).not.toHaveBeenCalled();
   });
 
   it('sin contraseña no hace nada, aunque esté habilitado', async () => {
@@ -122,7 +131,9 @@ describe('PeopleSeedService', () => {
 
     const resultado = await service.run(true, '12345678', dir);
 
-    expect(practitionerRegistration.registerPractitioner).not.toHaveBeenCalled();
+    expect(
+      practitionerRegistration.registerPractitioner,
+    ).not.toHaveBeenCalled();
     expect(resultado.practitionersExisting).toBe(1);
   });
 
@@ -133,7 +144,9 @@ describe('PeopleSeedService', () => {
     // excepción del propio servicio.
     const { service, patientRegistration } = build();
     patientRegistration.registerPatient.mockRejectedValueOnce(
-      new ConflictException('Ya existe una cuenta con ese documento de identidad'),
+      new ConflictException(
+        'Ya existe una cuenta con ese documento de identidad',
+      ),
     );
 
     const resultado = await service.run(true, '12345678', dir);

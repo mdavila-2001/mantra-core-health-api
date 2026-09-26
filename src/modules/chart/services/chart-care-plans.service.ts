@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,6 +8,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { CarePlansRepository } from '../repositories';
+
+/** Rol comodín que puede escribir en nombre de cualquier perfil profesional. */
+const SUPERADMIN_ROLE = 'SUPERADMIN';
 import { CHART } from '../chart.concepts';
 import {
   ActivityResponseDto,
@@ -16,7 +19,12 @@ import {
   UpdateActivityDto,
   type ActivityStatus,
 } from '../dto';
-import { ClinicalReadService } from '../../clinical/services';
+import {
+  ClinicalReadService,
+  // BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
+  // referencien. Servicio nuevo, independiente, exportado por `ClinicalModule`.
+  EncounterSealGuardService,
+} from '../../clinical/services';
 
 /** Mapa estado (DTO) → concepto de estado de actividad. */
 const ACTIVITY_STATUS_CONCEPT: Record<ActivityStatus, string> = {
@@ -41,14 +49,48 @@ export class ChartCarePlansService {
    * @param carePlansRepo - Valor de care plans repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly carePlansRepo: CarePlansRepository,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ChartCarePlansService.name);
+  }
+
+  /**
+   * CL-29 (BR-13): el autor del plan es el profesional de la sesión, con la
+   * misma regla que `ChartNotesService.resolveAuthor`: si el cuerpo declara
+   * otro perfil, 403; si no declara nada, el perfil de la sesión; sin perfil
+   * profesional, 403. `SUPERADMIN` pasa con lo que declare.
+   */
+  private resolveAuthor(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const elegido = declared ?? actor.practitionerProfileId;
+      if (!elegido) {
+        throw new ForbiddenException(
+          'Un plan de cuidados necesita un profesional autor.',
+        );
+      }
+      return elegido;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que crear el plan.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'El autor del plan es el profesional de la sesión: no se crea en nombre de otro perfil.',
+      );
+    }
+    return actor.practitionerProfileId;
   }
 
   /** UC-15-10: crea un plan de cuidado activo con sus actividades iniciales. */
@@ -64,7 +106,16 @@ export class ChartCarePlansService {
       },
       'Creating care plan',
     );
+    // CL-29 (BR-13): el autor del plan sale de la sesión, nunca del cuerpo.
+    const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
+      // BR-14 (CL-07): un plan no puede nacer contra un encuentro ya sellado.
+      if (dto.encounterId) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+      }
       const plan = this.carePlansRepo.createPlan(tx, {
         patientProfileId: dto.patientProfileId,
         conditionId: dto.conditionId,
@@ -74,7 +125,7 @@ export class ChartCarePlansService {
         goalText: dto.goalText,
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         actorUserId: actor.id,
       });
       // FK planas: persistir el plan antes de sus actividades.

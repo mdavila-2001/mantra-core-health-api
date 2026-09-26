@@ -2143,6 +2143,104 @@ paths:
       description: >-
         Expirar sesiones y tokens vencidos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /iam/auth/change-password:
+    post:
+      operationId: IamAccountSecurityController_changePassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cambiar la contraseña de la propia cuenta
+      tags:
+        - iam-auth
+      description: >-
+        Cambiar la contraseña de la propia cuenta. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /iam/me/sessions:
+    get:
+      operationId: IamAccountSecurityController_listSessions
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar mis sesiones abiertas
+      tags:
+        - iam-auth
+      description: >-
+        Listar mis sesiones abiertas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /iam/me/sessions/{id}/revoke:
+    post:
+      operationId: IamAccountSecurityController_revokeSession
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cerrar una de mis sesiones
+      tags:
+        - iam-auth
+      description: >-
+        Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /profiles/patients/me/summary:
     get:
       operationId: ProfilesPatientsController_getOwnSummary
@@ -3613,6 +3711,49 @@ paths:
       summary: Marcar una especialidad propia como la principal
       tags:
         - profiles-practitioners
+  /profiles/credentials:
+    get:
+      operationId: ProfilesPractitionersController_listPendingCredentials
+      parameters:
+        - name: state
+          required: false
+          in: query
+          description: Concepto de estado (por defecto, pendiente)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Credenciales por página
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar credenciales pendientes de verificación
+      tags:
+        - profiles-practitioners
+      description: >-
+        Listar credenciales pendientes de verificación. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /profiles/credentials/{credentialId}/verify:
     post:
       operationId: ProfilesPractitionersController_verifyCredential
@@ -4739,6 +4880,103 @@ paths:
         - authz-pdp
       description: >-
         Recalcular la decisión de autorización efectiva (PDP). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /authz/me/access:
+    get:
+      operationId: AuthzMeController_listMyAccess
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Quién ve mi historia
+      tags:
+        - authz-me
+      description: >-
+        Quién ve mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+  /authz/me/care-relationships/{id}/revoke:
+    post:
+      operationId: AuthzMeController_revokeCareRelationship
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Revocar una de mis relaciones asistenciales
+      tags:
+        - authz-me
+      description: >-
+        Revocar una de mis relaciones asistenciales. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /authz/me/clinical-access-grants/{grantId}/revoke:
+    post:
+      operationId: AuthzMeController_revokeClinicalGrant
+      parameters:
+        - name: grantId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Revocar uno de los accesos clínicos a mi historia
+      tags:
+        - authz-me
+      description: >-
+        Revocar uno de los accesos clínicos a mi historia. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /audit/data-access:
     post:
@@ -6183,6 +6421,9 @@ paths:
               - TENANT
               - CONDITION
               - PROCEDURE
+              - MEDICATION_REQUEST
+              - ALLERGY_INTOLERANCE
+              - ENCOUNTER
         - name: ownerId
           required: true
           in: query
@@ -6217,6 +6458,24 @@ paths:
         - name: id
           required: true
           in: path
+          schema:
+            type: string
+        - name: versionId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: expires
+          required: false
+          in: query
+          description: Vencimiento, en milisegundos epoch
+          schema:
+            type: string
+        - name: signature
+          required: false
+          in: query
+          description: HMAC-SHA256 en hexadecimal
           schema:
             type: string
       responses:
@@ -11077,6 +11336,142 @@ paths:
       description: >-
         Cerrar un encuentro en curso (gatilla facturación). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/encounters/{id}/attachments:
+    post:
+      operationId: ClinicalEncountersController_attachFileToEncounter
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachFileToEncounterDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Adjuntar un archivo ya subido a un encuentro
+      tags:
+        - clinical-encounters
+      description: >-
+        Adjuntar un archivo ya subido a un encuentro. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: ClinicalEncountersController_listEncounterAttachments
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los adjuntos de un encuentro
+      tags:
+        - clinical-encounters
+      description: >-
+        Listar los adjuntos de un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /clinical/me/medical-aspects:
+    get:
+      operationId: ClinicalMedicalAspectsController_getOwn
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ver mis aspectos médicos declarados
+      tags:
+        - clinical-me
+      description: >-
+        Ver mis aspectos médicos declarados. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    put:
+      operationId: ClinicalMedicalAspectsController_updateOwn
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOwnMedicalAspectsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Guardar mis aspectos médicos declarados
+      tags:
+        - clinical-me
+      description: >-
+        Guardar mis aspectos médicos declarados. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/observations:
     post:
       operationId: ClinicalObservationsController_record
@@ -11577,6 +11972,81 @@ paths:
       description: >-
         Registrar una alergia con reacciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+  /clinical/allergy-intolerances/{id}/attachments:
+    post:
+      operationId: ClinicalRecordsController_attachFileToAllergy
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachFileToAllergyIntoleranceDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Adjuntar un archivo ya subido a una alergia
+      tags:
+        - clinical-records
+      description: >-
+        Adjuntar un archivo ya subido a una alergia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: ClinicalRecordsController_listAllergyAttachments
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los adjuntos de una alergia
+      tags:
+        - clinical-records
+      description: >-
+        Listar los adjuntos de una alergia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /clinical/medication-requests:
     post:
       operationId: ClinicalRecordsController_prescribeMedication
@@ -11614,6 +12084,81 @@ paths:
       description: >-
         Prescribir medicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
         de error usan el envelope ErrorResponse.
+  /clinical/medication-requests/{id}/attachments:
+    post:
+      operationId: ClinicalRecordsController_attachFileToMedicationRequest
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachFileToMedicationRequestDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Adjuntar un archivo ya subido a una receta
+      tags:
+        - clinical-records
+      description: >-
+        Adjuntar un archivo ya subido a una receta. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: ClinicalRecordsController_listMedicationRequestAttachments
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los adjuntos de una receta
+      tags:
+        - clinical-records
+      description: >-
+        Listar los adjuntos de una receta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /clinical/medication-records:
     post:
       operationId: ClinicalRecordsController_administerMedication
@@ -13051,6 +13596,31 @@ paths:
       description: >-
         Alta de grupo empleador (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /patient-coverages/me:
+    get:
+      operationId: CoverageController_listMine
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mi cobertura
+      tags:
+        - insurance-coverage
+      description: >-
+        Mi cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error
+        usan el envelope ErrorResponse.
   /patient-coverages:
     post:
       operationId: CoverageController_enroll
@@ -14565,6 +15135,99 @@ paths:
       description: >-
         Dar de alta un sitio de práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /practices/{practiceId}/role-assignments:
+    get:
+      operationId: PracticesController_listRoleAssignments
+      parameters:
+        - name: practiceId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Concepto de estado (p. ej. la vinculación pendiente)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Vinculaciones por página
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las vinculaciones profesional-organización de la práctica
+      tags:
+        - practice
+      description: >-
+        Listar las vinculaciones profesional-organización de la práctica. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: PracticesController_assignRole
+      parameters:
+        - name: practiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PracticeCreateRoleAssignmentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Asignar un rol de profesional a sitio/unidad/servicio
+      tags:
+        - practice
+      description: >-
+        Asignar un rol de profesional a sitio/unidad/servicio. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /practices/{practiceId}/sites/{siteId}:
     delete:
       operationId: PracticesController_decommissionSite
@@ -14743,50 +15406,6 @@ paths:
       description: >-
         Configurar un ajuste de práctica (upsert). Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
-  /practices/{practiceId}/role-assignments:
-    post:
-      operationId: PracticesController_assignRole
-      parameters:
-        - name: practiceId
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PracticeCreateRoleAssignmentDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Asignar un rol de profesional a sitio/unidad/servicio
-      tags:
-        - practice
-      description: >-
-        Asignar un rol de profesional a sitio/unidad/servicio. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /practices/{practiceId}/role-assignments/self-request:
     post:
       description: >-
@@ -17042,6 +17661,225 @@ paths:
       description: >-
         Aceptar (con las especialidades autorizadas) o rechazar la solicitud. Requiere JWT y los roles o alcances
         declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/me/consents:
+    get:
+      operationId: ConsentMeController_listConsents
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis consentimientos (vigentes y retirados)
+      tags:
+        - consent-me
+      description: >-
+        Mis consentimientos (vigentes y retirados). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/me/hipaa-authorizations:
+    get:
+      operationId: ConsentMeController_listHipaaAuthorizations
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis autorizaciones de divulgación
+      tags:
+        - consent-me
+      description: >-
+        Mis autorizaciones de divulgación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /consent/me/objections:
+    get:
+      operationId: ConsentMeController_listObjections
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis objeciones (abiertas y resueltas)
+      tags:
+        - consent-me
+      description: >-
+        Mis objeciones (abiertas y resueltas). Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /consent/me/treatment-informed-consents:
+    get:
+      operationId: ConsentMeController_listTreatmentConsents
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis consentimientos informados de tratamiento
+      tags:
+        - consent-me
+      description: >-
+        Mis consentimientos informados de tratamiento. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /consent/me/consents/{id}/withdraw:
+    post:
+      operationId: ConsentMeController_withdraw
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawConsentDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Retirar uno de mis consentimientos
+      tags:
+        - consent-me
+      description: >-
+        Retirar uno de mis consentimientos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /consent/encounters/{encounterId}/informed-consent:
+    post:
+      operationId: EncounterInformedConsentsController_register
+      parameters:
+        - name: encounterId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEncounterInformedConsentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar el consentimiento informado del encuentro
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Registrar el consentimiento informado del encuentro. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: EncounterInformedConsentsController_list
+      parameters:
+        - name: encounterId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consentimientos informados registrados en el encuentro
+      tags:
+        - consent-treatment-informed-consents
+      description: >-
+        Consentimientos informados registrados en el encuentro. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /accounting/accounts:
     get:
       operationId: AccountingLedgerController_chartOfAccounts
@@ -18860,6 +19698,130 @@ paths:
       summary: Registro de activos fijos de una práctica
       tags:
         - accounting-cockpit
+  /billing/invoices:
+    get:
+      operationId: BillingReceivablesController_listInvoices
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          description: Práctica (uuid)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Facturas por página
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las facturas de la práctica
+      tags:
+        - billing-receivables
+      description: >-
+        Listar las facturas de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /billing/invoices/{id}:
+    get:
+      operationId: BillingReceivablesController_getInvoice
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: practiceId
+          required: true
+          in: query
+          description: Práctica (uuid)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Detalle de una factura, con sus líneas
+      tags:
+        - billing-receivables
+      description: >-
+        Detalle de una factura, con sus líneas. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /billing/patient-statements:
+    get:
+      operationId: BillingReceivablesController_listStatements
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          description: Práctica (uuid)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Estados de cuenta por página
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los estados de cuenta de la práctica
+      tags:
+        - billing-receivables
+      description: >-
+        Listar los estados de cuenta de la práctica. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /billing/invoices:issue-from-encounter:
     post:
       operationId: BillingReceivablesController_issueFromEncounter
@@ -19655,6 +20617,49 @@ paths:
       description: >-
         Ver una encuesta y su cuestionario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+    patch:
+      operationId: SurveysTemplatesController_updateTemplate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTemplateDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir título, consigna y plazo del borrador
+      tags:
+        - surveys-templates
+      description: >-
+        Corregir título, consigna y plazo del borrador. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /surveys/templates/{id}/questions:
     post:
       operationId: SurveysTemplatesController_addQuestion
@@ -19699,6 +20704,139 @@ paths:
       description: >-
         Configurar una pregunta y su tipo de respuesta. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/questions/order:
+    put:
+      operationId: SurveysTemplatesController_reorderQuestions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderQuestionsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Reordenar el cuestionario del borrador
+      tags:
+        - surveys-templates
+      description: >-
+        Reordenar el cuestionario del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/questions/{questionId}:
+    patch:
+      operationId: SurveysTemplatesController_updateQuestion
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: questionId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateQuestionDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir una pregunta del borrador
+      tags:
+        - surveys-templates
+      description: >-
+        Corregir una pregunta del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: SurveysTemplatesController_deleteQuestion
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: questionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Quitar una pregunta del borrador
+      tags:
+        - surveys-templates
+      description: >-
+        Quitar una pregunta del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /surveys/templates/{id}/versions:
     post:
       operationId: SurveysTemplatesController_createNextVersion
@@ -23704,6 +24842,31 @@ paths:
       description: >-
         Responder / aceptar una referencia inter-tenant. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /referrals/me:
+    get:
+      operationId: ReferralsController_listMine
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis derivaciones
+      tags:
+        - clinical-ext-referrals
+      description: >-
+        Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /care-gaps/recompute:
     post:
       operationId: CareGapsController_recompute
@@ -25405,6 +26568,42 @@ paths:
         Reasignar supervisor / suspender asignación de organización. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /delegated-permission-sets:
+    get:
+      operationId: DelegatedPermissionSetsController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco devuelto por la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Sets por página
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los sets de permisos delegados del tenant
+      tags:
+        - delegated-access-permission-sets
+      description: >-
+        Listar los sets de permisos delegados del tenant. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: DelegatedPermissionSetsController_createSet
       parameters: []
@@ -26702,7 +27901,9 @@ paths:
         - diagnostics-patient-results
   /diagnostic-results/me/{reportId}:
     get:
-      description: Cada `fileId` se descarga por `GET /common/files/{id}/content`.
+      description: >-
+        Cada `fileId` se descarga por `GET /diagnostic-results/me/{reportId}/files/{fileId}/content`. La vía genérica
+        `/common/files/{id}/content` es sólo para quien subió el archivo: el laboratorio lo subió, no el titular.
       operationId: DiagnosticsPatientResultsController_getOwnResult
       parameters:
         - name: reportId
@@ -26728,6 +27929,43 @@ paths:
       security:
         - bearer: []
       summary: Un resultado del titular, con sus archivos
+      tags:
+        - diagnostics-patient-results
+  /diagnostic-results/me/{reportId}/files/{fileId}/content:
+    get:
+      description: >-
+        Autoriza por titularidad y versión liberada y visible, no por autoría del archivo. Todo lo que no cumpla
+        responde 404.
+      operationId: DiagnosticsPatientResultsController_getOwnResultFileContent
+      parameters:
+        - name: reportId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bytes del archivo
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: No es del titular, no está liberado, o el archivo no cuelga del informe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Descargar un archivo de un resultado del titular
       tags:
         - diagnostics-patient-results
   /diagnostic-results/me/{reportId}/shares:
@@ -28351,6 +29589,50 @@ paths:
       description: >-
         Declarar una definición de campo con reglas de validación. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/field-definitions/{id}:
+    patch:
+      operationId: FormsFieldsController_updateFieldDefinition
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFieldDefinitionDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corregir el nombre o el tipo de un campo propio
+      tags:
+        - forms-fields
+      description: >-
+        Corregir el nombre o el tipo de un campo propio. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /forms/fields/{id}/dependencies:
     post:
       operationId: FormsFieldsController_addDependency
@@ -28604,6 +29886,122 @@ paths:
       description: >-
         Presupuesto de extensión del target para el tenant actual. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/assignments/order:
+    put:
+      operationId: FormsAssignmentsController_reorderAssignments
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderAssignmentsDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Reordenar los campos propios de un formulario
+      tags:
+        - forms-assignments
+      description: >-
+        Reordenar los campos propios de un formulario. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /forms/assignments/{id}:
+    patch:
+      operationId: FormsAssignmentsController_updateAssignment
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAssignmentDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar una asignación propia
+      tags:
+        - forms-assignments
+      description: >-
+        Editar una asignación propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: FormsAssignmentsController_retireAssignment
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Quitar una asignación propia (baja lógica)
+      tags:
+        - forms-assignments
+      description: >-
+        Quitar una asignación propia (baja lógica). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /forms/instances:
     get:
       operationId: FormsInstancesController_listInstances
@@ -44137,6 +45535,94 @@ paths:
       summary: Revertir una redención por devolución o cancelación
       tags:
         - promotions
+  /public/profiles/o/{slug}/services:
+    get:
+      description: >-
+        Sin sesión. Precio de referencia como texto, o null si no está definido. Un slug inexistente, oculto o de otro
+        tipo responde 404.
+      operationId: PublicCatalogController_organizationServices
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco de la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Servicios que ofrece una organización, desde su ficha pública
+      tags:
+        - public-catalog
+  /public/profiles/f/{slug}/products:
+    get:
+      description: >-
+        Sin sesión. Marca, presentación, precio vigente de lista pública como texto (o null) y si hay stock; un agotado
+        se lista igual. Un slug inexistente, oculto o de otro tipo responde 404.
+      operationId: PublicCatalogController_pharmacyProducts
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco de la página anterior
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Productos que ofrece una farmacia, desde su ficha pública
+      tags:
+        - public-catalog
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -46295,8 +47781,8 @@ paths:
         - scheduling
     delete:
       description: >-
-        La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Rechaza con 409 si
-        tiene citas confirmadas o presentadas.
+        La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas
+        o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.
       operationId: SchedulingController_retireTemplate
       parameters:
         - name: id
@@ -54406,6 +55892,10 @@ tags:
     description: >-
       Operaciones del dominio funcional authz grants. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: authz-me
+    description: >-
+      Operaciones del dominio funcional authz me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: authz-pdp
     description: >-
       Operaciones del dominio funcional authz pdp. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -54498,6 +55988,10 @@ tags:
     description: >-
       Operaciones del dominio funcional clinical ext virtual encounters. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: clinical-me
+    description: >-
+      Operaciones del dominio funcional clinical me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: clinical-observations
     description: >-
       Operaciones del dominio funcional clinical observations. Consulte el catálogo Markdown de endpoints para payloads
@@ -54598,6 +56092,10 @@ tags:
     description: >-
       Operaciones del dominio funcional consent internal. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: consent-me
+    description: >-
+      Operaciones del dominio funcional consent me. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: consent-patient-objections
     description: >-
       Operaciones del dominio funcional consent patient objections. Consulte el catálogo Markdown de endpoints para
@@ -55098,6 +56596,10 @@ tags:
     description: >-
       Operaciones del dominio funcional promotions. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: public-catalog
+    description: >-
+      Operaciones del dominio funcional public catalog. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: qa
     description: >-
       Operaciones del dominio funcional qa. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -56925,6 +58427,21 @@ components:
           description: >-
             Refresh token en crudo emitido previamente. Obligatorio salvo que la API entregue el token como cookie
             httpOnly (AUTH_REFRESH_COOKIE_ENABLED), en cuyo caso se ignora y se lee de la cookie
+    ChangePasswordDto:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          description: Contraseña actual
+          maxLength: 200
+        newPassword:
+          type: string
+          description: Contraseña nueva
+          minLength: 8
+          maxLength: 200
+      required:
+        - currentPassword
+        - newPassword
     OwnAddressDto:
       type: object
       properties:
@@ -59540,6 +61057,9 @@ components:
             - TENANT
             - CONDITION
             - PROCEDURE
+            - MEDICATION_REQUEST
+            - ALLERGY_INTOLERANCE
+            - ENCOUNTER
           description: Tipo de propietario polimórfico.
         ownerId:
           type: string
@@ -59578,6 +61098,9 @@ components:
             - TENANT
             - CONDITION
             - PROCEDURE
+            - MEDICATION_REQUEST
+            - ALLERGY_INTOLERANCE
+            - ENCOUNTER
         ownerId:
           type: string
           format: uuid
@@ -59620,6 +61143,9 @@ components:
             - TENANT
             - CONDITION
             - PROCEDURE
+            - MEDICATION_REQUEST
+            - ALLERGY_INTOLERANCE
+            - ENCOUNTER
         ownerId:
           type: string
           format: uuid
@@ -59743,6 +61269,9 @@ components:
             - TENANT
             - CONDITION
             - PROCEDURE
+            - MEDICATION_REQUEST
+            - ALLERGY_INTOLERANCE
+            - ENCOUNTER
         ownerId:
           type: string
           format: uuid
@@ -61056,6 +62585,38 @@ components:
         expectedRowVersion:
           type: number
           description: row_version esperado (bloqueo optimista)
+    AttachFileToEncounterDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+      required:
+        - fileId
+    UpdateOwnMedicalAspectsDto:
+      type: object
+      properties:
+        bloodType:
+          type: string
+          maxLength: 20
+        allergiesText:
+          type: string
+          maxLength: 2000
+        chronicConditionsText:
+          type: string
+          maxLength: 2000
+        currentMedicationsText:
+          type: string
+          maxLength: 2000
+        surgeriesText:
+          type: string
+          maxLength: 2000
+        familyHistoryText:
+          type: string
+          maxLength: 2000
+        habitsText:
+          type: string
+          maxLength: 2000
     ObservationComponentInput:
       type: object
       properties:
@@ -61520,6 +63081,10 @@ components:
           type: string
           description: Paciente (profiles.patient_profiles)
           format: uuid
+        encounterId:
+          type: string
+          description: Encuentro en el que se detectó (clinical.encounters)
+          format: uuid
         substanceConceptId:
           type: string
           description: Sustancia alergénica (concept id)
@@ -61544,6 +63109,14 @@ components:
         - custodianTenantId
         - patientProfileId
         - substanceConceptId
+    AttachFileToAllergyIntoleranceDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+      required:
+        - fileId
     CreateMedicationRequestDto:
       type: object
       properties:
@@ -61605,10 +63178,24 @@ components:
             Condición clínica que motiva la prescripción — para qué es la receta. Debe pertenecer al mismo paciente
             (Patch v4.1.6)
           format: uuid
+        indicationText:
+          type: string
+          description: >-
+            Motivo de la receta escrito a mano («Otro motivo»). Excluyente con indicationConditionId: si viajan los dos,
+            gana la condición (P24)
+          maxLength: 200
       required:
         - custodianTenantId
         - patientProfileId
         - medicationConceptId
+    AttachFileToMedicationRequestDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          format: uuid
+      required:
+        - fileId
     CreateMedicationRecordDto:
       type: object
       properties:
@@ -61694,6 +63281,10 @@ components:
           type: string
           description: Condición que motiva la prescripción; debe ser del mismo paciente (Patch v4.1.6)
           format: uuid
+        indicationText:
+          type: string
+          description: Motivo de la receta escrito a mano. Excluyente con indicationConditionId (P24)
+          maxLength: 200
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente impresas en la receta (Patch v4.1.3)
@@ -66419,6 +68010,32 @@ components:
           maximum: 60
       required:
         - decision
+    RegisterEncounterInformedConsentDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          description: Decisión del paciente
+          enum:
+            - ACCEPTED
+            - DECLINED
+        procedureCodeConceptId:
+          type: string
+          description: Código de procedimiento (concept id)
+          format: uuid
+        informationVersion:
+          type: string
+          description: Versión del material informativo vigente
+        interpreterUserId:
+          type: string
+          description: Intérprete presente (user id)
+          format: uuid
+        witnessUserId:
+          type: string
+          description: Testigo (user id)
+          format: uuid
+      required:
+        - decision
     AccountingCreateAccountDto:
       type: object
       properties:
@@ -68148,6 +69765,22 @@ components:
           default: 30
       required:
         - title
+    UpdateTemplateDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título del instrumento
+          maxLength: 200
+        description:
+          type: string
+          description: Consigna que ve el paciente; vacío la borra
+          maxLength: 2000
+        responseWindowDays:
+          type: number
+          description: Días para responder (de la versión en borrador)
+          minimum: 1
+          maximum: 365
     AddQuestionDto:
       type: object
       properties:
@@ -68184,6 +69817,47 @@ components:
       required:
         - questionText
         - answerType
+    ReorderQuestionsDto:
+      type: object
+      properties:
+        questionIds:
+          description: Preguntas en el orden final (sin repetidos)
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - questionIds
+    UpdateQuestionDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+          description: Enunciado de la pregunta
+          maxLength: 500
+        answerType:
+          type: string
+          enum:
+            - TEXT
+            - SCALE
+            - BOOLEAN
+            - SINGLE_CHOICE
+            - MULTIPLE_CHOICE
+          description: Tipo de respuesta esperado
+        required:
+          type: boolean
+          description: Si responderla es obligatorio
+        options:
+          description: Opciones, enteras. Reemplazan a las anteriores.
+          type: array
+          items:
+            type: string
+        scaleMin:
+          type: number
+          description: Mínimo de la escala. Solo para SCALE.
+        scaleMax:
+          type: number
+          description: Máximo de la escala. Solo para SCALE.
     PublishVersionDto:
       type: object
       properties:
@@ -70223,7 +71897,7 @@ components:
         authorProfileId:
           type: string
           format: uuid
-          description: Perfil del clínico autor
+          description: Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403
         encounterId:
           type: string
           format: uuid
@@ -70252,14 +71926,13 @@ components:
           description: Bloque P (plan) del SOAP
       required:
         - patientProfileId
-        - authorProfileId
     AddVersionDto:
       type: object
       properties:
         authorProfileId:
           type: string
           format: uuid
-          description: Perfil del clínico autor
+          description: Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403
         chiefComplaintText:
           type: string
         subjectiveText:
@@ -70270,8 +71943,6 @@ components:
           type: string
         planText:
           type: string
-      required:
-        - authorProfileId
     SignVersionDto:
       type: object
       properties:
@@ -70306,7 +71977,7 @@ components:
         authorProfileId:
           type: string
           format: uuid
-          description: Perfil del clínico que enmienda
+          description: Perfil del clínico que enmienda. Se toma de la sesión; si viaja otro, 403
         amendmentReasonText:
           type: string
           description: Motivo textual de la enmienda (obligatorio)
@@ -70323,7 +71994,6 @@ components:
         planText:
           type: string
       required:
-        - authorProfileId
         - amendmentReasonText
     ReleaseVersionDto:
       type: object
@@ -73903,6 +75573,30 @@ components:
         - code
         - name
         - dataType
+    UpdateFieldDefinitionDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre legible del campo
+          maxLength: 200
+        dataType:
+          type: string
+          enum:
+            - string
+            - text
+            - integer
+            - decimal
+            - boolean
+            - date
+            - datetime
+            - time
+            - uuid
+            - json
+            - binary
+            - reference
+            - code
+          description: Tipo de dato técnico; con valores capturados no se cambia (409)
     CreateFieldDependencyDto:
       type: object
       properties:
@@ -73992,6 +75686,34 @@ components:
           description: ¿Permite acceso break-glass?
       required:
         - purposeOfUseValueSetId
+    ReorderAssignmentsDto:
+      type: object
+      properties:
+        targetResourceConceptId:
+          type: string
+          description: Recurso destino (concept id)
+          format: uuid
+        assignmentIds:
+          description: Asignaciones propias en el orden final (sin repetidos)
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - targetResourceConceptId
+        - assignmentIds
+    UpdateAssignmentDto:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: ¿Requerido?
+        visible:
+          type: boolean
+          description: ¿Visible?
+        editable:
+          type: boolean
+          description: ¿Editable?
     OpenInstanceDto:
       type: object
       properties:

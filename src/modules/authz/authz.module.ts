@@ -9,6 +9,7 @@ import {
   AuthzClinicalController,
   AuthzCareRelationshipsController,
   AuthzPdpController,
+  AuthzMeController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -19,6 +20,7 @@ import {
   AuthzCareRelationshipsService,
   AuthzPdpService,
   AuthzEffectiveRolesService,
+  AuthzMeService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -43,7 +45,10 @@ import { MessagingModule } from '../messaging/messaging.module';
 // es una clase sin estado que recibe el `EntityManager` por parámetro.
 // `AuthzCareRelationshipsService` la usa para notificar al paciente titular
 // de una solicitud de acceso (FT-07-R05).
-import { PersonAccountLinksRepository } from '../profiles/repositories';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../profiles/repositories';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.
@@ -67,6 +72,7 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
     AuthzClinicalController,
     AuthzCareRelationshipsController,
     AuthzPdpController,
+    AuthzMeController,
   ],
   providers: [
     // Repositorios
@@ -87,6 +93,9 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
     PersonAccountLinksRepository,
+    // «Quién ve mi historia»: resuelve el perfil de paciente del titular. Clase sin
+    // estado sobre el `EntityManager`, como `PersonAccountLinksRepository`.
+    PatientProfilesRepository,
     // Servicios
     AuthzCatalogService,
     AuthzPoliciesService,
@@ -96,6 +105,7 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
     AuthzCareRelationshipsService,
     AuthzPdpService,
     AuthzEffectiveRolesService,
+    AuthzMeService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
@@ -108,7 +118,20 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
   exports: [
     AuthzEffectiveRolesService,
     ResourceScopeGrantsRepository,
+    // BR-17 (CL-48): diagnostics.DiagnosticsPatientResultsService la necesita
+    // para exigir una relación asistencial ACTIVE antes de compartir un
+    // resultado con un profesional.
+    CareRelationshipsRepository,
     AuthzPdpService,
+    // AG-31 (BR-26): `pharma_lab` necesita asignar/consultar MEDICAL_VISITOR al
+    // vincular o desvincular un visitador, en la misma transacción del caso de
+    // uso. `AuthzGrantsService.assignRole` ya es la escritura correcta (valida
+    // que el rol sea asignable, evita el solape MCH-034); exportar sólo agrega
+    // estos tres al barrel de salida, no toca ningún `@Roles` ni
+    // `role-mapping.ts`.
+    AuthzGrantsService,
+    RolesRepository,
+    UserRoleAssignmentsRepository,
   ],
 })
 export class AuthzModule {}

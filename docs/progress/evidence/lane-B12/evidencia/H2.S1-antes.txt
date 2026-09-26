@@ -1,0 +1,6 @@
+# Antes: las dos rutas que el front ya llama no existen en origin/test @ 002bdfdd
+$ git grep -nE "profiles/o/:slug/services|profiles/f/:slug/products" origin/test -- src
+exit=1 (1 = sin coincidencias)
+
+$ git grep -n "branch-availability" origin/test -- src
+exit=1

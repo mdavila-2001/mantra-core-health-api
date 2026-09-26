@@ -1609,7 +1609,16 @@ describe('SchedulingCatalogService', () => {
         tenants: [TENANT],
       };
 
-      it('con citas comprometidas NO retira: avisa y nombra cuáles', async () => {
+      /*
+       * M4 · H1.S2.M2 — contrato nuevo, fijado por el CA del encargo de M4
+       * (2026-09-26): «dado un horario con citas vivas, cuando se lo retira,
+       * la operación conserva los cupos con cita en vez de fallar con 409».
+       * Un médico en ejercicio siempre tiene citas confirmadas: con el 409 no
+       * podía cambiar su horario nunca. El retiro ya conservaba los cupos con
+       * cita (`keptSlots`); ahora corre, y dice cuáles citas quedaron vivas.
+       * Ver `docs/progress/evidence/lane-B10/DECISIONS.md` (Q-06).
+       */
+      it('con citas comprometidas retira igual: conserva sus cupos y dice cuáles citas siguen vivas', async () => {
         const d = buildCatalog();
         conPlantillaPropia(d);
         d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
@@ -1617,36 +1626,46 @@ describe('SchedulingCatalogService', () => {
           live: 3,
           sample: [{ id: 'b1' }, { id: 'b2' }, { id: 'b3' }],
         });
+        d.catalogRepo.retireTemplate.mockResolvedValue({
+          releasedSlots: 21,
+          keptSlots: 3,
+        });
 
-        await expect(
-          d.service.retireTemplate('tpl-1', duenio as never),
-        ).rejects.toBeInstanceOf(ConflictException);
+        const res = await d.service.retireTemplate('tpl-1', duenio as never);
 
-        // Lo que importa no es el error: es que el horario siga publicado.
-        expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+        expect(d.catalogRepo.retireTemplate).toHaveBeenCalledWith(
+          d.tx,
+          'tpl-1',
+          CONCEPTS.TEMPLATE_RETIRED,
+          'u-1',
+        );
+        expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
+        // Los tres cupos con cita se conservan: ninguna cita se toca.
+        expect(res.keptSlots).toBe(3);
+        expect(res.releasedSlots).toBe(21);
+        expect(res.liveBookings).toBe(3);
+        expect(res.liveBookingIds).toEqual(['b1', 'b2', 'b3']);
+        expect(res.truncated).toBe(false);
       });
 
-      it('el aviso trae el total y los ids, no los nombres de los pacientes', async () => {
+      it('la respuesta trae el total y los ids de las vivas, no los nombres de los pacientes', async () => {
         const d = buildCatalog();
         conPlantillaPropia(d);
         d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
-          total: 12,
+          total: 15,
           live: 12,
           sample: [{ id: 'b1' }, { id: 'b2' }],
         });
 
-        try {
-          await d.service.retireTemplate('tpl-1', duenio as never);
-          throw new Error('tendría que haber fallado');
-        } catch (error: any) {
-          const detalle = error.details ?? error.response?.details ?? {};
-          expect(detalle.liveBookings).toBe(12);
-          expect(detalle.bookingIds).toEqual(['b1', 'b2']);
-          // Mandar nombres acá filtraría pacientes a cualquiera que administre
-          // agendas: la pantalla ya sabe pedir cada cita con su permiso.
-          expect(JSON.stringify(detalle)).not.toMatch(/name|nombre/i);
-          expect(detalle.truncated).toBe(true);
-        }
+        const res = await d.service.retireTemplate('tpl-1', duenio as never);
+
+        expect(res.liveBookings).toBe(12);
+        expect(res.liveBookingIds).toEqual(['b1', 'b2']);
+        // Mandar nombres acá filtraría pacientes a cualquiera que administre
+        // agendas: la pantalla ya sabe pedir cada cita con su permiso.
+        expect(JSON.stringify(res)).not.toMatch(/name|nombre/i);
+        // Hay 12 vivas y la muestra trae 2: la lista está recortada.
+        expect(res.truncated).toBe(true);
       });
 
       it('sin citas comprometidas retira, y dice qué soltó', async () => {
@@ -1671,7 +1690,7 @@ describe('SchedulingCatalogService', () => {
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
       });
 
-      it('el historial NO frena el retiro: sólo las citas vivas', async () => {
+      it('el historial tampoco frena el retiro', async () => {
         const d = buildCatalog();
         conPlantillaPropia(d);
         // Ninguna viva, dos históricas. Con el borrado duro esto era un muro;

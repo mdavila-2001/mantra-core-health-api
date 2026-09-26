@@ -23,7 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, loadStorageEnv, Public } from '../../../common';
+import { CurrentUser, loadStorageEnv } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { FileUploadService, FilesService } from '../services';
 import type { UploadedFileBytes } from '../services';
@@ -40,7 +40,7 @@ import {
   FileVersionResponseDto,
   LinkedFilePageDto,
   ListFileLinksQueryDto,
-  SignedFileDownloadQueryDto,
+  SignedDownloadQueryDto,
   UploadFileDto,
 } from '../dto';
 
@@ -121,47 +121,17 @@ export class CommonFilesController {
   @ApiOperation({ summary: 'Descargar el contenido vigente de un archivo' })
   async downloadContent(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() signed: SignedDownloadQueryDto,
     @Res() res: Response,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
+    // La URL firmada que se emite se valida acá (TX-09); sin firma, sigue la
+    // lectura por autoría. En los dos casos hace falta sesión.
+    this.filesService.assertDownloadSignature(id, signed);
     const content = await this.uploadService.download(id, actor);
     res.setHeader('Content-Type', content.mimeType);
     if (content.originalName) {
       // Se codifica el nombre para que no pueda inyectar cabeceras ni comillas.
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
-      );
-    }
-    res.send(content.buffer);
-  }
-
-  /**
-   * Descarga con la URL firmada de `POST /:id/download-url` (H4.S1.M3).
-   *
-   * Pública **a propósito**: no hay `@CurrentUser` posible cuando el llamador
-   * es `window.open()` o un `<a href>`, que no pueden mandar el header
-   * `Authorization`. La firma en la query es la única credencial, verificada
-   * en `FilesService.verifySignedDownload` contra el archivo y su vencimiento
-   * — poseerla ya demostró, en el momento en que se emitió, que quien la pidió
-   * podía leer el archivo (`canActorReadOwnFile`).
-   */
-  @Get(':id/signed-content')
-  @Public()
-  @Header('Cache-Control', 'private, no-store')
-  @ApiOperation({ summary: 'Descargar con una URL de descarga firmada' })
-  async downloadSignedContent(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Query() query: SignedFileDownloadQueryDto,
-    @Res() res: Response,
-  ): Promise<void> {
-    await this.filesService.verifySignedDownload(id, query);
-    const content = await this.uploadService.downloadForAuthorizedContext(
-      id,
-      'common.file.signed-download',
-    );
-    res.setHeader('Content-Type', content.mimeType);
-    if (content.originalName) {
       res.setHeader(
         'Content-Disposition',
         `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,

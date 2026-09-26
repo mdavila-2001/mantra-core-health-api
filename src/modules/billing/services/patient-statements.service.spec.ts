@@ -8,7 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PatientStatementsService } from './patient-statements.service';
-import { ConflictException } from '../../../common';
+import { ConflictException, ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -18,19 +18,35 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const statementsRepo = { findByPeriod: mockFn(), create: mockFn() };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
+  const statementsRepo = {
+    findByPeriod: mockFn(),
+    create: mockFn(),
+    findByPracticePage: mockFn().mockResolvedValue([]),
+  };
   const invoicesRepo = { findByPatientInRange: mockFn() };
   const linksRepo = { create: mockFn() };
+  const practiceTenantLookup = {
+    findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PatientStatementsService(
     em as any,
     statementsRepo,
     invoicesRepo as any,
     linksRepo,
+    practiceTenantLookup as any,
     logger as any,
   );
-  return { service, statementsRepo, invoicesRepo, linksRepo };
+  return {
+    service,
+    em,
+    statementsRepo,
+    invoicesRepo,
+    linksRepo,
+    practiceTenantLookup,
+  };
 }
 
 describe('PatientStatementsService (UC-17-09)', () => {
@@ -79,5 +95,48 @@ describe('PatientStatementsService (UC-17-09)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  describe('listByPractice (CV-12)', () => {
+    it('pages by id, scoped to the given practice', async () => {
+      const d = build();
+      d.statementsRepo.findByPracticePage.mockResolvedValue([
+        {
+          id: 's1',
+          patientProfileId: 'p1',
+          periodStart: new Date('2026-01-01'),
+          periodEnd: new Date('2026-01-31'),
+          openingBalance: '0.00',
+          charges: '10.00',
+          payments: '0.00',
+          closingBalance: '10.00',
+        },
+      ]);
+
+      const res = await d.service.listByPractice('pr1', 'tenant-1', {
+        limit: 10,
+      });
+
+      expect(d.practiceTenantLookup.findTenantOfPractice).toHaveBeenCalledWith(
+        'pr1',
+      );
+      expect(d.statementsRepo.findByPracticePage).toHaveBeenCalledWith(
+        d.em,
+        'pr1',
+        undefined,
+        11,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('throws 404 without a query when the practice belongs to another tenant (isolation)', async () => {
+      const d = build();
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('tenant-b');
+      await expect(
+        d.service.listByPractice('pr1', 'tenant-a', {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.statementsRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
   });
 });

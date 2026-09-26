@@ -1,0 +1,8 @@
+PASS TX-19 12 cuentas distintas desde la misma IP en el mismo minuto: ninguna recibe 429 :: estados=[401]
+PASS TX-19 11 contraseñas malas en un minuto: los 10 primeros 401 y el 11 -> 429 RATE_LIMITED con Retry-After :: estados=[401, 401, 401, 401, 401, 401, 401, 401, 401, 401, 429] retry-after=60 code=RATE_LIMITED
+PASS TX-19 mientras una cuenta está limitada, otra desde la misma IP sigue respondiendo 401 (no 429) :: estado=401
+PASS TX-19 refresh: el cubo es la sesión (20/min): el 21 -> 429 y otro token sigue en 401 :: primeros={401} 21=429 otro=401
+crear usuario sin membresia: 201 ok
+PASS TX-16 sin tenant resoluble: 403 con details.reason TENANT_REQUIRED (el status no cambia) :: status=403 body={"code": "FORBIDDEN", "message": "El actor no pertenece a ningún tenant: indique X-Tenant-Id.", "correlationId": "50", "details": {"reason": "TENANT_REQUIRED"}, "timestamp": "2026-09-26T07:00:58.657Z", "path": "/scheduling/resources"}
+
+5 pruebas, 0 FAIL

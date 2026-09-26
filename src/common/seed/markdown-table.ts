@@ -57,17 +57,14 @@ export function filasDeTabla(texto: string): MarkdownTableRow[] {
 function normalizar(texto: string): string {
   return texto
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
 
 /** La celda de la primera columna cuyo título case con alguno de `nombres`. */
-export function columna(
-  fila: MarkdownTableRow,
-  ...nombres: string[]
-): string {
+export function columna(fila: MarkdownTableRow, ...nombres: string[]): string {
   for (const nombre of nombres) {
     const objetivo = normalizar(nombre);
     const i = fila.header.findIndex((h) => normalizar(h) === objetivo);

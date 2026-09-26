@@ -25,7 +25,8 @@ import {
 /** Santa Cruz (`geo:bo:department:SC`) — el padrón entero es de esa plaza. */
 const DEPARTAMENTO_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
 /** Santa Cruz de la Sierra (`geo:bo:municipality:070101`). */
-const MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA = '97d3017f-3df3-540d-9f5c-da9a4f259611';
+const MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA =
+  '97d3017f-3df3-540d-9f5c-da9a4f259611';
 
 const ARCHIVO_MEDICOS = 'USUARIO_MEDICOS_1.md';
 const ARCHIVO_PACIENTES = 'USUARIO_PACIENTES_1.md';

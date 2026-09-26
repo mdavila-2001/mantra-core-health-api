@@ -196,6 +196,39 @@ export class InvoicesRepository {
   }
 
   /**
+   * Página de facturas de una práctica, ordenada por `id` (keyset estable) —
+   * CV-12: hasta ahora `billing` sólo tenía escrituras y el catálogo de
+   * servicios; ningún `GET` de facturas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica cuyas facturas se listan.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   */
+  findByPracticePage(
+    em: EntityManager,
+    practiceId: string,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<Invoices[]> {
+    const where: Record<string, unknown> = { practiceId };
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(Invoices, where, { orderBy: { id: 'ASC' }, limit });
+  }
+
+  /** Líneas de una factura, para el detalle (CV-12). */
+  findLinesByInvoice(
+    em: EntityManager,
+    invoiceId: string,
+  ): Promise<InvoiceLines[]> {
+    return em.find(
+      InvoiceLines,
+      { invoiceId },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

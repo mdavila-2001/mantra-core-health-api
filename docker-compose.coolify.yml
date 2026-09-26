@@ -140,11 +140,19 @@ x-app-env: &app-env
   FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
   FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
   FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  # Escaneo antimalware APAGADO de forma explícita (TX-33): en Coolify no corre
+  # `worker-files` ni clamd, así que ninguna versión pasa a SCAN_CLEAN. Las lecturas
+  # por contexto (resultado del paciente, documento del expediente) no lo exigen;
+  # la URL firmada sí y responde 422 `details.reason = SCAN_PENDING`. Encenderlo
+  # exige sumar `clamav` y `worker-files` (ver docker-compose.yml).
+  MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-false}
   FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
   FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
   FILE_STORAGE_S3_ENDPOINT: http://minio:9000
   FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
-  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  # Prefijo propio de los archivos: `audio-assets` es el del módulo de audio y no
+  # se comparte (TX-34).
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-uploads}
   FILE_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
 
@@ -183,7 +191,14 @@ x-app-env: &app-env
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
 
   # --- Postura de seguridad ----------------------------------------------
+  # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
+  # del front (docs/progress/DECISIONS.md, D-I): con un solo lado la sesión se pierde.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_NAME: ${AUTH_REFRESH_COOKIE_NAME:-redesa_refresh}
+  AUTH_REFRESH_COOKIE_PATH: ${AUTH_REFRESH_COOKIE_PATH:-/iam/auth/token/refresh}
+  AUTH_REFRESH_COOKIE_SAMESITE: ${AUTH_REFRESH_COOKIE_SAMESITE:-strict}
+  # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
+  AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   # El bypass de verificación aborta el arranque si llega en `true` con
@@ -493,6 +508,17 @@ services:
 
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # `pull_policy: missing` (M1, 2026-09-26): además de `mc`, quay.io también
+    # bloqueó el acceso público anónimo al repo `minio/minio` — reproducido en
+    # vivo: un `docker pull` fresco de ESTE MISMO tag devuelve 401 hoy. Todo
+    # despliegue hace `docker compose pull` antes de `up`, así que sin esto
+    # cualquier redeploy vuelve a fallar aunque el contenedor viejo siga sano.
+    # La imagen ya está en la cache local del host (se confirmó con
+    # `docker images`) desde antes del bloqueo; `missing` la usa sin volver a
+    # pedirla al registro. Riesgo que esto NO resuelve, documentado aparte: si
+    # la cache local se pierde (host nuevo, `docker system prune -a`), esta
+    # imagen exacta deja de ser obtenible por cualquier medio público conocido.
+    pull_policy: missing
     restart: always
     command: server /data --console-address ":9001"
     environment:
@@ -513,16 +539,34 @@ services:
   # en `src/`). Contra un MinIO recién levantado, la primera subida de audio o
   # de archivo por S3 muere con `NoSuchBucket` — y el worker lo registra como
   # fallo de proveedor, que manda a buscar el problema donde no está.
+  #
+  # Imagen cambiada de `quay.io/minio/mc` a `amazon/aws-cli` (M1, 2026-09-26):
+  # MinIO retiró el acceso público anónimo a sus imágenes en Quay.io. Se
+  # reprodujo en vivo contra el VPS: `docker pull` de CUALQUIER tag de
+  # `quay.io/minio/mc` (incluidas versiones de 2023) devuelve 401 Unauthorized
+  # del registro, no un error de red — y esto tumbaba TODO despliegue de esta
+  # aplicación desde antes del 2026-09-14 (todas las corridas de
+  # `docker compose pull` fallan atómicamente si un solo servicio no resuelve).
+  # El contenedor `minio-init` sólo necesita un cliente S3 para dos comandos
+  # idempotentes; `amazon/aws-cli` es S3-compatible vía `--endpoint-url`, está
+  # pinneado a una versión exacta (mismo criterio que el resto del compose) y
+  # se verificó que SÍ se puede descargar hoy desde este mismo host.
   minio-init:
-    image: quay.io/minio/mc:RELEASE.2024-09-16T17-43-14Z
+    image: amazon/aws-cli:2.19.5
     restart: "no"
     entrypoint:
       - /bin/sh
       - -c
       - |
         set -e
-        mc alias set alovida http://minio:9000 "$$MINIO_ACCESS_KEY" "$$MINIO_SECRET_KEY"
-        mc mb --ignore-existing "alovida/$$MINIO_BUCKET"
+        export AWS_ACCESS_KEY_ID="$$MINIO_ACCESS_KEY"
+        export AWS_SECRET_ACCESS_KEY="$$MINIO_SECRET_KEY"
+        export AWS_DEFAULT_REGION=us-east-1
+        if aws --endpoint-url http://minio:9000 s3api head-bucket --bucket "$$MINIO_BUCKET" 2>/dev/null; then
+          echo "=== minio-init: bucket $$MINIO_BUCKET ya existe"
+        else
+          aws --endpoint-url http://minio:9000 s3 mb "s3://$$MINIO_BUCKET"
+        fi
         echo "=== minio-init: bucket $$MINIO_BUCKET listo"
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}

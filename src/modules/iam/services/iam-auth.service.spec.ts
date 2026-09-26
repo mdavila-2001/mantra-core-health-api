@@ -54,6 +54,8 @@ function build() {
     activeSessionIdsForUser: mockFn().mockResolvedValue([]),
     revokeAllActiveForUser: mockFn().mockResolvedValue(0),
     findByUser: jest.fn(() => Promise.resolve([])),
+    findActiveByUser: mockFn().mockResolvedValue([]),
+    revokeByIds: mockFn().mockResolvedValue(0),
     purgeExpired: mockFn().mockResolvedValue(0),
   };
   const refreshRepo = {

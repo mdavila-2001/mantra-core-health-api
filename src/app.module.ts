@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import {
-  ThrottlerGuard,
-  ThrottlerModule,
-  ThrottlerStorage,
-} from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerStorage } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
@@ -83,6 +79,7 @@ import { PolyglotStorageModule } from './modules/polyglot_storage/polyglot_stora
 import { PracticeModule } from './modules/practice/practice.module';
 import { ProceduresPerioperativeModule } from './modules/procedures_perioperative/procedures_perioperative.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { PublicCatalogModule } from './modules/public/public.module';
 import { QaLabModule } from './modules/qa_lab/qa_lab.module';
 import { QuotationsModule } from './modules/quotations/quotations.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
@@ -102,6 +99,7 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
 // Módulos 55/56/57: almacenamiento poliglota sobre motores no-PostgreSQL.
 import { DocumentStoreModule } from './modules/document_store/document_store.module';
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
+import { AuthThrottlerGuard } from './common/security/auth-throttler.guard';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
@@ -226,6 +224,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     PracticeModule,
     ProceduresPerioperativeModule,
     PromotionsModule,
+    PublicCatalogModule,
     QaLabModule,
     QuotationsModule,
     ReadModelsModule,
@@ -254,7 +253,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // qué se registra y qué se oculta al cliente. Ver AllExceptionsFilter.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     // Guard de rate limiting aplicado a todas las rutas HTTP.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: AuthThrottlerGuard },
     { provide: ThrottlerStorage, useClass: RedisThrottlerStorage },
     // Sólo actúa sobre manejadores `@Public()`: una respuesta con sesión no
     // puede llevar `Cache-Control: public` ni de casualidad. `PublicCacheStore`

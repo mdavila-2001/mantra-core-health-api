@@ -16,7 +16,11 @@ const actor = { id: 'md-1', roles: ['USER'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const referralsService = { create: mockFn(), respond: mockFn() };
+  const referralsService = {
+    create: mockFn(),
+    respond: mockFn(),
+    listMine: mockFn(),
+  };
   const controller = new ReferralsController(referralsService as any);
   return { controller, referralsService };
 }
@@ -34,5 +38,11 @@ describe('ReferralsController', () => {
     const dto = { decision: 'ACCEPT' };
     await d.controller.respond('ref1', dto as any, actor);
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
+  });
+
+  it('delegates listMine (CV-10) to the authenticated actor', async () => {
+    const d = build();
+    await d.controller.listMine(actor);
+    expect(d.referralsService.listMine).toHaveBeenCalledWith(actor);
   });
 });

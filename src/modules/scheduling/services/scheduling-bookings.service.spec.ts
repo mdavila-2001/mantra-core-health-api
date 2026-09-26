@@ -724,6 +724,201 @@ describe('SchedulingBookingsService', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
+
+    /*
+     * M4 · H1.S1 — reprogramar es ocupar un rango nuevo, y hasta ahora era el
+     * único camino que lo hacía sin preguntar: confirmar, aceptar, la cita
+     * directa y el walk-in corren la regla madre; `reschedule` sólo miraba la
+     * capacidad del cupo destino. Dos citas en cupos DISTINTOS cuyos rangos se
+     * pisan pasaban.
+     */
+    describe('solapamiento en cupos distintos (M4 · H1.S1)', () => {
+      const TARGET_ID = '44444444-4444-4444-4444-444444444444';
+      const HP = 'hp-dra-rojas';
+
+      /** Una cita confirmada del paciente, en el recurso del consultorio. */
+      function citaConfirmada() {
+        return {
+          id: 'booking-1',
+          bookableSlotId: SLOT_ID,
+          resourceId: 'res-1',
+          patientProfileId: PATIENT,
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        };
+      }
+
+      /**
+       * El cupo destino: OTRO cupo, en otro recurso de la misma médica (su
+       * hospital), con lugar libre. Que tenga capacidad es justamente por lo
+       * que la reprogramación lo aceptaba.
+       */
+      function destinoEnOtroRecurso() {
+        const inicio = new Date(Date.now() + 3 * EN_UNA_HORA);
+        return {
+          ...openSlot({
+            id: TARGET_ID,
+            resourceId: 'res-2',
+            remainingCapacity: 1,
+            startAt: inicio,
+          }),
+          endAt: new Date(inicio.getTime() + 30 * 60_000),
+        };
+      }
+
+      function montar(d: ReturnType<typeof build>) {
+        const booking = citaConfirmada();
+        const target = destinoEnOtroRecurso();
+        const origin = openSlot({
+          remainingCapacity: 0,
+          statusConceptId: CONCEPTS.SLOT_BOOKED,
+        });
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+        d.bookingsRepo.findSlotForUpdate.mockImplementation(
+          async (_tx: unknown, id: string) =>
+            id === TARGET_ID ? target : origin,
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-2',
+          resourceRefType: 'practitioner_profiles',
+          resourceRefId: HP,
+        });
+        return { booking, target, origin };
+      }
+
+      it('rechaza mover la cita a un cupo cuyo rango se pisa con otra cita comprometida de la misma médica', async () => {
+        const d = build();
+        const { target } = montar(d);
+        d.tiempoProfesional.assertRangoLibre.mockRejectedValue(
+          new PreconditionFailedException(
+            'El profesional ya tiene una cita de esa hora. No puede estar en dos lugares a la vez.',
+            { bookingId: 'booking-otra' },
+          ),
+        );
+
+        await expect(
+          d.service.reschedule(
+            'booking-1',
+            { toSlotId: TARGET_ID, reasonText: MOTIVO },
+            actor as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // Se preguntó por el rango del cupo DESTINO, de la médica dueña del
+        // recurso destino, y sin compararse con la propia cita que se mueve.
+        expect(d.tiempoProfesional.assertRangoLibre).toHaveBeenCalledWith(
+          d.tx,
+          HP,
+          target.startAt,
+          target.endAt,
+          'booking-1',
+        );
+        // Y no se movió nada.
+        expect(target.remainingCapacity).toBe(1);
+        expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+      });
+
+      it('rechaza mover la cita encima de otro turno confirmado del mismo paciente', async () => {
+        const d = build();
+        const { target } = montar(d);
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'booking-9',
+            startAt: target.startAt,
+            endAt: target.endAt,
+            statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+            resourceName: 'Consultorio Norte',
+          },
+        ]);
+
+        await expect(
+          d.service.reschedule(
+            'booking-1',
+            { toSlotId: TARGET_ID, reasonText: MOTIVO },
+            actor as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        expect(
+          d.bookingsRepo.findPatientBookingsOverlapping,
+        ).toHaveBeenCalledWith(
+          d.tx,
+          PATIENT,
+          target.startAt,
+          target.endAt,
+          [CONCEPTS.BOOKING_CONFIRMED, CONCEPTS.BOOKING_CHECKED_IN],
+          'booking-1',
+        );
+        expect(target.remainingCapacity).toBe(1);
+        expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+      });
+
+      it('con el rango libre, mueve la cita y la deja atribuida al recurso del cupo destino', async () => {
+        const d = build();
+        const { booking, target } = montar(d);
+
+        const res = await d.service.reschedule(
+          'booking-1',
+          { toSlotId: TARGET_ID, reasonText: MOTIVO },
+          actor as any,
+        );
+
+        expect(res.toSlotId).toBe(TARGET_ID);
+        expect(target.remainingCapacity).toBe(0);
+        // Sin esto la regla madre seguía atribuyendo la cita movida al
+        // recurso viejo (su consulta une por el recurso de la cita).
+        expect(booking.resourceId).toBe('res-2');
+        expect(booking.bookableSlotId).toBe(TARGET_ID);
+      });
+
+      it('un recurso que no es de un profesional (una sala) no pasa por la regla madre', async () => {
+        const d = build();
+        montar(d);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-2',
+          resourceRefType: 'rooms',
+          resourceRefId: 'sala-3',
+        });
+
+        await d.service.reschedule(
+          'booking-1',
+          { toSlotId: TARGET_ID, reasonText: MOTIVO },
+          actor as any,
+        );
+
+        expect(d.tiempoProfesional.assertRangoLibre).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+      });
+
+      /*
+       * M4 · H1.S2.M3 — el paciente reprograma SU turno. La ruta ya lo admitía
+       * (`@Roles(..., 'PATIENT')`) y comprobaba titularidad, pero ningún spec
+       * cubría el caso feliz del paciente: todos usaban al mostrador.
+       */
+      it('el paciente titular reprograma su propio turno', async () => {
+        const d = build();
+        const { booking } = montar(d);
+        const paciente = { id: 'user-paciente', roles: ['PATIENT'] };
+
+        const res = await d.service.reschedule(
+          'booking-1',
+          { toSlotId: TARGET_ID, reasonText: MOTIVO },
+          paciente as any,
+        );
+
+        expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+          PATIENT,
+          paciente,
+          d.tx,
+        );
+        expect(res).toEqual({
+          bookingId: 'booking-1',
+          fromSlotId: SLOT_ID,
+          toSlotId: TARGET_ID,
+        });
+        expect(booking.bookableSlotId).toBe(TARGET_ID);
+        expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('cancel (UC-41-09) — snapshot-based window (CAN-APT-001)', () => {

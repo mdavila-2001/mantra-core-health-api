@@ -17,6 +17,9 @@ import {
   ContainerCustodyEventDto,
   ResourceCreatedDto,
   AccessionCreatedDto,
+  AccessionDetailDto,
+  AccessionSpecimenDetailDto,
+  SpecimenDetailDto,
 } from '../dto';
 
 /**
@@ -278,6 +281,139 @@ export class DiagnosticsSpecimensService {
 
       return { id: custody.id, status: container.statusConceptId };
     });
+  }
+
+  /**
+   * Lectura (CL-47): detalle de una acesión con sus especímenes, contenedores
+   * y cadena de custodia. Acotada al tenant del actor — otro laboratorio
+   * recibe 404, no 403, para no confirmar que el id existe.
+   */
+  async getAccession(
+    id: string,
+    custodianTenantId: string,
+  ): Promise<AccessionDetailDto> {
+    const em = this.em.fork();
+    const accession = await this.repo.findAccessionForTenant(
+      em,
+      id,
+      custodianTenantId,
+    );
+    if (!accession) {
+      throw new ResourceNotFoundException('Acesión no encontrada', { id });
+    }
+
+    const items = await this.repo.findAccessionSpecimens(em, id);
+    const specimenIds = items.map((item) => item.specimenId);
+    const [specimenes, contenedores, custodia] = await Promise.all([
+      this.repo.findSpecimensByIds(em, specimenIds),
+      this.repo.findContainersBySpecimenIds(em, specimenIds),
+      this.repo.findCustodyEventsBySpecimenIds(em, specimenIds),
+    ]);
+    const specimenPorId = new Map(specimenes.map((s) => [s.id, s]));
+
+    const specimens: AccessionSpecimenDetailDto[] = [];
+    for (const item of items) {
+      const specimen = specimenPorId.get(item.specimenId);
+      if (!specimen) continue; // No debería pasar: FK íntegra, defensivo.
+      specimens.push({
+        accessionSpecimenId: item.id,
+        sequenceNumber: item.sequenceNumber,
+        statusConceptId: item.statusConceptId,
+        specimen: this.toSpecimenDetail(
+          specimen,
+          contenedores.filter((c) => c.specimenId === specimen.id),
+          custodia.filter((c) => c.specimenId === specimen.id),
+        ),
+      });
+    }
+
+    return {
+      id: accession.id,
+      custodianTenantId: accession.custodianTenantId,
+      patientProfileId: accession.patientProfileId,
+      accessionNumber: accession.accessionNumber,
+      receivedAt: accession.receivedAt,
+      priorityConceptId: accession.priorityConceptId,
+      statusConceptId: accession.statusConceptId,
+      specimens,
+    };
+  }
+
+  /**
+   * Lectura (CL-47): detalle de un espécimen con su cadena de custodia.
+   * Mismo criterio de aislamiento que {@link getAccession}.
+   */
+  async getSpecimen(
+    id: string,
+    custodianTenantId: string,
+  ): Promise<SpecimenDetailDto> {
+    const em = this.em.fork();
+    const specimen = await this.repo.findSpecimenForTenant(
+      em,
+      id,
+      custodianTenantId,
+    );
+    if (!specimen) {
+      throw new ResourceNotFoundException('Espécimen no encontrado', { id });
+    }
+    const [contenedores, custodia] = await Promise.all([
+      this.repo.findContainersBySpecimenIds(em, [id]),
+      this.repo.findCustodyEventsBySpecimenIds(em, [id]),
+    ]);
+    return this.toSpecimenDetail(specimen, contenedores, custodia);
+  }
+
+  /** Proyecta un espécimen, sus contenedores y su custodia al DTO de lectura. */
+  private toSpecimenDetail(
+    specimen: {
+      id: string;
+      patientProfileId: string;
+      specimenTypeConceptId: string;
+      statusConceptId: string;
+      collectedAt?: Date;
+      receivedAt?: Date;
+    },
+    containers: readonly {
+      id: string;
+      containerIdentifier: string;
+      containerTypeConceptId: string;
+      statusConceptId: string;
+    }[],
+    custodyEvents: readonly {
+      id: string;
+      specimenContainerId?: string;
+      custodyEventTypeConceptId: string;
+      occurredAt: Date;
+      fromPartyTypeConceptId?: string;
+      toPartyTypeConceptId?: string;
+      sealIdentifier?: string;
+      signedByUserId?: string;
+    }[],
+  ): SpecimenDetailDto {
+    return {
+      id: specimen.id,
+      patientProfileId: specimen.patientProfileId,
+      specimenTypeConceptId: specimen.specimenTypeConceptId,
+      statusConceptId: specimen.statusConceptId,
+      collectedAt: specimen.collectedAt,
+      receivedAt: specimen.receivedAt,
+      containers: containers.map((c) => ({
+        id: c.id,
+        containerIdentifier: c.containerIdentifier,
+        containerTypeConceptId: c.containerTypeConceptId,
+        statusConceptId: c.statusConceptId,
+      })),
+      custodyEvents: custodyEvents.map((e) => ({
+        id: e.id,
+        specimenContainerId: e.specimenContainerId,
+        custodyEventTypeConceptId: e.custodyEventTypeConceptId,
+        occurredAt: e.occurredAt,
+        fromPartyTypeConceptId: e.fromPartyTypeConceptId,
+        toPartyTypeConceptId: e.toPartyTypeConceptId,
+        sealIdentifier: e.sealIdentifier,
+        signedByUserId: e.signedByUserId,
+      })),
+    };
   }
 
   /** Resuelve el tenant custodio del espécimen para acesiones sin tenant explícito. */

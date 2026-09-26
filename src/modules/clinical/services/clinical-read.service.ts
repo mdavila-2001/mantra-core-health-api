@@ -1,13 +1,16 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../common';
+import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/repositories';
 import { diaLocalDe } from '../../scheduling/scheduling-time';
 import {
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones de alergia, independiente del
+  // repositorio de M3.
+  AllergyReactionsReadRepository,
   CareEpisodesRepository,
   ConditionsRepository,
   EncountersRepository,
@@ -35,7 +38,24 @@ import { AuthzPdpService } from '../../authz/services';
 // parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
 import { CareRelationshipsRepository } from '../../authz/repositories';
 import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
+// N-04 (BR-13 / M3): toda lectura del resumen clínico deja su fila en
+// `audit.data_access_log`, como ya hace el break-the-glass. Repositorio sin
+// estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de
+// `AuditModule` (que sólo exporta la cadena WORM de mutaciones).
+import { DataAccessLogRepository } from '../../audit/repositories';
+// BR-14 (CL-10): el motivo del último cambio de estado de una condición vive
+// en `audit.conditions_history.data_snapshot` (decisión D-BR14-04, sin
+// columna nueva). `HistoryRepository.latestBySource` ya resuelve "última
+// revisión por agregado en lote" para cualquier dominio registrado — se
+// reutiliza en vez de escribir la misma consulta de nuevo.
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
+
+/** Recurso que se asienta en `audit.data_access_log` al leer el resumen. */
+const SUMMARY_RESOURCE_TYPE = 'PATIENT_CLINICAL_SUMMARY';
+/** Propósito de uso que respalda la lectura del resumen: la atención. */
+const SUMMARY_PURPOSE = 'TREATMENT';
 
 /**
  * Cara de lectura del registro clínico (UC-39-20).
@@ -116,6 +136,7 @@ export class ClinicalReadService {
     private readonly em: EntityManager,
     private readonly conditionsRepo: ConditionsRepository,
     private readonly allergiesRepo: AllergyIntolerancesRepository,
+    private readonly allergyReactionsRepo: AllergyReactionsReadRepository,
     private readonly medicationRequestsRepo: MedicationRequestsRepository,
     private readonly observationsRepo: ObservationsRepository,
     private readonly encountersRepo: EncountersRepository,
@@ -130,6 +151,10 @@ export class ClinicalReadService {
     // B.1 — la historia de un menor la lee también quien lo representa. Quién
     // representa a quién lo sabe `profiles`; acá sólo se pregunta.
     private readonly representation: PatientRepresentationService,
+    // N-04 — la lectura del resumen se asienta en `audit.data_access_log`.
+    private readonly dataAccessLogRepo: DataAccessLogRepository,
+    // BR-14 (CL-10) — el motivo del último cambio de estado de una condición.
+    private readonly historyRepo: HistoryRepository,
   ) {
     this.logger.setContext(ClinicalReadService.name);
   }
@@ -224,6 +249,26 @@ export class ClinicalReadService {
       return;
     }
 
+    // BR-20 / CV-19: el acceso de emergencia (`break-the-glass`) es un grant con
+    // propósito EMERGENCY y nivel ELEVATED que emite el propio módulo `authz`,
+    // auditado y con ventana corta. El PDP compara propósito con propósito, así
+    // que la pregunta por TREATMENT de arriba lo deja afuera: la médica que
+    // acababa de obtener el 201 de la emergencia seguía recibiendo 403 al abrir
+    // la historia (verificado contra la API viva el 2026-09-26 con una cuenta
+    // CLINICAL_APPROVER real; SUPERADMIN no lo mostraba porque pasa antes). Se
+    // pregunta también por EMERGENCY. No exige `practitionerProfileId`: el grant
+    // se otorga al usuario, no al perfil profesional.
+    if (
+      await this.tieneAccesoAutorizado(
+        patientProfileId,
+        actor,
+        'READ',
+        'EMERGENCY',
+      )
+    ) {
+      return;
+    }
+
     // Sin turno hoy ni autorización vigente no alcanza el rol; queda la
     // titularidad, que además cubre al profesional que lee su propia historia.
     await this.assertOwnRecord(patientProfileId, actor, link);
@@ -287,6 +332,19 @@ export class ClinicalReadService {
       ) {
         return;
       }
+      // Mismo caso que en la lectura: el grant de emergencia (EMERGENCY,
+      // ELEVATED) sólo aparece si se pregunta por su propósito. El nivel lo
+      // sigue decidiendo el PDP (`CLINICAL_LEVEL_RANK`), no este servicio.
+      if (
+        await this.tieneAccesoAutorizado(
+          patientProfileId,
+          actor,
+          'WRITE',
+          'EMERGENCY',
+        )
+      ) {
+        return;
+      }
     }
 
     throw new ForbiddenException(SIN_ACCESO_A_LA_HISTORIA);
@@ -304,6 +362,7 @@ export class ClinicalReadService {
     patientProfileId: string,
     actor: AuthenticatedUser,
     action: 'READ' | 'WRITE' = 'READ',
+    purposeOfUse: 'TREATMENT' | 'EMERGENCY' = 'TREATMENT',
   ): Promise<boolean> {
     const tenantId = actor.tenantIds?.[0];
     if (!tenantId) return false;
@@ -315,7 +374,7 @@ export class ClinicalReadService {
         action,
         patientProfileId,
         practitionerProfileId: actor.practitionerProfileId,
-        purposeOfUse: 'TREATMENT',
+        purposeOfUse,
       },
       actor,
     );
@@ -556,14 +615,22 @@ export class ClinicalReadService {
   /**
    * UC-39-20: historial clínico del paciente.
    *
+   * N-04 (BR-13): la lectura **deja rastro** en `audit.data_access_log` —quién,
+   * qué paciente, con qué propósito—, en el mismo `EntityManager` de la
+   * lectura y **antes** de devolver nada: si el asiento no se puede escribir,
+   * el resumen no se sirve (fail-closed, mismo criterio que el break-the-glass
+   * de `authz`). El asiento lleva identificadores, nunca contenido clínico.
+   *
    * @param patientProfileId - Paciente cuyo historial se lee.
    * @param limit - Tope por bloque.
+   * @param actor - Quién lee; ya autorizado por `ClinicalRecordAccessGuard`.
    * @returns Condiciones, alergias, medicación, observaciones, encuentros y
    *          episodios de cuidado.
    */
   async getPatientSummary(
     patientProfileId: string,
     limit: number,
+    actor: AuthenticatedUser,
   ): Promise<PatientClinicalSummaryResponseDto> {
     this.logger.info(
       { operation: 'clinical.patient.read', patientProfileId, limit },
@@ -572,6 +639,18 @@ export class ClinicalReadService {
 
     const em = this.em.fork();
     const over = limit + 1;
+
+    this.dataAccessLogRepo.record(em, {
+      userId: actor.id,
+      actionConceptId: AUD.ACTION_READ,
+      patientProfileId,
+      tenantId: getCurrentTenantId(),
+      purpose: SUMMARY_PURPOSE,
+      resourceType: SUMMARY_RESOURCE_TYPE,
+      resourceId: patientProfileId,
+      recordedByUserId: actor.id,
+    });
+    await em.flush();
 
     const [
       conditions,
@@ -590,11 +669,52 @@ export class ClinicalReadService {
     ]);
 
     const truncated: string[] = [];
+    const cutConditions = this.cut(conditions, limit, 'conditions', truncated);
+    const cutAllergies = this.cut(allergies, limit, 'allergies', truncated);
+
+    // BR-14 (CL-10): última revisión de cada condición, en lote, para leer el
+    // motivo del último cambio de estado desde `data_snapshot` (decisión
+    // D-BR14-04, sin columna nueva).
+    const conditionHistory = await this.historyRepo.latestBySource(
+      em,
+      'conditions',
+      cutConditions.map((c) => c.id),
+    );
+    // BR-14 (CL-11): reacciones de cada alergia, en lote.
+    const reactionsByAllergy = new Map<
+      string,
+      {
+        id: string;
+        manifestationConceptId: string;
+        severityConceptId?: string;
+        description?: string;
+      }[]
+    >();
+    const reactions = await this.allergyReactionsRepo.findByAllergyIds(
+      em,
+      cutAllergies.map((a) => a.id),
+    );
+    for (const reaction of reactions) {
+      const list = reactionsByAllergy.get(reaction.allergyId) ?? [];
+      list.push({
+        id: reaction.id,
+        manifestationConceptId: reaction.manifestationConceptId,
+        severityConceptId: reaction.severityConceptId,
+        description: reaction.description,
+      });
+      reactionsByAllergy.set(reaction.allergyId, list);
+    }
 
     return {
       patientProfileId,
-      conditions: this.cut(conditions, limit, 'conditions', truncated).map(
-        (row) => ({
+      conditions: cutConditions.map((row) => {
+        const snapshot = conditionHistory.get(row.id)?.dataSnapshot as
+          Record<string, unknown> | undefined;
+        const lastStatusChangeReasonText =
+          typeof snapshot?.statusChangeReasonText === 'string'
+            ? snapshot.statusChangeReasonText
+            : undefined;
+        return {
           id: row.id,
           codeConceptId: row.codeConceptId,
           categoryConceptId: row.categoryConceptId,
@@ -603,24 +723,26 @@ export class ClinicalReadService {
           severityConceptId: row.severityConceptId,
           encounterId: row.encounterId,
           clinicalCourseConceptId: row.clinicalCourseConceptId,
+          lateralityConceptId: row.lateralityConceptId,
           onsetAt: row.onsetAt,
           expectedResolutionAt: row.expectedResolutionAt,
           resolvedAt: row.resolvedAt,
           noteText: row.noteText,
+          lastStatusChangeReasonText,
           createdAt: row.createdAt,
-        }),
-      ),
-      allergies: this.cut(allergies, limit, 'allergies', truncated).map(
-        (row) => ({
-          id: row.id,
-          substanceConceptId: row.substanceConceptId,
-          typeConceptId: row.typeConceptId,
-          categoryConceptId: row.categoryConceptId,
-          criticalityConceptId: row.criticalityConceptId,
-          clinicalStatusConceptId: row.clinicalStatusConceptId,
-          createdAt: row.createdAt,
-        }),
-      ),
+        };
+      }),
+      allergies: cutAllergies.map((row) => ({
+        id: row.id,
+        substanceConceptId: row.substanceConceptId,
+        encounterId: row.encounterId,
+        typeConceptId: row.typeConceptId,
+        categoryConceptId: row.categoryConceptId,
+        criticalityConceptId: row.criticalityConceptId,
+        clinicalStatusConceptId: row.clinicalStatusConceptId,
+        reactions: reactionsByAllergy.get(row.id) ?? [],
+        createdAt: row.createdAt,
+      })),
       medicationRequests: this.cut(
         medicationRequests,
         limit,
@@ -631,12 +753,14 @@ export class ClinicalReadService {
         medicationConceptId: row.medicationConceptId,
         statusConceptId: row.statusConceptId,
         prescriberProfileId: row.prescriberProfileId,
+        encounterId: row.encounterId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
         indicationConditionId: row.indicationConditionId,
+        indicationText: row.indicationText,
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,
@@ -670,6 +794,7 @@ export class ClinicalReadService {
           reasonText: row.reasonText,
           startAt: row.startAt,
           endAt: row.endAt,
+          rowVersion: row.rowVersion,
         }),
       ),
       careEpisodes: this.cut(

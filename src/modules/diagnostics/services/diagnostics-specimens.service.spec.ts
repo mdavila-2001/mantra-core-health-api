@@ -23,7 +23,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const forked = {};
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => forked),
+  };
   const repo = {
     findSpecimen: mockFn(),
     findAccession: mockFn(),
@@ -36,6 +40,12 @@ function build() {
     createContainer: mockFn(),
     recordContainerEvent: mockFn(),
     cancelTestsForSpecimen: mockFn().mockResolvedValue(0),
+    findAccessionForTenant: mockFn(),
+    findAccessionSpecimens: mockFn().mockResolvedValue([]),
+    findSpecimenForTenant: mockFn(),
+    findSpecimensByIds: mockFn().mockResolvedValue([]),
+    findContainersBySpecimenIds: mockFn().mockResolvedValue([]),
+    findCustodyEventsBySpecimenIds: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new DiagnosticsSpecimensService(
@@ -193,6 +203,119 @@ describe('DiagnosticsSpecimensService', () => {
       expect(res.id).toBe('cust1');
       expect(container.statusConceptId).toBe(DIAG.CONTAINER_STORED);
       expect(d.repo.recordContainerEvent).toHaveBeenCalled();
+    });
+  });
+
+  describe('getAccession (CL-47, lectura)', () => {
+    it('aceptado: arma el detalle con especímenes, contenedores y custodia', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue({
+        id: 'acc1',
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        accessionNumber: 'ACC-1',
+        receivedAt: new Date('2026-01-01'),
+        priorityConceptId: 'prio1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+      d.repo.findAccessionSpecimens.mockResolvedValue([
+        {
+          id: 'as1',
+          specimenId: 's1',
+          sequenceNumber: 1,
+          statusConceptId: 'st1',
+        },
+      ]);
+      d.repo.findSpecimensByIds.mockResolvedValue([
+        {
+          id: 's1',
+          patientProfileId: 'p1',
+          specimenTypeConceptId: 'type1',
+          statusConceptId: DIAG.SPECIMEN_RECEIVED,
+        },
+      ]);
+      d.repo.findContainersBySpecimenIds.mockResolvedValue([
+        {
+          id: 'c1',
+          specimenId: 's1',
+          containerIdentifier: 'CONT-1',
+          containerTypeConceptId: 'ct1',
+          statusConceptId: DIAG.CONTAINER_ACTIVE,
+        },
+      ]);
+      d.repo.findCustodyEventsBySpecimenIds.mockResolvedValue([
+        {
+          id: 'cust1',
+          specimenId: 's1',
+          custodyEventTypeConceptId: DIAG.CUSTODY_RECEPTION,
+          occurredAt: new Date('2026-01-01'),
+        },
+      ]);
+
+      const res = await d.service.getAccession('acc1', 't1');
+
+      expect(res.id).toBe('acc1');
+      expect(res.specimens).toHaveLength(1);
+      expect(res.specimens[0].specimen.containers).toHaveLength(1);
+      expect(res.specimens[0].specimen.custodyEvents).toHaveLength(1);
+    });
+
+    it('límite: una acesión sin especímenes todavía devuelve la lista vacía', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue({
+        id: 'acc1',
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        accessionNumber: 'ACC-1',
+        receivedAt: new Date('2026-01-01'),
+        priorityConceptId: 'prio1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+
+      const res = await d.service.getAccession('acc1', 't1');
+
+      expect(res.specimens).toEqual([]);
+    });
+
+    it('inválido: 404 si la acesión no existe o es de otro tenant', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue(null);
+      await expect(d.service.getAccession('acc1', 't1')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.repo.findAccessionForTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        'acc1',
+        't1',
+      );
+    });
+  });
+
+  describe('getSpecimen (CL-47, lectura)', () => {
+    it('aceptado: arma el detalle con contenedores y custodia', async () => {
+      const d = build();
+      d.repo.findSpecimenForTenant.mockResolvedValue({
+        id: 's1',
+        patientProfileId: 'p1',
+        specimenTypeConceptId: 'type1',
+        statusConceptId: DIAG.SPECIMEN_RECEIVED,
+      });
+      d.repo.findContainersBySpecimenIds.mockResolvedValue([]);
+      d.repo.findCustodyEventsBySpecimenIds.mockResolvedValue([]);
+
+      const res = await d.service.getSpecimen('s1', 't1');
+
+      expect(res.id).toBe('s1');
+      expect(res.containers).toEqual([]);
+      expect(res.custodyEvents).toEqual([]);
+    });
+
+    it('inválido: 404 si el espécimen no existe o es de otro tenant', async () => {
+      const d = build();
+      d.repo.findSpecimenForTenant.mockResolvedValue(null);
+      await expect(d.service.getSpecimen('s1', 't2')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
     });
   });
 });

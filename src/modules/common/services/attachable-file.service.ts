@@ -36,6 +36,17 @@ export interface AttachableFileOptions {
   readonly allowedCategoryConceptId?: string;
   /** Operación que se está intentando, para el log de rechazos. */
   readonly operation?: string;
+  /**
+   * Archivos que no necesitan ser del actor para poder referenciarse (AG-17).
+   *
+   * Pensado para un catálogo cerrado y del sistema —el pack de stickers del
+   * producto es el primer caso—, no para abrir la comprobación de propiedad
+   * en general: quien pase esta lista sigue pasando por
+   * {@link AttachableFileService.assertVersionUsable} (vivo, con versión
+   * vigente, sin infectar, del tipo admitido). Un id que no está en la lista
+   * sigue exigiendo dueño, exactamente como antes.
+   */
+  readonly allowIfFileIdIn?: readonly string[];
 }
 
 const DEFAULT_LABELS: AttachableFileLabels = {
@@ -120,7 +131,8 @@ export class AttachableFileService {
     if (!file) {
       throw new ResourceNotFoundException(labels.notFound, { fileId });
     }
-    if (file.createdByUserId !== actor.id) {
+    const enAllowlist = options.allowIfFileIdIn?.includes(fileId) ?? false;
+    if (file.createdByUserId !== actor.id && !enAllowlist) {
       this.logger.warn(
         { operation: options.operation, fileId, actorId: actor.id },
         'Refused to reference a file uploaded by someone else',

@@ -354,6 +354,80 @@ export class ModerationAppealItemDto {
   decision?: ModerationDecisionItemDto | null;
 }
 
+/** Query de `GET /community/moderation/decisions/mine` (AG-18, BR-27). */
+@ApiSchema({ name: 'CommunityMyModerationDecisionsQueryDto' })
+export class MyModerationDecisionsQueryDto {
+  /** El propio perfil, cuya titularidad comprueba el servicio. */
+  @ApiProperty({ description: 'Perfil propio', format: 'uuid' })
+  @IsUUID()
+  profileId!: string;
+
+  /** Cursor opaco de la página anterior. */
+  @ApiPropertyOptional({ description: 'Cursor de la página anterior' })
+  @IsOptional()
+  cursor?: string;
+
+  /** Tope de filas. */
+  @ApiPropertyOptional({ description: 'Tope de filas', minimum: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  limit?: number;
+}
+
+/**
+ * Una decisión propia, vista por quien la sufrió (AG-18).
+ *
+ * Deliberadamente **no** trae quién denunció ni notas internas del moderador:
+ * el autor tiene derecho a saber qué política se le aplicó, con qué motivo y
+ * si puede apelar — no a leer el expediente de moderación entero. Ver
+ * `CommunityModerationReadService.listMyDecisions`.
+ */
+export class MyModerationDecisionItemDto {
+  /** Identificador de la decisión, el que viaja en `POST .../appeal`. */
+  @ApiProperty({ format: 'uuid' })
+  decisionId!: string;
+
+  /** Concept id de la política aplicada. */
+  @ApiProperty({ format: 'uuid' })
+  policyConceptId!: string;
+
+  /** Concept id de la decisión tomada (removido, restringido, advertido). */
+  @ApiProperty({ format: 'uuid' })
+  decisionConceptId!: string;
+
+  /** Motivo escrito por quien decidió. */
+  @ApiPropertyOptional()
+  rationaleText?: string | null;
+
+  /** Cuándo se decidió. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  decidedAt?: Date | null;
+
+  /** `false` si ya hay una apelación abierta para esta decisión. */
+  @ApiProperty()
+  appealable!: boolean;
+}
+
+/** Página de decisiones propias. */
+export class MyModerationDecisionPageDto {
+  /** Decisiones de la página. */
+  @ApiProperty({ type: [MyModerationDecisionItemDto] })
+  items!: MyModerationDecisionItemDto[];
+
+  /** Cuántas trae esta página. */
+  @ApiProperty()
+  count!: number;
+
+  /** Tope pedido. */
+  @ApiProperty()
+  limit!: number;
+
+  /** Cursor de la página siguiente, o `null` si no hay más. */
+  @ApiPropertyOptional({ nullable: true })
+  nextCursor?: string | null;
+}
+
 /** Página de apelaciones. */
 export class ModerationAppealPageDto {
   /** Apelaciones de la página. */

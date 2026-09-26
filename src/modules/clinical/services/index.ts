@@ -1,6 +1,10 @@
 export * from './care-episodes.service';
 export * from './encounters.service';
 export * from './encounter-seal.service';
+// BR-14 (CL-07): guarda independiente que rechaza escrituras sobre un
+// encuentro ya sellado. Archivo y clase nuevos (no modifica
+// `EncounterSealService`), exportada para que `ChartModule` la use también.
+export * from './encounter-seal-guard.service';
 export * from './observations.service';
 export * from './service-requests.service';
 export * from './duplicate-study-detector';
@@ -8,6 +12,7 @@ export * from './diagnostic-reports.service';
 export * from './conditions.service';
 export * from './allergy-intolerances.service';
 export * from './medications.service';
+export * from './medical-aspects.service';
 export * from './prescription-signature-policies.service';
 export * from './procedures.service';
 export * from './immunizations.service';

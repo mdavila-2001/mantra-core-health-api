@@ -31,7 +31,8 @@ export function syntheticNationalId(key: string): string {
 
 /** Celular boliviano sintético: 8 dígitos, empieza con 6 o 7 (líneas móviles). */
 export function syntheticMobilePhone(key: string): string {
-  const prefijo = hexDigits(`seed:synthetic:phone-prefix:${key}`) % 2n === 0n ? '6' : '7';
+  const prefijo =
+    hexDigits(`seed:synthetic:phone-prefix:${key}`) % 2n === 0n ? '6' : '7';
   return prefijo + digits(`seed:synthetic:phone:${key}`, 7);
 }
 
@@ -49,7 +50,7 @@ export function syntheticBirthDate(key: string): string {
 function slugNombre(texto: string): string {
   return texto
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '')
     .trim();

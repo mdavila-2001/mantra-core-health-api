@@ -71,4 +71,16 @@ export class ReferralsController {
   ) {
     return this.referralsService.listByPatient(patientProfileId);
   }
+
+  /**
+   * CV-10 — el paciente lee sus propias derivaciones. La persona sale de la
+   * cuenta, nunca de un id que el cliente pudiera manipular; por eso pisa el
+   * `@Roles` de clase con uno propio en vez de reutilizar `listByPatient`.
+   */
+  @Get('me')
+  @Roles('PATIENT')
+  @ApiOperation({ summary: 'Mis derivaciones' })
+  listMine(@CurrentUser() actor: AuthenticatedUser) {
+    return this.referralsService.listMine(actor);
+  }
 }

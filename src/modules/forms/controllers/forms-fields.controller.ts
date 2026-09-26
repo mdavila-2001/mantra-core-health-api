@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import {
   UpsertLocalizationDto,
   CreateAccessRuleDto,
   IdResponseDto,
+  OkResultDto,
+  UpdateFieldDefinitionDto,
 } from '../dto';
 
 /**
@@ -37,6 +40,8 @@ export class FormsFieldsController {
 
   /** UC-09-02. */
   @Post('field-definitions')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Declarar una definición de campo con reglas de validación',
@@ -48,8 +53,27 @@ export class FormsFieldsController {
     return this.fieldsService.createFieldDefinition(dto, actor);
   }
 
+  /**
+   * CL-61 / CL-69: corrige nombre o tipo de un campo **propio**. Sólo lo que
+   * el modelo ya tiene (D-D registra el resto). Cambiar el tipo con valores
+   * capturados es 409: no se reescribe la historia clínica.
+   */
+  @Patch('field-definitions/:id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir el nombre o el tipo de un campo propio' })
+  updateFieldDefinition(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateFieldDefinitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.fieldsService.updateFieldDefinition(id, dto, actor);
+  }
+
   /** UC-09-04. */
   @Post('fields/:id/dependencies')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Definir dependencias condicionales entre campos' })
   addDependency(
@@ -62,6 +86,8 @@ export class FormsFieldsController {
 
   /** UC-09-05. */
   @Put('fields/:id/localizations/:lang')
+  // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Localizar (i18n) una definición de campo' })
   upsertLocalization(

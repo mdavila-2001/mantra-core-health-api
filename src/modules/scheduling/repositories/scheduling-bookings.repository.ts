@@ -803,6 +803,10 @@ export class SchedulingBookingsRepository {
       timeZone: string | null;
       patientProfileId: string;
     }[] = await em.getConnection().execute(
+      // El recurso sale del CUPO (`bookable_slots.resource_id`, NOT NULL), igual
+      // que el horario: `appointment_bookings.resource_id` es NULLable y la
+      // reprogramación lo dejaba en el recurso viejo, así que unir por ahí
+      // volvía invisible una cita para la regla madre (M4 · H1.S1.M4).
       `SELECT b.id,
               s.start_at          AS "startAt",
               s.end_at            AS "endAt",
@@ -812,7 +816,7 @@ export class SchedulingBookingsRepository {
               b.patient_profile_id AS "patientProfileId"
          FROM scheduling.appointment_bookings b
          JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
-         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+         JOIN scheduling.schedulable_resources r ON r.id = s.resource_id
         WHERE r.resource_ref_id = ?
           AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
           AND b.status_concept_id IN (?)

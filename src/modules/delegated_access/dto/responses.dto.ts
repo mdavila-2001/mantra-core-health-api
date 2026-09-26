@@ -21,6 +21,58 @@ export class ResourceCreatedDto {
   createdAt!: Date;
 }
 
+/** Un set de permisos delegados, para el listado del hub (CV-13). */
+export class PermissionSetSummaryDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Código del set, único dentro del tenant. */
+  @ApiProperty()
+  code!: string;
+
+  /** Nombre visible del set. */
+  @ApiProperty()
+  name!: string;
+
+  /** Concepto del tipo de delegado al que aplica. */
+  @ApiProperty({ format: 'uuid' })
+  delegateTypeConceptId!: string;
+
+  /** Descripción libre, si se publicó una. */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /** Concepto de estado del set. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Versión publicada más reciente. */
+  @ApiProperty()
+  versionNumber!: number;
+
+  /** Fecha de creación del set. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+}
+
+/** Página de sets de permisos delegados del tenant del actor. */
+export class ListPermissionSetsResponseDto {
+  /** Sets de esta página, ordenados por `id`. */
+  @ApiProperty({ type: [PermissionSetSummaryDto] })
+  items!: PermissionSetSummaryDto[];
+
+  /** Cantidad devuelta en esta página. */
+  @ApiProperty() count!: number;
+
+  /** Tope aplicado a la consulta. */
+  @ApiProperty() limit!: number;
+
+  /** Cursor opaco de continuación, o `null` si ésta es la última página. */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}
+
 /** Respuesta de publicación de set/versión de permisos delegados. */
 export class PermissionSetVersionDto {
   /**

@@ -43,7 +43,7 @@ export function requireTenantId(): string {
   if (!tenantId) {
     throw new PreconditionFailedException(
       'La operación requiere un tenant: indique X-Tenant-Id.',
-      {},
+      { reason: 'TENANT_REQUIRED' },
     );
   }
   return tenantId;

@@ -19,6 +19,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { CHART } from '../chart.concepts';
 
 const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
 
@@ -165,6 +166,113 @@ describe('EncounterPdfService', () => {
     expect(d.personsRepo.findById).toHaveBeenCalledWith(
       expect.anything(),
       'person-pat',
+    );
+  });
+});
+
+/**
+ * BR-15 (CL-31): la variante del titular. `actor.patientProfileId` sale del
+ * claim `pid` (patrón `forms-me.controller.ts`), nunca de la ruta.
+ */
+describe('EncounterPdfService.renderForPatient (BR-15/CL-31)', () => {
+  const titular = {
+    id: 'user-pat',
+    roles: ['PATIENT'],
+    patientProfileId: 'pat-1',
+  } as any;
+
+  it('404 si la sesión no tiene perfil de paciente', async () => {
+    const d = build();
+    await expect(
+      d.service.renderForPatient('enc1', { id: 'x', roles: [] } as any),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('404 si el encuentro es de otro paciente (mismo mensaje que "no existe")', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...encounterFinished(),
+      patientProfileId: 'otro-paciente',
+    });
+    await expect(
+      d.service.renderForPatient('enc1', titular),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('422 si el encuentro no está cerrado', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      ...encounterFinished(),
+      statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
+      contentHash: undefined,
+    });
+    await expect(
+      d.service.renderForPatient('enc1', titular),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('el PDF del titular pide la versión liberada, nunca la vigente en borrador', async () => {
+    // pdfkit comprime el stream de contenido por defecto: no se puede buscar
+    // texto plano en el buffer resultante (a diferencia del hash del sello,
+    // que va sin comprimir en los metadatos del documento — ver el test de
+    // `render()`). Se comprueba en el punto exacto de la diferencia: qué id
+    // de versión se pide.
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue(encounterFinished());
+    const service: any = d.service;
+    service.notesRepo = {
+      findHeadersByEncounter: mockFn().mockResolvedValue([
+        {
+          id: 'h1',
+          currentVersionId: 'draft-v2',
+          currentReleasedVersionId: 'released-v1',
+        },
+      ]),
+      findVersionsByIds: mockFn().mockResolvedValue(new Map()),
+    };
+
+    await service.renderForPatient('enc1', titular);
+
+    expect(service.notesRepo.findVersionsByIds).toHaveBeenCalledWith(
+      expect.anything(),
+      ['released-v1'],
+    );
+  });
+
+  it('el PDF del titular excluye documentos sólo para el profesional', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue(encounterFinished());
+    const service: any = d.service;
+    service.documentsRepo = {
+      findByEncounter: mockFn().mockResolvedValue([
+        {
+          id: 'doc-visible',
+          patientVisibilityConceptId: CHART.VISIBILITY_PATIENT_VISIBLE,
+          files: [{ fileId: 'f-visible' }],
+        },
+        {
+          id: 'doc-oculto',
+          patientVisibilityConceptId: CHART.VISIBILITY_PROVIDER_ONLY,
+          files: [{ fileId: 'f-oculto' }],
+        },
+      ]),
+    };
+    service.filesRepo = {
+      findById: mockFn((_em: unknown, id: string) =>
+        Promise.resolve({ id, originalName: `${id}.pdf` }),
+      ),
+    };
+
+    await service.renderForPatient('enc1', titular);
+
+    expect(service.filesRepo.findById).toHaveBeenCalledWith(
+      expect.anything(),
+      'f-visible',
+    );
+    expect(service.filesRepo.findById).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'f-oculto',
     );
   });
 });

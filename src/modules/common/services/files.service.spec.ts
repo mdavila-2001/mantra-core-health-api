@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { ForbiddenException } from '@nestjs/common';
 import { FilesService } from './files.service';
 import {
   CONCEPTS,
@@ -37,7 +38,10 @@ const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
 // H4.S1.M1: casos preexistentes de `listLinkedFiles` que no ejercitan la
 // autorización por propiedad usan un actor con rol de revisión, para no
 // enredar lo que ya probaban con el chequeo nuevo (N-01).
-const reviewer: AuthenticatedUser = { id: 'reviewer-1', roles: ['SECURITY_ADMIN'] };
+const reviewer: AuthenticatedUser = {
+  id: 'reviewer-1',
+  roles: ['SECURITY_ADMIN'],
+};
 
 describe('FilesService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -314,7 +318,7 @@ describe('FilesService', () => {
       const result = await service.generateDownloadUrl('file-1', actor);
 
       expect(em.fork).toHaveBeenCalled();
-      expect(result.url).toContain('/common/files/file-1/signed-content');
+      expect(result.url).toContain('/common/files/file-1/content');
       expect(result.url).not.toContain('s3://bucket');
       expect(result.url).toContain('signature=');
       expect(result.expiresAt).toBeInstanceOf(Date);
@@ -382,7 +386,7 @@ describe('FilesService', () => {
           roles: ['SECURITY_ADMIN'],
         }),
       ).resolves.toMatchObject({
-        url: expect.stringContaining('/common/files/file-1/signed-content'),
+        url: expect.stringContaining('/common/files/file-1/content'),
       });
     });
 
@@ -429,82 +433,34 @@ describe('FilesService', () => {
         expect(url).not.toContain('9f2c1ab3');
         // Lo que sí debe llevar: el recurso de la propia API y la firma.
         expect(url).toBe(
-          `/common/files/file-1/signed-content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
+          `/common/files/file-1/content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
         );
       },
     );
   });
 
-  describe('verifySignedDownload', () => {
-    /** Reconstruye la firma real de `generateDownloadUrl` para no repetirla a mano. */
-    async function firmar(fileId: string, versionId: string, expires: number) {
-      const { createHmac } = await import('node:crypto');
-      return createHmac('sha256', 'alovida-dev-download-secret')
-        .update(`${fileId}:${versionId}:${expires}`)
-        .digest('hex');
-    }
-
-    it('acepta una firma válida y no vencida', async () => {
-      const { service, filesRepo } = build();
-      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
-      const expires = Date.now() + 60_000;
-      const signature = await firmar('file-1', 'ver-1', expires);
-
-      await expect(
-        service.verifySignedDownload('file-1', {
-          versionId: 'ver-1',
-          expires: String(expires),
-          signature,
-        }),
-      ).resolves.toMatchObject({ id: 'file-1' });
-    });
-
-    it('rechaza una firma vencida', async () => {
-      const { service, filesRepo } = build();
-      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
-      const expires = Date.now() - 1_000;
-      const signature = await firmar('file-1', 'ver-1', expires);
-
-      await expect(
-        service.verifySignedDownload('file-1', {
-          versionId: 'ver-1',
-          expires: String(expires),
-          signature,
-        }),
-      ).rejects.toThrow('La URL de descarga venció');
-    });
-
-    it('rechaza una firma que no corresponde (forjada o de otro archivo/versión)', async () => {
-      const { service, filesRepo } = build();
-      filesRepo.findById.mockResolvedValue({ id: 'file-1' });
-      const expires = Date.now() + 60_000;
-      // Firmada para `ver-OTRA`, no para `ver-1`: mismo archivo, otra versión.
-      const signature = await firmar('file-1', 'ver-OTRA', expires);
-
-      await expect(
-        service.verifySignedDownload('file-1', {
-          versionId: 'ver-1',
-          expires: String(expires),
-          signature,
-        }),
-      ).rejects.toThrow('Firma de descarga inválida');
-    });
-
-    it('rechaza un archivo inexistente antes de mirar la firma', async () => {
-      const { service, filesRepo } = build();
-      filesRepo.findById.mockResolvedValue(null);
-
-      await expect(
-        service.verifySignedDownload('missing', {
-          versionId: 'ver-1',
-          expires: String(Date.now() + 60_000),
-          signature: 'lo-que-sea',
-        }),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
-    });
-  });
-
   describe('listLinkedFiles', () => {
+    /**
+     * BR-11 §1.C: el listado genérico no recibe al actor, así que no puede
+     * evaluar la política de la historia. Los tres tipos clínicos nuevos (P25)
+     * se rechazan acá antes de leer nada; el front los lista por la ruta del
+     * recurso. Sumarlos a un listado sin control ampliaría el IDOR.
+     */
+    it.each([
+      OwnerType.MEDICATION_REQUEST,
+      OwnerType.ALLERGY_INTOLERANCE,
+      OwnerType.ENCOUNTER,
+    ])(
+      'rechaza (403) listar adjuntos de %s por el genérico sin leer nada',
+      async (ownerType) => {
+        const { service, fileLinksRepo } = build();
+        await expect(
+          service.listLinkedFiles({ ownerType, ownerId: 'x-1' }, reviewer),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(fileLinksRepo.findByOwner).not.toHaveBeenCalled();
+      },
+    );
+
     /**
      * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca
      * `file_links`. Sin este filtro la ficha seguiría ofreciendo adjuntos que
@@ -552,10 +508,13 @@ describe('FilesService', () => {
         return Promise.resolve(null);
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       expect(pagina.count).toBe(1);
       expect(pagina.items[0]!.file.id).toBe('f-vivo');
@@ -580,10 +539,13 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       expect(pagina.items[0]!.file.category).toBe(FileCategory.IMAGE);
       expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
@@ -607,10 +569,13 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
       expect(pagina.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
@@ -620,10 +585,13 @@ describe('FilesService', () => {
       const { service, fileLinksRepo } = build();
       fileLinksRepo.findByOwner.mockResolvedValue([]);
 
-      await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-7',
-      }, reviewer);
+      await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-7',
+        },
+        reviewer,
+      );
 
       const [, tipo, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
       expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
@@ -666,10 +634,13 @@ describe('FilesService', () => {
         },
       ]);
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       const archivo = pagina.items[0]!.file;
       expect(archivo).toMatchObject({
@@ -731,10 +702,13 @@ describe('FilesService', () => {
           ),
       );
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       expect(fileVersionsRepo.findByIds).toHaveBeenCalledTimes(1);
       expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
@@ -778,10 +752,13 @@ describe('FilesService', () => {
       );
       fileVersionsRepo.findByIds.mockResolvedValue([]);
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       for (const item of pagina.items) {
         expect(item.file).not.toHaveProperty('mimeType');
@@ -820,10 +797,13 @@ describe('FilesService', () => {
         },
       ]);
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      const pagina = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       expect(pagina.items[0]!.file).not.toHaveProperty('mimeType');
       expect(pagina.items[0]!.file).not.toHaveProperty('sizeBytes');
@@ -833,10 +813,13 @@ describe('FilesService', () => {
       const { service, fileVersionsRepo, fileLinksRepo } = build();
       fileLinksRepo.findByOwner.mockResolvedValue([]);
 
-      await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      }, reviewer);
+      await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
       // El repositorio cortocircuita con la lista vacía; el servicio igual la
       // entrega vacía y no inventa ids.

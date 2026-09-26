@@ -5,8 +5,10 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
   requireTenantId,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ModerationRepository } from '../repositories';
+import { CommunityVisibilityService } from './community-visibility.service';
 import {
   APPEAL_STATUS_BY_CODE,
   CONTENT_TYPE_BY_CODE,
@@ -23,6 +25,8 @@ import type {
   ModerationDecisionsQueryDto,
   ModerationQueuePageDto,
   ModerationQueueQueryDto,
+  MyModerationDecisionPageDto,
+  MyModerationDecisionsQueryDto,
 } from '../dto';
 import type { ModerationDecisions } from '../entities';
 
@@ -65,6 +69,7 @@ export class CommunityModerationReadService {
   constructor(
     private readonly em: EntityManager,
     private readonly moderationRepo: ModerationRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityModerationReadService.name);
@@ -302,6 +307,104 @@ export class CommunityModerationReadService {
         hasMore && last
           ? encodeKeysetCursor({
               createdAt: last.createdAt.toISOString(),
+              id: last.id,
+            })
+          : null,
+    };
+  }
+
+  /**
+   * Las decisiones propias de un perfil, vistas por quien las sufrió (AG-18).
+   *
+   * ## De dónde sale «propias»
+   *
+   * Por los strikes: `moderation_strikes.subject_profile_id` es el único lugar
+   * donde el sistema anota a quién sancionó una decisión (una decisión
+   * `DISMISSED` no genera strike y no tiene nada que mostrar acá). Es la misma
+   * fuente que ya usa `appeal()` para comprobar que el apelante sea el
+   * sancionado — dos lugares, un solo vínculo.
+   *
+   * ## Qué no trae
+   *
+   * Nunca el denunciante ni notas internas del moderador: sólo política,
+   * decisión, motivo, fecha y si todavía se puede apelar.
+   *
+   * @param profileId - El perfil cuyas decisiones se piden.
+   * @param query - Cursor y tope.
+   * @param limit - Tope efectivo ya resuelto por el controlador.
+   * @param actor - Quien pide la lectura; tiene que ser el titular del
+   *   perfil (o plataforma), la misma regla que rige el resto de las
+   *   lecturas privadas del módulo (feed, marcadores, bloqueos).
+   * @returns Página de decisiones propias, de la más reciente a la más vieja.
+   * @throws ForbiddenException si `profileId` no es del actor.
+   */
+  async listMyDecisions(
+    profileId: string,
+    query: MyModerationDecisionsQueryDto,
+    limit: number,
+    actor: AuthenticatedUser,
+  ): Promise<MyModerationDecisionPageDto> {
+    const em = this.em.fork();
+    await this.visibility.assertOwnProfile(em, profileId, actor);
+
+    const strikes = await this.moderationRepo.listStrikesBySubject(
+      em,
+      profileId,
+    );
+    const decisionIds = [
+      ...new Set(strikes.map((strike) => strike.moderationDecisionId)),
+    ];
+    const decisiones = await this.moderationRepo.listDecisionsByIds(
+      em,
+      decisionIds,
+    );
+    // Más reciente primero; `id` desempata para que el orden sea estable
+    // cuando dos decisiones se tomaron en el mismo instante.
+    const ordenadas = [...decisiones].sort((a, b) => {
+      const diferencia =
+        (b.decidedAt?.getTime() ?? 0) - (a.decidedAt?.getTime() ?? 0);
+      return diferencia !== 0 ? diferencia : b.id.localeCompare(a.id);
+    });
+
+    // El listado de una persona es chico —son sanciones, no actividad—, así
+    // que el cursor corta en memoria por posición en vez de pedir un `JOIN`
+    // keyset sólo para un puñado de filas.
+    const indiceCursor = query.cursor
+      ? ordenadas.findIndex(
+          (d) => d.id === decodeKeysetCursor(query.cursor!).id,
+        )
+      : -1;
+    const desde = indiceCursor >= 0 ? indiceCursor + 1 : 0;
+    const ventana = ordenadas.slice(desde, desde + limit + 1);
+    const hasMore = ventana.length > limit;
+    const page = hasMore ? ventana.slice(0, limit) : ventana;
+    const last = page.at(-1);
+
+    const abiertas = await Promise.all(
+      page.map((decision) =>
+        this.moderationRepo.findOpenAppealForDecision(
+          em,
+          decision.id,
+          APPEAL_STATUS_BY_CODE.OPEN,
+        ),
+      ),
+    );
+
+    return {
+      items: page.map((decision, i) => ({
+        decisionId: decision.id,
+        policyConceptId: decision.policyConceptId,
+        decisionConceptId: decision.decisionConceptId,
+        rationaleText: decision.rationaleText ?? null,
+        decidedAt: decision.decidedAt ?? null,
+        appealable: !abiertas[i],
+      })),
+      count: page.length,
+      limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({
+              decidedAt: (last.decidedAt ?? last.createdAt).toISOString(),
               id: last.id,
             })
           : null,

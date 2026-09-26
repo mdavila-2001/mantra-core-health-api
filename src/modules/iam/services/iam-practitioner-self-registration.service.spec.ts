@@ -983,6 +983,46 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
   });
 
+  it('sin correo institucional (personalEmail === email) no inventa un contacto de trabajo', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      personalEmail: dto.email.toUpperCase(),
+    } as RegisterPractitionerDto);
+
+    const correos = d.contactPointsRepo.create.mock.calls
+      .map(
+        ([, fila]: [
+          unknown,
+          { systemConceptId: string; useConceptId: string },
+        ]) => fila,
+      )
+      .filter(
+        (fila: { systemConceptId: string }) =>
+          fila.systemConceptId === CONCEPTS.CONTACT_EMAIL,
+      );
+    expect(correos).toHaveLength(1);
+    expect(correos[0]).toMatchObject({
+      useConceptId: CONCEPTS.CONTACT_USE_HOME,
+    });
+  });
+
+  it('un cliente que no manda personalEmail conserva el correo como de trabajo', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({ ...dto });
+
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        value: dto.email,
+      }),
+    );
+  });
+
   it('el celular personal y el de trabajo no se pisan entre sí', async () => {
     const d = build();
 

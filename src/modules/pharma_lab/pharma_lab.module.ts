@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { AuditModule } from '../audit/audit.module';
+import { AuthzModule } from '../authz/authz.module';
 import { PharmaLabScopeGuard } from './guards';
 import {
   MedicalVisitorsController,
@@ -59,7 +60,13 @@ import {
  * cuele en un flujo clínico.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuditModule,
+    // AG-31: asignar/revocar MEDICAL_VISITOR al vincular/desvincular, en la
+    // misma transacción (ver `MedicalVisitorsService`).
+    AuthzModule,
+  ],
   controllers: [
     PharmaLabsController,
     PharmaLabReferenceController,

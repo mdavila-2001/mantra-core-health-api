@@ -206,6 +206,18 @@ export class FieldValuesRepository {
   }
 
   /**
+   * Cuántos valores se capturaron alguna vez contra un campo (CL-69): con uno
+   * solo, cambiar el tipo del campo reescribiría la historia clínica.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldId - Campo cuyos valores se cuentan.
+   * @returns Cantidad de valores, en cualquier estado.
+   */
+  countByField(em: EntityManager, fieldId: string): Promise<number> {
+    return em.count(FieldValues, { fieldId });
+  }
+
+  /**
    * Obtiene find preliminary by instance.
    *
    * @param em - Contexto de persistencia o transacción activa.

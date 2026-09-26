@@ -15,7 +15,9 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 
-const actor = { id: 'clin-1', roles: [] } as any;
+// CL-29 (BR-13): el autor del plan sale de la sesión, así que quien crea
+// planes en estas pruebas tiene perfil profesional.
+const actor = { id: 'clin-1', roles: [], practitionerProfileId: 's1' } as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -38,13 +40,18 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // BR-14 (CL-07): por defecto no rechaza nada.
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartCarePlansService(
     em as any,
     carePlansRepo,
     logger as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
-  return { service, tx, carePlansRepo, clinicalRead };
+  return { service, tx, carePlansRepo, clinicalRead, encounterSealGuard };
 }
 
 describe('ChartCarePlansService', () => {
@@ -70,6 +77,61 @@ describe('ChartCarePlansService', () => {
           statusConceptId: CHART.ACTIVITY_SCHEDULED,
         }),
       );
+    });
+
+    it('BR-14 (CL-07): rejects a plan against a sealed encounter', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.createCarePlan(
+          { patientProfileId: 'p1', encounterId: 'enc-1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+    });
+
+    // CL-29 (BR-13) — el autor del plan sale de la sesión.
+    describe('autor por sesión (CL-29)', () => {
+      const creado = () => ({
+        id: 'cp1',
+        statusConceptId: CHART.CAREPLAN_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      it('sin autor en el cuerpo, queda el perfil de la sesión', async () => {
+        const d = build();
+        d.carePlansRepo.createPlan.mockReturnValue(creado());
+        await d.service.createCarePlan({ patientProfileId: 'p1' }, actor);
+        expect(d.carePlansRepo.createPlan).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ authorProfileId: 's1' }),
+        );
+      });
+
+      it('con otro perfil en el cuerpo responde 403 y no crea el plan', async () => {
+        const d = build();
+        await expect(
+          d.service.createCarePlan(
+            { patientProfileId: 'p1', authorProfileId: 'hp-otro' },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+      });
+
+      it('una sesión sin perfil profesional no crea planes (403)', async () => {
+        const d = build();
+        await expect(
+          d.service.createCarePlan({ patientProfileId: 'p1' }, {
+            id: 'u',
+            roles: [],
+          } as any),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+      });
     });
   });
 

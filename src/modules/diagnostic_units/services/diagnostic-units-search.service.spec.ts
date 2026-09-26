@@ -45,6 +45,8 @@ function build() {
     findEquipment: mockFn().mockResolvedValue([]),
     findCurrentPublicSchedulesFor: mockFn().mockResolvedValue([]),
     findCurrentPricesForSchedules: mockFn().mockResolvedValue([]),
+    findPracticeSites: mockFn().mockResolvedValue([]),
+    findAddresses: mockFn().mockResolvedValue([]),
   };
   const ratings = {
     ratingsByProfiles: mockFn().mockResolvedValue(new Map()),
@@ -138,6 +140,77 @@ describe('DiagnosticUnitsSearchService', () => {
     expect(res.items[0].ratingCount).toBe(12);
     expect(res.items[0].studyCount).toBe(2);
     expect(res.items[0].siteCount).toBe(1);
+  });
+
+  describe('cities y minAmountCurrency (CL-45, CL-51)', () => {
+    it('aceptado: junta ciudades de sedes distintas y la moneda del precio mínimo', async () => {
+      const d = build();
+      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.countVisible.mockResolvedValue(1);
+      d.readRepo.findActiveSites.mockResolvedValue([
+        { id: 'site-1', diagnosticUnitId: 'unit-1', practiceSiteId: 'ps-1' },
+        { id: 'site-2', diagnosticUnitId: 'unit-1', practiceSiteId: 'ps-2' },
+      ]);
+      d.readRepo.findPracticeSites.mockResolvedValue([
+        { id: 'ps-1', addressId: 'addr-1' },
+        { id: 'ps-2', addressId: 'addr-2' },
+      ]);
+      d.readRepo.findAddresses.mockResolvedValue([
+        { id: 'addr-1', city: 'La Paz' },
+        { id: 'addr-2', city: 'El Alto' },
+      ]);
+      d.readRepo.findCurrentPublicSchedulesFor.mockResolvedValue([
+        {
+          id: 'sch-1',
+          diagnosticUnitId: 'unit-1',
+          currencyConceptId: 'cur-usd',
+        },
+      ]);
+      d.readRepo.findCurrentPricesForSchedules.mockResolvedValue([
+        { priceScheduleId: 'sch-1', baseAmount: '120.00' },
+      ]);
+      d.readRepo.findConcepts.mockImplementation(
+        async (_em: unknown, ids: string[]) =>
+          ids.includes('cur-usd')
+            ? [{ id: 'cur-usd', code: 'USD', display: 'Dólar' }]
+            : [],
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].cities).toEqual(['El Alto', 'La Paz']);
+      expect(res.items[0].minAmountCurrency).toBe('USD');
+    });
+
+    it('límite: una sede sin dirección cargada no aporta ciudad ni rompe la lista', async () => {
+      const d = build();
+      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.countVisible.mockResolvedValue(1);
+      d.readRepo.findActiveSites.mockResolvedValue([
+        { id: 'site-1', diagnosticUnitId: 'unit-1', practiceSiteId: 'ps-1' },
+      ]);
+      d.readRepo.findPracticeSites.mockResolvedValue([
+        { id: 'ps-1', addressId: undefined },
+      ]);
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].cities).toEqual([]);
+      expect(res.items[0].minAmountCurrency).toBeNull();
+    });
+
+    it('inválido: un centro sin tarifa publica no tiene minAmountCurrency', async () => {
+      const d = build();
+      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.countVisible.mockResolvedValue(1);
+      d.readRepo.findCurrentPublicSchedulesFor.mockResolvedValue([]);
+      d.readRepo.findCurrentPricesForSchedules.mockResolvedValue([]);
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].minAmount).toBeNull();
+      expect(res.items[0].minAmountCurrency).toBeNull();
+    });
   });
 
   it('never shows a concept id where a label belongs', async () => {

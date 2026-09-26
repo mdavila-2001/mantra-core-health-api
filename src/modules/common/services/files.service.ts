@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
+import {
+  ForbiddenException,
+  GoneException,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 import {
   StoragePublicationService,
   type PublicationContext,
@@ -12,6 +17,7 @@ import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
   CONCEPTS,
+  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
@@ -25,6 +31,7 @@ import {
 import { canActorReadOwnFile } from './file-access';
 import { FileVersions, Files } from '../entities';
 import {
+  CLINICAL_RECORD_OWNER_TYPES,
   CreateFileDerivativeDto,
   CreateFileDto,
   CreateFileLinkDto,
@@ -40,6 +47,7 @@ import {
   LinkedFilePageDto,
   LinkedFileResponseDto,
   ListFileLinksQueryDto,
+  OwnerType,
   PendingScanResponseDto,
   ScanResult,
   ScanResultDto,
@@ -629,8 +637,16 @@ export class FilesService {
       throw new ResourceNotFoundException('Versión vigente no encontrada');
     }
     if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
+      // `details.reason` deja que la UI distinga «en análisis» de «infectado» y
+      // de «borrado» (TX-33): los tres eran el mismo 422 sin más datos.
       throw new PreconditionFailedException(
         'La versión vigente no ha superado el escaneo antimalware',
+        {
+          reason:
+            version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED
+              ? 'SCAN_INFECTED'
+              : 'SCAN_PENDING',
+        },
       );
     }
 
@@ -640,17 +656,8 @@ export class FilesService {
       .update(`${file.id}:${version.id}:${expiry}`)
       .digest('hex');
     // Nunca `version.storageUri`: ver el porqué en el encabezado del método.
-    //
-    // H4.S1.M3: apunta a `signed-content`, no a `content`. `content` exige
-    // sesión (`@CurrentUser`) y nunca leyó `versionId`/`expires`/`signature` —
-    // la firma se emitía y nadie la verificaba. Un `window.open()` con esta
-    // URL no puede mandar el header `Authorization`, así que la única forma de
-    // que igual funcionara era pegar el token de sesión real en la query
-    // (CL-40), que es exactamente lo que una URL firmada tiene que evitar: acá
-    // lo que viaja es una credencial de un solo archivo, vencida en
-    // `DOWNLOAD_URL_TTL_MS`, no la sesión completa del actor.
     const url =
-      `/common/files/${file.id}/signed-content` +
+      `/common/files/${file.id}/content` +
       `?versionId=${version.id}&expires=${expiry}&signature=${signature}`;
 
     this.logger.info(
@@ -661,51 +668,47 @@ export class FilesService {
   }
 
   /**
-   * Verifica la firma de `GET /common/files/:id/signed-content` (H4.S1.M3).
+   * Valida la firma de una URL emitida por `generateDownloadUrl` (TX-09).
    *
-   * Es la contraparte de {@link generateDownloadUrl}: aquélla firma, ésta
-   * comprueba. No recibe actor porque no lo hay — la ruta es pública y la
-   * firma **es** la autorización, ya decidida por `canActorReadOwnFile` en el
-   * momento en que alguien con acceso llamó a `generateDownloadUrl`.
+   * Sin `signature` ni `expires` no hay nada que validar: es la lectura por
+   * autoría de siempre. Con alguno de los dos, tienen que venir los tres y
+   * coincidir con el HMAC de `archivo:versión:vencimiento`; una firma ajena o
+   * alterada es 403 y una vencida, 410. Se compara en tiempo constante.
    *
-   * Comparación en tiempo constante (`timingSafeEqual`): una firma HMAC no se
-   * compara con `===`, que corta apenas difiere el primer byte y deja un canal
-   * de tiempo para adivinarla byte a byte.
-   *
-   * @param fileId - Archivo de la URL.
-   * @param query - `versionId`, `expires` y `signature` tal como los firmó
-   *   `generateDownloadUrl`.
-   * @returns El archivo, para que el llamador pida sus bytes.
-   * @throws ResourceNotFoundException si el archivo no existe.
-   * @throws ForbiddenException si la firma no corresponde o venció.
+   * @param fileId - Archivo que se pide.
+   * @param query - `versionId`, `expires` y `signature` de la URL.
+   * @throws ForbiddenException si falta un campo o la firma no coincide.
+   * @throws GoneException si la URL venció.
    */
-  async verifySignedDownload(
+  assertDownloadSignature(
     fileId: string,
-    query: { versionId: string; expires: string; signature: string },
-  ): Promise<Files> {
-    const forked = this.em.fork();
-    const file = await this.filesRepo.findById(forked, fileId);
-    if (!file) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
-    }
-
+    query: { versionId?: string; expires?: string; signature?: string },
+  ): void {
+    if (query.signature === undefined && query.expires === undefined) return;
     const expiry = Number(query.expires);
-    if (!Number.isFinite(expiry) || expiry < Date.now()) {
-      throw new ForbiddenException('La URL de descarga venció');
+    if (!query.versionId || !query.signature || !Number.isFinite(expiry)) {
+      throw new ForbiddenException('La firma de la URL no es válida');
     }
-
-    const esperada = createHmac('sha256', downloadUrlSecret())
+    const expected = createHmac('sha256', downloadUrlSecret())
       .update(`${fileId}:${query.versionId}:${expiry}`)
-      .digest('hex');
-    const recibida = query.signature;
-    const valida =
-      recibida.length === esperada.length &&
-      timingSafeEqual(Buffer.from(recibida), Buffer.from(esperada));
-    if (!valida) {
-      throw new ForbiddenException('Firma de descarga inválida');
+      .digest();
+    const presented = Buffer.from(query.signature, 'hex');
+    if (
+      presented.length !== expected.length ||
+      !timingSafeEqual(presented, expected)
+    ) {
+      throw new ForbiddenException('La firma de la URL no es válida');
     }
-
-    return file;
+    if (expiry < Date.now()) {
+      throw new GoneException({
+        // Sin `code` propio el filtro global lo dejaba como INTERNAL (no hay un
+        // código estable para 410): PRECONDITION_FAILED es el más cercano y el
+        // cliente distingue el caso por `details.reason`.
+        code: ErrorCode.PRECONDITION_FAILED,
+        message: 'La URL de descarga venció',
+        details: { reason: 'URL_EXPIRED' },
+      });
+    }
   }
 
   /**
@@ -744,22 +747,52 @@ export class FilesService {
     query: ListFileLinksQueryDto,
     actor: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
+    // BR-11 §1.C: este listado no recibe al actor y no puede evaluar la
+    // política de la historia clínica. Para los tipos clínicos nuevos (P25)
+    // se cierra acá, antes de leer nada: el front los lista por la ruta del
+    // recurso (`GET /clinical/…/:id/attachments`), que sí autoriza por el
+    // paciente de la fila y llama a `listLinkedFilesOf`. Sumar tres tipos
+    // clínicos a un listado sin control sería ampliar el IDOR, no cerrarlo.
+    if (CLINICAL_RECORD_OWNER_TYPES.has(query.ownerType)) {
+      throw new ForbiddenException(
+        'Los adjuntos de la historia clínica se listan por la ruta clínica del recurso, no por el listado genérico.',
+      );
+    }
+    return this.listLinkedFilesOf(query.ownerType, query.ownerId, actor);
+  }
+
+  /**
+   * UC-02-08 (lectura), **ya autorizada por quien llama**: los adjuntos de un
+   * recurso cualquiera. Es la mitad sin guarda de {@link listLinkedFiles}, y
+   * existe para que las rutas clínicas puedan listar después de pasar por la
+   * política de la historia (`assertPuedeLeerHistoria`). No se expone en
+   * ningún controlador por sí sola.
+   *
+   * @param ownerType - Tipo de dueño del recurso.
+   * @param ownerId - Identificador del recurso.
+   * @returns Los adjuntos vigentes, del más reciente al más antiguo.
+   */
+  async listLinkedFilesOf(
+    ownerType: OwnerType,
+    ownerId: string,
+    actor?: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
     this.logger.info(
       {
         operation: 'common.fileLink.list',
-        ownerType: query.ownerType,
-        ownerId: query.ownerId,
+        ownerType,
+        ownerId,
       },
       'Listing linked files',
     );
 
     const forked = this.em.fork();
-    const ownerTypeConceptId = CONCEPTS[`OWNER_${query.ownerType}`];
+    const ownerTypeConceptId = CONCEPTS[`OWNER_${ownerType}`];
 
     const links = await this.fileLinksRepo.findByOwner(
       forked,
       ownerTypeConceptId,
-      query.ownerId,
+      ownerId,
       LINKED_FILES_PAGE_SIZE,
     );
 
@@ -776,9 +809,17 @@ export class FilesService {
       vivos.push({ link, file });
     }
 
-    const visibles = vivos.filter(({ file }) => canActorReadOwnFile(file, actor));
+    // N-01: con `actor` (el listado genérico) se exige propiedad o rol de
+    // revisión por archivo. Sin él, lo llama una ruta que ya autorizó por el
+    // contexto (p. ej. la historia del paciente): ahí «puede verlo» no significa
+    // «lo subió».
+    const visibles = actor
+      ? vivos.filter(({ file }) => canActorReadOwnFile(file, actor))
+      : vivos;
     if (vivos.length > 0 && visibles.length === 0) {
-      throw new ForbiddenException('No tiene acceso a los adjuntos de este recurso');
+      throw new ForbiddenException(
+        'No tiene acceso a los adjuntos de este recurso',
+      );
     }
 
     // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
@@ -795,7 +836,7 @@ export class FilesService {
     const items: LinkedFileResponseDto[] = visibles.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
-      ownerType: query.ownerType,
+      ownerType,
       linkedAt: link.createdAt,
       file: this.fileToResponse(
         file,

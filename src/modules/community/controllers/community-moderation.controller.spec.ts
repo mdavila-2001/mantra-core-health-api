@@ -26,6 +26,7 @@ function build() {
     listQueue: mockFn(),
     listDecisions: mockFn(),
     listAppeals: mockFn(),
+    listMyDecisions: mockFn(),
   };
   return {
     controller: new CommunityModerationController(
@@ -83,6 +84,18 @@ describe('CommunityModerationController', () => {
     const query = { limit: 10 };
     await d.controller.listQueue(query as any);
     expect(d.readService.listQueue).toHaveBeenCalledWith(query, 10);
+  });
+
+  it('delegates listMyDecisions (AG-18) con el profileId, el tope y el actor', async () => {
+    const d = build();
+    const query = { profileId: 'pp-1' };
+    await d.controller.listMyDecisions(query as any, actor);
+    expect(d.readService.listMyDecisions).toHaveBeenCalledWith(
+      'pp-1',
+      query,
+      50,
+      actor,
+    );
   });
 
   it('delegates listDecisions y listAppeals', async () => {

@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsInt,
-  IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
@@ -488,25 +487,30 @@ export class ListFileLinksQueryDto {
 }
 
 /**
- * Query de `GET /common/files/:id/signed-content` (H4.S1.M3).
+ * Parámetros opcionales de la URL que emite `GET /common/files/:id/download-url`.
  *
- * Los tres campos que `FilesService.generateDownloadUrl` firmó. Es **la única
- * credencial** de esta ruta pública: no hay `@CurrentUser`, así que la
- * posesión de una firma válida y no vencida es la prueba de autorización, no
- * un complemento de ella.
+ * Sin ellos, `GET /common/files/:id/content` sirve por autoría como siempre. Si
+ * llega alguno, los tres tienen que venir y la firma se **valida** (TX-09): la
+ * URL se emitía y nadie la comprobaba. Sigue exigiendo sesión: la firma no
+ * reemplaza al bearer, así que cada lectura queda con su actor.
  */
-export class SignedFileDownloadQueryDto {
-  @ApiProperty({ format: 'uuid' })
+export class SignedDownloadQueryDto {
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  versionId!: string;
+  versionId?: string;
 
-  @ApiProperty({ description: 'Epoch ms de vencimiento de la firma.' })
-  @IsNumberString()
-  expires!: string;
-
-  @ApiProperty({ description: 'HMAC-SHA256 de `fileId:versionId:expires`.' })
+  @ApiPropertyOptional({ description: 'Vencimiento, en milisegundos epoch' })
+  @IsOptional()
   @IsString()
-  signature!: string;
+  @MaxLength(20)
+  expires?: string;
+
+  @ApiPropertyOptional({ description: 'HMAC-SHA256 en hexadecimal' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  signature?: string;
 }
 
 /**

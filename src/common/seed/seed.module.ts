@@ -73,6 +73,8 @@ import {
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
+import { Files, FileVersions } from '../../modules/common/entities';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -131,6 +133,9 @@ import { PeopleSeedService } from './people-seed.service';
       DynamicFieldDefinitions,
       FieldAssignments,
       AuthzPermissions,
+      // Pack de stickers (AG-17): filas de metadatos, sin bytes.
+      Files,
+      FileVersions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -161,6 +166,7 @@ import { PeopleSeedService } from './people-seed.service';
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
+    StickerPackSeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -186,6 +192,7 @@ import { PeopleSeedService } from './people-seed.service';
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
+    StickerPackSeedService,
   ],
 })
 export class SeedModule {}

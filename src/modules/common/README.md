@@ -55,6 +55,39 @@ except for `files.tenant_id`, are **not** FK-enforced.
   `SCAN_CLEAN`; returns an HMAC-signed URL (`node:crypto`, 15-min expiry). A real
   S3 presign would replace the deterministic string.
 
+## Cómo descarga cada contexto (BR-05)
+
+`GET /common/files/:id/content` es **«lo tuyo o revisor»** (`canActorReadOwnFile`):
+quien subió el archivo, `SECURITY_ADMIN` o `SUPERADMIN`. No se afloja. La lectura
+clínica va por la ruta del contexto, que autoriza y recién entonces pide los bytes
+con `FileUploadService.downloadForAuthorizedContext`:
+
+| Contexto | Ruta | Autoriza |
+| --- | --- | --- |
+| Resultado del paciente | `GET /diagnostic-results/me/:reportId/files/:fileId/content` | Titular + versión liberada y visible + `fileId` del informe. Todo lo demás, 404 |
+| Documento del expediente | `GET /charts/documents/:documentId/files/:fileId/content` | Lectura de la historia del paciente |
+| Adjunto de mensaje | `community-messaging-read` | Participación activa |
+
+**URL firmada (TX-09).** `POST /common/files/:id/download-url` sigue emitiendo
+`?versionId&expires&signature`, y ahora `GET :id/content` **valida** la firma cuando
+viene: HMAC inválido, 403; vencida, 410 `details.reason = URL_EXPIRED`. Sigue
+exigiendo sesión (no hay enlaces sueltos y cada lectura queda con su actor), así
+que la URL firmada **no** habilita al paciente a leer lo que no subió: para eso
+está la ruta del contexto.
+
+**Escaneo (TX-33).** La emisión de la URL firmada exige `SCAN_CLEAN`; si no, 422
+con `details.reason = SCAN_PENDING` (o `SCAN_INFECTED`). La lectura por contexto
+sirve versiones `SCAN_PENDING` y deja un aviso en el log. En Coolify el escaneo
+está apagado de forma explícita (`MALWARE_SCAN_ENABLED=false`, sin `worker-files`
+ni clamd): la UI debe decir «sin análisis antimalware». Encenderlo requiere
+`clamav` + `worker-files` como en `docker-compose.yml`.
+
+**Almacenamiento (TX-34).** El prefijo S3 por defecto es `uploads` (antes
+`audio-assets`, del módulo de audio). Con el adaptador `local`, `api_storage` es un
+volumen del contenedor: sobrevive al redespliegue pero **no tiene respaldo** hasta
+que operaciones lo declare; el endpoint interno `http://minio:9000` nunca se entrega
+al navegador.
+
 ## Concepts & defaults
 
 Type/status fields are `*_concept_id` FKs resolved from `CONCEPTS` (see

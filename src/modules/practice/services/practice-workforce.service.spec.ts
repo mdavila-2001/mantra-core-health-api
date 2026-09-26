@@ -33,6 +33,7 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     findByPractitioner: mockFn(),
+    findByPracticePage: mockFn().mockResolvedValue([]),
   };
   const supportRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -203,6 +204,50 @@ describe('PracticeWorkforceService', () => {
       const [row] = await d.service.listMyAssignments(professional);
 
       expect(row.avatarUrl).toBeNull();
+    });
+  });
+
+  describe('listPracticeAssignments (CV-14)', () => {
+    it('throws 404 without distinguishing "does not exist" from "another tenant" (isolation)', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: 'tenant-b',
+      });
+      await expect(
+        d.service.listPracticeAssignments('p1', 'tenant-a', {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+
+    it('lists a page scoped to the practice, with a cursor when there is more', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: 'tenant-a',
+      });
+      const row = (id: string) => ({
+        id,
+        practiceId: 'p1',
+        practitionerProfileId: 'pp-1',
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+        createdAt: new Date('2026-01-01'),
+      });
+      d.rolesRepo.findByPracticePage.mockResolvedValue([row('a'), row('b')]);
+
+      const res = await d.service.listPracticeAssignments('p1', 'tenant-a', {
+        limit: 1,
+      });
+
+      expect(d.rolesRepo.findByPracticePage).toHaveBeenCalledWith(
+        d.forked,
+        'p1',
+        undefined,
+        undefined,
+        2,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
     });
   });
 });

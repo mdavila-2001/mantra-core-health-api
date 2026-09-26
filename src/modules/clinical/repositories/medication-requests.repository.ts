@@ -76,6 +76,10 @@ export interface CreateMedicationRequestData {
    */
   indicationConditionId?: string;
   /**
+   * Motivo escrito a mano cuando no hay condición codificada (P24).
+   */
+  indicationText?: string;
+  /**
    * Valor de issued at mantenido por la instancia.
    */
   issuedAt?: Date;
@@ -205,6 +209,7 @@ export class MedicationRequestsRepository {
         validTo: data.validTo,
         patientInstructionsText: data.patientInstructionsText,
         indicationConditionId: data.indicationConditionId,
+        indicationText: data.indicationText,
         issuedAt: data.issuedAt,
         statusReasonText: data.statusReasonText,
         replacesRequestId: data.replacesRequestId,

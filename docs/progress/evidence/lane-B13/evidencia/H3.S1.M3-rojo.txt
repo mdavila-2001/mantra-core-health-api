@@ -1,0 +1,16 @@
+$ corepack yarn test --testPathPatterns="quotations.service" -t "listQuotationsByPatient"
+FAIL QuotationsService.listQuotationsByPatient trae las cuotas de todas las cotizaciones en UNA consulta, y a cada una las suyas
+   TypeError: Cannot read properties of undefined (reading 'map')
+       at map (C:\wt\m4-api\src\modules\quotations\services\quotations.service.ts:333:67)
+       at toResponseDto (C:\wt\m4-api\src\modules\quotations\services\quotations.service.ts:236:16)
+       at processTicksAndRejections (node:internal/process/task_queues:103:5)
+       at async Promise.all (index 0)
+PASS QuotationsService.listQuotationsByPatient sin cotizaciones no consulta cuotas
+PASS QuotationsService.listQuotationsByPatient acota la consulta a las prácticas del profesional, no filtra después de leer
+PASS QuotationsService.listQuotationsByPatient sin ninguna práctica alcanzable devuelve vacío sin ir a la base
+PASS QuotationsService.listQuotationsByPatient un paciente autenticado no lista cotizaciones: ni vinculación ni organización
+PASS QuotationsService.listQuotationsByPatient la cuenta administradora acota a las prácticas activas de su organización en contexto
+PASS QuotationsService.listQuotationsByPatient la cuenta administradora sin organización en contexto no tiene contra qué acotar: vacío
+Suites: 0 passed, 1 failed, 1 total
+Tests:  6 passed, 1 failed, 28 skipped, 35 total
+exit=1

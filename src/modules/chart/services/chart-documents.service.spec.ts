@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ChartDocumentsService } from './chart-documents.service';
 import { CHART } from '../chart.concepts';
+import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'clin-1', roles: [] } as any;
 
@@ -45,6 +46,10 @@ function build() {
       originalName: 'doc.pdf',
     }),
   };
+  // BR-14 (CL-07): por defecto no rechaza nada.
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartDocumentsService(
     em as any,
     documentsRepo,
@@ -52,6 +57,7 @@ function build() {
     attachableFiles as any,
     clinicalRead as any,
     fileUpload as any,
+    encounterSealGuard as any,
   );
   return {
     service,
@@ -62,11 +68,32 @@ function build() {
     attachableFiles,
     clinicalRead,
     fileUpload,
+    encounterSealGuard,
   };
 }
 
 describe('ChartDocumentsService', () => {
   describe('createDocument (UC-15-09)', () => {
+    it('BR-14 (CL-07): rejects a document against a sealed encounter', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.createDocument(
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            title: 'Lab result',
+            encounterId: 'enc-1',
+            files: [],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.documentsRepo.createRecord).not.toHaveBeenCalled();
+    });
+
     it('flushes the record before its files and defaults the first file to PRIMARY', async () => {
       const d = build();
       d.documentsRepo.createRecord.mockReturnValue({
