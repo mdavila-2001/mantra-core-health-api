@@ -8,3 +8,4 @@ export * from './read.repository';
 export * from './claim-read.repository';
 export * from './insurance-analytics.repository';
 export * from './insurance-portability.repository';
+export * from './insurance-campaigns.repository';

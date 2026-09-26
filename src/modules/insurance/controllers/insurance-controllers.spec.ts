@@ -17,12 +17,15 @@ import { InsuranceReadController } from './insurance-read.controller';
 import { ClaimsReadController } from './claims-read.controller';
 import { InsuranceAnalyticsController } from './insurance-analytics.controller';
 import { PractitionerSettlementBatchesController } from './practitioner-settlement-batches.controller';
+import { InsuranceCampaignsController } from './insurance-campaigns.controller';
 import {
   PractitionerSettlementBatchDto,
   PractitionerSettlementBatchTotalsDto,
   PractitionerSettlementBatchClaimDto,
   PractitionerSettlementBatchExcludedClaimDto,
   PractitionerSettlementBatchReversalAdjustmentDto,
+  PatientCampaignDto,
+  PatientCampaignPartnerDto,
 } from '../dto';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
@@ -384,6 +387,113 @@ describe('Insurance controllers (delegación)', () => {
         ),
       ).toEqual([]);
     }
+  });
+
+  /**
+   * Tarea 4 · M-06 — campañas preventivas. Sin `@Roles`: la aseguradora se
+   * autoriza por membresía y el afiliado por titularidad, ambas en el servicio.
+   */
+  it('InsuranceCampaignsController delega en su servicio y no fija @Roles', async () => {
+    const service = {
+      create: mockFn().mockResolvedValue({ id: ID }),
+      list: mockFn().mockResolvedValue({ items: [], nextCursor: null }),
+      listActiveForPatient: mockFn().mockResolvedValue([]),
+      getById: mockFn().mockResolvedValue({ id: ID }),
+      changeStatus: mockFn().mockResolvedValue({ id: ID }),
+    };
+    const c = new InsuranceCampaignsController(service as never);
+
+    await c.create(dto, actor);
+    expect(service.create).toHaveBeenCalledWith(dto, actor);
+
+    const query = {} as never;
+    await c.list(query, actor);
+    expect(service.list).toHaveBeenCalledWith(query, actor);
+
+    await c.listForPatient(ID, actor);
+    expect(service.listActiveForPatient).toHaveBeenCalledWith(ID, actor);
+
+    await c.getById(ID, actor);
+    expect(service.getById).toHaveBeenCalledWith(ID, actor);
+
+    const status = { status: 'PAUSED' } as never;
+    await c.changeStatus(ID, status, actor);
+    expect(service.changeStatus).toHaveBeenCalledWith(ID, status, actor);
+
+    const proto = InsuranceCampaignsController.prototype as never as Record<
+      string,
+      object
+    >;
+    for (const metodo of [
+      'create',
+      'list',
+      'listForPatient',
+      'getById',
+      'changeStatus',
+    ]) {
+      expect(Reflect.getMetadata('requiredRoles', proto[metodo])).toEqual([]);
+    }
+  });
+
+  it('InsuranceCampaignsController: las rutas fijas van antes que `:id` y los verbos son los del contrato', () => {
+    const proto = InsuranceCampaignsController.prototype as never as Record<
+      string,
+      object
+    >;
+    const ruta = (metodo: string) => ({
+      path: Reflect.getMetadata(PATH_METADATA, proto[metodo]),
+      method: Reflect.getMetadata(METHOD_METADATA, proto[metodo]),
+    });
+
+    expect(ruta('create')).toEqual({ path: '/', method: RequestMethod.POST });
+    expect(ruta('list')).toEqual({ path: '/', method: RequestMethod.GET });
+    expect(ruta('listForPatient')).toEqual({
+      path: 'patient/:patientProfileId',
+      method: RequestMethod.GET,
+    });
+    expect(ruta('getById')).toEqual({ path: ':id', method: RequestMethod.GET });
+    expect(ruta('changeStatus')).toEqual({
+      path: ':id/status',
+      method: RequestMethod.PATCH,
+    });
+
+    // Nest registra las rutas en el orden en que se declaran los métodos: si
+    // `:id` fuera primero, `patient` se leería como un identificador.
+    const orden = Object.getOwnPropertyNames(
+      InsuranceCampaignsController.prototype,
+    );
+    expect(orden.indexOf('listForPatient')).toBeLessThan(
+      orden.indexOf('getById'),
+    );
+  });
+
+  it('el DTO de la campaña del afiliado no expone ningún identificador interno', () => {
+    const permitidas = (dto: { prototype: object }): string[] =>
+      (
+        Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
+        []
+      ).map((clave: string) => clave.replace(/^:/, ''));
+
+    expect(permitidas(PatientCampaignDto).sort()).toEqual(
+      [
+        'campaignType',
+        'carrierName',
+        'code',
+        'copayBonusPercentage',
+        'description',
+        'id',
+        'partners',
+        'targetCondition',
+        'title',
+        'validFrom',
+        'validTo',
+      ].sort(),
+    );
+    expect(permitidas(PatientCampaignPartnerDto).sort()).toEqual([
+      'name',
+      'role',
+      'type',
+    ]);
   });
 
   it('el DTO del lote de liquidación no expone ninguna propiedad de pago (contrato §11)', () => {

@@ -29,6 +29,7 @@ import {
   InsurancePortabilityController,
   InsurancePortabilityPublicController,
   PractitionerSettlementBatchesController,
+  InsuranceCampaignsController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -46,6 +47,7 @@ import {
   InsurancePortabilityService,
   InsurancePortabilityPdfService,
   PractitionerSettlementBatchesService,
+  InsuranceCampaignsService,
 } from './services';
 import {
   CatalogRepository,
@@ -58,6 +60,7 @@ import {
   InsuranceReadRepository,
   InsuranceAnalyticsRepository,
   InsurancePortabilityRepository,
+  InsuranceCampaignsRepository,
 } from './repositories';
 // Portabilidad de póliza y siniestralidad (subtarea 3.3): el certificado se
 // autoriza contra el titular (`ProfileOwnershipService`, mismo criterio que
@@ -116,6 +119,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurancePortabilityController,
     InsurancePortabilityPublicController,
     PractitionerSettlementBatchesController,
+    InsuranceCampaignsController,
   ],
   providers: [
     // Repositorios
@@ -129,6 +133,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     SettlementRepository,
     InsuranceAnalyticsRepository,
     InsurancePortabilityRepository,
+    InsuranceCampaignsRepository,
     LinkedClaimOrderService,
     LinkedClaimAccessService,
     DuplicateStudyDetector,
@@ -159,6 +164,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurancePortabilityService,
     InsurancePortabilityPdfService,
     PractitionerSettlementBatchesService,
+    InsuranceCampaignsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.
