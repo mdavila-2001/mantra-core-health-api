@@ -79,6 +79,7 @@ function build(
     } as any,
     { findById: mockFn().mockResolvedValue({ profileId: PACIENTE }) } as any,
     {} as any,
+    {} as any,
     logger as any,
     {} as any,
     fileUpload as any,
