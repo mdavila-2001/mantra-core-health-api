@@ -184,8 +184,10 @@ describe('FormsFieldsController · CL-68 roles', () => {
   ] as const)(
     '%s exige personal de salud o SECURITY_ADMIN, no cualquier sesión',
     (metodo) => {
+      // Se lee la metadata del método sin invocarlo: no hay `this` en juego.
       const roles = Reflect.getMetadata(
         ROLES_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         FormsFieldsController.prototype[metodo],
       );
       expect(roles).toEqual(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN']);
