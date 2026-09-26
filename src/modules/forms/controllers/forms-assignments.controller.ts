@@ -1,11 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   ParseUUIDPipe,
+  Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -27,6 +31,9 @@ import {
   ExtensionBudgetResponseDto,
   FieldAssignmentListResponseDto,
   IdResponseDto,
+  OkResultDto,
+  ReorderAssignmentsDto,
+  UpdateAssignmentDto,
 } from '../dto';
 
 /**
@@ -139,5 +146,45 @@ export class FormsAssignmentsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.assignmentsService.createAssignment(dto, actor);
+  }
+
+  /**
+   * CL-61: reordena los campos propios de un target. **Declarada antes** que
+   * las rutas con `:id` para que `order` nunca se lea como un identificador.
+   */
+  @Put('order')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reordenar los campos propios de un formulario' })
+  reorderAssignments(
+    @Body() dto: ReorderAssignmentsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.reorderAssignments(dto, actor);
+  }
+
+  /** CL-61: cambia lo obligatorio, visible o editable de un campo propio. */
+  @Patch(':id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Editar una asignación propia' })
+  updateAssignment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateAssignmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.updateAssignment(id, dto, actor);
+  }
+
+  /** CL-61: descuelga un campo propio (baja lógica; los valores siguen). */
+  @Delete(':id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quitar una asignación propia (baja lógica)' })
+  retireAssignment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.retireAssignment(id, actor);
   }
 }

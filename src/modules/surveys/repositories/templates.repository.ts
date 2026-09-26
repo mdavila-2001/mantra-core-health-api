@@ -242,6 +242,35 @@ export class TemplatesRepository {
   }
 
   /**
+   * Una pregunta por id. Quién puede tocarla lo decide el servicio, que
+   * comprueba que pertenezca a la versión en borrador de la plantilla dueña.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la pregunta.
+   * @returns Resultado conforme al contrato `Promise<SurveyQuestions | null>`.
+   */
+  findQuestionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<SurveyQuestions | null> {
+    return em.findOne(SurveyQuestions, { id });
+  }
+
+  /**
+   * Marca una pregunta del **borrador** para borrarla en el próximo flush.
+   *
+   * Sólo tiene sentido sobre un borrador: las respuestas existen únicamente
+   * sobre versiones publicadas, y ésas son inmutables, así que acá no hay
+   * ninguna respuesta que quede huérfana.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param question - La pregunta a quitar.
+   */
+  removeQuestion(em: EntityManager, question: SurveyQuestions): void {
+    em.remove(question);
+  }
+
+  /**
    * Crea la pregunta.
    *
    * @param em - Contexto de persistencia o transacción activa.

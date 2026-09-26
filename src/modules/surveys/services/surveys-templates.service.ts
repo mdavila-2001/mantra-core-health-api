@@ -15,18 +15,38 @@ import {
   CreateTemplateDto,
   PublishVersionDto,
   QuestionDto,
+  ReorderQuestionsDto,
   TemplateCreatedDto,
   TemplateDetailDto,
   TemplateSummaryDto,
   OkResultDto,
+  UpdateQuestionDto,
+  UpdateTemplateDto,
 } from '../dto';
 import {
   ANSWER_TYPE_BY_CODE,
   ANSWER_TYPE_CODE_BY_ID,
   ANSWER_TYPES_REQUIRING_OPTIONS,
   SURVEYS,
+  type AnswerTypeCode,
 } from '../surveys.concepts';
-import type { SurveyQuestions, SurveyTemplates } from '../entities';
+import type {
+  SurveyQuestions,
+  SurveyTemplates,
+  SurveyVersions,
+} from '../entities';
+
+/** La forma de una pregunta que `validateQuestionShape` comprueba. */
+interface QuestionShape {
+  /** Tipo de respuesta. */
+  answerType: AnswerTypeCode;
+  /** Opciones, si el tipo las admite. */
+  options?: string[];
+  /** Mínimo de la escala. */
+  scaleMin?: number;
+  /** Máximo de la escala. */
+  scaleMax?: number;
+}
 
 /** Plazo por defecto, en días, para responder una encuesta. */
 const DEFAULT_RESPONSE_WINDOW_DAYS = 30;
@@ -181,21 +201,7 @@ export class SurveysTemplatesService {
 
     return this.em.transactional(async (tx) => {
       const template = await this.loadOwnedTemplate(tx, templateId, actor);
-      const version = await this.templatesRepo.findLatestVersion(
-        tx,
-        template.id,
-      );
-      if (!version) {
-        throw new ResourceNotFoundException('La plantilla no tiene versiones', {
-          templateId,
-        });
-      }
-      if (version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT) {
-        throw new PreconditionFailedException(
-          'La versión ya está publicada: cree una versión nueva para modificar el cuestionario',
-          { templateId, versionNumber: version.versionNumber },
-        );
-      }
+      const version = await this.loadDraftVersion(tx, template);
 
       const position =
         (await this.templatesRepo.countQuestions(tx, version.id)) + 1;
@@ -221,6 +227,162 @@ export class SurveysTemplatesService {
         'Survey question added',
       );
       return this.toQuestionDto(question);
+    });
+  }
+
+  /**
+   * CL-72: corrige título, consigna y plazo. Sólo con la última versión en
+   * borrador —el plazo es de esa versión—; sobre una publicada, 422.
+   */
+  async updateTemplate(
+    templateId: string,
+    dto: UpdateTemplateDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const version = await this.loadDraftVersion(tx, template);
+
+      if (dto.title !== undefined) template.title = dto.title;
+      // Una clave ausente no vacía; `''` sí borra la consigna.
+      if (dto.description !== undefined) {
+        template.description =
+          dto.description === '' ? undefined : dto.description;
+      }
+      touch(template, actor.id);
+      if (dto.responseWindowDays !== undefined) {
+        version.responseWindowDays = dto.responseWindowDays;
+        touch(version, actor.id);
+      }
+
+      this.logger.info(
+        { operation: 'surveys.template.update', templateId },
+        'Survey template updated',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * CL-60: corrige una pregunta de la versión en borrador.
+   *
+   * `options` y la escala se reemplazan enteras cuando viajan. Al cambiar de
+   * tipo se descarta lo que el tipo nuevo no usa, en el mismo UPDATE: el `GET`
+   * nunca devuelve restos. La forma resultante se valida completa, con la
+   * misma regla que el alta.
+   */
+  async updateQuestion(
+    templateId: string,
+    questionId: string,
+    dto: UpdateQuestionDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const version = await this.loadDraftVersion(tx, template);
+      const question = await this.loadDraftQuestion(tx, version, questionId);
+
+      const answerType =
+        dto.answerType ?? ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId];
+      const changedType = dto.answerType !== undefined && dto.answerType !== ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId];
+      const needsOptions = ANSWER_TYPES_REQUIRING_OPTIONS.includes(answerType);
+
+      // Lo que no viaja se conserva, salvo que el tipo nuevo no lo use.
+      const options = needsOptions
+        ? (dto.options ?? (changedType ? undefined : question.options))
+        : undefined;
+      const scaleMin =
+        answerType === 'SCALE'
+          ? (dto.scaleMin ?? (changedType ? 1 : (question.scaleMin ?? 1)))
+          : undefined;
+      const scaleMax =
+        answerType === 'SCALE'
+          ? (dto.scaleMax ?? (changedType ? 5 : (question.scaleMax ?? 5)))
+          : undefined;
+
+      this.validateQuestionShape({ answerType, options, scaleMin, scaleMax });
+
+      if (dto.questionText !== undefined) question.questionText = dto.questionText;
+      if (dto.required !== undefined) question.required = dto.required;
+      question.answerTypeConceptId = ANSWER_TYPE_BY_CODE[answerType];
+      question.options = options;
+      question.scaleMin = scaleMin;
+      question.scaleMax = scaleMax;
+      touch(question, actor.id);
+
+      this.logger.info(
+        { operation: 'surveys.question.update', templateId, questionId },
+        'Survey question updated',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * CL-60: quita una pregunta del borrador y **renumera** las que quedan en la
+   * misma transacción: `position` es lo que la pantalla dibuja, y borrar la 2
+   * de 4 no puede dejar un cuestionario que va 1, 3, 4.
+   */
+  async deleteQuestion(
+    templateId: string,
+    questionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const version = await this.loadDraftVersion(tx, template);
+      const question = await this.loadDraftQuestion(tx, version, questionId);
+
+      this.templatesRepo.removeQuestion(tx, question);
+      const remaining = (
+        await this.templatesRepo.listQuestions(tx, version.id)
+      ).filter((q) => q.id !== question.id);
+      this.renumber(remaining, actor);
+
+      this.logger.info(
+        { operation: 'surveys.question.delete', templateId, questionId },
+        'Survey question deleted',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * CL-60: reordena el cuestionario del borrador. La lista viaja entera; una
+   * lista incompleta manda las no nombradas al final en su orden previo. Un id
+   * que no es de la versión responde 422.
+   */
+  async reorderQuestions(
+    templateId: string,
+    dto: ReorderQuestionsDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const version = await this.loadDraftVersion(tx, template);
+      const current = await this.templatesRepo.listQuestions(tx, version.id);
+      const byId = new Map(current.map((q) => [q.id, q]));
+
+      const unknown = dto.questionIds.filter((id) => !byId.has(id));
+      if (unknown.length > 0) {
+        throw new PreconditionFailedException(
+          'Hay preguntas que no pertenecen a la versión en borrador',
+          { templateId, questionIds: unknown },
+        );
+      }
+
+      const named = new Set(dto.questionIds);
+      const ordered = [
+        ...dto.questionIds.map((id) => byId.get(id)!),
+        ...current.filter((q) => !named.has(q.id)),
+      ];
+      this.renumber(ordered, actor);
+
+      this.logger.info(
+        { operation: 'surveys.question.reorder', templateId },
+        'Survey questions reordered',
+      );
+      return { ok: true };
     });
   }
 
@@ -428,6 +590,67 @@ export class SurveysTemplatesService {
     return template;
   }
 
+  /**
+   * La última versión de la plantilla, que tiene que estar **en borrador**.
+   *
+   * Es la guarda que comparten todas las escrituras del cuestionario: publicar
+   * congela, y corregir una publicada es crear la versión siguiente. Sobre una
+   * publicada responde 422, igual que el alta de pregunta desde siempre.
+   */
+  private async loadDraftVersion(
+    em: EntityManager,
+    template: SurveyTemplates,
+  ): Promise<SurveyVersions> {
+    const version = await this.templatesRepo.findLatestVersion(
+      em,
+      template.id,
+    );
+    if (!version) {
+      throw new ResourceNotFoundException('La plantilla no tiene versiones', {
+        templateId: template.id,
+      });
+    }
+    if (version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT) {
+      throw new PreconditionFailedException(
+        'La versión ya está publicada: cree una versión nueva para modificar el cuestionario',
+        { templateId: template.id, versionNumber: version.versionNumber },
+      );
+    }
+    return version;
+  }
+
+  /**
+   * Una pregunta que pertenezca a esa versión en borrador; si no existe o es
+   * de otra versión, el mismo 404 — no se confirma nada sobre otras plantillas.
+   */
+  private async loadDraftQuestion(
+    em: EntityManager,
+    version: SurveyVersions,
+    questionId: string,
+  ): Promise<SurveyQuestions> {
+    const question = await this.templatesRepo.findQuestionById(em, questionId);
+    if (!question || question.surveyVersionId !== version.id) {
+      throw new ResourceNotFoundException('Pregunta no encontrada', {
+        questionId,
+      });
+    }
+    return question;
+  }
+
+  /** Deja `position` en 1..n según el orden recibido; sólo toca lo que cambia. */
+  private renumber(
+    questions: readonly SurveyQuestions[],
+    actor: AuthenticatedUser,
+  ): void {
+    questions.forEach((question, index) => {
+      const position = index + 1;
+      if (question.position !== position) {
+        question.position = position;
+        touch(question, actor.id);
+      }
+    });
+  }
+
   /** Resuelve el profesional dueño, exigiendo que la sesión tenga perfil. */
   private resolveOwner(
     explicitOwner: string | undefined,
@@ -450,7 +673,7 @@ export class SurveysTemplatesService {
    * obligatorio u prohibido **según** `answerType`, y class-validator no
    * expresa esa dependencia sin un validador a medida.
    */
-  private validateQuestionShape(dto: AddQuestionDto): void {
+  private validateQuestionShape(dto: QuestionShape): void {
     const needsOptions = ANSWER_TYPES_REQUIRING_OPTIONS.includes(
       dto.answerType,
     );

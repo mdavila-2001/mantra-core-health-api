@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -6,17 +6,27 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { FieldDefinitionsRepository } from '../repositories';
+import {
+  AssignmentsRepository,
+  FieldDefinitionsRepository,
+  FieldValuesRepository,
+} from '../repositories';
 import {
   CreateFieldDefinitionDto,
   CreateFieldDependencyDto,
   UpsertLocalizationDto,
   CreateAccessRuleDto,
   IdResponseDto,
+  OkResultDto,
+  UpdateFieldDefinitionDto,
 } from '../dto';
+
+/** Roles que administran los campos sin techo de tenant (CL-69). */
+const ROLES_DE_GOBIERNO: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import {
   FORMS,
   DEPENDENCY_BEHAVIOR_BY_CODE,
@@ -44,13 +54,80 @@ export class FormsFieldsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param fieldsRepo - Valor de fields repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param assignmentsRepo - De quién es un campo: por dónde está colgado (CL-69).
+   * @param valuesRepo - Si un campo ya tiene valores capturados (CL-69).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly fieldsRepo: FieldDefinitionsRepository,
     private readonly logger: PinoLogger,
+    private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly valuesRepo: FieldValuesRepository,
   ) {
     this.logger.setContext(FormsFieldsService.name);
+  }
+
+  /**
+   * CL-61 / CL-69: corrige nombre o tipo de un campo **propio**.
+   *
+   * La definición es global (`dynamic_field_definitions` no tiene `tenant_id`),
+   * así que «propio» se decide por dónde está colgado: todas sus asignaciones
+   * tienen que ser del tenant del actor. Un campo colgado del estándar (alguna
+   * asignación global) o de otro tenant responde 403; quien gobierna no tiene
+   * techo. Cambiar el tipo con valores ya capturados reescribiría la historia
+   * clínica: 409.
+   */
+  async updateFieldDefinition(
+    fieldId: string,
+    dto: UpdateFieldDefinitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const field = await this.fieldsRepo.findFieldById(tx, fieldId);
+      if (!field) {
+        throw new ResourceNotFoundException('Campo no encontrado', {
+          fieldId,
+        });
+      }
+
+      const gobierna = actor.roles.some((rol) =>
+        ROLES_DE_GOBIERNO.includes(rol),
+      );
+      if (!gobierna) {
+        const tenantId = requireTenantId();
+        const assignments = await this.assignmentsRepo.findAssignmentsByField(
+          tx,
+          fieldId,
+        );
+        const ajeno = assignments.some(
+          (a) => !a.tenantId || a.tenantId !== tenantId,
+        );
+        if (ajeno) {
+          throw new ForbiddenException(
+            'Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá',
+          );
+        }
+      }
+
+      if (dto.dataType !== undefined && dto.dataType !== field.dataType) {
+        const captured = await this.valuesRepo.countByField(tx, fieldId);
+        if (captured > 0) {
+          throw new ConflictException(
+            'El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia',
+            { fieldId, captured },
+          );
+        }
+        field.dataType = dto.dataType;
+      }
+      if (dto.name !== undefined) field.name = dto.name;
+      touch(field, actor.id);
+
+      this.logger.info(
+        { operation: 'forms.field.update', fieldId },
+        'Field definition updated',
+      );
+      return { ok: true };
+    });
   }
 
   /** UC-09-02: declara una definición de campo con sus reglas de validación. */
