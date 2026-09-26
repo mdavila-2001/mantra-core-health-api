@@ -92,10 +92,12 @@
 | C.2 | `corepack yarn lint` en 0 | exit 0 | salida en `evidencia/lint.txt` | TODO |
 | C.3 | Specs dirigidos de los módulos tocados en verde | 0 fallos | `corepack yarn test --testPathPatterns="clinical|chart|forms|surveys|files.service"` → salida en `evidencia/test-dirigido.txt` | TODO |
 | C.4 | `REPORTE.md` con avance calculado, `No cubierto`, pedidos a M1 y M2, peldaño `TESTED` | las tres secciones obligatorias presentes | `python .claude/hooks/plan_status.py` | TODO |
-| C.5 | PR contra `test` abierto y mergeable | `mergeable=MERGEABLE`, `isDraft=false` | `gh pr view <n> --json isDraft,mergeable,mergeStateStatus` → `evidencia/pr-mergeable.txt` | A MEDIAS |
+| C.5 | PR contra `test` abierto y mergeable | `mergeable=MERGEABLE`, `isDraft=false` | `gh pr view 473 --json isDraft,mergeable,mergeStateStatus` → `evidencia/pr-mergeable.txt` | HECHO |
 | C.6 | Daily de M3 y Daily de máquinas actualizados en `AlovidaPromptManager` por PR | tabla de cierre con carriles, peldaño y PR | `gh pr view` en el PM | A MEDIAS |
 
-**C.5 y C.6 — qué anda, qué no anda, qué falta, dónde quedó:** la rama `justin/test-m3-api-clinica-2026-09-26` está **pusheada** con los ocho commits; el cuerpo del PR está escrito en `evidencia/pr-body.md`. Lo que no anda: `gh pr create` fue **denegado por el clasificador del modo automático de Claude Code** («Out-of-Place Publication»), que no permite abrir PRs desde esta sesión. Lo que falta exactamente: que el propietario corra el comando de `evidencia/pr-body.md` (una línea) y pegue `gh pr view <n> --json isDraft,mergeable,mergeStateStatus` en `evidencia/pr-mergeable.txt`. Lo mismo para el daily del PM: rama pusheada, PR sin abrir.
+**C.5:** el propietario abrió el PR con el comando de `evidencia/pr-body.md` (el clasificador del modo automático había denegado `gh pr create` desde la sesión): **PR #473**, `isDraft=false`, `mergeable=MERGEABLE`, `mergeStateStatus=CLEAN`, sin checks reportados (runners propios apagados; la compuerta es la verificación local). Salida literal en `evidencia/pr-mergeable.txt`.
+
+**C.6 — qué anda, qué no anda, qué falta, dónde quedó:** el daily de M3 y la fila de M3 en el daily de máquinas están actualizados en la rama `justin/m3-daily-2026-09-26` de `AlovidaPromptManager`, pusheada. Lo que no anda: el PR contra `main` del PM sigue sin abrir (misma denegación). Lo que falta: `gh pr create --base main --head justin/m3-daily-2026-09-26` en el PM, por el propietario.
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
