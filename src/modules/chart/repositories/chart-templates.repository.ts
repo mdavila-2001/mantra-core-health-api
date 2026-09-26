@@ -5,6 +5,7 @@ import {
   DynamicFieldDefinitions,
   DynamicFieldSections,
   FieldAssignments,
+  FieldDefinitionLocalizations,
 } from '../../forms/entities';
 import { createdBy } from '../../../common';
 
@@ -280,5 +281,21 @@ export class ChartTemplatesRepository {
   ): Promise<DynamicFieldDefinitions[]> {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(DynamicFieldDefinitions, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * CL-24: las localizaciones (ayuda del campo) de varios campos en un idioma,
+   * en una sola consulta.
+   */
+  findLocalizationsByFieldIds(
+    em: EntityManager,
+    fieldIds: readonly string[],
+    languageConceptId: string,
+  ): Promise<FieldDefinitionLocalizations[]> {
+    if (fieldIds.length === 0) return Promise.resolve([]);
+    return em.find(FieldDefinitionLocalizations, {
+      fieldId: { $in: [...fieldIds] },
+      languageConceptId,
+    });
   }
 }
