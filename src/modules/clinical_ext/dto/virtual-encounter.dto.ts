@@ -77,3 +77,45 @@ export class VirtualEncounterResponseDto {
   })
   statusConceptId!: string;
 }
+
+/** Un servidor ICE tal como lo recibe `RTCPeerConnection` (`RTCIceServer`). */
+export class IceServerDto {
+  /**
+   * URLs `stun:`/`stuns:` o `turn:`/`turns:` del servidor.
+   */
+  @ApiProperty({ type: [String] })
+  urls!: string[];
+
+  /**
+   * Usuario TURN (estático o efímero `<expira>:<userId>`); ausente en STUN.
+   */
+  @ApiPropertyOptional()
+  username?: string;
+
+  /**
+   * Credencial TURN; ausente en STUN.
+   */
+  @ApiPropertyOptional()
+  credential?: string;
+}
+
+/** Respuesta de `GET /virtual-encounters/{id}/ice-servers`. */
+export class IceServersResponseDto {
+  /**
+   * Lista para `new RTCPeerConnection({ iceServers })`.
+   */
+  @ApiProperty({ type: [IceServerDto] })
+  iceServers!: IceServerDto[];
+
+  /**
+   * `false` = sólo STUN: no hay TURN configurado en este entorno.
+   */
+  @ApiProperty()
+  turnConfigured!: boolean;
+
+  /**
+   * Vencimiento de la credencial TURN efímera (ISO 8601), si la hay.
+   */
+  @ApiPropertyOptional({ format: 'date-time' })
+  expiresAt?: string;
+}

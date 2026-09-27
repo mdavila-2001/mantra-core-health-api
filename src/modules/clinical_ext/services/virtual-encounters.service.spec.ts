@@ -30,7 +30,10 @@ const actor = {
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const encountersRepo = {
     findById: mockFn(),
     findByPatient: mockFn(() => Promise.resolve([])),
@@ -295,6 +298,87 @@ describe('VirtualEncountersService (UC-18-12)', () => {
       }),
     ).resolves.toMatchObject({
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
+    });
+  });
+
+  describe('assertSignalingParticipant (señalización /teleconsult)', () => {
+    const sesion = (statusConceptId: string) => ({
+      id: 've1',
+      encounterId: 'e1',
+      statusConceptId,
+    });
+
+    it('el médico primario y el paciente titular quedan autorizados con su papel', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(
+        sesion(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS),
+      );
+      await expect(
+        d.service.assertSignalingParticipant('ve1', actor),
+      ).resolves.toEqual({
+        virtualEncounterId: 've1',
+        encounterId: 'e1',
+        role: 'PRACTITIONER',
+      });
+      await expect(
+        d.service.assertSignalingParticipant('ve1', {
+          id: 'patient-user',
+          roles: ['PATIENT'],
+          patientProfileId: 'pat-1',
+          tenantIds: ['ten-1'],
+        }),
+      ).resolves.toMatchObject({ role: 'PATIENT' });
+    });
+
+    it('una sesión agendada (antes del join REST) ya admite señalizar', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(
+        sesion(CEXT.VIRTUAL_ENCOUNTER_SCHEDULED),
+      );
+      await expect(
+        d.service.assertSignalingParticipant('ve1', actor),
+      ).resolves.toMatchObject({ role: 'PRACTITIONER' });
+    });
+
+    it('sin transacción: lee con un fork y no escribe', async () => {
+      const d = build();
+      const venc = sesion(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS);
+      d.encountersRepo.findById.mockResolvedValue(venc);
+      await d.service.assertSignalingParticipant('ve1', actor);
+      expect(venc.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS);
+    });
+
+    it('rechaza a un ajeno, a otro tenant, una sesión terminada y una inexistente', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(
+        sesion(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS),
+      );
+      await expect(
+        d.service.assertSignalingParticipant('ve1', {
+          id: 'intruso',
+          roles: ['PATIENT'],
+          patientProfileId: 'pat-otro',
+          tenantIds: ['ten-1'],
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(
+        d.service.assertSignalingParticipant('ve1', {
+          ...actor,
+          tenantIds: ['ten-otro'],
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      d.encountersRepo.findById.mockResolvedValue(
+        sesion(CEXT.VIRTUAL_ENCOUNTER_COMPLETED),
+      );
+      await expect(
+        d.service.assertSignalingParticipant('ve1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.assertSignalingParticipant('ve1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });
