@@ -28,6 +28,7 @@ import {
   AttachFileToMedicationRequestDto,
   AttachFileToProcedureDto,
   ChangeConditionClinicalStatusDto,
+  ConditionItemDto,
   ConditionResponseDto,
   CreateAllergyIntoleranceDto,
   CreateConditionDto,
@@ -43,6 +44,7 @@ import {
   ProcedureResponseDto,
   RenewMedicationRequestDto,
   ReplaceMedicationRequestDto,
+  VerifyConditionDto,
 } from '../dto';
 
 /**
@@ -102,6 +104,30 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ConditionResponseDto> {
     return this.conditionsService.changeClinicalStatus(id, dto, actor);
+  }
+
+  /**
+   * C3 / P41: confirma o refuta un diagnóstico presuntivo. Devuelve la
+   * condición entera —estado clínico, verificación, fechas y la decisión—
+   * porque el front reemplaza la fila con lo que dice el servidor.
+   *
+   * Sin `ClinicalRecordAccessGuard` por lo mismo que `change-status` (SEC-01 /
+   * MCH-007, ver la clase): el paciente sólo se conoce al cargar la condición,
+   * y la política de escritura la aplica el servicio.
+   */
+  @Post('conditions/:id/verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Confirmar o refutar un diagnóstico presuntivo',
+    description:
+      '409 si ya estaba confirmado o refutado; 422 si falta motivo o evidencia, las fechas al confirmar, o la evidencia no es del paciente.',
+  })
+  verifyCondition(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: VerifyConditionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConditionItemDto> {
+    return this.conditionsService.verify(id, dto, actor);
   }
 
   /**

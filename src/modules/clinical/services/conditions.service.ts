@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -13,9 +13,15 @@ import {
   AttachFileToConditionDto,
   ChangeConditionClinicalStatusDto,
   CreateConditionDto,
+  ConditionItemDto,
   ConditionResponseDto,
+  ConditionVerificationDto,
+  DiagnosisEvidenceDto,
+  VerifyConditionDto,
 } from '../dto';
-import { Conditions } from '../entities';
+import { Conditions, DiagnosticReports, ServiceRequests } from '../entities';
+import { ClinicalNoteHeaders } from '../../chart/entities';
+import { VERIFICATION_SNAPSHOT_KEY } from './condition-verification';
 import { ClinicalReadService } from './clinical-read.service';
 // BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
 // referencien. Archivo y servicio nuevos, independientes.
@@ -68,6 +74,15 @@ const CLINICAL_STATUS_TRANSITIONS: Readonly<Record<string, readonly string[]>> =
     ],
     [CLIN.CONDITION_RESOLVED]: [CLIN.CONDITION_RECURRENCE],
   };
+
+/** Cursos clínicos del catálogo: lo único que la verificación acepta como curso. */
+const CLINICAL_COURSES: readonly string[] = [
+  CLIN.CONDITION_COURSE_ACUTE,
+  CLIN.CONDITION_COURSE_CHRONIC,
+  CLIN.CONDITION_COURSE_SUBACUTE,
+  CLIN.CONDITION_COURSE_RECURRENT,
+  CLIN.CONDITION_COURSE_UNKNOWN,
+];
 
 /**
  * UC-08-08: registro de condiciones/diagnósticos (activa + confirmada), y
@@ -362,6 +377,294 @@ export class ConditionsService {
   }
 
   /**
+   * C3 / P41: confirma o refuta un diagnóstico presuntivo.
+   *
+   * ## Qué cambia
+   *
+   * - `CONFIRMED`: verificación confirmada y estado clínico activo; fija el
+   *   inicio, el fin esperado y el curso si vienen. Un curso crónico se
+   *   confirma **sin** fin esperado: lo crónico no se resuelve.
+   * - `REFUTED`: verificación refutada y estado clínico inactivo. Inactivo y no
+   *   activo a propósito: el alta rechaza un duplicado **activo** del mismo
+   *   código, y un descartado no puede impedir registrar el diagnóstico si
+   *   aparece de verdad más adelante.
+   *
+   * ## Qué exige (422, el espejo del diálogo del front)
+   *
+   * Motivo **o** evidencia; al confirmar, inicio (el del cuerpo o el que ya
+   * tenía) y fin esperado salvo curso crónico, con el fin no anterior al
+   * inicio. La evidencia tiene que ser **de este paciente**: una nota o un
+   * estudio ajeno no respalda nada, y aceptarlo filtraría su existencia.
+   *
+   * ## Dónde queda la decisión
+   *
+   * En `audit.conditions_history`, bajo `verification` del `data_snapshot`
+   * (decisión D-BR14-04: sin columna nueva). La lectura del resumen la toma de
+   * la última revisión que la contiene.
+   *
+   * ## Autorización
+   *
+   * Como `change-status` y `attachments` (MCH-007): el paciente sólo se conoce
+   * al cargar la condición, así que la política de escritura sobre la historia
+   * la aplica el servicio, no `ClinicalRecordAccessGuard`.
+   *
+   * @param conditionId - El presuntivo a decidir.
+   * @param dto - Resultado, motivo y/o evidencia, y fechas al confirmar.
+   * @param actor - Profesional que decide; su perfil queda como autor.
+   * @returns La condición entera, como la lista el resumen clínico.
+   * @throws ResourceNotFoundException si la condición no existe.
+   * @throws ForbiddenException si no puede escribir en la historia del
+   *         paciente, o la sesión no tiene perfil profesional.
+   * @throws ConflictException si la condición ya estaba confirmada o refutada.
+   * @throws PreconditionFailedException si falta sustento, fechas, o la
+   *         evidencia no es del paciente.
+   */
+  async verify(
+    conditionId: string,
+    dto: VerifyConditionDto,
+    actor: AuthenticatedUser,
+  ): Promise<ConditionItemDto> {
+    this.logger.info(
+      {
+        operation: 'clinical.condition.verify',
+        conditionId,
+        outcome: dto.outcome,
+      },
+      'Verifying condition',
+    );
+    const decidedByProfileId = actor.practitionerProfileId;
+    if (!decidedByProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que decidir el diagnóstico.',
+      );
+    }
+    return this.em.transactional(async (tx) => {
+      const condition = await this.loadConditionForWrite(
+        tx,
+        conditionId,
+        actor,
+      );
+
+      const actual = condition.verificationStatusConceptId;
+      if (
+        actual === CLIN.CONDITION_CONFIRMED ||
+        actual === CLIN.CONDITION_REFUTED
+      ) {
+        throw new ConflictException(
+          'Ese diagnóstico ya fue decidido: sólo un presuntivo se confirma o se rechaza',
+          { conditionId, verificationStatus: actual },
+        );
+      }
+
+      const reasonText = dto.reasonText?.trim() || undefined;
+      if (reasonText === undefined && dto.basedOn === undefined) {
+        throw new PreconditionFailedException(
+          'Escribí el motivo o elegí una evidencia: al menos uno de los dos.',
+          { conditionId, field: 'reasonText' },
+        );
+      }
+      if (dto.basedOn) {
+        await this.assertEvidenceOfPatient(
+          tx,
+          dto.basedOn,
+          condition.patientProfileId,
+        );
+      }
+
+      const now = new Date();
+      if (dto.outcome === 'CONFIRMED') {
+        this.applyConfirmation(condition, dto, now);
+      } else {
+        condition.verificationStatusConceptId = CLIN.CONDITION_REFUTED;
+        condition.clinicalStatusConceptId = CLIN.CONDITION_INACTIVE;
+      }
+      touch(condition, actor.id);
+      await tx.flush();
+
+      const verification: ConditionVerificationDto = {
+        outcome: dto.outcome,
+        decidedAt: now.toISOString(),
+        decidedByProfileId,
+        reasonText: reasonText ?? null,
+        basedOn: dto.basedOn ? { ...dto.basedOn } : null,
+      };
+
+      await this.auditTrail.record(tx, actor, {
+        action:
+          dto.outcome === 'CONFIRMED'
+            ? 'CONDITION_CONFIRMED'
+            : 'CONDITION_REFUTED',
+        entity: CONDITION_AUDIT_ENTITY,
+        entityId: condition.id,
+        tenantId: condition.custodianTenantId,
+      });
+      await this.historyRepo.append(
+        tx,
+        CONDITION_HISTORY_ENTITY,
+        condition.id,
+        {
+          operationConceptId: AUD.OPERATION_UPDATE,
+          dataSnapshot: {
+            ...this.snapshot(condition),
+            [VERIFICATION_SNAPSHOT_KEY]: verification,
+          },
+          changedByUserId: actor.id,
+        },
+      );
+
+      this.logger.info(
+        {
+          operation: 'clinical.condition.verify',
+          conditionId,
+          outcome: dto.outcome,
+          // Nada de texto libre en el log (regla 90.2.7): el motivo va en la
+          // auditoría, no acá.
+        },
+        'Condition verified',
+      );
+      return this.toItem(condition, verification);
+    });
+  }
+
+  /**
+   * Aplica la confirmación sobre la condición, validando las fechas.
+   *
+   * @param condition - El presuntivo cargado.
+   * @param dto - La decisión.
+   * @param now - Instante de la decisión (el inicio no puede ser posterior).
+   * @throws PreconditionFailedException si falta el inicio, el fin esperado
+   *         (salvo crónico), o el fin es anterior al inicio.
+   */
+  private applyConfirmation(
+    condition: Conditions,
+    dto: VerifyConditionDto,
+    now: Date,
+  ): void {
+    const onsetAt = dto.onsetAt ? new Date(dto.onsetAt) : condition.onsetAt;
+    if (!onsetAt) {
+      throw new PreconditionFailedException(
+        'Indicá desde cuándo la persona presenta la condición.',
+        { conditionId: condition.id, field: 'onsetAt' },
+      );
+    }
+    if (onsetAt.getTime() > now.getTime()) {
+      throw new PreconditionFailedException(
+        'El inicio de la condición no puede ser futuro.',
+        { conditionId: condition.id, field: 'onsetAt' },
+      );
+    }
+
+    if (
+      dto.clinicalCourseConceptId !== undefined &&
+      !CLINICAL_COURSES.includes(dto.clinicalCourseConceptId)
+    ) {
+      throw new PreconditionFailedException(
+        'El curso clínico no es uno del catálogo.',
+        { conditionId: condition.id, field: 'clinicalCourseConceptId' },
+      );
+    }
+    const course =
+      dto.clinicalCourseConceptId ?? condition.clinicalCourseConceptId;
+    const cronica = course === CLIN.CONDITION_COURSE_CHRONIC;
+
+    let expectedResolutionAt: Date | undefined;
+    if (cronica) {
+      if (dto.expectedResolutionAt !== undefined) {
+        throw new PreconditionFailedException(
+          'Una condición crónica se confirma sin fin esperado.',
+          { conditionId: condition.id, field: 'expectedResolutionAt' },
+        );
+      }
+    } else {
+      expectedResolutionAt = dto.expectedResolutionAt
+        ? new Date(dto.expectedResolutionAt)
+        : condition.expectedResolutionAt;
+      if (!expectedResolutionAt) {
+        throw new PreconditionFailedException(
+          'Indicá hasta cuándo se espera la condición, o marcala como crónica.',
+          { conditionId: condition.id, field: 'expectedResolutionAt' },
+        );
+      }
+      if (expectedResolutionAt.getTime() < onsetAt.getTime()) {
+        throw new PreconditionFailedException(
+          'El fin esperado no puede ser anterior al inicio.',
+          { conditionId: condition.id, field: 'expectedResolutionAt' },
+        );
+      }
+    }
+
+    condition.verificationStatusConceptId = CLIN.CONDITION_CONFIRMED;
+    condition.clinicalStatusConceptId = CLIN.CONDITION_ACTIVE;
+    condition.onsetAt = onsetAt;
+    condition.expectedResolutionAt = expectedResolutionAt;
+    condition.clinicalCourseConceptId = course;
+  }
+
+  /**
+   * La evidencia tiene que existir y ser del mismo paciente que la condición.
+   *
+   * Un identificador ajeno responde lo mismo que uno inexistente, para que la
+   * ruta no sirva para averiguar qué notas o estudios tiene otra persona.
+   *
+   * @param tx - Transacción activa.
+   * @param evidence - La evidencia declarada.
+   * @param patientProfileId - El paciente de la condición.
+   * @throws PreconditionFailedException si falta el identificador que su clase
+   *         exige, o alguno no es de este paciente.
+   */
+  private async assertEvidenceOfPatient(
+    tx: EntityManager,
+    evidence: DiagnosisEvidenceDto,
+    patientProfileId: string,
+  ): Promise<void> {
+    const invalida = (motivo: string): PreconditionFailedException =>
+      new PreconditionFailedException(motivo, { field: 'basedOn' });
+
+    if (evidence.kind === 'NOTE' && !evidence.noteId) {
+      throw invalida('Una evidencia de nota necesita la nota.');
+    }
+    if (
+      evidence.kind === 'ANALYSIS' &&
+      !evidence.serviceRequestId &&
+      !evidence.diagnosticReportId
+    ) {
+      throw invalida(
+        'Una evidencia de análisis necesita la orden o el informe.',
+      );
+    }
+
+    const checks: Promise<unknown>[] = [];
+    if (evidence.noteId) {
+      checks.push(
+        tx.findOne(ClinicalNoteHeaders, {
+          id: evidence.noteId,
+          patientProfileId,
+        }),
+      );
+    }
+    if (evidence.serviceRequestId) {
+      checks.push(
+        tx.findOne(ServiceRequests, {
+          id: evidence.serviceRequestId,
+          patientProfileId,
+        }),
+      );
+    }
+    if (evidence.diagnosticReportId) {
+      checks.push(
+        tx.findOne(DiagnosticReports, {
+          id: evidence.diagnosticReportId,
+          patientProfileId,
+        }),
+      );
+    }
+    const encontrados = await Promise.all(checks);
+    if (encontrados.some((fila) => !fila)) {
+      throw invalida('La evidencia elegida no es de este paciente.');
+    }
+  }
+
+  /**
    * Liga un archivo ya subido a este diagnóstico (ALV-033, reemplazo de
    * ALV-032). El archivo se sube antes por separado
    * (`POST /common/files` → `POST /common/files/:id/versions`); esto sólo
@@ -446,6 +749,33 @@ export class ConditionsService {
       onsetAt: condition.onsetAt,
       expectedResolutionAt: condition.expectedResolutionAt,
       resolvedAt: condition.resolvedAt,
+    };
+  }
+
+  /**
+   * La condición entera, con la misma forma que la lista del resumen clínico:
+   * el front reemplaza la fila con lo que el servidor dice.
+   */
+  private toItem(
+    condition: Conditions,
+    verification: ConditionVerificationDto | null,
+  ): ConditionItemDto {
+    return {
+      id: condition.id,
+      codeConceptId: condition.codeConceptId,
+      categoryConceptId: condition.categoryConceptId,
+      clinicalStatusConceptId: condition.clinicalStatusConceptId,
+      verificationStatusConceptId: condition.verificationStatusConceptId,
+      severityConceptId: condition.severityConceptId,
+      encounterId: condition.encounterId,
+      clinicalCourseConceptId: condition.clinicalCourseConceptId,
+      lateralityConceptId: condition.lateralityConceptId,
+      onsetAt: condition.onsetAt,
+      expectedResolutionAt: condition.expectedResolutionAt,
+      resolvedAt: condition.resolvedAt,
+      noteText: condition.noteText,
+      verification,
+      createdAt: condition.createdAt,
     };
   }
 

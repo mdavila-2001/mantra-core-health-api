@@ -482,3 +482,265 @@ describe('ConditionsService · MCH-008.2, coherencia del encuentro', () => {
     );
   });
 });
+
+describe('ConditionsService.verify (C3 / P41)', () => {
+  const medica = {
+    id: 'user-1',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'prac-1',
+  } as any;
+  const AYER = new Date(Date.now() - 86_400_000).toISOString();
+  const EN_UN_MES = new Date(Date.now() + 30 * 86_400_000).toISOString();
+
+  /** Un presuntivo del paciente p1, activo y en estudio. */
+  function presuntivo(over: Record<string, unknown> = {}) {
+    return {
+      id: 'cond-1',
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+      codeConceptId: 'code-1',
+      clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+      verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
+      createdAt: new Date('2026-09-01T10:00:00Z'),
+      ...over,
+    };
+  }
+
+  function armar(condicion = presuntivo()) {
+    const d = build();
+    (d.tx as any).findOne = mockFn().mockResolvedValue({ id: 'evidencia' });
+    d.conditionsRepo.findById.mockResolvedValue(condicion);
+    return { ...d, condicion };
+  }
+
+  describe('correcto', () => {
+    it('confirma con motivo y fechas: activa, confirmada y la decisión sellada en el historial', async () => {
+      const d = armar();
+      const res = await d.service.verify(
+        'cond-1',
+        {
+          outcome: 'CONFIRMED',
+          reasonText: '  Cuadro compatible  ',
+          onsetAt: AYER,
+          expectedResolutionAt: EN_UN_MES,
+        },
+        medica,
+      );
+      expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_CONFIRMED);
+      expect(res.clinicalStatusConceptId).toBe(CLIN.CONDITION_ACTIVE);
+      expect(res.onsetAt).toEqual(new Date(AYER));
+      expect(res.verification).toEqual(
+        expect.objectContaining({
+          outcome: 'CONFIRMED',
+          decidedByProfileId: 'prac-1',
+          reasonText: 'Cuadro compatible',
+          basedOn: null,
+        }),
+      );
+      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        'p1',
+        medica,
+      );
+      const revision = d.historyRepo.append.mock.calls[0][3];
+      expect(revision.dataSnapshot.verification.outcome).toBe('CONFIRMED');
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        medica,
+        expect.objectContaining({ action: 'CONDITION_CONFIRMED' }),
+      );
+    });
+
+    it('refuta sólo con evidencia de análisis del mismo paciente: queda inactiva', async () => {
+      const d = armar();
+      const res = await d.service.verify(
+        'cond-1',
+        {
+          outcome: 'REFUTED',
+          basedOn: { kind: 'ANALYSIS', diagnosticReportId: 'dr-1' },
+        },
+        medica,
+      );
+      expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_REFUTED);
+      expect(res.clinicalStatusConceptId).toBe(CLIN.CONDITION_INACTIVE);
+      expect(res.verification?.basedOn).toEqual({
+        kind: 'ANALYSIS',
+        diagnosticReportId: 'dr-1',
+      });
+      expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
+        id: 'dr-1',
+        patientProfileId: 'p1',
+      });
+    });
+  });
+
+  describe('límite', () => {
+    it('confirma una crónica sin fin esperado y usa el inicio que ya tenía', async () => {
+      const inicio = new Date('2026-08-01T00:00:00Z');
+      const d = armar(
+        presuntivo({
+          onsetAt: inicio,
+          expectedResolutionAt: new Date('2026-12-01T00:00:00Z'),
+        }),
+      );
+      const res = await d.service.verify(
+        'cond-1',
+        {
+          outcome: 'CONFIRMED',
+          reasonText: 'HbA1c 8,1 %',
+          clinicalCourseConceptId: CLIN.CONDITION_COURSE_CHRONIC,
+        },
+        medica,
+      );
+      expect(res.onsetAt).toEqual(inicio);
+      expect(res.expectedResolutionAt).toBeUndefined();
+      expect(res.clinicalCourseConceptId).toBe(CLIN.CONDITION_COURSE_CHRONIC);
+    });
+
+    it('acepta un fin esperado igual al inicio', async () => {
+      const d = armar();
+      const res = await d.service.verify(
+        'cond-1',
+        {
+          outcome: 'CONFIRMED',
+          reasonText: 'x',
+          onsetAt: AYER,
+          expectedResolutionAt: AYER,
+        },
+        medica,
+      );
+      expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_CONFIRMED);
+    });
+
+    it('un motivo hecho de espacios no cuenta como sustento', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', reasonText: '   ' },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('inválido / no autorizado', () => {
+    it('409 si el diagnóstico ya estaba confirmado, sin tocar nada', async () => {
+      const d = armar(
+        presuntivo({ verificationStatusConceptId: CLIN.CONDITION_CONFIRMED }),
+      );
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', reasonText: 'x' },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('422 al confirmar sin fin esperado ni curso crónico', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'CONFIRMED', reasonText: 'x', onsetAt: AYER },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('422 al confirmar sin inicio, ni en el cuerpo ni en la condición', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'CONFIRMED',
+            reasonText: 'x',
+            expectedResolutionAt: EN_UN_MES,
+          },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('422 si el fin esperado es anterior al inicio', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'CONFIRMED',
+            reasonText: 'x',
+            onsetAt: '2026-01-02T00:00:00Z',
+            expectedResolutionAt: '2026-01-01T00:00:00Z',
+          },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('422 si la evidencia es de otro paciente (o no existe)', async () => {
+      const d = armar();
+      (d.tx as any).findOne.mockResolvedValue(null);
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', basedOn: { kind: 'NOTE', noteId: 'n-ajena' } },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('422 si la nota no trae su identificador', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', basedOn: { kind: 'NOTE' } },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('404 si la condición no existe', async () => {
+      const d = armar();
+      d.conditionsRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.verify(
+          'nada',
+          { outcome: 'REFUTED', reasonText: 'x' },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('403 si no puede escribir en la historia del paciente', async () => {
+      const d = armar();
+      d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+        new ForbiddenException('sin vínculo'),
+      );
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', reasonText: 'x' },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('403 si la sesión no tiene perfil profesional', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          { outcome: 'REFUTED', reasonText: 'x' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.conditionsRepo.findById).not.toHaveBeenCalled();
+    });
+  });
+});

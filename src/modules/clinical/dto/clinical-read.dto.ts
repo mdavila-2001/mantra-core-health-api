@@ -31,6 +31,58 @@ export class AllergyReactionItemDto {
   description?: string;
 }
 
+/** La evidencia registrada de una decisión de verificación (C3 / P41). */
+export class ConditionVerificationEvidenceDto {
+  /** `NOTE` o `ANALYSIS`. */
+  @ApiProperty({ enum: ['NOTE', 'ANALYSIS'] })
+  kind!: 'NOTE' | 'ANALYSIS';
+
+  /** Nota clínica que respalda la decisión. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  noteId?: string;
+
+  /** Encuentro de la nota. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
+
+  /** Orden de estudio. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  serviceRequestId?: string;
+
+  /** Informe del estudio. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  diagnosticReportId?: string;
+}
+
+/**
+ * Cómo se decidió un diagnóstico presuntivo (C3 / P41).
+ *
+ * No vive en columnas de `clinical.conditions`: igual que el motivo del cambio
+ * de estado (D-BR14-04), se sella en el `data_snapshot` de
+ * `audit.conditions_history` y se lee de la última revisión que lo contiene.
+ */
+export class ConditionVerificationDto {
+  /** `CONFIRMED` o `REFUTED`. */
+  @ApiProperty({ enum: ['CONFIRMED', 'REFUTED'] })
+  outcome!: 'CONFIRMED' | 'REFUTED';
+
+  /** Instante de la decisión, ISO. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  decidedAt!: string;
+
+  /** Perfil profesional que decidió. */
+  @ApiProperty({ format: 'uuid' })
+  decidedByProfileId!: string;
+
+  /** Motivo escrito, o `null`. */
+  @ApiProperty({ type: String, nullable: true })
+  reasonText!: string | null;
+
+  /** Evidencia elegida, o `null`. */
+  @ApiProperty({ type: ConditionVerificationEvidenceDto, nullable: true })
+  basedOn!: ConditionVerificationEvidenceDto | null;
+}
+
 /** Una condición registrada del paciente. */
 export class ConditionItemDto {
   /**
@@ -121,6 +173,13 @@ export class ConditionItemDto {
     description: 'Motivo del último cambio de estado clínico, si hubo alguno',
   })
   lastStatusChangeReasonText?: string;
+
+  /**
+   * Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se
+   * confirmó ni refutó por `POST /clinical/conditions/:id/verification`.
+   */
+  @ApiPropertyOptional({ type: ConditionVerificationDto, nullable: true })
+  verification?: ConditionVerificationDto | null;
 
   /**
    * Fecha y hora en que se creó el registro.
