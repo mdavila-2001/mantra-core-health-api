@@ -409,8 +409,25 @@ catálogo a mano. Es trabajo de bóveda, con su propia tarjeta.
 Bóveda PR #75 (`justin/b10-notas-fk-surveys`) agrega las 35 notas FK faltantes, contrastadas 1:1
 contra `SQL/65_surveys/03_fk_intra.sql` + `90_fk_deferred.sql`. Con esa bóveda,
 `yarn orm:catalog` emite `surveys.fk.ts` con **36/36** (`fkDescartadas: 0`) tocando **sólo** ese
-archivo del catálogo — verificado con `git status src/orm/catalog/`. B-10 cierra cuando el PR #75
-mergee a `dev` y esta rama incorpore ese merge.
+archivo del catálogo — verificado con `git status src/orm/catalog/`.
+
+**Cerrado 2026-09-26.** El PR #75 mergeó (`b660a187`, ancestro confirmado de
+`origin/dev` de la bóveda). El defecto ya no bloquea: `yarn orm:catalog` para módulos con
+notas completas vuelve a dejar el árbol reproducible. La certificación de la Tarea 4
+(campañas preventivas de la aseguradora) lo verificó de nuevo al escribir las 16 notas de
+`insurance_campaigns`/`insurance_campaign_partners` y regenerar el catálogo acotado a
+`insurance` sin arrastrar otros módulos.
+
+**Hallazgo lateral, no cerrado: la deuda que B-10 destapaba es más ancha que `surveys`.**
+Correr `salud-db/fix_vault_fk.py` el 2026-09-26 creó **297** notas FK faltantes, de las cuales
+sólo 12 eran de campañas: quedan **285** sin nota en `pharma_lab` (182), `audit` (32),
+`authz` (15), `iam` (13), `data_catalog` (13), `scheduling` (11), `qa_execution` (6),
+`clinical` (6), `community` (4), `profiles` (2) y `accounting` (1). Sin esas notas,
+`schemas.catalog.ts` sigue devolviendo módulo `null` para `data_catalog`/`qa_execution` (y
+probablemente otros) pese a que sus tablas ya están en `dev` — el mismo patrón de B-10, en
+más módulos. Las 285 notas quedaron generadas y en un `git stash` local (mensaje
+`AJENO 297-12`) sin commitear, fuera de alcance de este carril; falta abrirles ficha propia
+y un PR de bóveda dedicado.
 
 **B-11 · Ampliar un value set deja su propia ficha diciendo el número viejo.** `upsert_rows` de
 `gen_seeds.py` sólo inserta filas con PK nueva y **nunca actualiza una existente**. Los ids de
@@ -494,6 +511,30 @@ regla dice 404 sólo si el concepto pertenece al conjunto marcador `GLOSSARY_ALL
 la prueba no lo agrega ahí. O sea que **el buscador y la ficha deciden «esto es del glosario»
 con criterios distintos**. Hay que decidir cuál manda —módulo 03, tarea 25— antes de tocar
 ninguno de los dos.
+
+**B-16 · `yarn test:integration` no arranca por un `MetadataError` de `CatalogConcepts`,
+sin ficha hasta ahora.** Destapado al certificar la Tarea 4 (campañas preventivas de la
+aseguradora, 2026-09-26): `test:integration` muere antes de correr un solo caso con
+`MetadataError: Metadata for entity CatalogConcepts not found` de
+`TsMorphMetadataProvider`. `docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/REPORTE.md`
+ya lo había registrado de pasada (líneas 56 y 70: «desde `dist` sí corre»), pero sin ficha
+propia ni causa raíz documentada. Bloquea directamente el DoD de integración de cualquier
+tarea nueva sobre `insurance` (y probablemente cualquier módulo que importe
+`CatalogConcepts` transitivamente). Pendiente: reproducir con
+`node_modules/.cache/mikro-orm` vacío, revisar `entitiesTs`/`TsMorphMetadataProvider` en
+`src/orm/config/orm.config.ts`, y confirmar si el rodeo real es compilar y correr desde
+`dist/` o si hay una causa corregible en la configuración de metadatos.
+
+**B-17 · Deuda declarada por la certificación de Tarea 4 (campañas preventivas), pendiente
+de PR.** El prompt de Tarea 4 pedía rutas `insurance/campaigns` (con alias deprecado
+`insurance-campaigns`), roles `INSURANCE_ADMIN`/`INSURANCE_OPERATOR`, edición de campaña,
+`GET .../active` público y `GET .../my-benefits`, y auditoría 403 cruzada entre
+aseguradoras (CA-02) — nada de eso estaba en el PR #469 original (v1.0 del contrato). La
+certificación del 26/09 (v1.1 del contrato, `docs/contracts/insurer-preventive-campaigns.md`)
+cierra esos huecos en el código y en los tests unitarios; queda pendiente correr
+`test:integration` una vez resuelto B-16, aplicar la Tarea 4 a la rama `mockup` (paridad de
+demo, `origin/mockup` no tiene ningún archivo de campañas), y la tercera pasada
+independiente de revisión visual que quedó abierta en el PR #710 original.
 
 ---
 
