@@ -47,6 +47,13 @@ export interface CampaignListFilters {
   readonly after?: { readonly createdAt: string; readonly id: string };
   /** Se pide una fila de más para saber si hay página siguiente. */
   readonly limit: number;
+  /**
+   * Día civil de referencia (`patientCoverageReferenceDate()`). Cuando se
+   * filtra `status = ACTIVE`, una fila cuya `valid_to` ya pasó no cuenta como
+   * activa aunque el registro no se haya movido: el vencimiento es por fecha,
+   * no por transición (CA-04).
+   */
+  readonly referenceDate?: string;
 }
 
 const TS_UTC = `'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'`;
@@ -104,6 +111,18 @@ export class InsuranceCampaignsRepository {
     return em.findOne(InsuranceCampaigns, { id, insuranceCarrierId });
   }
 
+  /**
+   * La entidad por id, sin acotar por aseguradora. Sólo para distinguir, tras
+   * un intento fallido acotado, si la campaña no existe en absoluto o existe
+   * pero es de otra aseguradora (CA-02: ese segundo caso se audita distinto).
+   */
+  findAnyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<InsuranceCampaigns | null> {
+    return em.findOne(InsuranceCampaigns, { id });
+  }
+
   createCampaign(
     em: EntityManager,
     data: Record<string, unknown> & { actorUserId?: string },
@@ -114,6 +133,14 @@ export class InsuranceCampaignsRepository {
       { ...fields, ...createdBy(actorUserId) },
       { partial: true },
     );
+  }
+
+  /** Borra todos los aliados de la campaña, para reemplazarlos en la edición. */
+  deletePartners(
+    em: EntityManager,
+    insuranceCampaignId: string,
+  ): Promise<number> {
+    return em.nativeDelete(InsuranceCampaignPartners, { insuranceCampaignId });
   }
 
   createPartner(
@@ -183,6 +210,13 @@ export class InsuranceCampaignsRepository {
     if (filters.statusConceptId) {
       where.push('c.status_concept_id = ?');
       params.push(filters.statusConceptId);
+      if (
+        filters.statusConceptId === INS.CAMPAIGN_ACTIVE &&
+        filters.referenceDate
+      ) {
+        where.push('c.valid_to >= ?::date');
+        params.push(filters.referenceDate);
+      }
     }
     if (filters.after) {
       where.push('(c.created_at, c.id) < (?::timestamptz, ?::uuid)');
@@ -283,5 +317,60 @@ export class InsuranceCampaignsRepository {
         referenceDate,
       ],
     );
+  }
+
+  /**
+   * `GET /insurance-campaigns/active`, pública: campañas ACTIVE y vigentes de
+   * cualquier aseguradora (o de una sola, si `carrierId` la acota). Misma
+   * regla de vencimiento efectivo por fecha que la vista del afiliado.
+   */
+  listPublicActiveRows(
+    em: EntityManager,
+    referenceDate: string,
+    carrierId?: string,
+  ): Promise<PatientCampaignRow[]> {
+    const where = [
+      'c.status_concept_id = ?',
+      'c.valid_from <= ?::date',
+      'c.valid_to >= ?::date',
+    ];
+    const params: unknown[] = [
+      INS.CAMPAIGN_ACTIVE,
+      referenceDate,
+      referenceDate,
+    ];
+    if (carrierId) {
+      where.push('c.insurance_carrier_id = ?');
+      params.push(carrierId);
+    }
+    return em.getConnection().execute<PatientCampaignRow[]>(
+      `select ${CAMPAIGN_COLUMNS}, ca.legal_name as carrier_name
+         from insurance.insurance_campaigns c
+         join insurance.insurance_carriers ca on ca.id = c.insurance_carrier_id
+         left join terminology.catalog_concepts cond on cond.id = c.target_condition_concept_id
+        where ${where.join(' and ')}
+        order by c.valid_to, c.created_at desc, c.id desc`,
+      params,
+    );
+  }
+
+  /**
+   * Si una membresía de red de prestadores pertenece a alguna red de ESA
+   * aseguradora. Evita que un aliado de la campaña quede apuntando a la red
+   * de otra aseguradora (CA-02.e).
+   */
+  async membershipBelongsToCarrier(
+    em: EntityManager,
+    networkProviderMembershipId: string,
+    insuranceCarrierId: string,
+  ): Promise<boolean> {
+    const filas = await em.getConnection().execute<{ ok: number }[]>(
+      `select 1 as ok
+         from insurance.network_provider_memberships m
+         join insurance.provider_networks n on n.id = m.provider_network_id
+        where m.id = ? and n.insurance_carrier_id = ?`,
+      [networkProviderMembershipId, insuranceCarrierId],
+    );
+    return filas.length > 0;
   }
 }
