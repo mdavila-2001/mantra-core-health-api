@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  pickAccessibleContent,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -85,6 +86,9 @@ export class DiagnosticReportsService {
         lifecycleStatusConceptId: CLIN.REPORT_PARTIAL,
         resultReleaseStatusConceptId: CLIN.RELEASE_HELD,
         currentVersionId: dto.currentVersionId,
+        altText: dto.altText,
+        description: dto.description,
+        transcription: dto.transcription,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -177,9 +181,16 @@ export class DiagnosticReportsService {
      * Fecha y hora en que se creó el registro.
      */
     createdAt: Date;
+    /** Texto alternativo breve (v4.2.33). */
+    altText?: string | null;
+    /** Descripción larga (v4.2.33). */
+    description?: string | null;
+    /** Transcripción (v4.2.33). */
+    transcription?: string | null;
   }): DiagnosticReportResponseDto {
     return {
       id: report.id,
+      ...pickAccessibleContent(report),
       patientProfileId: report.patientProfileId,
       lifecycleStatus: report.lifecycleStatusConceptId,
       resultReleaseStatus: report.resultReleaseStatusConceptId ?? null,

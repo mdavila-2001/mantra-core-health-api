@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Files } from '../entities';
 import { createdBy } from '../../../common';
+import type { AccessibleContentFields } from '../../../common/dto/accessible-content.dto';
 
 /** Datos mínimos para dar de alta el agregado archivo (sin su primera versión). */
-export interface CreateFileData {
+export interface CreateFileData extends AccessibleContentFields {
   /** Coordinator target, allocated before the physical write. Not a public DTO field. */
   id?: string;
   /**
@@ -56,6 +57,9 @@ export class FilesRepository {
         tenantId: data.tenantId,
         categoryConceptId: data.categoryConceptId,
         originalName: data.originalName,
+        altText: data.altText,
+        description: data.description,
+        transcription: data.transcription,
         sensitivityConceptId: data.sensitivityConceptId,
         lifecycleStatusConceptId: data.lifecycleStatusConceptId,
         ...createdBy(data.actorUserId),

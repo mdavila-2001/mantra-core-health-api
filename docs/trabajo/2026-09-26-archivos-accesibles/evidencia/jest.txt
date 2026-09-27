@@ -1,0 +1,5 @@
+Test Suites: 5 passed, 5 total
+Tests:       94 passed, 94 total
+Snapshots:   0 total
+Time:        7.571 s, estimated 38 s
+Ran all test suites matching src/common/dto/accessible-content.dto.spec.ts|src/orm/catalog/accessible-content.contract.spec.ts|src/modules/common/services/files.service.spec.ts|src/modules/common/services/file-upload.service.spec.ts|src/modules/clinical/services/diagnostic-reports.service.spec.ts.

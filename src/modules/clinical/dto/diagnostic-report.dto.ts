@@ -1,8 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsUUID, Min } from 'class-validator';
+import {
+  AccessibleContentInputDto,
+  AccessibleContentResponseDto,
+} from '../../../common/dto/accessible-content.dto';
 
-/** Cuerpo de `POST /clinical/diagnostic-reports` (UC-08-06). */
-export class CreateDiagnosticReportDto {
+/**
+ * Cuerpo de `POST /clinical/diagnostic-reports` (UC-08-06).
+ *
+ * Hereda `altText`, `description` y `transcription` opcionales (v4.2.33): la
+ * alternativa accesible del informe para quien usa lector de pantalla.
+ */
+export class CreateDiagnosticReportDto extends AccessibleContentInputDto {
   /**
    * Identificador asociado a custodian tenant.
    */
@@ -89,8 +98,8 @@ export class ReleaseDiagnosticReportDto {
   expectedRowVersion?: number;
 }
 
-/** Respuesta de un reporte diagnóstico. */
-export class DiagnosticReportResponseDto {
+/** Respuesta de un reporte diagnóstico, con sus textos accesibles si los tiene. */
+export class DiagnosticReportResponseDto extends AccessibleContentResponseDto {
   /**
    * Identificador único de la instancia.
    */

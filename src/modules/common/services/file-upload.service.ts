@@ -23,6 +23,7 @@ import {
   type FileStorageAdapter,
   type SniffedMimeType,
 } from '../../../common';
+import type { AccessibleContentFields } from '../../../common/dto/accessible-content.dto';
 
 import { FileVersionsRepository, FilesRepository } from '../repositories';
 import { AttachableFileService } from './attachable-file.service';
@@ -36,6 +37,32 @@ import type {
   FileSensitivity,
   UploadFileDto,
 } from '../dto';
+
+/**
+ * Clasificación del archivo más sus textos accesibles (v4.2.33), que viajan
+ * juntos desde el cuerpo multipart hasta `FilesService.createFile`. Los textos
+ * los declara quien sube el archivo; no salen de los bytes.
+ */
+type FileClassification = {
+  category: FileCategory;
+  sensitivity: FileSensitivity;
+} & AccessibleContentFields;
+
+/**
+ * Los textos accesibles de un cuerpo de subida, sin arrastrar el resto del DTO.
+ *
+ * @param dto - Cuerpo de la subida.
+ * @returns Sólo `altText`, `description` y `transcription`.
+ */
+function accessibleFieldsOf(
+  dto: AccessibleContentFields,
+): AccessibleContentFields {
+  return {
+    altText: dto.altText,
+    description: dto.description,
+    transcription: dto.transcription,
+  };
+}
 
 /** Lo que llega del interceptor de multer, acotado a lo que aquí se usa. */
 export interface UploadedFileBytes {
@@ -210,7 +237,11 @@ export class FileUploadService {
 
     return this.persistBytes(
       { buffer: file.buffer, originalName: file.originalname },
-      { category: dto.category, sensitivity: dto.sensitivity },
+      {
+        category: dto.category,
+        sensitivity: dto.sensitivity,
+        ...accessibleFieldsOf(dto),
+      },
       detectedMimeType,
       actor,
       'common.file.upload',
@@ -238,7 +269,7 @@ export class FileUploadService {
    */
   private async persistBytes(
     bytes: { buffer: Buffer; originalName: string },
-    classification: { category: FileCategory; sensitivity: FileSensitivity },
+    classification: FileClassification,
     mimeType: string,
     actor: AuthenticatedUser | null,
     operation: string,
@@ -279,6 +310,7 @@ export class FileUploadService {
         originalName: bytes.originalName,
         category: classification.category,
         sensitivity: classification.sensitivity,
+        ...accessibleFieldsOf(classification),
         mimeType,
         sizeBytes: stored.sizeBytes,
         contentHash: stored.contentHash,
@@ -426,6 +458,7 @@ export class FileUploadService {
         originalName: file.originalname,
         category: dto.category,
         sensitivity: dto.sensitivity,
+        ...accessibleFieldsOf(dto),
         mimeType: detectedMimeType,
         sizeBytes: stored.sizeBytes,
         contentHash: stored.contentHash,
@@ -442,7 +475,7 @@ export class FileUploadService {
 
   private async publishUpload(
     file: UploadedFileBytes,
-    dto: { category: FileCategory; sensitivity: FileSensitivity },
+    dto: FileClassification,
     mimeType: string,
     actor: AuthenticatedUser | null,
   ) {
@@ -463,6 +496,7 @@ export class FileUploadService {
             originalName: file.originalname,
             category: dto.category,
             sensitivity: dto.sensitivity,
+            ...accessibleFieldsOf(dto),
             mimeType,
             sizeBytes: context.stored.sizeBytes,
             contentHash: context.stored.contentHash,

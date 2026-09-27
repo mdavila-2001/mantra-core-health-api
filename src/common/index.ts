@@ -105,6 +105,15 @@ export type {
 // Paginación
 export { PaginationQueryDto } from './dto/pagination-query.dto';
 export { PageResponseDto, PageMetaDto } from './dto/page-response.dto';
+
+// Textos accesibles de archivos y reportes (v4.2.33)
+export {
+  ACCESSIBLE_CONTENT_LIMITS,
+  AccessibleContentInputDto,
+  AccessibleContentResponseDto,
+  pickAccessibleContent,
+} from './dto/accessible-content.dto';
+export type { AccessibleContentFields } from './dto/accessible-content.dto';
 export {
   encodeKeysetCursor,
   decodeKeysetCursor,

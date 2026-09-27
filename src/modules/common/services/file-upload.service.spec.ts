@@ -97,6 +97,28 @@ describe('FileUploadService', () => {
       expect(result).toEqual({ id: 'file-1' });
     });
 
+    it('reenvía los textos accesibles del multipart al alta del archivo (v4.2.33)', async () => {
+      const { service, storage, filesService } = build();
+      storage.store.mockResolvedValue({
+        storageUri: 'file://local/abc',
+        sizeBytes: 6,
+        contentHash: 'abc',
+      });
+      filesService.createFile.mockResolvedValue({ id: 'file-1' });
+      const textos = {
+        altText: 'Carnet de identidad, anverso.',
+        description: 'Documento con foto.',
+        transcription: 'Transcripción del documento.',
+      };
+
+      await service.upload(uploadedFile(), { ...dto, ...textos }, actor);
+
+      expect(filesService.createFile).toHaveBeenCalledWith(
+        expect.objectContaining(textos),
+        actor,
+      );
+    });
+
     it('rejects an empty upload without touching storage', async () => {
       const { service, storage } = build();
 

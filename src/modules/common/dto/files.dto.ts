@@ -9,6 +9,10 @@ import {
   Min,
 } from 'class-validator';
 import {
+  AccessibleContentInputDto,
+  AccessibleContentResponseDto,
+} from '../../../common/dto/accessible-content.dto';
+import {
   DerivativeType,
   FileCategory,
   FileSensitivity,
@@ -18,8 +22,12 @@ import {
   ScanResult,
 } from './enums';
 
-/** Cuerpo de `POST /common/files` (crea el archivo y su versión 1). */
-export class CreateFileDto {
+/**
+ * Cuerpo de `POST /common/files` (crea el archivo y su versión 1).
+ *
+ * Hereda `altText`, `description` y `transcription` opcionales (v4.2.33).
+ */
+export class CreateFileDto extends AccessibleContentInputDto {
   /**
    * Valor de original name mantenido por la instancia.
    */
@@ -79,8 +87,11 @@ export class CreateFileDto {
  * Parte no binaria de `POST /common/files/upload`. El nombre original, el tipo
  * MIME, el tamaño y el hash no se declaran: salen del propio archivo subido y
  * del adaptador de almacenamiento, que es lo único verificable.
+ *
+ * Los textos accesibles (`altText`, `description`, `transcription`, v4.2.33)
+ * sí se declaran: los escribe quien conoce el contenido, no salen de los bytes.
  */
-export class UploadFileDto {
+export class UploadFileDto extends AccessibleContentInputDto {
   /**
    * Valor de category mantenido por la instancia.
    */
@@ -270,8 +281,11 @@ export class PendingScanResponseDto {
   items!: PendingScanItemDto[];
 }
 
-/** Representación segura de un archivo. */
-export class FileResponseDto {
+/**
+ * Representación segura de un archivo, con sus textos accesibles si los
+ * tiene (v4.2.33).
+ */
+export class FileResponseDto extends AccessibleContentResponseDto {
   /**
    * Identificador único de la instancia.
    */

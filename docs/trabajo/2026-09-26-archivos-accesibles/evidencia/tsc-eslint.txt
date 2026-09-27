@@ -1,0 +1,5 @@
+eslint (16 archivos .ts tocados):
+ESLINT_EXIT=0
+
+npx tsc --noEmit -p tsconfig.json:
+TSC_EXIT=0
