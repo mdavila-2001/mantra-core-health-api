@@ -21,6 +21,18 @@ export enum ErrorCode {
   CONFLICT = 'CONFLICT',
   PRECONDITION_FAILED = 'PRECONDITION_FAILED',
   CONCURRENCY_CONFLICT = 'CONCURRENCY_CONFLICT',
+  /**
+   * Se reutilizó una `Idempotency-Key` con un cuerpo distinto del de su
+   * primer uso (422). No se reintenta: la clave ya está atada a otra
+   * operación, y el cliente tiene que generar una nueva para estos datos.
+   */
+  IDEMPOTENCY_KEY_REUSED = 'IDEMPOTENCY_KEY_REUSED',
+  /**
+   * Otra petición con la misma `Idempotency-Key` sigue en curso (409). **Sí**
+   * se reintenta, con la misma clave: cuando la primera termine, el reintento
+   * recibirá su misma respuesta sin volver a ejecutarla.
+   */
+  IDEMPOTENCY_REQUEST_IN_PROGRESS = 'IDEMPOTENCY_REQUEST_IN_PROGRESS',
   PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
   RATE_LIMITED = 'RATE_LIMITED',
   DEPENDENCY_UNAVAILABLE = 'DEPENDENCY_UNAVAILABLE',

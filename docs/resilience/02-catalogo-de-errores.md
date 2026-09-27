@@ -157,6 +157,30 @@ leído por un cliente. La diferencia es práctica: **los cuatro significan
 | **Monitoreo** | Una tasa creciente indica contención real que conviene atacar en el diseño de la transacción, no en el cliente |
 | **Log** | `warn` |
 
+#### `IDEMPOTENCY_KEY_REUSED`
+
+| | |
+| --- | --- |
+| **HTTP** | 422 |
+| **Origen** | `IdempotencyInterceptor`, en las rutas `@Idempotent()`: la `Idempotency-Key` ya se usó (mismo usuario, tenant, método y ruta) con otro cuerpo o query |
+| **Significado** | La clave está atada a otra operación; no se ejecutó nada |
+| **Recuperable** | Sí, con una clave nueva |
+| **Automático** | No — reintentar con la misma clave siempre da lo mismo |
+| **Acción** | El cliente genera una clave nueva por cada envío con datos distintos |
+| **Log** | `warn` |
+
+#### `IDEMPOTENCY_REQUEST_IN_PROGRESS`
+
+| | |
+| --- | --- |
+| **HTTP** | 409 (con `Retry-After: 1`) |
+| **Origen** | `IdempotencyInterceptor`: otra petición con la misma clave y el mismo cuerpo todavía no terminó |
+| **Significado** | La operación ya está en marcha; ésta no la duplica |
+| **Recuperable** | Sí |
+| **Automático** | **Sí — reintentar con la misma clave**: al terminar la primera, el reintento recibe su respuesta (cabecera `Idempotent-Replayed: true`) sin re-ejecutar |
+| **Acción** | Esperar `Retry-After` y reintentar sin cambiar la clave |
+| **Log** | `warn` |
+
 #### `PAYLOAD_TOO_LARGE`
 
 | | |

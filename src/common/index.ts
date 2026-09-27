@@ -42,6 +42,9 @@ export {
   TenantAgnostic,
   IS_TENANT_AGNOSTIC_KEY,
 } from './tenant/tenant-agnostic.decorator';
+export { Idempotent } from './idempotency/idempotent.decorator';
+export { IdempotencyInterceptor } from './idempotency/idempotency.interceptor';
+export { IdempotencyStore } from './idempotency/idempotency.store';
 export type { AuthenticatedUser } from './auth/authenticated-user.interface';
 export type { JwtPayload } from './auth/jwt-payload.interface';
 

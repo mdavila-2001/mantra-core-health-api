@@ -11,7 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Idempotent,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { ClinicalRecordAccessGuard } from '../guards';
 import {
@@ -161,6 +166,7 @@ export class ClinicalRecordsController {
   @Post('medication-requests')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
+  @Idempotent()
   @ApiOperation({ summary: 'Prescribir medicación' })
   prescribeMedication(
     @Body() dto: CreateMedicationRequestDto,
