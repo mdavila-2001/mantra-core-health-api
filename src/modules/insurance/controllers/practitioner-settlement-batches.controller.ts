@@ -14,6 +14,7 @@ import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { PractitionerSettlementBatchesService } from '../services';
+import { InsurerAdministration } from '../guards';
 import {
   GeneratePractitionerSettlementBatchDto,
   PractitionerSettlementBatchDto,
@@ -40,9 +41,14 @@ export class PractitionerSettlementBatchesController {
   /**
    * Genera el lote del período, o devuelve el existente (contrato §9):
    * `201` si es nuevo, `200` con `replayed: true` si ya existía.
+   *
+   * Genera sólo la administración de la aseguradora (`assertInsurer` en el
+   * servicio); `@InsurerAdministration()` aplica esa regla en el borde. Las
+   * lecturas quedan sin él: también las abre el prestador.
    */
   @Post()
   @Roles()
+  @InsurerAdministration()
   @ApiOperation({
     summary: 'Generar (o repetir) el lote de liquidación del período',
   })

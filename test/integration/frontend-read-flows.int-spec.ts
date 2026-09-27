@@ -99,6 +99,27 @@ describe('Flujos de lectura del frontend (integración)', () => {
 
       expect(list.body.count).toBe(1);
       expect(list.body.items[0].profileId).toBe(profileId);
+
+      // La misma búsqueda con los filtros en el cuerpo: es la que usa el
+      // frontend, para que el criterio no quede en los logs de acceso. Mismo
+      // resultado, `200` y no `201`, y el `GET` avisa que está obsoleto.
+      const porCuerpo = await http()
+        .post('/profiles/patients/search')
+        .set(auth())
+        .send({ q: `PAC-${u}-lectura` })
+        .expect(200);
+
+      expect(porCuerpo.body.count).toBe(1);
+      expect(porCuerpo.body.items[0].profileId).toBe(profileId);
+      expect(list.headers['deprecation']).toBe('true');
+    });
+
+    it('la búsqueda por cuerpo rechaza un campo no declarado (400)', async () => {
+      await http()
+        .post('/profiles/patients/search')
+        .set(auth())
+        .send({ q: `PAC-${u}`, password: 'no-va' })
+        .expect(400);
     });
 
     it('el contacto de emergencia registrado se devuelve con su nombre, no sólo su id', async () => {

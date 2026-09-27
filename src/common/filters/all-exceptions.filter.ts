@@ -16,6 +16,7 @@ import {
 } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
+import { pathWithoutQuery } from '../http/redact-url';
 import {
   APP_ATTR,
   TracingService,
@@ -42,6 +43,60 @@ const EXPOSABLE_5XX_CODES: ReadonlySet<string> = new Set<string>([
   ErrorCode.CIRCUIT_OPEN,
   ErrorCode.CONCURRENCY_LIMIT,
 ]);
+
+/**
+ * Espera sugerida, en segundos, para la cabecera `Retry-After` de cada código
+ * de {@link EXPOSABLE_5XX_CODES} cuando la excepción no trae una propia.
+ *
+ * Decir "reintenta" sin decir cuándo empuja a los clientes a reintentar ya, y
+ * todos a la vez. Los valores siguen a lo que protege cada código:
+ * - `CIRCUIT_OPEN`: 30 s, el `openDurationMs` por defecto del cortacircuitos
+ *   (`circuit-breaker.ts`). En la práctica `CircuitOpenError` trae el plazo
+ *   real en `details.retryAfterMs` y éste es sólo el respaldo.
+ * - `DEPENDENCY_UNAVAILABLE` y `TIMEOUT`: 5 s. Una base arrancando o una
+ *   dependencia lenta; lo bastante para no martillar, poco para un usuario.
+ * - `CONCURRENCY_LIMIT`: 1 s. El mamparo se vacía en cuanto termina una
+ *   operación en vuelo; esperar más sólo sumaría latencia.
+ */
+const DEFAULT_RETRY_AFTER_SECONDS: Readonly<Record<string, number>> = {
+  [ErrorCode.CIRCUIT_OPEN]: 30,
+  [ErrorCode.DEPENDENCY_UNAVAILABLE]: 5,
+  [ErrorCode.TIMEOUT]: 5,
+  [ErrorCode.CONCURRENCY_LIMIT]: 1,
+};
+
+/**
+ * Segundos de `Retry-After` para un 5xx expuesto: los que declara la excepción
+ * en `details.retryAfterMs` (así lo hace `CircuitOpenError`) o, si no declara
+ * nada utilizable, el valor por código.
+ *
+ * Siempre entero y al menos 1: la cabecera sólo admite segundos enteros
+ * (RFC 9110 §10.2.3), y un `0` —el cortacircuitos a punto de pasar a
+ * semiabierto— invitaría a reintentar en el mismo milisegundo.
+ *
+ * @param code - Código estable del error, ya normalizado.
+ * @param details - `details` del cuerpo de error, tal como lo armó la excepción.
+ * @returns Segundos a esperar, o `undefined` si el código no es reintentable.
+ */
+export function retryAfterSeconds(
+  code: string,
+  details: unknown,
+): number | undefined {
+  const fallback = DEFAULT_RETRY_AFTER_SECONDS[code];
+  if (fallback === undefined) return undefined;
+  const declared =
+    typeof details === 'object' && details !== null
+      ? (details as { retryAfterMs?: unknown }).retryAfterMs
+      : undefined;
+  if (
+    typeof declared === 'number' &&
+    Number.isFinite(declared) &&
+    declared >= 0
+  ) {
+    return Math.max(1, Math.ceil(declared / 1000));
+  }
+  return fallback;
+}
 
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
@@ -161,13 +216,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { status, code, message, details, internals } =
       this.normalize(exception);
 
+    // Sin query string: en este backend lleva nombres y documentos de
+    // pacientes (`?q=`, `?nationalId=`), y ni el cuerpo que ve el cliente ni
+    // las líneas de log de abajo tienen por qué repetirlos.
+    const path = pathWithoutQuery(request.url);
+
     const body: ErrorResponseBody = {
       code,
       message,
       correlationId,
       details,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path,
     };
 
     // La traza se marca ANTES de escribir la respuesta, mientras el span HTTP
@@ -183,7 +243,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         {
           err: exception,
           correlationId,
-          path: request.url,
+          path,
           method: request.method,
         },
         'Unhandled exception',
@@ -192,13 +252,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
         body.message = 'Error interno del servidor';
         body.code = ErrorCode.INTERNAL;
         body.details = undefined;
+      } else {
+        // Los expuestos significan "reintenta": se dice también cuándo.
+        const retryAfter = retryAfterSeconds(code, details);
+        if (retryAfter !== undefined) {
+          response.setHeader('Retry-After', String(retryAfter));
+        }
       }
     } else {
       this.logger.warn(
         {
           correlationId,
           code,
-          path: request.url,
+          path,
           method: request.method,
           status,
           // Restricción, tabla y columna del error del driver. Van al log y NO

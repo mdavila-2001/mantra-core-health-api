@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { InsuranceCampaignsService } from '../services';
+import { InsurerAdministration } from '../guards';
 import {
   CreateInsuranceCampaignDto,
   InsuranceCampaignListQueryDto,
@@ -37,6 +38,11 @@ import {
  * (OWNER/ADMIN para mutar, cualquier miembro para leer) y el afiliado por
  * titularidad de su perfil contra el JWT. Un rol clínico o de paciente que
  * intente mutar recibe 403 del servicio.
+ *
+ * Las dos mutaciones llevan además `@InsurerAdministration()`: la misma regla
+ * OWNER/ADMIN aplicada en el borde, antes de abrir la transacción. Las
+ * lecturas no, porque las abre también el afiliado (`patient/:id`) y
+ * cualquier miembro de la aseguradora.
  */
 @ApiTags('insurance-campaigns')
 @ApiBearerAuth()
@@ -46,6 +52,7 @@ export class InsuranceCampaignsController {
 
   @Post()
   @Roles()
+  @InsurerAdministration()
   @ApiOperation({ summary: 'Crear una campaña preventiva de la aseguradora' })
   @ApiCreatedResponse({ type: InsuranceCampaignResponseDto })
   create(
@@ -99,6 +106,7 @@ export class InsuranceCampaignsController {
 
   @Patch(':id/status')
   @Roles()
+  @InsurerAdministration()
   @ApiOperation({
     summary: 'Activar, pausar o finalizar una campaña (transiciones cerradas)',
   })
