@@ -70,6 +70,10 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
 import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
 import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice.adapter';
 import { SupportAdminNoticeAdapter } from './adapters/support-admin-notice.adapter';
+// P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
+// Clase sin estado de `forms` (`EntityManager` por parámetro): se provee suelta,
+// sin importar `FormsModule` entero, mismo criterio que `AppointmentsRepository`.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo de agenda: recursos, políticas, plantillas, slots, reservas con
@@ -105,6 +109,7 @@ import { SupportAdminNoticeAdapter } from './adapters/support-admin-notice.adapt
     TenantAgendaController,
   ],
   providers: [
+    FormInstanceOriginValidator,
     // La regla de pertenencia del médico a una organización, que consultan
     // el catálogo (al publicar) y las reservas (al aceptar).
     PractitionerAffiliationGateService,

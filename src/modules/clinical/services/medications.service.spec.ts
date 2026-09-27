@@ -65,6 +65,10 @@ function build() {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
+  // P43: el origen en formulario. Por defecto, válido.
+  const formOrigin = {
+    assertUsableOrigin: mockFn().mockResolvedValue(undefined),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
@@ -77,8 +81,10 @@ function build() {
     logger as any,
     clinicalRead as any,
     filesService as any,
+    formOrigin as any,
   );
   return {
+    formOrigin,
     clinicalRead,
     filesService,
     clinicalNotifications,
@@ -301,6 +307,61 @@ describe('MedicationsService', () => {
         expect(
           d.requestsRepo.create.mock.calls[0][1].indicationText,
         ).toBeUndefined();
+      });
+    });
+
+    describe('formInstanceId (P43)', () => {
+      const alta = {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        encounterId: 'enc-1',
+        medicationConceptId: 'm1',
+      };
+      const creada = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      };
+
+      it('valida la instancia contra el encuentro, la guarda y la devuelve', async () => {
+        const d = build();
+        d.requestsRepo.create.mockImplementation((_tx: unknown, data: any) => ({
+          ...creada,
+          formInstanceId: data.formInstanceId,
+        }));
+        const res = await d.service.prescribe(
+          { ...alta, formInstanceId: 'form-1' },
+          actor,
+        );
+        expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
+          expect.anything(),
+          'form-1',
+          'enc-1',
+        );
+        expect(d.requestsRepo.create.mock.calls[0][1].formInstanceId).toBe(
+          'form-1',
+        );
+        expect(res.formInstanceId).toBe('form-1');
+      });
+
+      it('sin formInstanceId no valida nada y responde null', async () => {
+        const d = build();
+        d.requestsRepo.create.mockReturnValue(creada);
+        const res = await d.service.prescribe(alta, actor);
+        expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
+        expect(res.formInstanceId).toBeNull();
+      });
+
+      it('si el validador rechaza (422), no se crea la receta', async () => {
+        const d = build();
+        d.formOrigin.assertUsableOrigin.mockRejectedValue(
+          new PreconditionFailedException('La instancia no está cerrada'),
+        );
+        await expect(
+          d.service.prescribe({ ...alta, formInstanceId: 'form-1' }, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });
     });
   });

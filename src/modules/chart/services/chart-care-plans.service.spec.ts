@@ -44,14 +44,26 @@ function build() {
   const encounterSealGuard = {
     assertEncounterWritable: mockFn().mockResolvedValue(undefined),
   };
+  // P43: el origen en formulario. Por defecto, válido.
+  const formOrigin = {
+    assertUsableOrigin: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartCarePlansService(
     em as any,
     carePlansRepo,
     logger as any,
     clinicalRead as any,
     encounterSealGuard as any,
+    formOrigin as any,
   );
-  return { service, tx, carePlansRepo, clinicalRead, encounterSealGuard };
+  return {
+    service,
+    tx,
+    carePlansRepo,
+    clinicalRead,
+    encounterSealGuard,
+    formOrigin,
+  };
 }
 
 describe('ChartCarePlansService', () => {
@@ -91,6 +103,67 @@ describe('ChartCarePlansService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+    });
+
+    describe('formInstanceId (P43)', () => {
+      it('valida la instancia contra el encuentro, la guarda y la devuelve', async () => {
+        const d = build();
+        d.carePlansRepo.createPlan.mockImplementation(
+          (_tx: unknown, data: any) => ({
+            id: 'cp1',
+            statusConceptId: CHART.CAREPLAN_ACTIVE,
+            formInstanceId: data.formInstanceId,
+            createdAt: new Date(),
+          }),
+        );
+        const res = await d.service.createCarePlan(
+          {
+            patientProfileId: 'p1',
+            encounterId: 'enc-1',
+            formInstanceId: 'form-1',
+          },
+          actor,
+        );
+        expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
+          d.tx,
+          'form-1',
+          'enc-1',
+        );
+        expect(d.carePlansRepo.createPlan).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ formInstanceId: 'form-1' }),
+        );
+        expect(res.formInstanceId).toBe('form-1');
+      });
+
+      it('sin formInstanceId no valida nada y responde null', async () => {
+        const d = build();
+        d.carePlansRepo.createPlan.mockReturnValue({
+          id: 'cp1',
+          statusConceptId: CHART.CAREPLAN_ACTIVE,
+          createdAt: new Date(),
+        });
+        const res = await d.service.createCarePlan(
+          { patientProfileId: 'p1' },
+          actor,
+        );
+        expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
+        expect(res.formInstanceId).toBeNull();
+      });
+
+      it('si el validador rechaza (422), no se crea el plan', async () => {
+        const d = build();
+        d.formOrigin.assertUsableOrigin.mockRejectedValue(
+          new PreconditionFailedException('La instancia no existe'),
+        );
+        await expect(
+          d.service.createCarePlan(
+            { patientProfileId: 'p1', formInstanceId: 'form-1' },
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+      });
     });
 
     // CL-29 (BR-13) — el autor del plan sale de la sesión.
