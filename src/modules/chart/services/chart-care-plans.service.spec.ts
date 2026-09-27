@@ -79,6 +79,35 @@ describe('ChartCarePlansService', () => {
       );
     });
 
+    it('persiste el motivo escrito a mano (reasonText, patch v4.2.24)', async () => {
+      const d = build();
+      d.carePlansRepo.createPlan.mockReturnValue({
+        id: 'cp1',
+        statusConceptId: CHART.CAREPLAN_ACTIVE,
+        createdAt: new Date(),
+      });
+      await d.service.createCarePlan(
+        { patientProfileId: 'p1', reasonText: 'Control post alta' },
+        actor,
+      );
+      expect(d.carePlansRepo.createPlan).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ reasonText: 'Control post alta' }),
+      );
+    });
+
+    it('sin motivo ni diagnóstico, el plan nace igual y sin reasonText (límite)', async () => {
+      const d = build();
+      d.carePlansRepo.createPlan.mockReturnValue({
+        id: 'cp1',
+        statusConceptId: CHART.CAREPLAN_ACTIVE,
+        createdAt: new Date(),
+      });
+      await d.service.createCarePlan({ patientProfileId: 'p1' }, actor);
+      const datos = d.carePlansRepo.createPlan.mock.calls[0][1];
+      expect(datos.reasonText).toBeUndefined();
+    });
+
     it('BR-14 (CL-07): rejects a plan against a sealed encounter', async () => {
       const d = build();
       d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(

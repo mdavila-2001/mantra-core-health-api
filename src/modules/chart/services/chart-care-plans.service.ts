@@ -123,6 +123,7 @@ export class ChartCarePlansService {
         statusConceptId: CHART.CAREPLAN_ACTIVE,
         intentConceptId: dto.intentConceptId ?? CHART.CAREPLAN_INTENT_PLAN,
         goalText: dto.goalText,
+        reasonText: dto.reasonText,
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         authorProfileId,

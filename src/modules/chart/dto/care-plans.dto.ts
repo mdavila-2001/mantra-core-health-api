@@ -4,6 +4,7 @@ import {
   IsArray,
   IsDateString,
   IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
@@ -110,6 +111,25 @@ export class CreateCarePlanDto {
   @IsString()
   @MaxLength(2000)
   goalText?: string;
+
+  /**
+   * Motivo del plan escrito a mano (patch v4.2.24).
+   *
+   * Es la otra forma de decir **por qué** se abre el plan, cuando todavía no
+   * hay un diagnóstico registrado del que colgarlo (`conditionId`). El cliente
+   * manda uno de los dos; el servidor acepta ambos o ninguno, porque el
+   * contrato del alta sólo exige el paciente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Motivo escrito a mano cuando el plan no cuelga de un diagnóstico (hasta 2000 caracteres)',
+    maxLength: 2000,
+  })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(2000)
+  reasonText?: string;
 
   /**
    * Valor de start date mantenido por la instancia.

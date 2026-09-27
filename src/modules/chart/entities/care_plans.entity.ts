@@ -49,6 +49,13 @@ export class CarePlans {
   goalText?: string;
 
   /**
+   * Motivo del plan escrito a mano, cuando no cuelga de un diagnóstico ya
+   * registrado (`condition_id`). Patch v4.2.24.
+   */
+  @Property({ fieldName: 'reason_text', columnType: 'text', nullable: true })
+  reasonText?: string;
+
+  /**
    * Valor de start date mantenido por la instancia.
    */
   @Property({ fieldName: 'start_date', columnType: 'date', nullable: true })

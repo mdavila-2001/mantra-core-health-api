@@ -166,6 +166,13 @@ export class ChartCarePlanItemDto {
   goalText?: string;
 
   /**
+   * Motivo escrito a mano, cuando el plan no cuelga de un diagnóstico
+   * (patch v4.2.24). Ausente si no se declaró.
+   */
+  @ApiPropertyOptional()
+  reasonText?: string;
+
+  /**
    * Valor de start date mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date' })
