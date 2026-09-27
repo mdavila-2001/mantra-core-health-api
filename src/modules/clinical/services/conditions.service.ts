@@ -16,6 +16,7 @@ import {
   ConditionItemDto,
   ConditionResponseDto,
   ConditionVerificationDto,
+  ConditionVerificationEvidenceDto,
   DiagnosisEvidenceDto,
   VerifyConditionDto,
 } from '../dto';
@@ -463,20 +464,24 @@ export class ConditionsService {
           { conditionId, field: 'reasonText' },
         );
       }
-      if (dto.basedOn) {
-        await this.assertEvidenceOfPatient(
-          tx,
-          dto.basedOn,
-          condition.patientProfileId,
-        );
-      }
+      const basedOn = dto.basedOn
+        ? await this.resolveEvidenceOfPatient(
+            tx,
+            dto.basedOn,
+            condition.patientProfileId,
+          )
+        : null;
 
       const now = new Date();
       if (dto.outcome === 'CONFIRMED') {
         this.applyConfirmation(condition, dto, now);
       } else {
+        // Refutado es terminal y cierra la condición: no hay enfermedad que
+        // seguir. Inactiva, además, para no bloquear un alta futura del mismo
+        // código (el duplicado se mide contra las activas).
         condition.verificationStatusConceptId = CLIN.CONDITION_REFUTED;
         condition.clinicalStatusConceptId = CLIN.CONDITION_INACTIVE;
+        condition.resolvedAt = now;
       }
       touch(condition, actor.id);
       await tx.flush();
@@ -486,7 +491,7 @@ export class ConditionsService {
         decidedAt: now.toISOString(),
         decidedByProfileId,
         reasonText: reasonText ?? null,
-        basedOn: dto.basedOn ? { ...dto.basedOn } : null,
+        basedOn,
       };
 
       await this.auditTrail.record(tx, actor, {
@@ -567,15 +572,10 @@ export class ConditionsService {
       dto.clinicalCourseConceptId ?? condition.clinicalCourseConceptId;
     const cronica = course === CLIN.CONDITION_COURSE_CHRONIC;
 
+    // Una crónica no resuelve: el fin esperado se descarta aunque viniera en
+    // el cuerpo o en el alta, igual que hace el diálogo al marcarla.
     let expectedResolutionAt: Date | undefined;
-    if (cronica) {
-      if (dto.expectedResolutionAt !== undefined) {
-        throw new PreconditionFailedException(
-          'Una condición crónica se confirma sin fin esperado.',
-          { conditionId: condition.id, field: 'expectedResolutionAt' },
-        );
-      }
-    } else {
+    if (!cronica) {
       expectedResolutionAt = dto.expectedResolutionAt
         ? new Date(dto.expectedResolutionAt)
         : condition.expectedResolutionAt;
@@ -601,67 +601,70 @@ export class ConditionsService {
   }
 
   /**
-   * La evidencia tiene que existir y ser del mismo paciente que la condición.
+   * La evidencia resuelta contra lo que el paciente tiene, o 422.
    *
-   * Un identificador ajeno responde lo mismo que uno inexistente, para que la
-   * ruta no sirva para averiguar qué notas o estudios tiene otra persona.
+   * Tiene que existir y ser del mismo paciente que la condición. Un
+   * identificador ajeno responde igual que uno inexistente, para que la ruta
+   * no sirva para averiguar qué notas o estudios tiene otra persona.
+   *
+   * Lo que se guarda es lo resuelto, no lo que vino: una nota trae su
+   * consulta, y un informe nombra su orden. Así la lectura no tiene que volver
+   * a cruzar nada. Es la misma regla que el simulador del front
+   * (`diagnosis-verification.handlers.ts`).
    *
    * @param tx - Transacción activa.
    * @param evidence - La evidencia declarada.
    * @param patientProfileId - El paciente de la condición.
+   * @returns La evidencia resuelta.
    * @throws PreconditionFailedException si falta el identificador que su clase
-   *         exige, o alguno no es de este paciente.
+   *         exige, o alguno no existe o no es de este paciente.
    */
-  private async assertEvidenceOfPatient(
+  private async resolveEvidenceOfPatient(
     tx: EntityManager,
     evidence: DiagnosisEvidenceDto,
     patientProfileId: string,
-  ): Promise<void> {
+  ): Promise<ConditionVerificationEvidenceDto> {
     const invalida = (motivo: string): PreconditionFailedException =>
       new PreconditionFailedException(motivo, { field: 'basedOn' });
 
-    if (evidence.kind === 'NOTE' && !evidence.noteId) {
-      throw invalida('Una evidencia de nota necesita la nota.');
-    }
-    if (
-      evidence.kind === 'ANALYSIS' &&
-      !evidence.serviceRequestId &&
-      !evidence.diagnosticReportId
-    ) {
-      throw invalida(
-        'Una evidencia de análisis necesita la orden o el informe.',
-      );
+    if (evidence.kind === 'NOTE') {
+      const nota = evidence.noteId
+        ? await tx.findOne(ClinicalNoteHeaders, {
+            id: evidence.noteId,
+            patientProfileId,
+          })
+        : null;
+      if (!nota) {
+        throw invalida('La nota indicada no existe o no es de esta persona.');
+      }
+      return {
+        kind: 'NOTE',
+        noteId: nota.id,
+        ...(nota.encounterId ? { encounterId: nota.encounterId } : {}),
+      };
     }
 
-    const checks: Promise<unknown>[] = [];
-    if (evidence.noteId) {
-      checks.push(
-        tx.findOne(ClinicalNoteHeaders, {
-          id: evidence.noteId,
-          patientProfileId,
-        }),
-      );
-    }
-    if (evidence.serviceRequestId) {
-      checks.push(
-        tx.findOne(ServiceRequests, {
-          id: evidence.serviceRequestId,
-          patientProfileId,
-        }),
-      );
-    }
-    if (evidence.diagnosticReportId) {
-      checks.push(
-        tx.findOne(DiagnosticReports, {
+    const informe = evidence.diagnosticReportId
+      ? await tx.findOne(DiagnosticReports, {
           id: evidence.diagnosticReportId,
           patientProfileId,
-        }),
-      );
+        })
+      : null;
+    if (evidence.diagnosticReportId && !informe) {
+      throw invalida('El informe indicado no existe o no es de esta persona.');
     }
-    const encontrados = await Promise.all(checks);
-    if (encontrados.some((fila) => !fila)) {
-      throw invalida('La evidencia elegida no es de este paciente.');
+    const ordenId = evidence.serviceRequestId ?? informe?.serviceRequestId;
+    const orden = ordenId
+      ? await tx.findOne(ServiceRequests, { id: ordenId, patientProfileId })
+      : null;
+    if (!orden) {
+      throw invalida('La orden indicada no existe o no es de esta persona.');
     }
+    return {
+      kind: 'ANALYSIS',
+      serviceRequestId: orden.id,
+      ...(informe ? { diagnosticReportId: informe.id } : {}),
+    };
   }
 
   /**
