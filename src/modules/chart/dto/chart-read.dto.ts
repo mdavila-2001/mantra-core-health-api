@@ -111,6 +111,16 @@ export class CarePlanActivityItemDto {
   id!: string;
 
   /**
+   * Clase de la actividad (concept id) — columna existente
+   * (`chart.care_plan_activities.activity_concept_id`, NOT NULL, siempre
+   * `CPACT_GENERAL` por defecto). BR-16/CL-26: el alta ya la manda y la
+   * guarda; esta lectura no la exponía, así que el expediente mostraba un
+   * plan sin la clase de actividad que se eligió.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  activityConceptId?: string;
+
+  /**
    * Identificador asociado a status concept.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -154,6 +164,13 @@ export class ChartCarePlanItemDto {
    */
   @ApiPropertyOptional()
   goalText?: string;
+
+  /**
+   * Motivo escrito a mano, cuando el plan no cuelga de un diagnóstico
+   * (patch v4.2.24). Ausente si no se declaró.
+   */
+  @ApiPropertyOptional()
+  reasonText?: string;
 
   /**
    * Valor de start date mantenido por la instancia.

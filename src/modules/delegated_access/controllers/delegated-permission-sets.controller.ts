@@ -1,19 +1,33 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PermissionSetsService } from '../services';
 import {
   CreatePermissionSetDto,
   PublishSetVersionDto,
   PermissionSetVersionDto,
+  ListPermissionSetsResponseDto,
 } from '../dto';
 
 /** Sets de permisos delegados y su versionado (UC-29-02). */
@@ -27,6 +41,23 @@ export class DelegatedPermissionSetsController {
    * @param service - Valor de service requerido por la operación.
    */
   constructor(private readonly service: PermissionSetsService) {}
+
+  /** CV-13: listado del hub, acotado al tenant del actor. */
+  @Get()
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar los sets de permisos delegados del tenant' })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({ name: 'limit', required: false, description: 'Sets por página' })
+  list(
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPermissionSetsResponseDto> {
+    return this.service.listByTenant(requireTenantId(), { cursor, limit });
+  }
 
   /** UC-29-02: publica el set (versión 1). */
   @Post()

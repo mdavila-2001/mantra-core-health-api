@@ -47,13 +47,14 @@ export class RegisterOrganizationLegalDocumentsDto {
   /**
    * Escritura de constitución de la empresa (1.1.2 del registro de procesos).
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document)',
+      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante',
   })
+  @IsOptional()
   @IsUUID()
-  constitutionFileId!: string;
+  constitutionFileId?: string;
 
   /**
    * Certificado de inscripción tributaria — el NIT en Bolivia (1.2.1).
@@ -330,12 +331,14 @@ export class RegisterOrganizationLegalRepresentativeDto {
    * Id del PDF del poder notariado, ya subido con
    * `POST /iam/auth/upload-registration-document`.
    */
-  @ApiProperty({
-    description: 'Id del archivo del poder notariado (PDF ya pre-cargado)',
+  @ApiPropertyOptional({
+    description:
+      'Id del archivo del poder notariado (PDF ya pre-cargado). Obligatorio salvo para UNIPERSONAL, donde el titular actúa por sí; el servicio responde 422 si falta',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  powerOfAttorneyFileId!: string;
+  powerOfAttorneyFileId?: string;
 }
 
 /**

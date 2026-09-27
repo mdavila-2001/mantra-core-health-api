@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ConcurrencyConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -98,66 +97,53 @@ export class DiagnosticReportsService {
     });
   }
 
-  /** UC-08-07: libera los resultados de un reporte (preliminary/partial → final). */
+  /**
+   * @deprecated (D-E, BR-17/CL-46) Este camino **no** escribe
+   * `diagnostics.diagnostic_release_events`, así que lo liberado por acá nunca
+   * llegó a `GET /diagnostic-results/me` — el paciente no lo veía en «Mis
+   * resultados». Ese hallazgo (CV-02) hizo elegir un solo camino canónico:
+   * `POST /diagnostics/reports/:reportId/versions/:versionId/release`
+   * (`DiagnosticsReportsService.releaseVersion`), que sí registra el evento de
+   * liberación con la visibilidad del paciente en la misma transacción.
+   *
+   * Se marca obsoleto **sin borrarlo** (así lo decidió D-E/Q-02): el contrato
+   * UC-08-07 sigue teniendo spec en la API y el front, y borrarlo de golpe
+   * rompía ambos sin aviso. Este método ya no libera nada — devuelve 422 con
+   * el endpoint canónico en el mensaje — para que ningún llamador crea que
+   * liberó un informe que el paciente jamás va a ver.
+   */
   async release(
     reportId: string,
-    dto: ReleaseDiagnosticReportDto,
+    _dto: ReleaseDiagnosticReportDto,
     actor: AuthenticatedUser,
   ): Promise<DiagnosticReportResponseDto> {
-    this.logger.info(
-      { operation: 'clinical.diagnostic-report.release', reportId },
-      'Releasing diagnostic report',
+    const report = await this.reportsRepo.findById(this.em.fork(), reportId);
+    if (!report) {
+      throw new ResourceNotFoundException('Reporte diagnóstico no encontrado', {
+        reportId,
+      });
+    }
+    // MCH-007: la ruta sólo trae el id; el paciente sale de la fila. Se
+    // mantiene la verificación de permiso aunque la ruta esté obsoleta: no
+    // hay que revelar el estado de un reporte a quien no puede leerlo.
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      report.patientProfileId,
+      actor,
     );
-    return this.em.transactional(async (tx) => {
-      const report = await this.reportsRepo.findById(tx, reportId);
-      if (!report) {
-        throw new ResourceNotFoundException(
-          'Reporte diagnóstico no encontrado',
-          { reportId },
-        );
-      }
-      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
-        report.patientProfileId,
-        actor,
-      );
-      const releasable = [CLIN.REPORT_PARTIAL, CLIN.REPORT_PRELIMINARY];
-      if (!releasable.includes(report.lifecycleStatusConceptId)) {
-        throw new PreconditionFailedException(
-          'El reporte no está en estado liberable',
-          {
-            reportId,
-            status: report.lifecycleStatusConceptId,
-          },
-        );
-      }
-      if (
-        dto.expectedRowVersion !== undefined &&
-        dto.expectedRowVersion !== report.rowVersion
-      ) {
-        throw new ConcurrencyConflictException(
-          'Versión del reporte desactualizada',
-          {
-            expected: dto.expectedRowVersion,
-            actual: report.rowVersion,
-          },
-        );
-      }
-
-      report.lifecycleStatusConceptId = CLIN.REPORT_FINAL;
-      report.resultReleaseStatusConceptId = CLIN.RELEASE_RELEASED;
-      if (report.currentVersionId) {
-        report.currentReleasedVersionId = report.currentVersionId;
-      }
-      touch(report, actor.id);
-      await tx.flush();
-
-      this.logger.info(
-        { operation: 'clinical.diagnostic-report.release', reportId },
-        'Diagnostic report released',
-      );
-      return this.toResponse(report);
-    });
+    this.logger.warn(
+      { operation: 'clinical.diagnostic-report.release.deprecated', reportId },
+      'Camino de liberación obsoleto (D-E): usar diagnostics/reports/:reportId/versions/:versionId/release',
+    );
+    throw new PreconditionFailedException(
+      'Esta ruta ya no libera informes. Usá ' +
+        'POST /diagnostics/reports/:reportId/versions/:versionId/release, ' +
+        'que es el único camino que el paciente ve en «Mis resultados».',
+      {
+        reportId,
+        canonicalEndpoint:
+          'diagnostics/reports/:reportId/versions/:versionId/release',
+      },
+    );
   }
 
   /**

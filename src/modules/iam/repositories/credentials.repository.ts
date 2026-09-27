@@ -63,6 +63,18 @@ export class CredentialsRepository {
     });
   }
 
+  /** Credencial de contraseña ACTIVA del usuario (`null` si sólo tiene federadas). */
+  findActivePasswordByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<AuthenticationCredentials | null> {
+    return em.findOne(AuthenticationCredentials, {
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
+      userId,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /**
    * Credenciales cuyo sujeto contiene el texto dado, para buscar usuarios por
    * correo o documento desde el listado de administración.

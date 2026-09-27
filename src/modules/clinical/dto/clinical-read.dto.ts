@@ -1,5 +1,88 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/**
+ * Una reacción registrada de una alergia (BR-14/CL-11): la tabla
+ * `clinical.allergy_reactions` existe y se escribe al crear la alergia
+ * (`AllergyIntolerancesService.create`), pero el resumen nunca la leía.
+ */
+export class AllergyReactionItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a manifestation concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  manifestationConceptId!: string;
+
+  /**
+   * Identificador asociado a severity concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  severityConceptId?: string;
+
+  /**
+   * Descripción libre de la reacción.
+   */
+  @ApiPropertyOptional()
+  description?: string;
+}
+
+/** La evidencia registrada de una decisión de verificación (C3 / P41). */
+export class ConditionVerificationEvidenceDto {
+  /** `NOTE` o `ANALYSIS`. */
+  @ApiProperty({ enum: ['NOTE', 'ANALYSIS'] })
+  kind!: 'NOTE' | 'ANALYSIS';
+
+  /** Nota clínica que respalda la decisión. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  noteId?: string;
+
+  /** Encuentro de la nota. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
+
+  /** Orden de estudio. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  serviceRequestId?: string;
+
+  /** Informe del estudio. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  diagnosticReportId?: string;
+}
+
+/**
+ * Cómo se decidió un diagnóstico presuntivo (C3 / P41).
+ *
+ * No vive en columnas de `clinical.conditions`: igual que el motivo del cambio
+ * de estado (D-BR14-04), se sella en el `data_snapshot` de
+ * `audit.conditions_history` y se lee de la última revisión que lo contiene.
+ */
+export class ConditionVerificationDto {
+  /** `CONFIRMED` o `REFUTED`. */
+  @ApiProperty({ enum: ['CONFIRMED', 'REFUTED'] })
+  outcome!: 'CONFIRMED' | 'REFUTED';
+
+  /** Instante de la decisión, ISO. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  decidedAt!: string;
+
+  /** Perfil profesional que decidió. */
+  @ApiProperty({ format: 'uuid' })
+  decidedByProfileId!: string;
+
+  /** Motivo escrito, o `null`. */
+  @ApiProperty({ type: String, nullable: true })
+  reasonText!: string | null;
+
+  /** Evidencia elegida, o `null`. */
+  @ApiProperty({ type: ConditionVerificationEvidenceDto, nullable: true })
+  basedOn!: ConditionVerificationEvidenceDto | null;
+}
+
 /** Una condición registrada del paciente. */
 export class ConditionItemDto {
   /**
@@ -51,6 +134,12 @@ export class ConditionItemDto {
   clinicalCourseConceptId?: string;
 
   /**
+   * Lateralidad de la condición (columna existente en el modelo; BR-14/CL-11).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  lateralityConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
@@ -75,6 +164,24 @@ export class ConditionItemDto {
   noteText?: string;
 
   /**
+   * Motivo del último cambio de estado clínico (BR-14/CL-10). Decisión (b) —
+   * D-BR14-04: no vive en una columna de `clinical.conditions`, sino en el
+   * último `data_snapshot` de `audit.conditions_history`. Ausente si la
+   * condición nunca cambió de estado.
+   */
+  @ApiPropertyOptional({
+    description: 'Motivo del último cambio de estado clínico, si hubo alguno',
+  })
+  lastStatusChangeReasonText?: string;
+
+  /**
+   * Decisión de verificación (C3 / P41), o `null` si el diagnóstico nunca se
+   * confirmó ni refutó por `POST /clinical/conditions/:id/verification`.
+   */
+  @ApiPropertyOptional({ type: ConditionVerificationDto, nullable: true })
+  verification?: ConditionVerificationDto | null;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })
@@ -94,6 +201,12 @@ export class AllergyItemDto {
    */
   @ApiProperty({ format: 'uuid' })
   substanceConceptId!: string;
+
+  /**
+   * Encuentro en el que se detectó, si se registró dentro de una atención (P26).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
 
   /**
    * Identificador asociado a type concept.
@@ -118,6 +231,13 @@ export class AllergyItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   clinicalStatusConceptId?: string;
+
+  /**
+   * Reacciones registradas de esta alergia (BR-14/CL-11: la tabla existe y
+   * se escribía; el resumen no la leía).
+   */
+  @ApiProperty({ type: [AllergyReactionItemDto] })
+  reactions!: AllergyReactionItemDto[];
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -151,6 +271,14 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   prescriberProfileId?: string;
+
+  /**
+   * Encuentro en el que se prescribió (columna existente en el modelo;
+   * BR-14/CL-11: `ConditionItemDto` y `ObservationItemDto` ya lo exponían,
+   * la receta no).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
 
   /**
    * Valor de dose text mantenido por la instancia.
@@ -187,6 +315,12 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   indicationConditionId?: string;
+
+  /**
+   * Motivo escrito a mano cuando no hay condición codificada (P24).
+   */
+  @ApiPropertyOptional({ nullable: true })
+  indicationText?: string;
 
   /**
    * Valor de signed at mantenido por la instancia.
@@ -331,6 +465,14 @@ export class EncounterItemDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   endAt?: Date;
+
+  /**
+   * Versión de fila para bloqueo optimista (BR-14/CL-16): el cierre concurrente
+   * ya compara `expectedRowVersion` contra esta columna; el resumen no la
+   * exponía, así que el cliente no tenía con qué mandar el cierre.
+   */
+  @ApiProperty()
+  rowVersion!: number;
 }
 
 /**

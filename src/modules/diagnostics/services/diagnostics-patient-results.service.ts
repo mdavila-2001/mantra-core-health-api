@@ -15,12 +15,18 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
-import { ResourceScopeGrantsRepository } from '../../authz/repositories';
+import { findPractitionerNames } from '../../profiles/read/practitioner-names';
+import {
+  CareRelationshipsRepository,
+  ResourceScopeGrantsRepository,
+} from '../../authz/repositories';
 import { AUTHZ } from '../../authz/authz.concepts';
 import {
   DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,
   platformPermissionId,
 } from '../../authz/authz.seed';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
 import { CATEGORIAS_DIAGNOSTICAS, DIAG } from '../diagnostics.concepts';
 import type {
@@ -86,7 +92,9 @@ export class DiagnosticsPatientResultsService {
    * @param accountLinksRepo - Vínculo cuenta↔persona, para resolver al titular.
    * @param patientProfilesRepo - Perfil de paciente de esa persona.
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
+   * @param careRepo - Relaciones asistenciales, para exigir vínculo vigente al compartir (CL-48).
    * @param logger - Registro estructurado.
+   * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
     private readonly em: EntityManager,
@@ -95,8 +103,10 @@ export class DiagnosticsPatientResultsService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly grantsRepo: ResourceScopeGrantsRepository,
+    private readonly careRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
+    private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
   }
@@ -328,6 +338,73 @@ export class DiagnosticsPatientResultsService {
   }
 
   /**
+   * Los bytes de un archivo de un resultado del titular (CL-40).
+   *
+   * La vía genérica `GET /common/files/:id/content` sigue siendo «lo tuyo o
+   * revisor» (`canActorReadOwnFile`) y no se afloja: el PDF lo subió el
+   * laboratorio, no el paciente. Acá autoriza el contexto —el informe es del
+   * titular, tiene una versión liberada y visible, y el archivo cuelga de esa
+   * versión— y recién entonces se piden los bytes con
+   * `downloadForAuthorizedContext`.
+   *
+   * Todo lo que no cumpla es **404**, no 403 ni 401: no se revela si el
+   * informe o el archivo existen, y un 401 haría que el cliente cierre la
+   * sesión.
+   *
+   * @param actor - Usuario autenticado (el paciente).
+   * @param reportId - Informe.
+   * @param fileId - Archivo del informe.
+   * @returns Bytes y tipo MIME.
+   * @throws ResourceNotFoundException si no es suyo, no está liberado o el
+   *   archivo no pertenece a la versión visible.
+   */
+  async getOwnResultFileContent(
+    actor: AuthenticatedUser,
+    reportId: string,
+    fileId: string,
+  ): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const patientProfileId = await this.resolveOwnPatientProfileId(em, actor);
+    const report = await this.ordersRepo.findReportById(em, reportId);
+    if (!report || report.patientProfileId !== patientProfileId) {
+      if (report) {
+        this.logger.warn(
+          { operation: 'diagnostics.patient-results.file.denied', reportId },
+          'Intento de leer el archivo de un informe de otra persona',
+        );
+      }
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    const [item] = await this.projectReleasedResults(em, [report]);
+    if (!item?.files.some((file) => file.fileId === fileId)) {
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    if (!this.fileUpload) {
+      throw new PreconditionFailedException(
+        'La descarga de archivos no está disponible',
+      );
+    }
+    this.logger.info(
+      {
+        operation: 'diagnostics.patient-results.file.content',
+        reportId,
+        fileId,
+      },
+      'El titular descarga un archivo de su resultado',
+    );
+    return this.fileUpload.downloadForAuthorizedContext(
+      fileId,
+      'diagnostics.patient-result.file.content',
+    );
+  }
+
+  /**
    * Comparte un resultado con un profesional, hasta una fecha.
    *
    * Se materializa como un `authz.resource_scope_grants`: sujeto el profesional,
@@ -352,15 +429,48 @@ export class DiagnosticsPatientResultsService {
         { validUntil: dto.validUntil.toISOString() },
       );
     }
-    if (dto.practitionerUserId === actor.id) {
-      throw new PreconditionFailedException(
-        'No hace falta compartirse un resultado con uno mismo',
-        {},
-      );
-    }
 
     return this.em.transactional(async (tx) => {
       const report = await this.requireOwnReport(tx, actor, reportId);
+
+      // CL-48: la lista que ve el paciente sale de sus relaciones
+      // asistenciales reales, nunca de un buscador global de usuarios. El
+      // servidor repite la misma exigencia del lado del servidor: compartir
+      // sólo vale con un profesional que tiene una relación ACTIVE con este
+      // paciente en este momento, sea cual sea el perfil que mande el cliente.
+      const relacion = await this.careRepo.findActive(
+        tx,
+        report.patientProfileId,
+        dto.practitionerProfileId,
+      );
+      if (!relacion) {
+        throw new PreconditionFailedException(
+          'El profesional no tiene una relación asistencial vigente con este paciente',
+          { practitionerProfileId: dto.practitionerProfileId },
+        );
+      }
+      const cuenta = await this.accountLinksRepo.findActiveByPerson(
+        tx,
+        dto.practitionerProfileId,
+      );
+      if (!cuenta) {
+        throw new ResourceNotFoundException(
+          'El profesional no tiene una cuenta activa en el portal',
+          { practitionerProfileId: dto.practitionerProfileId },
+        );
+      }
+      const practitionerUserId = cuenta.userId;
+      if (practitionerUserId === actor.id) {
+        throw new PreconditionFailedException(
+          'No hace falta compartirse un resultado con uno mismo',
+          {},
+        );
+      }
+      const nombres = await findPractitionerNames(tx, [
+        dto.practitionerProfileId,
+      ]);
+      const practitionerName = nombres.get(dto.practitionerProfileId);
+
       // Sólo se comparte lo que la persona misma puede ver. Compartir un
       // resultado que ni el titular puede abrir sería adelantarle a un tercero
       // algo que el profesional que lo firma todavía no liberó.
@@ -374,7 +484,7 @@ export class DiagnosticsPatientResultsService {
 
       const existing = await this.grantsRepo.findExisting(
         tx,
-        dto.practitionerUserId,
+        practitionerUserId,
         RESULT_READ_PERMISSION_ID,
         reportId,
       );
@@ -395,16 +505,17 @@ export class DiagnosticsPatientResultsService {
           },
           'Se extendió un resultado ya compartido',
         );
-        return this.toShareDto(existing.id, reportId, dto.practitionerUserId, {
+        return this.toShareDto(existing.id, reportId, practitionerUserId, {
           validFrom: existing.validFrom,
           validTo: existing.validTo,
           now,
+          practitionerName,
         });
       }
 
       const grant = this.grantsRepo.create(tx, {
         subjectTypeConceptId: AUTHZ.SUBJECT_TYPE_USER,
-        subjectId: dto.practitionerUserId,
+        subjectId: practitionerUserId,
         permissionId: RESULT_READ_PERMISSION_ID,
         resourceTypeConceptId: AUTHZ.RESOURCE_TYPE_DOCUMENT,
         resourceId: reportId,
@@ -424,10 +535,11 @@ export class DiagnosticsPatientResultsService {
         },
         'Resultado compartido con un profesional',
       );
-      return this.toShareDto(grant.id, reportId, dto.practitionerUserId, {
+      return this.toShareDto(grant.id, reportId, practitionerUserId, {
         validFrom: now,
         validTo: dto.validUntil,
         now,
+        practitionerName,
       });
     });
   }
@@ -453,6 +565,11 @@ export class DiagnosticsPatientResultsService {
       RESULT_READ_PERMISSION_ID,
     );
 
+    const nombresPorUsuario = await this.namesByUserId(
+      em,
+      grants.map((grant) => grant.subjectId),
+    );
+
     return {
       reportId,
       items: grants.map((grant) =>
@@ -460,6 +577,7 @@ export class DiagnosticsPatientResultsService {
           validFrom: grant.validFrom,
           validTo: grant.validTo,
           now,
+          practitionerName: nombresPorUsuario.get(grant.subjectId),
         }),
       ),
     };
@@ -522,10 +640,12 @@ export class DiagnosticsPatientResultsService {
         },
         'Se dejó de compartir un resultado',
       );
+      const nombres = await this.namesByUserId(tx, [grant.subjectId]);
       return this.toShareDto(grant.id, reportId, grant.subjectId, {
         validFrom: grant.validFrom,
         validTo: grant.validTo,
         now,
+        practitionerName: nombres.get(grant.subjectId),
       });
     });
   }
@@ -737,6 +857,8 @@ export class DiagnosticsPatientResultsService {
       validTo?: Date;
       /** Instante contra el que se decide la vigencia. */
       now: Date;
+      /** Nombre resuelto del profesional, si se pudo resolver. */
+      practitionerName?: string;
     },
   ): DiagnosticResultShareDto {
     const desde = vigencia.validFrom ?? vigencia.now;
@@ -748,9 +870,44 @@ export class DiagnosticsPatientResultsService {
       id,
       reportId,
       practitionerUserId,
+      practitionerName: vigencia.practitionerName,
       validFrom: desde,
       validTo: vigencia.validTo,
       active: activo,
     };
+  }
+
+  /**
+   * Nombre de cada cuenta (`iam.users.id`), por su persona vinculada.
+   *
+   * Mismo camino de dos saltos que `AuthzMeService.namesByUserId` (BR-20):
+   * cuenta → persona activa → nombre. Se duplica acá porque ese método es
+   * privado de otro módulo y el compartido (CL-48) resuelve el sentido
+   * contrario del mismo vínculo que ya usa este servicio para el titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userIds - Cuentas a resolver.
+   * @returns Mapa `userId -> nombre`, sin las que no se pudieron resolver.
+   */
+  private async namesByUserId(
+    em: EntityManager,
+    userIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const unicos = [...new Set(userIds)];
+    if (unicos.length === 0) return new Map();
+    const personIdPorUsuario = new Map<string, string>();
+    for (const userId of unicos) {
+      const link = await this.accountLinksRepo.findActiveByUser(em, userId);
+      if (link) personIdPorUsuario.set(userId, link.personId);
+    }
+    const nombres = await findPractitionerNames(em, [
+      ...personIdPorUsuario.values(),
+    ]);
+    const resultado = new Map<string, string>();
+    for (const [userId, personId] of personIdPorUsuario) {
+      const nombre = nombres.get(personId);
+      if (nombre !== undefined) resultado.set(userId, nombre);
+    }
+    return resultado;
   }
 }

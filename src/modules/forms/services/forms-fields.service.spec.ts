@@ -8,10 +8,12 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsFieldsService } from './forms-fields.service';
+import { ForbiddenException } from '@nestjs/common';
 import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 
 const actor = { id: 'steward-1', roles: ['USER'] } as any;
@@ -35,15 +37,136 @@ function build() {
     createAccessRule: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // CL-69: de quién es un campo (por sus asignaciones) y si ya tiene valores.
+  const assignmentsRepo = {
+    findAssignmentsByField: mockFn().mockResolvedValue([]),
+  };
+  const valuesRepo = { countByField: mockFn().mockResolvedValue(0) };
   const service = new FormsFieldsService(
     em as any,
     fieldsRepo as any,
     logger as any,
+    assignmentsRepo as any,
+    valuesRepo as any,
   );
-  return { service, tx, fieldsRepo };
+  return { service, tx, fieldsRepo, assignmentsRepo, valuesRepo };
+}
+
+/** Una doctora del tenant A: contrato estrictamente menor que el gobierno. */
+const doctora = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+
+/** Ejecuta dentro del contexto de tenant que exige la propiedad del campo. */
+function enTenantA<T>(fn: () => Promise<T>): Promise<T> {
+  return runWithTenant('tenant-a', fn);
 }
 
 describe('FormsFieldsService', () => {
+  // CL-61 / CL-69 — corregir un campo propio sin reescribir la historia.
+  describe('updateFieldDefinition (CL-69)', () => {
+    const campo = () => ({
+      id: 'f1',
+      name: 'Fuma',
+      dataType: 'string',
+      updatedAt: new Date(0),
+    });
+
+    it('renombra un campo colgado sólo del tenant del actor', async () => {
+      const d = build();
+      const field = campo();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      const res = await enTenantA(() =>
+        d.service.updateFieldDefinition('f1', { name: '¿Fuma?' }, doctora),
+      );
+      expect(res).toEqual({ ok: true });
+      expect(field.name).toBe('¿Fuma?');
+    });
+
+    it('un campo colgado del estándar (asignación global) responde 403', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(campo());
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as-global', tenantId: undefined },
+      ]);
+      await expect(
+        enTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctora),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('un campo colgado de otro tenant responde 403', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(campo());
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+        { id: 'as2', tenantId: 'tenant-b' },
+      ]);
+      await expect(
+        enTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctora),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('cambiar el tipo con valores capturados responde 409 y no toca el campo', async () => {
+      const d = build();
+      const field = campo();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      d.valuesRepo.countByField.mockResolvedValue(3);
+      await expect(
+        enTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { dataType: 'integer' } as any,
+            doctora,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(field.dataType).toBe('string');
+    });
+
+    it('cambia el tipo cuando no hay valores capturados', async () => {
+      const d = build();
+      const field = campo();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      await enTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { dataType: 'integer' } as any,
+          doctora,
+        ),
+      );
+      expect(field.dataType).toBe('integer');
+    });
+
+    it('quien gobierna edita cualquier campo sin mirar sus asignaciones', async () => {
+      const d = build();
+      const field = campo();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+      await d.service.updateFieldDefinition('f1', { name: 'Tabaco' }, admin);
+      expect(field.name).toBe('Tabaco');
+      expect(d.assignmentsRepo.findAssignmentsByField).not.toHaveBeenCalled();
+    });
+
+    it('responde 404 cuando el campo no existe', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(null);
+      await expect(
+        d.service.updateFieldDefinition('nope', { name: 'x' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('createFieldDefinition (UC-09-02)', () => {
     it('creates the field then its validation rules', async () => {
       const d = build();

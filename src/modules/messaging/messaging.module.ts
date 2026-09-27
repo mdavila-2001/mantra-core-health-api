@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { WsJwtGuard } from '../../common';
 import {
   MessagingController,
   MessagingInternalController,
@@ -13,6 +14,7 @@ import {
   NotificationsRepository,
   DeliveryStatusTransitionsRepository,
 } from './repositories';
+import { NotificationsGateway } from './gateways';
 
 /**
  * Módulo de mensajería: outbox transaccional, colas de trabajo con reintento y
@@ -39,6 +41,11 @@ import {
     OutboxService,
     QueuesService,
     NotificationsService,
+    // Auth del gateway WS — igual que en `CommunityMessagingModule`, no es un
+    // `APP_GUARD` (los gateways no pasan por el pipeline HTTP de Nest) y se
+    // provee acá explícitamente para que `NotificationsGateway` lo inyecte.
+    WsJwtGuard,
+    NotificationsGateway,
   ],
   // `NotificationsService` se exporta para que otros dominios puedan pedir un
   // envío (p. ej. IAM al verificar el correo del auto-registro) sin duplicar la

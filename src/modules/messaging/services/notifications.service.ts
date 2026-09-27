@@ -17,6 +17,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { NotificationsRepository } from '../repositories';
+import { NotificationsGateway } from '../gateways';
 import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
@@ -90,6 +91,12 @@ export class NotificationsService implements InAppNotificationEmitter {
     private readonly em: EntityManager,
     private readonly notificationsRepo: NotificationsRepository,
     private readonly logger: PinoLogger,
+    // Opcional a propósito: los specs unitarios existentes
+    // (`notifications*.service.spec.ts`) construyen el servicio con tres
+    // argumentos y no deberían tener que aprender del socket sólo para probar
+    // la escritura. En producción, Nest siempre lo resuelve (está en
+    // `MessagingModule.providers`).
+    private readonly gateway?: NotificationsGateway,
   ) {
     this.logger.setContext(NotificationsService.name);
   }
@@ -705,7 +712,30 @@ export class NotificationsService implements InAppNotificationEmitter {
    */
   async emitInApp(input: EmitInAppInput): Promise<EmitInAppResult> {
     try {
-      return await this.em.transactional((tx) => this.writeInApp(tx, input));
+      const result = await this.em.transactional((tx) =>
+        this.writeInApp(tx, input),
+      );
+      // AG-22: el socket se empuja DESPUÉS del commit y fuera de cualquier
+      // lock — nunca desde dentro de `writeInApp`. Si quedó suprimida, si el
+      // silencio nocturno la aplazó a más tarde, o si no llegó a crear la fila
+      // de bandeja, no hay nada que empujar: el sondeo de respaldo la sirve
+      // cuando corresponda.
+      if (
+        !result.suppressed &&
+        result.inAppNotificationId &&
+        result.availableAt &&
+        new Date(result.availableAt).getTime() <= Date.now()
+      ) {
+        this.gateway?.notifyUser(input.recipientUserId, {
+          id: result.inAppNotificationId,
+          category: input.category,
+          subject: input.subject,
+          bodyText: input.bodyText ?? null,
+          destination: input.destination ?? null,
+          availableAt: result.availableAt,
+        });
+      }
+      return result;
     } catch (error) {
       // Un fallo acá no puede tumbar la receta que lo disparó: se registra con
       // todo lo necesario para reconstruirlo y el caso de uso sigue.
@@ -1372,6 +1402,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       requestId: request.id,
       inAppNotificationId: inApp.id,
       suppressed: false,
+      availableAt: availableAt.toISOString(),
     };
   }
 }

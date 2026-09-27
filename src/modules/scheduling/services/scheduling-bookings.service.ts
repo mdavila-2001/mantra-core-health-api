@@ -1301,6 +1301,50 @@ export class SchedulingBookingsService {
         });
       }
 
+      // M4 · H1.S1: reprogramar es ocupar un rango nuevo, y era el único
+      // camino que lo hacía sin preguntar. Que el cupo destino tenga lugar no
+      // dice nada de OTRO cupo cuyo horario se pisa con éste: se corren las
+      // mismas dos reglas que al confirmar (`materializarReserva`), sin que la
+      // cita se compare consigo misma.
+      const finDestino = target.endAt ?? target.startAt;
+      const choqueDelPaciente =
+        await this.bookingsRepo.findPatientBookingsOverlapping(
+          tx,
+          booking.patientProfileId,
+          target.startAt,
+          finDestino,
+          ACTIVE_BOOKING_STATES,
+          booking.id,
+        );
+      if (choqueDelPaciente.length > 0) {
+        const choque = choqueDelPaciente[0];
+        throw new PreconditionFailedException(
+          `El paciente ya tiene un turno confirmado a esa hora${
+            choque.resourceName ? ` en «${choque.resourceName}»` : ''
+          }.`,
+          {
+            bookingId: choque.id,
+            startAt: choque.startAt,
+          },
+        );
+      }
+      const recursoDestino = await this.catalogRepo.findResourceById(
+        tx,
+        target.resourceId,
+      );
+      if (
+        recursoDestino &&
+        TABLAS_DE_PERFIL_PROFESIONAL.includes(recursoDestino.resourceRefType)
+      ) {
+        await this.tiempoProfesional.assertRangoLibre(
+          tx,
+          recursoDestino.resourceRefId,
+          target.startAt,
+          finDestino,
+          booking.id,
+        );
+      }
+
       const origin = await this.bookingsRepo.findSlotForUpdate(tx, fromSlotId);
       if (origin) {
         origin.remainingCapacity += 1;
@@ -1316,6 +1360,9 @@ export class SchedulingBookingsService {
       touch(target, actor.id);
 
       booking.bookableSlotId = dto.toSlotId;
+      // La cita queda en el recurso de su cupo nuevo: si no, la regla madre
+      // la seguía atribuyendo al recurso viejo (y a su profesional).
+      booking.resourceId = target.resourceId;
       touch(booking, actor.id);
 
       this.bookingsRepo.recordReschedule(tx, {

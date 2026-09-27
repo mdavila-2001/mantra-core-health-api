@@ -30,6 +30,10 @@ export interface CreateCarePlanData {
    */
   goalText?: string;
   /**
+   * Motivo escrito a mano cuando el plan no cuelga de un diagnóstico.
+   */
+  reasonText?: string;
+  /**
    * Valor de start date mantenido por la instancia.
    */
   startDate?: Date;
@@ -212,6 +216,7 @@ export class CarePlansRepository {
         statusConceptId: data.statusConceptId,
         intentConceptId: data.intentConceptId,
         goalText: data.goalText,
+        reasonText: data.reasonText,
         startDate: data.startDate,
         endDate: data.endDate,
         authorProfileId: data.authorProfileId,
