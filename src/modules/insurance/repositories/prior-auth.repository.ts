@@ -63,6 +63,78 @@ export class PriorAuthRepository {
     );
   }
 
+  /**
+   * Ids de las solicitudes cuya cobertura pertenece a la aseguradora
+   * (cobertura → plan → producto → aseguradora; la solicitud no tiene columna
+   * de aseguradora). El filtro va dentro de la consulta: nunca se lee una
+   * solicitud ajena para descartarla después.
+   *
+   * @param em - Contexto de persistencia.
+   * @param carrierId - Aseguradora del tenant activo.
+   * @param statusConceptIds - Estados admitidos; vacío = todos.
+   * @param limit - Máximo de filas, las más recientes primero.
+   */
+  async findIdsForCarrier(
+    em: EntityManager,
+    carrierId: string,
+    statusConceptIds: readonly string[],
+    limit: number,
+  ): Promise<string[]> {
+    const rows = await em.getConnection().execute<{ id: string }[]>(
+      `SELECT r.id
+         FROM insurance.prior_authorization_requests r
+         JOIN insurance.patient_coverages pc ON pc.id = r.patient_coverage_id
+         JOIN insurance.insurance_plans pl ON pl.id = pc.insurance_plan_id
+         JOIN insurance.insurance_products pr ON pr.id = pl.insurance_product_id
+        WHERE pr.insurance_carrier_id = ?
+          AND (cardinality(?::uuid[]) = 0 OR r.status_concept_id = ANY(?::uuid[]))
+        ORDER BY r.submitted_at DESC NULLS LAST, r.id DESC
+        LIMIT ?`,
+      [
+        carrierId,
+        `{${statusConceptIds.join(',')}}`,
+        `{${statusConceptIds.join(',')}}`,
+        limit,
+      ],
+    );
+    return rows.map((row) => row.id);
+  }
+
+  /** Solicitudes por id, sin orden garantizado. */
+  findRequestsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthorizationRequests[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PriorAuthorizationRequests, { id: { $in: [...ids] } });
+  }
+
+  /** Ítems de las solicitudes, en su orden de secuencia. */
+  findItemsByRequestIds(
+    em: EntityManager,
+    requestIds: readonly string[],
+  ): Promise<PriorAuthorizationItems[]> {
+    if (requestIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      PriorAuthorizationItems,
+      { priorAuthorizationRequestId: { $in: [...requestIds] } },
+      { orderBy: { itemSequence: 'ASC' } },
+    );
+  }
+
+  /** Determinaciones de las solicitudes, de la versión más nueva a la más vieja. */
+  findDeterminationsByRequestIds(
+    em: EntityManager,
+    requestIds: readonly string[],
+  ): Promise<PriorAuthorizationDeterminations[]> {
+    if (requestIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      PriorAuthorizationDeterminations,
+      { priorAuthorizationRequestId: { $in: [...requestIds] } },
+      { orderBy: { determinationVersion: 'DESC' } },
+    );
+  }
+
   /** Mayor `determination_version` existente para la solicitud (0 si ninguna). */
   async maxDeterminationVersion(
     em: EntityManager,

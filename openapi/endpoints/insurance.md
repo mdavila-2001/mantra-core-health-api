@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 48 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 50 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-campaigns`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`
 - **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCampaignsController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `PractitionerSettlementBatchesController`, `PriorAuthController`, `ReconciliationController`
@@ -53,12 +53,14 @@ Referencia exhaustiva de 48 operación(es) del módulo `insurance`, derivada del
 40. [POST /practitioner-settlement-batches](#40-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
 41. [GET /practitioner-settlement-batches/{id}](#41-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
 42. [POST /prior-authorization-requests](#42-post-prior-authorization-requests) — Solicitar autorización previa con items
-43. [POST /prior-authorization-requests/{id}/determinations](#43-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-44. [POST /provider-networks](#44-post-provider-networks) — Alta de red de prestadores (soporte)
-45. [POST /provider-networks/{id}/memberships](#45-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-46. [GET /public/portability/verify/{manifestHash}](#46-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
-47. [POST /reconciliation-batches](#47-post-reconciliation-batches) — Abrir lote de conciliación
-48. [POST /reconciliation-batches/{id}/items](#48-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+43. [GET /prior-authorization-requests/{id}](#43-get-prior-authorization-requests-id) — Detalle de una solicitud de aprobación (aseguradora)
+44. [POST /prior-authorization-requests/{id}/determinations](#44-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+45. [GET /prior-authorization-requests/inbox](#45-get-prior-authorization-requests-inbox) — Bandeja de solicitudes de aprobación (aseguradora)
+46. [POST /provider-networks](#46-post-provider-networks) — Alta de red de prestadores (soporte)
+47. [POST /provider-networks/{id}/memberships](#47-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+48. [GET /public/portability/verify/{manifestHash}](#48-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
+49. [POST /reconciliation-batches](#49-post-reconciliation-batches) — Abrir lote de conciliación
+50. [POST /reconciliation-batches/{id}/items](#50-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -6857,7 +6859,174 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /prior-authorization-requests/{id}/determinations
+## 43. GET /prior-authorization-requests/{id}
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-prior-auth`
+- **Nombre:** Detalle de una solicitud de aprobación (aseguradora)
+- **Operation ID:** `PriorAuthController_getById`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PriorAuthController.getById](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+
+### Descripción de negocio
+
+Detalle de una solicitud de aprobación (aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Detalle con ítems y decisión vigente por ítem (aseguradora).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /prior-authorization-requests/{id}` en `PriorAuthController_getById`. El controlador delega en `PriorAuthReadService.getForInsurer`. No recibe body. El tipo de retorno estático es `Promise<PriorAuthDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /prior-authorization-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `BILLING`, `FINANCE`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /prior-authorization-requests/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PriorAuthDetailDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PriorAuthDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PriorAuthDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "origin": "PHARMACY",
+  "status": "SUBMITTED",
+  "decision": "APPROVED",
+  "patient": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "patientCode": "CODIGO_EJEMPLO",
+    "memberIdentifier": "valor-ejemplo"
+  },
+  "planName": "Nombre de ejemplo",
+  "currencyCode": "BOB",
+  "itemCount": 1,
+  "totalRequestedAmount": "valor-ejemplo",
+  "submittedAt": "2026-07-31T12:00:00.000Z",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "sequence": 1,
+      "description": "Texto descriptivo de ejemplo",
+      "requestedQuantity": "valor-ejemplo",
+      "requestedAmount": "valor-ejemplo",
+      "decision": {
+        "decision": "APPROVED",
+        "approvedQuantity": "valor-ejemplo",
+        "approvedAmount": "valor-ejemplo",
+        "policyClauseReference": "valor-ejemplo",
+        "denialRationale": "valor-ejemplo",
+        "decidedAt": "2026-07-31T12:00:00.000Z"
+      }
+    }
+  ],
+  "decidedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `origin` | Sí | `string` | valores: `PHARMACY`, `DIAGNOSTIC`, `GENERIC` | Sin descripción específica en el contrato OpenAPI. | `PHARMACY` |
+| `status` | Sí | `string` | valores: `SUBMITTED`, `IN_REVIEW`, `DETERMINED` | Sin descripción específica en el contrato OpenAPI. | `SUBMITTED` |
+| `decision` | Sí | `string` | valores: `APPROVED`, `DENIED`, `PARTIAL`; admite null | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `patient` | Sí | `PriorAuthPatientDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"}` |
+| `patient.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patient.displayName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `patient.patientCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `patient.memberIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `planName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `itemCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `totalRequestedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `submittedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items` | Sí | `array<PriorAuthItemViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","sequence":1,"description":"Texto descriptivo de ejemplo","requestedQuantity":"valor-ejemplo","requestedAmount":"valor-ejemplo","decision":{"decision":"APPROVED","approvedQuantity":"valor-ejemplo","approvedAmount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo","decidedAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].sequence` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].requestedQuantity` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].requestedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].decision` | Sí | `PriorAuthItemDecisionDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"decision":"APPROVED","approvedQuantity":"valor-ejemplo","approvedAmount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo","decidedAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].decision.decision` | Sí | `string` | valores: `APPROVED`, `DENIED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].decision.approvedQuantity` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].decision.approvedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].decision.policyClauseReference` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].decision.denialRationale` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].decision.decidedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `decidedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/prior-authorization-requests/{id}"
+}
+```
+
+---
+
+## 44. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -6870,6 +7039,7 @@ Ejemplo de error normalizado:
 
 Emitir determinación de autorización previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
+Contexto declarado en el controlador: UC-26-05. Con `items`, la aseguradora decide APROBADO / NO APROBADO por ítem (cláusula obligatoria al no aprobar) y la global se deriva.
 
 ### Descripción del sistema
 
@@ -6891,9 +7061,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "decision": "APPROVED"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -6907,7 +7075,15 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `decision` | Sí | `string` | valores: `APPROVED`, `DENIED`, `PARTIAL` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `decision` | No | `string` | valores: `APPROVED`, `DENIED`, `PARTIAL` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items` | No | `array<ItemDeterminationDto>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"priorAuthorizationItemId":"00000000-0000-4000-8000-000000000001","decision":"APPROVED","denialReasonConceptId":"00000000-0000-4000-8000-000000000001","policyClauseReference":"Cláusula 12.3: medicamento no cubierto en plan ambulatorio","denialRationale":"valor-ejemplo","approvedQuantity":"1","approvedAmount":"80.00"}]` |
+| `items[].priorAuthorizationItemId` | No | `string` | formato `uuid` | Ítem de la solicitud decidido | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision` | No | `string` | valores: `APPROVED`, `DENIED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].denialReasonConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].policyClauseReference` | No | `string` | longitud mínima 1; longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `Cláusula 12.3: medicamento no cubierto en plan ambulatorio` |
+| `items[].denialRationale` | No | `string` | longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].approvedQuantity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].approvedAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `80.00` |
 | `approvedQuantity` | No | `string` | Sin restricción adicional declarada | Cantidad aprobada | `valor-ejemplo` |
 | `approvedAmount` | No | `string` | Sin restricción adicional declarada | Monto aprobado | `valor-ejemplo` |
 | `validFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -6925,6 +7101,17 @@ Content-Type: application/json
 
 {
   "decision": "APPROVED",
+  "items": [
+    {
+      "priorAuthorizationItemId": "00000000-0000-4000-8000-000000000001",
+      "decision": "APPROVED",
+      "denialReasonConceptId": "00000000-0000-4000-8000-000000000001",
+      "policyClauseReference": "Cláusula 12.3: medicamento no cubierto en plan ambulatorio",
+      "denialRationale": "valor-ejemplo",
+      "approvedQuantity": "1",
+      "approvedAmount": "80.00"
+    }
+  ],
   "approvedQuantity": "valor-ejemplo",
   "approvedAmount": "valor-ejemplo",
   "validFrom": "2026-07-31",
@@ -6973,6 +7160,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud no admite determinación en su estado actual | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | El ítem decidido no pertenece a la solicitud | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Cada ítem se decide una sola vez | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La determinación debe decidir todos los ítems de la solicitud | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un ítem no aprobado no lleva cantidad ni monto aprobado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | El monto aprobado no puede superar el solicitado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6991,7 +7183,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /provider-networks
+## 45. GET /prior-authorization-requests/inbox
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-prior-auth`
+- **Nombre:** Bandeja de solicitudes de aprobación (aseguradora)
+- **Operation ID:** `PriorAuthController_inbox`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PriorAuthController.inbox](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+
+### Descripción de negocio
+
+Bandeja de solicitudes de aprobación (aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Bandeja de la aseguradora: las solicitudes de aprobación cuya cobertura es suya. El servicio exige administrar el tenant de la aseguradora.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /prior-authorization-requests/inbox` en `PriorAuthController_inbox`. El controlador delega en `PriorAuthReadService.listInbox`. No recibe body. El tipo de retorno estático es `Promise<PriorAuthListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | valores: `PENDING`, `DETERMINED` | Sin descripción específica en OpenAPI. | `PENDING` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /prior-authorization-requests/inbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `BILLING`, `FINANCE`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /prior-authorization-requests/inbox?status=PENDING HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PriorAuthListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PriorAuthListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PriorAuthListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PriorAuthListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PriorAuthListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PriorAuthListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PriorAuthListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "origin": "PHARMACY",
+      "status": "SUBMITTED",
+      "decision": "APPROVED",
+      "patient": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "displayName": "Nombre de ejemplo",
+        "patientCode": "CODIGO_EJEMPLO",
+        "memberIdentifier": "valor-ejemplo"
+      },
+      "planName": "Nombre de ejemplo",
+      "currencyCode": "BOB",
+      "itemCount": 1,
+      "totalRequestedAmount": "valor-ejemplo",
+      "submittedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PriorAuthListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","origin":"PHARMACY","status":"SUBMITTED","decision":"APPROVED","patient":{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"},"planName":"Nombre de ejemplo","currencyCode":"BOB","itemCount":1,"totalRequestedAmount":"valor-ejemplo","submittedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].origin` | Sí | `string` | valores: `PHARMACY`, `DIAGNOSTIC`, `GENERIC` | Sin descripción específica en el contrato OpenAPI. | `PHARMACY` |
+| `items[].status` | Sí | `string` | valores: `SUBMITTED`, `IN_REVIEW`, `DETERMINED` | Sin descripción específica en el contrato OpenAPI. | `SUBMITTED` |
+| `items[].decision` | Sí | `string` | valores: `APPROVED`, `DENIED`, `PARTIAL`; admite null | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].patient` | Sí | `PriorAuthPatientDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","memberIdentifier":"valor-ejemplo"}` |
+| `items[].patient.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patient.displayName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].patient.patientCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].patient.memberIdentifier` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].planName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].itemCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].totalRequestedAmount` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].submittedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/prior-authorization-requests/inbox"
+}
+```
+
+---
+
+## 46. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -7122,7 +7452,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /provider-networks/{id}/memberships
+## 47. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -7256,7 +7586,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /public/portability/verify/{manifestHash}
+## 48. GET /public/portability/verify/{manifestHash}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability-public`
@@ -7367,7 +7697,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /reconciliation-batches
+## 49. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -7500,7 +7830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. POST /reconciliation-batches/{id}/items
+## 50. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`

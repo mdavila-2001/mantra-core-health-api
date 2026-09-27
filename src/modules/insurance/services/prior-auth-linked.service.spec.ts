@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
-import { PriorAuthService } from './prior-auth.service';
+import { PriorAuthService, deriveDecision } from './prior-auth.service';
 import {
   PriorAuthorizationRequests,
   PatientCoverages,
@@ -77,6 +77,20 @@ function fixture() {
     createRequest: fn().mockReturnValue(request),
     createItem: fn(),
     findRequest: fn().mockResolvedValue(request),
+    findItemsByRequestIds: fn().mockResolvedValue([
+      {
+        id: 'item-1',
+        itemSequence: 1,
+        requestedQuantity: '2',
+        requestedAmount: '100.00',
+      },
+      {
+        id: 'item-2',
+        itemSequence: 2,
+        requestedQuantity: '1',
+        requestedAmount: '40.00',
+      },
+    ]),
     maxDeterminationVersion: fn().mockResolvedValue(0),
     createDetermination: fn().mockReturnValue({ id: 'determination' }),
   };
@@ -265,5 +279,151 @@ describe('PriorAuthService linked orders', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+  describe('determinación por ítem (APROBADO / NO APROBADO)', () => {
+    it('aprobación parcial: una fila global PARTIAL y una por ítem con la cláusula', async () => {
+      const f = fixture();
+      await f.service.issueDetermination(
+        'prior',
+        {
+          items: [
+            { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+            {
+              priorAuthorizationItemId: 'item-2',
+              decision: 'DENIED',
+              policyClauseReference: '  Cláusula 12.3  ',
+              denialRationale: 'No cubierto en ambulatorio',
+            },
+          ],
+        },
+        actor,
+      );
+      const calls = f.repo.createDetermination.mock.calls.map(
+        (call: unknown[]) => call[1] as Record<string, unknown>,
+      );
+      expect(calls).toHaveLength(3);
+      expect(calls[0]).toMatchObject({
+        decisionConceptId: INS.DECISION_PARTIAL,
+        approvedAmount: '100.00',
+        determinationVersion: 1,
+      });
+      expect(calls[0].priorAuthorizationItemId).toBeUndefined();
+      expect(calls[1]).toMatchObject({
+        priorAuthorizationItemId: 'item-1',
+        decisionConceptId: INS.DECISION_APPROVED,
+        approvedAmount: '100.00',
+        approvedQuantity: '2',
+        determinationVersion: 1,
+      });
+      expect(calls[2]).toMatchObject({
+        priorAuthorizationItemId: 'item-2',
+        decisionConceptId: INS.DECISION_DENIED,
+        policyClauseReference: 'Cláusula 12.3',
+        denialRationale: 'No cubierto en ambulatorio',
+        determinationVersion: 1,
+      });
+      expect(calls[2].approvedAmount).toBeUndefined();
+      expect(f.request.statusConceptId).toBe(INS.PRIOR_AUTH_DETERMINED);
+    });
+
+    it.each([
+      [
+        'falta un ítem',
+        [{ priorAuthorizationItemId: 'item-1', decision: 'APPROVED' }],
+      ],
+      [
+        'ítem ajeno a la solicitud',
+        [
+          { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+          { priorAuthorizationItemId: 'otro', decision: 'APPROVED' },
+        ],
+      ],
+      [
+        'ítem repetido',
+        [
+          { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+          { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+          { priorAuthorizationItemId: 'item-2', decision: 'APPROVED' },
+        ],
+      ],
+      [
+        'monto aprobado mayor al solicitado',
+        [
+          {
+            priorAuthorizationItemId: 'item-1',
+            decision: 'APPROVED',
+            approvedAmount: '100.01',
+          },
+          { priorAuthorizationItemId: 'item-2', decision: 'APPROVED' },
+        ],
+      ],
+      [
+        'no aprobado con monto aprobado',
+        [
+          { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+          {
+            priorAuthorizationItemId: 'item-2',
+            decision: 'DENIED',
+            policyClauseReference: 'Cl. 4',
+            approvedAmount: '1',
+          },
+        ],
+      ],
+    ])('rechaza con 422 si %s, sin escribir nada', async (_caso, items) => {
+      const f = fixture();
+      await expect(
+        f.service.issueDetermination('prior', { items: items as never }, actor),
+      ).rejects.toMatchObject({ status: 422 });
+      expect(f.repo.createDetermination).not.toHaveBeenCalled();
+      expect(f.request.statusConceptId).toBe(INS.PRIOR_AUTH_SUBMITTED);
+    });
+
+    it('rechaza una decisión global que contradice la de los ítems', async () => {
+      const f = fixture();
+      await expect(
+        f.service.issueDetermination(
+          'prior',
+          {
+            decision: 'APPROVED',
+            items: [
+              { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+              {
+                priorAuthorizationItemId: 'item-2',
+                decision: 'DENIED',
+                policyClauseReference: 'Cl. 4',
+              },
+            ],
+          },
+          actor,
+        ),
+      ).rejects.toMatchObject({ status: 422 });
+      expect(f.repo.createDetermination).not.toHaveBeenCalled();
+    });
+
+    it('una aseguradora ajena no decide ítems', async () => {
+      const f = fixture();
+      f.access.assertInsurer.mockRejectedValue(new ForbiddenException());
+      await expect(
+        f.service.issueDetermination(
+          'prior',
+          {
+            items: [
+              { priorAuthorizationItemId: 'item-1', decision: 'APPROVED' },
+              { priorAuthorizationItemId: 'item-2', decision: 'APPROVED' },
+            ],
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(f.repo.findItemsByRequestIds).not.toHaveBeenCalled();
+    });
+
+    it('deriva la decisión global', () => {
+      expect(deriveDecision([{ decision: 'APPROVED' }])).toBe('APPROVED');
+      expect(deriveDecision([{ decision: 'DENIED' }])).toBe('DENIED');
+      expect(
+        deriveDecision([{ decision: 'APPROVED' }, { decision: 'DENIED' }]),
+      ).toBe('PARTIAL');
+    });
   });
 });

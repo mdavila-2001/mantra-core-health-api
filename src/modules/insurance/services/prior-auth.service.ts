@@ -21,6 +21,7 @@ import {
   CreatePriorAuthRequestDto,
   CreateDeterminationDto,
   CreatedResourceDto,
+  ItemDeterminationDto,
   ResourceStatusDto,
 } from '../dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
@@ -37,6 +38,41 @@ const DECISION_CONCEPT: Record<string, string> = {
   DENIED: INS.DECISION_DENIED,
   PARTIAL: INS.DECISION_PARTIAL,
 };
+
+/** Decisión de un ítem ya validada contra la solicitud. */
+interface ItemDecisionRow {
+  itemId: string;
+  decision: 'APPROVED' | 'DENIED';
+  approvedQuantity?: string;
+  approvedAmount?: string;
+  denialReasonConceptId?: string;
+  policyClauseReference?: string;
+  denialRationale?: string;
+}
+
+/**
+ * Decisión global a partir de la de cada ítem: todo aprobado → APPROVED, todo
+ * denegado → DENIED, mezcla → PARTIAL. Si el cliente también mandó la global,
+ * tiene que coincidir: dos verdades distintas en la misma versión no se guardan.
+ */
+export function deriveDecision(
+  items: readonly Pick<ItemDeterminationDto, 'decision'>[],
+  declared?: 'APPROVED' | 'DENIED' | 'PARTIAL',
+): 'APPROVED' | 'DENIED' | 'PARTIAL' {
+  const approved = items.filter((item) => item.decision === 'APPROVED').length;
+  const derived =
+    approved === items.length
+      ? 'APPROVED'
+      : approved === 0
+        ? 'DENIED'
+        : 'PARTIAL';
+  if (declared && declared !== derived) {
+    throw new PreconditionFailedException(
+      'La decisión global no coincide con la decisión de los ítems',
+    );
+  }
+  return derived;
+}
 
 @Injectable()
 export class PriorAuthService {
@@ -289,21 +325,128 @@ export class PriorAuthService {
         if (dto.approvedQuantity !== undefined)
           requireNonNegativeAmount(dto.approvedQuantity);
       }
+      const itemRows = dto.items
+        ? await this.resolveItemDecisions(tx, requestId, dto.items)
+        : [];
+      const decision = dto.items
+        ? deriveDecision(dto.items, dto.decision)
+        : dto.decision!;
+      const version =
+        (await this.repo.maxDeterminationVersion(tx, requestId)) + 1;
+      const validFrom = dto.validFrom ? new Date(dto.validFrom) : undefined;
+      const validTo = dto.validTo ? new Date(dto.validTo) : undefined;
       const determination = this.repo.createDetermination(tx, {
         priorAuthorizationRequestId: requestId,
-        determinationVersion:
-          (await this.repo.maxDeterminationVersion(tx, requestId)) + 1,
-        decisionConceptId: DECISION_CONCEPT[dto.decision],
+        determinationVersion: version,
+        decisionConceptId: DECISION_CONCEPT[decision],
         approvedQuantity: dto.approvedQuantity,
-        approvedAmount: dto.approvedAmount,
-        validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
-        validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        approvedAmount:
+          dto.approvedAmount ??
+          (dto.items
+            ? sumarDecimales(itemRows.map((row) => row.approvedAmount ?? '0'))
+            : undefined),
+        validFrom,
+        validTo,
         actorUserId: actor.id,
       });
+      // Una fila por ítem, en la misma versión que la global: la global dice
+      // APROBADO / PARCIAL / NO APROBADO y las del ítem dicen cuál y por qué.
+      for (const row of itemRows) {
+        this.repo.createDetermination(tx, {
+          priorAuthorizationRequestId: requestId,
+          priorAuthorizationItemId: row.itemId,
+          determinationVersion: version,
+          decisionConceptId: DECISION_CONCEPT[row.decision],
+          approvedQuantity: row.approvedQuantity,
+          approvedAmount: row.approvedAmount,
+          denialReasonConceptId: row.denialReasonConceptId,
+          policyClauseReference: row.policyClauseReference,
+          denialRationale: row.denialRationale,
+          validFrom,
+          validTo,
+          actorUserId: actor.id,
+        });
+      }
       request.statusConceptId = INS.PRIOR_AUTH_DETERMINED;
       touch(request, actor.id);
       await tx.flush();
       return { id: determination.id };
+    });
+  }
+
+  /**
+   * Valida que cada ítem de la solicitud se decida exactamente una vez y
+   * completa los importes: si se aprueba sin importe, se aprueba lo solicitado;
+   * nunca más de lo solicitado. Un NO APROBADO no lleva importe aprobado.
+   */
+  private async resolveItemDecisions(
+    tx: EntityManager,
+    requestId: string,
+    decisions: readonly ItemDeterminationDto[],
+  ): Promise<ItemDecisionRow[]> {
+    const items = await this.repo.findItemsByRequestIds(tx, [requestId]);
+    const byId = new Map(items.map((item) => [item.id, item]));
+    const seen = new Set<string>();
+    for (const decision of decisions) {
+      if (!byId.has(decision.priorAuthorizationItemId))
+        throw new PreconditionFailedException(
+          'El ítem decidido no pertenece a la solicitud',
+        );
+      if (seen.has(decision.priorAuthorizationItemId))
+        throw new PreconditionFailedException(
+          'Cada ítem se decide una sola vez',
+        );
+      seen.add(decision.priorAuthorizationItemId);
+    }
+    if (seen.size !== items.length)
+      throw new PreconditionFailedException(
+        'La determinación debe decidir todos los ítems de la solicitud',
+      );
+    return decisions.map((decision) => {
+      const item = byId.get(decision.priorAuthorizationItemId)!;
+      if (decision.decision === 'DENIED') {
+        if (
+          decision.approvedAmount !== undefined ||
+          decision.approvedQuantity !== undefined
+        )
+          throw new PreconditionFailedException(
+            'Un ítem no aprobado no lleva cantidad ni monto aprobado',
+          );
+        return {
+          itemId: item.id,
+          decision: 'DENIED',
+          denialReasonConceptId: decision.denialReasonConceptId,
+          policyClauseReference: decision.policyClauseReference?.trim(),
+          denialRationale: decision.denialRationale?.trim() || undefined,
+        };
+      }
+      const approvedAmount = decision.approvedAmount ?? item.requestedAmount;
+      const approvedQuantity =
+        decision.approvedQuantity ?? item.requestedQuantity;
+      if (approvedAmount !== undefined && approvedAmount !== null) {
+        requireNonNegativeAmount(approvedAmount);
+        if (
+          item.requestedAmount !== undefined &&
+          item.requestedAmount !== null &&
+          sumarDecimales([
+            item.requestedAmount,
+            `-${approvedAmount.replace(/^\+/, '')}`,
+          ])!.startsWith('-')
+        )
+          throw new PreconditionFailedException(
+            'El monto aprobado no puede superar el solicitado',
+          );
+      }
+      if (approvedQuantity !== undefined && approvedQuantity !== null)
+        requireNonNegativeAmount(approvedQuantity);
+      return {
+        itemId: item.id,
+        decision: 'APPROVED',
+        approvedAmount: approvedAmount ?? undefined,
+        approvedQuantity: approvedQuantity ?? undefined,
+        policyClauseReference:
+          decision.policyClauseReference?.trim() || undefined,
+      };
     });
   }
 }

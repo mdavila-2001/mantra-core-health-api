@@ -677,6 +677,134 @@ isolated('Coberturas y copagos: HTTP → PostgreSQL aislado', () => {
     }
   }, 180000);
 
+  it('lets the insurer approve and reject each prior-authorization item with the policy clause', async () => {
+    const order = await pharmacy.createOrder();
+    const prior = await post('/prior-authorization-requests', {
+      patientCoverageId: coverageId,
+      requestingProviderEntityId: pharmacy.pharmacyId,
+      inventoryReservationId: order.orderId,
+      medicationRequestId: pharmacy.medicationRequestId,
+      currencyConceptId: CONCEPTS.CURRENCY_BOB,
+      items: pharmacy.productIds.map((pharmacyProductId, index) => ({
+        pharmacyProductId,
+        requestedQuantity: '2',
+        requestedAmount: index === 0 ? '40.00' : '60.00',
+      })),
+    });
+    const get = (path: string, actor: Organization, expected = 200) =>
+      http().get(path).set(auth(actor)).expect(expected);
+
+    // La bandeja de la aseguradora la lista como pendiente; la otra no la ve.
+    const inbox = await get(
+      '/prior-authorization-requests/inbox?status=PENDING',
+      insurer,
+    );
+    const row = inbox.body.items.find(
+      (item: { id: string }) => item.id === prior.id,
+    );
+    expect(row).toMatchObject({
+      origin: 'PHARMACY',
+      status: 'SUBMITTED',
+      decision: null,
+      itemCount: 2,
+      totalRequestedAmount: '100.00',
+      currencyCode: 'BOB',
+    });
+    const foreign = await get(
+      '/prior-authorization-requests/inbox',
+      otherInsurer,
+    );
+    expect(
+      foreign.body.items.some((item: { id: string }) => item.id === prior.id),
+    ).toBe(false);
+    await get(`/prior-authorization-requests/${prior.id}`, otherInsurer, 403);
+    await get(`/prior-authorization-requests/inbox`, provider, 403);
+
+    const before = await get(
+      `/prior-authorization-requests/${prior.id}`,
+      insurer,
+    );
+    const [approvedItem, deniedItem] = before.body.items as { id: string }[];
+
+    // NO APROBADO sin cláusula: 400, y no se escribe nada.
+    await post(
+      `/prior-authorization-requests/${prior.id}/determinations`,
+      {
+        items: [
+          { priorAuthorizationItemId: approvedItem.id, decision: 'APPROVED' },
+          { priorAuthorizationItemId: deniedItem.id, decision: 'DENIED' },
+        ],
+      },
+      insurer,
+      400,
+    );
+    // Otra aseguradora no decide.
+    await post(
+      `/prior-authorization-requests/${prior.id}/determinations`,
+      {
+        items: [
+          { priorAuthorizationItemId: approvedItem.id, decision: 'APPROVED' },
+          { priorAuthorizationItemId: deniedItem.id, decision: 'APPROVED' },
+        ],
+      },
+      otherInsurer,
+      403,
+    );
+    await post(
+      `/prior-authorization-requests/${prior.id}/determinations`,
+      {
+        items: [
+          { priorAuthorizationItemId: approvedItem.id, decision: 'APPROVED' },
+          {
+            priorAuthorizationItemId: deniedItem.id,
+            decision: 'DENIED',
+            policyClauseReference: 'Cláusula 12.3 — fuera del vademécum',
+            denialRationale: 'Principio activo excluido del plan ambulatorio',
+          },
+        ],
+      },
+      insurer,
+    );
+
+    // Recarga: lo persistido es lo que se decidió.
+    const detail = await get(
+      `/prior-authorization-requests/${prior.id}`,
+      insurer,
+    );
+    expect(detail.body).toMatchObject({
+      status: 'DETERMINED',
+      decision: 'PARTIAL',
+    });
+    expect(detail.body.decidedAt).toEqual(expect.any(String));
+    expect(detail.body.items[0].decision).toMatchObject({
+      decision: 'APPROVED',
+      policyClauseReference: null,
+    });
+    expect(Number(detail.body.items[0].decision.approvedAmount)).toBe(40);
+    expect(detail.body.items[1].decision).toMatchObject({
+      decision: 'DENIED',
+      approvedAmount: null,
+      policyClauseReference: 'Cláusula 12.3 — fuera del vademécum',
+      denialRationale: 'Principio activo excluido del plan ambulatorio',
+    });
+    const determined = await get(
+      '/prior-authorization-requests/inbox?status=DETERMINED',
+      insurer,
+    );
+    expect(
+      determined.body.items.find((item: { id: string }) => item.id === prior.id)
+        ?.decision,
+    ).toBe('PARTIAL');
+
+    // Ya determinada: no admite una segunda determinación.
+    await post(
+      `/prior-authorization-requests/${prior.id}/determinations`,
+      { decision: 'APPROVED' },
+      insurer,
+      422,
+    );
+  }, 180000);
+
   it('exports real browser fixtures without tokens', async () => {
     const credentials = ({ nationalId, password, profileId }: Patient) => ({
       nationalId,
