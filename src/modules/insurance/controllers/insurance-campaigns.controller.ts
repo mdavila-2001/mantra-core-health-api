@@ -17,14 +17,21 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Public,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { InsuranceCampaignsService } from '../services';
 import {
+  ActiveCampaignsQueryDto,
   CreateInsuranceCampaignDto,
   InsuranceCampaignListQueryDto,
   InsuranceCampaignPageDto,
   InsuranceCampaignResponseDto,
   PatientCampaignDto,
+  UpdateInsuranceCampaignDto,
   UpdateInsuranceCampaignStatusDto,
 } from '../dto';
 
@@ -38,9 +45,14 @@ import {
  * titularidad de su perfil contra el JWT. Un rol clínico o de paciente que
  * intente mutar recibe 403 del servicio.
  */
+/**
+ * Ruta canónica `insurance/campaigns`, con alias `insurance-campaigns`
+ * (deprecado, un ciclo) por compatibilidad mientras el front y los artefactos
+ * generados terminan de moverse. Ver `docs/contracts/insurer-preventive-campaigns.md` §7.
+ */
 @ApiTags('insurance-campaigns')
 @ApiBearerAuth()
-@Controller('insurance-campaigns')
+@Controller(['insurance/campaigns', 'insurance-campaigns'])
 export class InsuranceCampaignsController {
   constructor(private readonly service: InsuranceCampaignsService) {}
 
@@ -68,9 +80,43 @@ export class InsuranceCampaignsController {
   }
 
   /**
+   * Pública, sin token: rutas fijas van ANTES que `:id` para que Nest no las
+   * lea como un identificador.
+   */
+  @Get('active')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)',
+  })
+  @ApiOkResponse({ type: [PatientCampaignDto] })
+  listActive(
+    @Query() query: ActiveCampaignsQueryDto,
+  ): Promise<PatientCampaignDto[]> {
+    return this.service.listActivePublic(query);
+  }
+
+  /** El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL. */
+  @Get('my-benefits')
+  @Roles()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Campañas vigentes de mi aseguradora, para el afiliado autenticado',
+  })
+  @ApiOkResponse({ type: [PatientCampaignDto] })
+  myBenefits(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PatientCampaignDto[]> {
+    return this.service.listMyBenefits(actor);
+  }
+
+  /**
    * Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id.
    * El perfil viaja en la URL para que un intento sobre el de otro afiliado sea
-   * verificable y auditable.
+   * verificable y auditable. Se conserva junto a `my-benefits` para el caso
+   * de IDOR con un perfil ajeno explícito.
    */
   @Get('patient/:patientProfileId')
   @Roles()
@@ -109,5 +155,20 @@ export class InsuranceCampaignsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<InsuranceCampaignResponseDto> {
     return this.service.changeStatus(id, dto, actor);
+  }
+
+  @Patch(':id')
+  @Roles()
+  @ApiOperation({
+    summary:
+      'Editar una campaña en borrador o pausada (422 si está activa o vencida)',
+  })
+  @ApiOkResponse({ type: InsuranceCampaignResponseDto })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateInsuranceCampaignDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<InsuranceCampaignResponseDto> {
+    return this.service.update(id, dto, actor);
   }
 }
