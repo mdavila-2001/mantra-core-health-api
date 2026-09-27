@@ -512,18 +512,27 @@ la prueba no lo agrega ahí. O sea que **el buscador y la ficha deciden «esto e
 con criterios distintos**. Hay que decidir cuál manda —módulo 03, tarea 25— antes de tocar
 ninguno de los dos.
 
-**B-16 · `yarn test:integration` no arranca por un `MetadataError` de `CatalogConcepts`,
-sin ficha hasta ahora.** Destapado al certificar la Tarea 4 (campañas preventivas de la
-aseguradora, 2026-09-26): `test:integration` muere antes de correr un solo caso con
-`MetadataError: Metadata for entity CatalogConcepts not found` de
-`TsMorphMetadataProvider`. `docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/REPORTE.md`
-ya lo había registrado de pasada (líneas 56 y 70: «desde `dist` sí corre»), pero sin ficha
-propia ni causa raíz documentada. Bloquea directamente el DoD de integración de cualquier
-tarea nueva sobre `insurance` (y probablemente cualquier módulo que importe
-`CatalogConcepts` transitivamente). Pendiente: reproducir con
-`node_modules/.cache/mikro-orm` vacío, revisar `entitiesTs`/`TsMorphMetadataProvider` en
-`src/orm/config/orm.config.ts`, y confirmar si el rodeo real es compilar y correr desde
-`dist/` o si hay una causa corregible en la configuración de metadatos.
+**B-16 · `yarn test:integration` no arranca por un `MetadataError` de `TsMorphMetadataProvider`,
+sin ficha hasta ahora — y el error cambia de entidad según qué se le agregue al módulo.**
+Destapado al certificar la Tarea 4 (campañas preventivas de la aseguradora, 2026-09-26):
+`test:integration` moría antes de correr un solo caso con
+`MetadataError: Metadata for entity CatalogConcepts not found`.
+`docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/REPORTE.md` ya lo había
+registrado de pasada (líneas 56 y 70: «desde `dist` sí corre»), pero sin ficha propia ni causa
+raíz documentada.
+
+**Reproducido de nuevo el mismo día, con `node_modules/.cache/mikro-orm` vacío**: la corrida
+avanzó mucho más (conectó a Neon: `postgresql://neondb_owner@ep-shy-snow-acyd0u4s-pooler…`,
+777 s) y falló con un error **distinto**: `MetadataError: Metadata for entity
+InsuranceCampaignPartners not found` — la entidad nueva de esta misma tarea. O sea que el
+`MetadataError` de `TsMorphMetadataProvider` no señala una entidad fija y rota: señala **la
+entidad más reciente en el orden de descubrimiento** cuando algo en el análisis de ts-morph se
+desincroniza (probablemente con la caché o con el orden en que `entitiesTs` recorre los
+archivos). No se investigó la causa exacta ni se intentó arreglar en esta sesión. Bloquea
+directamente el DoD de integración de cualquier tarea nueva que agregue una entidad. Pendiente:
+revisar `entitiesTs`/`metadataCache` en `src/orm/config/orm.config.ts`, entender por qué la
+entidad que falla varía, y confirmar si el rodeo real es compilar y correr desde `dist/` o si
+hay una causa corregible en la configuración de metadatos.
 
 **B-17 · Deuda declarada por la certificación de Tarea 4 (campañas preventivas), pendiente
 de PR.** El prompt de Tarea 4 pedía rutas `insurance/campaigns` (con alias deprecado
