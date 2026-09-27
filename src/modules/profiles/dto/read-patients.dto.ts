@@ -53,6 +53,32 @@ export class PatientListItemDto {
   personStatusConceptId?: string;
 
   /**
+   * Grupo sanguíneo, factor Rh e idioma clínico del perfil, los mismos tres
+   * de {@link PatientDetailResponseDto}. Viajan en la fila porque el listado
+   * permite filtrar por ellos (`SearchPatientsQueryDto`): un filtro cuya
+   * columna no se ve deja a quien busca sin saber qué encontró.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del grupo ABO (VS_BLOOD_GROUP)',
+  })
+  aboGroupConceptId?: string;
+
+  /** Factor Rh (`VS_RH_FACTOR`). */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del factor Rh (VS_RH_FACTOR)',
+  })
+  rhFactorConceptId?: string;
+
+  /** Idioma clínico (`VS_LANGUAGE`). */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del idioma clínico (VS_LANGUAGE)',
+  })
+  clinicalLanguageConceptId?: string;
+
+  /**
    * Valor de deceased mantenido por la instancia.
    */
   @ApiProperty({
@@ -96,6 +122,40 @@ export class SearchPatientsQueryDto {
   @IsOptional()
   @IsUUID()
   issuerAdministrativeAreaConceptId?: string;
+
+  /**
+   * Grupo sanguíneo exacto (`VS_BLOOD_GROUP`).
+   *
+   * Los tres filtros de catálogo acotan, no buscan: un rol clínico igual tiene
+   * que mandar `q` o `nationalId` (`requiereCriterioDeBusqueda()`), porque
+   * «todos los O+» sigue siendo enumerar el padrón.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Grupo ABO exacto (VS_BLOOD_GROUP). Acota; para roles clínicos no reemplaza a q ni a nationalId',
+  })
+  @IsOptional()
+  @IsUUID()
+  aboGroupConceptId?: string;
+
+  /** Factor Rh exacto (`VS_RH_FACTOR`). */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Factor Rh exacto (VS_RH_FACTOR)',
+  })
+  @IsOptional()
+  @IsUUID()
+  rhFactorConceptId?: string;
+
+  /** Idioma clínico exacto (`VS_LANGUAGE`). */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Idioma clínico exacto (VS_LANGUAGE)',
+  })
+  @IsOptional()
+  @IsUUID()
+  clinicalLanguageConceptId?: string;
 
   /** Cursor opaco devuelto por la página anterior. */
   @ApiPropertyOptional({

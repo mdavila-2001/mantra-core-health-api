@@ -277,6 +277,31 @@ describe('ProfilesPatientsController — búsqueda sin datos del paciente en la 
     );
   });
 
+  it('correcto — los tres filtros de catálogo llegan al servicio', async () => {
+    const d = build();
+    d.patientsService.searchPatients.mockResolvedValue({ items: [] });
+
+    await d.controller.searchPatientsByBody(
+      {
+        q: 'Ana',
+        aboGroupConceptId: 'abo-o',
+        rhFactorConceptId: 'rh-pos',
+        clinicalLanguageConceptId: 'lang-ay',
+      },
+      actor,
+    );
+
+    expect(d.patientsService.searchPatients).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'Ana',
+        aboGroupConceptId: 'abo-o',
+        rhFactorConceptId: 'rh-pos',
+        clinicalLanguageConceptId: 'lang-ay',
+      }),
+      actor,
+    );
+  });
+
   it('límite — sin tope en el cuerpo aplica el de siempre (50)', async () => {
     const d = build();
     d.patientsService.searchPatients.mockResolvedValue({ items: [] });
@@ -346,6 +371,27 @@ describe('ProfilesPatientsController — búsqueda sin datos del paciente en la 
         { limit: 500 },
       );
       await expect(pipe.transform({ limit: 501 }, meta)).rejects.toThrow();
+    });
+
+    it('correcto — acepta los tres filtros de catálogo como uuid', async () => {
+      const uuid = '6f1c1d1e-0000-4000-8000-000000000001';
+      await expect(
+        pipe.transform(
+          {
+            q: 'Ana',
+            aboGroupConceptId: uuid,
+            rhFactorConceptId: uuid,
+            clinicalLanguageConceptId: uuid,
+          },
+          meta,
+        ),
+      ).resolves.toMatchObject({ aboGroupConceptId: uuid });
+    });
+
+    it('inválido — un filtro de catálogo que no es uuid es 400', async () => {
+      await expect(
+        pipe.transform({ q: 'Ana', aboGroupConceptId: 'O+' }, meta),
+      ).rejects.toThrow();
     });
 
     it('inválido — un campo no declarado es 400, no se ignora', async () => {

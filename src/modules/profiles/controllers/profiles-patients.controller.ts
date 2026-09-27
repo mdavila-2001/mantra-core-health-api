@@ -508,6 +508,9 @@ export class ProfilesPatientsController {
         nationalId: filters.nationalId,
         issuerAdministrativeAreaConceptId:
           filters.issuerAdministrativeAreaConceptId,
+        aboGroupConceptId: filters.aboGroupConceptId,
+        rhFactorConceptId: filters.rhFactorConceptId,
+        clinicalLanguageConceptId: filters.clinicalLanguageConceptId,
         cursor: filters.cursor,
         limit: filters.limit ?? 50,
       },
