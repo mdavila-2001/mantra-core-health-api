@@ -508,7 +508,14 @@ describe('ConditionsService.verify (C3 / P41)', () => {
 
   function armar(condicion = presuntivo()) {
     const d = build();
-    (d.tx as any).findOne = mockFn().mockResolvedValue({ id: 'evidencia' });
+    // Toda evidencia pedida existe y es del paciente, salvo que el test diga
+    // otra cosa; un informe nombra su orden y una nota, su consulta.
+    (d.tx as any).findOne = mockFn(async (_entity: unknown, where: any) => ({
+      id: where.id,
+      patientProfileId: where.patientProfileId,
+      serviceRequestId: 'sr-1',
+      encounterId: 'enc-1',
+    }));
     d.conditionsRepo.findById.mockResolvedValue(condicion);
     return { ...d, condicion };
   }
@@ -562,8 +569,11 @@ describe('ConditionsService.verify (C3 / P41)', () => {
       );
       expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_REFUTED);
       expect(res.clinicalStatusConceptId).toBe(CLIN.CONDITION_INACTIVE);
+      expect(res.resolvedAt).toBeInstanceOf(Date);
+      // Se guarda lo resuelto: el informe nombra su orden.
       expect(res.verification?.basedOn).toEqual({
         kind: 'ANALYSIS',
+        serviceRequestId: 'sr-1',
         diagnosticReportId: 'dr-1',
       });
       expect((d.tx as any).findOne).toHaveBeenCalledWith(expect.anything(), {
@@ -594,6 +604,27 @@ describe('ConditionsService.verify (C3 / P41)', () => {
       expect(res.onsetAt).toEqual(inicio);
       expect(res.expectedResolutionAt).toBeUndefined();
       expect(res.clinicalCourseConceptId).toBe(CLIN.CONDITION_COURSE_CHRONIC);
+    });
+
+    it('una crónica descarta el fin esperado aunque venga en el cuerpo', async () => {
+      const d = armar();
+      const res = await d.service.verify(
+        'cond-1',
+        {
+          outcome: 'CONFIRMED',
+          basedOn: { kind: 'NOTE', noteId: 'n-1' },
+          onsetAt: AYER,
+          expectedResolutionAt: EN_UN_MES,
+          clinicalCourseConceptId: CLIN.CONDITION_COURSE_CHRONIC,
+        },
+        medica,
+      );
+      expect(res.expectedResolutionAt).toBeUndefined();
+      expect(res.verification?.basedOn).toEqual({
+        kind: 'NOTE',
+        noteId: 'n-1',
+        encounterId: 'enc-1',
+      });
     });
 
     it('acepta un fin esperado igual al inicio', async () => {
@@ -691,6 +722,38 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('422 si el informe no nombra orden y no se indicó ninguna', async () => {
+      const d = armar();
+      (d.tx as any).findOne.mockResolvedValue({ id: 'dr-1' });
+      await expect(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'REFUTED',
+            basedOn: { kind: 'ANALYSIS', diagnosticReportId: 'dr-1' },
+          },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('422 si el curso clínico no es uno del catálogo', async () => {
+      const d = armar();
+      await expect(
+        d.service.verify(
+          'cond-1',
+          {
+            outcome: 'CONFIRMED',
+            reasonText: 'x',
+            onsetAt: AYER,
+            expectedResolutionAt: EN_UN_MES,
+            clinicalCourseConceptId: '99999999-9999-4999-8999-999999999999',
+          },
+          medica,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('422 si la nota no trae su identificador', async () => {
