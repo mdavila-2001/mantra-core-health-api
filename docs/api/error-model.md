@@ -240,7 +240,12 @@ Reglas para un interceptor de errores, en orden de importancia:
    cambia sin previo aviso.
 2. **`details` es opcional y su forma depende del código.** Hoy sólo `VALIDATION_FAILED` lo
    rellena de forma predecible, con `details.violations: string[]` — un mensaje por regla de
-   `class-validator` incumplida. Los errores de negocio lo usan para identificar el recurso
+   `class-validator` incumplida. Desde el 2026-09-26 trae además `details.fields`, la misma
+   información agrupada por campo con la ruta completa en objetos anidados y arreglos
+   (`[{ "field": "items[0].quantity", "constraints": { "min": "…" }, "messages": ["…"] }]`,
+   ver `src/common/filters/validation-exception.factory.ts`). `violations` conserva el texto
+   exacto de antes (`items.0.quantity must not be less than 1`); la captura de arriba es
+   anterior a `fields`. Los errores de negocio lo usan para identificar el recurso
    (`{ "userId": "…" }`), así que trátalo como `Record<string, unknown>` y no asumas claves.
    **Un error de integridad de la base no trae `details`**: la restricción, la tabla y el valor de
    la clave que falló describen el esquema y los datos, así que se registran en el log —localizables

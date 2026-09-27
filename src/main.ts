@@ -19,6 +19,7 @@ import {
   installProcessGuards,
   installShutdownWatchdog,
   loadBuildInfo,
+  validationExceptionFactory,
 } from './common';
 
 /**
@@ -155,12 +156,15 @@ async function bootstrap() {
   // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en
   // lugar de filtrarse a la capa de dominio. `transform` habilita la coerción de
   // tipos declarada con class-transformer (p. ej. query params numéricos).
+  // `exceptionFactory` agrega `details.fields` (ruta completa por campo) sin
+  // cambiar `details.violations`, que el front ya lee.
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
+      exceptionFactory: validationExceptionFactory,
     }),
   );
 
