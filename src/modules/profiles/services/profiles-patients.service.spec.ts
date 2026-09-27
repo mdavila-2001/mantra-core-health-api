@@ -104,7 +104,9 @@ function build() {
   };
   const relatedPersonsRepo = {
     findById: mockFn(),
-    create: mockFn(),
+    // El repositorio real devuelve la fila: `createGuardianRelatedPerson` lee
+    // su id para devolverlo.
+    create: mockFn().mockReturnValue({ id: 'related-1' }),
     findActiveGuardian: mockFn(),
     findActiveDeclaredGuardian: mockFn().mockResolvedValue(null),
     findActiveByPatient: mockFn().mockResolvedValue([]),

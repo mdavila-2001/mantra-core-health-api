@@ -107,7 +107,11 @@ describe('IamPatientSelfRegistrationService', () => {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
     const tenantMembershipsRepo = { create: fn() };
-    const relatedPersonsRepo = { create: fn() };
+    // El repositorio real devuelve la fila: `createGuardianRelatedPerson`
+    // lee su id para devolverlo.
+    const relatedPersonsRepo = {
+      create: fn().mockReturnValue({ id: 'related-1' }),
+    };
     const insuranceCatalogRepo = {
       findPlan: fn().mockResolvedValue({
         id: 'plan-1',

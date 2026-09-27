@@ -192,4 +192,29 @@ describe('createWalkInPatient', () => {
       expect.objectContaining({ patientProfileId: 'person-1' }),
     );
   });
+
+  it('devuelve los ids del tutor para pedir el aviso, y nada si no se declaró', async () => {
+    const { tx, repos } = build();
+    const sinTutor = await createWalkInPatient(repos, tx, DATA_BASE);
+    expect(sinTutor.guardian).toBeUndefined();
+
+    const { tx: tx2, repos: repos2 } = build();
+    const conTutor = await createWalkInPatient(repos2, tx2, {
+      ...DATA_BASE,
+      guardianName: 'Rosa Mamani',
+      guardianPhone: '+591 71111111',
+    });
+    expect(conTutor.guardian).toEqual({
+      guardianPersonId: 'person-1',
+      relatedPersonId: 'related-1',
+      hasPhone: true,
+    });
+
+    const { tx: tx3, repos: repos3 } = build();
+    const tutorSinTelefono = await createWalkInPatient(repos3, tx3, {
+      ...DATA_BASE,
+      guardianName: 'Rosa Mamani',
+    });
+    expect(tutorSinTelefono.guardian?.hasPhone).toBe(false);
+  });
 });

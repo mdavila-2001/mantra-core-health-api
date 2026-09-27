@@ -19,11 +19,14 @@ import { MedicalSpecialtyCatalogService } from './services/medical-specialty-cat
 import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
 import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
 import {
+  GuardianLinksInternalController,
+  GuardianLinksPublicController,
   ProfilesPatientsController,
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
 } from './controllers';
 import {
+  GuardianLinkService,
   ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
@@ -43,6 +46,7 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
+  GuardianLinkInvitationsRepository,
 } from './repositories';
 import { ProfileOwnershipService } from './services';
 import { PatientRepresentationService } from './services/patient-representation.service';
@@ -77,6 +81,10 @@ import { MessagingModule } from '../messaging/messaging.module';
     ProfilesPatientsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
+    // El aviso al tutor del paciente de mostrador: lo que llama el worker que
+    // consume la cola `guardian-links`, y la confirmación sin sesión del tutor.
+    GuardianLinksInternalController,
+    GuardianLinksPublicController,
   ],
   providers: [
     ProfileOwnershipService,
@@ -108,9 +116,11 @@ import { MessagingModule } from '../messaging/messaging.module';
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    GuardianLinkInvitationsRepository,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
+    GuardianLinkService,
   ],
   // Los repositorios que necesita el auto-registro de pacientes (IAM crea en la
   // misma transacción la cuenta y su persona/perfil). Se exportan los
@@ -147,6 +157,9 @@ import { MessagingModule } from '../messaging/messaging.module';
     // regla vive acá porque la representación es un dato de perfiles.
     PatientRepresentationService,
     PatientPortalProxiesRepository,
+    // El alta de mostrador (`scheduling`) publica el aviso al tutor en su
+    // propia transacción; el evento y su forma son de este módulo.
+    GuardianLinkService,
   ],
 })
 export class ProfilesModule {}

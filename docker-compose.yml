@@ -257,6 +257,14 @@ x-app-env: &app-env
   GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
+  # Canal de teléfono del aviso al tutor (worker de mensajería). Sin las tres
+  # piezas del canal elegido, el worker usa el DOBLE y lo dice al arrancar: el
+  # aviso se registra (`provider_message_ref = mock:…`) y no sale del sistema.
+  PHONE_CHANNEL: ${PHONE_CHANNEL:-SMS}
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_SMS_FROM: ${TWILIO_SMS_FROM:-}
+  TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM:-}
   # Trazas distribuidas. Apagadas por defecto; se activan con OTEL_ENABLED=true
   # en el `.env` DESPUÉS de levantar Jaeger (`yarn jaeger:up`), que se une a
   # esta misma red y por eso se alcanza por su nombre de servicio y no por
@@ -905,6 +913,8 @@ services:
     command: ["node", "dist/src/worker-messaging.js"]
     environment:
       <<: *app-env
+      # Cola del aviso al tutor (walk-in): sin esto QueueJob no la drena.
+      MESSAGING_QUEUE_CODES: guardian-links
     deploy:
       resources: *worker-resources
     healthcheck: *worker-healthcheck

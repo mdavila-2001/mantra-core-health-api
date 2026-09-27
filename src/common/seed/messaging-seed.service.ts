@@ -2,10 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { MikroORM, type EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  EventSubscriptions,
   MessageChannels,
+  MessageQueues,
   MessagingProviders,
   ProviderChannelConfigs,
 } from '../../modules/messaging/entities';
+import {
+  GUARDIAN_LINK_DEAD_LETTER_QUEUE,
+  GUARDIAN_LINK_QUEUE,
+  GUARDIAN_LINK_REQUESTED_EVENT,
+  GUARDIAN_LINK_REQUESTED_EVENT_VERSION,
+  GUARDIAN_LINK_SUBSCRIBER_CODE,
+} from '../../modules/profiles/guardian-link.contract';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 
 /**
@@ -34,6 +43,20 @@ export const MESSAGING_SEED = {
   inAppProviderId: deterministicId('seed:messaging-provider:in-app'),
   inAppProviderCode: 'DEFAULT_IN_APP',
   inAppChannelConfigId: deterministicId('seed:provider-channel-config:in-app'),
+
+  /* --- Aviso al tutor del paciente de mostrador ---------------------------
+     El primer consumidor interno del outbox con suscripción propia. Sin estas
+     tres filas el alta publica `GuardianLinkRequested` y el fan-out no
+     encuentra a nadie: el evento queda publicado y el tutor, sin aviso. El
+     módulo no expone alta de suscripciones ni de colas, igual que con los
+     canales. */
+  guardianLinkQueueId: deterministicId('seed:queue:guardian-links'),
+  guardianLinkDeadLetterQueueId: deterministicId(
+    'seed:queue:guardian-links-dlq',
+  ),
+  guardianLinkSubscriptionId: deterministicId(
+    'seed:event-subscription:guardian-link',
+  ),
 } as const;
 
 /**
@@ -87,10 +110,31 @@ export class MessagingSeedService {
     inserted += await this.seedInAppChannelConfig(em, now);
     await em.flush();
 
+    // La cola muerta es padre (FK plana) de la cola del aviso.
+    inserted += await this.seedQueue(
+      em,
+      MESSAGING_SEED.guardianLinkDeadLetterQueueId,
+      GUARDIAN_LINK_DEAD_LETTER_QUEUE,
+      'Guardian link dead letter',
+      undefined,
+      now,
+    );
+    await em.flush();
+    inserted += await this.seedQueue(
+      em,
+      MESSAGING_SEED.guardianLinkQueueId,
+      GUARDIAN_LINK_QUEUE,
+      'Guardian link notices',
+      MESSAGING_SEED.guardianLinkDeadLetterQueueId,
+      now,
+    );
+    inserted += await this.seedGuardianLinkSubscription(em, now);
+    await em.flush();
+
     if (inserted > 0) {
       this.logger.info(
         { inserted },
-        'Canales por defecto (correo e in-app) materializados',
+        'Canales por defecto (correo e in-app) y cola del aviso al tutor materializados',
       );
     }
     return { inserted };
@@ -307,6 +351,77 @@ export class MessagingSeedService {
         trackingModeConceptId: CONCEPTS.MSG_TRACKING_MODE_NONE,
         statusMappingVersion: 1,
         enabledAt: now,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    return 1;
+  }
+
+  /**
+   * Una cola durable, por código (la única que existe es
+   * `uq_message_queues_code`). Mismos valores por defecto que las colas de
+   * audio: 4 intentos con backoff y 2 minutos de visibilidad.
+   */
+  private async seedQueue(
+    em: EntityManager,
+    id: string,
+    code: string,
+    name: string,
+    deadLetterQueueId: string | undefined,
+    now: Date,
+  ): Promise<number> {
+    if (await em.findOne(MessageQueues, { code })) return 0;
+    em.create(
+      MessageQueues,
+      {
+        id,
+        code,
+        name,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        defaultPriority: 5,
+        defaultMaxAttempts: 4,
+        visibilityTimeoutS: 120,
+        deadLetterQueueId,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    return 1;
+  }
+
+  /**
+   * La suscripción que lleva `GuardianLinkRequested` a la cola del aviso.
+   *
+   * Global (`tenant_id` nulo): el fan-out casa `tenant_id IS NULL` o el del
+   * evento, así que una sola fila sirve a todas las organizaciones. La versión
+   * tiene que ser exactamente la del evento: `findActiveSubscriptions` la
+   * compara por igualdad.
+   */
+  private async seedGuardianLinkSubscription(
+    em: EntityManager,
+    now: Date,
+  ): Promise<number> {
+    if (
+      await em.findOne(EventSubscriptions, {
+        subscriberCode: GUARDIAN_LINK_SUBSCRIBER_CODE,
+        eventType: GUARDIAN_LINK_REQUESTED_EVENT,
+      })
+    )
+      return 0;
+    em.create(
+      EventSubscriptions,
+      {
+        id: MESSAGING_SEED.guardianLinkSubscriptionId,
+        subscriberCode: GUARDIAN_LINK_SUBSCRIBER_CODE,
+        eventType: GUARDIAN_LINK_REQUESTED_EVENT,
+        eventVersion: GUARDIAN_LINK_REQUESTED_EVENT_VERSION,
+        deliveryModeConceptId: CONCEPTS.MSG_DELIVERY_MODE_QUEUE,
+        targetQueue: GUARDIAN_LINK_QUEUE,
+        isActive: true,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
         createdAt: now,
         updatedAt: now,
       },
