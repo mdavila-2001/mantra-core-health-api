@@ -16,7 +16,7 @@ const actor = { id: 'user-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const conditionsService = { create: mockFn() };
+  const conditionsService = { create: mockFn(), verify: mockFn() };
   const allergyService = { create: mockFn() };
   const medicationsService = {
     prescribe: mockFn(),
@@ -173,5 +173,28 @@ describe('ClinicalRecordsController', () => {
     };
     await d.controller.createImmunization(dto, actor);
     expect(d.immunizationsService.create).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delega la verificación de un presuntivo (C3 / P41) con el id de la ruta', async () => {
+    const d = build();
+    const fila = { id: 'cond-1', verification: { outcome: 'CONFIRMED' } };
+    d.conditionsService.verify.mockResolvedValue(fila);
+    const dto = { outcome: 'REFUTED' as const, reasonText: 'No compatible' };
+    await expect(
+      d.controller.verifyCondition('cond-1', dto, actor),
+    ).resolves.toBe(fila);
+    expect(d.conditionsService.verify).toHaveBeenCalledWith(
+      'cond-1',
+      dto,
+      actor,
+    );
+  });
+
+  it('propaga el rechazo del servicio en la verificación', async () => {
+    const d = build();
+    d.conditionsService.verify.mockRejectedValue(new Error('409'));
+    await expect(
+      d.controller.verifyCondition('cond-1', { outcome: 'CONFIRMED' }, actor),
+    ).rejects.toThrow('409');
   });
 });
