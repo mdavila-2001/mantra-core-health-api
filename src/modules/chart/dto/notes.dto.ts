@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
@@ -22,6 +23,38 @@ export const DEFAULT_NOTES_PAGE_SIZE = 50;
 
 /** Tope máximo de página de `GET /charts/notes`. */
 const MAX_NOTES_PAGE_SIZE = 100;
+
+/** Tope de filas clave/valor por versión de nota (P39). */
+export const MAX_NOTE_ENTRIES = 50;
+
+/** Recorta los extremos de un texto y deja pasar cualquier otro valor tal cual. */
+const trimText = ({ value }: { value: unknown }): unknown =>
+  typeof value === 'string' ? value.trim() : value;
+
+/**
+ * Una fila clave/valor de la nota médica (P39): p. ej. «Presión arterial» →
+ * «120/80». Viaja con la versión y queda inmutable con ella.
+ *
+ * Las dos partes se recortan y son obligatorias: una fila sin etiqueta o sin
+ * valor no aporta nada a la historia.
+ */
+export class NoteEntryInputDto {
+  /** Etiqueta de la fila. */
+  @ApiProperty({ minLength: 1, maxLength: 120, example: 'Presión arterial' })
+  @Transform(trimText)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  label!: string;
+
+  /** Valor de la fila. */
+  @ApiProperty({ minLength: 1, maxLength: 2000, example: '120/80 mmHg' })
+  @Transform(trimText)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  value!: string;
+}
 
 /** Cuerpo de `POST /charts/notes` (UC-15-01): crea una nota y su versión 1 borrador. */
 export class CreateNoteDto {
@@ -121,6 +154,20 @@ export class CreateNoteDto {
   @IsOptional()
   @IsString()
   planText?: string;
+  /**
+   * Filas clave/valor de la nota (P39). Cuentan como contenido de la versión.
+   */
+  @ApiPropertyOptional({
+    type: [NoteEntryInputDto],
+    maxItems: MAX_NOTE_ENTRIES,
+    description: 'Filas clave/valor de la nota (máx. 50)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_NOTE_ENTRIES)
+  @ValidateNested({ each: true })
+  @Type(() => NoteEntryInputDto)
+  entries?: NoteEntryInputDto[];
 }
 
 /** Cuerpo de `PUT /charts/notes/{noteId}/versions` (UC-15-02): nueva versión borrador. */
@@ -177,6 +224,20 @@ export class AddVersionDto {
   @IsOptional()
   @IsString()
   planText?: string;
+  /**
+   * Filas clave/valor de la nota (P39). Cuentan como contenido de la versión.
+   */
+  @ApiPropertyOptional({
+    type: [NoteEntryInputDto],
+    maxItems: MAX_NOTE_ENTRIES,
+    description: 'Filas clave/valor de la nota (máx. 50)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_NOTE_ENTRIES)
+  @ValidateNested({ each: true })
+  @Type(() => NoteEntryInputDto)
+  entries?: NoteEntryInputDto[];
 }
 
 /** Cuerpo de `POST .../versions/{versionId}/sign` (UC-15-03). */

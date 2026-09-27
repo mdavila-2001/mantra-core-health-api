@@ -131,4 +131,47 @@ describe('ChartReadService', () => {
       );
     });
   });
+
+  describe('getPatientChart · notes[].entries (P39)', () => {
+    it('devuelve las filas de la versión vigente y [] cuando no tiene', async () => {
+      const d = build();
+      const entries = [
+        { label: 'Presión arterial', value: '120/80 mmHg' },
+        { label: 'Peso', value: '70 kg' },
+      ];
+      const nota = (id: string, currentVersionId: string) => ({
+        id,
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+        currentVersionId,
+        createdAt: new Date('2026-03-01T12:00:00.000Z'),
+      });
+      d.notesRepo.findHeadersByPatient.mockResolvedValue([
+        nota('n1', 'v1'),
+        nota('n2', 'v2'),
+        nota('n3', 'v-missing'),
+      ]);
+      d.notesRepo.findVersionsByIds.mockResolvedValue(
+        new Map([
+          [
+            'v1',
+            {
+              id: 'v1',
+              versionNumber: 1,
+              subjectiveText: 's',
+              entriesJson: entries,
+            },
+          ],
+          ['v2', { id: 'v2', versionNumber: 1, subjectiveText: 's' }],
+        ]),
+      );
+
+      const chart = await d.service.getPatientChart('pat-1', 20);
+
+      const porId = new Map(chart.notes.map((n) => [n.noteId, n]));
+      expect(porId.get('n1')?.entries).toEqual(entries);
+      expect(porId.get('n1')?.subjectiveText).toBe('s');
+      expect(porId.get('n2')?.entries).toEqual([]);
+      expect(porId.get('n3')?.entries).toEqual([]);
+    });
+  });
 });

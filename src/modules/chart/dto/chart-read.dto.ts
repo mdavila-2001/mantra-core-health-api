@@ -1,5 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/** Una fila clave/valor de la versión vigente de una nota (P39). */
+export class ChartNoteEntryDto {
+  /** Etiqueta de la fila. */
+  @ApiProperty()
+  label!: string;
+
+  /** Valor de la fila. */
+  @ApiProperty()
+  value!: string;
+}
+
 /**
  * Una nota del expediente con el texto de su versión vigente.
  *
@@ -79,6 +90,13 @@ export class ChartNoteItemDto {
    */
   @ApiPropertyOptional()
   planText?: string;
+
+  /**
+   * Filas clave/valor de la versión vigente (P39). Siempre presente: `[]`
+   * cuando la versión no tiene filas o no se pudo resolver.
+   */
+  @ApiProperty({ type: [ChartNoteEntryDto] })
+  entries!: ChartNoteEntryDto[];
 
   /**
    * Valor de signed at mantenido por la instancia.

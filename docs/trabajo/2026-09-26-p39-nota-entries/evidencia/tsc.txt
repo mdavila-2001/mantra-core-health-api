@@ -1,0 +1,24 @@
+src/modules/chart/services/encounter-pdf.service.ts(3,25): error TS2307: Cannot find module 'pdfkit' or its corresponding type declarations.
+src/modules/clinical/services/alovida-mark.ts(189,8): error TS2503: Cannot find namespace 'PDFKit'.
+src/modules/clinical/services/prescription-pdf.service.ts(3,25): error TS2307: Cannot find module 'pdfkit' or its corresponding type declarations.
+src/modules/clinical/services/prescription-qr.ts(1,20): error TS2307: Cannot find module 'qrcode' or its corresponding type declarations.
+src/modules/clinical/services/prescription-qr.ts(21,8): error TS2503: Cannot find namespace 'PDFKit'.
+src/modules/insurance/services/insurance-portability-pdf.service.ts(2,25): error TS2307: Cannot find module 'pdfkit' or its corresponding type declarations.
+src/modules/insurance/services/insurance-portability-pdf.service.ts(245,8): error TS2503: Cannot find namespace 'PDFKit'.
+src/modules/insurance/services/insurance-portability-pdf.service.ts(260,8): error TS2503: Cannot find namespace 'PDFKit'.
+src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(10,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(11,44): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+src/modules/terminology/import/xlsx-parser.ts(111,47): error TS7006: Parameter 'registro' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(111,57): error TS7006: Parameter 'indiceRegistro' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(134,38): error TS7006: Parameter 'celda' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(137,25): error TS7006: Parameter 'celda' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(137,32): error TS7006: Parameter 'indice' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(147,25): error TS7006: Parameter 'columna' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(162,42): error TS7006: Parameter 'registro' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(162,52): error TS7006: Parameter 'indice' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(163,27): error TS7006: Parameter 'celda' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(166,25): error TS7006: Parameter 'celda' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(166,32): error TS7006: Parameter 'columnaIndice' implicitly has an 'any' type.
+src/modules/terminology/services/concept-file-import.service.spec.ts(13,23): error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+TSC_EXIT=2

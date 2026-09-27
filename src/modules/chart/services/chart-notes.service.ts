@@ -35,6 +35,17 @@ import {
 } from '../../clinical/services';
 
 /**
+ * Filas clave/valor del cuerpo (P39) tal como se guardan en `entries_json`:
+ * objetos planos `{ label, value }`, o `null` si no viene ninguna.
+ */
+function toEntriesJson(
+  entries: CreateNoteDto['entries'],
+): Array<{ label: string; value: string }> | null {
+  if (!entries?.length) return null;
+  return entries.map(({ label, value }) => ({ label, value }));
+}
+
+/**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
  *
  * Reglas del agregado: las versiones son inmutables una vez firmadas; el texto se
@@ -71,6 +82,9 @@ export class ChartNotesService {
       o: v.objectiveText ?? null,
       a: v.assessmentText ?? null,
       p: v.planText ?? null,
+      // P39: las filas entran al sello sólo si hay alguna, para que las
+      // versiones sin filas (todas las anteriores) conserven el mismo hash.
+      ...(v.entriesJson?.length ? { e: v.entriesJson } : {}),
     });
     return createHash('sha256').update(payload).digest('hex');
   }
@@ -116,6 +130,7 @@ export class ChartNotesService {
         objectiveText: dto.objectiveText,
         assessmentText: dto.assessmentText,
         planText: dto.planText,
+        entriesJson: toEntriesJson(dto.entries),
         recordedByUserId: actor.id,
       });
       await tx.flush();
@@ -180,6 +195,7 @@ export class ChartNotesService {
         objectiveText: dto.objectiveText,
         assessmentText: dto.assessmentText,
         planText: dto.planText,
+        entriesJson: toEntriesJson(dto.entries),
         supersedesVersionId: header.currentVersionId,
         recordedByUserId: actor.id,
       });
