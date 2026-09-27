@@ -288,7 +288,12 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'portal-proxy-status',
     name: 'Estado del apoderado de portal',
     description: 'Si la representación en el portal sigue vigente.',
-    concepts: [PROF.PROXY_ACTIVE, PROF.PROXY_REVOKED],
+    concepts: [
+      PROF.PROXY_ACTIVE,
+      PROF.PROXY_REVOKED,
+      PROF.PROXY_PENDING,
+      PROF.PROXY_REJECTED,
+    ],
     defaultConceptId: PROF.PROXY_ACTIVE,
     targets: ['profiles.patient_portal_proxies.status_concept_id'],
   },

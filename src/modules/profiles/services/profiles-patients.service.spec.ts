@@ -120,6 +120,11 @@ function build() {
     findActiveByProxyUser: mockFn().mockResolvedValue([]),
     findActiveByProxyUserAndPatient: mockFn().mockResolvedValue(null),
     listActiveDependentsOfUser: mockFn().mockResolvedValue([]),
+    // Las solicitudes de dependiente las usa otro servicio; están para que el
+    // doble cumpla el tipo del repositorio.
+    findById: mockFn().mockResolvedValue(null),
+    findPendingByProxyUserAndPatient: mockFn().mockResolvedValue(null),
+    listPendingForPatient: mockFn().mockResolvedValue([]),
   };
   // El teléfono y el domicilio del paciente viven en `common`: el perfil propio
   // los lee y los reemplaza, y sin estos dobles no se puede probar ni que cierre

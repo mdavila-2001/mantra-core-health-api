@@ -374,6 +374,15 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     // Proxies de portal
     PROXY_ACTIVE: { code: 'PROXY_ACTIVE', display: 'Portal proxy active' },
     PROXY_REVOKED: { code: 'PROXY_REVOKED', display: 'Portal proxy revoked' },
+    // La solicitud de representar a quien ya tiene cuenta: el apoderamiento
+    // existe desde que se pide, pero no habilita nada hasta que la persona lo
+    // acepta. Todas las lecturas de permiso filtran por `PROXY_ACTIVE`, así que
+    // una fila pendiente o rechazada no abre ninguna historia.
+    PROXY_PENDING: { code: 'PROXY_PENDING', display: 'Portal proxy pending' },
+    PROXY_REJECTED: {
+      code: 'PROXY_REJECTED',
+      display: 'Portal proxy rejected',
+    },
 
     // Género administrativo de la persona (`persons.administrative_gender_concept_id`).
     // Valores de HL7 FHIR AdministrativeGender: es el género con el que la persona

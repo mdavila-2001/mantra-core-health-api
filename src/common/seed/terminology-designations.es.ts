@@ -385,6 +385,22 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.PROXY_PENDING,
+    {
+      display: 'Apoderado del portal pendiente',
+      definition:
+        'Alguien pidió representar al paciente y todavía no respondió: hasta que acepte, esa persona no puede hacer nada en su nombre.',
+    },
+  ],
+  [
+    PROF.PROXY_REJECTED,
+    {
+      display: 'Apoderado del portal rechazado',
+      definition:
+        'El paciente no aceptó que esa persona lo represente, así que nunca tuvo permiso para entrar en su nombre.',
+    },
+  ],
+  [
     PROF.ACCOUNT_LINK_SELF,
     {
       display: 'Cuenta propia',

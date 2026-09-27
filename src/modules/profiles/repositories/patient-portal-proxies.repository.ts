@@ -77,6 +77,29 @@ export interface DependentRow {
   readonly national_id: string | null;
 }
 
+/**
+ * Una fila de {@link PatientPortalProxiesRepository.listPendingForPatient}.
+ *
+ * Nombres en `snake_case` por ser SQL cruda. Las partes del nombre pueden venir
+ * `null` si la cuenta que pidió ya no tiene persona vinculada.
+ */
+export interface PendingRequestRow {
+  /** Identificador del apoderamiento pendiente, que es el de la solicitud. */
+  readonly id: string;
+  /** Cuándo se pidió. */
+  readonly created_at: Date | string;
+  /** Nombre de pila de quien pide. */
+  readonly name: string | null;
+  /** Segundo nombre. */
+  readonly middle_name: string | null;
+  /** Apellido paterno. */
+  readonly last_name: string | null;
+  /** Apellido materno. */
+  readonly mother_last_name: string | null;
+  /** Nombre visible ya compuesto. */
+  readonly display_name: string | null;
+}
+
 /** Acceso a datos de `profiles.patient_portal_proxies`. */
 @Injectable()
 export class PatientPortalProxiesRepository {
@@ -221,6 +244,79 @@ export class PatientPortalProxiesRepository {
         now,
         now,
       ],
+    );
+  }
+
+  /**
+   * Un apoderamiento por su id, en cualquier estado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del apoderamiento.
+   * @returns La fila, o `null` si no existe.
+   */
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PatientPortalProxies | null> {
+    return em.findOne(PatientPortalProxies, { id });
+  }
+
+  /**
+   * La solicitud pendiente de una cuenta para representar a UN paciente.
+   *
+   * Es el freno contra el pedido repetido: mientras haya una sin responder, la
+   * segunda no suma nada salvo otra notificación a quien ya la tiene.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param proxyUserId - La cuenta que pide representar.
+   * @param patientProfileId - El paciente al que se lo pide.
+   * @returns La solicitud pendiente, o `null` si no la hay.
+   */
+  findPendingByProxyUserAndPatient(
+    em: EntityManager,
+    proxyUserId: string,
+    patientProfileId: string,
+  ): Promise<PatientPortalProxies | null> {
+    return em.findOne(PatientPortalProxies, {
+      proxyUserId,
+      patientProfileId,
+      statusConceptId: PROF.PROXY_PENDING,
+    });
+  }
+
+  /**
+   * Las solicitudes que esperan respuesta de un paciente, con el nombre de
+   * quien pide.
+   *
+   * SQL cruda por lo mismo que {@link listActiveDependentsOfUser}: el nombre
+   * sale de cruzar la cuenta que pide (`proxy_user_id`) con su persona, y las
+   * FK son columnas uuid planas sin relación en el ORM.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - El paciente al que se lo pidieron.
+   * @returns Una fila por solicitud pendiente, de la más reciente a la más vieja.
+   */
+  listPendingForPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<PendingRequestRow[]> {
+    return em.getConnection().execute<PendingRequestRow[]>(
+      `select pr.id               as id,
+              pr.created_at       as created_at,
+              p.name              as name,
+              p.middle_name       as middle_name,
+              p.last_name         as last_name,
+              p.mother_last_name  as mother_last_name,
+              p.display_name      as display_name
+         from profiles.patient_portal_proxies pr
+         left join profiles.person_account_links pal
+                on pal.user_id = pr.proxy_user_id
+               and pal.status_concept_id = ?
+         left join profiles.persons p on p.id = pal.person_id
+        where pr.patient_profile_id = ?
+          and pr.status_concept_id = ?
+        order by pr.created_at desc`,
+      [PROF.ACCOUNT_LINK_ACTIVE, patientProfileId, PROF.PROXY_PENDING],
     );
   }
 
