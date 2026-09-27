@@ -1,5 +1,5 @@
 -- ============================================================================
--- SALUD · patch v4.2.24 (RLS · lectura de la orden por el laboratorio ejecutante)
+-- SALUD · patch v4.2.36 (RLS · lectura de la orden por el laboratorio ejecutante)
 -- Fecha: 2026-09-26
 -- Idempotente (DROP POLICY IF EXISTS antes de crear). UNA sola pasada. Sin DDL
 -- de columnas ni backfill.
@@ -56,9 +56,9 @@ BEGIN
       AND tablename  = 'service_requests'
       AND policyname = 'service_requests_performer_read'
   ) THEN
-    RAISE EXCEPTION 'v4.2.24 incompleto: falta la política service_requests_performer_read';
+    RAISE EXCEPTION 'v4.2.36 incompleto: falta la política service_requests_performer_read';
   END IF;
-  RAISE NOTICE 'v4.2.24 aplicado: clinical.service_requests legible por su tenant ejecutante.';
+  RAISE NOTICE 'v4.2.36 aplicado: clinical.service_requests legible por su tenant ejecutante.';
 END $$;
 
 COMMIT;
