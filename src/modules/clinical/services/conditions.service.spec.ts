@@ -41,6 +41,11 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // BR-14 (CL-07): por defecto el encuentro no está sellado, así que la
+  // guarda no rechaza nada salvo que el test la sobreescriba.
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ConditionsService(
     em as any,
     conditionsRepo as any,
@@ -50,6 +55,7 @@ function build() {
     logger as any,
     filesService as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
   return {
     service,
@@ -60,6 +66,8 @@ function build() {
     historyRepo,
     filesService,
     clinicalRead,
+    encounterSealGuard,
+    logger,
   };
 }
 
@@ -109,6 +117,26 @@ describe('ConditionsService (UC-08-08)', () => {
     ).rejects.toBeInstanceOf(ConflictException);
     expect(d.auditTrail.record).not.toHaveBeenCalled();
   });
+
+  it('BR-14 (CL-07): rejects recording a condition against a sealed encounter', async () => {
+    const d = build();
+    d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
+    d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+      new PreconditionFailedException('sellado'),
+    );
+    await expect(
+      d.service.create(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+          encounterId: 'enc-1',
+        } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.conditionsRepo.create).not.toHaveBeenCalled();
+  });
 });
 
 describe('ConditionsService.changeClinicalStatus (Patch v4.0.8)', () => {
@@ -140,6 +168,46 @@ describe('ConditionsService.changeClinicalStatus (Patch v4.0.8)', () => {
       'CONDITION_STATUS_CHANGED',
     );
     expect(d.historyRepo.append).toHaveBeenCalledTimes(1);
+  });
+
+  it('BR-14 (CL-10): keeps the reason in the history snapshot and out of the log', async () => {
+    const d = build();
+    const condition = {
+      id: 'cond1',
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+      clinicalCourseConceptId: undefined,
+      resolvedAt: undefined,
+    };
+    d.conditionsRepo.findById.mockResolvedValue(condition);
+
+    await d.service.changeClinicalStatus(
+      'cond1',
+      {
+        newClinicalStatusConceptId: CLIN.CONDITION_INACTIVE,
+        reasonText: 'Motivo clínico confidencial del cambio',
+      },
+      actor,
+    );
+
+    expect(d.historyRepo.append).toHaveBeenCalledWith(
+      expect.anything(),
+      'conditions',
+      'cond1',
+      expect.objectContaining({
+        dataSnapshot: expect.objectContaining({
+          statusChangeReasonText: 'Motivo clínico confidencial del cambio',
+        }),
+      }),
+    );
+    const loggedPayloads = d.logger.info.mock.calls;
+    expect(loggedPayloads.length).toBeGreaterThan(0);
+    for (const [payload] of loggedPayloads) {
+      expect(JSON.stringify(payload)).not.toContain(
+        'Motivo clínico confidencial del cambio',
+      );
+    }
   });
 
   it('sets resolvedAt when resolving an acute condition', async () => {

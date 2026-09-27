@@ -79,6 +79,9 @@ export class ChartNotesService {
       { operation: 'chart.note.create', actorId: actor.id },
       'Creating clinical note',
     );
+    // CL-20 (BR-13): el autor sale de la sesión; se resuelve antes de tocar
+    // nada para que un 403 no deje cabecera.
+    const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
       const header = this.notesRepo.createHeader(tx, {
         patientProfileId: dto.patientProfileId,
@@ -95,7 +98,7 @@ export class ChartNotesService {
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: header.id,
         versionNumber: 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         chiefComplaintText: dto.chiefComplaintText,
         subjectiveText: dto.subjectiveText,
@@ -153,11 +156,13 @@ export class ChartNotesService {
         );
       }
 
+      // CL-20 (BR-13): el autor de la versión sale de la sesión.
+      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
         versionNumber: n + 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         chiefComplaintText: dto.chiefComplaintText,
         subjectiveText: dto.subjectiveText,
@@ -335,11 +340,13 @@ export class ChartNotesService {
         );
       }
 
+      // CL-20 (BR-13): quien enmienda es el profesional de la sesión.
+      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
         versionNumber: n + 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         subjectiveText: dto.subjectiveText,
         objectiveText: dto.objectiveText,
@@ -558,6 +565,44 @@ export class ChartNotesService {
         'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
       );
     }
+  }
+
+  /**
+   * CL-20 (BR-13): el autor de una nota, de una versión o de una enmienda es
+   * el profesional de la sesión, nunca el que diga el cuerpo. La misma regla
+   * que {@link assertFirmaConPerfilPropio}, aplicada a escribir en vez de a
+   * firmar: el DTO conserva `authorProfileId` por compatibilidad —si viene, se
+   * confirma; si difiere, 403— y si no viene, el autor es el perfil de la
+   * sesión. `SUPERADMIN` pasa con lo que declare.
+   *
+   * @param declared - Lo que trajo el cuerpo, si trajo algo.
+   * @param actor - La sesión que escribe.
+   * @returns El perfil profesional que queda como autor.
+   */
+  private resolveAuthor(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const elegido = declared ?? actor.practitionerProfileId;
+      if (!elegido) {
+        throw new ForbiddenException(
+          'Una nota clínica necesita un profesional autor.',
+        );
+      }
+      return elegido;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que escribir la nota.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil.',
+      );
+    }
+    return actor.practitionerProfileId;
   }
 
   /**

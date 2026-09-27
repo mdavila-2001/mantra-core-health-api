@@ -17,10 +17,13 @@ import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PeopleSeedService } from './people-seed.service';
+import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -95,8 +98,13 @@ export function contarInsertados(result: unknown): number | null {
     // `orphanRelationships`, que son relaciones declaradas cuyo destino no
     // existe y por eso NO se insertan. Sumarlas hacía que una corrida sin
     // trabajo informara «1 filas», que es justo la clase de mentira que este
-    // resumen vino a eliminar.
-    .filter(([nombre]) => !nombre.startsWith('orphan'))
+    // resumen vino a eliminar. Por el mismo motivo, `people-seed.service.ts`
+    // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
+    // pasada — y tampoco cuentan.
+    .filter(
+      ([nombre]) =>
+        !nombre.startsWith('orphan') && !nombre.endsWith('Existing'),
+    )
     .map(([, valor]) => valor)
     .filter((valor): valor is number => typeof valor === 'number');
   if (numeros.length === 0) return null;
@@ -132,6 +140,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   referencia (`VS_BO_MEDICAL_PROCEDURE`).
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
+   * @param stickerPack - Los 24 stickers del producto (AG-17).
    * @param vademecum - Catálogo de medicamentos para prescribir.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
@@ -140,6 +149,10 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
    * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
    *   sin catálogo.
+   * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
+   *   opt-in por `SEED_PEOPLE_ENABLED`.
+   * @param directoryNetworks - Médicos de las redes de Alianza y Nacional, con
+   *   sus sedes y membresías (H3), opt-in por `SEED_DIRECTORY_NETWORKS_ENABLED`.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -156,6 +169,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
+    private readonly stickerPack: StickerPackSeedService,
     private readonly vademecum: VademecumSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
@@ -164,6 +178,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly people: PeopleSeedService,
+    private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -362,6 +378,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'core',
         run: () => this.audioAssets.run(),
       },
+      // Contenido, no núcleo: sin el pack la mensajería sigue funcionando
+      // entera, sólo el botón de stickers no tiene qué ofrecer. Depende del
+      // tenant DEFAULT y del `SEED.systemWorkerUserId` que ya materializó el
+      // catálogo de conceptos.
+      {
+        name: 'pack de stickers',
+        kind: 'content',
+        run: () => this.stickerPack.run(),
+      },
       {
         name: 'verificación de identidad',
         kind: 'core',
@@ -402,6 +427,22 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'cuentas de proveedores',
         kind: 'content',
         run: () => this.providerAccounts.run(),
+      },
+      // H2 (carril M2 · MacBook, 2026-09-26): después de los roles de sistema
+      // y del administrador de arranque, porque el alta de médico/paciente
+      // necesita `authz.roles` materializado y un actor con el que auditar.
+      // Opt-in con `SEED_PEOPLE_ENABLED`: sin la variable, no toca nada.
+      {
+        name: 'padrón de personas',
+        kind: 'content',
+        run: () => this.people.run(),
+      },
+      // H3: después de `people` sólo por orden de lectura; depende de las
+      // aseguradoras (`boliviaInsurance`) y del actor de arranque.
+      {
+        name: 'directorio de redes de aseguradoras',
+        kind: 'content',
+        run: () => this.directoryNetworks.run(),
       },
       // El último, y no por importancia: es el único paso que siembra **sobre
       // filas de negocio que ya existen** —una por práctica— en vez de

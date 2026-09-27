@@ -118,6 +118,9 @@ function build() {
     findOwnMedicationRequest: mockFn(async () => null),
     findPrescriberProfileId: mockFn(async () => null),
     findPersonNamesByProfileIds: mockFn(async () => new Map()),
+    findPrescriberProfileIdsByRequestIds: mockFn(async () => new Map()),
+    findPrimarySpecialtyConceptIds: mockFn(async () => new Map()),
+    findAddressesByIds: mockFn(async () => []),
     findPharmaciesByTenant: mockFn(async () => [FARMACIA]),
     findOrdersForPharmacies: mockFn(async () => []),
   };
@@ -341,6 +344,116 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
       // Tras vencer, la bandeja se relee para servir el estado asentado.
       expect(d.ordersRepo.findOrdersForPharmacies).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('prescriptor y dirección de entrega (lecturas)', () => {
+    it('names the prescriber and their primary specialty in the same batches', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersForPharmacies.mockResolvedValue([
+        pedido({ medicationRequestId: 'mr-1' }),
+        pedido({ id: 'order-2', patientProfileId: 'pat-2' }),
+      ]);
+      d.ordersRepo.findPrescriberProfileIdsByRequestIds.mockResolvedValue(
+        new Map([['mr-1', 'prac-1']]),
+      );
+      d.ordersRepo.findPrimarySpecialtyConceptIds.mockResolvedValue(
+        new Map([['prac-1', 'concept-cardio']]),
+      );
+      d.ordersRepo.findPersonNamesByProfileIds.mockResolvedValue(
+        new Map([
+          ['pat-1', 'Ana Rojas'],
+          ['prac-1', 'Dra. Mariana Suárez'],
+        ]),
+      );
+      d.ordersRepo.findConceptsByIds.mockResolvedValue([
+        { id: 'concept-cardio', code: 'CARDIO', display: 'Cardiología' },
+      ]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listForPharmacyTenant({}, staff),
+      );
+
+      expect(
+        d.ordersRepo.findPrescriberProfileIdsByRequestIds,
+      ).toHaveBeenCalledWith(d.fork, ['mr-1']);
+      // El prescriptor entra al MISMO lote de nombres que los pacientes.
+      expect(d.ordersRepo.findPersonNamesByProfileIds).toHaveBeenCalledTimes(1);
+      expect(d.ordersRepo.findPersonNamesByProfileIds).toHaveBeenCalledWith(
+        d.fork,
+        ['pat-1', 'pat-2', 'prac-1'],
+      );
+      expect(d.ordersRepo.findConceptsByIds).toHaveBeenCalledTimes(1);
+      expect(res.items[0].prescriber).toEqual({
+        name: 'Dra. Mariana Suárez',
+        specialty: 'Cardiología',
+      });
+      // Sin receta no hay prescriptor: null, no un nombre inventado.
+      expect(res.items[1].prescriber).toBeNull();
+    });
+
+    it('says null parts when the prescriber has no name or specialty on file', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersForPharmacies.mockResolvedValue([
+        pedido({ medicationRequestId: 'mr-1' }),
+      ]);
+      d.ordersRepo.findPrescriberProfileIdsByRequestIds.mockResolvedValue(
+        new Map([['mr-1', 'prac-1']]),
+      );
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listForPharmacyTenant({}, staff),
+      );
+
+      expect(res.items[0].prescriber).toEqual({ name: null, specialty: null });
+    });
+
+    it('does not query prescribers nor addresses when no order has them', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersForPharmacies.mockResolvedValue([pedido()]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listForPharmacyTenant({}, staff),
+      );
+
+      expect(
+        d.ordersRepo.findPrescriberProfileIdsByRequestIds,
+      ).not.toHaveBeenCalled();
+      expect(
+        d.ordersRepo.findPrimarySpecialtyConceptIds,
+      ).not.toHaveBeenCalled();
+      expect(d.ordersRepo.findAddressesByIds).not.toHaveBeenCalled();
+      expect(res.items[0].deliveryAddressText).toBeNull();
+      expect(res.items[0].prescriber).toBeNull();
+    });
+
+    it('serves the stored delivery address as one line', async () => {
+      const d = build();
+      d.ordersRepo.findOrdersForPharmacies.mockResolvedValue([
+        pedido({ deliveryAddressId: 'addr-1' }),
+        pedido({ id: 'order-2', deliveryAddressId: 'addr-perdida' }),
+      ]);
+      d.ordersRepo.findAddressesByIds.mockResolvedValue([
+        {
+          id: 'addr-1',
+          lines: 'Calle Sucre 120, piso 2',
+          city: 'Cochabamba',
+        },
+      ]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listForPharmacyTenant({}, staff),
+      );
+
+      expect(d.ordersRepo.findAddressesByIds).toHaveBeenCalledWith(d.fork, [
+        'addr-1',
+        'addr-perdida',
+      ]);
+      expect(res.items[0].deliveryAddressText).toBe(
+        'Calle Sucre 120, piso 2, Cochabamba',
+      );
+      // Una dirección que ya no resuelve se dice null.
+      expect(res.items[1].deliveryAddressText).toBeNull();
     });
   });
 

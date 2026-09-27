@@ -34,6 +34,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -44,6 +45,11 @@ RAIZ_API = Path(__file__).resolve().parents[2]
 # este. Se reapunta con `--fuente` si están en otro lado.
 FUENTE_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health-model" / "markdown_convertidos"
 SALIDA_POR_DEFECTO = RAIZ_API / "src" / "common" / "seed" / "data" / "bolivia"
+# Coordenadas ya resueltas contra Nominatim por el front (H1.S1.M3): no se
+# vuelve a geocodificar nada acá, sólo se adjunta lo que ya existe. Sin este
+# repo hermano, `coords()` no encuentra nada y las filas quedan sin lat/lng —
+# nunca inventadas.
+FUENTE_COORDS_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health" / "data" / "markdown-institutions"
 
 # Marcas de daño de OCR: letras y dígitos mezclados dentro de una palabra, o
 # caracteres que el reconocedor usa para rellenar lo que no pudo leer.
@@ -229,6 +235,78 @@ def telefonos(texto: str) -> list[str]:
     return [t for t in (c.strip() for c in crudos) if re.fullmatch(r"\d{6,10}", t)]
 
 
+def filas_con_indice(lineas: Iterable[str]) -> Iterator[tuple[list[str], list[str], int]]:
+    """Como `filas_de_tabla`, pero con la posición (1-based) de cada fila de
+    dato dentro del archivo entero.
+
+    Es la procedencia que exige H1.S1.M4: no identifica una tabla ni una
+    sección —el archivo apila varias y no vale la pena esa precisión—, dice
+    «la fila N de datos de este archivo», que ya alcanza para ir a mirar el
+    `.md` original cuando algo no cuadra.
+    """
+    for indice, (cabecera, fila) in enumerate(filas_de_tabla(lineas), start=1):
+        yield cabecera, fila, indice
+
+
+def procedencia(archivo: Path, indice: int) -> dict:
+    """`source_file`/`source_row` para adjuntar a cada registro (H1.S1.M4)."""
+    return {"source_file": archivo.name, "source_row": indice}
+
+
+# --------------------------------------------------------------------------- #
+#  Coordenadas ya resueltas (H1.S1.M3) — nunca geocodificadas acá
+# --------------------------------------------------------------------------- #
+
+def _cargar_json(ruta: Path) -> object | None:
+    if not ruta.is_file():
+        return None
+    return json.loads(ruta.read_text(encoding="utf-8"))
+
+
+class Coordenadas:
+    """Adjunta `lat`/`lng`/`precision` ya derivados por el front, por nombre.
+
+    Dos fuentes, cada una con su propia clave de emparejamiento porque así las
+    escribió el front que las generó:
+
+    - `pharmacies-and-labs.json`: por nombre normalizado — cubre `FARMACIA`,
+      `LABORATORIO` e `IMAGEN`.
+    - `primary-care.json`: por (municipio, nombre) normalizados — cubre
+      `CENTRO_SALUD` (primer nivel).
+
+    Si el repo hermano no está, o el nombre no aparece en ninguna de las dos,
+    la ficha queda sin coordenadas. Nunca se inventa un punto.
+    """
+
+    def __init__(self, fuente: Path) -> None:
+        farmacias = _cargar_json(fuente / "pharmacies-and-labs.json") or []
+        primer_nivel = _cargar_json(fuente / "primary-care.json") or []
+        self._por_nombre = {
+            normalizar(f["name"]): f
+            for f in farmacias
+            if f.get("lat") is not None
+        }
+        self._por_municipio_nombre = {
+            (normalizar(p["municipality"]), normalizar(p["name"])): p
+            for p in primer_nivel
+            if p.get("lat") is not None
+        }
+
+    def de_farmacia(self, nombre: str) -> dict:
+        punto = self._por_nombre.get(normalizar(nombre))
+        return self._punto(punto)
+
+    def de_primer_nivel(self, municipio: str, nombre: str) -> dict:
+        punto = self._por_municipio_nombre.get((normalizar(municipio), normalizar(nombre)))
+        return self._punto(punto)
+
+    @staticmethod
+    def _punto(punto: dict | None) -> dict:
+        if punto is None:
+            return {"lat": None, "lng": None, "precision": None}
+        return {"lat": punto["lat"], "lng": punto["lng"], "precision": punto["precision"]}
+
+
 # --------------------------------------------------------------------------- #
 #  1 · Aseguradoras  (registro de procesos · PACIENTE §1.13.1)
 # --------------------------------------------------------------------------- #
@@ -243,13 +321,13 @@ def extraer_aseguradoras(fuente: Path) -> list[dict]:
     lista completa es la que existe en el mercado y sirve para el alta de
     organizaciones.
     """
-    lineas = leer(exigir(fuente, "LISTADO_DE_ASEGURADORAS_1", "LISTADO DE ASEGURADORAS"))
+    archivo = exigir(fuente, "LISTADO_DE_ASEGURADORAS_1", "LISTADO DE ASEGURADORAS")
     ramo = "PERSONAS"
     salida: list[dict] = []
     usados: set[str] = set()
     vistos: set[str] = set()
 
-    for cabecera, fila in filas_de_tabla(lineas):
+    for cabecera, fila, indice in filas_con_indice(leer(archivo)):
         nombre = columna(cabecera, fila, "NOMBRE EMPRESA")
         # La segunda tabla viene embebida como fila de la primera, con su propio
         # título y su propia cabecera repetida.
@@ -273,6 +351,7 @@ def extraer_aseguradoras(fuente: Path) -> list[dict]:
                 "direccion": columna(cabecera, fila, "DIRECCION"),
                 "ramo": ramo,
                 "ofreceSalud": ramo == "PERSONAS",
+                **procedencia(archivo, indice),
             }
         )
     return salida
@@ -282,7 +361,9 @@ def extraer_aseguradoras(fuente: Path) -> list[dict]:
 #  2 · Establecimientos  (registro de procesos · MEDICO §3.1 y §3.2)
 # --------------------------------------------------------------------------- #
 
-def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> list[dict]:
+def extraer_establecimientos(
+    fuente: Path, usados: set[str] | None = None, coords: "Coordenadas | None" = None
+) -> list[dict]:
     """Clínicas privadas, hospitales de los tres niveles y cajas de salud.
 
     El nivel y la naturaleza (privada, pública, seguridad social) salen del
@@ -293,9 +374,12 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
     # códigos tienen que ser únicos a lo largo de TODO el padrón, no por pasada.
     if usados is None:
         usados = set()
+    if coords is None:
+        coords = Coordenadas(FUENTE_COORDS_POR_DEFECTO)
 
     # -- clínicas privadas --------------------------------------------------
-    for cabecera, fila in filas_de_tabla(leer(exigir(fuente, "LISTA_DE_CLINICAS_PRIVADAS_1", "LISTA DE CLINICAS PRIVADAS"))):
+    archivo_clinicas = exigir(fuente, "LISTA_DE_CLINICAS_PRIVADAS_1", "LISTA DE CLINICAS PRIVADAS")
+    for cabecera, fila, indice in filas_con_indice(leer(archivo_clinicas)):
         nombre = columna(cabecera, fila, "ESTABLECIMIENTO")
         if not nombre or normalizar(nombre) == "establecimiento":
             continue
@@ -312,19 +396,26 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
                 "tipo": "CLINICA_PRIVADA",
                 "nivel": None,
                 "naturaleza": "PRIVADA",
+                # Sin cobertura hoy: `pharmacies-and-labs.json` y
+                # `primary-care.json` no traen clínicas privadas ni hospitales.
+                "lat": None,
+                "lng": None,
+                "precision": None,
+                **procedencia(archivo_clinicas, indice),
             }
         )
 
     # -- hospitales de 3.º y 2.º nivel, y cajas -----------------------------
-    lineas = leer(exigir(fuente, "LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1", "LISTA DE HOSPITAL DE TERCER, SEGUNDO NIVEL Y CAJAS"))
-    seccion = ""
-    for linea in lineas:
-        if linea.startswith("#"):
-            seccion = normalizar(linea)
-    # Se recorre otra vez llevando la sección vigente en paralelo a las tablas.
+    archivo_hospitales = exigir(
+        fuente,
+        "LISTA_DE_HOSPITAL_DE_TERCER_SEGUNDO_NIVEL_Y_CAJAS_1",
+        "LISTA DE HOSPITAL DE TERCER, SEGUNDO NIVEL Y CAJAS",
+    )
+    lineas = leer(archivo_hospitales)
     seccion = ""
     cabecera: list[str] = []
     anterior: list[str] = []
+    indice = 0
     for linea in lineas:
         if linea.startswith("#"):
             seccion = normalizar(linea)
@@ -342,6 +433,7 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
             anterior = fila
             continue
         anterior = fila
+        indice += 1
         nombre = columna(cabecera, fila, "ESTABLECIMIENTO")
         if not nombre or normalizar(nombre) == "establecimiento":
             continue
@@ -367,13 +459,18 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
                 "nivel": nivel,
                 "naturaleza": naturaleza,
                 "redSalud": columna(cabecera, fila, "RED SALUD") or None,
+                "lat": None,
+                "lng": None,
+                "precision": None,
+                **procedencia(archivo_hospitales, indice),
             }
         )
 
     # -- centros de salud de primer nivel -----------------------------------
-    for cabecera, fila in filas_de_tabla(
-        leer(exigir(fuente, "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1", "LISTA DE HOSPITAL DE PRIMER NIVEL SANTA CRUZ"))
-    ):
+    archivo_primer_nivel = exigir(
+        fuente, "LISTA_DE_HOSPITAL_DE_PRIMER_NIVEL_SANTA_CRUZ_1", "LISTA DE HOSPITAL DE PRIMER NIVEL SANTA CRUZ"
+    )
+    for cabecera, fila, indice in filas_con_indice(leer(archivo_primer_nivel)):
         nombre = columna(cabecera, fila, "ESTABLECIMIENTO")
         if not nombre or normalizar(nombre) == "establecimiento":
             continue
@@ -391,6 +488,8 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
                 "tipo": "CENTRO_SALUD",
                 "nivel": 1,
                 "naturaleza": "PUBLICA",
+                **coords.de_primer_nivel(municipio, nombre),
+                **procedencia(archivo_primer_nivel, indice),
             }
         )
 
@@ -411,6 +510,7 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
     )
     if archivo_empresas is not None:
         seccion = ""
+        indice = 0
         for linea in leer(archivo_empresas):
             if linea.startswith("#"):
                 seccion = normalizar(linea)
@@ -418,6 +518,7 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
             fila = celdas(linea)
             if not fila or es_separador(fila):
                 continue
+            indice += 1
             nombre = limpiar_nan(fila[0])
             # El export de pandas repite el título de la hoja y la cabecera como
             # filas normales; ninguna de las dos es una empresa.
@@ -449,6 +550,11 @@ def extraer_establecimientos(fuente: Path, usados: set[str] | None = None) -> li
                     "tipo": tipo,
                     "nivel": None,
                     "naturaleza": "PRIVADA",
+                    # `pharmacies-and-labs.json` cubre los tres tipos de esta
+                    # tabla (`PHARMACY`/`LABORATORY`/`DIAGNOSTIC_CENTER`) y se
+                    # empareja por nombre solo, sin filtrar por tipo.
+                    **coords.de_farmacia(nombre),
+                    **procedencia(archivo_empresas, indice),
                 }
             )
 
@@ -530,6 +636,15 @@ def consultorios_de_las_redes(fuente: Path, usados: set[str]) -> list[dict]:
                         "tipo": "CONSULTORIO",
                         "nivel": None,
                         "naturaleza": "RED_ASEGURADORA",
+                        "lat": None,
+                        "lng": None,
+                        "precision": None,
+                        # El nombre es una lectura nuestra de la dirección de
+                        # la RED (ver docstring), así que la procedencia
+                        # correcta es la fila de la red que la trajo, no un
+                        # archivo propio.
+                        "source_file": sede.get("source_file"),
+                        "source_row": sede.get("source_row"),
                     }
                 else:
                     for t in sede.get("telefonos") or []:
@@ -584,7 +699,8 @@ def extraer_redes(fuente: Path) -> dict:
     for carrier, etiqueta, archivo, c_medico, c_ciudad, c_plan, c_dir, c_tel in fuentes:
         profesionales: dict[str, dict] = {}
         planes: set[str] = set()
-        for cabecera, fila in filas_de_tabla(leer(exigir(fuente, archivo.replace(".md","")))):
+        archivo_red = exigir(fuente, archivo.replace(".md", ""))
+        for cabecera, fila, indice in filas_con_indice(leer(archivo_red)):
             nombre = columna(cabecera, fila, *c_medico)
             if not nombre or normalizar(nombre) in {"medico", "nombre del medico"}:
                 continue
@@ -607,7 +723,9 @@ def extraer_redes(fuente: Path) -> dict:
             for titulo in c_tel:
                 tel.extend(telefonos(columna(cabecera, fila, titulo)))
             if direccion and not any(s["direccion"] == direccion for s in ficha["sedes"]):
-                ficha["sedes"].append({"direccion": direccion, "telefonos": tel})
+                ficha["sedes"].append(
+                    {"direccion": direccion, "telefonos": tel, **procedencia(archivo_red, indice)}
+                )
             for plan in (p.strip() for p in columna(cabecera, fila, *c_plan).split(",")):
                 if plan and plan not in ficha["planes"]:
                     ficha["planes"].append(plan)
@@ -647,9 +765,8 @@ def extraer_aranceles(fuente: Path) -> dict:
     grupo = ""
     especialidad_previa = ""
 
-    for cabecera, fila in filas_de_tabla(
-        leer(exigir(fuente, "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas"))
-    ):
+    archivo_honorarios = exigir(fuente, "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas")
+    for cabecera, fila, indice in filas_con_indice(leer(archivo_honorarios)):
         especialidad = columna(cabecera, fila, "Especialidad")
         concepto = columna(cabecera, fila, "Procedimiento / concepto")
         uma = columna(cabecera, fila, "UMA")
@@ -685,6 +802,7 @@ def extraer_aranceles(fuente: Path) -> dict:
                 "concepto": concepto,
                 "uma": float(uma.replace(",", ".")),
                 "ocrSospechoso": sospechoso_de_ocr(concepto),
+                **procedencia(archivo_honorarios, indice),
             }
         )
 
@@ -694,7 +812,9 @@ def extraer_aranceles(fuente: Path) -> dict:
     seccion = ""
     cabecera: list[str] = []
     anterior: list[str] = []
-    for linea in leer(exigir(fuente, "LISTADO_ARANCEL_ODONTOLOGICO_2026_1", "LISTADO ARANCEL ODONTOLOGICO 2026")):
+    indice_odo = 0
+    archivo_odontologico = exigir(fuente, "LISTADO_ARANCEL_ODONTOLOGICO_2026_1", "LISTADO ARANCEL ODONTOLOGICO 2026")
+    for linea in leer(archivo_odontologico):
         if linea.startswith("##"):
             seccion = linea.lstrip("# ").strip()
             cabecera = []
@@ -711,6 +831,7 @@ def extraer_aranceles(fuente: Path) -> dict:
             anterior = fila
             continue
         anterior = fila
+        indice_odo += 1
         concepto = columna(cabecera, fila, "Concepto")
         precio = columna(cabecera, fila, "Precio $us.", "Precio $us")
         if not concepto or not re.fullmatch(r"\d+(?:[.,]\d+)?", precio):
@@ -726,10 +847,48 @@ def extraer_aranceles(fuente: Path) -> dict:
                 "concepto": re.sub(r"^[a-z0-9]\)\s*", "", concepto),
                 "precioUsd": float(precio.replace(",", ".")),
                 "ocrSospechoso": sospechoso_de_ocr(concepto),
+                **procedencia(archivo_odontologico, indice_odo),
             }
         )
 
     return {"honorariosMedicos": medicos, "arancelOdontologico": odontologicos}
+
+
+# --------------------------------------------------------------------------- #
+#  4b · Especialidades odontológicas  (H1.S1.M2 — no llegaba a la API)
+# --------------------------------------------------------------------------- #
+
+def extraer_especialidades_odontologicas(fuente: Path) -> list[dict]:
+    """Las 14 especialidades del padrón odontológico, por profesión de origen.
+
+    A diferencia de `observed-specialties` (que cuenta APARICIONES en redes y
+    arancel para contrastar contra `VS_MEDICAL_SPECIALTY`), esta es la lista
+    CERRADA que declara el propio stakeholder — `LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md`—
+    y no tenía extractor: de los doce markdown, era el único sin ningún JSON.
+    """
+    archivo = exigir(fuente, "LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS", "LISTA DE ESPECIALIDADES ODONTOLOGICAS")
+    salida: list[dict] = []
+    usados: set[str] = set()
+    vistos: set[str] = set()
+
+    for cabecera, fila, indice in filas_con_indice(leer(archivo)):
+        especialidad = columna(cabecera, fila, "ESPECIALIDAD")
+        profesion = columna(cabecera, fila, "PROFESION")
+        if not especialidad or normalizar(especialidad) == "especialidad":
+            continue
+        clave = normalizar(especialidad)
+        if clave in vistos:
+            continue
+        vistos.add(clave)
+        salida.append(
+            {
+                "code": codigo("BO_ESP_ODO", especialidad, usados),
+                "especialidad": especialidad,
+                "profesion": profesion or None,
+                **procedencia(archivo, indice),
+            }
+        )
+    return salida
 
 
 # --------------------------------------------------------------------------- #
@@ -796,7 +955,13 @@ def escribir(salida: Path, nombre: str, contenido, nota: str) -> int:
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--fuente", type=Path, default=FUENTE_POR_DEFECTO)
+    p.add_argument("--fuente-coords", type=Path, default=FUENTE_COORDS_POR_DEFECTO)
     p.add_argument("--salida", type=Path, default=SALIDA_POR_DEFECTO)
+    p.add_argument(
+        "--check", action="store_true",
+        help="Regenera y falla (exit 1) si el árbol quedó sucio (H1.S2): "
+        "no aplica el resultado, sólo lo compara con `git diff --exit-code`.",
+    )
     args = p.parse_args()
 
     if not args.fuente.is_dir():
@@ -805,6 +970,13 @@ def main() -> int:
 
     print(f"Origen : {args.fuente}")
     print(f"Destino: {args.salida}\n")
+
+    coords = Coordenadas(args.fuente_coords)
+    if not args.fuente_coords.is_dir():
+        print(
+            f"Aviso: no está el repo de coordenadas ({args.fuente_coords}); "
+            "health-facilities.dataset.json sale con lat/lng en null.",
+        )
 
     escribir(
         args.salida, "insurance-carriers.dataset.json",
@@ -816,7 +988,7 @@ def main() -> int:
     # y se descartan contra él, para no cargar dos veces el mismo lugar con dos
     # nombres. `usados` viaja entre las dos pasadas para que ningún código choque.
     codigos_de_establecimiento: set[str] = set()
-    padron = extraer_establecimientos(args.fuente, codigos_de_establecimiento)
+    padron = extraer_establecimientos(args.fuente, codigos_de_establecimiento, coords)
     _PADRON_OFICIAL_CACHE.clear()
     _PADRON_OFICIAL_CACHE.extend(padron)
     consultorios = consultorios_de_las_redes(args.fuente, codigos_de_establecimiento)
@@ -849,7 +1021,30 @@ def main() -> int:
         "Especialidades que aparecen en las redes y el arancel, para contrastar contra "
         "VS_MEDICAL_SPECIALTY.",
     )
+    escribir(
+        args.salida, "dental-specialties.dataset.json",
+        extraer_especialidades_odontologicas(args.fuente),
+        "Las 14 especialidades odontológicas del padrón del stakeholder, por profesión "
+        "de origen. Origen: LISTA_DE_ESPECIALIDADES_ODONTOLOGICAS.md — el único de los "
+        "doce markdown que no tenía extractor (H1 del carril M6, 2026-09-26).",
+    )
     print("\nListo.")
+
+    if args.check:
+        resultado = subprocess.run(
+            ["git", "diff", "--exit-code", "--stat", "--", str(args.salida)],
+            cwd=RAIZ_API,
+        )
+        if resultado.returncode != 0:
+            print(
+                "\ncheck: el árbol quedó sucio — el JSON versionado no está al día "
+                "con el markdown de origen. Correr `python tools/bolivia-datasets/"
+                "extract_datasets.py` y commitear el resultado.",
+                file=sys.stderr,
+            )
+            return 1
+        print("check: el árbol está al día.")
+
     return 0
 
 

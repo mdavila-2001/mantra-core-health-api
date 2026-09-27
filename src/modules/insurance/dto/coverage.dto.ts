@@ -176,3 +176,54 @@ export class CreateCobDto {
   @IsString()
   effectiveFrom?: string;
 }
+
+/** Una cobertura del paciente, para «Mi cobertura» (CV-11). */
+export class MyCoverageDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Plan de la aseguradora. */
+  @ApiProperty({ format: 'uuid' })
+  insurancePlanId!: string;
+
+  /** Corredor que intermedió el alta, si hubo uno. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  insuranceBrokerId?: string;
+
+  /** Identificador de afiliado ante la aseguradora. */
+  @ApiProperty()
+  memberIdentifier!: string;
+
+  /** Número de póliza, si se declaró. */
+  @ApiPropertyOptional()
+  policyIdentifier?: string;
+
+  /** 1 = cobertura privada, 2 = pública. */
+  @ApiPropertyOptional()
+  coverageOrder?: number;
+
+  /** Vínculo con el titular de la póliza (a sí mismo, cónyuge, hijo). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  relationshipToSubscriberConceptId?: string;
+
+  /** Vigencia desde. */
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveFrom?: Date;
+
+  /** Vigencia hasta, si venció. */
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  effectiveTo?: Date;
+
+  /** Estado de verificación de la elegibilidad. */
+  @ApiProperty({ format: 'uuid' })
+  verificationStatusConceptId!: string;
+
+  /** Estado de la cobertura. */
+  @ApiProperty({ format: 'uuid' })
+  status!: string;
+
+  /** Fecha de alta. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+}

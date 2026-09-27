@@ -759,3 +759,37 @@ describe('DirectoryReadService.listMemberships', () => {
     });
   });
 });
+
+describe('DirectoryReadService.readRepresentation', () => {
+  it('lee el representante de una organización con la misma lectura que la ficha, sin autorizar nada', async () => {
+    const d = build();
+    d.legalRepo.listLegalRepsByTenant.mockResolvedValue([
+      {
+        personId: 'person-rep',
+        representativeRoleConceptId: 'ct-representante',
+        isPrimary: true,
+      },
+    ]);
+    d.legalRepo.findPersonsByIds.mockResolvedValue(
+      new Map([['person-rep', { id: 'person-rep', displayName: 'Ana Pérez' }]]),
+    );
+
+    const salida = await d.service.readRepresentation('ten-farmacia');
+
+    expect(d.legalRepo.listLegalRepsByTenant).toHaveBeenCalledWith(
+      expect.anything(),
+      'ten-farmacia',
+    );
+    expect(salida.legalRepresentative).toMatchObject({
+      role: 'LEGAL_REPRESENTATIVE',
+      fullName: 'Ana Pérez',
+    });
+    // Quien la llama responde por el alcance: acá no se comprueba membresía.
+    expect(d.tenantAdmin.assertCanRead).not.toHaveBeenCalled();
+  });
+
+  it('sin vínculos devuelve vacío', async () => {
+    const d = build();
+    await expect(d.service.readRepresentation('ten-x')).resolves.toEqual({});
+  });
+});

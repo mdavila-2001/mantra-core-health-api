@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /clinical/conditions` (UC-08-08). */
 export class CreateConditionDto {
@@ -135,10 +142,17 @@ export class ChangeConditionClinicalStatusDto {
   newClinicalStatusConceptId!: string;
 
   /**
-   * Valor de reason text mantenido por la instancia.
+   * Motivo del cambio de estado (BR-14/CL-10: obligatorio y acotado; vacío
+   * responde 400).
    */
-  @ApiProperty({ description: 'Motivo del cambio de estado (obligatorio)' })
+  @ApiProperty({
+    description:
+      'Motivo del cambio de estado (obligatorio, hasta 500 caracteres)',
+    maxLength: 500,
+  })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
   reasonText!: string;
 }
 

@@ -71,11 +71,36 @@ describe('TenantContextInterceptor', () => {
       );
     });
 
+    it('con varias membresías y sin cabecera, 403 con details.reason TENANT_AMBIGUOUS (TX-16)', () => {
+      const ctx = httpContext(
+        {},
+        { id: 'u1', roles: [], tenantIds: ['tenant-A', 'tenant-B'] },
+      );
+      try {
+        build().intercept(ctx, handler('ok'));
+        throw new Error('debía lanzar');
+      } catch (error) {
+        const body = (error as ForbiddenException).getResponse() as {
+          details?: { reason?: string };
+        };
+        expect((error as ForbiddenException).getStatus()).toBe(403);
+        expect(body.details?.reason).toBe('TENANT_AMBIGUOUS');
+      }
+    });
+
     it('rechaza si el actor no pertenece a ningún tenant', () => {
       const ctx = httpContext({}, { id: 'u1', roles: [], tenantIds: [] });
       expect(() => build().intercept(ctx, handler('ok'))).toThrow(
         ForbiddenException,
       );
+      try {
+        build().intercept(ctx, handler('ok'));
+      } catch (error) {
+        const body = (error as ForbiddenException).getResponse() as {
+          details?: { reason?: string };
+        };
+        expect(body.details?.reason).toBe('TENANT_REQUIRED');
+      }
     });
 
     it('SUPERADMIN sin cabecera opera en modo sistema, sin acotar a un tenant', async () => {

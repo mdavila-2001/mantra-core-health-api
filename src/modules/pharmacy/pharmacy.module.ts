@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { DirectoryModule } from '../directory/directory.module';
 import {
   PharmacyController,
   PharmacyPublicController,
@@ -14,6 +15,7 @@ import {
   PharmacyIntegrationService,
   PharmacyCatalogService,
   PharmacyReadService,
+  PharmacyStaffReadService,
   PharmacyMarketplaceService,
 } from './services';
 import {
@@ -37,7 +39,14 @@ import {
  * de catálogo y proyección de catálogo/precios al read-model.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // La ficha de la farmacia reservada a su personal: la pertenencia a la
+    // organización (`TenantAdministrationService`, vía
+    // `DirectoryAuthorizationModule`) y el representante y las gerencias
+    // (`DirectoryReadService`), leídos en el mismo lugar que `GET /tenants/me`.
+    DirectoryModule,
+  ],
   controllers: [
     PharmacyController,
     PharmacyReadController,
@@ -64,6 +73,7 @@ import {
     PharmacyIntegrationService,
     PharmacyCatalogService,
     PharmacyReadService,
+    PharmacyStaffReadService,
     PharmacyMarketplaceService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga

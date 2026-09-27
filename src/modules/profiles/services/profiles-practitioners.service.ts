@@ -29,7 +29,18 @@ import {
 // contar cuatro números ataría `profiles` a dos módulos enteros.
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
-import { PROF } from '../profiles.concepts';
+import {
+  BIRTH_SEX_CODE_BY_CONCEPT,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../profiles.concepts';
+import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './health-facility-catalog.service';
+// Sólo entidades, como con la actividad: se cuenta si hay un trámite abierto o
+// historia de auditoría antes de retirar una matrícula; no se llama a sus servicios.
+import { IdentityVerificationCases } from '../../identity_assurance/entities';
+import { IDA } from '../../identity_assurance/identity_assurance.concepts';
+import { JurisdictionAuthorizationsHistory } from '../../audit/entities';
 import { PracticeSites } from '../../practice/entities';
 import { esEstado } from './profiles-affiliations.service';
 import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
@@ -58,6 +69,7 @@ import {
   JurisdictionAuthorizationResponseDto,
   VerifyCredentialDto,
   CredentialResponseDto,
+  ListPendingCredentialsResponseDto,
   AddSpecialtyDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
@@ -73,6 +85,8 @@ import {
   AddOwnCredentialDto,
   OwnCredentialResponseDto,
   UpdateOwnCredentialDto,
+  UpdateOwnSpecialtyDto,
+  UpdateOwnLicenseDto,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import {
@@ -208,6 +222,8 @@ export class ProfilesPractitionersService {
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
     private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    private readonly healthFacilities: HealthFacilityCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -1023,6 +1039,10 @@ export class ProfilesPractitionersService {
       lastName: person.lastName,
       motherLastName: person.motherLastName,
       birthDate: person.birthDate,
+      // Dato personal: sólo en la lectura propia, como el documento.
+      ...(incluyeContacto && person.sexAtBirthConceptId
+        ? { sexAtBirth: BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId] }
+        : {}),
       nationalId: filiacion.nationalId,
       issuerAdministrativeAreaConceptId: filiacion.issuerArea,
       taxId: filiacion.taxId,
@@ -1084,6 +1104,10 @@ export class ProfilesPractitionersService {
         stateConceptId: license.stateConceptId,
         validFrom: license.validFrom,
         validTo: license.validTo,
+        // Como el diploma: sólo el titular recupera el archivo de su matrícula.
+        ...(incluyeContacto && license.fileId
+          ? { fileId: license.fileId }
+          : {}),
       })),
       languages: languages.map((language) => ({
         languageConceptId: language.languageConceptId,
@@ -1198,6 +1222,10 @@ export class ProfilesPractitionersService {
             motherLastName: person.motherLastName,
           });
         }
+        if (dto.sexAtBirth !== undefined) {
+          person.sexAtBirthConceptId =
+            BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth];
+        }
         if (dto.birthDate !== undefined) {
           // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
           // borrarla dejaba a la persona nacida en la época Unix. Se borra
@@ -1213,6 +1241,15 @@ export class ProfilesPractitionersService {
         aplicarOcupacion(person, dto);
         aplicarEmpresa(person, dto);
         touch(person, actor.id);
+
+        if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+          await this.corregirExpedicion(
+            tx,
+            person.id,
+            dto.issuerAdministrativeAreaConceptId,
+            actor.id,
+          );
+        }
 
         if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
           await this.reemplazarNit(
@@ -1303,6 +1340,38 @@ export class ProfilesPractitionersService {
     // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
     // las colecciones y la actividad, que esta operación no toca.
     return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Corrige el departamento emisor del documento (P28, ID-13), sin tocar el
+   * número: la fila `ID_TYPE_NATIONAL` vigente se edita en el lugar, como en el
+   * perfil del paciente. Fuera de `VS_BO_DEPARTMENT` responde 422.
+   */
+  private async corregirExpedicion(
+    tx: EntityManager,
+    personId: string,
+    departamentoId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    await this.administrativeAreas.assertIsAdministrativeArea(
+      tx,
+      departamentoId,
+    );
+    const filas = await tx.find(Identifiers, {
+      ownerId: personId,
+      validTo: null,
+    });
+    const documento = filas.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    if (
+      !documento ||
+      documento.issuerAdministrativeAreaConceptId === departamentoId
+    ) {
+      return;
+    }
+    documento.issuerAdministrativeAreaConceptId = departamentoId;
+    touch(documento, actorUserId);
   }
 
   /**
@@ -1715,6 +1784,21 @@ export class ProfilesPractitionersService {
         );
       }
 
+      // Quién la declara decide con qué estado nace. La ruta no lleva `@Roles` y
+      // el titular administra lo suyo (arriba), pero una matrícula que el propio
+      // profesional agrega desde su editor NO puede nacer vigente: la verifica la
+      // plataforma (UC-05-05), igual que las del alta, que nacen AUTH_PENDING. Se
+      // vio contra la API real el 2026-09-26: la médica agregaba una matrícula, el
+      // front decía «queda pendiente de verificación» y la fila aparecía
+      // «Habilitación vigente» con el sello. Sólo el alta administrativa
+      // (SECURITY_ADMIN / SUPERADMIN) la registra ya vigente.
+      const rolesQueHabilitan: readonly string[] = [
+        'SECURITY_ADMIN',
+        'SUPERADMIN',
+      ];
+      const esAdministrador = actor.roles.some((rol) =>
+        rolesQueHabilitan.includes(rol),
+      );
       const authorization = this.authorizationsRepo.create(tx, {
         practitionerProfileId: profileId,
         jurisdictionConceptId:
@@ -1722,7 +1806,7 @@ export class ProfilesPractitionersService {
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         practiceScopeConceptId: dto.practiceScopeConceptId,
-        stateConceptId: PROF.AUTH_ACTIVE,
+        stateConceptId: esAdministrador ? PROF.AUTH_ACTIVE : PROF.AUTH_PENDING,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
         fileId: dto.fileId,
@@ -1739,6 +1823,52 @@ export class ProfilesPractitionersService {
         createdAt: authorization.createdAt,
       };
     });
+  }
+
+  /**
+   * CV-20 — cola de credenciales pendientes de verificación (títulos y
+   * matrículas cargados por el profesional). `SECURITY_ADMIN`, igual que
+   * {@link verifyCredential}: es una lectura de plataforma, la credencial no
+   * declara tenant propio.
+   */
+  async listPendingCredentials(options: {
+    stateConceptId?: string;
+    cursor?: string;
+    limit?: number;
+  }): Promise<ListPendingCredentialsResponseDto> {
+    const em = this.em.fork();
+    const limit = options.limit ?? 50;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+    const stateConceptId = options.stateConceptId ?? PROF.CRED_PENDING;
+
+    const rows = await this.credentialsRepo.findByStatePage(
+      em,
+      stateConceptId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((credential) => ({
+        id: credential.id,
+        practitionerProfileId: credential.practitionerProfileId,
+        credentialTypeConceptId: credential.credentialTypeConceptId,
+        number: credential.number,
+        issuingInstitutionText: credential.issuingInstitutionText,
+        fileId: credential.fileId,
+        state: credential.stateConceptId,
+        createdAt: credential.createdAt,
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
   }
 
   /** UC-05-05: verifica (o rechaza) una credencial; recomputa el estado del profesional. */
@@ -2126,6 +2256,286 @@ export class ProfilesPractitionersService {
     });
   }
 
+  /**
+   * Corrige una especialidad propia que sigue pendiente de verificación
+   * (ID-07). `isPrimary` no viaja: tiene su ruta (`setOwnPrimarySpecialty`).
+   *
+   * Cambiar `specialtyConceptId` respeta las reglas del alta: pertenece al
+   * catálogo y no duplica una vigente.
+   *
+   * @throws ResourceNotFoundException si no existe o es de otro profesional.
+   * @throws PreconditionFailedException si ya no está pendiente o ya no se ejerce.
+   */
+  async updateOwnSpecialty(
+    specialtyId: string,
+    dto: UpdateOwnSpecialtyDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const specialty = await this.specialtiesRepo.findByIdForUpdate(
+        tx,
+        specialtyId,
+      );
+      if (!specialty || specialty.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Especialidad no encontrada', {
+          specialtyId,
+        });
+      }
+      this.assertSpecialtyEditable(specialty, 'corregir');
+
+      if (
+        dto.specialtyConceptId !== undefined &&
+        dto.specialtyConceptId !== specialty.specialtyConceptId
+      ) {
+        await this.specialtyCatalog.assertIsMedicalSpecialty(
+          tx,
+          dto.specialtyConceptId,
+        );
+        const duplicate = await this.specialtiesRepo.findActive(
+          tx,
+          profileId,
+          dto.specialtyConceptId,
+        );
+        if (duplicate) {
+          throw new ConflictException(
+            'El profesional ya tiene esa especialidad activa',
+            { specialtyConceptId: dto.specialtyConceptId },
+          );
+        }
+        specialty.specialtyConceptId = dto.specialtyConceptId;
+      }
+      if (dto.boardCertified !== undefined) {
+        specialty.boardCertified = dto.boardCertified;
+      }
+      touch(specialty, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.specialty.updateOwn',
+          specialtyId,
+          actorId: actor.id,
+        },
+        'Own specialty updated',
+      );
+    });
+  }
+
+  /**
+   * Retira una especialidad propia pendiente (ID-07).
+   *
+   * Si era la principal el perfil queda sin principal: no se promueve otra en
+   * silencio, porque elegir con cuál se presenta es decisión del titular.
+   */
+  async removeOwnSpecialty(
+    specialtyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+      const specialty = await this.specialtiesRepo.findByIdForUpdate(
+        tx,
+        specialtyId,
+      );
+      if (!specialty || specialty.practitionerProfileId !== profileId) {
+        throw new ResourceNotFoundException('Especialidad no encontrada', {
+          specialtyId,
+        });
+      }
+      this.assertSpecialtyEditable(specialty, 'retirar');
+
+      this.specialtiesRepo.remove(tx, specialty);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.specialty.removeOwn',
+          specialtyId,
+          actorId: actor.id,
+        },
+        'Own specialty removed',
+      );
+    });
+  }
+
+  /** Una especialidad verificada, rechazada o dada de baja es un hecho, no un borrador. */
+  private assertSpecialtyEditable(
+    specialty: {
+      id: string;
+      verificationStatusConceptId: string;
+      validTo?: Date | null;
+    },
+    verbo: 'corregir' | 'retirar',
+  ): void {
+    if (
+      specialty.verificationStatusConceptId !== PROF.SPEC_VERIF_PENDING ||
+      specialty.validTo
+    ) {
+      throw new PreconditionFailedException(
+        `Esa especialidad ya no está pendiente de verificación; no se puede ${verbo}`,
+        {
+          specialtyId: specialty.id,
+          verificationStatusConceptId: specialty.verificationStatusConceptId,
+        },
+      );
+    }
+  }
+
+  /**
+   * Corrige una matrícula propia pendiente (ID-08). Sólo en `AUTH_PENDING` y
+   * sin un caso de verificación de identidad abierto: mientras la autoridad la
+   * está revisando, cambiarla por debajo invalidaría lo que revisa.
+   */
+  async updateOwnLicense(
+    licenseId: string,
+    dto: UpdateOwnLicenseDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const license = await this.lockOwnEditableLicense(
+        tx,
+        licenseId,
+        actor,
+        'corregir',
+      );
+
+      if (dto.fileId !== undefined) {
+        await this.attachableFiles.assertUsableBy(
+          tx,
+          dto.fileId,
+          actor,
+          {
+            allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.DOCUMENT,
+            operation: 'profiles.authorization.updateOwn',
+          },
+          {
+            subject: 'El archivo de la matrícula',
+            notFound: 'El archivo de la matrícula no existe',
+          },
+        );
+        license.fileId = dto.fileId;
+      }
+      if (dto.licenseNumber !== undefined) {
+        license.licenseNumber = dto.licenseNumber.trim();
+      }
+      if (dto.regulatoryAuthority !== undefined) {
+        license.regulatoryAuthority = dto.regulatoryAuthority.trim();
+      }
+      if (dto.validFrom !== undefined) {
+        license.validFrom = new Date(dto.validFrom);
+      }
+      touch(license, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.authorization.updateOwn',
+          licenseId,
+          actorId: actor.id,
+        },
+        'Own license updated',
+      );
+    });
+  }
+
+  /**
+   * Retira una matrícula propia pendiente (ID-08).
+   *
+   * Además de las reglas de la corrección: si la auditoría ya tiene historia de
+   * esa matrícula **no se borra** (la FK de `audit` la referencia sin
+   * `ON DELETE`) y responde 422 con el motivo. Se mira antes en vez de capturar
+   * un `23503` a ciegas.
+   */
+  async removeOwnLicense(
+    licenseId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.em.transactional(async (tx) => {
+      const license = await this.lockOwnEditableLicense(
+        tx,
+        licenseId,
+        actor,
+        'retirar',
+      );
+
+      const historia = await tx.count(JurisdictionAuthorizationsHistory, {
+        jurisdictionAuthorizationId: licenseId,
+      });
+      if (historia > 0) {
+        throw new PreconditionFailedException(
+          'Esa matrícula ya tiene historial de auditoría; no se puede borrar',
+          { licenseId },
+        );
+      }
+
+      this.authorizationsRepo.remove(tx, license);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.authorization.removeOwn',
+          licenseId,
+          actorId: actor.id,
+        },
+        'Own license removed',
+      );
+    });
+  }
+
+  /** Dueño por sesión, bloqueo de fila, pendiente y sin caso de verificación abierto. */
+  private async lockOwnEditableLicense(
+    tx: EntityManager,
+    licenseId: string,
+    actor: AuthenticatedUser,
+    verbo: 'corregir' | 'retirar',
+  ) {
+    const profileId = await this.ownership.requireOwnPractitionerProfileId(
+      tx,
+      actor,
+    );
+    const license = await this.authorizationsRepo.findByIdForUpdate(
+      tx,
+      licenseId,
+    );
+    if (!license || license.practitionerProfileId !== profileId) {
+      throw new ResourceNotFoundException('Matrícula no encontrada', {
+        licenseId,
+      });
+    }
+    if (license.stateConceptId !== PROF.AUTH_PENDING) {
+      throw new PreconditionFailedException(
+        `Esa matrícula ya no está pendiente; no se puede ${verbo}`,
+        { licenseId, stateConceptId: license.stateConceptId },
+      );
+    }
+    const abiertos = await tx.count(IdentityVerificationCases, {
+      subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+      subjectEntityId: licenseId,
+      statusConceptId: {
+        $in: [
+          IDA.CASE_OPEN,
+          IDA.CASE_IN_VERIFICATION,
+          IDA.CASE_AT_RISK,
+          IDA.CASE_MANUAL_REVIEW,
+        ],
+      },
+    });
+    if (abiertos > 0) {
+      throw new PreconditionFailedException(
+        `Esa matrícula tiene una verificación en curso; no se puede ${verbo}`,
+        { licenseId },
+      );
+    }
+    return license;
+  }
+
   /* -- UC-05-16: historial laboral del profesional -------------------------- */
 
   /**
@@ -2239,6 +2649,14 @@ export class ProfilesPractitionersService {
         }
       }
 
+      // ID-16: el establecimiento del padrón se valida contra su value set.
+      if (dto.healthFacilityConceptId !== undefined) {
+        await this.healthFacilities.assertIsHealthFacility(
+          tx,
+          dto.healthFacilityConceptId,
+        );
+      }
+
       const organizationName = dto.organizationName.trim();
       // ALV-007: opcional. `null` explícito -no `undefined`- para que
       // `findSame` busque "sin cargo" y no "cualquier cargo" (ver el
@@ -2257,6 +2675,29 @@ export class ProfilesPractitionersService {
           'Ese vínculo ya está en el historial laboral',
           { organizationName, roleTitle, startDate: dto.startDate },
         );
+      }
+
+      // ID-16: el mismo establecimiento del padrón con el mismo cargo e inicio
+      // es el doble envío que el índice único de la base rechaza; se dice acá.
+      if (dto.healthFacilityConceptId !== undefined) {
+        const mismoEstablecimiento =
+          await this.affiliationsRepo.findSameFacility(
+            tx,
+            profileId,
+            dto.healthFacilityConceptId,
+            roleTitle,
+            startDate,
+          );
+        if (mismoEstablecimiento) {
+          throw new ConflictException(
+            'Ese vínculo con el establecimiento ya está en el historial laboral',
+            {
+              healthFacilityConceptId: dto.healthFacilityConceptId,
+              roleTitle,
+              startDate: dto.startDate,
+            },
+          );
+        }
       }
 
       // TP-2: y pedir dos veces atender en la MISMA sede es lo mismo, aunque el
@@ -2283,6 +2724,7 @@ export class ProfilesPractitionersService {
         practitionerProfileId: profileId,
         organizationName,
         roleTitle: roleTitle ?? undefined,
+        healthFacilityConceptId: dto.healthFacilityConceptId,
         practiceSiteId: dto.practiceSiteId,
         affiliationTypeConceptId:
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
@@ -2766,6 +3208,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     organizationName: row.organizationName,
     roleTitle: row.roleTitle ?? null,
     practiceSiteId: row.practiceSiteId ?? null,
+    healthFacilityConceptId: row.healthFacilityConceptId ?? null,
     affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
     startDate: row.startDate,
     endDate: row.endDate ?? null,

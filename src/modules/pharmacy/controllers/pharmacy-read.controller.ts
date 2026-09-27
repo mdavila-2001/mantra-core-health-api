@@ -13,10 +13,20 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { ParseOptionalLimitPipe } from '../../../common';
-import { PharmacyReadService, type GeoPoint } from '../services';
 import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  PharmacyReadService,
+  PharmacyStaffReadService,
+  type GeoPoint,
+} from '../services';
+import {
+  PharmacyContactsResponseDto,
   PharmacyDetailDto,
+  PharmacyLicenseListResponseDto,
   PharmacyDirectoryResponseDto,
   PharmacyProductSearchResponseDto,
   PharmacySiteListResponseDto,
@@ -40,8 +50,12 @@ export class PharmacyReadController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param readService - Lecturas del directorio de farmacias.
+   * @param staffReadService - Lecturas reservadas al personal de la farmacia.
    */
-  constructor(private readonly readService: PharmacyReadService) {}
+  constructor(
+    private readonly readService: PharmacyReadService,
+    private readonly staffReadService: PharmacyStaffReadService,
+  ) {}
 
   /** E2: el directorio de farmacias publicadas. */
   @Get('pharmacies')
@@ -59,6 +73,43 @@ export class PharmacyReadController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PharmacyDetailDto> {
     return this.readService.getPharmacy(id);
+  }
+
+  /**
+   * La carpeta de licencias de la farmacia (`pharmacy_licenses`), con los días
+   * hasta el vencimiento contados por el servidor.
+   *
+   * Sin `@Roles`: el alcance no es un rol global sino **pertenecer a la
+   * organización dueña** (o ser de la plataforma), y eso lo decide el
+   * servicio. Quien no pertenece recibe el mismo 404 que un id inexistente.
+   */
+  @Get('pharmacies/:id/licenses')
+  @ApiOperation({
+    summary: 'Licencias de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacyLicenseListResponseDto })
+  listLicenses(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyLicenseListResponseDto> {
+    return this.staffReadService.listLicenses(id, actor);
+  }
+
+  /**
+   * El representante legal y las gerencias de la organización dueña de la
+   * farmacia. Mismo alcance que las licencias.
+   */
+  @Get('pharmacies/:id/contacts')
+  @ApiOperation({
+    summary:
+      'Representante legal y gerencias de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacyContactsResponseDto })
+  getContacts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyContactsResponseDto> {
+    return this.staffReadService.getContacts(id, actor);
   }
 
   /**

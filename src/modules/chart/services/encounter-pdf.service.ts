@@ -11,6 +11,7 @@ import {
   EncountersRepository,
   MedicationRequestsRepository,
 } from '../../clinical/repositories';
+import type { Encounters } from '../../clinical/entities';
 import { ClinicalReadService } from '../../clinical/services';
 import { CLIN } from '../../clinical/clinical.concepts';
 import type { CatalogConcepts } from '../../terminology/entities';
@@ -26,6 +27,9 @@ import {
   ClinicalNotesRepository,
   DocumentsRepository,
 } from '../repositories';
+import type { ClinicalNoteHeaders, DocumentRecords } from '../entities';
+// BR-15 (CL-31): la variante del titular filtra documentos visibles.
+import { CHART } from '../chart.concepts';
 
 /** Márgenes y medidas del PDF oficial del encuentro, en puntos. */
 const PAGE_MARGIN = 50;
@@ -332,7 +336,86 @@ export class EncounterPdfService {
       });
     }
 
-    const [headers, conditions, medicationRequests, carePlans, documents] =
+    return this.componer(em, encounter, encounterId, {
+      versionIdOf: (header) => header.currentVersionId,
+      documentFilter: () => true,
+    });
+  }
+
+  /**
+   * BR-15 (CL-31): variante del **titular** del mismo PDF oficial.
+   *
+   * Autorización propia, no `assertPuedeLeerHistoria`: el titular sale de la
+   * sesión (`actor.patientProfileId`, patrón `forms-me.controller.ts`), nunca
+   * de la ruta — el encuentro de otro paciente responde el mismo 404 que uno
+   * inexistente (regla del titular fuera de la sesión, BR-15 §5).
+   *
+   * Reusa `componer()` con dos filtros que son la diferencia entera con
+   * `render()`: las notas imprimen la versión **liberada**
+   * (`currentReleasedVersionId`), nunca la vigente, y los documentos se
+   * recortan a los visibles para el paciente
+   * (`patientVisibilityConceptId === VISIBILITY_PATIENT_VISIBLE`). Todo lo
+   * demás —diagnósticos, prescripciones, plan de cuidados— es el mismo
+   * contenido que ya ve el titular en `/clinical/patients/:id/summary` y
+   * `/charts/patients/:id/chart`.
+   *
+   * @throws ResourceNotFoundException si el encuentro no existe o no es del
+   *   titular (404, mismo mensaje que "no existe").
+   * @throws PreconditionFailedException si el encuentro no está cerrado (422).
+   */
+  async renderForPatient(
+    encounterId: string,
+    actor: AuthenticatedUser,
+  ): Promise<EncounterPdfResult> {
+    if (!actor.patientProfileId) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    const em = this.em.fork();
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    if (!encounter || encounter.patientProfileId !== actor.patientProfileId) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+
+    if (
+      encounter.statusConceptId !== CLIN.ENCOUNTER_FINISHED ||
+      !encounter.contentHash
+    ) {
+      throw new PreconditionFailedException('El encuentro no está cerrado', {
+        encounterId,
+        status: encounter.statusConceptId,
+      });
+    }
+
+    return this.componer(em, encounter, encounterId, {
+      versionIdOf: (header) => header.currentReleasedVersionId,
+      documentFilter: (document) =>
+        document.patientVisibilityConceptId ===
+        CHART.VISIBILITY_PATIENT_VISIBLE,
+    });
+  }
+
+  /**
+   * El cuerpo entero de "juntar los datos y dibujar el papel", común a
+   * `render()` (médico, versión vigente, todos los documentos) y
+   * `renderForPatient()` (titular, versión liberada, sólo documentos
+   * visibles). La única diferencia entre ambos caminos son los dos filtros
+   * de `opts`; nada de un flag booleano que ramifique el comportamiento
+   * adentro de este método (BR-15 §5).
+   */
+  private async componer(
+    em: EntityManager,
+    encounter: Encounters,
+    encounterId: string,
+    opts: {
+      versionIdOf: (header: ClinicalNoteHeaders) => string | undefined;
+      documentFilter: (document: DocumentRecords) => boolean;
+    },
+  ): Promise<EncounterPdfResult> {
+    const [headers, conditions, medicationRequests, carePlans, documentsAll] =
       await Promise.all([
         this.notesRepo.findHeadersByEncounter(em, encounterId),
         this.conditionsRepo.findByEncounter(em, encounterId),
@@ -340,9 +423,10 @@ export class EncounterPdfService {
         this.carePlansRepo.findByEncounter(em, encounterId),
         this.documentsRepo.findByEncounter(em, encounterId),
       ]);
+    const documents = documentsAll.filter(opts.documentFilter);
 
     const versionIds = headers
-      .map((header) => header.currentVersionId)
+      .map((header) => opts.versionIdOf(header))
       .filter((id): id is string => Boolean(id));
     const versionsById = await this.notesRepo.findVersionsByIds(em, versionIds);
 
@@ -382,18 +466,19 @@ export class EncounterPdfService {
       endAt: encounter.endAt ?? null,
       patientName,
       practitionerName,
-      notas: headers.map((header) => ({
-        version: header.currentVersionId
-          ? versionsById.get(header.currentVersionId)
-          : undefined,
-      })),
+      notas: headers.map((header) => {
+        const versionId = opts.versionIdOf(header);
+        return {
+          version: versionId ? versionsById.get(versionId) : undefined,
+        };
+      }),
       conditions,
       medicationRequests,
       conceptsById,
       carePlans,
       documents,
       fileNamesById,
-      contentHash: encounter.contentHash,
+      contentHash: encounter.contentHash!,
       sealedAt: encounter.sealedAt ?? null,
     });
 

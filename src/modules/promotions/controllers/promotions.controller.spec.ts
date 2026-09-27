@@ -43,9 +43,16 @@ function build() {
     applyDiscount: mockFn(),
     reverseRedemption: mockFn(),
   };
+  const readService = {
+    listMine: mockFn().mockResolvedValue({ items: [], count: 0 }),
+  };
   return {
     loyalty: new LoyaltyController(loyaltyService as any),
-    promotions: new PromotionsController(discountsService as any),
+    promotions: new PromotionsController(
+      discountsService as any,
+      readService as any,
+    ),
+    readService,
     loyaltyService,
     discountsService,
   };
@@ -333,5 +340,20 @@ describe('PromotionsController', () => {
     await expect(
       d.promotions.createPromotion({} as any, actor as any),
     ).rejects.toThrow('boom');
+  });
+
+  it('publishes GET /promotions/me only for PATIENT and delegates with the actor', async () => {
+    const d = build();
+    const prototipo = PromotionsController.prototype as unknown as Record<
+      string,
+      unknown
+    >;
+    const roles: string[] =
+      Reflect.getMetadata(ROLES_KEY, prototipo.listMine as object) ?? [];
+    expect(roles).toEqual(['PATIENT']);
+
+    await d.promotions.listMine(actor as any);
+
+    expect(d.readService.listMine).toHaveBeenCalledWith(actor);
   });
 });

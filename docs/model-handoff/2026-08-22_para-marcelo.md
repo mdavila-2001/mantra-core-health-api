@@ -240,11 +240,20 @@ emite el JSON que consumen los seeders. Existe como script y no como una
 conversión hecha una vez porque el stakeholder va a mandar versiones nuevas: se
 vuelve a correr y se diffea.
 
-**`tools/bolivia-datasets/load_people.py`** (PR #212, sin correr) — el cargador
-del padrón de personas. Lee el markdown en el momento y **no escribe nada a
-disco**, así que ninguna cédula entra al repositorio. Usa el alta real de la API,
-no `INSERT`: el alta hashea con argon2, crea persona, perfil, identificador y
-credencial en una transacción y respeta el registro atómico CTI de la regla 11.
+**`tools/bolivia-datasets/load_people.py`** (PR #212; corrido por primera vez el
+26/09/2026 contra el entorno de prueba) — el cargador del padrón de personas.
+Lee el markdown en el momento y **no escribe nada a disco**, así que ninguna
+cédula entra al repositorio. Usa el alta real de la API, no `INSERT`: el alta
+hashea con argon2, crea persona, perfil, identificador y credencial en una
+transacción y respeta el registro atómico CTI de la regla 11.
+
+Del padrón toma **sólo nombre, matrícula y ocupación**: cédula, nacimiento,
+celular y correo los **inventa deterministas** (decisión del propietario del
+26/09/2026), así que un entorno de prueba expuesto no filtra datos de terceros.
+Dos consecuencias prácticas: **el paciente entra con la cédula inventada** —no
+con el correo, porque el alta de paciente guarda el documento como
+`external_subject`— y el script **comprueba el login de cada cuenta** después de
+crearla, con salida distinta de 0 si alguna no entra.
 
 ---
 

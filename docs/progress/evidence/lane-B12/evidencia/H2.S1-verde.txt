@@ -1,0 +1,37 @@
+$ corepack yarn test --testPathPatterns="modules/public|app.module.wiring"
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services trae los servicios de la organización del slug, con el precio como texto exacto
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services la proyección no deja salir nada interno, aunque la fila lo traiga
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services un precio en cero es «sin precio definido»: viaja null, no gratis
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services un servicio dado de baja se lista rotulado, no se esconde
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services un slug inexistente es 404
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services un slug de farmacia pedido como organización es el MISMO 404
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services pagina por keyset: pide una fila de más y, si llega, emite el cursor de la última de la página
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services con cursor, sigue desde esa posición
+PASS PublicCatalogService (M4 · H2) organizationServices — GET /public/profiles/o/:slug/services un cursor ajeno o corrupto es 400, no un 500 de la base
+PASS PublicCatalogService (M4 · H2) pharmacyProducts — GET /public/profiles/f/:slug/products trae genérico, marca, presentación, precio como texto y stock
+PASS PublicCatalogService (M4 · H2) pharmacyProducts — GET /public/profiles/f/:slug/products un producto agotado se lista con inStock=false, no se omite
+PASS PublicCatalogService (M4 · H2) pharmacyProducts — GET /public/profiles/f/:slug/products sin precio publicado viaja price=null y currency=null; sin presentación, null
+PASS PublicCatalogService (M4 · H2) pharmacyProducts — GET /public/profiles/f/:slug/products un slug de organización pedido como farmacia es 404
+PASS PublicCatalogService (M4 · H2) pharmacyProducts — GET /public/profiles/f/:slug/products pagina por el genérico y el id
+PASS PublicCatalogRepository (M4 · H2) resuelve el slug sólo entre perfiles visibles y activos
+PASS PublicCatalogRepository (M4 · H2) findOfferedServices proyecta sólo columnas publicables del catálogo de las prácticas activas de la organización
+PASS PublicCatalogRepository (M4 · H2) findOfferedServices con posición, continúa por keyset (código, id)
+PASS PublicCatalogRepository (M4 · H2) findPharmacyProducts exige farmacia activa y verificada, producto activo, y lista de precios pública, vigente y sin aseguradora
+PASS PublicCatalogRepository (M4 · H2) findPharmacyProducts el stock informa, no filtra: se une con LEFT JOIN y cae a 0
+PASS PublicCatalogRepository (M4 · H2) findPharmacyProducts el precio se lee como texto, sin pasar por number
+PASS PublicCatalogModule (M4 · H2) registra el controlador de las fichas
+PASS PublicCatalogModule (M4 · H2) organizationServices es GET public/profiles/o/:slug/services y @Public()
+PASS PublicCatalogModule (M4 · H2) pharmacyProducts es GET public/profiles/f/:slug/products y @Public()
+PASS PublicCatalogModule (M4 · H2) el controlador delega en el servicio con el slug y la página
+PASS PublicCatalogModule (M4 · H2) la query se valida como en main.ts (400, no se ignora) acepta limit dentro de [1, 50] y lo convierte a número
+PASS PublicCatalogModule (M4 · H2) la query se valida como en main.ts (400, no se ignora) rechaza limit fuera de rango o no numérico
+PASS PublicCatalogModule (M4 · H2) la query se valida como en main.ts (400, no se ignora) rechaza un parámetro que la lectura no declara
+PASS Fichas públicas por HTTP (M4 · H2) GET /public/profiles/o/:slug/services sin token → 200 con la envoltura pública
+PASS Fichas públicas por HTTP (M4 · H2) GET /public/profiles/f/:slug/products sin token → 200; el agotado viaja inStock=false
+PASS Fichas públicas por HTTP (M4 · H2) un slug inexistente y uno de otro tipo responden el mismo 404
+PASS Fichas públicas por HTTP (M4 · H2) limit fuera de rango, un parámetro no declarado o un cursor corrupto → 400
+PASS MCH-012 · todo módulo de dominio está conectado al arranque encuentra los módulos de dominio (el inventario no quedó vacío)
+PASS MCH-012 · todo módulo de dominio está conectado al arranque ningún módulo de dominio queda fuera del grafo de AppModule
+Suites: 5 passed, 0 failed, 5 total
+Tests:  33 passed, 0 failed, 0 skipped, 33 total
+exit=0
