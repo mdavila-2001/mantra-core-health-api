@@ -1,5 +1,6 @@
 export * from './administrator_profiles.entity';
 export * from './emergency_staff_profiles.entity';
+export * from './guardian_link_invitations.entity';
 export * from './health_practitioner_profiles.entity';
 export * from './insurance_representative_profiles.entity';
 export * from './jurisdiction_authorizations.entity';

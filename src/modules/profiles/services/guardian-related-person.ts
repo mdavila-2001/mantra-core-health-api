@@ -28,6 +28,16 @@ export interface GuardianData {
   readonly actorUserId: string;
 }
 
+/** Lo que quedó escrito al registrar al tutor. */
+export interface GuardianRegistration {
+  /** La persona del tutor. */
+  readonly guardianPersonId: string;
+  /** La fila de `related_persons` que lo vincula al paciente. */
+  readonly relatedPersonId: string;
+  /** `true` si también se guardó su teléfono. */
+  readonly hasPhone: boolean;
+}
+
 /**
  * Registra al tutor o persona autorizada que el paciente declara al registrarse.
  *
@@ -69,7 +79,9 @@ export interface GuardianData {
  * @param tx - Contexto transaccional del alta.
  * @param data - Perfil del paciente, nombre, teléfono y parentesco del tutor, y
  *   actor.
- * @returns `true` si registró al tutor.
+ * @returns Los ids de lo registrado, o `undefined` si no se declaró tutor. El
+ *   alta de mostrador los usa para pedir el aviso al tutor; los demás
+ *   llamadores sólo esperan a que termine.
  * @throws BadRequestException si llega un teléfono sin nombre: sería un contacto
  *   sin dueño, imposible de mostrar y de corregir.
  */
@@ -81,14 +93,14 @@ export async function createGuardianRelatedPerson(
   },
   tx: EntityManager,
   data: GuardianData,
-): Promise<boolean> {
+): Promise<GuardianRegistration | undefined> {
   if (!data.name) {
     if (data.phone) {
       throw new BadRequestException(
         'Para guardar el teléfono del tutor hace falta también su nombre',
       );
     }
-    return false;
+    return undefined;
   }
 
   const guardian = repos.persons.create(tx, {
@@ -101,7 +113,7 @@ export async function createGuardianRelatedPerson(
   // existir en la base antes de nombrarla.
   await tx.flush();
 
-  repos.relatedPersons.create(tx, {
+  const related = repos.relatedPersons.create(tx, {
     patientProfileId: data.patientProfileId,
     personId: guardian.id,
     relationshipConceptId:
@@ -123,5 +135,9 @@ export async function createGuardianRelatedPerson(
     });
   }
 
-  return true;
+  return {
+    guardianPersonId: guardian.id,
+    relatedPersonId: related.id,
+    hasPhone: Boolean(data.phone),
+  };
 }

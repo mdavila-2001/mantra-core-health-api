@@ -244,6 +244,15 @@ x-app-env: &app-env
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
 
+  # --- Canal de teléfono del aviso al tutor (worker de mensajería). Sin las tres
+  # piezas del canal elegido, el worker usa el DOBLE y lo dice al arrancar: el
+  # aviso se registra (`provider_message_ref = mock:…`) y no sale del sistema.
+  PHONE_CHANNEL: ${PHONE_CHANNEL:-SMS}
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_SMS_FROM: ${TWILIO_SMS_FROM:-}
+  TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM:-}
+
   # --- Audio / TTS --------------------------------------------------------
   # El único subsistema que puede COSTAR DINERO por ejecución, y por eso lleva
   # tres interruptores en serie en vez de uno: `AUDIO_TTS_ENABLED` monta el
@@ -705,6 +714,10 @@ services:
   worker-messaging:
     <<: *worker
     command: ["node", "dist/src/worker-messaging.js"]
+    environment:
+      <<: *app-env
+      # Cola del aviso al tutor (walk-in): sin esto QueueJob no la drena.
+      MESSAGING_QUEUE_CODES: guardian-links
 
   worker-scheduling:
     <<: *worker

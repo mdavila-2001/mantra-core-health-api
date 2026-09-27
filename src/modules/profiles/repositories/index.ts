@@ -12,3 +12,4 @@ export * from './patient-identity-links.repository';
 export * from './patient-merge-events.repository';
 export * from './related-persons.repository';
 export * from './patient-portal-proxies.repository';
+export * from './guardian-link-invitations.repository';

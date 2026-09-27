@@ -315,6 +315,30 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       display: 'Related person active',
     },
 
+    // Ciclo de vida de la invitación al tutor (`guardian_link_invitations`).
+    // Confirmar el enlace prueba que el teléfono es de quien lo atendió, no la
+    // tutela legal: por eso ningún estado toca `is_legal_guardian`.
+    GUARDIAN_LINK_PENDING: {
+      code: 'GUARDIAN_LINK_PENDING',
+      display: 'Guardian link invitation pending delivery',
+    },
+    GUARDIAN_LINK_SENT: {
+      code: 'GUARDIAN_LINK_SENT',
+      display: 'Guardian link invitation sent',
+    },
+    GUARDIAN_LINK_FAILED: {
+      code: 'GUARDIAN_LINK_FAILED',
+      display: 'Guardian link invitation delivery failed',
+    },
+    GUARDIAN_LINK_INVALID_PHONE: {
+      code: 'GUARDIAN_LINK_INVALID_PHONE',
+      display: 'Guardian phone cannot be normalized to E.164',
+    },
+    GUARDIAN_LINK_CONFIRMED: {
+      code: 'GUARDIAN_LINK_CONFIRMED',
+      display: 'Guardian link confirmed',
+    },
+
     // Proxies de portal
     PROXY_ACTIVE: { code: 'PROXY_ACTIVE', display: 'Portal proxy active' },
     PROXY_REVOKED: { code: 'PROXY_REVOKED', display: 'Portal proxy revoked' },

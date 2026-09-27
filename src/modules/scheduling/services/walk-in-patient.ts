@@ -14,7 +14,10 @@ import type {
   PersonsRepository,
   RelatedPersonsRepository,
 } from '../../profiles/repositories';
-import { createGuardianRelatedPerson } from '../../profiles/services/guardian-related-person';
+import {
+  createGuardianRelatedPerson,
+  type GuardianRegistration,
+} from '../../profiles/services/guardian-related-person';
 
 /** Repositorios de `profiles`/`common` que necesita el alta de mostrador. */
 export interface WalkInPatientRepos {
@@ -50,6 +53,11 @@ export interface WalkInPatientResult {
   readonly personId: string;
   readonly patientProfileId: string;
   readonly patientCode: string;
+  /**
+   * El tutor, si se declaró. Con teléfono, el servicio del mostrador pide el
+   * aviso para que confirme el vínculo.
+   */
+  readonly guardian?: GuardianRegistration;
 }
 
 /**
@@ -153,7 +161,7 @@ export async function createWalkInPatient(
 
   // El tutor o persona autorizada, si lo declaró: `createGuardianRelatedPerson`
   // hace su propio `flush` entre la persona del tutor y su vínculo.
-  await createGuardianRelatedPerson(
+  const guardian = await createGuardianRelatedPerson(
     {
       persons: repos.persons,
       relatedPersons: repos.relatedPersons,
@@ -173,5 +181,6 @@ export async function createWalkInPatient(
     personId: person.id,
     patientProfileId: patient.profileId,
     patientCode,
+    ...(guardian ? { guardian } : {}),
   };
 }

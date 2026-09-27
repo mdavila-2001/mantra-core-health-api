@@ -96,6 +96,14 @@ function build() {
     error: mockFn(),
   };
 
+  // El aviso al tutor se dobla: su lógica (outbox) tiene su propio spec en
+  // `guardian-link.service.spec.ts`; acá importa QUÉ le pide el mostrador.
+  const guardianLinks = {
+    requestInTransaction: mockFn().mockResolvedValue({
+      domainEventId: 'event-1',
+    }),
+  };
+
   const service = new SchedulingWalkInService(
     em,
     bookingsService as any,
@@ -107,6 +115,7 @@ function build() {
     contactPointsRepo as any,
     relatedPersonsRepo as any,
     logger as any,
+    guardianLinks as any,
   );
 
   return {
@@ -116,6 +125,7 @@ function build() {
     bookingsService,
     encountersRepo,
     identifiersRepo,
+    guardianLinks,
   };
 }
 
@@ -212,5 +222,76 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
     ).rejects.toThrow('boom');
 
     expect(bookingsService.iniciarEnTransaccion).not.toHaveBeenCalled();
+  });
+
+  describe('aviso al tutor', () => {
+    it('con tutor y teléfono publica el aviso en la MISMA transacción, con ids', async () => {
+      const { service, tx, guardianLinks } = build();
+
+      await service.createWalkInAppointment(
+        {
+          ...DTO,
+          patient: {
+            ...DTO.patient,
+            guardianName: 'Rosa Mamani',
+            guardianPhone: '71234567',
+          },
+        },
+        actor as any,
+      );
+
+      expect(guardianLinks.requestInTransaction).toHaveBeenCalledTimes(1);
+      expect(guardianLinks.requestInTransaction).toHaveBeenCalledWith(tx, {
+        tenantId: 'tenant-1',
+        patientProfileId: 'person-1',
+        relatedPersonId: 'related-1',
+        guardianPersonId: 'person-1',
+        actorUserId: 'actor-1',
+      });
+      // Nada de nombre ni teléfono en lo que viaja al outbox.
+      const input = guardianLinks.requestInTransaction.mock.calls[0][1];
+      expect(JSON.stringify(input)).not.toContain('Rosa');
+      expect(JSON.stringify(input)).not.toContain('71234567');
+    });
+
+    it('con tutor sin teléfono no publica: no hay a dónde avisar', async () => {
+      const { service, guardianLinks } = build();
+
+      await service.createWalkInAppointment(
+        { ...DTO, patient: { ...DTO.patient, guardianName: 'Rosa Mamani' } },
+        actor as any,
+      );
+
+      expect(guardianLinks.requestInTransaction).not.toHaveBeenCalled();
+    });
+
+    it('sin tutor no publica', async () => {
+      const { service, guardianLinks } = build();
+
+      await service.createWalkInAppointment(DTO, actor as any);
+
+      expect(guardianLinks.requestInTransaction).not.toHaveBeenCalled();
+    });
+
+    it('si publicar falla, el alta entera falla (el hecho y el cambio van juntos)', async () => {
+      const { service, guardianLinks } = build();
+      guardianLinks.requestInTransaction.mockRejectedValue(
+        new Error('outbox caído'),
+      );
+
+      await expect(
+        service.createWalkInAppointment(
+          {
+            ...DTO,
+            patient: {
+              ...DTO.patient,
+              guardianName: 'Rosa Mamani',
+              guardianPhone: '71234567',
+            },
+          },
+          actor as any,
+        ),
+      ).rejects.toThrow('outbox caído');
+    });
   });
 });

@@ -15,6 +15,7 @@ import {
   PersonsRepository,
   RelatedPersonsRepository,
 } from '../../profiles/repositories';
+import { GuardianLinkService } from '../../profiles/services/guardian-link.service';
 import { WalkInAppointmentDto, WalkInAppointmentResponseDto } from '../dto';
 import { SchedulingBookingsService } from './scheduling-bookings.service';
 import { createWalkInPatient } from './walk-in-patient';
@@ -51,6 +52,8 @@ export class SchedulingWalkInService {
    * @param contactPointsRepo - Teléfono de contacto.
    * @param relatedPersonsRepo - Tutor o persona autorizada, si lo declaró.
    * @param logger - Valor de logger requerido por la operación.
+   * @param guardianLinks - Publica en el outbox el aviso al tutor, dentro de
+   *   la misma transacción del alta.
    */
   constructor(
     private readonly em: EntityManager,
@@ -63,6 +66,7 @@ export class SchedulingWalkInService {
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly relatedPersonsRepo: RelatedPersonsRepository,
     private readonly logger: PinoLogger,
+    private readonly guardianLinks: GuardianLinkService,
   ) {
     this.logger.setContext(SchedulingWalkInService.name);
   }
@@ -145,6 +149,19 @@ export class SchedulingWalkInService {
       }
 
       await this.bookingsService.iniciarEnTransaccion(tx, booking, actor);
+
+      // El aviso al tutor viaja por el outbox: se escribe el hecho con el alta
+      // y lo entrega el worker después del commit. Sin teléfono no hay a dónde
+      // mandarlo, así que ni se publica.
+      if (paciente.guardian?.hasPhone) {
+        await this.guardianLinks.requestInTransaction(tx, {
+          tenantId: booking.tenantId,
+          patientProfileId: paciente.patientProfileId,
+          relatedPersonId: paciente.guardian.relatedPersonId,
+          guardianPersonId: paciente.guardian.guardianPersonId,
+          actorUserId: actor.id,
+        });
+      }
 
       return {
         patientProfileId: paciente.patientProfileId,

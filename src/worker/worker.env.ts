@@ -153,6 +153,20 @@ export const workerEnvSchema = Joi.object({
   GOOGLE_OAUTH_REFRESH_TOKEN: Joi.string().allow('').default(''),
   /** Buzón remitente real (debe ser la misma cuenta que otorgó el consentimiento OAuth2). */
   GOOGLE_SENDER_EMAIL: Joi.string().allow('').default(''),
+  /**
+   * Canal de teléfono del aviso al tutor (`GuardianLinkSubscriber`). Lo lee
+   * `phone/phone-messaging.config.ts`; se valida acá para que un valor mal
+   * escrito aborte el arranque y no el primer envío.
+   */
+  PHONE_CHANNEL: Joi.string().valid('SMS', 'WHATSAPP').default('SMS'),
+  /**
+   * Twilio: el adaptador real se activa sólo con SID, token y el remitente del
+   * canal elegido. Vacías = el doble, declarado en el log de arranque.
+   */
+  TWILIO_ACCOUNT_SID: Joi.string().allow('').default(''),
+  TWILIO_AUTH_TOKEN: Joi.string().allow('').default(''),
+  TWILIO_SMS_FROM: Joi.string().allow('').default(''),
+  TWILIO_WHATSAPP_FROM: Joi.string().allow('').default(''),
 }).unknown(true);
 
 /**
