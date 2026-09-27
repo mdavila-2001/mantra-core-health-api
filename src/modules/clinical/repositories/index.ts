@@ -10,6 +10,7 @@ export * from './allergy-intolerances.repository';
 export * from './allergy-reactions-read.repository';
 export * from './medication-requests.repository';
 export * from './medication-records.repository';
+export * from './medication-reminder-dispatches.repository';
 export * from './patient-reported-health-statements.repository';
 export * from './prescription-signature-policies.repository';
 export * from './procedures.repository';

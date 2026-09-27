@@ -7,7 +7,10 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { MedicationTimingDto } from './medication-timing.dto';
 
 /** Tope del motivo escrito a mano de una receta (P24, `indication_text`). */
 export const INDICATION_TEXT_MAX_LENGTH = 200;
@@ -181,6 +184,21 @@ export class CreateMedicationRequestDto {
   @IsString()
   @MaxLength(INDICATION_TEXT_MAX_LENGTH)
   indicationText?: string;
+
+  /**
+   * Posología estructurada (patch v4.2.35). No reemplaza a `frequencyText`:
+   * alimenta el recordatorio de tomas y el .ics.
+   */
+  @ApiPropertyOptional({
+    type: MedicationTimingDto,
+    description:
+      'Posología estructurada (subconjunto de FHIR Timing.repeat) para recordatorios y calendario. ' +
+      'No reemplaza a frequencyText, que es lo que se imprime y se firma',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MedicationTimingDto)
+  timing?: MedicationTimingDto;
 }
 
 /** Cuerpo de `POST /clinical/medication-records` (UC-08-11). */
@@ -406,6 +424,22 @@ export class EditMedicationRequestDraftDto {
   @IsOptional()
   @IsString()
   patientInstructionsText?: string;
+
+  /**
+   * Posología estructurada (patch v4.2.35). Si viaja, reemplaza entera
+   * la posología anterior del borrador. No reemplaza a `frequencyText`:
+   * alimenta el recordatorio de tomas y el .ics.
+   */
+  @ApiPropertyOptional({
+    type: MedicationTimingDto,
+    description:
+      'Posología estructurada (subconjunto de FHIR Timing.repeat) para recordatorios y calendario. ' +
+      'No reemplaza a frequencyText, que es lo que se imprime y se firma',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MedicationTimingDto)
+  timing?: MedicationTimingDto;
 }
 
 /** Cuerpo de `POST /clinical/medication-requests/:id/invalidate`. */

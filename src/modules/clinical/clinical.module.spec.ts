@@ -1,7 +1,9 @@
 import { ClinicalModule } from './clinical.module';
 import {
   ClinicalEncountersController,
+  ClinicalInternalController,
   ClinicalMedicalAspectsController,
+  ClinicalMedicationScheduleController,
   ClinicalRecordsController,
 } from './controllers';
 
@@ -31,5 +33,11 @@ describe('ClinicalModule', () => {
     const controladores = controladoresDe(ClinicalModule);
     expect(controladores).toContain(ClinicalRecordsController);
     expect(controladores).toContain(ClinicalEncountersController);
+  });
+
+  it('publica el .ics de tomas y el despacho interno de recordatorios (patch v4.2.35)', () => {
+    const controladores = controladoresDe(ClinicalModule);
+    expect(controladores).toContain(ClinicalMedicationScheduleController);
+    expect(controladores).toContain(ClinicalInternalController);
   });
 });

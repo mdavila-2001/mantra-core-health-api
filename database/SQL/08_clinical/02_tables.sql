@@ -289,7 +289,25 @@ CREATE TABLE IF NOT EXISTS "clinical"."medication_requests" (
     "replaced_by_request_id" uuid,
     "renewed_from_request_id" uuid,
     "issue_idempotency_key" varchar,
+    "timing_as_needed" boolean NOT NULL DEFAULT false,
+    "timing_frequency" integer,
+    "timing_period" numeric,
+    "timing_period_unit" varchar,
+    "timing_times_of_day" jsonb,
+    "timing_start_at" timestamptz,
+    "timing_duration_days" integer,
+    "timing_time_zone" varchar,
     CONSTRAINT "pk_medication_requests" PRIMARY KEY ("id")
+);
+
+-- Patch v4.2.35: una fila por (receta, toma) ya avisada; el UNIQUE deduplica el despacho.
+CREATE TABLE IF NOT EXISTS "clinical"."medication_reminder_dispatches" (
+    "id" uuid NOT NULL,
+    "medication_request_id" uuid NOT NULL,
+    "dose_at" timestamptz NOT NULL,
+    "notification_request_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    CONSTRAINT "pk_medication_reminder_dispatches" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical"."prescription_signature_policies" (

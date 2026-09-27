@@ -24,3 +24,8 @@ export * from './prescription-pdf.service';
 // Carril P1: los disparadores in-app de receta y encuentro. Va al final porque
 // es el único servicio de `clinical` que no registra nada clínico — sólo avisa.
 export { ClinicalNotificationsService } from './clinical-notifications.service';
+// Patch v4.2.35: cronograma de tomas (.ics) y recordatorios. Las funciones puras
+// (`medication-schedule`, `medication-schedule-ics`, `medication-timing.mapper`)
+// no se exportan: son colaboradores internos.
+export { MedicationScheduleService } from './medication-schedule.service';
+export { MedicationRemindersService } from './medication-reminders.service';

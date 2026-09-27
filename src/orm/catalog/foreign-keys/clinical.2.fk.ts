@@ -2,11 +2,14 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 2/2).
- * 28 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 30 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  // Patch v4.2.35 (API): deduplicación de recordatorios de toma.
+  ['medication_reminder_dispatches', 'medication_request_id', 'clinical', 'medication_requests', 'id'],
+  ['medication_reminder_dispatches', 'notification_request_id', 'messaging', 'notification_requests', 'id'],
   ['procedures', 'practice_site_id', 'practice', 'practice_sites', 'id'],
   ['procedures', 'recorder_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['procedures', 'reported_source_concept_id', 'terminology', 'catalog_concepts', 'id'],

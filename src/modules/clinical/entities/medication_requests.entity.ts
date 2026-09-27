@@ -254,4 +254,66 @@ export class MedicationRequests {
     nullable: true,
   })
   issueIdempotencyKey?: string;
+
+  /* --- Posología estructurada (patch v4.2.35) -----------------------------
+     Subconjunto de FHIR `Timing.repeat`. Es dato operativo del recordatorio y
+     del .ics: el texto firmado de la receta sigue siendo `frequency_text`. Ver
+     `services/medication-schedule.ts`. */
+
+  /** PRN / «según necesidad»: sin tomas programadas. */
+  @Property({ fieldName: 'timing_as_needed', type: 'boolean', default: false })
+  timingAsNeeded: boolean = false;
+
+  /** Tomas por período (FHIR `repeat.frequency`). */
+  @Property({ fieldName: 'timing_frequency', type: 'integer', nullable: true })
+  timingFrequency?: number;
+
+  /** Longitud del período (FHIR `repeat.period`). */
+  @Property({
+    fieldName: 'timing_period',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  timingPeriod?: string;
+
+  /** Unidad del período: `h`, `d` o `wk` (FHIR `repeat.periodUnit`, acotado). */
+  @Property({
+    fieldName: 'timing_period_unit',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  timingPeriodUnit?: string;
+
+  /** Horas locales del día, `HH:mm` (FHIR `repeat.timeOfDay`). */
+  @Property({
+    fieldName: 'timing_times_of_day',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  timingTimesOfDay?: string[];
+
+  /** Ancla de la primera toma. */
+  @Property({
+    fieldName: 'timing_start_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  timingStartAt?: Date;
+
+  /** Duración del tratamiento en días; 0 = sin tomas. */
+  @Property({
+    fieldName: 'timing_duration_days',
+    type: 'integer',
+    nullable: true,
+  })
+  timingDurationDays?: number;
+
+  /** Zona IANA en la que se leen las horas del día. */
+  @Property({
+    fieldName: 'timing_time_zone',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  timingTimeZone?: string;
 }

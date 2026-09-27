@@ -33,6 +33,8 @@ import {
   ClinicalReadController,
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
+  ClinicalMedicationScheduleController,
+  ClinicalInternalController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
@@ -53,6 +55,8 @@ import {
   ClinicalReadService,
   ClinicalNotificationsService,
   PrescriptionPdfService,
+  MedicationScheduleService,
+  MedicationRemindersService,
   // Antiduplicación de estudios (subtarea 3.2, T-26): clase sin estado, mismo
   // criterio que `DeclaredCoveragesReader` — se provee acá Y directo en
   // `InsuranceModule` para que el detalle del reclamo la use sin importar
@@ -73,6 +77,7 @@ import {
   AllergyReactionsReadRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
+  MedicationReminderDispatchesRepository,
   PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
@@ -167,6 +172,10 @@ import { DataAccessLogRepository } from '../audit/repositories';
     ClinicalReadController,
     ClinicalPrescriptionsController,
     ClinicalPrescriptionsPublicController,
+    // Patch v4.2.35: `GET /clinical/medication-requests/:id/schedule.ics` y
+    // `POST /clinical/internal/medication-reminders/dispatch`.
+    ClinicalMedicationScheduleController,
+    ClinicalInternalController,
   ],
   providers: [
     // Repositorios
@@ -188,6 +197,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     AllergyReactionsReadRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
+    MedicationReminderDispatchesRepository,
     PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
@@ -220,6 +230,8 @@ import { DataAccessLogRepository } from '../audit/repositories';
     ClinicalNotificationsService,
     ClinicalRecordAccessGuard,
     PrescriptionPdfService,
+    MedicationScheduleService,
+    MedicationRemindersService,
     DuplicateStudyDetector,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar

@@ -51,6 +51,7 @@ import { DataAccessLogRepository } from '../../audit/repositories';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
+import { timingResponseOf } from './medication-timing.mapper';
 
 /** Recurso que se asienta en `audit.data_access_log` al leer el resumen. */
 const SUMMARY_RESOURCE_TYPE = 'PATIENT_CLINICAL_SUMMARY';
@@ -761,6 +762,7 @@ export class ClinicalReadService {
         patientInstructionsText: row.patientInstructionsText,
         indicationConditionId: row.indicationConditionId,
         indicationText: row.indicationText,
+        timing: timingResponseOf(row),
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,

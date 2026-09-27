@@ -10,6 +10,7 @@ export * from './encounters.entity';
 export * from './family_member_history.entity';
 export * from './immunizations.entity';
 export * from './medication_records.entity';
+export * from './medication_reminder_dispatches.entity';
 export * from './medication_requests.entity';
 export * from './observation_components.entity';
 export * from './observation_notes.entity';

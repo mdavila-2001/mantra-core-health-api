@@ -34,6 +34,8 @@ function build() {
     findByEncounter: mockFn().mockResolvedValue([]),
     create: mockFn(),
     findByIssueIdempotencyKey: mockFn().mockResolvedValue(null),
+    // Patch v4.2.35: el despacho de recordatorios; este servicio no lo usa.
+    findSchedulable: mockFn().mockResolvedValue([]),
   };
   const recordsRepo = { create: mockFn() };
   // v4.1.6: la indicación diagnóstica se valida contra el paciente de la receta.
@@ -923,5 +925,125 @@ describe('MedicationsService · MCH-007', () => {
     await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
+  });
+
+  // Patch v4.2.35: posología estructurada. Se escribe con el borrador, igual que
+  // `frequencyText`, y viaja al reemplazar o renovar.
+  describe('posología estructurada (timing)', () => {
+    it('prescribe traduce el timing a columnas', async () => {
+      const d = build();
+      d.requestsRepo.create.mockReturnValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+      await d.service.prescribe(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          medicationConceptId: 'm1',
+          timing: {
+            frequency: 3,
+            period: 1,
+            periodUnit: 'd',
+            startAt: '2026-09-26T12:00:00Z',
+            durationDays: 7,
+          },
+        },
+        actor,
+      );
+      expect(d.requestsRepo.create.mock.calls[0][1].timing).toEqual({
+        timingAsNeeded: false,
+        timingFrequency: 3,
+        timingPeriod: '1',
+        timingPeriodUnit: 'd',
+        timingTimesOfDay: undefined,
+        timingStartAt: new Date('2026-09-26T12:00:00Z'),
+        timingDurationDays: 7,
+        timingTimeZone: undefined,
+      });
+    });
+
+    it('sin timing no escribe posología', async () => {
+      const d = build();
+      d.requestsRepo.create.mockReturnValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+      await d.service.prescribe(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          medicationConceptId: 'm1',
+        },
+        actor,
+      );
+      expect(d.requestsRepo.create.mock.calls[0][1].timing).toBeUndefined();
+    });
+
+    it('editDraft reemplaza la posología entera del borrador', async () => {
+      const d = build();
+      const request: any = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        timingFrequency: 3,
+        timingPeriod: '1',
+        timingPeriodUnit: 'd',
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await d.service.editDraft(
+        'mr1',
+        { timing: { timesOfDay: ['08:00', '20:00'] } },
+        actor,
+      );
+      expect(request.timingTimesOfDay).toEqual(['08:00', '20:00']);
+      expect(request.timingFrequency).toBeUndefined();
+      expect(request.timingPeriod).toBeUndefined();
+      expect(request.timingAsNeeded).toBe(false);
+    });
+
+    it('una receta emitida no admite cambiar la posología (mismo candado que frequencyText)', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+      });
+      await expect(
+        d.service.editDraft('mr1', { timing: { asNeeded: true } }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('renovar copia la posología pero no su ancla', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'mr1',
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        medicationConceptId: 'm1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_COMPLETED,
+        timingAsNeeded: false,
+        timingTimesOfDay: ['08:00'],
+        timingStartAt: new Date('2026-01-01T12:00:00Z'),
+        timingTimeZone: 'America/La_Paz',
+        createdAt: new Date(),
+      });
+      d.requestsRepo.create.mockReturnValue({
+        id: 'mr3',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        createdAt: new Date(),
+      });
+      await d.service.renew('mr1', {}, actor);
+      const timing = d.requestsRepo.create.mock.calls[0][1].timing;
+      expect(timing.timingTimesOfDay).toEqual(['08:00']);
+      expect(timing.timingTimeZone).toBe('America/La_Paz');
+      expect(timing.timingStartAt).toBeUndefined();
+    });
   });
 });
