@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -142,6 +143,183 @@ export class PublicPharmacyProductPageDto {
 
   @ApiProperty({ type: Number, nullable: true })
   totalHint!: number | null;
+
+  @ApiProperty({ format: 'date-time' })
+  generatedAt!: string;
+}
+
+/** Tope de renglones de receta por consulta de disponibilidad. */
+export const PUBLIC_BRANCH_AVAILABILITY_MAX_TERMS = 20;
+/** Tope de largo de un renglón, en caracteres. */
+export const PUBLIC_BRANCH_AVAILABILITY_MAX_TERM_LENGTH = 100;
+
+/** Un punto en grados decimales, como lo sirve la superficie pública. */
+export class PublicGeoPointDto {
+  @ApiProperty({ example: -17.7833 })
+  lat!: number;
+
+  @ApiProperty({ example: -63.1821 })
+  lng!: number;
+}
+
+/**
+ * Una sucursal de la cadena, como se lee desde afuera (P37).
+ *
+ * Mismo contrato que `PublicPharmacyBranch` del front, más `id` (la sede),
+ * que es lo único que distingue dos sedes del mismo tenant: comparten ficha y
+ * por eso comparten `slug`.
+ */
+export class PublicPharmacyBranchDto {
+  /** La sede (`pharmacy.pharmacy_sites`). */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** El slug de la ficha pública del tenant dueño de la sede. */
+  @ApiProperty()
+  slug!: string;
+
+  /** «Farmacorp · San Miguel»: la farmacia y la sede. */
+  @ApiProperty()
+  name!: string;
+
+  /** Sólo la sede («San Miguel»). */
+  @ApiProperty()
+  siteName!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  city!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  addressText!: string | null;
+
+  /** Siempre `null` por ahora: el teléfono público de una sede no se modela. */
+  @ApiProperty({ type: String, nullable: true })
+  phone!: string | null;
+
+  /** Siempre `null` por ahora: el horario publicado no se modela como texto. */
+  @ApiProperty({ type: String, nullable: true })
+  openingHours!: string | null;
+
+  /** Sin punto no hay pin ni distancia; la sucursal se lista igual. */
+  @ApiProperty({ type: PublicGeoPointDto, nullable: true })
+  location!: PublicGeoPointDto | null;
+
+  /** `null`: el modelo no declara la precisión del punto. */
+  @ApiProperty({ type: String, nullable: true })
+  locationAccuracy!: string | null;
+
+  /** Si la sede es del tenant cuya ficha se está mirando. */
+  @ApiProperty()
+  isCurrent!: boolean;
+}
+
+/** Envoltura pública de las sucursales. Sin paginar: son pocas y van todas. */
+export class PublicPharmacyBranchPageDto {
+  @ApiProperty({ type: [PublicPharmacyBranchDto] })
+  items!: PublicPharmacyBranchDto[];
+
+  @ApiProperty({ type: String, nullable: true })
+  nextCursor!: string | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  totalHint!: number | null;
+
+  @ApiProperty({ format: 'date-time' })
+  generatedAt!: string;
+}
+
+/**
+ * Query de `GET /public/profiles/f/:slug/branch-availability`.
+ *
+ * `items` son los renglones de la receta separados por `|`, tal como los
+ * escribe una persona. El origen es opcional y va de a pares.
+ */
+export class PublicBranchAvailabilityQueryDto {
+  @ApiPropertyOptional({
+    description:
+      'Renglones de la receta separados por «|» (hasta 20, de hasta 100 caracteres cada uno)',
+    example: 'amoxicilina 500|paracetamol',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2200)
+  items?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud del origen (va con lng)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud del origen (va con lat)' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
+}
+
+/** Un renglón de la receta que la sucursal sí tiene. */
+export class PublicBranchMatchDto {
+  /** Lo que la persona escribió. */
+  @ApiProperty()
+  term!: string;
+
+  @ApiProperty()
+  genericName!: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  brandName!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  presentation!: string | null;
+
+  /** Texto exacto; `null` si no hay precio publicado. */
+  @ApiProperty({ type: String, nullable: true })
+  price!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  currency!: string | null;
+}
+
+/** Qué tiene una sucursal de una receta concreta. */
+export class PublicBranchAvailabilityDto {
+  @ApiProperty({ type: PublicPharmacyBranchDto })
+  branch!: PublicPharmacyBranchDto;
+
+  @ApiProperty({ type: [PublicBranchMatchDto] })
+  matches!: PublicBranchMatchDto[];
+
+  /** Los renglones que no tiene, o tiene agotados. */
+  @ApiProperty({ type: [String] })
+  missing!: string[];
+
+  /** Lo dice el servidor: hubo renglones y no falta ninguno. */
+  @ApiProperty()
+  complete!: boolean;
+
+  /** Suma de lo que tiene con precio, texto exacto; `null` sin precios. */
+  @ApiProperty({ type: String, nullable: true })
+  totalAmount!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  currency!: string | null;
+
+  /** Distancia en línea recta, con un decimal; `null` sin origen o sin punto. */
+  @ApiProperty({ type: Number, nullable: true })
+  distanceKm!: number | null;
+}
+
+/** Respuesta de la disponibilidad: ya ordenada por el servidor. */
+export class PublicBranchAvailabilityResponseDto {
+  @ApiProperty({ type: [PublicBranchAvailabilityDto] })
+  items!: PublicBranchAvailabilityDto[];
+
+  @ApiProperty()
+  count!: number;
 
   @ApiProperty({ format: 'date-time' })
   generatedAt!: string;

@@ -3,8 +3,11 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../../common';
 import {
+  PublicBranchAvailabilityQueryDto,
+  PublicBranchAvailabilityResponseDto,
   PublicCatalogPageQueryDto,
   PublicOfferedServicePageDto,
+  PublicPharmacyBranchPageDto,
   PublicPharmacyProductPageDto,
 } from '../dto/public-catalog.dto';
 import { PublicCatalogService } from '../services/public-catalog.service';
@@ -53,5 +56,32 @@ export class PublicCatalogController {
     @Query() page: PublicCatalogPageQueryDto,
   ): Promise<PublicPharmacyProductPageDto> {
     return this.service.pharmacyProducts(slug, page);
+  }
+
+  @Public()
+  @Get('public/profiles/f/:slug/branches')
+  @ApiOperation({
+    summary: 'Sucursales de la cadena de una farmacia, desde su ficha pública',
+    description:
+      'Sin sesión y sin datos de pacientes. Las sedes activas de las farmacias activas y verificadas de la cadena (tenant raíz y sus hijos) que tienen ficha visible, con la farmacia mirada adentro; una farmacia sin cadena devuelve sólo las suyas. Todas en una página. Un slug inexistente, oculto o de otro tipo responde 404.',
+  })
+  pharmacyBranches(
+    @Param('slug') slug: string,
+  ): Promise<PublicPharmacyBranchPageDto> {
+    return this.service.pharmacyBranches(slug);
+  }
+
+  @Public()
+  @Get('public/profiles/f/:slug/branch-availability')
+  @ApiOperation({
+    summary: 'Qué sucursal de la cadena tiene lo de una receta, y a cuánto',
+    description:
+      'Sin sesión. Los renglones viajan como texto separado por «|» (hasta 20, de 3 a 100 caracteres). Casa con productos con stock en la sede; ordenado: completas primero, luego la más cercana (si llega lat y lng), luego las que tienen más. Distancia en línea recta. Un slug inexistente, oculto o de otro tipo responde 404.',
+  })
+  branchAvailability(
+    @Param('slug') slug: string,
+    @Query() query: PublicBranchAvailabilityQueryDto,
+  ): Promise<PublicBranchAvailabilityResponseDto> {
+    return this.service.branchAvailability(slug, query);
   }
 }

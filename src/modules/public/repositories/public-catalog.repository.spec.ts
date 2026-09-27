@@ -136,4 +136,59 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
       );
     });
   });
+
+  describe('findPharmacyBranches (P37)', () => {
+    it('recorre la cadena (raíz e hijos) y exige ficha visible, farmacia activa y verificada y sede activa', async () => {
+      const { em, execute, repo } = conConexion();
+
+      await repo.findPharmacyBranches(em as any, TENANT, 200);
+
+      const sql = sqlDe(execute);
+      expect(sql).toContain('COALESCE(t.parent_tenant_id, t.id) AS root');
+      expect(sql).toContain(
+        'ON t.id = chain.root OR t.parent_tenant_id = chain.root',
+      );
+      expect(sql).toMatch(/LIMIT \?$/);
+      // Nada interno de la farmacia ni de la práctica sale de la consulta.
+      expect(sql).not.toMatch(/tax_code|income_account|practice_id AS/);
+      expect(execute.mock.calls[0][1]).toEqual([
+        TENANT,
+        COMM.PROFILE_TARGET_PHARMACY,
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        PHARM.PHARMACY_ACTIVE,
+        PHARM.VERIFICATION_VERIFIED,
+        PHARM.SITE_ACTIVE,
+        200,
+      ]);
+    });
+  });
+
+  describe('findBranchStockMatches (P37)', () => {
+    it('manda los arreglos como JSON y sólo trae productos con stock en la sede', async () => {
+      const { em, execute, repo } = conConexion();
+      const sede = '33333333-3333-4333-8333-000000000001';
+
+      await repo.findBranchStockMatches(em as any, [sede], ['amoxicilina']);
+
+      const sql = sqlDe(execute);
+      expect(sql).toContain('jsonb_array_elements_text(CAST(? AS jsonb))');
+      expect(sql).toContain(') stock ON stock.available > 0');
+      expect(sql).toContain('LIMIT 5000');
+      const params = execute.mock.calls[0][1];
+      expect(params).toContain(JSON.stringify(['amoxicilina']));
+      expect(params).toContain(JSON.stringify([sede]));
+    });
+
+    it('sin sedes o sin palabras no consulta la base', async () => {
+      const { em, execute, repo } = conConexion();
+      await expect(
+        repo.findBranchStockMatches(em as any, [], ['x']),
+      ).resolves.toEqual([]);
+      await expect(
+        repo.findBranchStockMatches(em as any, ['s'], []),
+      ).resolves.toEqual([]);
+      expect(execute).not.toHaveBeenCalled();
+    });
+  });
 });

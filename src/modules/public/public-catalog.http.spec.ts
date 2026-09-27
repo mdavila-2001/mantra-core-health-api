@@ -33,6 +33,35 @@ function baseDoble(perfiles: Record<string, Perfil>) {
       const perfil = perfiles[params[0] as string];
       return perfil ? [perfil] : [];
     }
+    if (sql.includes('WITH chain AS')) {
+      return [
+        {
+          siteId: '33333333-3333-4333-8333-000000000001',
+          siteName: 'Centro',
+          pharmacyName: 'Farmacia Central',
+          slug: 'farmacia-central',
+          tenantId: TENANT,
+          lines: 'Av. Siempre Viva 742',
+          city: 'Santa Cruz',
+          latitude: '-17.7833',
+          longitude: '-63.1821',
+        },
+      ];
+    }
+    if (sql.includes('DISTINCT ON (site.id, prod.id)')) {
+      return [
+        {
+          siteId: '33333333-3333-4333-8333-000000000001',
+          productId: '44444444-4444-4444-8444-000000000001',
+          genericName: 'Amoxicilina',
+          brandName: null,
+          strengthText: '500 mg',
+          packageSizeText: null,
+          price: '21.00',
+          currency: 'BOB',
+        },
+      ];
+    }
     if (sql.includes('FROM billing.service_catalog')) {
       return [
         {
@@ -193,5 +222,63 @@ describe('Fichas públicas por HTTP (M4 · H2)', () => {
         '/public/profiles/f/farmacia-central/products?cursor=no-es-un-cursor',
       )
       .expect(400);
+  });
+
+  it('GET /public/profiles/f/:slug/branches sin token → 200 con la farmacia adentro', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/public/profiles/f/farmacia-central/branches')
+      .expect(200);
+
+    expect(res.body).toEqual({
+      items: [
+        expect.objectContaining({
+          id: '33333333-3333-4333-8333-000000000001',
+          slug: 'farmacia-central',
+          name: 'Farmacia Central · Centro',
+          isCurrent: true,
+          location: { lat: -17.7833, lng: -63.1821 },
+        }),
+      ],
+      nextCursor: null,
+      totalHint: 1,
+      generatedAt: expect.any(String),
+    });
+  });
+
+  it('GET /public/profiles/f/:slug/branch-availability sin token → 200; lat y lng llegan como número', async () => {
+    const res = await request(app.getHttpServer())
+      .get(
+        '/public/profiles/f/farmacia-central/branch-availability?items=amoxicilina%20500%7Cibuprofeno&lat=-17.7833&lng=-63.1821',
+      )
+      .expect(200);
+
+    expect(res.body.count).toBe(1);
+    expect(res.body.items[0]).toEqual(
+      expect.objectContaining({
+        complete: false,
+        missing: ['ibuprofeno'],
+        totalAmount: '21.00',
+        distanceKm: 0,
+      }),
+    );
+  });
+
+  it('branch-availability: origen a medias, coordenada fuera de rango o parámetro no declarado → 400; slug de otro tipo → 404', async () => {
+    await request(app.getHttpServer())
+      .get(
+        '/public/profiles/f/farmacia-central/branch-availability?items=amoxicilina&lat=-17.7',
+      )
+      .expect(400);
+    await request(app.getHttpServer())
+      .get(
+        '/public/profiles/f/farmacia-central/branch-availability?lat=91&lng=0',
+      )
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/public/profiles/f/farmacia-central/branch-availability?city=x')
+      .expect(400);
+    await request(app.getHttpServer())
+      .get('/public/profiles/f/clinica-norte/branches')
+      .expect(404);
   });
 });
