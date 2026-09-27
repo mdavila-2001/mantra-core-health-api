@@ -1,0 +1,1 @@
+Catálogo generado: 1260 entidades implementadas (1197 con descripción de negocio), 148 solo-diseño → docs/data/entity-catalog.md
