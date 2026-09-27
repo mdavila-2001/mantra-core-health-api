@@ -14,6 +14,10 @@ import { AuthzModule } from '../authz/authz.module';
 // Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
 // `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
 import { CommonModule } from '../common/common.module';
+// Membresías de tenant: `LabStaffGuard` reconoce al personal del laboratorio
+// por su membresía, no por un rol del token.
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { LabStaffGuard } from './guards';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
@@ -21,6 +25,7 @@ import {
   DiagnosticsImagingController,
   DiagnosticsOrdersController,
   DiagnosticsPatientResultsController,
+  DiagnosticsReceptionController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -30,6 +35,7 @@ import {
   DiagnosticsMediaQualityService,
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
+  DiagnosticsReceptionService,
 } from './services';
 import {
   SpecimensRepository,
@@ -38,6 +44,7 @@ import {
   ImagingRepository,
   MediaQualityRepository,
   DiagnosticOrdersRepository,
+  LabReceptionRepository,
 } from './repositories';
 
 /**
@@ -57,6 +64,7 @@ import {
     ProfilesModule,
     AuthzModule,
     CommonModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     DiagnosticsSpecimensController,
@@ -65,6 +73,7 @@ import {
     DiagnosticsImagingController,
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
+    DiagnosticsReceptionController,
   ],
   providers: [
     // Repositorios
@@ -77,6 +86,7 @@ import {
     // acá no crea una segunda fuente de verdad — mismo criterio con el que
     // `scheduling` provee `AppointmentsRepository`.
     DiagnosticOrdersRepository,
+    LabReceptionRepository,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,
@@ -85,6 +95,9 @@ import {
     DiagnosticsMediaQualityService,
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
+    DiagnosticsReceptionService,
+    // Guard del personal de laboratorio (recepción y circuito de especímenes).
+    LabStaffGuard,
   ],
 })
 export class DiagnosticsModule {}

@@ -8,14 +8,15 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
-  Roles,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+import { LabStaffGuard } from '../guards';
 import { DiagnosticsLabService } from '../services';
 import {
   CreateWorkOrderDto,
@@ -35,7 +36,11 @@ import {
  */
 @ApiTags('diagnostics-laboratory')
 @ApiBearerAuth()
-@Roles('CLINICIAN', 'PRACTITIONER')
+// Mismo guard que la recepción: la cola la opera el personal del laboratorio
+// (membresía en un DIAGNOSTIC_CENTER) además de CLINICIAN/PRACTITIONER, que
+// siguen pasando con la misma regla de ámbito. Con `@Roles` en la clase,
+// `RolesGuard` rebotaba a la dueña del laboratorio antes de mirar su membresía.
+@UseGuards(LabStaffGuard)
 @Controller('diagnostics')
 export class DiagnosticsLabController {
   /**

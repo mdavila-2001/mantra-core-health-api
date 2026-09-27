@@ -4,6 +4,7 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
+import { DIAG } from '../../modules/diagnostics/diagnostics.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -4144,6 +4145,193 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Centro de diagnóstico',
       definition:
         'Centro de diagnóstico por imagen o de otro estudio que presta el servicio de la campaña.',
+    },
+  ],
+
+  // --- Recepción de muestras: tipo de espécimen y de contenedor (M20) -----
+  // HL7 v2-0487 para el espécimen; el color de tapa de los tubos sigue la
+  // convención ISO 6710. Traducción del proyecto, en lenguaje llano.
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+    {
+      display: 'Sangre venosa',
+      definition:
+        'Sangre extraída de una vena, habitualmente del pliegue del codo. Se usa entera, sin separar, por ejemplo para el hemograma.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SERUM,
+    {
+      display: 'Suero',
+      definition:
+        'La parte líquida de la sangre que queda después de que coagula. Es la muestra de la mayoría de los análisis de química, hormonas y serología.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_PLASMA,
+    {
+      display: 'Plasma',
+      definition:
+        'La parte líquida de la sangre obtenida sin dejarla coagular, gracias a un anticoagulante del tubo. Se usa en coagulación y en algunas pruebas de química.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URINE,
+    {
+      display: 'Orina',
+      definition:
+        'Una muestra de orina tomada en un solo momento, idealmente la primera de la mañana y del chorro medio.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URINE_24H,
+    {
+      display: 'Orina de 24 horas',
+      definition:
+        'Toda la orina de un día completo, juntada en un mismo recipiente. Sirve para medir cuánto elimina el riñón en ese tiempo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_ARTERIAL,
+    {
+      display: 'Sangre arterial',
+      definition:
+        'Sangre extraída de una arteria, por lo general de la muñeca. Se usa para medir los gases de la sangre.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_CAPILLARY,
+    {
+      display: 'Sangre capilar',
+      definition:
+        'Unas gotas de sangre obtenidas con un pinchazo en el dedo o en el talón del bebé.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_STOOL,
+    {
+      display: 'Heces',
+      definition:
+        'Una muestra de materia fecal, para buscar parásitos, sangre oculta o gérmenes.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_CSF,
+    {
+      display: 'Líquido cefalorraquídeo',
+      definition:
+        'El líquido que rodea el cerebro y la médula espinal. Lo obtiene un médico con una punción lumbar.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SPUTUM,
+    {
+      display: 'Esputo',
+      definition:
+        'La flema que se expulsa al toser desde los pulmones, no la saliva. Se usa, por ejemplo, para buscar tuberculosis.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_THROAT_SWAB,
+    {
+      display: 'Hisopado de garganta',
+      definition:
+        'Muestra tomada frotando un hisopo en la garganta, para buscar bacterias o virus.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+    {
+      display: 'Tubo tapa lila (EDTA)',
+      definition:
+        'Tubo con anticoagulante EDTA que conserva las células de la sangre. Es el del hemograma.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GOLD_SST,
+    {
+      display: 'Tubo tapa amarilla (gel separador)',
+      definition:
+        'Tubo con activador de la coagulación y un gel que separa el suero de las células al centrifugar. Es el más usado en química.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_RED_PLAIN,
+    {
+      display: 'Tubo tapa roja',
+      definition:
+        'Tubo sin anticoagulante: la sangre coagula y se obtiene suero. Se usa en química y serología.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_LIGHT_BLUE_CITRATE,
+    {
+      display: 'Tubo tapa celeste (citrato)',
+      definition:
+        'Tubo con citrato de sodio al 3,2 %, que impide la coagulación de forma reversible. Es el de las pruebas de coagulación; debe llenarse hasta la marca.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GREEN_HEPARIN,
+    {
+      display: 'Tubo tapa verde (heparina)',
+      definition:
+        'Tubo con heparina de litio como anticoagulante, para obtener plasma en pruebas de química urgentes.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GRAY_FLUORIDE,
+    {
+      display: 'Tubo tapa gris (fluoruro)',
+      definition:
+        'Tubo con fluoruro de sodio, que frena el consumo de azúcar por las células. Se usa para medir glucosa y lactato.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_SYRINGE_BLOOD_GAS,
+    {
+      display: 'Jeringa de gasometría',
+      definition:
+        'Jeringa con heparina para sangre arterial. Se procesa enseguida y sin burbujas de aire.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CUP_URINE_STERILE,
+    {
+      display: 'Frasco estéril de orina',
+      definition:
+        'Frasco de boca ancha y tapa a rosca, estéril, para una muestra de orina.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_JUG_URINE_24H,
+    {
+      display: 'Bidón de orina de 24 horas',
+      definition: 'Recipiente grande donde se junta toda la orina de un día.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CUP_STOOL,
+    {
+      display: 'Frasco para heces',
+      definition:
+        'Frasco con tapa y, a veces, paleta incorporada, para la muestra de materia fecal.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_STERILE,
+    {
+      display: 'Tubo estéril con tapa a rosca',
+      definition:
+        'Tubo estéril sin aditivos, para líquidos como el cefalorraquídeo.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_SWAB_TRANSPORT,
+    {
+      display: 'Hisopo con medio de transporte',
+      definition:
+        'Hisopo que se guarda en un tubo con un medio que mantiene vivos los gérmenes hasta el laboratorio.',
     },
   ],
 ];
