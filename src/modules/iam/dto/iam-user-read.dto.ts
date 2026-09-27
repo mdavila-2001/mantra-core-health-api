@@ -1,4 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 /**
  * Contratos de lectura de `/iam/users`.
@@ -9,6 +11,52 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  * contrato. Es la razón de que las respuestas se compongan campo a campo en vez
  * de devolver la entidad: un campo nuevo en el modelo no se publica solo.
  */
+
+/**
+ * Filtros de `POST /iam/users/search`: los mismos que el obsoleto
+ * `GET /iam/users` leía de la query string, ahora en el cuerpo.
+ *
+ * `q` busca sobre el nombre visible y el correo de acceso, que son datos
+ * personales: en la URL quedaban en los logs de acceso de cada proxy. Los
+ * nombres de campo son los del `GET` (`q`, `status`) para que un cliente
+ * migre cambiando el verbo y no el contrato. El tope repite el de
+ * `ParseOptionalLimitPipe` (1–500), que es lo que validaba el `GET`.
+ */
+export class SearchUsersBodyDto {
+  /** Texto a buscar en el nombre visible o en el correo de acceso. */
+  @ApiPropertyOptional({
+    description: 'Texto a buscar en el nombre visible o en el correo de acceso',
+  })
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  /** Concepto de estado al que acotar. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concepto de estado al que acotar',
+  })
+  @IsOptional()
+  @IsUUID()
+  status?: string;
+
+  /** Cursor opaco devuelto por la página anterior. */
+  @ApiPropertyOptional({
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
+  /** Tope de resultados de la página (por defecto 50). */
+  @ApiPropertyOptional({ default: 50, minimum: 1, maximum: 500 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  limit?: number;
+}
 
 /** Una fila del listado de usuarios: lo justo para pintar la tabla y decidir a cuál entrar. */
 export class UserListItemDto {

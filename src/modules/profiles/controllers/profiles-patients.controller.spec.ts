@@ -1,5 +1,17 @@
 import { jest } from '@jest/globals';
 import { readFileSync } from 'node:fs';
+import {
+  HttpStatus,
+  RequestMethod,
+  ValidationPipe,
+  type ArgumentMetadata,
+} from '@nestjs/common';
+import {
+  HEADERS_METADATA,
+  HTTP_CODE_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+} from '@nestjs/common/constants';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
 /**
@@ -10,6 +22,8 @@ import { readFileSync } from 'node:fs';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProfilesPatientsController } from './profiles-patients.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
+import { SearchPatientsQueryDto } from '../dto';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -33,6 +47,7 @@ function build() {
     removeOwnPhoto: mockFn(),
     getOwnDependents: mockFn(),
     registerOwnDependent: mockFn(),
+    searchPatients: mockFn(),
   };
   const controller = new ProfilesPatientsController(patientsService as any);
   return { controller, patientsService };
@@ -216,5 +231,127 @@ describe('ProfilesPatientsController', () => {
     expect(porId).toBeGreaterThan(-1);
     expect(dependientes).toBeLessThan(porId);
     expect(alta).toBeLessThan(porId);
+  });
+});
+
+/**
+ * La búsqueda de pacientes por cuerpo: el nombre (`q`) y el documento
+ * (`nationalId`) no pueden viajar en la URL, que registran los logs de acceso.
+ */
+describe('ProfilesPatientsController — búsqueda sin datos del paciente en la URL', () => {
+  const proto = ProfilesPatientsController.prototype as unknown as Record<
+    string,
+    object
+  >;
+
+  it('correcto — POST patients/search delega en el servicio igual que el GET', async () => {
+    const d = build();
+    d.patientsService.searchPatients.mockResolvedValue({ items: [] });
+    const filtros = {
+      q: 'Quispe',
+      nationalId: '4455667',
+      issuerAdministrativeAreaConceptId: '6f1c1d1e-0000-4000-8000-000000000001',
+      cursor: 'c-1',
+      limit: 10,
+    };
+
+    await d.controller.searchPatientsByBody(filtros, actor);
+    await d.controller.searchPatients(filtros, actor);
+
+    const esperado = {
+      query: 'Quispe',
+      nationalId: '4455667',
+      issuerAdministrativeAreaConceptId: '6f1c1d1e-0000-4000-8000-000000000001',
+      cursor: 'c-1',
+      limit: 10,
+    };
+    expect(d.patientsService.searchPatients).toHaveBeenNthCalledWith(
+      1,
+      esperado,
+      actor,
+    );
+    expect(d.patientsService.searchPatients).toHaveBeenNthCalledWith(
+      2,
+      esperado,
+      actor,
+    );
+  });
+
+  it('límite — sin tope en el cuerpo aplica el de siempre (50)', async () => {
+    const d = build();
+    d.patientsService.searchPatients.mockResolvedValue({ items: [] });
+
+    await d.controller.searchPatientsByBody({}, actor);
+
+    expect(d.patientsService.searchPatients).toHaveBeenCalledWith(
+      {
+        query: undefined,
+        nationalId: undefined,
+        issuerAdministrativeAreaConceptId: undefined,
+        cursor: undefined,
+        limit: 50,
+      },
+      actor,
+    );
+  });
+
+  it('es POST patients/search, responde 200 y exige los mismos roles que el GET', () => {
+    const porCuerpo = proto.searchPatientsByBody;
+    expect(Reflect.getMetadata(METHOD_METADATA, porCuerpo)).toBe(
+      RequestMethod.POST,
+    );
+    expect(Reflect.getMetadata(PATH_METADATA, porCuerpo)).toBe(
+      'patients/search',
+    );
+    expect(Reflect.getMetadata(HTTP_CODE_METADATA, porCuerpo)).toBe(
+      HttpStatus.OK,
+    );
+    expect(Reflect.getMetadata(ROLES_KEY, porCuerpo)).toEqual(
+      Reflect.getMetadata(ROLES_KEY, proto.searchPatients),
+    );
+  });
+
+  it('el GET sigue vivo pero anuncia su reemplazo (Deprecation + Link)', () => {
+    expect(Reflect.getMetadata(HEADERS_METADATA, proto.searchPatients)).toEqual(
+      expect.arrayContaining([
+        { name: 'Deprecation', value: 'true' },
+        {
+          name: 'Link',
+          value: '</profiles/patients/search>; rel="successor-version"',
+        },
+      ]),
+    );
+  });
+
+  describe('validación del cuerpo (mismo ValidationPipe que main.ts)', () => {
+    const pipe = new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    });
+    const meta: ArgumentMetadata = {
+      type: 'body',
+      metatype: SearchPatientsQueryDto,
+    };
+
+    it('correcto — acepta nombre, documento y tope', async () => {
+      await expect(
+        pipe.transform({ q: 'Ana', nationalId: '123', limit: 5 }, meta),
+      ).resolves.toMatchObject({ q: 'Ana', nationalId: '123', limit: 5 });
+    });
+
+    it('límite — tope 500 pasa, 501 no', async () => {
+      await expect(pipe.transform({ limit: 500 }, meta)).resolves.toMatchObject(
+        { limit: 500 },
+      );
+      await expect(pipe.transform({ limit: 501 }, meta)).rejects.toThrow();
+    });
+
+    it('inválido — un campo no declarado es 400, no se ignora', async () => {
+      await expect(
+        pipe.transform({ q: 'Ana', password: 'x' }, meta),
+      ).rejects.toThrow();
+    });
   });
 });

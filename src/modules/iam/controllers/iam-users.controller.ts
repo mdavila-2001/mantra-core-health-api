@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -46,6 +48,7 @@ import {
   AssistedPractitionerRegistrationResponseDto,
   AssistedRegistrationDto,
   AssistedRegistrationResponseDto,
+  SearchUsersBodyDto,
   SearchUsersResponseDto,
   UserDetailResponseDto,
   ListCredentialsResponseDto,
@@ -101,7 +104,18 @@ export class IamUsersController {
    */
   @Get()
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Listado paginado de usuarios' })
+  // Obsoleto por lo mismo que `GET /profiles/patients`: `q` es un nombre o un
+  // correo, y en la URL queda en los logs de acceso de cualquier proxy. Sigue
+  // respondiendo igual para no romper a un cliente ya desplegado.
+  @Header('Deprecation', 'true')
+  @Header('Link', '</iam/users/search>; rel="successor-version"')
+  @ApiOperation({
+    summary: 'Listado paginado de usuarios (obsoleto)',
+    description:
+      'Obsoleto: usar `POST /iam/users/search`, que recibe los mismos filtros en el cuerpo. ' +
+      'Por query string, `q` (nombre o correo) queda en los logs de acceso de los proxies y en el historial del navegador.',
+    deprecated: true,
+  })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -134,6 +148,39 @@ export class IamUsersController {
       statusConceptId,
       cursor,
       limit: limit ?? DEFAULT_USERS_PAGE_SIZE,
+    });
+  }
+
+  /**
+   * UC-01-01 (cara de lectura) por cuerpo: el mismo listado que `GET /iam/users`,
+   * con los filtros en el JSON y no en la URL.
+   *
+   * Es `POST` para que el nombre o el correo buscados no viajen en la línea de
+   * petición —que registran nginx, los proxies y el historial del navegador—,
+   * no porque mute nada: responde `200`. Mismo rol y mismo servicio que el
+   * `GET`. `search` es un segmento fijo y ninguna ruta `POST :id` de este
+   * controlador lo puede capturar (todas llevan un segundo segmento).
+   *
+   * @param body - Texto, estado, cursor y tope.
+   * @returns Página de usuarios.
+   */
+  @Post('search')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Buscar usuarios con los filtros en el cuerpo',
+    description:
+      'Reemplaza a `GET /iam/users`: mismos filtros, misma respuesta y mismo rol, pero el texto buscado (nombre o correo) viaja en el cuerpo y no queda en los logs de acceso.',
+  })
+  @ApiOkResponse({ type: SearchUsersResponseDto })
+  searchUsersByBody(
+    @Body() body: SearchUsersBodyDto,
+  ): Promise<SearchUsersResponseDto> {
+    return this.usersReadService.searchUsers({
+      query: body.q,
+      statusConceptId: body.status,
+      cursor: body.cursor,
+      limit: body.limit ?? DEFAULT_USERS_PAGE_SIZE,
     });
   }
 

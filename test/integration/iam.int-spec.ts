@@ -59,6 +59,26 @@ describe('IAM (integración)', () => {
     expect(cred!.secretHash).not.toBe(password);
   });
 
+  it('UC-01-01 lo encuentra por correo con los filtros en el cuerpo (POST /iam/users/search)', async () => {
+    const res = await http()
+      .post('/iam/users/search')
+      .set(bearer(ctx.adminToken))
+      .send({ q: email, limit: 5 })
+      .expect(200);
+
+    expect(res.body.items.map((item: { id: string }) => item.id)).toContain(
+      userId,
+    );
+  });
+
+  it('UC-01-01 la búsqueda por cuerpo exige tope válido (400)', async () => {
+    await http()
+      .post('/iam/users/search')
+      .set(bearer(ctx.adminToken))
+      .send({ limit: 501 })
+      .expect(400);
+  });
+
   it('UC-01-01 rechaza sin autenticación (401)', async () => {
     await http()
       .post('/iam/users')

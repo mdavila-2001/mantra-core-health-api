@@ -63,7 +63,9 @@ export class PatientListItemDto {
 }
 
 /**
- * Filtros de `GET /profiles/patients` (UC-05-13).
+ * Filtros de `POST /profiles/patients/search` (cuerpo) y del obsoleto
+ * `GET /profiles/patients` (query string), UC-05-13. El mismo DTO sirve a los
+ * dos: la búsqueda es una sola, sólo cambia por dónde viajan los filtros.
  *
  * `nationalId` e `issuerAdministrativeAreaConceptId` son el camino nuevo de la
  * TAREA-07: encontrar a alguien por su documento aunque su nombre y su código

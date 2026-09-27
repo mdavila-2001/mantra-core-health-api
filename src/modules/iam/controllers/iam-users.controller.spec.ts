@@ -1,4 +1,16 @@
 import { jest } from '@jest/globals';
+import {
+  HttpStatus,
+  RequestMethod,
+  ValidationPipe,
+  type ArgumentMetadata,
+} from '@nestjs/common';
+import {
+  HEADERS_METADATA,
+  HTTP_CODE_METADATA,
+  METHOD_METADATA,
+  PATH_METADATA,
+} from '@nestjs/common/constants';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
 /**
@@ -9,6 +21,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IamUsersController } from './iam-users.controller';
+import { ROLES_KEY } from '../../../common/auth/roles.decorator';
+import { SearchUsersBodyDto } from '../dto';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -182,5 +196,122 @@ describe('IamUsersController — lecturas', () => {
     await (d.controller as any)[metodo]('u1');
 
     expect((d.usersReadService as any)[delegado]).toHaveBeenCalledWith('u1');
+  });
+});
+
+/**
+ * El listado de usuarios por cuerpo: `q` es un nombre o un correo y no puede
+ * viajar en la URL, que registran los logs de acceso.
+ */
+describe('IamUsersController — búsqueda sin datos personales en la URL', () => {
+  const proto = IamUsersController.prototype as unknown as Record<
+    string,
+    object
+  >;
+
+  it('correcto — POST search traduce el cuerpo a los filtros del GET', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsersByBody({
+      q: 'ana@alovida.test',
+      status: 'status-1',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: 'ana@alovida.test',
+      statusConceptId: 'status-1',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+  });
+
+  it('límite — cuerpo vacío aplica el tope por defecto', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsersByBody({});
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: undefined,
+      statusConceptId: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('es POST search, responde 200 y exige SECURITY_ADMIN como el GET', () => {
+    const porCuerpo = proto.searchUsersByBody;
+    expect(Reflect.getMetadata(METHOD_METADATA, porCuerpo)).toBe(
+      RequestMethod.POST,
+    );
+    expect(Reflect.getMetadata(PATH_METADATA, porCuerpo)).toBe('search');
+    expect(Reflect.getMetadata(HTTP_CODE_METADATA, porCuerpo)).toBe(
+      HttpStatus.OK,
+    );
+    expect(Reflect.getMetadata(ROLES_KEY, porCuerpo)).toEqual([
+      'SECURITY_ADMIN',
+    ]);
+    expect(Reflect.getMetadata(ROLES_KEY, proto.searchUsers)).toEqual([
+      'SECURITY_ADMIN',
+    ]);
+  });
+
+  it('el GET sigue vivo pero anuncia su reemplazo (Deprecation + Link)', () => {
+    expect(Reflect.getMetadata(HEADERS_METADATA, proto.searchUsers)).toEqual(
+      expect.arrayContaining([
+        { name: 'Deprecation', value: 'true' },
+        { name: 'Link', value: '</iam/users/search>; rel="successor-version"' },
+      ]),
+    );
+  });
+
+  describe('validación del cuerpo (mismo ValidationPipe que main.ts)', () => {
+    const pipe = new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    });
+    const meta: ArgumentMetadata = {
+      type: 'body',
+      metatype: SearchUsersBodyDto,
+    };
+
+    it('correcto — texto, estado uuid, cursor y tope', async () => {
+      await expect(
+        pipe.transform(
+          {
+            q: 'ana',
+            status: '6f1c1d1e-0000-4000-8000-000000000001',
+            cursor: '25',
+            limit: 25,
+          },
+          meta,
+        ),
+      ).resolves.toMatchObject({ q: 'ana', limit: 25 });
+    });
+
+    it('límite — el tope va de 1 a 500, como el ParseOptionalLimitPipe del GET', async () => {
+      await expect(pipe.transform({ limit: 1 }, meta)).resolves.toMatchObject({
+        limit: 1,
+      });
+      await expect(pipe.transform({ limit: 500 }, meta)).resolves.toMatchObject(
+        { limit: 500 },
+      );
+      await expect(pipe.transform({ limit: 0 }, meta)).rejects.toThrow();
+      await expect(pipe.transform({ limit: 501 }, meta)).rejects.toThrow();
+    });
+
+    it('inválido — estado que no es uuid o campo no declarado', async () => {
+      await expect(
+        pipe.transform({ status: 'ACTIVO' }, meta),
+      ).rejects.toThrow();
+      await expect(
+        pipe.transform({ q: 'ana', role: 'SUPERADMIN' }, meta),
+      ).rejects.toThrow();
+    });
   });
 });
