@@ -56,13 +56,17 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ChartNotesService(
     em as any,
     notesRepo,
     logger as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
-  return { service, tx, em, notesRepo, clinicalRead };
+  return { service, tx, em, notesRepo, clinicalRead, encounterSealGuard };
 }
 
 describe('ChartNotesService', () => {
@@ -100,6 +104,23 @@ describe('ChartNotesService', () => {
         lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
         versionStatusConceptId: CHART.VERSION_DRAFT,
       });
+    });
+  });
+
+  // BR-14 (CL-07) — un encuentro sellado no admite notas nuevas.
+  describe('encuentro sellado (CL-07)', () => {
+    it('createNote contra un encuentro sellado responde 422 y no crea la cabecera', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.createNote(
+          { patientProfileId: 'p1', encounterId: 'enc-1' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
     });
   });
 

@@ -4,6 +4,7 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -4024,6 +4025,278 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Farmacia',
       definition:
         'Medicamentos que el plan cubre cuando se retiran con receta.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_CHUQUISACA,
+    {
+      display: 'SEDES Chuquisaca',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Chuquisaca. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_LA_PAZ,
+    {
+      display: 'SEDES La Paz',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de La Paz. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_COCHABAMBA,
+    {
+      display: 'SEDES Cochabamba',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Cochabamba. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_ORURO,
+    {
+      display: 'SEDES Oruro',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Oruro. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_POTOSI,
+    {
+      display: 'SEDES Potosí',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Potosí. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_TARIJA,
+    {
+      display: 'SEDES Tarija',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Tarija. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_BENI,
+    {
+      display: 'SEDES Beni',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Beni. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    PROF.JURISDICTION_SEDES_PANDO,
+    {
+      display: 'SEDES Pando',
+      definition:
+        'Registro ante el Servicio Departamental de Salud de Pando. Es una habilitación departamental que se suma a la nacional, no la reemplaza.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition: 'Unidad que procesa análisis de muestras de pacientes.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_IMAGING,
+    {
+      display: 'Centro de imagenología',
+      definition: 'Unidad que realiza estudios de diagnóstico por imágenes.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_LABORATORY,
+    {
+      display: 'Laboratorio',
+      definition: 'Análisis de laboratorio clínico.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_XRAY,
+    {
+      display: 'Rayos X',
+      definition: 'Radiografía convencional.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_ULTRASOUND,
+    {
+      display: 'Ecografía',
+      definition: 'Estudio por ultrasonido.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_CT,
+    {
+      display: 'Tomografía computada',
+      definition: 'Estudio por tomografía axial computada.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MRI,
+    {
+      display: 'Resonancia magnética',
+      definition: 'Estudio por resonancia magnética.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MAMMOGRAPHY,
+    {
+      display: 'Mamografía',
+      definition: 'Estudio por imagen de la mama.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_BONE_DENSITOMETRY,
+    {
+      display: 'Densitometría ósea',
+      definition: 'Medición de la densidad mineral de los huesos.',
+    },
+  ],
+  [
+    CONCEPTS.COUNTRY_BO,
+    {
+      display: 'Bolivia',
+      definition: 'El país donde opera la organización.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PATIENT_VISIBLE,
+    {
+      display: 'Visible para el paciente',
+      definition: 'El titular puede ver este documento en su propia historia.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PROVIDER_ONLY,
+    {
+      display: 'Sólo para el profesional',
+      definition:
+        'El documento queda visible únicamente para el equipo que atiende.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_PLAN,
+    {
+      display: 'Plan',
+      definition: 'El plan de cuidados que se propone seguir.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_PROPOSAL,
+    {
+      display: 'Propuesta',
+      definition:
+        'Un plan sugerido que todavía nadie se comprometió a cumplir.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_ORDER,
+    {
+      display: 'Indicación',
+      definition: 'Un plan que el profesional indica y espera que se cumpla.',
+    },
+  ],
+  [
+    CHART.CAREPLAN_INTENT_OPTION,
+    {
+      display: 'Opción',
+      definition: 'Un plan posible entre varios, a elección de la persona.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_DEFAULT,
+    {
+      display: 'Actividad general',
+      definition:
+        'Un paso del plan que no encaja en ninguna clase más específica.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_CONTROL,
+    {
+      display: 'Control clínico',
+      definition: 'Un control de seguimiento con el profesional.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_STUDY,
+    {
+      display: 'Estudio o laboratorio',
+      definition: 'Un estudio de laboratorio o de imagen que hay que hacerse.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_TREATMENT,
+    {
+      display: 'Tratamiento',
+      definition: 'Una terapia o medicación que la persona debe seguir.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_EDUCATION,
+    {
+      display: 'Educación de la persona',
+      definition:
+        'Una indicación de cuidado o hábito que la persona debe aprender.',
+    },
+  ],
+  [
+    CHART.ACTIVITY_CLASS_REFERRAL,
+    {
+      display: 'Derivación',
+      definition: 'Enviar a la persona a otro profesional o servicio.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_GENERAL,
+    {
+      display: 'Documento general',
+      definition: 'Un documento del expediente sin categoría específica.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_REPORT,
+    {
+      display: 'Informe clínico',
+      definition: 'Un informe redactado por un profesional sobre la atención.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_LAB,
+    {
+      display: 'Resultado de laboratorio',
+      definition: 'El resultado de un análisis de laboratorio.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_IMAGING,
+    {
+      display: 'Estudio de imagen',
+      definition: 'Un estudio de imagenología y su informe.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_CONSENT,
+    {
+      display: 'Consentimiento informado',
+      definition:
+        'La constancia de que la persona aceptó un procedimiento tras ser informada.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_CERTIFICATE,
+    {
+      display: 'Certificado',
+      definition: 'Una constancia emitida por el profesional.',
+    },
+  ],
+  [
+    CHART.DOC_CATEGORY_DISCHARGE,
+    {
+      display: 'Epicrisis o alta',
+      definition: 'El resumen de una internación al darse de alta.',
     },
   ],
 ];

@@ -24,7 +24,11 @@ import {
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
 } from '../../../common';
-import { ChartMeReadService, EncounterPdfService } from '../services';
+import {
+  ChartMeReadService,
+  EncounterPdfService,
+  PatientRecordPdfService,
+} from '../services';
 import {
   MyChartDocumentListResponseDto,
   MyChartNoteListResponseDto,
@@ -46,6 +50,7 @@ export class ChartMeController {
   constructor(
     private readonly readService: ChartMeReadService,
     private readonly encounterPdfService: EncounterPdfService,
+    private readonly recordPdfService: PatientRecordPdfService,
   ) {}
 
   /** Las evoluciones liberadas del titular — nunca un borrador ni una retenida. */
@@ -145,6 +150,39 @@ export class ChartMeController {
     res.setHeader('Cache-Control', 'private, no-store');
     const { buffer, fileName } =
       await this.encounterPdfService.renderForPatient(id, actor);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    );
+    res.send(buffer);
+  }
+
+  /**
+   * PDF oficial de la historia completa del titular (BR-15, CV-06, TX-32):
+   * armado en la API con sólo lo liberado y visible, sellado con SHA-256 y
+   * con rastro en `audit.data_access_log`.
+   */
+  @Get('record/pdf')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar mi historia completa en PDF oficial',
+    description:
+      'Sólo lo liberado y visible; sellado y auditado. 422 si la sesión no tiene perfil de paciente.',
+  })
+  @ApiOkResponse({
+    description: 'PDF oficial de la historia del titular',
+    content: {
+      'application/pdf': { schema: { type: 'string', format: 'binary' } },
+    },
+  })
+  async getMyRecordPdf(
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    res.setHeader('Cache-Control', 'private, no-store');
+    const { buffer, fileName } =
+      await this.recordPdfService.renderForPatient(actor);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',

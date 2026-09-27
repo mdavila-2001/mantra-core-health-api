@@ -184,8 +184,10 @@ describe('FormsFieldsController · CL-68 roles', () => {
   ] as const)(
     '%s exige personal de salud o SECURITY_ADMIN, no cualquier sesión',
     (metodo) => {
+      // Se lee la metadata del método sin invocarlo: no hay `this` en juego.
       const roles = Reflect.getMetadata(
         ROLES_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         FormsFieldsController.prototype[metodo],
       );
       expect(roles).toEqual(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN']);
@@ -398,10 +400,27 @@ describe('FormsMeController', () => {
     };
   }
 
+  it('listMyInstances con include=values lo delega y con otro valor responde 400', async () => {
+    const d = build();
+    await d.controller.listMyInstances(paciente, undefined, 'values');
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(
+      paciente,
+      50,
+      true,
+    );
+    expect(() =>
+      d.controller.listMyInstances(paciente, undefined, 'todo'),
+    ).toThrow('include admite sólo: values');
+  });
+
   it('delegates listMyInstances with the actor and the default limit', async () => {
     const d = build();
     await d.controller.listMyInstances(paciente, undefined);
-    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(
+      paciente,
+      50,
+      false,
+    );
   });
 
   it('delegates getMyInstance with the actor of the session', async () => {

@@ -258,6 +258,25 @@ export class ChartTemplateFieldDto {
   valueSetId?: string;
 
   /**
+   * Cardinalidad mínima del campo (CL-24), si el modelo la declara.
+   */
+  @ApiPropertyOptional()
+  cardinalityMin?: number;
+
+  /**
+   * Cardinalidad máxima del campo (CL-24), si el modelo la declara.
+   */
+  @ApiPropertyOptional()
+  cardinalityMax?: number;
+
+  /**
+   * Texto de ayuda del campo en español (CL-24), desde
+   * `forms.field_definition_localizations`.
+   */
+  @ApiPropertyOptional()
+  helpText?: string;
+
+  /**
    * Si el campo es obligatorio al completar la plantilla.
    */
   @ApiProperty()

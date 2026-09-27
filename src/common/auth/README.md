@@ -46,6 +46,7 @@ decisión coordinada con el front, no el efecto colateral de un despliegue.
 | `AUTH_REFRESH_COOKIE_NAME` | `redesa_refresh` | Nombre de la cookie. El default es el nombre que ya tenía (TX-28); declarar `mch_refresh` lo cambia y el refresh la lee con ese nombre. |
 | `AUTH_REFRESH_COOKIE_PATH` | `/iam/auth/token/refresh` | `Path` de la cookie. Detrás de un prefijo de proxy (`/api/...`) hay que declararlo igual. |
 | `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | `strict`, `lax` o `none`. |
+| `AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED` | `false` | Con `true`, un administrador de plataforma (`SUPERADMIN`, `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `IDENTITY_ADMIN`, `HEALTH_DATA_ADMIN`, `SOURCE_ADMIN`) con factor verificado recibe siempre el desafío, aunque `AUTH_MFA_CHALLENGE_ENABLED` esté apagada. Uno sin factor entra y deja rastro (`auth.admin-without-mfa`): enrolar un factor exige sesión (TX-29). |
 | `AUTH_MFA_CHALLENGE_ENABLED` | `false` | Con `true`, el login de una cuenta con factor MFA verificado exige `mfaCode`: sin él, `401 details.reason = MFA_REQUIRED`; con uno que no valida, `MFA_INVALID` (TX-29). |
 | `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | Fuerza o quita el atributo `Secure`. Sólo hace falta declararlo en pruebas o tras un proxy que termina TLS. |
 

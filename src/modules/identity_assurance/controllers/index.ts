@@ -6,3 +6,4 @@ export * from './identity-manual-review.controller';
 export * from './identity-assertions.controller';
 export * from './identity-worker.controller';
 export * from './identity-self-service.controller';
+export * from './identity-catalog-listing.controller';

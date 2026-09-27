@@ -98,6 +98,14 @@ export class PractitionerCredentialDto {
   @ApiPropertyOptional()
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se emitió el título, en texto libre. */
+  @ApiPropertyOptional()
+  issuingCityText?: string;
+
+  /** País de emisión (concepto de `VS_COUNTRY`). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  issuingCountryConceptId?: string;
+
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   issueDate?: Date;
 

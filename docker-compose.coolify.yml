@@ -199,6 +199,9 @@ x-app-env: &app-env
   AUTH_REFRESH_COOKIE_SAMESITE: ${AUTH_REFRESH_COOKIE_SAMESITE:-strict}
   # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
   AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
+  # MFA obligatorio para los roles administrativos (TX-29). Apagado: un
+  # administrador sin factor entra igual (no hay alta de factor previa al login).
+  AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED: ${AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   # El bypass de verificación aborta el arranque si llega en `true` con
@@ -755,8 +758,19 @@ volumes:
   mongodb_data:
   redis_data:
   opensearch_data:
+  # TX-34: los dos volúmenes con archivos de pacientes. Las etiquetas declaran
+  # que el volumen exige respaldo: es lo que una herramienta de respaldo del
+  # servidor (o una revisión de despliegue) filtra. `api_storage` sólo se usa con
+  # FILE_STORAGE_ADAPTER=local; `minio_data`, con FILE_STORAGE_ADAPTER=s3 (bucket
+  # MINIO_BUCKET, prefijo FILE_STORAGE_S3_PREFIX).
   minio_data:
+    labels:
+      com.alovida.backup: "required"
+      com.alovida.backup.contents: "archivos clínicos (bucket MINIO_BUCKET, prefijo FILE_STORAGE_S3_PREFIX)"
   api_storage:
+    labels:
+      com.alovida.backup: "required"
+      com.alovida.backup.contents: "archivos clínicos del adaptador local (FILE_STORAGE_LOCAL_DIR)"
 
 # -------------------------------------------------------------------------
 # Red compartida con el stack del frontend.

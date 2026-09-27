@@ -2484,6 +2484,31 @@ describe('SchedulingBookingsService', () => {
       };
     }
 
+    it('TX-27 · resourceIds lista varias agendas en una sola lectura', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      await d.service.searchBookings(
+        { resourceIds: ['res-1', 'res-2'], includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+      expect(d.bookingsRepo.findBookings).toHaveBeenCalledTimes(1);
+      expect(d.bookingsRepo.findBookings.mock.calls[0][1]).toMatchObject({
+        resourceIds: ['res-1', 'res-2'],
+      });
+    });
+
+    it('TX-27 · sin paciente ni recursos sigue rechazando el listado sin acotar', async () => {
+      const d = build();
+      await expect(
+        d.service.searchBookings(
+          { resourceIds: [], includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
     it('MAC-6 · el profesional de la agenda ve el nombre del paciente', async () => {
       // Sin esto, la vista del día es una lista de identificadores. Es el
       // pedido explícito del registro del cliente: «nombre completo del

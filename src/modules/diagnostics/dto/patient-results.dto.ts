@@ -4,7 +4,13 @@ import {
 } from '../../insurance/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsUUID } from 'class-validator';
+import {
+  IsDate,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /**
  * Un archivo del informe: lo que se descarga.
@@ -210,13 +216,13 @@ export class PatientOwnOrdersResponseDto {
  * directamente un `userId` hubiera dejado que el cliente compartiera con
  * cualquier cuenta de la plataforma, vinculada o no al paciente.
  *
- * ## Por qué no lleva `reason` (CL-50)
+ * ## El motivo (CL-50)
  *
- * `authz.resource_scope_grants` no tiene una columna para el motivo y este
- * carril no hace DDL. Un campo que se validaba pero no se guardaba en ningún
- * lado era peor que no tenerlo: quien lo mandaba creía que había quedado
- * registrado. Si el producto necesita el motivo, es un pedido a M1 para que lo
- * agregue al modelo (ver `docs/progress/DECISIONS.md`).
+ * `reason` es opcional y se guarda en `authz.resource_scope_grants.reason_text`
+ * (columna agregada al modelo en v4.2.30). Antes se retiró del DTO porque la
+ * tabla no tenía dónde guardarlo y un campo que se validaba pero se perdía era
+ * peor que no tenerlo. Ahora se persiste y se devuelve en el listado de
+ * compartidos.
  */
 export class ShareDiagnosticResultDto {
   /**
@@ -236,6 +242,13 @@ export class ShareDiagnosticResultDto {
   @Type(() => Date)
   @IsDate()
   validUntil!: Date;
+
+  /** Por qué se comparte (CL-50). Opcional; se guarda y se devuelve. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
 }
 
 /** Un resultado compartido: con quién y hasta cuándo. */
@@ -263,6 +276,9 @@ export class DiagnosticResultShareDto {
 
   /** Si el grant está vigente en este momento. */
   @ApiProperty() active!: boolean;
+
+  /** Motivo con el que se compartió, si el paciente lo dio (CL-50). */
+  @ApiPropertyOptional() reason?: string;
 }
 
 /** Los profesionales con los que un resultado está o estuvo compartido. */

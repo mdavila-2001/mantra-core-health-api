@@ -24,7 +24,7 @@ const future = new Date(Date.now() + 3_600_000);
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const forkEm = {};
+  const forkEm = { find: mockFn().mockResolvedValue([]) };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => forkEm),
@@ -64,6 +64,7 @@ function build() {
   );
   return {
     service,
+    em,
     tx,
     careRepo,
     legalRepo,
@@ -296,6 +297,43 @@ describe('AuthzCareRelationshipsService', () => {
           practitionerProfileId: 'pro-2',
           statusConceptId: CONCEPTS.STATE_PENDING,
         }),
+      ]);
+    });
+
+    it('resuelve el nombre de todos los profesionales en una sola lectura (TX-27)', async () => {
+      const d = build();
+      const fila = (id: string, pro: string) => ({
+        id,
+        patientProfileId: 'pat-1',
+        practitionerProfileId: pro,
+        relationshipTypeConceptId: 'type-1',
+        statusConceptId: CONCEPTS.STATE_PENDING,
+        validFrom: future,
+      });
+      d.careRepo.findPendingByPatient.mockResolvedValue([
+        fila('cr-1', 'pro-1'),
+        fila('cr-2', 'pro-2'),
+        fila('cr-3', 'pro-1'),
+      ]);
+      const forkEm: any = d.em.fork();
+      forkEm.find.mockResolvedValue([
+        { id: 'pro-1', displayName: 'Dra. Uno' },
+        { id: 'pro-2', name: 'Dos', lastName: 'Pérez' },
+      ]);
+      const paciente = {
+        id: 'u-pat-1',
+        roles: ['PATIENT'],
+        patientProfileId: 'pat-1',
+      } as any;
+
+      const res =
+        await d.service.listMyPendingCareRelationshipRequests(paciente);
+
+      expect(forkEm.find).toHaveBeenCalledTimes(1);
+      expect(res.map((r) => r.practitionerName)).toEqual([
+        'Dra. Uno',
+        'Dos Pérez',
+        'Dra. Uno',
       ]);
     });
 

@@ -8,3 +8,5 @@ export * from './chart-notes-read.service';
 export * from './encounter-pdf.service';
 // BR-15 (CL-30/CL-36): lectura del titular, archivo nuevo e independiente.
 export * from './chart-me-read.service';
+// BR-15 (CV-06, TX-32): PDF oficial de la historia completa del titular.
+export * from './patient-record-pdf.service';

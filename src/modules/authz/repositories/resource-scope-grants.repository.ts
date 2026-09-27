@@ -33,6 +33,8 @@ export interface CreateResourceScopeGrantData {
    * Identificador asociado a tenant.
    */
   tenantId?: string;
+  /** Motivo del grant en texto libre (CL-50). */
+  reasonText?: string;
   /**
    * Valor de valid from mantenido por la instancia.
    */
@@ -139,6 +141,7 @@ export class ResourceScopeGrantsRepository {
         resourceId: data.resourceId,
         effectConceptId: data.effectConceptId,
         tenantId: data.tenantId,
+        reasonText: data.reasonText,
         validFrom: data.validFrom,
         validTo: data.validTo,
         ...createdBy(data.actorUserId),

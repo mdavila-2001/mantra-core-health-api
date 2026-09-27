@@ -99,6 +99,66 @@ describe('TenantAffiliationDocumentsService', () => {
     }
   });
 
+  describe('certificado de radioprotección (D-BR09-1)', () => {
+    const CON_RADIOPROTECCION = {
+      ...CONCEPTS_RESOLVED,
+      documentType: new Map([
+        ...CONCEPTS_RESOLVED.documentType,
+        ['CERTIFICADO_RADIOPROTECCION', 'ct-radioprotec'],
+      ]),
+    };
+
+    it('sin el archivo, el alta crea los 5 de siempre y no toca el código nuevo', async () => {
+      const d = build();
+      const ids = await d.service.attachRegistrationDocuments(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        documents: DOCUMENTS,
+      });
+      expect(ids).toHaveLength(5);
+    });
+
+    it('con el archivo crea una sexta fila con el tipo CERTIFICADO_RADIOPROTECCION y autoridad OTRO', async () => {
+      const d = build();
+      d.concepts.resolve.mockResolvedValue(CON_RADIOPROTECCION);
+      const ids = await d.service.attachRegistrationDocuments(d.tx, {
+        tenantId: 'tenant-1',
+        ownerUserId: 'user-1',
+        documents: { ...DOCUMENTS, RADIOPROTECTION_CERT_DOC: 'file-radio' },
+      });
+      expect(ids).toHaveLength(6);
+      const ultima = d.legalRepo.createAffiliationDocument.mock.calls.at(-1)[1];
+      expect(ultima).toMatchObject({
+        fileId: 'file-radio',
+        documentTypeConceptId: 'ct-radioprotec',
+        issuingAuthorityConceptId: 'ia-otro',
+      });
+    });
+
+    it('en una base sin el código responde 412 nombrándolo y no crea la fila', async () => {
+      const d = build();
+      await expect(
+        d.service.attachRegistrationDocuments(d.tx, {
+          tenantId: 'tenant-1',
+          ownerUserId: 'user-1',
+          documents: { ...DOCUMENTS, RADIOPROTECTION_CERT_DOC: 'file-radio' },
+        }),
+      ).rejects.toThrow('CERTIFICADO_RADIOPROTECCION');
+    });
+
+    it('no admite el mismo archivo para radioprotección y otro documento', async () => {
+      const d = build();
+      d.concepts.resolve.mockResolvedValue(CON_RADIOPROTECCION);
+      await expect(
+        d.service.attachRegistrationDocuments(d.tx, {
+          tenantId: 'tenant-1',
+          ownerUserId: 'user-1',
+          documents: { ...DOCUMENTS, RADIOPROTECTION_CERT_DOC: 'file-sedes' },
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
   it('reclama cada archivo antes de crear la fila, con la categoría y el PDF exigidos', async () => {
     const d = build();
 

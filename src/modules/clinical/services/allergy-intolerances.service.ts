@@ -11,6 +11,8 @@ import {
   AllergyIntolerancesRepository,
   EncountersRepository,
 } from '../repositories';
+// BR-14 (CL-07): un encuentro sellado no admite más alergias contra él.
+import { EncounterSealGuardService } from './encounter-seal-guard.service';
 import {
   AttachFileToAllergyIntoleranceDto,
   CreateAllergyIntoleranceDto,
@@ -47,6 +49,7 @@ export class AllergyIntolerancesService {
     private readonly encountersRepo: EncountersRepository,
     private readonly filesService: FilesService,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(AllergyIntolerancesService.name);
   }
@@ -90,6 +93,10 @@ export class AllergyIntolerancesService {
           tx,
           dto.encounterId,
           dto.patientProfileId,
+        );
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
         );
       }
       const existing = await this.allergyRepo.findActiveBySubstance(

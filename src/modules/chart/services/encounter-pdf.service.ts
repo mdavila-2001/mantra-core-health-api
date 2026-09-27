@@ -4,8 +4,13 @@ import PDFDocument from 'pdfkit';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+// BR-15 (TX-32): la descarga del PDF de la atención deja rastro, como el resto
+// de las lecturas del titular (`ChartMeReadService`).
+import { DataAccessLogRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import {
   ConditionsRepository,
   EncountersRepository,
@@ -67,6 +72,8 @@ export interface PapelDelEncuentro {
   readonly pie: string;
   readonly contentHash: string;
   readonly encounterId: string;
+  /** Título de los metadatos del PDF; por defecto, el del encuentro. */
+  readonly metadataTitle?: string;
 }
 
 /** Fecha y hora en formato es-BO, o un guion si no se conoce. */
@@ -235,7 +242,9 @@ export function dibujar(papel: PapelDelEncuentro): Promise<Buffer> {
       size: 'A4',
       margin: PAGE_MARGIN,
       info: {
-        Title: `Encuentro clínico oficial ${papel.encounterId}`,
+        Title:
+          papel.metadataTitle ??
+          `Encuentro clínico oficial ${papel.encounterId}`,
         Subject: 'Documento oficial de encuentro clínico cerrado',
         Keywords: `sello:${papel.contentHash}`,
       },
@@ -296,6 +305,7 @@ export class EncounterPdfService {
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly personsRepo: PersonsRepository,
     private readonly filesRepo: FilesRepository,
+    private readonly dataAccessLogRepo: DataAccessLogRepository,
   ) {}
 
   /**
@@ -390,12 +400,25 @@ export class EncounterPdfService {
       });
     }
 
-    return this.componer(em, encounter, encounterId, {
+    const result = await this.componer(em, encounter, encounterId, {
       versionIdOf: (header) => header.currentReleasedVersionId,
       documentFilter: (document) =>
         document.patientVisibilityConceptId ===
         CHART.VISIBILITY_PATIENT_VISIBLE,
     });
+
+    this.dataAccessLogRepo.record(em, {
+      userId: actor.id,
+      actionConceptId: AUD.ACTION_READ,
+      patientProfileId: actor.patientProfileId,
+      tenantId: getCurrentTenantId(),
+      purpose: 'PATIENT_ACCESS',
+      resourceType: 'PATIENT_ENCOUNTER_PDF',
+      resourceId: encounterId,
+      recordedByUserId: actor.id,
+    });
+    await em.flush();
+    return result;
   }
 
   /**

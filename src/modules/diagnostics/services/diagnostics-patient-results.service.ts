@@ -495,6 +495,9 @@ export class DiagnosticsPatientResultsService {
         // persona quiere decir cuando lo vuelve a compartir.
         existing.validFrom = existing.validFrom ?? now;
         existing.validTo = dto.validUntil;
+        if (dto.reason !== undefined) {
+          existing.reasonText = dto.reason.trim() || undefined;
+        }
         tx.persist(touch(existing, actor.id));
         await tx.flush();
         this.logger.info(
@@ -510,6 +513,7 @@ export class DiagnosticsPatientResultsService {
           validTo: existing.validTo,
           now,
           practitionerName,
+          reason: existing.reasonText,
         });
       }
 
@@ -521,6 +525,7 @@ export class DiagnosticsPatientResultsService {
         resourceId: reportId,
         effectConceptId: AUTHZ.EFFECT_ALLOW,
         tenantId: report.custodianTenantId,
+        reasonText: dto.reason?.trim() || undefined,
         validFrom: now,
         validTo: dto.validUntil,
         actorUserId: actor.id,
@@ -540,6 +545,7 @@ export class DiagnosticsPatientResultsService {
         validTo: dto.validUntil,
         now,
         practitionerName,
+        reason: grant.reasonText,
       });
     });
   }
@@ -578,6 +584,7 @@ export class DiagnosticsPatientResultsService {
           validTo: grant.validTo,
           now,
           practitionerName: nombresPorUsuario.get(grant.subjectId),
+          reason: grant.reasonText,
         }),
       ),
     };
@@ -646,6 +653,7 @@ export class DiagnosticsPatientResultsService {
         validTo: grant.validTo,
         now,
         practitionerName: nombres.get(grant.subjectId),
+        reason: grant.reasonText,
       });
     });
   }
@@ -859,6 +867,8 @@ export class DiagnosticsPatientResultsService {
       now: Date;
       /** Nombre resuelto del profesional, si se pudo resolver. */
       practitionerName?: string;
+      /** Motivo con el que se compartió (CL-50). */
+      reason?: string;
     },
   ): DiagnosticResultShareDto {
     const desde = vigencia.validFrom ?? vigencia.now;
@@ -874,6 +884,7 @@ export class DiagnosticsPatientResultsService {
       validFrom: desde,
       validTo: vigencia.validTo,
       active: activo,
+      reason: vigencia.reason,
     };
   }
 

@@ -7,6 +7,7 @@ import {
 } from '../../terminology/repositories';
 import {
   AFFILIATION_DOCUMENT_ROLES,
+  OPTIONAL_DOCUMENT_ROLES,
   AFFILIATION_DOCUMENT_VALUE_SETS,
   DOCUMENT_TYPE_CODE_BY_ROLE,
   BOLIVIAN_ISSUING_AUTHORITY_BY_ROLE,
@@ -118,9 +119,9 @@ export class AffiliationDocumentConceptsService {
       AFFILIATION_DOCUMENT_VALUE_SETS.documentType,
       [
         ...new Set(
-          AFFILIATION_DOCUMENT_ROLES.map(
-            (role) => DOCUMENT_TYPE_CODE_BY_ROLE[role],
-          ),
+          AFFILIATION_DOCUMENT_ROLES.filter(
+            (role) => !OPTIONAL_DOCUMENT_ROLES.includes(role),
+          ).map((role) => DOCUMENT_TYPE_CODE_BY_ROLE[role]),
         ),
       ],
     );

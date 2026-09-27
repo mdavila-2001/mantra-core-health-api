@@ -114,6 +114,18 @@ describe('B.3 · PDF oficial de receta y verificación pública (integración)',
     titular.token = t.token;
     titular.pid = t.pid;
 
+    // Recetar exige una relación asistencial vigente con la titular (MCH-007).
+    await http()
+      .post('/authz/care-relationships')
+      .set(bearer(ctx.adminToken))
+      .send({
+        tenantId: medico.tenantId,
+        patientProfileId: titular.pid,
+        practitionerProfileId: medico.hpid,
+        relationshipType: 'TREATING',
+      })
+      .expect(201);
+
     const a = await registrarPaciente('ajeno');
     ajeno.nationalId = a.nationalId;
     ajeno.token = a.token;

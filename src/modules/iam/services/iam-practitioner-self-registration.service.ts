@@ -676,6 +676,8 @@ export class IamPractitionerSelfRegistrationService {
           credentialTypeConceptId: declarada.credentialTypeConceptId,
           number: numero,
           issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
+          issuingCityText: declarada.issuingCityText?.trim(),
+          issuingCountryConceptId: declarada.issuingCountryConceptId,
           fileId: declarada.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,

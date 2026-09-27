@@ -329,6 +329,7 @@ export class FormsReadService {
   async listMyInstances(
     actor: AuthenticatedUser,
     limit: number,
+    includeValues = false,
   ): Promise<MyFormInstanceListResponseDto> {
     const patientProfileId = this.requirePatientProfile(actor);
     const tenantId = requireTenantId();
@@ -350,11 +351,16 @@ export class FormsReadService {
       limit + 1,
     );
     const truncated = rows.length > limit;
-    return {
-      items: rows.slice(0, limit).map((row) => this.toInstanceItem(row)),
-      limit,
-      truncated,
-    };
+    const page = rows.slice(0, limit);
+    // TX-27: una sola petición HTTP trae las instancias con sus valores. Las
+    // instancias ya están probadas como propias (parten de los encuentros del
+    // titular), así que se compone el mismo detalle que `getMyInstance`.
+    const items = includeValues
+      ? await Promise.all(
+          page.map((row) => this.composeInstanceDetail(em, row)),
+        )
+      : page.map((row) => this.toInstanceItem(row));
+    return { items, limit, truncated };
   }
 
   /**

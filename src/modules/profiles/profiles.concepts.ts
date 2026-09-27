@@ -97,6 +97,62 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'JURISDICTION_SEDES_SANTA_CRUZ',
       display: 'SEDES — Gobernación Autónoma Departamental de Santa Cruz',
     },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_CHUQUISACA: {
+      code: 'JURISDICTION_SEDES_CHUQUISACA',
+      display: 'SEDES — Servicio Departamental de Salud de Chuquisaca',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_LA_PAZ: {
+      code: 'JURISDICTION_SEDES_LA_PAZ',
+      display: 'SEDES — Servicio Departamental de Salud de La Paz',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_COCHABAMBA: {
+      code: 'JURISDICTION_SEDES_COCHABAMBA',
+      display: 'SEDES — Servicio Departamental de Salud de Cochabamba',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_ORURO: {
+      code: 'JURISDICTION_SEDES_ORURO',
+      display: 'SEDES — Servicio Departamental de Salud de Oruro',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_POTOSI: {
+      code: 'JURISDICTION_SEDES_POTOSI',
+      display: 'SEDES — Servicio Departamental de Salud de Potosí',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_TARIJA: {
+      code: 'JURISDICTION_SEDES_TARIJA',
+      display: 'SEDES — Servicio Departamental de Salud de Tarija',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_BENI: {
+      code: 'JURISDICTION_SEDES_BENI',
+      display: 'SEDES — Servicio Departamental de Salud de Beni',
+    },
+    // Cada departamento tiene su SEDES: misma lógica que el de Santa Cruz (una
+    // segunda fila de `jurisdiction_authorizations`, no un reemplazo). La clave
+    // es la del paquete del modelo (`profiles:JURISDICTION_SEDES_*`, v4.2.30).
+    JURISDICTION_SEDES_PANDO: {
+      code: 'JURISDICTION_SEDES_PANDO',
+      display: 'SEDES — Servicio Departamental de Salud de Pando',
+    },
     AUTH_PENDING: { code: 'AUTH_PENDING', display: 'Authorization pending' },
     AUTH_ACTIVE: { code: 'AUTH_ACTIVE', display: 'Authorization active' },
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },

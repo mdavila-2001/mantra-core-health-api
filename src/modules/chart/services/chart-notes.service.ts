@@ -28,7 +28,11 @@ import {
   WithholdVersionDto,
 } from '../dto';
 import type { ClinicalNoteVersions } from '../entities';
-import { ClinicalReadService } from '../../clinical/services';
+import {
+  ClinicalReadService,
+  // BR-14 (CL-07): un encuentro sellado no admite más notas contra él.
+  EncounterSealGuardService,
+} from '../../clinical/services';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -54,6 +58,7 @@ export class ChartNotesService {
     private readonly notesRepo: ClinicalNotesRepository,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ChartNotesService.name);
   }
@@ -83,6 +88,12 @@ export class ChartNotesService {
     // nada para que un 403 no deje cabecera.
     const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
+      if (dto.encounterId !== undefined) {
+        await this.encounterSealGuard.assertEncounterWritable(
+          tx,
+          dto.encounterId,
+        );
+      }
       const header = this.notesRepo.createHeader(tx, {
         patientProfileId: dto.patientProfileId,
         encounterId: dto.encounterId,

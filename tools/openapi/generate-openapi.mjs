@@ -131,6 +131,11 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
   // — subtarea 3.3, 2026-09-18).
   ['get', '/public/portability/verify/{manifestHash}'],
+  // Lo que ofrece una ficha pública de organización o de farmacia
+  // (`public-catalog.controller.ts`, `@Public()` — M4 · H2): entraron sin
+  // sumarse acá y el lint de Redocly los daba como `security-defined`.
+  ['get', '/public/profiles/o/{slug}/services'],
+  ['get', '/public/profiles/f/{slug}/products'],
 ];
 
 function markPublicOperations(document) {

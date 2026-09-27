@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { HealthContextController } from './controllers';
-import { ContextCollectionService, CountryContextService } from './services';
+import {
+  HealthContextController,
+  HealthContextListingController,
+} from './controllers';
+import {
+  ContextCollectionService,
+  CountryContextService,
+  HealthContextListingService,
+} from './services';
 import { HealthContextRepository } from './repositories';
 
 /**
@@ -13,11 +20,12 @@ import { HealthContextRepository } from './repositories';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [HealthContextController],
+  controllers: [HealthContextController, HealthContextListingController],
   providers: [
     HealthContextRepository,
     ContextCollectionService,
     CountryContextService,
+    HealthContextListingService,
   ],
 })
 export class HealthContextModule {}

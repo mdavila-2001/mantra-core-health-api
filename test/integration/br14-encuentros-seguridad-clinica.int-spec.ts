@@ -22,7 +22,9 @@ import {
  */
 describe('BR-14 · encuentros, sello del cierre, CDS y lecturas del resumen (integración)', () => {
   let ctx: TestContext;
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);
@@ -178,6 +180,116 @@ describe('BR-14 · encuentros, sello del cierre, CDS y lecturas del resumen (int
         })
         .expect(422);
     });
+
+    it('rechaza una alergia nueva contra ese encuentro con 422 (CL-07, cableado de M3)', async () => {
+      await http()
+        .post('/clinical/allergy-intolerances')
+        .set(bearer(medico.token))
+        .send({
+          custodianTenantId: medico.tenantId,
+          patientProfileId: titular.pid,
+          encounterId,
+          substanceConceptId: codeConceptId1,
+        })
+        .expect(422);
+    });
+
+    it('rechaza una receta nueva contra ese encuentro con 422 (CL-07, cableado de M3)', async () => {
+      await http()
+        .post('/clinical/medication-requests')
+        .set(bearer(medico.token))
+        .send({
+          custodianTenantId: medico.tenantId,
+          patientProfileId: titular.pid,
+          encounterId,
+          medicationConceptId: codeConceptId1,
+        })
+        .expect(422);
+    });
+
+    it('rechaza una nota clínica nueva contra ese encuentro con 422 (CL-07, cableado de M3)', async () => {
+      await http()
+        .post('/charts/notes')
+        .set(bearer(medico.token))
+        .send({ patientProfileId: titular.pid, encounterId })
+        .expect(422);
+    });
+
+    it('la alergia sin encuentro sigue registrándose: la guarda sólo mira al encuentro sellado', async () => {
+      await http()
+        .post('/clinical/allergy-intolerances')
+        .set(bearer(medico.token))
+        .send({
+          custodianTenantId: medico.tenantId,
+          patientProfileId: titular.pid,
+          substanceConceptId: codeConceptId2,
+        })
+        .expect(201);
+    });
+
+    describe('BR-15 · el PDF oficial del titular deja rastro (TX-32)', () => {
+      const filasDeAuditoria = async (resourceType: string) => {
+        const filas = await ctx.orm.em.getConnection().execute<{ n: number }[]>(
+          `select count(*)::int as n from audit.data_access_log
+              where patient_profile_id = ? and resource_type = ?`,
+          [titular.pid, resourceType],
+        );
+        return filas[0].n;
+      };
+
+      it('el PDF de la atención se descarga y asienta una fila de PATIENT_ENCOUNTER_PDF', async () => {
+        const antes = await filasDeAuditoria('PATIENT_ENCOUNTER_PDF');
+        const res = await http()
+          .get(`/charts/me/encounters/${encounterId}/pdf`)
+          .set(bearer(titular.token))
+          .buffer(true)
+          .parse((r, cb) => {
+            const trozos: Buffer[] = [];
+            r.on('data', (c: Buffer) => trozos.push(c));
+            r.on('end', () => cb(null, Buffer.concat(trozos)));
+          })
+          .expect(200);
+        expect(res.headers['content-type']).toContain('application/pdf');
+        expect(res.headers['cache-control']).toContain('no-store');
+        expect((res.body as Buffer).subarray(0, 4).toString()).toBe('%PDF');
+        expect(await filasDeAuditoria('PATIENT_ENCOUNTER_PDF')).toBe(antes + 1);
+      });
+
+      it('la historia completa se descarga como PDF sellado y asienta PATIENT_RECORD_PDF', async () => {
+        const antes = await filasDeAuditoria('PATIENT_RECORD_PDF');
+        const res = await http()
+          .get('/charts/me/record/pdf')
+          .set(bearer(titular.token))
+          .buffer(true)
+          .parse((r, cb) => {
+            const trozos: Buffer[] = [];
+            r.on('data', (c: Buffer) => trozos.push(c));
+            r.on('end', () => cb(null, Buffer.concat(trozos)));
+          })
+          .expect(200);
+        expect(res.headers['content-type']).toContain('application/pdf');
+        expect(res.headers['cache-control']).toContain('no-store');
+        const bytes = res.body as Buffer;
+        expect(bytes.subarray(0, 4).toString()).toBe('%PDF');
+        expect(/sello:[0-9a-f]{64}/.test(bytes.toString('latin1'))).toBe(true);
+        expect(await filasDeAuditoria('PATIENT_RECORD_PDF')).toBe(antes + 1);
+      });
+
+      it('sin sesión, 401; con una cuenta sin perfil de paciente, 422', async () => {
+        await http().get('/charts/me/record/pdf').expect(401);
+        await http()
+          .get('/charts/me/record/pdf')
+          .set(bearer(ctx.adminToken))
+          .expect(422);
+      });
+
+      it('el PDF de una atención ajena es el mismo 404 que uno inexistente', async () => {
+        await http()
+          .get(`/charts/me/encounters/${randomUUID()}/pdf`)
+          .set(bearer(titular.token))
+          .expect(404);
+      });
+    });
   });
 
   describe('CL-09 · CDS exige rol clínico, acceso al paciente y no deja basura', () => {
@@ -263,12 +375,10 @@ describe('BR-14 · encuentros, sello del cierre, CDS y lecturas del resumen (int
     it('el motivo queda en audit.conditions_history, recuperable por la lectura del resumen (CL-10/CL-11)', async () => {
       // Concepto real de `condition-clinical-status` (INACTIVE) — el mismo
       // que usa `ConditionsService.CLINICAL_STATUS_TRANSITIONS`.
-      const fila = await ctx.orm.em
-        .getConnection()
-        .execute<{ id: string }[]>(
-          `select id from terminology.catalog_concepts
+      const fila = await ctx.orm.em.getConnection().execute<{ id: string }[]>(
+        `select id from terminology.catalog_concepts
              where code = 'inactive' limit 1`,
-        );
+      );
       const inactiveConceptId = fila[0]?.id;
       if (!inactiveConceptId) {
         // Si el catálogo no trae el código exacto, el resto de la suite ya

@@ -716,3 +716,75 @@ nuevo, independiente del repositorio de M3) sólo para esta lectura.
   (aislamiento) y con `test/integration/admin-listados.int-spec.ts` contra Postgres real: dos tenants, un
   administrador cada uno, 404 cruzando de tenant en las tres lecturas nuevas de `practice`/`delegated_access`/
   `billing`.
+
+---
+
+## M7-D · 2026-09-26 · cierre de lo que quedó a medias en la API (H2-H6)
+
+Carril M7 · Legion, segunda pasada sobre la API (`legion/test-cierre-api-2`). Lo que cada hito dejó
+`A MEDIAS` y se cerró acá, con lo que se decidió por el camino. Nada detuvo el trabajo; cada
+decisión es la de criterio más seguro y queda escrita para que el propietario la confirme.
+
+- **CV-06/TX-32 (BR-15) — historia completa y rastro.** `GET /charts/me/record/pdf` arma en la API
+  el documento del titular con sólo lo liberado y visible (misma regla que `charts/me/*`), sellado
+  con el SHA-256 del **contenido** (no del instante de emisión: dos descargas sin cambios dan el
+  mismo sello) y con `Cache-Control: private, no-store`. Descargar ese PDF y el de una atención deja
+  fila en `audit.data_access_log` (`PATIENT_RECORD_PDF`, `PATIENT_ENCOUNTER_PDF`). **Pendiente de
+  confirmar:** no se registra en `health_data.health_export_jobs`/`health_export_manifests`; el sello
+  vive en el propio PDF, pero la verificación por QR de un tercero exigiría ese registro.
+- **CL-07 (BR-14) — guarda de encuentro sellado.** M3 no cableó `EncounterSealGuardService` en
+  `origin/test`; se cableó en `medications` (prescribir y reasignar un borrador), `allergy-intolerances`
+  y `chart-notes` (crear nota). Sigue la decisión D-BR14-01: 422, sin addendum.
+- **CL-24 (BR-16) — plantillas.** `ChartTemplateFieldDto` expone `cardinalityMin/Max` y `helpText`
+  (de `forms.field_definition_localizations`, idioma ES, en un solo lote). **Nada de `options`** hasta
+  D-D. **Supuesto:** el idioma de la ayuda es el español; la sesión no lleva un concepto de idioma.
+- **CV-13 (BR-28) — los cuatro hubs.** `GET org/user-assignments`, `practitioner-delegates`,
+  `access-requests` (aislamiento por `directory.tenant_memberships`), `auth-providers/identity-providers`
+  (+ `:id`, sin `client_secret_ref` ni `extra_config_json` ni `certificate`: cada consulta nombra sus
+  columnas), `identity/authorities` (del tenant) y `identity/verification-policies` (catálogo de
+  plataforma), `health-context/{sources,agents,schedules,contexts,contexts/:id/versions,collection-runs}`.
+  Roles: los mismos que ya administran cada recurso (ningún `@Roles` existente se tocó; `SECURITY_ADMIN`
+  en `delegated_access`/`identity`, `IDENTITY_ADMIN` en `auth_providers`, los de `HealthContextController`).
+  **Decisión:** los proveedores globales (`tenant_id` nulo o `is_global`) se ven desde cualquier tenant; los
+  agentes de contexto, los de plataforma más los del tenant. Sólo lectura; las escrituras no cambian.
+- **CV-26 (BR-27) — grupos médicos.** La API ya cubre el ciclo completo (8 rutas, ventana de 7 días,
+  `assertPuedeLeerHistoria` en el selector de diagnósticos). El hueco era de **cobertura**: el módulo
+  tenía 0 specs. Se agregó el primero. Las pantallas siguen siendo trabajo del front.
+- **TX-27 (BR-30) — N+1.** Cuatro lecturas en lote y una que no hacía falta: `requests/mine` trae
+  `practitionerName`; `forms/me/instances?include=values`; `community/posts?ids=` (hasta 50; lo no visible
+  se omite sin distinguirlo); `scheduling/bookings?resourceIds=` (hasta 20). La lista de cotizaciones
+  **ya traía las cuotas**: el front debe usarla en vez de pedir el detalle de cada una. Medido por
+  construcción (peticiones HTTP por pantalla), no por reloj: ver el reporte del carril.
+- **TX-29 — MFA de administradores.** `AUTH_MFA_REQUIRED_FOR_ADMIN_ENABLED` (apagada): un administrador
+  de plataforma **con factor verificado** recibe siempre el desafío. Uno **sin factor entra** y deja rastro
+  (`auth.admin-without-mfa`): enrolar un factor exige una sesión, así que bloquearlo lo dejaría sin cómo
+  darse de alta. Cerrar ese hueco (token de alcance limitado para el enrolamiento) sigue siendo de M2.
+- **TX-34 — almacenamiento.** `.env.example` ya no hereda el prefijo `audio-assets`; los volúmenes con
+  archivos clínicos (`api_storage`, `minio_data`) llevan `com.alovida.backup=required`. Es una declaración
+  para la herramienta de respaldo del servidor: **el respaldo en sí sigue siendo de operaciones (M1)**.
+- **CL-25/ID-09 (modelo v4.2.28–v4.2.30).** La API declara los conceptos nuevos con la misma clave que
+  `M7_CATALOGS` (mismos ids: `model-shared-concepts.spec.ts` los fija contra los del paquete), el enum
+  `jurisdiction` publica los 9 SEDES y `dynamic-enum-catalog.ts` declara los tres enums de cuidados y
+  documentos. **Hallazgo:** el paquete de seeds del modelo también define `VS_CARE_PLAN_*`/`VS_DOCUMENT_CATEGORY`
+  con su enumeración y su amarre, pero con el estado genérico `ACTIVE` y no con `ENUM_DEF_ACTIVE`/`ENUM_BIND_ACTIVE`,
+  que es lo que filtra `GET /system-context/dynamic-enums`: contra una base con el paquete cargado y sin la
+  declaración de la API, el endpoint respondía 404 (verificado; ocurre con las 48 enumeraciones del paquete, no
+  sólo con éstas). **Pedido a M1/modelo:** que `gen_seeds.py` emita los estados que la API espera, o que el
+  paquete deje de sembrar enumeraciones que la API ya declara. Mientras tanto la declaración de la API es la que
+  responde, y con o sin el paquete el resultado es el mismo.
+- **ID-10.** `issuingCityText` (columna nueva) e `issuingCountryConceptId` (existía sin exponer) en el alta
+  propia, la edición, la ficha y el alta del profesional. Sin validación de pertenencia a `VS_COUNTRY`: la FK
+  a `catalog_concepts` responde 422 ante un id inexistente.
+- **CL-50.** `reason` vuelve a aceptarse en `POST .../shares` (hasta 500 caracteres) y se guarda en
+  `authz.resource_scope_grants.reason_text`; el listado de compartidos lo devuelve. Reemplaza la decisión
+  de retirarlo (BR-17): la columna ya existe.
+- **D-BR09-1.** `RADIOPROTECTION_CERT_DOC` → `CERTIFICADO_RADIOPROTECCION`, autoridad `OTRO`. Es opcional en el
+  alta de organización (`radioprotectionCertificateFileId`) y **no se exige al resolver el catálogo**, para no
+  romper el alta en las bases sembradas antes de v4.2.30.
+- **BR-26 (AG-30).** Con `SQL/69_pharma_lab` vendorizado a mano, ninguna ruta de `pharma_lab` responde 500
+  (`test/integration/pharma-lab.int-spec.ts`). El módulo ya estaba en `schemas.catalog.ts`.
+- **Hallazgos de suites que nunca habían corrido.** (1) `diagnostics-release.int-spec.ts` esperaba 201 en una
+  transición de estado que declara `HttpCode(200)`, no mandaba `X-Tenant-Id` a lecturas que lo exigen y seguía
+  afirmando que `reason` daba 400. (2) `terminology-designations.es.spec.ts` estaba en rojo en `origin/test`:
+  12 conceptos de las enumeraciones de BR-09/BR-16 sin traducción al castellano. (3) Un
+  `PreconditionFailedException` responde **422**, no 412: las rutas nuevas lo documentan así.

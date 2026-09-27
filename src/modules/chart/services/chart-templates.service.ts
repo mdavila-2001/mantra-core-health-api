@@ -264,6 +264,17 @@ export class ChartTemplatesService {
       assignments.map((a) => a.fieldId),
     );
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
+    // CL-24: la ayuda de cada campo, en un solo lote (sin N+1).
+    const localizations = await this.templatesRepo.findLocalizationsByFieldIds(
+      this.em,
+      fieldDefinitions.map((f) => f.id),
+      CONCEPTS.LANG_ES,
+    );
+    const helpTextByField = new Map(
+      localizations
+        .filter((l) => l.helpText)
+        .map((l) => [l.fieldId, l.helpText as string]),
+    );
 
     let provenance: ChartTemplateProvenanceDto | undefined;
     const fields: ChartTemplateFieldDto[] = [];
@@ -286,6 +297,9 @@ export class ChartTemplatesService {
         name: field.name,
         dataType: field.dataType as ChartTemplateFieldDto['dataType'],
         valueSetId: field.valueSetId,
+        cardinalityMin: field.cardinalityMin,
+        cardinalityMax: field.cardinalityMax,
+        helpText: helpTextByField.get(field.id),
         required: assignment.required,
         ordinal: assignment.ordinal,
         // Los del estándar son globales; los que agregó la organización llevan

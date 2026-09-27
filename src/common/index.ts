@@ -110,6 +110,12 @@ export {
   decodeKeysetCursor,
 } from './pagination/keyset-cursor';
 export type { KeysetCursorKey } from './pagination/keyset-cursor';
+export {
+  DEFAULT_KEYSET_PAGE_SIZE,
+  afterIdOf,
+  toKeysetPage,
+} from './pagination/keyset-page';
+export type { KeysetPage } from './pagination/keyset-page';
 
 // Persistencia
 export { createdBy, touch } from './persistence/audit-fields';

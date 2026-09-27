@@ -65,6 +65,9 @@ function build() {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
@@ -77,8 +80,10 @@ function build() {
     logger as any,
     clinicalRead as any,
     filesService as any,
+    encounterSealGuard as any,
   );
   return {
+    encounterSealGuard,
     clinicalRead,
     filesService,
     clinicalNotifications,
@@ -93,6 +98,46 @@ function build() {
 }
 
 describe('MedicationsService', () => {
+  describe('encuentro sellado (BR-14 / CL-07)', () => {
+    it('prescribe contra un encuentro sellado responde 422 y no crea la receta', async () => {
+      const d = build();
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.prescribe(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            medicationConceptId: 'm1',
+            encounterId: 'enc-1',
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.requestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('editDraft que reasigna a un encuentro sellado responde 422', async () => {
+      const d = build();
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.editDraft('mr1', { encounterId: 'enc-1' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect((request as any).encounterId).toBeUndefined();
+    });
+  });
+
   describe('prescribe (UC-08-10)', () => {
     it('prescribes a medication as an editable DRAFT', async () => {
       const d = build();
