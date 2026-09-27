@@ -20,6 +20,16 @@ import { EncountersRepository } from '../../clinical/repositories';
 import type { Encounters } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
 
+/** Quién queda autorizado a señalizar sobre una sesión virtual. */
+export interface SignalingParticipant {
+  /** `clinical_ext.virtual_encounters.id`. */
+  readonly virtualEncounterId: string;
+  /** Encuentro clínico 1:1 de la sesión. */
+  readonly encounterId: string;
+  /** Con qué papel participa: sólo identificación, no permiso adicional. */
+  readonly role: 'PATIENT' | 'PRACTITIONER';
+}
+
 /**
  * Telesalud (UC-18-12): alta de la sesión virtual (scheduled), unión (in-progress)
  * y cierre (completed). La sesión es 1:1 con el encuentro clínico, con transiciones
@@ -162,6 +172,52 @@ export class VirtualEncountersService {
         statusConceptId: venc.statusConceptId,
       };
     });
+  }
+
+  /**
+   * Autoriza la señalización WebRTC (gateway `/teleconsult`) y la entrega de
+   * servidores ICE sobre una sesión virtual: **la misma regla que `join`** —
+   * paciente del encuentro, médico primario o participante activo, dentro de
+   * una organización del actor—, más una condición propia: una sesión ya
+   * `COMPLETED` no negocia medios.
+   *
+   * Sólo lee: usa un `fork` y no abre transacción, porque se llama desde el
+   * socket, donde no hay contexto de request ni `X-Tenant-Id` (el tenant se
+   * contrasta contra las membresías del token, como ya hace
+   * `requireEncounterParticipant` cuando falta el tenant activo).
+   *
+   * @param id - `clinical_ext.virtual_encounters.id`.
+   * @param actor - Sujeto autenticado (HTTP o socket).
+   * @returns Ids de la sesión y el papel con el que participa el actor.
+   * @throws ResourceNotFoundException si la sesión o su encuentro no existen.
+   * @throws ForbiddenException si el actor no participa o es de otra organización.
+   * @throws PreconditionFailedException si la sesión ya terminó.
+   */
+  async assertSignalingParticipant(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<SignalingParticipant> {
+    const em = this.em.fork();
+    const venc = await this.encountersRepo.findById(em, id);
+    if (!venc)
+      throw new ResourceNotFoundException('Sesión virtual no encontrada', {
+        id,
+      });
+    const encounter = await this.requireEncounterParticipant(
+      em,
+      venc.encounterId,
+      actor,
+      true,
+    );
+    if (venc.statusConceptId === CEXT.VIRTUAL_ENCOUNTER_COMPLETED) {
+      throw new PreconditionFailedException('La sesión ya terminó', { id });
+    }
+    const role: SignalingParticipant['role'] =
+      actor.patientProfileId !== undefined &&
+      actor.patientProfileId === encounter.patientProfileId
+        ? 'PATIENT'
+        : 'PRACTITIONER';
+    return { virtualEncounterId: venc.id, encounterId: venc.encounterId, role };
   }
 
   /**

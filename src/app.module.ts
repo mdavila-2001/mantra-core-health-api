@@ -39,6 +39,7 @@ import { AdsModule } from './modules/ads/ads.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
+import { teleconsultEnvSchema } from './modules/clinical_ext/teleconsult.env';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -123,6 +124,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
+        .concat(teleconsultEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
         .concat(verificationBypassEnvSchema)

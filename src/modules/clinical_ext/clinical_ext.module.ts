@@ -20,7 +20,10 @@ import {
   CareGapsService,
   VirtualEncountersService,
   PrescriptionFavoritesService,
+  TeleconsultIceService,
 } from './services';
+import { TeleconsultGateway } from './gateways/teleconsult.gateway';
+import { WsJwtGuard } from '../../common';
 import {
   CareTeamsRepository,
   CareTeamMembersRepository,
@@ -111,6 +114,12 @@ import {
     CareGapsService,
     VirtualEncountersService,
     PrescriptionFavoritesService,
+    // Teleconsulta: servidores ICE por entorno y señalización WebRTC
+    // (`/teleconsult`). `WsJwtGuard` se provee acá por lo mismo que en
+    // `CommunityModule`: los gateways no pasan por los guards HTTP.
+    TeleconsultIceService,
+    WsJwtGuard,
+    TeleconsultGateway,
   ],
 })
 export class ClinicalExtModule {}

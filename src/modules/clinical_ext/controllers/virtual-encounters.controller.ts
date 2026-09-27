@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,10 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { VirtualEncountersService } from '../services';
+import { TeleconsultIceService, VirtualEncountersService } from '../services';
 import {
   CreateVirtualEncounterDto,
   EndVirtualEncounterDto,
+  IceServersResponseDto,
   VirtualEncounterResponseDto,
 } from '../dto';
 
@@ -30,9 +33,11 @@ export class VirtualEncountersController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param virtualEncountersService - Valor de virtual encounters service requerido por la operación.
+   * @param iceService - Servidores ICE de la teleconsulta (STUN/TURN por entorno).
    */
   constructor(
     private readonly virtualEncountersService: VirtualEncountersService,
+    private readonly iceService: TeleconsultIceService,
   ) {}
 
   /** UC-18-12 (alta). */
@@ -68,5 +73,23 @@ export class VirtualEncountersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<VirtualEncounterResponseDto> {
     return this.virtualEncountersService.end(id, dto, actor);
+  }
+
+  /**
+   * Servidores ICE para la señalización WebRTC (`/teleconsult`). Misma
+   * autorización que la señalización: sólo participantes del encuentro, y no
+   * sobre una sesión terminada. La credencial TURN (si la hay) es de este
+   * usuario y no se cachea.
+   */
+  @Get(':id/ice-servers')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Servidores ICE de una sesión de telesalud' })
+  async iceServers(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IceServersResponseDto> {
+    await this.virtualEncountersService.assertSignalingParticipant(id, actor);
+    return this.iceService.iceServersFor(actor.id);
   }
 }
