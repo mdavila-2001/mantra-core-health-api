@@ -7,14 +7,15 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
-  Roles,
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+import { LabStaffGuard } from '../guards';
 import { DiagnosticsSpecimensService } from '../services';
 import {
   CreateSpecimenDto,
@@ -32,10 +33,15 @@ import {
  * Endpoints del agregado de especímenes: alta (soporte), acesión (UC-20-01),
  * rechazo (UC-20-02), alta de contenedor (soporte) y cadena de custodia
  * (UC-20-03). Capa fina: valida parámetros y delega en el servicio.
+ *
+ * Autoriza `LabStaffGuard` en lugar de `@Roles('CLINICIAN', 'PRACTITIONER')`:
+ * esos dos roles siguen pasando igual, y además el personal de un laboratorio
+ * (`DIAGNOSTIC_CENTER`) por su membresía — sin ella, el laboratorio que se
+ * registraba no podía recibir una muestra en su propia recepción.
  */
 @ApiTags('diagnostics-specimens')
 @ApiBearerAuth()
-@Roles('CLINICIAN', 'PRACTITIONER')
+@UseGuards(LabStaffGuard)
 @Controller('diagnostics')
 export class DiagnosticsSpecimensController {
   /**
