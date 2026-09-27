@@ -36,7 +36,8 @@ export enum ErrorCode {
    * El cortacircuitos de una dependencia está abierto: se rechaza sin intentar
    * la llamada (503). Es un rechazo **deliberado y barato** para no sumar carga
    * a algo que ya está caído; el `Retry-After` de la respuesta indica cuándo
-   * volverá a probarse.
+   * volverá a probarse (lo pone `AllExceptionsFilter` a partir de
+   * `details.retryAfterMs`, redondeado hacia arriba a segundos).
    */
   CIRCUIT_OPEN = 'CIRCUIT_OPEN',
   /**

@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Params } from 'nestjs-pino';
 import { loadLoggingEnv } from './logging.env';
 import { currentTraceContext } from '../observability/trace-context.service';
+import { redactQueryObject, redactUrlQuery } from '../common/http/redact-url';
 
 /**
  * Construcción de las opciones de pino que consume `LoggingModule`.
@@ -91,6 +92,42 @@ export function genReqId(req: IncomingMessage, res: ServerResponse): string {
   return id;
 }
 
+/**
+ * Forma mínima de la petición ya serializada por `pino-std-serializers` que
+ * este módulo toca. El resto de los campos (`id`, `method`, `headers`…) pasan
+ * sin cambios.
+ */
+interface SerializedRequestLike {
+  url?: string;
+  query?: unknown;
+}
+
+/**
+ * Serializador de `req` para el log de peticiones: la query string sale con
+ * los nombres de parámetro y **sin sus valores**.
+ *
+ * El serializador estándar escribe `req.url` con la query completa y además
+ * `req.query` parseado. En este backend la query lleva datos de personas —el
+ * nombre (`q`) y el documento (`nationalId`) de un paciente, el correo de un
+ * usuario— y también términos de búsqueda de catálogo que no son del paciente
+ * pero dicen qué buscaba alguien. `redact` de pino no alcanza: trabaja por
+ * ruta fija de propiedad y la query es una cadena. Se hace acá, una vez, para
+ * toda línea que lleve `req`.
+ *
+ * pino-http le pasa a este serializador el objeto que ya armó el estándar
+ * (`wrapRequestSerializer`), así que basta con reescribir dos campos.
+ *
+ * @param req - Petición serializada por `pino-std-serializers`.
+ * @returns La misma petición con `url` y `query` redactados.
+ */
+export function serializeRequest<T extends SerializedRequestLike>(req: T): T {
+  req.url = redactUrlQuery(req.url);
+  if (req.query !== undefined) {
+    req.query = redactQueryObject(req.query);
+  }
+  return req;
+}
+
 /** Opciones de pino derivadas del entorno validado. */
 export function buildPinoOptions(): Params {
   const env = loadLoggingEnv();
@@ -101,6 +138,7 @@ export function buildPinoOptions(): Params {
       level: env.level,
       genReqId,
       redact: { paths: REDACT_PATHS, remove: true },
+      serializers: { req: serializeRequest },
 
       // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade
       // el contexto de traza activo en ese instante, de modo que buscar
