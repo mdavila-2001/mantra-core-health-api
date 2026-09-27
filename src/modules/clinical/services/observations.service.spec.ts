@@ -41,6 +41,11 @@ function build() {
   const clinicalRead = {
     assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
   };
+  // BR-14 (CL-07): por defecto no rechaza; el test que necesite un encuentro
+  // sellado lo sobreescribe.
+  const encounterSealGuard = {
+    assertEncounterWritable: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ObservationsService(
     em as any,
     observationsRepo,
@@ -48,6 +53,7 @@ function build() {
     serviceRequestsRepo as any,
     logger as any,
     clinicalRead as any,
+    encounterSealGuard as any,
   );
   return {
     service,
@@ -56,6 +62,7 @@ function build() {
     encountersRepo,
     serviceRequestsRepo,
     clinicalRead,
+    encounterSealGuard,
   };
 }
 
@@ -109,6 +116,31 @@ describe('ObservationsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('BR-14 (CL-07): rejects recording an observation against a sealed encounter', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'enc-1',
+        patientProfileId: 'p1',
+        tenantId: 't1',
+      });
+      d.encounterSealGuard.assertEncounterWritable.mockRejectedValue(
+        new PreconditionFailedException('sellado'),
+      );
+      await expect(
+        d.service.record(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            encounterId: 'enc-1',
+            quantityValue: 1,
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.observationsRepo.create).not.toHaveBeenCalled();
     });
 
     describe('MCH-008 · coherencia de paciente, encuentro y orden', () => {

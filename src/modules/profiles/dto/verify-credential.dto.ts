@@ -66,3 +66,55 @@ export class CredentialResponseDto {
   })
   practitionerVerified!: boolean;
 }
+
+/** Una credencial en la cola de verificación (CV-20). */
+export class PendingCredentialSummaryDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Profesional dueño de la credencial. */
+  @ApiProperty({ format: 'uuid' })
+  practitionerProfileId!: string;
+
+  /** Concepto del tipo de credencial (matrícula, título, certificación). */
+  @ApiProperty({ format: 'uuid' })
+  credentialTypeConceptId!: string;
+
+  /** Número de matrícula o de documento declarado. */
+  @ApiProperty()
+  number!: string;
+
+  /** Institución u organismo emisor, en texto libre. */
+  @ApiPropertyOptional()
+  issuingInstitutionText?: string;
+
+  /** Archivo adjunto (diploma o certificado), si se cargó uno. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  fileId?: string;
+
+  /** Estado actual de la credencial. */
+  @ApiProperty({ format: 'uuid' })
+  state!: string;
+
+  /** Fecha en que se cargó la credencial. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+}
+
+/** Página de la cola de verificación de credenciales. */
+export class ListPendingCredentialsResponseDto {
+  /** Credenciales de esta página, ordenadas por `id`. */
+  @ApiProperty({ type: [PendingCredentialSummaryDto] })
+  items!: PendingCredentialSummaryDto[];
+
+  /** Cantidad devuelta en esta página. */
+  @ApiProperty() count!: number;
+
+  /** Tope aplicado a la consulta. */
+  @ApiProperty() limit!: number;
+
+  /** Cursor opaco de continuación, o `null` si ésta es la última página. */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}

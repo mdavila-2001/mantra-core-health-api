@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsSpecimensController } from './diagnostics-specimens.controller';
+import { runWithTenant } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -22,6 +23,8 @@ function build() {
     reject: mockFn(),
     createContainer: mockFn(),
     recordCustodyEvent: mockFn(),
+    getAccession: mockFn(),
+    getSpecimen: mockFn(),
   };
   return {
     controller: new DiagnosticsSpecimensController(service as any),
@@ -76,5 +79,37 @@ describe('DiagnosticsSpecimensController', () => {
       { specimenId: 's1' },
       actor,
     );
+  });
+
+  describe('lecturas (CL-47)', () => {
+    it('aceptado: getAccession delega con el tenant del contexto', async () => {
+      const d = build();
+      d.service.getAccession.mockResolvedValue({ id: 'acc1' });
+      const res = await runWithTenant('t1', () =>
+        d.controller.getAccession('acc1'),
+      );
+      expect(d.service.getAccession).toHaveBeenCalledWith('acc1', 't1');
+      expect(res).toEqual({ id: 'acc1' });
+    });
+
+    it('aceptado: getSpecimen delega con el tenant del contexto', async () => {
+      const d = build();
+      d.service.getSpecimen.mockResolvedValue({ id: 's1' });
+      const res = await runWithTenant('t1', () =>
+        d.controller.getSpecimen('s1'),
+      );
+      expect(d.service.getSpecimen).toHaveBeenCalledWith('s1', 't1');
+      expect(res).toEqual({ id: 's1' });
+    });
+
+    it('inválido: sin X-Tenant-Id, requireTenantId corta antes de llamar al servicio', async () => {
+      const d = build();
+      // requireTenantId() se evalúa antes de cualquier await: sin contexto de
+      // tenant tira sincrónicamente, así que hay que envolver la llamada.
+      await expect(async () =>
+        d.controller.getAccession('acc1'),
+      ).rejects.toThrow(/tenant/i);
+      expect(d.service.getAccession).not.toHaveBeenCalled();
+    });
   });
 });

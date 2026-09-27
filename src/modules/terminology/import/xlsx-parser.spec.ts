@@ -41,11 +41,14 @@ const GEMELOS = [
 ];
 
 describe('XlsxParser · igualdad contra el CsvParser sobre los gemelos', () => {
-  it.each(GEMELOS)('%s.xlsx produce el mismo resultado que %s.csv', (nombre) => {
-    const resultadoCsv = csv.parsear(leer(`${nombre}.csv`), perfil);
-    const resultadoXlsx = xlsx.parsear(leer(`${nombre}.xlsx`), perfil);
-    expect(resultadoXlsx).toEqual(resultadoCsv);
-  });
+  it.each(GEMELOS)(
+    '%s.xlsx produce el mismo resultado que %s.csv',
+    (nombre) => {
+      const resultadoCsv = csv.parsear(leer(`${nombre}.csv`), perfil);
+      const resultadoXlsx = xlsx.parsear(leer(`${nombre}.xlsx`), perfil);
+      expect(resultadoXlsx).toEqual(resultadoCsv);
+    },
+  );
 });
 
 describe('XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV)', () => {
@@ -69,11 +72,20 @@ describe('XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV)', () => {
 describe('XlsxParser · hoja preferida', () => {
   it('elige la hoja «conceptos» aunque no sea la primera', () => {
     const wb = XLSX.utils.book_new();
-    const otra = XLSX.utils.aoa_to_sheet([['code', 'display', 'definition'], ['ZZ-999', 'No debería leerse', '']]);
-    const conceptos = XLSX.utils.aoa_to_sheet([['code', 'display', 'definition'], ['ZZ-001', 'Sí debería leerse', '']]);
+    const otra = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ['ZZ-999', 'No debería leerse', ''],
+    ]);
+    const conceptos = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ['ZZ-001', 'Sí debería leerse', ''],
+    ]);
     XLSX.utils.book_append_sheet(wb, otra, 'otra');
     XLSX.utils.book_append_sheet(wb, conceptos, 'conceptos');
-    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+    const buffer = XLSX.write(wb, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    }) as Buffer;
 
     const resultado = xlsx.parsear(buffer, perfil);
     expect(resultado.filas).toHaveLength(1);
@@ -91,18 +103,28 @@ describe('XlsxParser · límite de filas', () => {
 
     expect(resultado.filas).toHaveLength(10_000);
     expect(duracionMs).toBeLessThan(5_000);
-    // eslint-disable-next-line no-console -- evidencia de rendimiento pedida por el DoD de H7.S3.M5
+
     console.log(
       `grande-10k: ${duracionMs.toFixed(0)} ms, heapUsed antes=${antes} después=${despues} (+${despues - antes} bytes)`,
     );
   });
 
   it('rechaza un archivo con más filas que MAX_FILAS_XLSX', () => {
-    const filas = Array.from({ length: 100_002 }, (_, i) => [`ZZ-${i}`, 'x', '']);
+    const filas = Array.from({ length: 100_002 }, (_, i) => [
+      `ZZ-${i}`,
+      'x',
+      '',
+    ]);
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([['code', 'display', 'definition'], ...filas]);
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ...filas,
+    ]);
     XLSX.utils.book_append_sheet(wb, ws, 'conceptos');
-    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer;
+    const buffer = XLSX.write(wb, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    }) as Buffer;
 
     const resultado = xlsx.parsear(buffer, perfil);
     expect(resultado.filas).toHaveLength(0);

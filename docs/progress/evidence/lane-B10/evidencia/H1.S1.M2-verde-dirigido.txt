@@ -1,0 +1,5 @@
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) rechaza mover la cita a un cupo cuyo rango se pisa con otra cita comprometida de la misma médica
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) rechaza mover la cita encima de otro turno confirmado del mismo paciente
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) con el rango libre, mueve la cita y la deja atribuida al recurso del cupo destino
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) un recurso que no es de un profesional (una sala) no pasa por la regla madre
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) el paciente titular reprograma su propio turno

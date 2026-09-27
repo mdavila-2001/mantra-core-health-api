@@ -185,6 +185,37 @@ export class RoleAssignmentResponseDto {
   @ApiProperty() createdAt!: Date;
 }
 
+/**
+ * Página de vinculaciones profesional-organización de una práctica (CV-14).
+ *
+ * Es lo que el administrador de la práctica necesita para dejar de aprobar a
+ * ciegas: antes de esto, `POST …/approve` existía pero nada permitía ver qué
+ * había pendiente sin que alguien pasara el uuid por otro canal.
+ */
+export class ListPracticeRoleAssignmentsResponseDto {
+  /**
+   * Vinculaciones de esta página, ordenadas por `id`.
+   */
+  @ApiProperty({ type: [RoleAssignmentResponseDto] })
+  items!: RoleAssignmentResponseDto[];
+
+  /**
+   * Cantidad devuelta en esta página.
+   */
+  @ApiProperty() count!: number;
+
+  /**
+   * Tope aplicado a la consulta.
+   */
+  @ApiProperty() limit!: number;
+
+  /**
+   * Cursor opaco de continuación, o `null` si ésta es la última página.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}
+
 /** Respuesta de asignación de apoyo (UC-14-09). */
 export class SupportAssignmentResponseDto {
   /**

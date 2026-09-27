@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -18,10 +21,13 @@ import {
   OkResultDto,
   PublishVersionDto,
   QuestionDto,
+  ReorderQuestionsDto,
   SurveyResponseDto,
   TemplateCreatedDto,
   TemplateDetailDto,
   TemplateSummaryDto,
+  UpdateQuestionDto,
+  UpdateTemplateDto,
 } from '../dto';
 
 /**
@@ -77,6 +83,18 @@ export class SurveysTemplatesController {
     return this.templatesService.getTemplate(id, actor);
   }
 
+  /** CL-72: corrige título, consigna y plazo de la versión en borrador. */
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir título, consigna y plazo del borrador' })
+  updateTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateTemplateDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.templatesService.updateTemplate(id, dto, actor);
+  }
+
   /** Agrega una pregunta a la versión en borrador. */
   @Post(':id/questions')
   @HttpCode(HttpStatus.CREATED)
@@ -87,6 +105,46 @@ export class SurveysTemplatesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<QuestionDto> {
     return this.templatesService.addQuestion(id, dto, actor);
+  }
+
+  /**
+   * CL-60: reordena el cuestionario entero. **Declarada antes** que las rutas
+   * con `:questionId` para que `order` nunca se lea como un identificador.
+   */
+  @Put(':id/questions/order')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reordenar el cuestionario del borrador' })
+  reorderQuestions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReorderQuestionsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.templatesService.reorderQuestions(id, dto, actor);
+  }
+
+  /** CL-60: corrige una pregunta del borrador (opciones y escala enteras). */
+  @Patch(':id/questions/:questionId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir una pregunta del borrador' })
+  updateQuestion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('questionId', ParseUUIDPipe) questionId: string,
+    @Body() dto: UpdateQuestionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.templatesService.updateQuestion(id, questionId, dto, actor);
+  }
+
+  /** CL-60: quita una pregunta del borrador y renumera las que quedan. */
+  @Delete(':id/questions/:questionId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quitar una pregunta del borrador' })
+  deleteQuestion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('questionId', ParseUUIDPipe) questionId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.templatesService.deleteQuestion(id, questionId, actor);
   }
 
   /** Abre una versión nueva en borrador, para corregir una plantilla ya publicada (FT-31). */

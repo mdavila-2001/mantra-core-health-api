@@ -11,6 +11,8 @@ import {
   ConsentEvidenceController,
   ConsentSweepController,
   PractitionerAccessRequestsController,
+  ConsentMeController,
+  EncounterInformedConsentsController,
 } from './controllers';
 import {
   ConsentsService,
@@ -22,6 +24,8 @@ import {
   ConsentEvidenceService,
   ConsentSweepService,
   PractitionerAccessRequestsService,
+  ConsentMeService,
+  EncounterInformedConsentsService,
 } from './services';
 import {
   ConsentsRepository,
@@ -41,6 +45,10 @@ import {
 } from '../profiles/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
+// El médico registra el consentimiento informado desde su consulta (CL-77): hace
+// falta el encuentro y la autorización de escritura sobre la historia. `clinical`
+// no conoce a `consent`, así que no hay ciclo.
+import { ClinicalModule } from '../clinical/clinical.module';
 import { MessagingPractitionerAccessNoticeAdapter } from './adapters/messaging-practitioner-access-notice.adapter';
 import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-notice.port';
 
@@ -55,6 +63,7 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    ClinicalModule,
   ],
   controllers: [
     ConsentsController,
@@ -66,6 +75,8 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     ConsentEvidenceController,
     ConsentSweepController,
     PractitionerAccessRequestsController,
+    ConsentMeController,
+    EncounterInformedConsentsController,
   ],
   providers: [
     // Repositorios
@@ -98,6 +109,8 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     ConsentEvidenceService,
     ConsentSweepService,
     PractitionerAccessRequestsService,
+    ConsentMeService,
+    EncounterInformedConsentsService,
     {
       provide: PRACTITIONER_ACCESS_NOTICE_PORT,
       useClass: MessagingPractitionerAccessNoticeAdapter,

@@ -1,0 +1,2 @@
+$ corepack yarn lint   # baseline origin/test @ 016caaa1
+exit=0

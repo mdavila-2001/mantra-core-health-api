@@ -70,6 +70,7 @@ function build() {
     accountLinksRepo as any,
     patientProfilesRepo as any,
     grantsRepo as any,
+    {} as any,
     logger as any,
     {
       forOrders: mockFn(async () => new Map()),

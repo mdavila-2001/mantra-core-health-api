@@ -174,14 +174,23 @@ function contactosDeclarados(
   const fijoDeTrabajo = dto.workLandline ?? dto.phone;
   const correoPersonal =
     dto.personalEmail ?? (dto.workEmail ? dto.email : undefined);
-  const correoTrabajo = dto.workEmail ?? dto.email;
+  // ID-12: sin correo institucional el cliente manda `personalEmail === email`.
+  // Eso dice que el único correo es personal, y guardarlo además como de
+  // trabajo sería inventar un contacto laboral que la persona no declaró.
+  const soloPersonal =
+    dto.workEmail === undefined &&
+    dto.personalEmail !== undefined &&
+    dto.personalEmail.trim().toLowerCase() === dto.email.trim().toLowerCase();
+  const correoTrabajo = soloPersonal ? undefined : (dto.workEmail ?? dto.email);
 
   const candidatos: readonly (ContactoDeclarado | null)[] = [
-    {
-      systemConceptId: CONCEPTS.CONTACT_EMAIL,
-      value: correoTrabajo,
-      useConceptId: CONCEPTS.CONTACT_USE_WORK,
-    },
+    correoTrabajo
+      ? {
+          systemConceptId: CONCEPTS.CONTACT_EMAIL,
+          value: correoTrabajo,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        }
+      : null,
     correoPersonal
       ? {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,

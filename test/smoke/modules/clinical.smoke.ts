@@ -224,15 +224,20 @@ export const CLINICAL_SMOKE: SmokeCase[] = [
     expectedStatus: 404,
   },
 
-  // ---- UC-08-07: liberar resultados -----------------------------------------
+  // ---- UC-08-07: liberar resultados (D-E: obsoleta, BR-17/CL-46) ------------
+  // No escribía diagnostic_release_events: lo liberado por acá no llegaba a
+  // «Mis resultados» (CV-02). D-E fijó un solo camino canónico
+  // (diagnostics/reports/:reportId/versions/:versionId/release) y ésta quedó
+  // sin borrar pero devolviendo 422 siempre, para no simular una liberación
+  // que el paciente nunca ve.
   {
     module: 'Clinical',
     endpoint: 'POST /clinical/diagnostic-reports/{id}/release',
-    name: 'happy: liberar',
+    name: 'obsoleta: un reporte liberable igual devuelve 422 (D-E)',
     method: 'post',
     path: (c) => `/clinical/diagnostic-reports/${c.vars.clinReportId}/release`,
     body: () => ({}),
-    expectedStatus: 200,
+    expectedStatus: 422,
   },
   {
     module: 'Clinical',
