@@ -173,7 +173,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'insurance-campaign-status',
     name: 'Estado de la campaña preventiva',
-    description: 'Ciclo de vida de una campaña preventiva de la aseguradora (Tarea 4).',
+    description:
+      'Ciclo de vida de una campaña preventiva de la aseguradora (Tarea 4).',
     concepts: [
       INS.CAMPAIGN_DRAFT,
       INS.CAMPAIGN_ACTIVE,
@@ -211,7 +212,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'insurance-campaign-partner-type',
     name: 'Tipo de aliado de la campaña',
-    description: 'Qué clase de organización es el aliado de la campaña preventiva.',
+    description:
+      'Qué clase de organización es el aliado de la campaña preventiva.',
     concepts: [
       INS.CAMPAIGN_PARTNER_TYPE_IMPORTER,
       INS.CAMPAIGN_PARTNER_TYPE_MANUFACTURER,
