@@ -191,6 +191,86 @@ export class UpdateInsuranceCampaignStatusDto {
   status!: CampaignTargetStatusDto;
 }
 
+/**
+ * `PATCH /insurance-campaigns/:id`. Edición parcial, sólo en `DRAFT`/`PAUSED`
+ * (422 en `ACTIVE`/`EXPIRED`). `code` no es editable: no está en este DTO, y el
+ * `ValidationPipe` global (`forbidNonWhitelisted`) rechaza con 400 si llega.
+ */
+export class UpdateInsuranceCampaignDto {
+  @ApiPropertyOptional({
+    example: 'Chequeo Preventivo Cardiovascular y Perfil Lipídico',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(3, 200)
+  title?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @ApiPropertyOptional({ enum: CAMPAIGN_TYPES })
+  @IsOptional()
+  @IsIn(CAMPAIGN_TYPES)
+  campaignType?: CampaignTypeDto;
+
+  @ApiPropertyOptional({
+    example: 'I10',
+    description:
+      'Código CIE-10 de la patología que se previene. Sólo descriptivo: no filtra afiliados (D4).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(16)
+  targetConditionCode?: string;
+
+  @ApiPropertyOptional({
+    type: Number,
+    minimum: 0,
+    maximum: 100,
+    example: 100,
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(100)
+  copayBonusPercentage?: number;
+
+  @ApiPropertyOptional({ type: String, format: 'date', example: '2026-09-25' })
+  @IsOptional()
+  @Matches(DATE_ONLY, { message: 'validFrom debe ser AAAA-MM-DD' })
+  @IsISO8601({ strict: true })
+  validFrom?: string;
+
+  @ApiPropertyOptional({ type: String, format: 'date', example: '2026-11-24' })
+  @IsOptional()
+  @Matches(DATE_ONLY, { message: 'validTo debe ser AAAA-MM-DD' })
+  @IsISO8601({ strict: true })
+  validTo?: string;
+
+  @ApiPropertyOptional({ type: [InsuranceCampaignPartnerInputDto] })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => InsuranceCampaignPartnerInputDto)
+  partners?: InsuranceCampaignPartnerInputDto[];
+}
+
+/** `GET /insurance-campaigns/active` — pública, sin autenticación. */
+export class ActiveCampaignsQueryDto {
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Acota a una aseguradora. Sin filtro, trae de todas.',
+  })
+  @IsOptional()
+  @IsUUID()
+  carrierId?: string;
+}
+
 /** `GET /insurance-campaigns` — filtros y cursor opaco. */
 export class InsuranceCampaignListQueryDto {
   @ApiPropertyOptional({ enum: CAMPAIGN_TYPES })
@@ -268,6 +348,14 @@ export class InsuranceCampaignResponseDto {
 
   @ApiProperty({ enum: CAMPAIGN_STATUSES })
   status!: CampaignStatusDto;
+
+  @ApiProperty({
+    enum: CAMPAIGN_STATUSES,
+    description:
+      'EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el ' +
+      'vencimiento es por fecha, no por transición (CA-04). No hay cron.',
+  })
+  effectiveStatus!: CampaignStatusDto;
 
   @ApiProperty({ type: InsuranceCampaignConditionDto, nullable: true })
   targetCondition!: InsuranceCampaignConditionDto | null;

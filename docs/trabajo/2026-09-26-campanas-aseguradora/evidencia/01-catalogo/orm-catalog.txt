@@ -1,0 +1,9 @@
+{
+  "schemas": 63,
+  "fkEmitidas": 6760,
+  "fkDescartadas": 0,
+  "fkArchivos": 71,
+  "idxEmitidos": 7784,
+  "idxDescartados": 72,
+  "idxArchivos": 77
+}

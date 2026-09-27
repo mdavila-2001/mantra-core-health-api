@@ -401,13 +401,16 @@ describe('Insurance controllers (delegación)', () => {
    * Tarea 4 · M-06 — campañas preventivas. Sin `@Roles`: la aseguradora se
    * autoriza por membresía y el afiliado por titularidad, ambas en el servicio.
    */
-  it('InsuranceCampaignsController delega en su servicio y no fija @Roles', async () => {
+  it('InsuranceCampaignsController delega en su servicio y no fija @Roles (salvo `active`, pública)', async () => {
     const service = {
       create: mockFn().mockResolvedValue({ id: ID }),
       list: mockFn().mockResolvedValue({ items: [], nextCursor: null }),
+      listActivePublic: mockFn().mockResolvedValue([]),
+      listMyBenefits: mockFn().mockResolvedValue([]),
       listActiveForPatient: mockFn().mockResolvedValue([]),
       getById: mockFn().mockResolvedValue({ id: ID }),
       changeStatus: mockFn().mockResolvedValue({ id: ID }),
+      update: mockFn().mockResolvedValue({ id: ID }),
     };
     const c = new InsuranceCampaignsController(service as never);
 
@@ -417,6 +420,13 @@ describe('Insurance controllers (delegación)', () => {
     const query = {} as never;
     await c.list(query, actor);
     expect(service.list).toHaveBeenCalledWith(query, actor);
+
+    const activeQuery = {} as never;
+    await c.listActive(activeQuery);
+    expect(service.listActivePublic).toHaveBeenCalledWith(activeQuery);
+
+    await c.myBenefits(actor);
+    expect(service.listMyBenefits).toHaveBeenCalledWith(actor);
 
     await c.listForPatient(ID, actor);
     expect(service.listActiveForPatient).toHaveBeenCalledWith(ID, actor);
@@ -428,6 +438,10 @@ describe('Insurance controllers (delegación)', () => {
     await c.changeStatus(ID, status, actor);
     expect(service.changeStatus).toHaveBeenCalledWith(ID, status, actor);
 
+    const updateDto = { title: 'Nueva' } as never;
+    await c.update(ID, updateDto, actor);
+    expect(service.update).toHaveBeenCalledWith(ID, updateDto, actor);
+
     const proto = InsuranceCampaignsController.prototype as never as Record<
       string,
       object
@@ -435,12 +449,22 @@ describe('Insurance controllers (delegación)', () => {
     for (const metodo of [
       'create',
       'list',
+      'myBenefits',
       'listForPatient',
       'getById',
       'changeStatus',
+      'update',
     ]) {
       expect(Reflect.getMetadata('requiredRoles', proto[metodo])).toEqual([]);
     }
+    // `active` es pública: sin `@Roles`, con `isPublic`.
+    expect(Reflect.getMetadata('isPublic', proto['listActive'])).toBe(true);
+  });
+
+  it('InsuranceCampaignsController: acepta la ruta canónica y el alias deprecado', () => {
+    expect(
+      Reflect.getMetadata(PATH_METADATA, InsuranceCampaignsController),
+    ).toEqual(['insurance/campaigns', 'insurance-campaigns']);
   });
 
   it('InsuranceCampaignsController: las rutas fijas van antes que `:id` y los verbos son los del contrato', () => {
@@ -455,6 +479,14 @@ describe('Insurance controllers (delegación)', () => {
 
     expect(ruta('create')).toEqual({ path: '/', method: RequestMethod.POST });
     expect(ruta('list')).toEqual({ path: '/', method: RequestMethod.GET });
+    expect(ruta('listActive')).toEqual({
+      path: 'active',
+      method: RequestMethod.GET,
+    });
+    expect(ruta('myBenefits')).toEqual({
+      path: 'my-benefits',
+      method: RequestMethod.GET,
+    });
     expect(ruta('listForPatient')).toEqual({
       path: 'patient/:patientProfileId',
       method: RequestMethod.GET,
@@ -464,12 +496,18 @@ describe('Insurance controllers (delegación)', () => {
       path: ':id/status',
       method: RequestMethod.PATCH,
     });
+    expect(ruta('update')).toEqual({
+      path: ':id',
+      method: RequestMethod.PATCH,
+    });
 
     // Nest registra las rutas en el orden en que se declaran los métodos: si
-    // `:id` fuera primero, `patient` se leería como un identificador.
+    // `:id` fuera primero, las estáticas se leerían como un identificador.
     const orden = Object.getOwnPropertyNames(
       InsuranceCampaignsController.prototype,
     );
+    expect(orden.indexOf('listActive')).toBeLessThan(orden.indexOf('getById'));
+    expect(orden.indexOf('myBenefits')).toBeLessThan(orden.indexOf('getById'));
     expect(orden.indexOf('listForPatient')).toBeLessThan(
       orden.indexOf('getById'),
     );

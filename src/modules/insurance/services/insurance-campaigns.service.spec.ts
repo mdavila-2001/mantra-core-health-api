@@ -89,17 +89,21 @@ function build() {
   const repo = {
     findByCarrierAndCode: fn().mockResolvedValue(null),
     findEntityForCarrier: fn().mockResolvedValue(null),
+    findAnyById: fn().mockResolvedValue(null),
     createCampaign: fn().mockReturnValue(created),
     createPartner: fn().mockReturnValue({ id: 'partner-x' }),
+    deletePartners: fn().mockResolvedValue(0),
     resolveIcd10ConceptId: fn().mockResolvedValue('concept-i10'),
     getRowForCarrier: fn().mockResolvedValue(campaignRow()),
     listRowsByCarrier: fn().mockResolvedValue([]),
     findCurrentCarrierIdsForPatient: fn().mockResolvedValue([]),
     listActiveRowsForCarriers: fn().mockResolvedValue([]),
+    listPublicActiveRows: fn().mockResolvedValue([]),
+    membershipBelongsToCarrier: fn().mockResolvedValue(true),
   };
   const catalog = { findCarrierByTenantId: fn().mockResolvedValue(CARRIER) };
   const tenantAdministration = {
-    assertCanAdminister: fn().mockResolvedValue(undefined),
+    canAdminister: fn().mockResolvedValue(true),
     assertCanRead: fn().mockResolvedValue(undefined),
   };
   const profileOwnership = {
@@ -314,14 +318,51 @@ describe('InsuranceCampaignsService · control de acceso administrativo (CA-4.7)
     expect(repo.createCampaign).not.toHaveBeenCalled();
   });
 
-  it('un actor con tenant pero sin rol de administración recibe 403', async () => {
-    const { service, repo, tenantAdministration } = build();
-    tenantAdministration.assertCanAdminister.mockRejectedValue(
-      new ForbiddenException('Se requiere ser OWNER o ADMIN'),
-    );
+  it('un actor con tenant pero sin rol de administración recibe 403 y lo audita', async () => {
+    const { service, repo, tenantAdministration, auditTrail } = build();
+    tenantAdministration.canAdminister.mockResolvedValue(false);
 
     await expect(
       asOperator(() => service.create(createDto(), PATIENT)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(repo.createCampaign).not.toHaveBeenCalled();
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      PATIENT,
+      expect.objectContaining({
+        action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
+        tenantId: TENANT_ID,
+      }),
+    );
+  });
+
+  it('INSURANCE_OPERATOR con membresía activa (no OWNER/ADMIN) puede crear', async () => {
+    const OPERATOR_ROLE = {
+      id: 'user-op-role',
+      roles: ['INSURANCE_OPERATOR'],
+    } as never;
+    const { service, repo, tenantAdministration } = build();
+    tenantAdministration.canAdminister.mockResolvedValue(false);
+
+    await asOperator(() => service.create(createDto(), OPERATOR_ROLE));
+
+    expect(tenantAdministration.assertCanRead).toHaveBeenCalled();
+    expect(repo.createCampaign).toHaveBeenCalled();
+  });
+
+  it('INSURANCE_OPERATOR sin membresía activa en el tenant sigue recibiendo 403', async () => {
+    const OPERATOR_ROLE = {
+      id: 'user-op-role',
+      roles: ['INSURANCE_OPERATOR'],
+    } as never;
+    const { service, repo, tenantAdministration } = build();
+    tenantAdministration.canAdminister.mockResolvedValue(false);
+    tenantAdministration.assertCanRead.mockRejectedValue(
+      new ForbiddenException('Se requiere pertenecer a la organización'),
+    );
+
+    await expect(
+      asOperator(() => service.create(createDto(), OPERATOR_ROLE)),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(repo.createCampaign).not.toHaveBeenCalled();
   });
@@ -446,27 +487,54 @@ describe('InsuranceCampaignsService · cambio de estado', () => {
     expect(auditTrail.record).not.toHaveBeenCalled();
   });
 
-  it('una campaña de otra aseguradora responde 404, igual que una inexistente', async () => {
-    const { service, repo } = build();
+  it('una campaña inexistente en ningún lado responde 404 sin auditar', async () => {
+    const { service, repo, auditTrail } = build();
     repo.findEntityForCarrier.mockResolvedValue(null);
+    repo.findAnyById.mockResolvedValue(null);
 
     await expect(
       asOperator(() =>
-        service.changeStatus('camp-ajena', { status: 'ACTIVE' }, OPERATOR),
+        service.changeStatus(
+          'camp-inexistente',
+          { status: 'ACTIVE' },
+          OPERATOR,
+        ),
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(repo.findEntityForCarrier).toHaveBeenCalledWith(
       expect.anything(),
       CARRIER.id,
-      'camp-ajena',
+      'camp-inexistente',
+    );
+    expect(auditTrail.record).not.toHaveBeenCalled();
+  });
+
+  it('CA-02.b: una campaña que existe en OTRA aseguradora responde 403 y deja auditoría', async () => {
+    const { service, repo, auditTrail } = build();
+    repo.findEntityForCarrier.mockResolvedValue(null);
+    repo.findAnyById.mockResolvedValue({ id: 'camp-ajena' });
+
+    await expect(
+      asOperator(() =>
+        service.changeStatus('camp-ajena', { status: 'ACTIVE' }, OPERATOR),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      OPERATOR,
+      expect.objectContaining({
+        action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
+        entity: 'insurance_campaign',
+        entityId: 'camp-ajena',
+        tenantId: TENANT_ID,
+        success: false,
+      }),
     );
   });
 
   it('un paciente no puede cambiar el estado (403)', async () => {
     const { service, tenantAdministration } = build();
-    tenantAdministration.assertCanAdminister.mockRejectedValue(
-      new ForbiddenException('Se requiere ser OWNER o ADMIN'),
-    );
+    tenantAdministration.canAdminister.mockResolvedValue(false);
 
     await expect(
       asOperator(() =>
@@ -493,6 +561,7 @@ describe('InsuranceCampaignsService · listado administrativo', () => {
         statusConceptId: INS.CAMPAIGN_PAUSED,
         after: undefined,
         limit: 11,
+        referenceDate: patientCoverageReferenceDate(),
       },
     );
   });
@@ -559,9 +628,10 @@ describe('InsuranceCampaignsService · listado administrativo', () => {
     });
   });
 
-  it('una campaña inexistente o de otra aseguradora responde 404', async () => {
+  it('una campaña inexistente en ningún lado responde 404', async () => {
     const { service, repo } = build();
     repo.getRowForCarrier.mockResolvedValue(null);
+    repo.findAnyById.mockResolvedValue(null);
 
     await expect(
       asOperator(() => service.getById('nada', OPERATOR)),
@@ -570,6 +640,250 @@ describe('InsuranceCampaignsService · listado administrativo', () => {
       expect.anything(),
       CARRIER.id,
       'nada',
+    );
+  });
+
+  it('CA-02.b: leer por id una campaña de otra aseguradora responde 403 y audita', async () => {
+    const { service, repo, auditTrail } = build();
+    repo.getRowForCarrier.mockResolvedValue(null);
+    repo.findAnyById.mockResolvedValue({ id: 'camp-ajena' });
+
+    await expect(
+      asOperator(() => service.getById('camp-ajena', OPERATOR)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      OPERATOR,
+      expect.objectContaining({
+        action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
+        entityId: 'camp-ajena',
+      }),
+    );
+  });
+
+  it('una vencida (ACTIVE con valid_to pasado) muestra effectiveStatus EXPIRED', async () => {
+    const { service, repo } = build();
+    repo.getRowForCarrier.mockResolvedValue(
+      campaignRow({
+        status_concept_id: INS.CAMPAIGN_ACTIVE,
+        valid_to: civil(-1),
+      }),
+    );
+
+    const dto = await asOperator(() => service.getById('camp-1', OPERATOR));
+
+    expect(dto.status).toBe('ACTIVE');
+    expect(dto.effectiveStatus).toBe('EXPIRED');
+  });
+
+  it('una ACTIVE vigente muestra el mismo effectiveStatus', async () => {
+    const { service, repo } = build();
+    repo.getRowForCarrier.mockResolvedValue(
+      campaignRow({
+        status_concept_id: INS.CAMPAIGN_ACTIVE,
+        valid_to: civil(30),
+      }),
+    );
+
+    const dto = await asOperator(() => service.getById('camp-1', OPERATOR));
+
+    expect(dto.effectiveStatus).toBe('ACTIVE');
+  });
+});
+
+describe('InsuranceCampaignsService · edición (CA-3.2.e)', () => {
+  function withEditable(status: string) {
+    const ctx = build();
+    const entity = {
+      id: 'camp-1',
+      statusConceptId: status,
+      title: 'Vieja',
+      description: undefined as string | undefined,
+      campaignTypeConceptId: INS.CAMPAIGN_TYPE_LABORATORY,
+      targetConditionConceptId: undefined as string | undefined,
+      copayBonusPercentage: '100',
+      validFrom: new Date('2026-09-25T12:00:00.000Z'),
+      validTo: new Date('2026-11-24T12:00:00.000Z'),
+      updatedAt: new Date(0),
+      updatedByUserId: undefined as string | undefined,
+    };
+    ctx.repo.findEntityForCarrier.mockResolvedValue(entity);
+    return { ...ctx, entity };
+  }
+
+  it('en DRAFT edita título y bonificación, audita y devuelve el detalle', async () => {
+    const { service, entity, tx, auditTrail } = withEditable(
+      INS.CAMPAIGN_DRAFT,
+    );
+
+    await asOperator(() =>
+      service.update(
+        'camp-1',
+        { title: 'Nueva', copayBonusPercentage: 50 },
+        OPERATOR,
+      ),
+    );
+
+    expect(entity.title).toBe('Nueva');
+    expect(entity.copayBonusPercentage).toBe('50');
+    expect(entity.updatedByUserId).toBe('user-operator');
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      tx,
+      OPERATOR,
+      expect.objectContaining({ action: 'INSURANCE_CAMPAIGN_UPDATED' }),
+    );
+  });
+
+  it('en PAUSED también se puede editar', async () => {
+    const { service, entity } = withEditable(INS.CAMPAIGN_PAUSED);
+
+    await asOperator(() =>
+      service.update('camp-1', { title: 'Reeditada' }, OPERATOR),
+    );
+
+    expect(entity.title).toBe('Reeditada');
+  });
+
+  it('en ACTIVE responde 422: hay que pausarla primero', async () => {
+    const { service, entity } = withEditable(INS.CAMPAIGN_ACTIVE);
+
+    await expect(
+      asOperator(() =>
+        service.update('camp-1', { title: 'No debería' }, OPERATOR),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(entity.title).toBe('Vieja');
+  });
+
+  it('en EXPIRED responde 422', async () => {
+    const { service } = withEditable(INS.CAMPAIGN_EXPIRED);
+
+    await expect(
+      asOperator(() =>
+        service.update('camp-1', { title: 'No debería' }, OPERATOR),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('con fechas nuevas invertidas responde 400 y no muta', async () => {
+    const { service, entity } = withEditable(INS.CAMPAIGN_DRAFT);
+
+    await expect(
+      asOperator(() =>
+        service.update(
+          'camp-1',
+          { validFrom: civil(10), validTo: civil(1) },
+          OPERATOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(entity.title).toBe('Vieja');
+  });
+
+  it('reemplaza los aliados completos cuando llegan partners', async () => {
+    const { service, repo, entity } = withEditable(INS.CAMPAIGN_DRAFT);
+
+    await asOperator(() =>
+      service.update(
+        'camp-1',
+        {
+          partners: [
+            { role: 'PROVIDER', type: 'PHARMACY', name: 'Otra Farmacia' },
+          ],
+        },
+        OPERATOR,
+      ),
+    );
+
+    expect(repo.deletePartners).toHaveBeenCalledWith(
+      expect.anything(),
+      'camp-1',
+    );
+    expect(repo.createPartner).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ partnerName: 'Otra Farmacia' }),
+    );
+  });
+
+  it('CA-02.e: un aliado con membresía de red de OTRA aseguradora responde 422', async () => {
+    const { service, repo, entity } = withEditable(INS.CAMPAIGN_DRAFT);
+    repo.membershipBelongsToCarrier.mockResolvedValue(false);
+
+    await expect(
+      asOperator(() =>
+        service.update(
+          'camp-1',
+          {
+            partners: [
+              {
+                role: 'PROVIDER',
+                type: 'LABORATORY',
+                name: 'Lab ajeno',
+                networkProviderMembershipId: 'membership-de-otra-aseguradora',
+              },
+            ],
+          },
+          OPERATOR,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(repo.deletePartners).not.toHaveBeenCalled();
+  });
+});
+
+describe('InsuranceCampaignsService · my-benefits y active público (§3.1)', () => {
+  it('listMyBenefits usa el perfil del JWT, no uno de la URL', async () => {
+    const { service, repo } = build();
+    repo.findCurrentCarrierIdsForPatient.mockResolvedValue(['carrier-andina']);
+    const actor = {
+      id: 'u1',
+      roles: ['PATIENT'],
+      patientProfileId: PROFILE_ID,
+    } as never;
+
+    await service.listMyBenefits(actor);
+
+    expect(repo.findCurrentCarrierIdsForPatient).toHaveBeenCalledWith(
+      expect.anything(),
+      PROFILE_ID,
+      expect.any(String),
+    );
+  });
+
+  it('sin patientProfileId en el JWT responde 403', async () => {
+    const { service } = build();
+    const actor = { id: 'u1', roles: ['PATIENT'] } as never;
+
+    await expect(service.listMyBenefits(actor)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+  });
+
+  it('listActivePublic no exige autenticación ni acota por titular', async () => {
+    const { service, repo } = build();
+    repo.listPublicActiveRows.mockResolvedValue([
+      { ...campaignRow(), carrier_name: 'Seguros Andina' },
+    ]);
+
+    const items = await service.listActivePublic({});
+
+    expect(repo.listPublicActiveRows).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(String),
+      undefined,
+    );
+    expect(items[0].carrierName).toBe('Seguros Andina');
+  });
+
+  it('listActivePublic acota por carrierId cuando se pide', async () => {
+    const { service, repo } = build();
+
+    await service.listActivePublic({ carrierId: 'carrier-andina' });
+
+    expect(repo.listPublicActiveRows).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(String),
+      'carrier-andina',
     );
   });
 });

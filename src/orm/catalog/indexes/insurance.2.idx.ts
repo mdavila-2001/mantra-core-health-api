@@ -2,11 +2,23 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `insurance` (parte 2/2).
- * 29 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 41 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['patient_coverages', 'ix_patient_coverages_insurance_broker_id', ['insurance_broker_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_employer_group_id', ['employer_group_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_relationship_to_subscriber_concept_id', ['relationship_to_subscriber_concept_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['patient_coverages', 'ix_patient_coverages_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_insurance_claim_id', ['insurance_claim_id'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_claim_adjudication__441b4744', ['claim_adjudication_version_id'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_document_record_id', ['document_record_id'], false, 'btree'],
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['patient_explanations_of_benefit', 'ix_patient_explanations_of_benefit_patient_profile_id__2239c1f8', ['patient_profile_id', 'created_at desc'], false, 'btree'],

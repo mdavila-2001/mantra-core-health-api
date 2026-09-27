@@ -1,0 +1,926 @@
+(node:23820) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:29284) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:9000) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:34796) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/modules/insurance/services/insurance-campaigns.service.spec.ts (75.697 s)
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › crea la campaña en borrador con sus aliados y deja auditoría
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:137:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:136:26)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › persiste el padre antes que los aliados (las FK son uuid planas)
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:186:36)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:186:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › con activate=true nace ACTIVE y sella activatedAt
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:195:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:194:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › guarda las fechas como día civil estable (mediodía UTC)
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:211:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:210:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › resuelve el CIE-10 en mayúsculas y lo guarda como concepto
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:226:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:225:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › sin patología no consulta el catálogo y deja el concepto vacío
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:236:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:235:11)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza fechas invertidas con 400 y no persiste nada
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 255 |[39m         )[33m,[39m
+     [90m 256 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 257 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 258 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 259 |[39m   })[33m;[39m
+     [90m 260 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:257:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza activar una campaña cuya vigencia ya terminó
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 273 |[39m         )[33m,[39m
+     [90m 274 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 275 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 276 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 277 |[39m   })[33m;[39m
+     [90m 278 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:275:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza un código repetido en la misma aseguradora con 409
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ConflictException
+    Received constructor: TypeError
+
+    [0m [90m 283 |[39m     [36mawait[39m expect(
+     [90m 284 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 285 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mConflictException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 286 |[39m     expect(repo[33m.[39mfindByCarrierAndCode)[33m.[39mtoHaveBeenCalledWith(
+     [90m 287 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 288 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:285:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza un CIE-10 que el catálogo no conoce con 400
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 300 |[39m         service[33m.[39mcreate(createDto({ targetConditionCode[33m:[39m [32m'ZZZ9'[39m })[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 301 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 302 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 303 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 304 |[39m   })[33m;[39m
+     [90m 305 |[39m })[33m;[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:302:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › un paciente sin tenant recibe 403, no 412
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 309 |[39m     [36mconst[39m { service[33m,[39m repo } [33m=[39m build()[33m;[39m
+     [90m 310 |[39m
+    [31m[1m>[22m[39m[90m 311 |[39m     [36mawait[39m expect(service[33m.[39mcreate(createDto()[33m,[39m [33mPATIENT[39m))[33m.[39mrejects[33m.[39mtoBeInstanceOf(
+     [90m     |[39m                                                                [31m[1m^[22m[39m
+     [90m 312 |[39m       [33mForbiddenException[39m[33m,[39m
+     [90m 313 |[39m     )[33m;[39m
+     [90m 314 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:311:64)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › un actor con tenant pero sin rol de administración recibe 403
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 323 |[39m     [36mawait[39m expect(
+     [90m 324 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mPATIENT[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 325 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 326 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 327 |[39m   })[33m;[39m
+     [90m 328 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:325:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › una organización que no es aseguradora recibe 403
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 333 |[39m     [36mawait[39m expect(
+     [90m 334 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 335 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 336 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 337 |[39m   })[33m;[39m
+     [90m 338 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:335:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › autoriza antes de validar: un paciente con datos inválidos ve 403, no 400
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 353 |[39m         [33mPATIENT[39m[33m,[39m
+     [90m 354 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 355 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 356 |[39m   })[33m;[39m
+     [90m 357 |[39m })[33m;[39m
+     [90m 358 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:355:15)
+
+  ● InsuranceCampaignsService · cambio de estado › DRAFT → ACTIVE activa, sella activatedAt y audita
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:382:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:381:11)
+
+  ● InsuranceCampaignsService · cambio de estado › ACTIVE ⇄ PAUSED y ACTIVE → EXPIRED están permitidos
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:403:17)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:402:13)
+
+  ● InsuranceCampaignsService · cambio de estado › una transición fuera de la tabla responde 422 y no muta
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: PreconditionFailedException
+    Received constructor: TypeError
+
+    [0m [90m 419 |[39m           service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m to }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 420 |[39m         )[33m,[39m
+    [31m[1m>[22m[39m[90m 421 |[39m       )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mPreconditionFailedException[39m)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 422 |[39m       expect(entity[33m.[39mstatusConceptId)[33m.[39mtoBe([36mfrom[39m)[33m;[39m
+     [90m 423 |[39m       expect(auditTrail[33m.[39mrecord)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 424 |[39m     }[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:421:17)
+
+  ● InsuranceCampaignsService · cambio de estado › no activa una campaña cuya vigencia ya venció
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: PreconditionFailedException
+    Received constructor: TypeError
+
+    [0m [90m 432 |[39m         service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 433 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 434 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mPreconditionFailedException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 435 |[39m     expect(entity[33m.[39mstatusConceptId)[33m.[39mtoBe([33mINS[39m[33m.[39m[33mCAMPAIGN_PAUSED[39m)[33m;[39m
+     [90m 436 |[39m   })[33m;[39m
+     [90m 437 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:434:15)
+
+  ● InsuranceCampaignsService · cambio de estado › repetir el estado actual es idempotente: no escribe ni audita
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:442:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:441:11)
+
+  ● InsuranceCampaignsService · cambio de estado › una campaña de otra aseguradora responde 404, igual que una inexistente
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ResourceNotFoundException
+    Received constructor: TypeError
+
+    [0m [90m 455 |[39m         service[33m.[39mchangeStatus([32m'camp-ajena'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 456 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 457 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mResourceNotFoundException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 458 |[39m     expect(repo[33m.[39mfindEntityForCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m 459 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 460 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:457:15)
+
+  ● InsuranceCampaignsService · cambio de estado › un paciente no puede cambiar el estado (403)
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 473 |[39m         service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mPATIENT[39m)[33m,[39m
+     [90m 474 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 475 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 476 |[39m   })[33m;[39m
+     [90m 477 |[39m })[33m;[39m
+     [90m 478 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:475:15)
+
+  ● InsuranceCampaignsService · listado administrativo › traduce los filtros a conceptos y acota por aseguradora
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      {"flush": [Function mockConstructor]},
+      "carrier-andina",
+      Object {
+        "after": undefined,
+        "limit": 11,
+    +   "referenceDate": "2026-09-26",
+        "statusConceptId": "c9c1ba81-84ef-5875-9b6c-f29d063584c1",
+        "typeConceptId": "815a3484-c984-5d63-b406-524302074912",
+      },
+
+    Number of calls: 1
+
+    [0m [90m 486 |[39m
+     [90m 487 |[39m     expect(tenantAdministration[33m.[39massertCanRead)[33m.[39mtoHaveBeenCalled()[33m;[39m
+    [31m[1m>[22m[39m[90m 488 |[39m     expect(repo[33m.[39mlistRowsByCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 489 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 490 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m
+     [90m 491 |[39m       {[0m
+
+      at Object.toHaveBeenCalledWith (modules/insurance/services/insurance-campaigns.service.spec.ts:488:36)
+
+  ● InsuranceCampaignsService · listado administrativo › una campaña inexistente o de otra aseguradora responde 404
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ResourceNotFoundException
+    Received constructor: TypeError
+
+    [0m [90m 566 |[39m     [36mawait[39m expect(
+     [90m 567 |[39m       asOperator(() [33m=>[39m service[33m.[39mgetById([32m'nada'[39m[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 568 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mResourceNotFoundException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 569 |[39m     expect(repo[33m.[39mgetRowForCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m 570 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 571 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:568:15)
+
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Summary of all failing tests
+FAIL modules/insurance/services/insurance-campaigns.service.spec.ts (75.697 s)
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › crea la campaña en borrador con sus aliados y deja auditoría
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:137:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:136:26)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › persiste el padre antes que los aliados (las FK son uuid planas)
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:186:36)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:186:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › con activate=true nace ACTIVE y sella activatedAt
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:195:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:194:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › guarda las fechas como día civil estable (mediodía UTC)
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:211:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:210:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › resuelve el CIE-10 en mayúsculas y lo guarda como concepto
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:226:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:225:11)
+
+  ● InsuranceCampaignsService · alta y activación (CA-4.1) › sin patología no consulta el catálogo y deja el concepto vacío
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:193:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as create] (modules/insurance/services/insurance-campaigns.service.ts:192:20)
+      at create (modules/insurance/services/insurance-campaigns.service.spec.ts:236:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:235:11)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza fechas invertidas con 400 y no persiste nada
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 255 |[39m         )[33m,[39m
+     [90m 256 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 257 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 258 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 259 |[39m   })[33m;[39m
+     [90m 260 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:257:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza activar una campaña cuya vigencia ya terminó
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 273 |[39m         )[33m,[39m
+     [90m 274 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 275 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 276 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 277 |[39m   })[33m;[39m
+     [90m 278 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:275:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza un código repetido en la misma aseguradora con 409
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ConflictException
+    Received constructor: TypeError
+
+    [0m [90m 283 |[39m     [36mawait[39m expect(
+     [90m 284 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 285 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mConflictException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 286 |[39m     expect(repo[33m.[39mfindByCarrierAndCode)[33m.[39mtoHaveBeenCalledWith(
+     [90m 287 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 288 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:285:15)
+
+  ● InsuranceCampaignsService · validaciones negativas (CA-4.6) › rechaza un CIE-10 que el catálogo no conoce con 400
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: BadRequestException
+    Received constructor: TypeError
+
+    [0m [90m 300 |[39m         service[33m.[39mcreate(createDto({ targetConditionCode[33m:[39m [32m'ZZZ9'[39m })[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 301 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 302 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mBadRequestException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 303 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 304 |[39m   })[33m;[39m
+     [90m 305 |[39m })[33m;[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:302:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › un paciente sin tenant recibe 403, no 412
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 309 |[39m     [36mconst[39m { service[33m,[39m repo } [33m=[39m build()[33m;[39m
+     [90m 310 |[39m
+    [31m[1m>[22m[39m[90m 311 |[39m     [36mawait[39m expect(service[33m.[39mcreate(createDto()[33m,[39m [33mPATIENT[39m))[33m.[39mrejects[33m.[39mtoBeInstanceOf(
+     [90m     |[39m                                                                [31m[1m^[22m[39m
+     [90m 312 |[39m       [33mForbiddenException[39m[33m,[39m
+     [90m 313 |[39m     )[33m;[39m
+     [90m 314 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:311:64)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › un actor con tenant pero sin rol de administración recibe 403
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 323 |[39m     [36mawait[39m expect(
+     [90m 324 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mPATIENT[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 325 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 326 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 327 |[39m   })[33m;[39m
+     [90m 328 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:325:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › una organización que no es aseguradora recibe 403
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 333 |[39m     [36mawait[39m expect(
+     [90m 334 |[39m       asOperator(() [33m=>[39m service[33m.[39mcreate(createDto()[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 335 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 336 |[39m     expect(repo[33m.[39mcreateCampaign)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 337 |[39m   })[33m;[39m
+     [90m 338 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:335:15)
+
+  ● InsuranceCampaignsService · control de acceso administrativo (CA-4.7) › autoriza antes de validar: un paciente con datos inválidos ve 403, no 400
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 353 |[39m         [33mPATIENT[39m[33m,[39m
+     [90m 354 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 355 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 356 |[39m   })[33m;[39m
+     [90m 357 |[39m })[33m;[39m
+     [90m 358 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:355:15)
+
+  ● InsuranceCampaignsService · cambio de estado › DRAFT → ACTIVE activa, sella activatedAt y audita
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:382:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:381:11)
+
+  ● InsuranceCampaignsService · cambio de estado › ACTIVE ⇄ PAUSED y ACTIVE → EXPIRED están permitidos
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:403:17)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:402:13)
+
+  ● InsuranceCampaignsService · cambio de estado › una transición fuera de la tabla responde 422 y no muta
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: PreconditionFailedException
+    Received constructor: TypeError
+
+    [0m [90m 419 |[39m           service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m to }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 420 |[39m         )[33m,[39m
+    [31m[1m>[22m[39m[90m 421 |[39m       )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mPreconditionFailedException[39m)[33m;[39m
+     [90m     |[39m                 [31m[1m^[22m[39m
+     [90m 422 |[39m       expect(entity[33m.[39mstatusConceptId)[33m.[39mtoBe([36mfrom[39m)[33m;[39m
+     [90m 423 |[39m       expect(auditTrail[33m.[39mrecord)[33m.[39mnot[33m.[39mtoHaveBeenCalled()[33m;[39m
+     [90m 424 |[39m     }[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:421:17)
+
+  ● InsuranceCampaignsService · cambio de estado › no activa una campaña cuya vigencia ya venció
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: PreconditionFailedException
+    Received constructor: TypeError
+
+    [0m [90m 432 |[39m         service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 433 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 434 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mPreconditionFailedException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 435 |[39m     expect(entity[33m.[39mstatusConceptId)[33m.[39mtoBe([33mINS[39m[33m.[39m[33mCAMPAIGN_PAUSED[39m)[33m;[39m
+     [90m 436 |[39m   })[33m;[39m
+     [90m 437 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:434:15)
+
+  ● InsuranceCampaignsService · cambio de estado › repetir el estado actual es idempotente: no escribe ni audita
+
+    TypeError: this.tenantAdministration.canAdminister is not a function
+
+    [0m [90m 590 |[39m     [36mtry[39m {
+     [90m 591 |[39m       tenantId [33m=[39m [36mthis[39m[33m.[39mtenantOf(actor)[33m;[39m
+    [31m[1m>[22m[39m[90m 592 |[39m       [36mconst[39m canAdminister [33m=[39m [36mawait[39m [36mthis[39m[33m.[39mtenantAdministration[33m.[39mcanAdminister(
+     [90m     |[39m                                                             [31m[1m^[22m[39m
+     [90m 593 |[39m         tx[33m,[39m
+     [90m 594 |[39m         tenantId[33m,[39m
+     [90m 595 |[39m         actor[33m,[39m[0m
+
+      at InsuranceCampaignsService.canAdminister [as administrableCarrier] (modules/insurance/services/insurance-campaigns.service.ts:592:61)
+      at administrableCarrier (modules/insurance/services/insurance-campaigns.service.ts:287:34)
+      at Object.work (modules/insurance/services/insurance-campaigns.service.spec.ts:85:60)
+      at InsuranceCampaignsService.transactional [as changeStatus] (modules/insurance/services/insurance-campaigns.service.ts:286:20)
+      at changeStatus (modules/insurance/services/insurance-campaigns.service.spec.ts:442:15)
+      at run (common/tenant/tenant-context.ts:20:18)
+      at runWithTenant (modules/insurance/services/insurance-campaigns.service.spec.ts:130:3)
+      at Object.asOperator (modules/insurance/services/insurance-campaigns.service.spec.ts:441:11)
+
+  ● InsuranceCampaignsService · cambio de estado › una campaña de otra aseguradora responde 404, igual que una inexistente
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ResourceNotFoundException
+    Received constructor: TypeError
+
+    [0m [90m 455 |[39m         service[33m.[39mchangeStatus([32m'camp-ajena'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mOPERATOR[39m)[33m,[39m
+     [90m 456 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 457 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mResourceNotFoundException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 458 |[39m     expect(repo[33m.[39mfindEntityForCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m 459 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 460 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:457:15)
+
+  ● InsuranceCampaignsService · cambio de estado › un paciente no puede cambiar el estado (403)
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ForbiddenException
+    Received constructor: TypeError
+
+    [0m [90m 473 |[39m         service[33m.[39mchangeStatus([32m'camp-1'[39m[33m,[39m { status[33m:[39m [32m'ACTIVE'[39m }[33m,[39m [33mPATIENT[39m)[33m,[39m
+     [90m 474 |[39m       )[33m,[39m
+    [31m[1m>[22m[39m[90m 475 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mForbiddenException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 476 |[39m   })[33m;[39m
+     [90m 477 |[39m })[33m;[39m
+     [90m 478 |[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:475:15)
+
+  ● InsuranceCampaignsService · listado administrativo › traduce los filtros a conceptos y acota por aseguradora
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      {"flush": [Function mockConstructor]},
+      "carrier-andina",
+      Object {
+        "after": undefined,
+        "limit": 11,
+    +   "referenceDate": "2026-09-26",
+        "statusConceptId": "c9c1ba81-84ef-5875-9b6c-f29d063584c1",
+        "typeConceptId": "815a3484-c984-5d63-b406-524302074912",
+      },
+
+    Number of calls: 1
+
+    [0m [90m 486 |[39m
+     [90m 487 |[39m     expect(tenantAdministration[33m.[39massertCanRead)[33m.[39mtoHaveBeenCalled()[33m;[39m
+    [31m[1m>[22m[39m[90m 488 |[39m     expect(repo[33m.[39mlistRowsByCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 489 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 490 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m
+     [90m 491 |[39m       {[0m
+
+      at Object.toHaveBeenCalledWith (modules/insurance/services/insurance-campaigns.service.spec.ts:488:36)
+
+  ● InsuranceCampaignsService · listado administrativo › una campaña inexistente o de otra aseguradora responde 404
+
+    expect(received).rejects.toBeInstanceOf(expected)
+
+    Expected constructor: ResourceNotFoundException
+    Received constructor: TypeError
+
+    [0m [90m 566 |[39m     [36mawait[39m expect(
+     [90m 567 |[39m       asOperator(() [33m=>[39m service[33m.[39mgetById([32m'nada'[39m[33m,[39m [33mOPERATOR[39m))[33m,[39m
+    [31m[1m>[22m[39m[90m 568 |[39m     )[33m.[39mrejects[33m.[39mtoBeInstanceOf([33mResourceNotFoundException[39m)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 569 |[39m     expect(repo[33m.[39mgetRowForCarrier)[33m.[39mtoHaveBeenCalledWith(
+     [90m 570 |[39m       expect[33m.[39manything()[33m,[39m
+     [90m 571 |[39m       [33mCARRIER[39m[33m.[39mid[33m,[39m[0m
+
+      at Object.toBeInstanceOf (../node_modules/expect/build/index.js:2155:20)
+      at Object.toBeInstanceOf (modules/insurance/services/insurance-campaigns.service.spec.ts:568:15)
+
+
+Test Suites: 1 failed, 27 passed, 28 total
+Tests:       23 failed, 397 passed, 420 total
+Snapshots:   0 total
+Time:        121.96 s
+Ran all test suites matching src/modules/insurance.

@@ -1,0 +1,64 @@
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\dynamic-enum-catalog.ts
+  176:17  error  Insert `⏎·····`  prettier/prettier
+  214:17  error  Insert `⏎·····`  prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\insurance\controllers\insurance-campaigns.controller.ts
+   90:13  error  Insert `⏎·····`  prettier/prettier
+  104:13  error  Insert `⏎·····`  prettier/prettier
+  161:13  error  Insert `⏎·····`  prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\insurance\controllers\insurance-controllers.spec.ts
+  457:12  error  Replace `Reflect.getMetadata(PATH_METADATA,·InsuranceCampaignsController)).toEqual([⏎······'insurance/campaigns',⏎······'insurance-campaigns',⏎····` with `⏎······Reflect.getMetadata(PATH_METADATA,·InsuranceCampaignsController),⏎····).toEqual(['insurance/campaigns',·'insurance-campaigns'`  prettier/prettier
+  492:37  error  Replace `·path:·':id',·method:·RequestMethod.PATCH` with `⏎······path:·':id',⏎······method:·RequestMethod.PATCH,⏎···`                                                                                                                                                                             prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\insurance\repositories\insurance-campaigns.repository.ts
+  213:11  error  Replace `filters.statusConceptId·===·INS.CAMPAIGN_ACTIVE·&&·filters.referenceDate` with `⏎········filters.statusConceptId·===·INS.CAMPAIGN_ACTIVE·&&⏎········filters.referenceDate⏎······`  prettier/prettier
+  334:32  error  Replace `INS.CAMPAIGN_ACTIVE,·referenceDate,·referenceDate` with `⏎······INS.CAMPAIGN_ACTIVE,⏎······referenceDate,⏎······referenceDate,⏎····`                                               prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\insurance\services\insurance-campaigns.service.spec.ts
+  340:28  error  Replace `·id:·'user-op-role',·roles:·['INSURANCE_OPERATOR']` with `⏎······id:·'user-op-role',⏎······roles:·['INSURANCE_OPERATOR'],⏎···`                            prettier/prettier
+  351:28  error  Replace `·id:·'user-op-role',·roles:·['INSURANCE_OPERATOR']` with `⏎······id:·'user-op-role',⏎······roles:·['INSURANCE_OPERATOR'],⏎···`                            prettier/prettier
+  491:30  error  Replace `'camp-inexistente',·{·status:·'ACTIVE'·},·OPERATOR` with `⏎··········'camp-inexistente',⏎··········{·status:·'ACTIVE'·},⏎··········OPERATOR,⏎········`    prettier/prettier
+  657:20  error  Replace `·status_concept_id:·INS.CAMPAIGN_ACTIVE,·valid_to:·civil(-1)` with `⏎········status_concept_id:·INS.CAMPAIGN_ACTIVE,⏎········valid_to:·civil(-1),⏎·····`  prettier/prettier
+  669:20  error  Replace `·status_concept_id:·INS.CAMPAIGN_ACTIVE,·valid_to:·civil(30)` with `⏎········status_concept_id:·INS.CAMPAIGN_ACTIVE,⏎········valid_to:·civil(30),⏎·····`  prettier/prettier
+  699:62  error  Replace `INS.CAMPAIGN_DRAFT` with `⏎······INS.CAMPAIGN_DRAFT,⏎····`                                                                                                prettier/prettier
+  780:54  error  Replace `expect.anything(),·'camp-1'` with `⏎······expect.anything(),⏎······'camp-1',⏎····`                                                                        prettier/prettier
+  817:20  error  Replace `·id:·'u1',·roles:·['PATIENT'],·patientProfileId:·PROFILE_ID` with `⏎······id:·'u1',⏎······roles:·['PATIENT'],⏎······patientProfileId:·PROFILE_ID,⏎···`    prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\insurance\services\insurance-campaigns.service.ts
+  141:7   error  Replace `⏎····(status·===·'ACTIVE'·||·status·===·'PAUSED')·&&⏎····validTo·<·referenceDate⏎··` with `(status·===·'ACTIVE'·||·status·===·'PAUSED')·&&·validTo·<·referenceDate`  prettier/prettier
+  358:24  error  Insert `⏎·······`                                                                                                                                                             prettier/prettier
+  359:22  error  Insert `⏎·······`                                                                                                                                                             prettier/prettier
+  502:24  error  Replace `actor:·AuthenticatedUser` with `⏎····actor:·AuthenticatedUser,⏎··`                                                                                                   prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\terminology\import\xlsx-parser.spec.ts
+   44:20  error    Replace `'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',` with `⏎····'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',⏎···`                                                        prettier/prettier
+   45:1   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   46:5   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   47:5   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   48:3   error    Replace `}` with `··},⏎··`                                                                                                                                                         prettier/prettier
+   72:43  error    Replace `['code',·'display',·'definition'],·['ZZ-999',·'No·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-999',·'No·debería·leerse',·''],⏎····`  prettier/prettier
+   73:48  error    Replace `['code',·'display',·'definition'],·['ZZ-001',·'Sí·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-001',·'Sí·debería·leerse',·''],⏎····`  prettier/prettier
+   76:36  error    Replace `·type:·'buffer',·bookType:·'xlsx'` with `⏎······type:·'buffer',⏎······bookType:·'xlsx',⏎···`                                                                              prettier/prettier
+   94:5   warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  101:62  error    Replace ``ZZ-${i}`,·'x',·''` with `⏎······`ZZ-${i}`,⏎······'x',⏎······'',⏎····`                                                                                                    prettier/prettier
+  103:41  error    Replace `['code',·'display',·'definition'],·...filas` with `⏎······['code',·'display',·'definition'],⏎······...filas,⏎····`                                                        prettier/prettier
+  105:36  error    Replace `·type:·'buffer',·bookType:·'xlsx'` with `⏎······type:·'buffer',⏎······bookType:·'xlsx',⏎···`                                                                              prettier/prettier
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\modules\terminology\import\xlsx-parser.ts
+   71:17  error  Insert `⏎·····`                                                                                                                                                                                prettier/prettier
+   77:12  error  Replace `·fila:·FILA_DEL_ENCABEZADO,·motivo:·'el·archivo·no·tiene·encabezado'` with `⏎············fila:·FILA_DEL_ENCABEZADO,⏎············motivo:·'el·archivo·no·tiene·encabezado',⏎·········`  prettier/prettier
+  108:33  error  Replace `registro,·hoja,·indiceRegistro,·problemasDeCelda` with `⏎········registro,⏎········hoja,⏎········indiceRegistro,⏎········problemasDeCelda,⏎······`                                    prettier/prettier
+  116:12  error  Replace `·fila:·FILA_DEL_ENCABEZADO,·motivo:·'el·archivo·no·tiene·encabezado'` with `⏎············fila:·FILA_DEL_ENCABEZADO,⏎············motivo:·'el·archivo·no·tiene·encabezado',⏎·········`  prettier/prettier
+  122:47  error  Replace `·resolverColumna(perfil,·String(celda))` with `⏎······resolverColumna(perfil,·String(celda)),⏎····`                                                                                   prettier/prettier
+  225:20  error  Replace `hoja:·WorkSheet,·fila:·number,·columna:·number` with `⏎··hoja:·WorkSheet,⏎··fila:·number,⏎··columna:·number,⏎`                                                                        prettier/prettier
+  249:27  error  Replace `·?·valor.toISOString().slice(0,·10)` with `⏎······?·valor.toISOString().slice(0,·10)⏎·····`                                                                                           prettier/prettier
+  254:17  error  'valor' will use Object's default stringification format ('[object Object]') when stringified                                                                                                  @typescript-eslint/no-base-to-string
+
+D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\orm\catalog\schemas.catalog.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+✖ 42 problems (40 errors, 2 warnings)
+  39 errors and 1 warning potentially fixable with the `--fix` option.
+

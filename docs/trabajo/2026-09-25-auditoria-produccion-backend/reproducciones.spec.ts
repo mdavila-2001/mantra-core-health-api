@@ -110,7 +110,7 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const service = new PaymentsIntentsService({ transactional: (fn: any) => fn(tx) } as any,
       new PaymentIntentsRepository(), { createRiskAssessment: () => ({ id: ID }) } as any, log as any);
     const user = actor('PAYMENTS_ADMIN');
-    const dto = { riskScore: 90, decision: 'DECLINE' as const, threeDsAuthenticated: false };
+    const dto = { riskScore: '90', decision: 'DECLINE' as const, threeDsAuthenticated: false };
     await guarded(PaymentsIntentsController, 'assessRisk',
       { headers: { 'x-tenant-id': T1 }, user, params: { id: ID }, query: {}, body: dto },
       () => service.assessRisk(ID, dto, user));
@@ -181,7 +181,7 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const tx = { findOne: async () => intent };
     const service = new PaymentsIntentsService({ transactional: (fn: any) => fn(tx) } as any,
       new PaymentIntentsRepository(), { createRiskAssessment: () => ({ id: ID }) } as any, log as any);
-    await service.assessRisk(ID, { riskScore: 90, decision: 'DECLINE' }, actor('PAYMENTS_ADMIN'));
+    await service.assessRisk(ID, { riskScore: '90', decision: 'DECLINE' }, actor('PAYMENTS_ADMIN'));
     expect(intent.statusConceptId).toBe(CONCEPTS.PI_FAILED);
   });
 

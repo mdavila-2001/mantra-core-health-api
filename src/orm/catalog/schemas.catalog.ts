@@ -38,7 +38,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['health_data', 52, 'health_data', 34],
   ['iam', 1, 'iam', 14],
   ['identity_assurance', 27, 'identity_assurance', 11],
-  ['insurance', 26, 'insurance', 29],
+  ['insurance', 26, 'insurance', 31],
   ['integration_contracts', 31, 'integration_contracts', 9],
   ['integrations', 12, 'integrations', 10],
   ['lakehouse', 63, 'lakehouse', 18],

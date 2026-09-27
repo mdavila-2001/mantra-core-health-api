@@ -1,0 +1,18 @@
+(node:9240) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:31400) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:27308) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 29 passed, 29 total
+Tests:       458 passed, 458 total
+Snapshots:   0 total
+Time:        41.261 s, estimated 99 s
+Ran all test suites matching src/modules/insurance.
