@@ -57,6 +57,11 @@ export {
   IdentityVerificationRequiredException,
 } from './errors/domain.exception';
 export { AllExceptionsFilter } from './filters/all-exceptions.filter';
+export { validationExceptionFactory } from './filters/validation-exception.factory';
+export type {
+  FieldViolation,
+  ValidationFailureDetails,
+} from './filters/validation-exception.factory';
 
 // Ciclo de vida del proceso (fallo terminal observable, apagado acotado)
 export {

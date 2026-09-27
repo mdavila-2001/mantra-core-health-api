@@ -6,7 +6,13 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createHash } from 'node:crypto';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
-import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  TokenService,
+  createdBy,
+  validationExceptionFactory,
+} from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
 import {
@@ -203,6 +209,7 @@ export async function bootstrapTestApp(
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
+      exceptionFactory: validationExceptionFactory,
     }),
   );
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando

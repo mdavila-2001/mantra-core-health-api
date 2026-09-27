@@ -9,6 +9,7 @@ Traducción centralizada de errores a respuestas de transporte.
 | Archivo | Responsabilidad |
 | --- | --- |
 | `all-exceptions.filter.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `validation-exception.factory.ts` | `exceptionFactory` del `ValidationPipe` global: `details.violations` (textos, compatibles) + `details.fields` (ruta completa por campo). |
 
 ## Criterios de mantenimiento
 
