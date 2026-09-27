@@ -83,6 +83,24 @@ export class Files {
   deletedAt?: Date;
 
   /**
+   * Texto alternativo breve del contenido (WCAG 1.1.1). PHI: no se loguea.
+   */
+  @Property({ fieldName: 'alt_text', columnType: 'varchar', nullable: true })
+  altText?: string;
+
+  /**
+   * Descripción larga del contenido, cuando el texto breve no alcanza.
+   */
+  @Property({ fieldName: 'description', columnType: 'text', nullable: true })
+  description?: string;
+
+  /**
+   * Transcripción del contenido (audio, video o documento escaneado).
+   */
+  @Property({ fieldName: 'transcription', columnType: 'text', nullable: true })
+  transcription?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

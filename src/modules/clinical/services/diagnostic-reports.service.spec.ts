@@ -163,3 +163,48 @@ describe('DiagnosticReportsService · MCH-007, liberación por id', () => {
     expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });
+
+describe('DiagnosticReportsService · textos accesibles (v4.2.33)', () => {
+  const alta = {
+    custodianTenantId: 't1',
+    patientProfileId: 'p1',
+    codeConceptId: 'code1',
+  };
+
+  it('persiste los tres textos con el reporte y los devuelve', async () => {
+    const d = build();
+    const textos = {
+      altText: 'Ecografía abdominal, corte longitudinal.',
+      description: 'Hígado de ecogenicidad conservada.',
+      transcription: 'Informe dictado por el operador.',
+    };
+    d.reportsRepo.create.mockImplementation((_tx: unknown, data: any) => ({
+      ...report(),
+      ...data,
+    }));
+
+    const res = await d.service.create({ ...alta, ...textos }, actor);
+
+    expect(d.reportsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining(textos),
+    );
+    expect(res).toMatchObject(textos);
+  });
+
+  it('sin textos, la respuesta no los trae (ni como null)', async () => {
+    const d = build();
+    d.reportsRepo.create.mockReturnValue({
+      ...report(),
+      altText: null,
+      description: null,
+      transcription: null,
+    });
+
+    const res = await d.service.create(alta, actor);
+
+    expect('altText' in res).toBe(false);
+    expect('description' in res).toBe(false);
+    expect('transcription' in res).toBe(false);
+  });
+});

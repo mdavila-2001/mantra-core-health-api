@@ -21,6 +21,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
+  pickAccessibleContent,
 } from '../../../common';
 import {
   FileDerivativesRepository,
@@ -187,6 +188,9 @@ export class FilesService {
         sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
         originalName: dto.originalName,
+        altText: dto.altText,
+        description: dto.description,
+        transcription: dto.transcription,
         actorUserId: actor?.id,
       });
       // Flush del padre antes de crear la versión que lo referencia por FK.
@@ -887,6 +891,7 @@ export class FilesService {
       id: file.id,
       currentVersionId: file.currentVersionId,
       originalName: file.originalName,
+      ...pickAccessibleContent(file),
       ...(vigente
         ? {
             mimeType: vigente.mimeType,

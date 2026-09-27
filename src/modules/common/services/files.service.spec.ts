@@ -943,4 +943,59 @@ describe('FilesService', () => {
       expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
     });
   });
+
+  /**
+   * v4.2.33 · los textos accesibles se persisten con el archivo y vuelven en
+   * la respuesta; si no se declararon, no aparecen.
+   */
+  describe('createFile · textos accesibles (v4.2.33)', () => {
+    const textos = {
+      altText: 'Radiografía de tórax, proyección frontal.',
+      description: 'Silueta cardíaca normal.',
+      transcription: 'Sin hallazgos agudos.',
+    };
+
+    it('persiste los tres textos y los devuelve', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockImplementation(
+        (_tx: unknown, data: Record<string, unknown>) => ({
+          id: 'file-1',
+          ...data,
+          createdAt: new Date(),
+        }),
+      );
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      const result = await service.createFile(
+        { ...createFileDto, ...textos },
+        actor,
+      );
+
+      expect(filesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining(textos),
+      );
+      expect(result).toMatchObject(textos);
+    });
+
+    it('sin textos declarados la respuesta no los trae (ni como null)', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-1',
+        altText: null,
+        description: null,
+        transcription: null,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      const result = await service.createFile(createFileDto, actor);
+
+      expect(result.altText).toBeUndefined();
+      expect(result.description).toBeUndefined();
+      expect(result.transcription).toBeUndefined();
+      expect('altText' in result).toBe(false);
+    });
+  });
 });

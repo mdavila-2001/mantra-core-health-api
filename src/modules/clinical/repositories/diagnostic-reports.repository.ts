@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { DiagnosticReports } from '../entities';
 import { createdBy } from '../../../common';
+import type { AccessibleContentFields } from '../../../common/dto/accessible-content.dto';
 
 /**
  * Describe el contrato estructural de create diagnostic report data.
  */
-export interface CreateDiagnosticReportData {
+export interface CreateDiagnosticReportData extends AccessibleContentFields {
   /**
    * Identificador asociado a custodian tenant.
    */
@@ -86,6 +87,9 @@ export class DiagnosticReportsRepository {
         lifecycleStatusConceptId: data.lifecycleStatusConceptId,
         resultReleaseStatusConceptId: data.resultReleaseStatusConceptId,
         currentVersionId: data.currentVersionId,
+        altText: data.altText,
+        description: data.description,
+        transcription: data.transcription,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
