@@ -28,9 +28,10 @@ import {
   type CampaignRow,
   type PatientCampaignRow,
 } from '../repositories/insurance-campaigns.repository';
-import type { InsuranceCarriers } from '../entities';
+import type { InsuranceCampaigns, InsuranceCarriers } from '../entities';
 import { INS } from '../insurance.concepts';
 import type {
+  ActiveCampaignsQueryDto,
   CampaignPartnerRoleDto,
   CampaignPartnerTypeDto,
   CampaignStatusDto,
@@ -42,6 +43,7 @@ import type {
   InsuranceCampaignPartnerDto,
   InsuranceCampaignResponseDto,
   PatientCampaignDto,
+  UpdateInsuranceCampaignDto,
   UpdateInsuranceCampaignStatusDto,
 } from '../dto/insurance-campaigns.dto';
 
@@ -50,6 +52,14 @@ const PLATFORM_ROLES: ReadonlySet<string> = new Set([
   'SECURITY_ADMIN',
   'SUPERADMIN',
 ]);
+
+/**
+ * Rol de negocio de la aseguradora sin membresía OWNER/ADMIN. Igual que
+ * `insurance-analytics.service.ts`: mientras tenga membresía activa en el
+ * tenant (cualquier rol de membresía, típicamente STAFF), puede administrar
+ * campañas. El prompt de Tarea 4 lo nombra explícitamente junto a OWNER/ADMIN.
+ */
+const INSURANCE_OPERATOR_ROLE = 'INSURANCE_OPERATOR';
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -116,6 +126,22 @@ const TRANSITIONS: Readonly<
  */
 function dateOnlyColumn(civilDate: string): Date {
   return new Date(`${civilDate}T12:00:00.000Z`);
+}
+
+/**
+ * `status` tal como está en la fila; `EXPIRED` si `validTo` ya pasó y el
+ * estado grabado es `ACTIVE`/`PAUSED` (CA-04). No escribe nada: es sólo lo que
+ * la respuesta muestra, para no depender de un cron que cierre la campaña.
+ */
+function effectiveStatusOf(
+  status: CampaignStatusDto,
+  validTo: string,
+  referenceDate: string,
+): CampaignStatusDto {
+  if ((status === 'ACTIVE' || status === 'PAUSED') && validTo < referenceDate) {
+    return 'EXPIRED';
+  }
+  return status;
 }
 
 function must<K>(
@@ -199,6 +225,8 @@ export class InsuranceCampaignsService {
         targetConditionConceptId = conceptId;
       }
 
+      await this.assertPartnersBelongToCarrier(tx, carrier.id, dto.partners);
+
       const activate = dto.activate === true;
       const now = new Date();
       const campaign = this.repo.createCampaign(tx, {
@@ -254,11 +282,7 @@ export class InsuranceCampaignsService {
   ): Promise<InsuranceCampaignResponseDto> {
     return this.em.transactional(async (tx) => {
       const carrier = await this.administrableCarrier(tx, actor);
-      // Acotada a la aseguradora: la de otra responde igual que una inexistente.
-      const campaign = await this.repo.findEntityForCarrier(tx, carrier.id, id);
-      if (!campaign) {
-        throw new ResourceNotFoundException('Campaña no encontrada', { id });
-      }
+      const campaign = await this.requireOwnedEntity(tx, actor, carrier, id);
 
       const current = must(
         STATUS_BY_CONCEPT,
@@ -301,6 +325,105 @@ export class InsuranceCampaignsService {
     });
   }
 
+  /**
+   * Edición parcial. Sólo en `DRAFT`/`PAUSED` (422 en `ACTIVE`/`EXPIRED`): una
+   * campaña que los afiliados ya vieron no se reescribe en caliente, se pausa
+   * primero. `code` no está en el DTO: es inmutable. Si llegan `partners`, la
+   * lista completa reemplaza a la anterior en la misma transacción.
+   */
+  async update(
+    id: string,
+    dto: UpdateInsuranceCampaignDto,
+    actor: AuthenticatedUser,
+  ): Promise<InsuranceCampaignResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const carrier = await this.administrableCarrier(tx, actor);
+      const campaign = await this.requireOwnedEntity(tx, actor, carrier, id);
+
+      const current = must(
+        STATUS_BY_CONCEPT,
+        campaign.statusConceptId,
+        'estado de campaña',
+      );
+      if (current !== 'DRAFT' && current !== 'PAUSED') {
+        throw new PreconditionFailedException(
+          `Una campaña en estado ${current} no se puede editar; pausela primero`,
+          { status: current },
+        );
+      }
+
+      const validFrom =
+        dto.validFrom ?? campaign.validFrom.toISOString().slice(0, 10);
+      const validTo =
+        dto.validTo ?? campaign.validTo.toISOString().slice(0, 10);
+      if (validTo < validFrom) {
+        throw new BadRequestException(
+          'validTo debe ser igual o posterior a validFrom',
+        );
+      }
+
+      if (dto.targetConditionCode !== undefined) {
+        const code = dto.targetConditionCode.trim().toUpperCase();
+        const conceptId = await this.repo.resolveIcd10ConceptId(tx, code);
+        if (!conceptId) {
+          throw new BadRequestException(
+            `El código CIE-10 ${code} no está en el catálogo`,
+          );
+        }
+        campaign.targetConditionConceptId = conceptId;
+      }
+
+      if (dto.partners) {
+        await this.assertPartnersBelongToCarrier(tx, carrier.id, dto.partners);
+      }
+
+      if (dto.title !== undefined) campaign.title = dto.title.trim();
+      if (dto.description !== undefined) {
+        campaign.description = dto.description.trim() || undefined;
+      }
+      if (dto.campaignType !== undefined) {
+        campaign.campaignTypeConceptId = TYPE_CONCEPTS[dto.campaignType];
+      }
+      if (dto.validFrom !== undefined) {
+        campaign.validFrom = dateOnlyColumn(dto.validFrom);
+      }
+      if (dto.validTo !== undefined) {
+        campaign.validTo = dateOnlyColumn(dto.validTo);
+      }
+      if (dto.copayBonusPercentage !== undefined) {
+        campaign.copayBonusPercentage = String(dto.copayBonusPercentage);
+      }
+      touch(campaign, actor.id);
+      await tx.flush();
+
+      if (dto.partners) {
+        await this.repo.deletePartners(tx, campaign.id);
+        for (const partner of dto.partners) {
+          this.repo.createPartner(tx, {
+            actorUserId: actor.id,
+            insuranceCampaignId: campaign.id,
+            partnerRoleConceptId: PARTNER_ROLE_CONCEPTS[partner.role],
+            partnerTypeConceptId: PARTNER_TYPE_CONCEPTS[partner.type],
+            partnerName: partner.name.trim(),
+            partnerTenantId: partner.partnerTenantId,
+            networkProviderMembershipId: partner.networkProviderMembershipId,
+          });
+        }
+        await tx.flush();
+      }
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'INSURANCE_CAMPAIGN_UPDATED',
+        entity: 'insurance_campaign',
+        entityId: campaign.id,
+        tenantId: carrier.tenantId,
+      });
+      await tx.flush();
+
+      return this.detail(tx, carrier.id, id);
+    });
+  }
+
   /** Página del listado de la aseguradora activa, de la más nueva a la más vieja. */
   async list(
     query: InsuranceCampaignListQueryDto,
@@ -315,6 +438,7 @@ export class InsuranceCampaignsService {
       statusConceptId: query.status ? STATUS_CONCEPTS[query.status] : undefined,
       after: query.cursor ? this.decodeCursor(query.cursor) : undefined,
       limit: limit + 1,
+      referenceDate: patientCoverageReferenceDate(),
     });
 
     const page = rows.slice(0, limit);
@@ -335,7 +459,12 @@ export class InsuranceCampaignsService {
   ): Promise<InsuranceCampaignResponseDto> {
     const em = this.em.fork();
     const carrier = await this.readableCarrier(em, actor);
-    return this.detail(em, carrier.id, id);
+    const row = await this.repo.getRowForCarrier(em, carrier.id, id);
+    if (!row) {
+      await this.assertNotCrossTenant(actor, carrier, id);
+      throw new ResourceNotFoundException('Campaña no encontrada', { id });
+    }
+    return this.toResponse(row);
   }
 
   /**
@@ -360,6 +489,39 @@ export class InsuranceCampaignsService {
       em,
       carrierIds,
       referenceDate,
+    );
+    return rows.map((row) => this.toPatientResponse(row));
+  }
+
+  /**
+   * `GET /insurance-campaigns/my-benefits`: el afiliado autenticado, sin poner
+   * el perfil en la URL. El claim `pid` ya identifica al paciente; si el
+   * actor no tiene perfil de paciente, 403 (no aplica: no es un afiliado).
+   */
+  async listMyBenefits(
+    actor: AuthenticatedUser,
+  ): Promise<PatientCampaignDto[]> {
+    if (!actor.patientProfileId) {
+      throw new ForbiddenException(
+        'La cuenta no tiene un perfil de paciente asociado',
+      );
+    }
+    return this.listActiveForPatient(actor.patientProfileId, actor);
+  }
+
+  /**
+   * `GET /insurance-campaigns/active`, pública y sin token: las campañas
+   * vigentes de cualquier aseguradora (o de una sola con `?carrierId=`), con
+   * el mismo DTO sin identificadores internos que ve el afiliado.
+   */
+  async listActivePublic(
+    query: ActiveCampaignsQueryDto,
+  ): Promise<PatientCampaignDto[]> {
+    const em = this.em.fork();
+    const rows = await this.repo.listPublicActiveRows(
+      em,
+      patientCoverageReferenceDate(),
+      query.carrierId,
     );
     return rows.map((row) => this.toPatientResponse(row));
   }
@@ -392,14 +554,63 @@ export class InsuranceCampaignsService {
     return carrier;
   }
 
-  /** Para mutar: OWNER/ADMIN de la aseguradora, o plataforma. */
+  /**
+   * Escribe `INSURANCE_CAMPAIGN_ACCESS_DENIED` en una transacción PROPIA,
+   * independiente de la del llamador: si éste sigue y hace rollback (porque
+   * este mismo 403 lo aborta), la fila de auditoría tiene que sobrevivir
+   * igual (CA-02). Por eso nunca usa el `tx` de quien la invoca.
+   */
+  private async auditDenied(
+    actor: AuthenticatedUser,
+    tenantId?: string,
+    entityId?: string,
+  ): Promise<void> {
+    await this.em.transactional((tx) =>
+      this.auditTrail.record(tx, actor, {
+        action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
+        entity: 'insurance_campaign',
+        entityId,
+        tenantId,
+        success: false,
+      }),
+    );
+  }
+
+  /**
+   * Para mutar: OWNER/ADMIN de la aseguradora, `INSURANCE_OPERATOR` con
+   * membresía activa en el tenant, o plataforma. Todo 403 de este camino
+   * (sin tenant, sin membresía, organización que no es aseguradora) queda
+   * auditado, aunque nunca se haya llegado a resolver una aseguradora.
+   */
   private async administrableCarrier(
     tx: EntityManager,
     actor: AuthenticatedUser,
   ): Promise<InsuranceCarriers> {
-    const tenantId = this.tenantOf(actor);
-    await this.tenantAdministration.assertCanAdminister(tx, tenantId, actor);
-    return this.carrierOf(tx, tenantId);
+    let tenantId: string | undefined;
+    try {
+      tenantId = this.tenantOf(actor);
+      const canAdminister = await this.tenantAdministration.canAdminister(
+        tx,
+        tenantId,
+        actor,
+      );
+      if (!canAdminister) {
+        if (!actor.roles.includes(INSURANCE_OPERATOR_ROLE)) {
+          throw new ForbiddenException(
+            'Se requiere ser OWNER o ADMIN de la organización, ' +
+              'INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma',
+          );
+        }
+        // INSURANCE_OPERATOR: basta con pertenecer al tenant activo.
+        await this.tenantAdministration.assertCanRead(tx, tenantId, actor);
+      }
+      return await this.carrierOf(tx, tenantId);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        await this.auditDenied(actor, tenantId);
+      }
+      throw error;
+    }
   }
 
   /** Para leer: cualquier miembro activo de la aseguradora, o plataforma. */
@@ -407,9 +618,73 @@ export class InsuranceCampaignsService {
     tx: EntityManager,
     actor: AuthenticatedUser,
   ): Promise<InsuranceCarriers> {
-    const tenantId = this.tenantOf(actor);
-    await this.tenantAdministration.assertCanRead(tx, tenantId, actor);
-    return this.carrierOf(tx, tenantId);
+    let tenantId: string | undefined;
+    try {
+      tenantId = this.tenantOf(actor);
+      await this.tenantAdministration.assertCanRead(tx, tenantId, actor);
+      return await this.carrierOf(tx, tenantId);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        await this.auditDenied(actor, tenantId);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Campaña acotada a la aseguradora, para mutarla. Si el id existe en OTRA
+   * aseguradora, 403 auditado (CA-02.b) en vez del 404 llano: no dice que
+   * campañas ajenas sean "inexistentes" sin dejar rastro de que alguien miró.
+   */
+  private async requireOwnedEntity(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    carrier: InsuranceCarriers,
+    id: string,
+  ): Promise<InsuranceCampaigns> {
+    const campaign = await this.repo.findEntityForCarrier(tx, carrier.id, id);
+    if (campaign) return campaign;
+    await this.assertNotCrossTenant(actor, carrier, id);
+    throw new ResourceNotFoundException('Campaña no encontrada', { id });
+  }
+
+  /** Si el id existe en otra aseguradora, audita y lanza 403; si no existe, no hace nada. */
+  private async assertNotCrossTenant(
+    actor: AuthenticatedUser,
+    carrier: InsuranceCarriers,
+    id: string,
+  ): Promise<void> {
+    const em = this.em.fork();
+    const elsewhere = await this.repo.findAnyById(em, id);
+    if (!elsewhere) return;
+    await this.auditDenied(actor, carrier.tenantId, id);
+    throw new ForbiddenException('La campaña pertenece a otra aseguradora');
+  }
+
+  /**
+   * Un aliado con `networkProviderMembershipId` tiene que pertenecer a una red
+   * de LA MISMA aseguradora (CA-02.e): si no, 422, porque el dato en sí es
+   * válido (la membresía existe), sólo que apunta a otra organización.
+   */
+  private async assertPartnersBelongToCarrier(
+    tx: EntityManager,
+    insuranceCarrierId: string,
+    partners: readonly { readonly networkProviderMembershipId?: string }[],
+  ): Promise<void> {
+    for (const partner of partners) {
+      if (!partner.networkProviderMembershipId) continue;
+      const belongs = await this.repo.membershipBelongsToCarrier(
+        tx,
+        partner.networkProviderMembershipId,
+        insuranceCarrierId,
+      );
+      if (!belongs) {
+        throw new PreconditionFailedException(
+          'La membresía de red del aliado no pertenece a esta aseguradora',
+          { networkProviderMembershipId: partner.networkProviderMembershipId },
+        );
+      }
+    }
   }
 
   /** Titularidad del perfil; un rechazo queda en `audit.audit_log`. */
@@ -503,6 +778,11 @@ export class InsuranceCampaignsService {
         STATUS_BY_CONCEPT,
         row.status_concept_id,
         'estado de campaña',
+      ),
+      effectiveStatus: effectiveStatusOf(
+        must(STATUS_BY_CONCEPT, row.status_concept_id, 'estado de campaña'),
+        row.valid_to,
+        patientCoverageReferenceDate(),
       ),
       targetCondition: this.toCondition(row),
       copayBonusPercentage: Number(row.copay_bonus_percentage),
