@@ -1,6 +1,7 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
 import { CONCEPTS } from '../../../src/common';
+import { DIAG } from '../../../src/modules/diagnostics/diagnostics.concepts';
 
 /**
  * Concepto real ya sembrado (terminology.catalog_concepts) reutilizado como
@@ -41,7 +42,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -58,7 +59,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 401,
   },
@@ -85,7 +86,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -154,7 +155,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     path: (c) => `/diagnostics/specimens/${c.vars.diagSpecimenId}/containers`,
     body: () => ({
       containerIdentifier: `CT-${Date.now()}`,
-      containerTypeConceptId: CID,
+      containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
     }),
     expectedStatus: 201,
     capture: (b, c) => {

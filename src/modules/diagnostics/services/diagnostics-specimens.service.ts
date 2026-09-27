@@ -9,6 +9,10 @@ import {
 } from '../../../common';
 import { SpecimensRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
+import {
+  assertContainerTypeInCatalog,
+  assertSpecimenTypeInCatalog,
+} from '../specimen-catalogs';
 import { toSpecimenDetail } from './specimen-detail.projection';
 import {
   CreateSpecimenDto,
@@ -60,6 +64,8 @@ export class DiagnosticsSpecimensService {
       { operation: 'diagnostics.specimen.create', actorId: actor.id },
       'Creating specimen',
     );
+    // Antes de abrir la transacción: es un error del cliente, no del estado.
+    assertSpecimenTypeInCatalog(dto.specimenTypeConceptId);
     return this.em.transactional(async (tx) => {
       const specimen = this.repo.createSpecimen(tx, {
         patientProfileId: dto.patientProfileId,
@@ -217,6 +223,7 @@ export class DiagnosticsSpecimensService {
       { operation: 'diagnostics.container.create', specimenId },
       'Creating container',
     );
+    assertContainerTypeInCatalog(dto.containerTypeConceptId);
     return this.em.transactional(async (tx) => {
       const specimen = await this.repo.findSpecimen(tx, specimenId);
       if (!specimen)
