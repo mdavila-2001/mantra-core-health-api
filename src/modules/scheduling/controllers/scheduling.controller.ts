@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CurrentUser,
+  Idempotent,
   ParseOptionalDatePipe,
   ParseOptionalLimitPipe,
   PreconditionFailedException,
@@ -574,6 +575,7 @@ export class SchedulingController {
   @Post('appointments/walk-in')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
+  @Idempotent()
   @ApiOperation({
     summary: 'Turno de mostrador atómico (walk-in)',
     description:

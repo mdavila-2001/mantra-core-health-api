@@ -18,6 +18,8 @@ import {
   AllExceptionsFilter,
   AuthModule,
   FileStorageModule,
+  IdempotencyInterceptor,
+  IdempotencyStore,
   TenantContextInterceptor,
   VerificationBypassModule,
   appSecurityEnvSchema,
@@ -261,6 +263,12 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // más en la app la necesita.
     PublicCacheStore,
     { provide: APP_INTERCEPTOR, useClass: PublicCacheInterceptor },
+    // `Idempotency-Key` en las escrituras marcadas `@Idempotent()`. Va antes que
+    // el de tenant a propósito: envuelve la transacción RLS, así una respuesta
+    // sólo se recuerda cuando la transacción ya confirmó. Comparte el cliente
+    // Redis de `RedisRuntimeModule`, como el rate limit.
+    IdempotencyStore,
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },

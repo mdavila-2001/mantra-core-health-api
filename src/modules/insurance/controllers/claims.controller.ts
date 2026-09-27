@@ -14,7 +14,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Idempotent,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClaimsService } from '../services';
 import {
   CreateClaimDto,
@@ -60,6 +65,7 @@ export class ClaimsController {
   @Post(':id/adjudications')
   @Roles()
   @HttpCode(HttpStatus.CREATED)
+  @Idempotent()
   @ApiOperation({ summary: 'Adjudicar reclamo por línea (835)' })
   adjudicate(
     @Param('id', ParseUUIDPipe) id: string,

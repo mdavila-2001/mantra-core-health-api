@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Idempotent,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../guards';
 import { DiagnosticReportsService, ServiceRequestsService } from '../services';
 import {
@@ -72,6 +77,7 @@ export class ClinicalOrdersController {
   @Post('service-requests')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
+  @Idempotent()
   @ApiOperation({ summary: 'Crear una orden de servicio' })
   createServiceRequest(
     @Body() dto: CreateServiceRequestDto,
