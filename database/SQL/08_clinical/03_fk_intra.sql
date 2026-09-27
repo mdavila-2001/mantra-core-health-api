@@ -157,3 +157,10 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_observation_notes_observation_id" FOREIGN KEY ("observation_id")
         REFERENCES "clinical"."observations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Patch v4.2.35
+DO $$ BEGIN
+    ALTER TABLE "clinical"."medication_reminder_dispatches"
+        ADD CONSTRAINT "fk_medication_reminder_dispatches_medication_request_id" FOREIGN KEY ("medication_request_id")
+        REFERENCES "clinical"."medication_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)

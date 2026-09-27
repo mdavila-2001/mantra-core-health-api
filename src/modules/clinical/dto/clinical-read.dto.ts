@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MedicationTimingResponseDto } from './medication-timing.dto';
 
 /**
  * Una reacción registrada de una alergia (BR-14/CL-11): la tabla
@@ -262,6 +263,13 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ nullable: true })
   indicationText?: string;
+
+  /**
+   * Posología estructurada (patch v4.2.35); ausente si la receta sólo tiene
+   * `frequencyText`.
+   */
+  @ApiPropertyOptional({ type: MedicationTimingResponseDto })
+  timing?: MedicationTimingResponseDto;
 
   /**
    * Valor de signed at mantenido por la instancia.

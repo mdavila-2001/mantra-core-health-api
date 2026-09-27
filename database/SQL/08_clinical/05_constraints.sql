@@ -20,3 +20,20 @@ ALTER TABLE "clinical"."appointments" ADD CONSTRAINT "ex_appointments_practition
     EXCLUDE USING gist ("practitioner_profile_id" WITH =, tstzrange("start_at", "end_at", '[)') WITH &&) WHERE ("practitioner_profile_id" IS NOT NULL AND "end_at" IS NOT NULL AND "status_concept_id" IN ('51530fd7-05b1-5c29-80c4-da740ede4d27', '37dded87-7a7a-5a24-86f6-0ef48cccb482'));
 
 --   LOCK: reservation confirmation transaction
+
+
+-- ═══ medication_requests (patch v4.2.35 · posología estructurada) ═══
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_frequency_positive";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_frequency_positive" CHECK (("timing_frequency" IS NULL OR "timing_frequency" >= 1));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_period_positive";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_period_positive" CHECK (("timing_period" IS NULL OR "timing_period" > 0));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_period_unit";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_period_unit" CHECK (("timing_period_unit" IS NULL OR "timing_period_unit" IN ('h', 'd', 'wk')));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_frequency_period_together";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_frequency_period_together" CHECK ((("timing_frequency" IS NULL) = ("timing_period" IS NULL) AND ("timing_period" IS NULL) = ("timing_period_unit" IS NULL)));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_times_of_day_array";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_times_of_day_array" CHECK (("timing_times_of_day" IS NULL OR jsonb_typeof("timing_times_of_day") = 'array'));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_exclusive";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_exclusive" CHECK ((NOT ("timing_frequency" IS NOT NULL AND "timing_times_of_day" IS NOT NULL)) AND (NOT ("timing_as_needed" AND ("timing_frequency" IS NOT NULL OR "timing_times_of_day" IS NOT NULL))));
+ALTER TABLE "clinical"."medication_requests" DROP CONSTRAINT IF EXISTS "ck_medication_requests_timing_duration_days";
+ALTER TABLE "clinical"."medication_requests" ADD CONSTRAINT "ck_medication_requests_timing_duration_days" CHECK (("timing_duration_days" IS NULL OR "timing_duration_days" >= 0));

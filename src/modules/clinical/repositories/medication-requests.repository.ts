@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { MedicationRequests } from '../entities';
 import { createdBy } from '../../../common';
+import type { MedicationTimingColumns } from '../services/medication-timing.mapper';
 
 /**
  * Describe el contrato estructural de create medication request data.
@@ -100,6 +101,10 @@ export interface CreateMedicationRequestData {
    */
   renewedFromRequestId?: string;
   /**
+   * Posología estructurada (patch v4.2.35), ya traducida a columnas.
+   */
+  timing?: MedicationTimingColumns;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -163,6 +168,58 @@ export class MedicationRequestsRepository {
   }
 
   /**
+   * Recetas vigentes con posología programable, para el despacho de
+   * recordatorios (patch v4.2.35).
+   *
+   * Sólo las que están en efecto (`ISSUED`/`ACTIVE`), no PRN, con frecuencia u
+   * horas del día, cuyo ancla ya empezó antes del fin de la ventana y cuya
+   * vigencia no terminó. El filtro fino (duración, tomas exactas) lo hace el
+   * generador de cronograma: acá sólo se acota el lote. Usa el índice parcial
+   * `ix_medication_requests_schedulable`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param criteria - Estados en efecto, instante actual, fin de ventana y tope.
+   * @returns Recetas candidatas, de la más antigua a la más reciente.
+   */
+  findSchedulable(
+    em: EntityManager,
+    criteria: {
+      /** Estados que cuentan como «en efecto». */
+      statusConceptIds: string[];
+      /** Instante de la pasada. */
+      now: Date;
+      /** Fin de la ventana de despacho. */
+      windowEnd: Date;
+      /** Tope de filas. */
+      limit: number;
+    },
+  ): Promise<MedicationRequests[]> {
+    return em.find(
+      MedicationRequests,
+      {
+        statusConceptId: { $in: criteria.statusConceptIds },
+        timingAsNeeded: false,
+        $and: [
+          {
+            $or: [
+              { timingFrequency: { $ne: null } },
+              { timingTimesOfDay: { $ne: null } },
+            ],
+          },
+          {
+            $or: [
+              { timingStartAt: { $lt: criteria.windowEnd } },
+              { timingStartAt: null },
+            ],
+          },
+          { $or: [{ validTo: null }, { validTo: { $gte: criteria.now } }] },
+        ],
+      },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit: criteria.limit },
+    );
+  }
+
+  /**
    * Busca una receta por su clave de idempotencia de emisión. `issue_idempotency_key`
    * tiene un índice UNIQUE global (parcial, `WHERE ... IS NOT NULL`); esto permite
    * detectar en el propio servicio la reutilización de una clave sobre una receta
@@ -215,6 +272,7 @@ export class MedicationRequestsRepository {
         replacesRequestId: data.replacesRequestId,
         replacedByRequestId: data.replacedByRequestId,
         renewedFromRequestId: data.renewedFromRequestId,
+        ...(data.timing ?? {}),
         ...createdBy(data.actorUserId),
       },
       { partial: true },

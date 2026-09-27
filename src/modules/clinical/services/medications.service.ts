@@ -28,6 +28,10 @@ import {
 import { MedicationRequests } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
+import {
+  timingColumnsFromDto,
+  timingColumnsOf,
+} from './medication-timing.mapper';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
@@ -365,6 +369,9 @@ export class MedicationsService {
         patientInstructionsText: dto.patientInstructionsText,
         indicationConditionId: dto.indicationConditionId,
         indicationText: this.indicationTextFor(dto),
+        // Patch v4.2.35: la posología estructurada nace con el borrador, igual
+        // que `frequencyText`; no entra al sello.
+        timing: dto.timing ? timingColumnsFromDto(dto.timing) : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -415,6 +422,10 @@ export class MedicationsService {
         request.routeConceptId = dto.routeConceptId;
       if (dto.frequencyText !== undefined)
         request.frequencyText = dto.frequencyText;
+      // Patch v4.2.35: mismo gating que `frequencyText` (sólo DRAFT). Si viaja,
+      // reemplaza la posología entera.
+      if (dto.timing !== undefined)
+        Object.assign(request, timingColumnsFromDto(dto.timing));
       if (dto.quantityDecimal !== undefined)
         request.quantityDecimal = String(dto.quantityDecimal);
       if (dto.unitConceptId !== undefined)
@@ -700,6 +711,8 @@ export class MedicationsService {
         // no cambia para qué era.
         indicationConditionId: original.indicationConditionId,
         indicationText: original.indicationText,
+        // La posología estructurada también se arrastra (patch v4.2.35).
+        timing: timingColumnsOf(original),
         replacesRequestId: original.id,
         actorUserId: actor.id,
       });
@@ -786,6 +799,9 @@ export class MedicationsService {
         // Renovar es seguir tratando lo mismo: la indicación viaja con la receta.
         indicationConditionId: source.indicationConditionId,
         indicationText: source.indicationText,
+        // La posología viaja, pero no su ancla: la renovación empieza de nuevo
+        // (inicio de vigencia o emisión de la receta nueva) — patch v4.2.35.
+        timing: { ...timingColumnsOf(source), timingStartAt: undefined },
         renewedFromRequestId: source.id,
         actorUserId: actor.id,
       });

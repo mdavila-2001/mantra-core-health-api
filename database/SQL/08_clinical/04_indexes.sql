@@ -324,6 +324,12 @@ CREATE INDEX IF NOT EXISTS "ix_medication_requests_patient_profile_id_updated_at
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_medication_requests_issue_idempotency_key" ON "clinical"."medication_requests" ("issue_idempotency_key") WHERE issue_idempotency_key IS NOT NULL;
 
+CREATE INDEX IF NOT EXISTS "ix_medication_requests_schedulable" ON "clinical"."medication_requests" ("status_concept_id", "timing_start_at") WHERE "timing_as_needed" = false AND ("timing_frequency" IS NOT NULL OR "timing_times_of_day" IS NOT NULL);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_medication_reminder_dispatches_request_dose" ON "clinical"."medication_reminder_dispatches" ("medication_request_id", "dose_at");
+
+CREATE INDEX IF NOT EXISTS "ix_medication_reminder_dispatches_notification_request_id" ON "clinical"."medication_reminder_dispatches" ("notification_request_id");
+
 CREATE INDEX IF NOT EXISTS "ix_medication_records_custodian_tenant_id" ON "clinical"."medication_records" ("custodian_tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_medication_records_patient_profile_id" ON "clinical"."medication_records" ("patient_profile_id");

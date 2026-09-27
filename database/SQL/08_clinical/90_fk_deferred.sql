@@ -1324,3 +1324,10 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_observation_notes_author_user_id" FOREIGN KEY ("author_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Patch v4.2.35 · destino: messaging.notification_requests (requiere schema messaging)
+DO $$ BEGIN
+    ALTER TABLE "clinical"."medication_reminder_dispatches"
+        ADD CONSTRAINT "fk_medication_reminder_dispatches_notification_request_id" FOREIGN KEY ("notification_request_id")
+        REFERENCES "messaging"."notification_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)

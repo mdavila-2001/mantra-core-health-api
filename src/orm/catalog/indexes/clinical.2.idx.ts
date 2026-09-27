@@ -2,11 +2,16 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  // Patch v4.2.35 (API): deduplicación de recordatorios de toma. El índice
+  // parcial `ix_medication_requests_schedulable` vive sólo en el DDL: la tupla
+  // no expresa predicados WHERE.
+  ['medication_reminder_dispatches', 'uq_medication_reminder_dispatches_request_dose', ['medication_request_id', 'dose_at'], true, 'btree'],
+  ['medication_reminder_dispatches', 'ix_medication_reminder_dispatches_notification_request_id', ['notification_request_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['observation_notes', 'ix_observation_notes_observation_id', ['observation_id'], false, 'btree'],

@@ -45,6 +45,8 @@ El módulo 33 (`integrity`) **no posee tablas**: es una matriz de verificación 
 |-------|-------------|-------------------|
 | `service_requests` | `REFERENCE_ONLY` | **CHECK_SQL** ck_service_requests_override_reason_requires_previous_report \| ("duplicate_override_reason" IS NULL OR "previous_diagnostic_report_id" IS NOT NULL) |
 | `appointments` | `REFERENCE_ONLY` | **EXCLUDE** practitioner/location time overlap; **EXCLUDE_SQL** ex_appointments_practitioner_time \| "practitioner_profile_id" WITH =, tstzrange("start_at", "end_at", '[)') WITH && \| "practitioner_profile_id" IS NOT NULL AND "end_at" IS NOT NULL AND "status_concept_id" IN ('51530fd7-05b1-5c29-80c4-da740ede4d27', '37dded87-7a7a-5a24-86f6-0ef48cccb482'); **LOCK** reservation confirmation transaction |
+| `medication_requests` | `REFERENCE_ONLY` | **CHECK_SQL** ck_medication_requests_timing_frequency_period_together \| frequency, period y unidad se declaran juntos; **CHECK_SQL** ck_medication_requests_timing_exclusive \| times_of_day excluye frequency, y PRN excluye ambos; **CHECK_SQL** rangos (frequency ≥ 1, period > 0, unidad h/d/wk, duration_days ≥ 0, times_of_day es array) — patch v4.2.35 |
+| `medication_reminder_dispatches` | `REFERENCE_ONLY` | **UK** medication_request_id + dose_at (deduplica el recordatorio de cada toma) — patch v4.2.35 |
 
 ### Módulo 29 · `delegated_access`
 
