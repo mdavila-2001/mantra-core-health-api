@@ -9,7 +9,11 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsSpecimensService } from './diagnostics-specimens.service';
-import { DIAG } from '../diagnostics.concepts';
+import {
+  CONTAINER_TYPE_CONCEPTS,
+  DIAG,
+  SPECIMEN_TYPE_CONCEPTS,
+} from '../diagnostics.concepts';
 import {
   ResourceNotFoundException,
   PreconditionFailedException,
@@ -57,6 +61,107 @@ function build() {
 }
 
 describe('DiagnosticsSpecimensService', () => {
+  describe('catálogos de tipo de espécimen y de contenedor', () => {
+    const alta = (specimenTypeConceptId: string) => ({
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+      specimenTypeConceptId,
+    });
+
+    it('correcto: un tipo del catálogo `specimen-type` da de alta', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+      });
+      await d.service.createSpecimen(alta(DIAG.SPECIMEN_TYPE_SERUM), actor);
+      expect(d.repo.createSpecimen).toHaveBeenCalled();
+    });
+
+    it('correcto: un tipo del catálogo `specimen-container-type` crea el contenedor', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.createContainer.mockReturnValue({
+        id: 'c1',
+        statusConceptId: DIAG.CONTAINER_ACTIVE,
+      });
+      const res = await d.service.createContainer(
+        's1',
+        {
+          containerIdentifier: 'TUBO-1',
+          containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+        },
+        actor,
+      );
+      expect(res).toEqual({ id: 'c1', status: DIAG.CONTAINER_ACTIVE });
+    });
+
+    it('límite: el primero y el último de cada catálogo se aceptan', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({ id: 's1' });
+      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.createContainer.mockReturnValue({ id: 'c1' });
+      for (const type of [
+        SPECIMEN_TYPE_CONCEPTS[0],
+        SPECIMEN_TYPE_CONCEPTS[SPECIMEN_TYPE_CONCEPTS.length - 1],
+      ]) {
+        await expect(
+          d.service.createSpecimen(alta(type), actor),
+        ).resolves.toBeDefined();
+      }
+      for (const type of [
+        CONTAINER_TYPE_CONCEPTS[0],
+        CONTAINER_TYPE_CONCEPTS[CONTAINER_TYPE_CONCEPTS.length - 1],
+      ]) {
+        await expect(
+          d.service.createContainer(
+            's1',
+            { containerIdentifier: 'T', containerTypeConceptId: type },
+            actor,
+          ),
+        ).resolves.toBeDefined();
+      }
+    });
+
+    it('inválido: un concepto que existe pero no es un tipo de espécimen → 422 con motivo estable, sin abrir la transacción', async () => {
+      const d = build();
+      const error = await d.service
+        .createSpecimen(alta(DIAG.SPECIMEN_COLLECTED), actor)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      const body = (error as PreconditionFailedException).getResponse();
+      expect((error as PreconditionFailedException).getStatus()).toBe(422);
+      expect(body).toMatchObject({
+        code: 'PRECONDITION_FAILED',
+        details: {
+          reason: 'SPECIMEN_TYPE_NOT_IN_CATALOG',
+          field: 'specimenTypeConceptId',
+          catalog: 'specimen-type',
+        },
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+    });
+
+    it('inválido: un tipo de espécimen usado como contenedor → 422 CONTAINER_TYPE_NOT_IN_CATALOG', async () => {
+      const d = build();
+      const error = await d.service
+        .createContainer(
+          's1',
+          {
+            containerIdentifier: 'TUBO-1',
+            containerTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(
+        (error as PreconditionFailedException).getResponse(),
+      ).toMatchObject({ details: { reason: 'CONTAINER_TYPE_NOT_IN_CATALOG' } });
+      expect(d.repo.createContainer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createSpecimen (soporte)', () => {
     it('creates a collected specimen and flushes', async () => {
       const d = build();
@@ -68,7 +173,7 @@ describe('DiagnosticsSpecimensService', () => {
         {
           patientProfileId: 'p1',
           custodianTenantId: 't1',
-          specimenTypeConceptId: 'c1',
+          specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
         },
         actor,
       );

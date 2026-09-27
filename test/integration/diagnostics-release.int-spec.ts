@@ -8,6 +8,7 @@ import {
   identidadProfesional,
 } from './harness';
 import { CONCEPTS, SEED } from '../../src/common';
+import { DIAG } from '../../src/modules/diagnostics/diagnostics.concepts';
 
 /**
  * BR-17 (D-E) contra la aplicación real y Postgres.
@@ -321,7 +322,7 @@ describe('BR-17 · liberación de diagnósticos, un solo camino (integración)',
         .send({
           patientProfileId: perfilAna,
           custodianTenantId: SEED.tenantId,
-          specimenTypeConceptId: CID,
+          specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
         })
         .expect(201);
 
