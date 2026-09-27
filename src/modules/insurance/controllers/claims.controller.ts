@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ClaimsService } from '../services';
+import { InsurerAdministration } from '../guards';
 import {
   CreateClaimDto,
   CreatedClaimDto,
@@ -56,9 +57,15 @@ export class ClaimsController {
     return this.service.submitClaim(dto, actor);
   }
 
-  /** UC-26-07. */
+  /**
+   * UC-26-07. `@Roles()` vacío anula el `BILLING`/`FINANCE` de la clase, que
+   * dejaría afuera al OWNER/ADMIN de la aseguradora (rol global `USER`); la
+   * barrera de borde es `@InsurerAdministration`, con los mismos roles
+   * heredados que acepta `assertLegacyClaimRoles` para los reclamos sin pedido.
+   */
   @Post(':id/adjudications')
   @Roles()
+  @InsurerAdministration('BILLING', 'FINANCE')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjudicar reclamo por línea (835)' })
   adjudicate(
@@ -69,9 +76,10 @@ export class ClaimsController {
     return this.service.adjudicate(id, dto, actor);
   }
 
-  /** UC-26-08. */
+  /** UC-26-08. Misma barrera que la adjudicación: la EOB la publica la aseguradora. */
   @Post(':id/eob')
   @Roles()
+  @InsurerAdministration('BILLING', 'FINANCE')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar Explicación de Beneficios (EOB)' })
   publishEob(
@@ -82,9 +90,10 @@ export class ClaimsController {
     return this.service.publishEob(id, dto, actor);
   }
 
-  /** UC-26-10. */
+  /** UC-26-10. Misma barrera que la adjudicación: revierte la aseguradora. */
   @Post(':id/reversals')
   @Roles()
+  @InsurerAdministration('BILLING', 'FINANCE')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar reversión de reclamo' })
   reverse(

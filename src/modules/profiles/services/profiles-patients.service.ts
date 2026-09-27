@@ -1749,6 +1749,14 @@ export class ProfilesPatientsService {
       nationalId?: string;
       /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
       issuerAdministrativeAreaConceptId?: string;
+      /**
+       * Grupo ABO, factor Rh e idioma clínico exactos. Acotan la página pero
+       * no cuentan como criterio: sin `query` ni `nationalId` un rol clínico
+       * sigue recibiendo 422.
+       */
+      aboGroupConceptId?: string;
+      rhFactorConceptId?: string;
+      clinicalLanguageConceptId?: string;
       /** Cursor opaco devuelto por la página anterior. */
       cursor?: string;
       /** Tope de filas de la página. */
@@ -1795,6 +1803,9 @@ export class ProfilesPatientsService {
         nationalId: options.nationalId,
         issuerAdministrativeAreaConceptId:
           options.issuerAdministrativeAreaConceptId,
+        aboGroupConceptId: options.aboGroupConceptId,
+        rhFactorConceptId: options.rhFactorConceptId,
+        clinicalLanguageConceptId: options.clinicalLanguageConceptId,
         scope: resolvePatientSearchScope(actor),
         afterPatientCode,
       },
@@ -1817,6 +1828,9 @@ export class ProfilesPatientsService {
         displayName: person?.displayName,
         birthDate: person?.birthDate,
         personStatusConceptId: person?.personStatusConceptId,
+        aboGroupConceptId: row.aboGroupConceptId,
+        rhFactorConceptId: row.rhFactorConceptId,
+        clinicalLanguageConceptId: row.clinicalLanguageConceptId,
         deceased: Boolean(person?.deceasedAt),
       };
     });

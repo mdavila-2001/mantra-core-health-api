@@ -26,7 +26,7 @@ se homogeneiza a través de `AllExceptionsFilter` (`@Catch()` global) en:
 | `correlationId` | `string`                    | Cuando `pino-http` asigna `req.id` o llega `x-request-id` | `AllExceptionsFilter.catch()`                                                                         |
 | `details`       | `Record<string, unknown>`   | No — depende de la excepción concreta                     | Contexto adicional específico del error (p. ej. campo inválido)                                       |
 | `timestamp`     | `string` (ISO 8601)         | Sí                                                        | `new Date().toISOString()` en el momento del error                                                    |
-| `path`          | `string`                    | Sí                                                        | `request.url`                                                                                         |
+| `path`          | `string`                    | Sí                                                        | `request.url` **sin la query string** (puede llevar nombres o documentos de personas)                 |
 
 ## Códigos de error (`ErrorCode`)
 
@@ -93,7 +93,7 @@ recibe el cliente, el que está mal es este documento.
   "message": "Unauthorized",
   "correlationId": "6",
   "timestamp": "2026-08-01T11:12:53.106Z",
-  "path": "/terminology/concepts?q=X"
+  "path": "/terminology/concepts"
 }
 ```
 
@@ -107,7 +107,7 @@ recibe el cliente, el que está mal es este documento.
   "message": "Unauthorized",
   "correlationId": "7",
   "timestamp": "2026-08-01T11:12:53.108Z",
-  "path": "/terminology/concepts?q=X"
+  "path": "/terminology/concepts"
 }
 ```
 
@@ -135,7 +135,7 @@ recibe el cliente, el que está mal es este documento.
   "message": "El actor no pertenece a ningún tenant: indique X-Tenant-Id.",
   "correlationId": "13",
   "timestamp": "2026-08-01T11:12:53.285Z",
-  "path": "/terminology/concepts?q=X"
+  "path": "/terminology/concepts"
 }
 ```
 
@@ -261,7 +261,10 @@ Reglas para un interceptor de errores, en orden de importancia:
    entre en el ciclo que asigna el id. Trátalo como `string | undefined`.
 5. **429 sí trae `Retry-After`**, con los segundos que faltan para que se libere la ventana
    (`Retry-After: 60` en la captura). Es el valor a respetar antes de reintentar; no hace falta
-   inventar un backoff.
+   inventar un backoff. Los 5xx que se exponen porque significan "reintenta" —
+   `DEPENDENCY_UNAVAILABLE`, `TIMEOUT`, `CIRCUIT_OPEN` y `CONCURRENCY_LIMIT`— también lo traen:
+   el plazo real cuando la excepción lo conoce (el cortacircuitos sabe cuándo vuelve a probar) y,
+   si no, 5 s, 5 s, 30 s y 1 s respectivamente.
 6. **401 y 403 no son lo mismo.** 401 es "no hay sesión válida" → renovar token o ir al login.
    403 es "hay sesión pero no alcanza" → no reintentar, y sus dos variantes se distinguen por el
    mensaje: rol insuficiente frente a actor sin tenant.

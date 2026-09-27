@@ -95,7 +95,7 @@ export async function createWalkInPatient(
   if (duplicado) {
     throw new ConflictException(
       'Ya existe un paciente con ese documento de identidad. Buscalo con ' +
-        'GET /profiles/patients?nationalId= en vez de registrarlo de nuevo.',
+        'POST /profiles/patients/search en vez de registrarlo de nuevo.',
     );
   }
 

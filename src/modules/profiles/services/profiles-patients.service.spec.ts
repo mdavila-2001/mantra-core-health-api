@@ -591,6 +591,83 @@ describe('ProfilesPatientsService', () => {
       expect(d.patientProfilesRepo.searchPage).not.toHaveBeenCalled();
     });
 
+    /**
+     * Grupo ABO, factor Rh e idioma clínico: el front los manda desde el
+     * listado de pacientes y el DTO no los declaraba (400 por
+     * `forbidNonWhitelisted`). Son columnas indexadas de `patient_profiles`.
+     */
+    describe('filtros de catálogo (ABO, Rh, idioma clínico)', () => {
+      const ABO = '0f000000-0000-4000-8000-00000000000a';
+      const RH = '0f000000-0000-4000-8000-00000000000b';
+      const IDIOMA = '0f000000-0000-4000-8000-00000000000c';
+
+      it('correcto — viajan al repositorio y vuelven en cada fila', async () => {
+        const d = build();
+        d.patientProfilesRepo.searchPage.mockResolvedValue([
+          {
+            profileId: 'pp-1',
+            patientCode: 'PAC-1',
+            aboGroupConceptId: ABO,
+            rhFactorConceptId: RH,
+            clinicalLanguageConceptId: IDIOMA,
+          },
+        ]);
+
+        const page = await d.service.searchPatients(
+          {
+            aboGroupConceptId: ABO,
+            rhFactorConceptId: RH,
+            clinicalLanguageConceptId: IDIOMA,
+            limit: 50,
+          },
+          actor,
+        );
+
+        expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            aboGroupConceptId: ABO,
+            rhFactorConceptId: RH,
+            clinicalLanguageConceptId: IDIOMA,
+          }),
+          51,
+        );
+        expect(page.items[0]).toMatchObject({
+          aboGroupConceptId: ABO,
+          rhFactorConceptId: RH,
+          clinicalLanguageConceptId: IDIOMA,
+        });
+      });
+
+      it('límite — una fila sin los datos los deja ausentes, no en null', async () => {
+        const d = build();
+        d.patientProfilesRepo.searchPage.mockResolvedValue([
+          { profileId: 'pp-1', patientCode: 'PAC-1' },
+        ]);
+
+        const page = await d.service.searchPatients({ limit: 50 }, actor);
+
+        expect(page.items[0]?.aboGroupConceptId).toBeUndefined();
+        expect(page.items[0]?.rhFactorConceptId).toBeUndefined();
+        expect(page.items[0]?.clinicalLanguageConceptId).toBeUndefined();
+      });
+
+      it.each(['PRACTITIONER', 'CLINICIAN'])(
+        'inválido — %s con sólo filtros de catálogo sigue siendo 422: acotan, no buscan',
+        async (rol) => {
+          const d = build();
+
+          await expect(
+            d.service.searchPatients(
+              { aboGroupConceptId: ABO, rhFactorConceptId: RH, limit: 50 },
+              { id: 'u-1', roles: [rol] } as any,
+            ),
+          ).rejects.toThrow(PreconditionFailedException);
+          expect(d.patientProfilesRepo.searchPage).not.toHaveBeenCalled();
+        },
+      );
+    });
+
     /** Sin departamento, no hay nada que validar: la búsqueda sigue de largo. */
     it('sin departamento no llama al catálogo de departamentos', async () => {
       const d = build();

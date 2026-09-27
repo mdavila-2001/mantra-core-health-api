@@ -568,8 +568,8 @@ export class SchedulingController {
    * nace `IN_PROGRESS`, no `CONFIRMED`: quien llegó al mostrador ya está ahí,
    * no esperando un check-in posterior. 404 si el recurso no existe; 409 si
    * el documento ya está registrado (retomar al paciente existente con
-   * `GET /profiles/patients?nationalId=`); 422 si el horario choca con otro
-   * turno del profesional o del paciente.
+   * `POST /profiles/patients/search`, `nationalId` en el cuerpo); 422 si el
+   * horario choca con otro turno del profesional o del paciente.
    */
   @Post('appointments/walk-in')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')

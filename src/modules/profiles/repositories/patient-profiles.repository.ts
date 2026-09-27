@@ -35,6 +35,12 @@ export interface PatientSearchCriteria {
    * sin decir dónde se expidió.
    */
   issuerAdministrativeAreaConceptId?: string;
+  /** Grupo ABO exacto (`patient_profiles.abo_group_concept_id`). */
+  aboGroupConceptId?: string;
+  /** Factor Rh exacto (`patient_profiles.rh_factor_concept_id`). */
+  rhFactorConceptId?: string;
+  /** Idioma clínico exacto (`patient_profiles.clinical_language_concept_id`). */
+  clinicalLanguageConceptId?: string;
   /** Alcance de quien pregunta. */
   scope: PatientSearchScope;
   /** Continuación keyset: último `patientCode` devuelto. */
@@ -54,6 +60,14 @@ export interface PatientSearchRow {
   profileId: string;
   /** Código único de paciente; es también la clave del cursor. */
   patientCode: string;
+  /**
+   * Los tres conceptos filtrables del perfil. Salen de la misma fila que ya se
+   * lee —son columnas de `patient_profiles`—, así que mostrarlos no cuesta
+   * otra consulta.
+   */
+  aboGroupConceptId?: string;
+  rhFactorConceptId?: string;
+  clinicalLanguageConceptId?: string;
 }
 
 /** Datos del perfil de paciente (PK = person_profiles.id, 1:1). */
@@ -177,6 +191,20 @@ export class PatientProfilesRepository {
       condiciones.push(`${documento})`);
     }
 
+    // Los tres de catálogo son columnas de la propia fila, cada una con su
+    // índice (`ix_patient_profiles_*_concept_id`): igualdad simple, sin
+    // `EXISTS`.
+    const porConcepto: [string, string | undefined][] = [
+      ['pp.abo_group_concept_id', criteria.aboGroupConceptId],
+      ['pp.rh_factor_concept_id', criteria.rhFactorConceptId],
+      ['pp.clinical_language_concept_id', criteria.clinicalLanguageConceptId],
+    ];
+    for (const [columna, valor] of porConcepto) {
+      if (!valor) continue;
+      condiciones.push(`${columna} = ?`);
+      params.push(valor);
+    }
+
     // El separador es un salto real dentro de un template: las condiciones
     // quedan una por línea en el SQL, que es lo que hace legible el EXPLAIN.
     const separador = `
@@ -184,20 +212,31 @@ export class PatientProfilesRepository {
     const where =
       condiciones.length > 0 ? `where ${condiciones.join(separador)}` : '';
 
-    const filas = await em
-      .getConnection()
-      .execute<{ profile_id: string; patient_code: string }[]>(
-        `select pp.profile_id, pp.patient_code
+    const filas = await em.getConnection().execute<
+      {
+        profile_id: string;
+        patient_code: string;
+        abo_group_concept_id: string | null;
+        rh_factor_concept_id: string | null;
+        clinical_language_concept_id: string | null;
+      }[]
+    >(
+      `select pp.profile_id, pp.patient_code,
+                pp.abo_group_concept_id, pp.rh_factor_concept_id,
+                pp.clinical_language_concept_id
          from profiles.patient_profiles pp
         ${where}
         order by pp.patient_code asc
         limit ?`,
-        [...params, limit],
-      );
+      [...params, limit],
+    );
 
     return filas.map((f) => ({
       profileId: f.profile_id,
       patientCode: f.patient_code,
+      aboGroupConceptId: f.abo_group_concept_id ?? undefined,
+      rhFactorConceptId: f.rh_factor_concept_id ?? undefined,
+      clinicalLanguageConceptId: f.clinical_language_concept_id ?? undefined,
     }));
   }
 

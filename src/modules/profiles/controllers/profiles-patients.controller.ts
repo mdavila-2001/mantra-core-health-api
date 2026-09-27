@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -270,7 +271,20 @@ export class ProfilesPatientsController {
    */
   @Get('patients')
   @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
-  @ApiOperation({ summary: 'UC-05-13: listado paginado de pacientes' })
+  // Obsoleto: el nombre y el documento en la URL quedan en los logs de acceso
+  // de cualquier proxy y en el historial del navegador. Sigue respondiendo
+  // igual para no romper a un cliente desplegado; los nuevos usan
+  // `POST patients/search`. Cabeceras de RFC 9745 (`Deprecation`) y RFC 8288
+  // (`Link` al sucesor) para que un cliente lo detecte sin leer la doc.
+  @Header('Deprecation', 'true')
+  @Header('Link', '</profiles/patients/search>; rel="successor-version"')
+  @ApiOperation({
+    summary: 'UC-05-13: listado paginado de pacientes (obsoleto)',
+    description:
+      'Obsoleto: usar `POST /profiles/patients/search`, que recibe los mismos filtros en el cuerpo. ' +
+      'Por query string, `q` y `nationalId` (nombre y documento del paciente) quedan en los logs de acceso de los proxies y en el historial del navegador.',
+    deprecated: true,
+  })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -301,17 +315,45 @@ export class ProfilesPatientsController {
     @Query() query: SearchPatientsQueryDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SearchPatientsResponseDto> {
-    return this.patientsService.searchPatients(
-      {
-        query: query.q,
-        nationalId: query.nationalId,
-        issuerAdministrativeAreaConceptId:
-          query.issuerAdministrativeAreaConceptId,
-        cursor: query.cursor,
-        limit: query.limit ?? 50,
-      },
-      actor,
-    );
+    return this.runPatientSearch(query, actor);
+  }
+
+  /**
+   * UC-05-13 por cuerpo: el mismo listado que `GET patients`, con los filtros
+   * en el JSON y no en la URL.
+   *
+   * `q` y `nationalId` son el nombre y el documento de un paciente. En la
+   * query string viajan en la línea de petición, y esa línea la registran los
+   * logs de acceso de nginx y de cualquier proxy intermedio, el historial del
+   * navegador y el `Referer`; el cuerpo no lo guarda ninguno de ellos. Es
+   * `POST` por eso y no por mutar nada: la búsqueda no cambia estado, así que
+   * responde `200` y no `201`.
+   *
+   * Mismo DTO, mismos roles y mismo servicio que el `GET`: la regla de
+   * `requiereCriterioDeBusqueda()` (422 si un rol clínico no manda `q` ni
+   * `nationalId`) aplica igual.
+   *
+   * Va antes que `patients/:profileId` por la regla de siempre, aunque ese es
+   * `GET` y este `POST`: que el orden no dependa del verbo.
+   *
+   * @param body - Filtros, cursor y tope de la página.
+   * @param actor - Quien pregunta; decide el alcance de la búsqueda.
+   * @returns Página de pacientes.
+   */
+  @Post('patients/search')
+  @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'UC-05-13: buscar pacientes con los filtros en el cuerpo',
+    description:
+      'Reemplaza a `GET /profiles/patients`: mismos filtros, misma respuesta y mismos roles, pero el nombre y el documento del paciente viajan en el cuerpo y no quedan en los logs de acceso.',
+  })
+  @ApiOkResponse({ type: SearchPatientsResponseDto })
+  searchPatientsByBody(
+    @Body() body: SearchPatientsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
+    return this.runPatientSearch(body, actor);
   }
 
   /**
@@ -453,5 +495,26 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DeceaseResponseDto> {
     return this.patientsService.decease(personId, dto, actor);
+  }
+
+  /** Traduce los filtros del contrato a los del servicio; común a `GET` y `POST`. */
+  private runPatientSearch(
+    filters: SearchPatientsQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
+    return this.patientsService.searchPatients(
+      {
+        query: filters.q,
+        nationalId: filters.nationalId,
+        issuerAdministrativeAreaConceptId:
+          filters.issuerAdministrativeAreaConceptId,
+        aboGroupConceptId: filters.aboGroupConceptId,
+        rhFactorConceptId: filters.rhFactorConceptId,
+        clinicalLanguageConceptId: filters.clinicalLanguageConceptId,
+        cursor: filters.cursor,
+        limit: filters.limit ?? 50,
+      },
+      actor,
+    );
   }
 }
