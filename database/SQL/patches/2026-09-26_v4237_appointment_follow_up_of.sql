@@ -1,5 +1,5 @@
 -- ============================================================================
--- SALUD · patch v4.2.31 (scheduling · P42 reconsulta) sobre BD viva
+-- SALUD · patch v4.2.37 (scheduling · P42 reconsulta) sobre BD viva
 -- Fecha: 2026-09-26
 -- Idempotente (ADD COLUMN IF NOT EXISTS / CREATE INDEX IF NOT EXISTS /
 -- ADD CONSTRAINT bajo EXCEPTION duplicate_object). UNA sola pasada. SIN backfill.
