@@ -105,18 +105,28 @@ function duplicateStudyDetector(over: Record<string, unknown> = {}) {
   };
 }
 
-/** Arma el servicio con sus cuatro dependencias dobladas. */
+/** Doble del catálogo de aseguradoras: no es aseguradora por omisión. */
+function catalogRepo(over: Record<string, unknown> = {}) {
+  return {
+    findCarrierByTenantId: mockFn().mockResolvedValue(null),
+    ...over,
+  };
+}
+
+/** Arma el servicio con sus cinco dependencias dobladas. */
 function servicioCon(
   r: Record<string, unknown>,
   practicas: string[] = [PRACTICE],
   detector: Record<string, unknown> = duplicateStudyDetector(),
   entidadManager: unknown = em(),
+  catalogo: Record<string, unknown> = catalogRepo(),
 ) {
   return new ClaimsReadService(
     entidadManager as never,
     r as never,
     practiceLookup(practicas) as never,
     detector as never,
+    catalogo as never,
   );
 }
 
@@ -185,6 +195,49 @@ describe('ClaimsReadService', () => {
         conTenant(() => servicioCon(r, []).getClaim(CLAIM)),
       ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimInScope).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alcance de la aseguradora (bandeja de solicitudes recibidas)', () => {
+    it('cuando el tenant es aseguradora, acota por insuranceCarrierId sin requerir prácticas', async () => {
+      const r = repo();
+      const catalogo = catalogRepo({
+        findCarrierByTenantId: mockFn().mockResolvedValue({ id: CARRIER }),
+      });
+
+      await conTenant(() =>
+        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).listClaims({}),
+      );
+
+      expect(r.findClaimsPage).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+        expect.objectContaining({ insuranceCarrierId: undefined }),
+        expect.any(Number),
+        null,
+        [],
+        CARRIER,
+      );
+    });
+
+    it('la aseguradora puede consultar el detalle de sus solicitudes recibidas', async () => {
+      const r = repo();
+      const catalogo = catalogRepo({
+        findCarrierByTenantId: mockFn().mockResolvedValue({ id: CARRIER }),
+      });
+
+      const res = await conTenant(() =>
+        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).getClaim(CLAIM),
+      );
+
+      expect(r.findClaimInScope).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+        CLAIM,
+        [],
+        CARRIER,
+      );
+      expect(res.header.id).toBe(CLAIM);
     });
   });
 
