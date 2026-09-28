@@ -111,22 +111,24 @@ export class ClaimReadRepository {
     limit: number,
     cursor: ClaimCursor | null,
     diagnosticUnitIds: readonly string[] = [],
+    carrierId?: string,
   ): Promise<InsuranceClaims[]> {
-    const providerScope = this.providerScope(practiceIds, diagnosticUnitIds);
-    if (providerScope.length === 0) return Promise.resolve([]);
-
     const range: Record<string, Date> = {};
     if (filters.submittedFrom) range.$gte = filters.submittedFrom;
     if (filters.submittedTo) range.$lte = filters.submittedTo;
 
-    const where: Record<string, unknown> = { $or: providerScope };
-    // La aseguradora es un **filtro** del usuario, no el alcance: acota lo que
-    // ya está acotado por las prácticas y unidades diagnósticas propias.
-    // Pedir una aseguradora ajena devuelve vacío porque ninguna solicitud
-    // propia la referencia, no porque se haya intersectado una lista.
-    if (filters.insuranceCarrierId) {
-      where.insuranceCarrierId = filters.insuranceCarrierId;
+    const where: Record<string, unknown> = {};
+    if (carrierId) {
+      where.insuranceCarrierId = carrierId;
+    } else {
+      const providerScope = this.providerScope(practiceIds, diagnosticUnitIds);
+      if (providerScope.length === 0) return Promise.resolve([]);
+      where.$or = providerScope;
+      if (filters.insuranceCarrierId) {
+        where.insuranceCarrierId = filters.insuranceCarrierId;
+      }
     }
+
     if (filters.statusConceptId) {
       where.statusConceptId = filters.statusConceptId;
     }
@@ -223,7 +225,11 @@ export class ClaimReadRepository {
     practiceIds: readonly string[],
     id: string,
     diagnosticUnitIds: readonly string[] = [],
+    carrierId?: string,
   ): Promise<InsuranceClaims | null> {
+    if (carrierId) {
+      return em.findOne(InsuranceClaims, { id, insuranceCarrierId: carrierId });
+    }
     const providerScope = this.providerScope(practiceIds, diagnosticUnitIds);
     if (providerScope.length === 0) return Promise.resolve(null);
     return em.findOne(InsuranceClaims, { id, $or: providerScope });
