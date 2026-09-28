@@ -754,6 +754,7 @@ export class ClinicalReadService {
         statusConceptId: row.statusConceptId,
         prescriberProfileId: row.prescriberProfileId,
         encounterId: row.encounterId,
+        formInstanceId: row.formInstanceId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
         validFrom: row.validFrom,

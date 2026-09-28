@@ -107,3 +107,31 @@ describe('EditMedicationRequestDraftDto — motivo escrito a mano (P24)', () => 
     ).toEqual(['indicationText']);
   });
 });
+
+describe('CreateMedicationRequestDto — formInstanceId (P43)', () => {
+  const FORM = '44444444-4444-4444-8444-444444444444';
+
+  it('acepta formInstanceId uuid (ya no es 400 por forbidNonWhitelisted)', async () => {
+    expect(
+      await validar(
+        CreateMedicationRequestDto,
+        cuerpoDelFront({ formInstanceId: FORM }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('sigue siendo opcional: sin formInstanceId también valida', async () => {
+    expect(await validar(CreateMedicationRequestDto, cuerpoDelFront())).toEqual(
+      [],
+    );
+  });
+
+  it('rechaza un formInstanceId que no es uuid', async () => {
+    expect(
+      await validar(
+        CreateMedicationRequestDto,
+        cuerpoDelFront({ formInstanceId: 'no-es-uuid' }),
+      ),
+    ).toEqual(['formInstanceId']);
+  });
+});

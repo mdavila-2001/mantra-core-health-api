@@ -25,6 +25,8 @@ import {
   // referencien. Servicio nuevo, independiente, exportado por `ClinicalModule`.
   EncounterSealGuardService,
 } from '../../clinical/services';
+// P43: el plan puede declarar de qué formulario médico cerrado sale.
+import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 
 /** Mapa estado (DTO) → concepto de estado de actividad. */
 const ACTIVITY_STATUS_CONCEPT: Record<ActivityStatus, string> = {
@@ -50,6 +52,7 @@ export class ChartCarePlansService {
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
+   * @param formOrigin - Valida la instancia de formulario de origen (P43).
    */
   constructor(
     private readonly em: EntityManager,
@@ -57,6 +60,7 @@ export class ChartCarePlansService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly encounterSealGuard: EncounterSealGuardService,
+    private readonly formOrigin: FormInstanceOriginValidator,
   ) {
     this.logger.setContext(ChartCarePlansService.name);
   }
@@ -116,10 +120,19 @@ export class ChartCarePlansService {
           dto.encounterId,
         );
       }
+      // P43: sólo si viaja; 422 antes de escribir nada.
+      if (dto.formInstanceId !== undefined) {
+        await this.formOrigin.assertUsableOrigin(
+          tx,
+          dto.formInstanceId,
+          dto.encounterId,
+        );
+      }
       const plan = this.carePlansRepo.createPlan(tx, {
         patientProfileId: dto.patientProfileId,
         conditionId: dto.conditionId,
         encounterId: dto.encounterId,
+        formInstanceId: dto.formInstanceId,
         statusConceptId: CHART.CAREPLAN_ACTIVE,
         intentConceptId: dto.intentConceptId ?? CHART.CAREPLAN_INTENT_PLAN,
         goalText: dto.goalText,
@@ -149,6 +162,7 @@ export class ChartCarePlansService {
       );
       return {
         id: plan.id,
+        formInstanceId: plan.formInstanceId ?? null,
         statusConceptId: plan.statusConceptId,
         activityCount: activities.length,
         createdAt: plan.createdAt,

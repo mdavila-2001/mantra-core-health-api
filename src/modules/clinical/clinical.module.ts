@@ -138,6 +138,10 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
 // así que el repositorio del log de acceso se provee acá con el mismo
 // criterio del resto del archivo: clase sin estado por `EntityManager`.
 import { DataAccessLogRepository } from '../audit/repositories';
+// P43 — receta y orden pueden declarar de qué formulario médico cerrado salen.
+// La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
+// se provee suelta, sin importar `FormsModule` entero, igual que el resto.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -170,6 +174,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
   ],
   providers: [
     // Repositorios
+    FormInstanceOriginValidator,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,

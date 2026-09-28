@@ -223,6 +223,38 @@ export class BookingInsuranceClaimDto {
   submittedAt!: string | null;
 }
 
+/**
+ * P42 · La consulta de la que sale una reconsulta, tal como se LEE.
+ *
+ * Es el mismo vínculo que se escribe en `followUpOf` de la cita directa, con
+ * cuándo fue esa consulta ya resuelto por el servidor: sin `startAt`, la
+ * agenda y «Mis citas» necesitarían una petición por fila para decir «de la
+ * cita del 12 de septiembre».
+ */
+export class BookingFollowUpOriginDto {
+  /** La reserva de la que nace la reconsulta. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /**
+   * El encuentro clínico de esa reserva, si lo tuvo. Lo resuelve el servidor
+   * (cita → encuentro), igual que `BookingItemDto.encounterId`.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  encounterId!: string | null;
+
+  /** Cuándo fue la consulta de origen; `null` si su cupo no se encontró. */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  startAt!: Date | null;
+
+  /**
+   * P43: la instancia del formulario médico de esa consulta de la que sale
+   * la reconsulta. Se omite si no se declaró.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  formInstanceId?: string;
+}
+
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
@@ -423,6 +455,28 @@ export class BookingItemDto {
     nullable: true,
   })
   insuranceClaim?: BookingInsuranceClaimDto | null;
+
+  /**
+   * P42: la consulta de la que sale esta cita, si es una reconsulta.
+   *
+   * Misma compuerta de privacidad que `patientName` y `reasonText`: viaja al
+   * titular (y a quien lo representa) y al profesional de esa agenda.
+   * **Ausente** es «no te corresponde verlo»; `null` es «se buscó y no es una
+   * reconsulta».
+   */
+  @ApiPropertyOptional({
+    type: () => BookingFollowUpOriginDto,
+    nullable: true,
+  })
+  followUpOf?: BookingFollowUpOriginDto | null;
+
+  /**
+   * P42: la reconsulta viva (no cancelada ni ausente) que salió de esta cita,
+   * derivada al leer —el vínculo se guarda sólo en la reconsulta—. Misma
+   * compuerta y mismo trato del `null` que `followUpOf`.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  followUpBookingId?: string | null;
 
   /**
    * De cuándo se movió, si la cita se reprogramó.

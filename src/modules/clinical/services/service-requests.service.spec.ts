@@ -49,6 +49,10 @@ function build() {
   const clinicalNotifications = {
     serviceRequestPlaced: mockFn().mockResolvedValue({ suppressed: false }),
   };
+  // P43: el origen en formulario. Por defecto, válido.
+  const formOrigin = {
+    assertUsableOrigin: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ServiceRequestsService(
     em as any,
     serviceRequestsRepo as any,
@@ -58,8 +62,10 @@ function build() {
     logger as any,
     outbox as any,
     clinicalNotifications as any,
+    formOrigin as any,
   );
   return {
+    formOrigin,
     service,
     outbox,
     clinicalNotifications,
@@ -133,6 +139,66 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  describe('formInstanceId (P43)', () => {
+    const alta = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'code1',
+      encounterId: 'enc-1',
+    };
+
+    it('valida la instancia contra el encuentro, la guarda y la devuelve', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockImplementation(
+        (_tx: unknown, data: any) => ({
+          id: 'sr1',
+          patientProfileId: 'p1',
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+          formInstanceId: data.formInstanceId,
+          createdAt: new Date(),
+        }),
+      );
+      const res = await d.service.create(
+        { ...alta, formInstanceId: 'form-1' },
+        actor,
+      );
+      expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
+        expect.anything(),
+        'form-1',
+        'enc-1',
+      );
+      expect(d.serviceRequestsRepo.create.mock.calls[0][1].formInstanceId).toBe(
+        'form-1',
+      );
+      expect(res.formInstanceId).toBe('form-1');
+    });
+
+    it('sin formInstanceId no valida nada y responde null', async () => {
+      const d = build();
+      d.serviceRequestsRepo.create.mockReturnValue({
+        id: 'sr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        createdAt: new Date(),
+      });
+      const res = await d.service.create(alta, actor);
+      expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
+      expect(res.formInstanceId).toBeNull();
+    });
+
+    it('si el validador rechaza (422), no se crea la orden', async () => {
+      const d = build();
+      d.formOrigin.assertUsableOrigin.mockRejectedValue(
+        new PreconditionFailedException('La instancia es de otro encuentro'),
+      );
+      await expect(
+        d.service.create({ ...alta, formInstanceId: 'form-1' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('antiduplicación de estudios (T-26, subtarea 3.2)', () => {

@@ -26,6 +26,8 @@ import {
   RenewMedicationRequestDto,
 } from '../dto';
 import { MedicationRequests } from '../entities';
+// P43: la receta puede declarar de qué formulario médico cerrado sale.
+import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
@@ -76,6 +78,7 @@ export class MedicationsService {
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    * @param filesService - Vincula archivos ya subidos a una receta puntual (P25).
+   * @param formOrigin - Valida la instancia de formulario de origen (P43).
    */
   constructor(
     private readonly em: EntityManager,
@@ -89,6 +92,7 @@ export class MedicationsService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
+    private readonly formOrigin: FormInstanceOriginValidator,
   ) {
     this.logger.setContext(MedicationsService.name);
   }
@@ -247,6 +251,7 @@ export class MedicationsService {
     return {
       id: request.id,
       patientProfileId: request.patientProfileId,
+      formInstanceId: request.formInstanceId ?? null,
       status: request.statusConceptId,
       replacesRequestId: request.replacesRequestId ?? null,
       replacedByRequestId: request.replacedByRequestId ?? null,
@@ -343,10 +348,19 @@ export class MedicationsService {
           dto.patientProfileId,
         );
       }
+      // P43: sólo si viaja; 422 antes de escribir nada.
+      if (dto.formInstanceId !== undefined) {
+        await this.formOrigin.assertUsableOrigin(
+          tx,
+          dto.formInstanceId,
+          dto.encounterId,
+        );
+      }
       const request = this.requestsRepo.create(tx, {
         custodianTenantId: dto.custodianTenantId,
         patientProfileId: dto.patientProfileId,
         encounterId: dto.encounterId,
+        formInstanceId: dto.formInstanceId,
         medicationConceptId: dto.medicationConceptId,
         substanceAtcConceptId: dto.substanceAtcConceptId,
         intentConceptId: CLIN.MEDICATION_INTENT_ORDER,

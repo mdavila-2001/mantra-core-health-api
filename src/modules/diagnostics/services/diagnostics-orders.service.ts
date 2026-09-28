@@ -84,6 +84,7 @@ export class DiagnosticsOrdersService {
         id: row.id,
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
+        formInstanceId: row.formInstanceId,
         codeConceptId: row.codeConceptId,
         categoryConceptId: row.categoryConceptId,
         statusConceptId: row.statusConceptId,
