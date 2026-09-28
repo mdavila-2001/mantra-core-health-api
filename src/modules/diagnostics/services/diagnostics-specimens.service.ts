@@ -10,6 +10,11 @@ import {
 import { SpecimensRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
 import {
+  assertContainerTypeInCatalog,
+  assertSpecimenTypeInCatalog,
+} from '../specimen-catalogs';
+import { toSpecimenDetail } from './specimen-detail.projection';
+import {
   CreateSpecimenDto,
   CreateAccessionDto,
   RejectSpecimenDto,
@@ -59,6 +64,8 @@ export class DiagnosticsSpecimensService {
       { operation: 'diagnostics.specimen.create', actorId: actor.id },
       'Creating specimen',
     );
+    // Antes de abrir la transacción: es un error del cliente, no del estado.
+    assertSpecimenTypeInCatalog(dto.specimenTypeConceptId);
     return this.em.transactional(async (tx) => {
       const specimen = this.repo.createSpecimen(tx, {
         patientProfileId: dto.patientProfileId,
@@ -216,6 +223,7 @@ export class DiagnosticsSpecimensService {
       { operation: 'diagnostics.container.create', specimenId },
       'Creating container',
     );
+    assertContainerTypeInCatalog(dto.containerTypeConceptId);
     return this.em.transactional(async (tx) => {
       const specimen = await this.repo.findSpecimen(tx, specimenId);
       if (!specimen)
@@ -319,7 +327,7 @@ export class DiagnosticsSpecimensService {
         accessionSpecimenId: item.id,
         sequenceNumber: item.sequenceNumber,
         statusConceptId: item.statusConceptId,
-        specimen: this.toSpecimenDetail(
+        specimen: toSpecimenDetail(
           specimen,
           contenedores.filter((c) => c.specimenId === specimen.id),
           custodia.filter((c) => c.specimenId === specimen.id),
@@ -360,60 +368,7 @@ export class DiagnosticsSpecimensService {
       this.repo.findContainersBySpecimenIds(em, [id]),
       this.repo.findCustodyEventsBySpecimenIds(em, [id]),
     ]);
-    return this.toSpecimenDetail(specimen, contenedores, custodia);
-  }
-
-  /** Proyecta un espécimen, sus contenedores y su custodia al DTO de lectura. */
-  private toSpecimenDetail(
-    specimen: {
-      id: string;
-      patientProfileId: string;
-      specimenTypeConceptId: string;
-      statusConceptId: string;
-      collectedAt?: Date;
-      receivedAt?: Date;
-    },
-    containers: readonly {
-      id: string;
-      containerIdentifier: string;
-      containerTypeConceptId: string;
-      statusConceptId: string;
-    }[],
-    custodyEvents: readonly {
-      id: string;
-      specimenContainerId?: string;
-      custodyEventTypeConceptId: string;
-      occurredAt: Date;
-      fromPartyTypeConceptId?: string;
-      toPartyTypeConceptId?: string;
-      sealIdentifier?: string;
-      signedByUserId?: string;
-    }[],
-  ): SpecimenDetailDto {
-    return {
-      id: specimen.id,
-      patientProfileId: specimen.patientProfileId,
-      specimenTypeConceptId: specimen.specimenTypeConceptId,
-      statusConceptId: specimen.statusConceptId,
-      collectedAt: specimen.collectedAt,
-      receivedAt: specimen.receivedAt,
-      containers: containers.map((c) => ({
-        id: c.id,
-        containerIdentifier: c.containerIdentifier,
-        containerTypeConceptId: c.containerTypeConceptId,
-        statusConceptId: c.statusConceptId,
-      })),
-      custodyEvents: custodyEvents.map((e) => ({
-        id: e.id,
-        specimenContainerId: e.specimenContainerId,
-        custodyEventTypeConceptId: e.custodyEventTypeConceptId,
-        occurredAt: e.occurredAt,
-        fromPartyTypeConceptId: e.fromPartyTypeConceptId,
-        toPartyTypeConceptId: e.toPartyTypeConceptId,
-        sealIdentifier: e.sealIdentifier,
-        signedByUserId: e.signedByUserId,
-      })),
-    };
+    return toSpecimenDetail(specimen, contenedores, custodia);
   }
 
   /** Resuelve el tenant custodio del espécimen para acesiones sin tenant explícito. */

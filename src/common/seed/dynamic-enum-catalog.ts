@@ -5,6 +5,10 @@ import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
 import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
+import {
+  CONTAINER_TYPE_CONCEPTS,
+  SPECIMEN_TYPE_CONCEPTS,
+} from '../../modules/diagnostics/diagnostics.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /**
@@ -1367,6 +1371,33 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     defaultConceptId: CHART.VISIBILITY_PROVIDER_ONLY,
     targets: ['chart.document_records.patient_visibility_concept_id'],
+  },
+  /* --- Recepción de muestras del laboratorio (M20) ---------------------------
+     `POST /diagnostics/specimens` y `POST .../containers` pedían un uuid de
+     tipo de espécimen y de contenedor que nada sembraba: la pantalla de
+     recepción no tenía de dónde ofrecer «Sangre venosa» ni «Tubo tapa lila».
+     Los conceptos los declara `diagnostics.concepts.ts` (HL7 v2-0487 para el
+     espécimen; color de tapa ISO 6710 para el tubo). Sin DDL: lo materializa el
+     seed al arrancar. El tipo de contenedor gobierna las dos columnas que lo
+     guardan: la del contenedor y la copia en el propio espécimen. */
+  {
+    code: 'specimen-type',
+    name: 'Tipo de espécimen',
+    description:
+      'Qué muestra se tomó al paciente: sangre, suero, orina, heces, líquido cefalorraquídeo, etc.',
+    concepts: SPECIMEN_TYPE_CONCEPTS,
+    targets: ['diagnostics.specimens.specimen_type_concept_id'],
+  },
+  {
+    code: 'specimen-container-type',
+    name: 'Tipo de contenedor de la muestra',
+    description:
+      'Tubo o frasco en el que viaja la muestra; en los tubos, el color de la tapa indica el aditivo.',
+    concepts: CONTAINER_TYPE_CONCEPTS,
+    targets: [
+      'diagnostics.specimen_containers.container_type_concept_id',
+      'diagnostics.specimens.container_type_concept_id',
+    ],
   },
 ];
 
