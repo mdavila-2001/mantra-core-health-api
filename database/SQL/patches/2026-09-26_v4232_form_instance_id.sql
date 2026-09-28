@@ -12,7 +12,7 @@
 --   chart.care_plans               POST /charts/care-plans
 --   scheduling.appointment_bookings POST /scheduling/appointments/direct
 --                                  (dentro de `followUpOf`, junto a
---                                  follow_up_of_booking_id — patch v4.2.31)
+--                                  follow_up_of_booking_id — patch v4.2.37)
 -- La API valida (422) que la instancia exista, esté cerrada y sea del mismo
 -- encuentro que el registro.
 --
