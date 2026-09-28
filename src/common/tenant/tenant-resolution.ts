@@ -46,11 +46,17 @@ export function resolveOrdinaryTenantId(
     return memberships[0];
   }
 
-  throw new ForbiddenException(
-    memberships.length === 0
-      ? 'El actor no pertenece a ningún tenant: indique X-Tenant-Id.'
-      : 'El actor pertenece a varios tenants: indique cuál en X-Tenant-Id.',
-  );
+  // El status no cambia (403); `details.reason` le deja al cliente distinguir
+  // «falta elegir organización» de un rechazo por permisos y abrir el selector.
+  throw new ForbiddenException({
+    message:
+      memberships.length === 0
+        ? 'El actor no pertenece a ningún tenant: indique X-Tenant-Id.'
+        : 'El actor pertenece a varios tenants: indique cuál en X-Tenant-Id.',
+    details: {
+      reason: memberships.length === 0 ? 'TENANT_REQUIRED' : 'TENANT_AMBIGUOUS',
+    },
+  });
 }
 
 /**

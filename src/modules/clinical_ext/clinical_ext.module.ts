@@ -39,6 +39,10 @@ import {
   EncountersRepository,
   ServiceRequestsRepository,
 } from '../clinical/repositories';
+// BR-14 (CL-09): `ClinicalRecordAccessGuard` (y `ClinicalReadService`, que lo
+// resuelve) para exigir acceso al paciente en `cds/evaluate` y
+// `cds/check-interactions`.
+import { ClinicalModule } from '../clinical/clinical.module';
 // Los favoritos de prescripción cuelgan del perfil profesional de quien pide, y
 // `ProfileOwnershipService` es quien resuelve de quién es la sesión. Se provee la
 // clase con sus tres repositorios —todos sin estado, reciben el EntityManager por
@@ -58,7 +62,14 @@ import {
  * referencias, brechas de cuidado / inmunizaciones y telesalud.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // BR-14 (CL-09): `cds/evaluate` y `cds/check-interactions` usan
+    // `ClinicalRecordAccessGuard`, que Nest resuelve en ESTE contenedor y
+    // necesita a `ClinicalReadService` visible como export propio de
+    // `ClinicalModule` (mismo motivo documentado en `chart.module.ts`).
+    ClinicalModule,
+  ],
   controllers: [
     CareTeamsController,
     CdsController,

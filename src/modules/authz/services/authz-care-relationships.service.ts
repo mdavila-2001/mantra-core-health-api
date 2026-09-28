@@ -372,7 +372,10 @@ export class AuthzCareRelationshipsService {
       }
 
       const now = new Date();
-      const expired = rel.validTo !== undefined && rel.validTo <= now;
+      // `valid_to` llega como `null` (no `undefined`) cuando la relación no tiene fin, y
+      // `null <= now` es verdadero: una relación abierta se marcaba EXPIRED en vez de
+      // REVOKED y su vigencia no se cerraba.
+      const expired = rel.validTo != null && rel.validTo <= now;
       rel.statusConceptId = expired
         ? CONCEPTS.STATE_EXPIRED
         : CONCEPTS.STATE_REVOKED;

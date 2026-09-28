@@ -532,6 +532,25 @@ export class DirectoryReadService {
   }
 
   /**
+   * El representante legal y las gerencias de una organización, para otra
+   * cara de lectura que ya decidió que el actor puede verlos (la ficha de la
+   * farmacia, `GET /pharmacy/pharmacies/:id/contacts`).
+   *
+   * **No autoriza**: quien lo llama responde por el alcance. Existe para que
+   * «quién representa a la organización» se lea en un solo lugar — el mismo
+   * que sirve `GET /tenants/me` — y no en una copia que se separe con el
+   * tiempo.
+   *
+   * @param tenantId - La organización.
+   * @returns Representante y gerencias; claves ausentes si no hay vínculos.
+   */
+  async readRepresentation(
+    tenantId: string,
+  ): Promise<Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'>> {
+    return this.leerRepresentacion(this.em.fork(), tenantId);
+  }
+
+  /**
    * Quién representa a la organización y quiénes son sus gerencias de
    * contacto (subtarea 1.4).
    *

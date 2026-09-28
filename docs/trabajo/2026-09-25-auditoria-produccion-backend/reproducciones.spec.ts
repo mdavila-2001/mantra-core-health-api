@@ -92,7 +92,9 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     } };
     const policy = { assertPuedeEscribirHistoria: jest.fn(async () => { throw new Error('must deny'); }) };
     const service = new EncountersService({ transactional: (fn: any) => fn(tx) } as any,
-      new EncountersRepository(), {} as any, {} as any, {} as any, log as any, policy as any);
+      new EncountersRepository(), {} as any, {} as any, {} as any, log as any, policy as any,
+      // P25 (carril M3, 2026-09-26): `FilesService` para los adjuntos del encuentro.
+      {} as any);
     const user = actor('CLINICIAN');
     const dto = { tenantId: T1, patientProfileId: P1, appointmentId: ID };
     const result: any = await guarded(ClinicalEncountersController, 'checkIn',
@@ -196,7 +198,13 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const gateway = new CommunityMessagingGateway({ fork: () => ({}) } as any, auth as any,
       { findActiveParticipant: async () => ({ id: ID }) } as any,
       { assertOwnProfile: async () => undefined } as any, {} as any, log as any);
-    await gateway.handleConnection(socket as any);
+    // La autenticación se movió de `handleConnection` a un middleware de
+    // socket.io (`afterInit`, ver community-messaging.gateway.ts) para cerrar
+    // una carrera con los `@SubscribeMessage` del propio socket. Acá se
+    // reproduce a mano lo que ese middleware hace una sola vez, al conectar:
+    // el defecto que documenta AUD-08 —que lo autenticado no se revalida por
+    // mensaje— no cambió de lugar, sólo de método.
+    (socket as any).data.user = await auth.authenticate();
     revoked = true;
     await gateway.handleJoinConversation(socket as any, { conversationId: ID, profileId: P1 });
     expect(auth.authenticate).toHaveBeenCalledTimes(1);

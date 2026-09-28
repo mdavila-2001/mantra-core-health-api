@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CoverageService } from '../services';
@@ -8,6 +15,7 @@ import {
   CreateCobDto,
   CreatedResourceDto,
   ResourceStatusDto,
+  MyCoverageDto,
 } from '../dto';
 
 /**
@@ -25,6 +33,18 @@ export class CoverageController {
    * @param service - Valor de service requerido por la operación.
    */
   constructor(private readonly service: CoverageService) {}
+
+  /**
+   * CV-11 — «Mi cobertura»: el paciente lee sus propias coberturas. Pisa el
+   * `@Roles` de clase con el propio del titular, igual que
+   * `ReferralsController.listMine`.
+   */
+  @Get('patient-coverages/me')
+  @Roles('PATIENT')
+  @ApiOperation({ summary: 'Mi cobertura' })
+  listMine(@CurrentUser() actor: AuthenticatedUser): Promise<MyCoverageDto[]> {
+    return this.service.listMine(actor);
+  }
 
   /** UC-26-02. */
   @Post('patient-coverages')

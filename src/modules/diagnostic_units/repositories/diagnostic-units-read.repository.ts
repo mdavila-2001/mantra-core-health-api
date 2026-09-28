@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PracticeSites } from '../../practice/entities';
+import { Addresses } from '../../common/entities';
 import { CatalogConcepts } from '../../terminology/entities';
 import {
   DiagnosticEquipment,
@@ -59,6 +60,19 @@ export class DiagnosticUnitsReadRepository {
       },
       { orderBy: { createdAt: 'ASC' } },
     );
+  }
+
+  /**
+   * Direcciones de `common.addresses`, para leer la ciudad de cada sede
+   * (CL-45, CL-51). `findPracticeSites` (más abajo) ya daba la sede de
+   * `practice`; sólo faltaba este último salto hasta la dirección.
+   */
+  findAddresses(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Addresses[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Addresses, { id: { $in: [...ids] } });
   }
 
   findEquipment(

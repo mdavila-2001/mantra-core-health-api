@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  STICKER_PACK_FILE_IDS,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -392,7 +393,14 @@ export class CommunityMessagingService {
     fileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const options = { operation: 'community.message.attachment.associate' };
+    const options = {
+      operation: 'community.message.attachment.associate',
+      // AG-17: el pack de stickers del producto no es de ningún remitente —es
+      // del sistema— así que cualquier participante puede adjuntarlo. Un
+      // fileId ajeno a este catálogo cerrado sigue exigiendo dueño, igual que
+      // antes.
+      allowIfFileIdIn: STICKER_PACK_FILE_IDS,
+    };
     try {
       await this.attachableFiles.assertUsableBy(tx, fileId, actor, options);
       return;

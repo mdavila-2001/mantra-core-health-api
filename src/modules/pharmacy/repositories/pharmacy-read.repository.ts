@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { Addresses } from '../../common/entities';
+import { CONCEPTS } from '../../../common';
+import { Addresses, Identifiers } from '../../common/entities';
+// Lectura, no escritura: la ficha legal de la farmacia vive en su
+// organización (`directory.tenants` y sus documentos de afiliación). Consultar
+// la entidad de otro módulo en una lectura ya tiene precedente
+// (`pharmacy-orders.repository.ts`, `directory-tenant-legal.repository.ts`).
+import { TenantAffiliationDocuments, Tenants } from '../../directory/entities';
 import { PracticeSites } from '../../practice/entities';
 import { CatalogConcepts } from '../../terminology/entities';
 import {
   Pharmacies,
+  PharmacyLicenses,
   PharmacyPriceLists,
   PharmacyProductPrices,
   PharmacyProducts,
@@ -224,5 +231,90 @@ export class PharmacyReadRepository {
   ): Promise<CatalogConcepts[]> {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(CatalogConcepts, { id: { $in: [...ids] } });
+  }
+  /**
+   * Una farmacia del tenant activo, **publicada o no**: la carpeta legal y la
+   * gente de la farmacia las mira su propio personal, que necesita verlas
+   * también mientras la farmacia espera verificación. El alcance lo decide el
+   * servicio (membresía en la organización), no la publicación.
+   */
+  findByIdInTenant(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<Pharmacies | null> {
+    return em.findOne(Pharmacies, { id, tenantId });
+  }
+
+  /** La organización dueña de la farmacia (`directory.tenants`). */
+  findTenant(em: EntityManager, tenantId: string): Promise<Tenants | null> {
+    return em.findOne(Tenants, { id: tenantId });
+  }
+
+  /**
+   * Los documentos de afiliación **activos** de la organización. El servicio
+   * elige entre ellos el del NIT por el código de su tipo.
+   */
+  findActiveAffiliationDocuments(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<TenantAffiliationDocuments[]> {
+    return em.find(
+      TenantAffiliationDocuments,
+      { tenantId, statusConceptId: CONCEPTS.STATE_ACTIVE },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /** Identificadores por id (`common.identifiers`). */
+  findIdentifiers(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Identifiers[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Identifiers, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * La casa matriz de la organización: su dirección vigente de uso laboral
+   * (`ADDR_USE_WORK`) con `owner_id` = tenant. Es el mismo criterio con que
+   * `GET /tenants/me` lee la casa matriz de una aseguradora; la más reciente
+   * gana si hubiera dos vigentes.
+   */
+  findHeadquartersAddress(
+    em: EntityManager,
+    tenantId: string,
+    now: Date,
+  ): Promise<Addresses | null> {
+    return em.findOne(
+      Addresses,
+      {
+        ownerId: tenantId,
+        useConceptId: CONCEPTS.ADDR_USE_WORK,
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /** Las licencias de una farmacia, de la farmacia entera y de cada sede. */
+  findLicenses(
+    em: EntityManager,
+    pharmacyId: string,
+  ): Promise<PharmacyLicenses[]> {
+    return em.find(
+      PharmacyLicenses,
+      { pharmacyId },
+      { orderBy: { validTo: 'ASC', licenseNumber: 'ASC' } },
+    );
+  }
+
+  /** Sedes por id, en cualquier estado: una licencia vieja nombra su sede. */
+  findSitesByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PharmacySites[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PharmacySites, { id: { $in: [...ids] } });
   }
 }

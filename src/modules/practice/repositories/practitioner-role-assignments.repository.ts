@@ -204,6 +204,38 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * Página de vinculaciones de una práctica, ordenada por `id` (keyset estable).
+   *
+   * CV-14: hasta ahora la organización no podía enumerar sus vinculaciones
+   * pendientes — sólo aprobarlas u observarlas de a una, si alguien le pasaba
+   * el uuid por otro canal. `practiceId` acota siempre; `statusConceptId` es
+   * opcional porque el administrador también quiere ver el historial completo,
+   * no sólo lo pendiente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica cuyas vinculaciones se listan.
+   * @param statusConceptId - Filtra por estado; sin filtro, trae cualquiera.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   * @returns Vinculaciones de la práctica, de menor a mayor `id`.
+   */
+  findByPracticePage(
+    em: EntityManager,
+    practiceId: string,
+    statusConceptId: string | undefined,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<PractitionerRoleAssignments[]> {
+    const where: Record<string, unknown> = { practiceId };
+    if (statusConceptId !== undefined) where.statusConceptId = statusConceptId;
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(PractitionerRoleAssignments, where, {
+      orderBy: { id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

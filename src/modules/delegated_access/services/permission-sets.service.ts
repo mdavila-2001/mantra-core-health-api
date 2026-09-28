@@ -4,6 +4,8 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,8 +17,12 @@ import {
   CreatePermissionSetDto,
   PublishSetVersionDto,
   PermissionSetVersionDto,
+  ListPermissionSetsResponseDto,
 } from '../dto';
 import { DELEGATE_TYPE_CONCEPT, STATUS } from './concept-maps';
+
+/** Tope de sets por página cuando el cliente no pide uno (CV-13). */
+const DEFAULT_SETS_PAGE_SIZE = 50;
 
 /**
  * UC-29-02: publicar/versionar sets de permisos delegados (scoped). El set y sus
@@ -40,6 +46,51 @@ export class PermissionSetsService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PermissionSetsService.name);
+  }
+
+  /**
+   * CV-13 — página de sets de permisos delegados del tenant del actor.
+   *
+   * El hub `delegated-access` sólo podía publicar sets, nunca verlos: el
+   * front tenía que pegar el uuid del set a mano en el formulario de alta de
+   * una delegación (ID-19).
+   */
+  async listByTenant(
+    tenantId: string,
+    options: { cursor?: string; limit?: number },
+  ): Promise<ListPermissionSetsResponseDto> {
+    const em = this.em.fork();
+    const limit = options.limit ?? DEFAULT_SETS_PAGE_SIZE;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    const rows = await this.setsRepo.findByTenantPage(
+      em,
+      tenantId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((set) => ({
+        id: set.id,
+        code: set.code,
+        name: set.name,
+        delegateTypeConceptId: set.delegateTypeConceptId,
+        description: set.description,
+        statusConceptId: set.statusConceptId,
+        versionNumber: set.versionNumber,
+        createdAt: set.createdAt,
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
   }
 
   /** UC-29-02: crea el set (versión 1) con sus ítems de permiso. */

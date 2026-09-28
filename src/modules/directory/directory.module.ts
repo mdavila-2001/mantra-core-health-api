@@ -94,6 +94,10 @@ import {
     // `TenantLegalRepresentativesService` lo necesita `iam` para el
     // autorregistro de organización (subtarea 1.4), igual que los otros dos.
     TenantLegalRepresentativesService,
+    // `DirectoryReadService` lo necesita `pharmacy` para servir el
+    // representante y las gerencias de la ficha de la farmacia con la misma
+    // lectura que `GET /tenants/me`.
+    DirectoryReadService,
   ],
 })
 export class DirectoryModule {}

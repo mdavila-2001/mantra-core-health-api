@@ -227,6 +227,23 @@ export class PharmacyOrderReservationLineDto {
 }
 
 /** Un pedido de farmacia del paciente, resuelto a palabras. */
+/** Quién firmó la receta de un pedido, en palabras. */
+export class PharmacyOrderPrescriberDto {
+  /**
+   * Nombre pintable del profesional, o `null` si su persona no lo tiene
+   * cargado.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  name!: string | null;
+
+  /**
+   * Especialidad principal vigente (la marcada como principal; si ninguna lo
+   * está, la primera), o `null` si no declara ninguna.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  specialty!: string | null;
+}
+
 export class PharmacyOrderDto implements PatientSettlementProjection {
   @ApiProperty({
     type: [PharmacyOrderReservationLineDto],
@@ -298,6 +315,18 @@ export class PharmacyOrderDto implements PatientSettlementProjection {
   medicationRequestId!: string | null;
 
   /**
+   * Quién firmó la receta que respalda el pedido: su nombre y su especialidad
+   * principal, resueltos en lote desde `clinical.medication_requests` →
+   * `profiles.persons` / `profiles.practitioner_specialties`. `null` sin
+   * receta, o si la receta no declara prescriptor.
+   */
+  @ApiPropertyOptional({
+    type: () => PharmacyOrderPrescriberDto,
+    nullable: true,
+  })
+  prescriber!: PharmacyOrderPrescriberDto | null;
+
+  /**
    * Nombre pintable del paciente, resuelto en lote por el backend (la bandeja
    * FAR-E2 lo necesita; cero UUIDs como copy). `null` si la persona no tiene
    * nombre cargado.
@@ -311,6 +340,14 @@ export class PharmacyOrderDto implements PatientSettlementProjection {
    */
   @ApiPropertyOptional({ type: InventoryConceptDto, nullable: true })
   deliveryMode!: InventoryConceptDto | null;
+
+  /**
+   * La dirección de entrega guardada en el pedido (`delivery_address_id` →
+   * `common.addresses`), en una línea. `null` si el pedido no la tiene —hoy
+   * todo pedido nace `RETIRO`: el envío llega con FAR-E4—.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  deliveryAddressText!: string | null;
 
   /**
    * Código de retiro del pedido, sellado al quedar `LISTO_PARA_RETIRO`.

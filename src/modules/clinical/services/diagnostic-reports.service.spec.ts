@@ -9,7 +9,6 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticReportsService } from './diagnostic-reports.service';
 import {
-  ConcurrencyConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
@@ -24,7 +23,10 @@ const actor = { id: 'user-1', roles: [] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => ({})),
+  };
   const reportsRepo = { findById: mockFn(), create: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -101,27 +103,25 @@ describe('DiagnosticReportsService', () => {
     });
   });
 
-  describe('release (UC-08-07)', () => {
-    it('releases a report (partial -> final, held -> released)', async () => {
+  describe('release (UC-08-07) — obsoleta (D-E, CL-46)', () => {
+    it('aceptado: un reporte liberable igual devuelve 422, sin tocar su estado', async () => {
       const d = build();
       const r = report();
+      const estadoAntes = r.lifecycleStatusConceptId;
       d.reportsRepo.findById.mockResolvedValue(r);
-      const res = await d.service.release('dr1', {}, actor);
-      expect(r.lifecycleStatusConceptId).toBe(CLIN.REPORT_FINAL);
-      expect(r.resultReleaseStatusConceptId).toBe(CLIN.RELEASE_RELEASED);
-      expect((r as any).currentReleasedVersionId).toBe('v1');
-      expect(res.lifecycleStatus).toBe(CLIN.REPORT_FINAL);
+
+      await expect(d.service.release('dr1', {}, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+
+      // No liberó nada: ni cambió el estado ni escribió nada. Que este camino
+      // parezca funcionar sin escribir el evento de liberación es exactamente
+      // el bug (CV-02) que D-E cerró.
+      expect(r.lifecycleStatusConceptId).toBe(estadoAntes);
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
 
-    it('throws when the report does not exist', async () => {
-      const d = build();
-      d.reportsRepo.findById.mockResolvedValue(null);
-      await expect(
-        d.service.release('missing', {}, actor),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
-    });
-
-    it('rejects releasing a report in a non-releasable status', async () => {
+    it('límite: un reporte ya en estado final también devuelve 422 (nunca 200)', async () => {
       const d = build();
       d.reportsRepo.findById.mockResolvedValue({
         ...report(),
@@ -132,12 +132,12 @@ describe('DiagnosticReportsService', () => {
       );
     });
 
-    it('rejects on optimistic version mismatch', async () => {
+    it('inválido: 404 si el reporte no existe', async () => {
       const d = build();
-      d.reportsRepo.findById.mockResolvedValue({ ...report(), rowVersion: 5 });
+      d.reportsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.release('dr1', { expectedRowVersion: 1 }, actor),
-      ).rejects.toBeInstanceOf(ConcurrencyConflictException);
+        d.service.release('missing', {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

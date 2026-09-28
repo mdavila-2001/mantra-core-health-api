@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AffiliationResponseDto } from './affiliation.dto';
 import { OwnAddressDto } from './read-patients.dto';
+import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
 
 /* ============================================================================
     `GET /profiles/practitioners/me/summary` — el perfil profesional propio.
@@ -145,6 +146,13 @@ export class PractitionerLicenseDto {
 
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   validTo?: Date;
+
+  /** Archivo del carnet de matrícula. Sólo en la lectura propia. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Sólo en la lectura propia',
+  })
+  fileId?: string;
 }
 
 /**
@@ -285,6 +293,13 @@ export class PractitionerProfileSummaryDto {
 
   @ApiPropertyOptional({ type: String, format: 'date' })
   birthDate?: Date;
+
+  /** Sexo asignado al nacer, por código legible. Sólo en la lectura propia. */
+  @ApiPropertyOptional({
+    enum: BIRTH_SEX_CODES,
+    description: 'Sólo en la lectura propia',
+  })
+  sexAtBirth?: BirthSexCode;
 
   /**
    * Documento de identidad. **No editable desde el perfil**: es un identificador

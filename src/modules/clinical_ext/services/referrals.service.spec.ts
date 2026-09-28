@@ -23,16 +23,27 @@ const actor = { id: 'md-1', roles: ['USER'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const referralsRepo = {
     findById: mockFn(),
     findByPatient: mockFn(() => Promise.resolve([])),
     findDuplicate: mockFn(),
     create: mockFn(),
   };
+  const accountLinksRepo = {
+    findActiveByUser: mockFn(() => Promise.resolve(null)),
+  };
+  const patientProfilesRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new ReferralsService(em as any, referralsRepo, logger as any);
-  return { service, referralsRepo };
+  const service = new ReferralsService(
+    em as any,
+    referralsRepo,
+    accountLinksRepo as any,
+    patientProfilesRepo as any,
+    logger as any,
+  );
+  return { service, referralsRepo, accountLinksRepo, patientProfilesRepo };
 }
 
 describe('ReferralsService', () => {
@@ -102,6 +113,42 @@ describe('ReferralsService', () => {
       await expect(
         d.service.respond('ref1', { decision: 'ACCEPT' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('listMine (CV-10)', () => {
+    it('returns an empty list when the account has no linked person', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+      const res = await d.service.listMine(actor);
+      expect(res).toEqual([]);
+      expect(d.referralsRepo.findByPatient).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty list when the person has no patient profile', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'person-1',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue(null);
+      const res = await d.service.listMine(actor);
+      expect(res).toEqual([]);
+    });
+
+    it('resolves the patient from the account, never from a caller-supplied id', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'person-1',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({ profileId: 'pp-own' });
+      d.referralsRepo.findByPatient.mockResolvedValue([{ id: 'r1' }]);
+      const res = await d.service.listMine(actor);
+      expect(d.referralsRepo.findByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        'pp-own',
+        50,
+      );
+      expect(res).toEqual([{ id: 'r1' }]);
     });
   });
 });
