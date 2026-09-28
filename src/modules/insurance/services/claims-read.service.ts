@@ -41,6 +41,7 @@ import type {
 } from '../dto';
 import { INS } from '../insurance.concepts';
 import {
+  CatalogRepository,
   ClaimReadRepository,
   type ClaimCursor,
   type ClaimListFilters,
@@ -103,25 +104,27 @@ export class ClaimsReadService {
     private readonly claimRepo: ClaimReadRepository,
     private readonly practiceLookup: PracticeTenantLookupService,
     private readonly duplicateStudyDetector: DuplicateStudyDetector,
+    private readonly catalogRepo: CatalogRepository,
   ) {}
 
   /**
-   * Página de solicitudes enviadas por la organización activa.
+   * Página de solicitudes de seguro para la organización activa
+   * (enviadas por el prestador o recibidas por la aseguradora).
    *
    * @param query - Filtros y paginación.
    * @returns Las filas de la página y el cursor de la siguiente.
-   * @throws ForbiddenException si la organización no tiene prácticas activas.
+   * @throws ForbiddenException si la organización no tiene prácticas ni es aseguradora.
    */
   async listClaims(query: ClaimListQueryDto): Promise<ClaimListResponseDto> {
     const em = this.em.fork();
     const limit = query.limit ?? DEFAULT_PAGE_SIZE;
 
-    const { practiceIds, diagnosticUnitIds } =
-      await this.providerScopeInScope();
+    const scope = await this.resolveScope();
 
     const filters: ClaimListFilters = {
       statusConceptId: query.statusConceptId,
-      insuranceCarrierId: query.insuranceCarrierId,
+      insuranceCarrierId:
+        scope.type === 'carrier' ? undefined : query.insuranceCarrierId,
       submittedFrom: this.parseDate(query.submittedFrom),
       submittedTo: this.parseDate(query.submittedTo),
     };
@@ -129,14 +132,25 @@ export class ClaimsReadService {
       ? (decodeKeysetCursor(query.cursor) as unknown as ClaimCursor)
       : null;
 
-    const rows = await this.claimRepo.findClaimsPage(
-      em,
-      practiceIds,
-      filters,
-      limit,
-      cursor,
-      diagnosticUnitIds,
-    );
+    const rows =
+      scope.type === 'carrier'
+        ? await this.claimRepo.findClaimsPage(
+            em,
+            [],
+            filters,
+            limit,
+            cursor,
+            [],
+            scope.carrierId,
+          )
+        : await this.claimRepo.findClaimsPage(
+            em,
+            scope.practiceIds,
+            filters,
+            limit,
+            cursor,
+            scope.diagnosticUnitIds,
+          );
     // La fila de sondeo se descarta: existía para saber si hay siguiente, no
     // para mostrarse.
     const hasMore = rows.length > limit;
@@ -165,14 +179,22 @@ export class ClaimsReadService {
   async getClaim(id: string): Promise<ClaimDetailDto> {
     const em = this.em.fork();
 
-    const { practiceIds, diagnosticUnitIds } =
-      await this.providerScopeInScope();
-    const claim = await this.claimRepo.findClaimInScope(
-      em,
-      practiceIds,
-      id,
-      diagnosticUnitIds,
-    );
+    const scope = await this.resolveScope();
+    const claim =
+      scope.type === 'carrier'
+        ? await this.claimRepo.findClaimInScope(
+            em,
+            [],
+            id,
+            [],
+            scope.carrierId,
+          )
+        : await this.claimRepo.findClaimInScope(
+            em,
+            scope.practiceIds,
+            id,
+            scope.diagnosticUnitIds,
+          );
     if (!claim) {
       // Mismo cuerpo que un uuid inexistente, y **sin detalles** (AC-16-14).
       throw this.accessDenied();
@@ -291,21 +313,24 @@ export class ClaimsReadService {
   }
 
   /**
-   * El alcance completo del prestador activo: prácticas (reclamos de
-   * atención) y unidades diagnósticas (reclamos vinculados a una orden de
-   * laboratorio/imagen — antiduplicación, subtarea 3.2). Sin esto, un
-   * reclamo que una unidad diagnóstica presentó nunca era legible: la lectura
-   * sólo miraba `billing_provider_type = PRACTICE`.
+   * Resuelve el alcance de la organización activa:
+   * - Si es una aseguradora, acota por su propio `insurance_carrier_id`.
+   * - Si es un prestador, acota por sus prácticas y unidades diagnósticas activas.
+   * - Si no es ninguna de las dos, rechaza con 403.
    *
-   * @returns Prácticas y unidades activas de la organización activa.
+   * @returns El alcance (carrier o provider).
    * @throws ForbiddenException si la organización no tiene ninguna de las dos.
    */
-  private async providerScopeInScope(): Promise<{
-    practiceIds: string[];
-    diagnosticUnitIds: string[];
-  }> {
+  private async resolveScope(): Promise<
+    | { type: 'carrier'; carrierId: string }
+    | { type: 'provider'; practiceIds: string[]; diagnosticUnitIds: string[] }
+  > {
     const tenantId = requireTenantId();
     const em = this.em.fork();
+    const carrier = await this.catalogRepo.findCarrierByTenantId(em, tenantId);
+    if (carrier) {
+      return { type: 'carrier', carrierId: carrier.id };
+    }
     const [practiceIds, units] = await Promise.all([
       this.practiceLookup.findActivePracticeIdsForTenant(tenantId),
       em.find(DiagnosticUnits, {
@@ -317,7 +342,7 @@ export class ClaimsReadService {
     if (practiceIds.length === 0 && diagnosticUnitIds.length === 0) {
       throw this.accessDenied();
     }
-    return { practiceIds, diagnosticUnitIds };
+    return { type: 'provider', practiceIds, diagnosticUnitIds };
   }
 
   /**
