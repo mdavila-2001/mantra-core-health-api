@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   PreconditionFailedException,
   ResourceNotFoundException,
   type AuthenticatedUser,
@@ -23,7 +25,11 @@ import {
   SelfRequestRoleAssignmentDto,
   RoleAssignmentTransitionDto,
   MyRoleAssignmentResponseDto,
+  ListPracticeRoleAssignmentsResponseDto,
 } from '../dto';
+
+/** Tope de vinculaciones por página cuando el cliente no pide uno (CV-14). */
+const DEFAULT_ASSIGNMENTS_PAGE_SIZE = 50;
 
 /** Transiciones válidas del ciclo de vida de una vinculación (Carril 18). */
 const ASSIGNMENT_TRANSITIONS: Record<string, readonly string[]> = {
@@ -318,6 +324,65 @@ export class PracticeWorkforceService {
    */
   private fileUrl(fileId?: string): string | null {
     return fileId ? `/public/media/${fileId}` : null;
+  }
+
+  /**
+   * CV-14 — página de vinculaciones profesional-organización de una práctica,
+   * para que su administrador deje de aprobar a ciegas.
+   *
+   * Aislamiento: si la práctica no existe o es de otro tenant, 404 sin
+   * distinguir el caso (el mismo criterio que
+   * {@link PracticeOrganizationReadService.getConsole}) — un administrador de
+   * la clínica A no debe poder confirmar, ni siquiera por el código de error,
+   * que una práctica de la clínica B existe.
+   *
+   * @param practiceId - Práctica cuyas vinculaciones se listan.
+   * @param tenantId - Tenant del contexto (el del actor).
+   * @param options - Filtro de estado, cursor y tope de página.
+   */
+  async listPracticeAssignments(
+    practiceId: string,
+    tenantId: string,
+    options: { statusConceptId?: string; cursor?: string; limit?: number },
+  ): Promise<ListPracticeRoleAssignmentsResponseDto> {
+    const em = this.em.fork();
+    const practice = await this.practicesRepo.findById(em, practiceId);
+    if (!practice || practice.tenantId !== tenantId) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
+
+    const limit = options.limit ?? DEFAULT_ASSIGNMENTS_PAGE_SIZE;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    // Una fila de más para saber si hay página siguiente sin un COUNT aparte.
+    const rows = await this.rolesRepo.findByPracticePage(
+      em,
+      practiceId,
+      options.statusConceptId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((role) => ({
+        id: role.id,
+        practiceId: role.practiceId,
+        practitionerProfileId: role.practitionerProfileId,
+        status: role.statusConceptId,
+        createdAt: role.createdAt,
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
   }
 
   /**

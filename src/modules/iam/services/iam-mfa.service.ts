@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { generateSecret, generateURI, verify as verifyTotp } from 'otplib';
@@ -17,6 +17,17 @@ import {
   SecurityEventsRepository,
 } from '../repositories';
 import { MfaFactorDto, MfaFactorResponseDto } from '../dto';
+
+/**
+ * Roles que pueden enrolar o verificar un factor sobre una cuenta que no es la
+ * propia. Son los mismos que administran el resto de `/iam/users/:id` (todas
+ * esas rutas llevan `@Roles('SECURITY_ADMIN')`; `SUPERADMIN` pasa cualquier
+ * `@Roles`, ver `roles.guard.ts`).
+ */
+const ROLES_QUE_ADMINISTRAN_MFA: readonly string[] = [
+  'SECURITY_ADMIN',
+  'SUPERADMIN',
+];
 
 /**
  * Enrolamiento y verificación de factores MFA (UC-01-03). El mismo endpoint sirve
@@ -50,6 +61,26 @@ export class IamMfaService {
     dto: MfaFactorDto,
     actor: AuthenticatedUser,
   ): Promise<MfaFactorResponseDto> {
+    // Titularidad. La ruta `POST /iam/users/:id/mfa-factors` no lleva `@Roles`
+    // —cualquier sesión la alcanza— y este servicio no miraba quién era el actor:
+    // verificado contra la API viva el 2026-09-26, una paciente enroló un factor
+    // TOTP sobre la cuenta de otra (201) y quedó en `iam.mfa_factors` con el
+    // `user_id` ajeno. Un factor lo enrola o verifica su dueño, o un
+    // administrador de seguridad; para cualquier otro la cuenta ni existe (403
+    // genérico, sin confirmar el id).
+    if (
+      actor.id !== userId &&
+      !actor.roles.some((rol) => ROLES_QUE_ADMINISTRAN_MFA.includes(rol))
+    ) {
+      this.logger.warn(
+        { operation: 'iam.mfa.forbidden', userId, actorId: actor.id },
+        'MFA factor request over another account rejected',
+      );
+      throw new ForbiddenException(
+        'No tiene acceso a los factores MFA de esta cuenta',
+      );
+    }
+
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)

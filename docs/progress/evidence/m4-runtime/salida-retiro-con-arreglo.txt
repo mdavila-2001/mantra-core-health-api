@@ -1,0 +1,6 @@
+$ node m4-verify-retiro.mjs   # misma API + el arreglo de esta rama
+## B10 · retiro con citas vivas (build con el arreglo de booking_reschedules)
+   DELETE /scheduling/templates/:id → 200 {"id":"6dd64d02-ae19-42ca-83b4-9c4ff3f32217","statusConceptId":"2e13f0be-425f-5f65-b53e-7eb679513b4d","releasedSlots":68,"keptSlots":12,"liveBookings":6,"liveBookingIds":["3e5c5c40-e03b-4130-8e02-d6eb01f8a23f","f8029335-22e8-417e-acf6-947fff6eb7b1","74f66c7e-f668-40dc-b172-d572535e2f06","758bf484-6913-4896-9094-684b254876fc","83cd88d2-6b9f-4b16-94e7-2dc3102e
+PASS  retirar un horario con citas vivas → 200, las informa, conserva sus cupos y no toca ninguna cita  — vivas antes=6 después=6 · plantilla=TPL_RETIRED
+
+RESULTADO: TODO PASS

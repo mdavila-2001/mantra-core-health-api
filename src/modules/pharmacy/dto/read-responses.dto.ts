@@ -152,6 +152,21 @@ export class PharmacyDirectoryResponseDto {
   count!: number;
 }
 
+/** Un punto WGS84. */
+export class PharmacyGeoPointDto {
+  /**
+   * Latitud WGS84.
+   */
+  @ApiProperty()
+  latitude!: number;
+
+  /**
+   * Longitud WGS84.
+   */
+  @ApiProperty()
+  longitude!: number;
+}
+
 /** El perfil de una farmacia: su ficha y sus sedes con dirección. */
 export class PharmacyDetailDto extends PharmacyDirectoryItemDto {
   /**
@@ -159,6 +174,178 @@ export class PharmacyDetailDto extends PharmacyDirectoryItemDto {
    */
   @ApiProperty({ type: [PharmacySiteReadDto] })
   sites!: PharmacySiteReadDto[];
+
+  /**
+   * NIT de la organización dueña de la farmacia: el número declarado en su
+   * documento de identificación tributaria (`NIT_EXHIBICION`) del alta
+   * institucional. `null` si no se declaró, o si la organización no es una
+   * farmacia (ver `companyType`).
+   */
+  @ApiPropertyOptional({ nullable: true })
+  taxId!: string | null;
+
+  /**
+   * Forma societaria de la organización (`legal_entity_type_concept_id` de
+   * `directory.tenants`): `UNIPERSONAL`, `SRL`, `LTDA`, `SA`,
+   * `SOCIEDAD_COLECTIVA`, `COMANDITA_SIMPLE`, `COMANDITA_ACCIONES`,
+   * `SUCURSAL_EXTRANJERA` o una figura de otra jurisdicción. No es el `type`
+   * (tipo de farmacia) ni `ownership_type` (pública/privada).
+   *
+   * `null` cuando la organización no eligió forma (la genérica `COMPANY` de
+   * las filas anteriores al diccionario no se sirve como si fuera una), y
+   * cuando la organización dueña no es de tipo farmacia: en ese caso sus datos
+   * legales son de otra entidad y atribuírselos a esta farmacia sería falso.
+   */
+  @ApiPropertyOptional({ type: PharmacyConceptDto, nullable: true })
+  companyType!: PharmacyConceptDto | null;
+
+  /**
+   * Dirección legal de la central (casa matriz de la organización:
+   * `common.addresses` vigente de uso laboral), en una línea. `null` si no la
+   * registró. Mismo criterio de atribución que `companyType`.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  legalAddressText!: string | null;
+
+  /**
+   * Punto de la central en el mapa, si la casa matriz tiene coordenadas.
+   */
+  @ApiPropertyOptional({ type: PharmacyGeoPointDto, nullable: true })
+  headquarters!: PharmacyGeoPointDto | null;
+}
+
+/** Una licencia de la farmacia (`pharmacy.pharmacy_licenses`). */
+export class PharmacyLicenseDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Tipo de licencia, resuelto.
+   */
+  @ApiPropertyOptional({ type: PharmacyConceptDto, nullable: true })
+  type!: PharmacyConceptDto | null;
+
+  /**
+   * Número de la licencia.
+   */
+  @ApiProperty()
+  number!: string;
+
+  /**
+   * Sede a la que corresponde; `null` si es de la farmacia entera.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  siteId!: string | null;
+
+  /**
+   * Nombre de esa sede, si corresponde a una.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  siteName!: string | null;
+
+  /**
+   * Jurisdicción, resuelta.
+   */
+  @ApiPropertyOptional({ type: PharmacyConceptDto, nullable: true })
+  jurisdiction!: PharmacyConceptDto | null;
+
+  /**
+   * Inicio de vigencia (fecha, sin hora).
+   */
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  validFrom!: string | null;
+
+  /**
+   * Fin de vigencia (fecha, sin hora).
+   */
+  @ApiPropertyOptional({ format: 'date', nullable: true })
+  validTo!: string | null;
+
+  /**
+   * Días de calendario hasta el vencimiento, negativo si ya venció; `null`
+   * sin fin de vigencia. Lo calcula el servidor para que el aviso sea el mismo
+   * en todas las pantallas.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  daysToExpiry!: number | null;
+
+  /**
+   * Estado de verificación, resuelto.
+   */
+  @ApiPropertyOptional({ type: PharmacyConceptDto, nullable: true })
+  verificationStatus!: PharmacyConceptDto | null;
+
+  /**
+   * Archivo de respaldo (`common.files`), si se adjuntó.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  evidenceFileId!: string | null;
+}
+
+/** La carpeta de licencias de una farmacia. */
+export class PharmacyLicenseListResponseDto {
+  /**
+   * Valor de items mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PharmacyLicenseDto] })
+  items!: PharmacyLicenseDto[];
+
+  /**
+   * Cantidad de licencias servidas.
+   */
+  @ApiProperty()
+  count!: number;
+}
+
+/** Una persona que representa o gestiona la organización de la farmacia. */
+export class PharmacyContactPersonDto {
+  /**
+   * Rol canónico: `LEGAL_REPRESENTATIVE`, `GENERAL_MANAGER`,
+   * `COMMERCIAL_MANAGER` o `MARKETING_MANAGER`.
+   */
+  @ApiProperty()
+  role!: string;
+
+  /**
+   * Nombre completo, tal como figura en `profiles.persons`.
+   */
+  @ApiProperty()
+  fullName!: string;
+
+  /**
+   * Correo vigente preferido, si lo tiene.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  email!: string | null;
+
+  /**
+   * Celular o teléfono vigente preferido, si lo tiene.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  phone!: string | null;
+}
+
+/**
+ * El representante legal y las gerencias de la organización de la farmacia.
+ * El documento de identidad de las personas **no** viaja: esta lectura es para
+ * ubicarlas, no para identificarlas.
+ */
+export class PharmacyContactsResponseDto {
+  /**
+   * El representante legal, o `null` si la organización no lo registró.
+   */
+  @ApiPropertyOptional({ type: PharmacyContactPersonDto, nullable: true })
+  legalRepresentative!: PharmacyContactPersonDto | null;
+
+  /**
+   * Las gerencias registradas, en orden canónico (general, comercial,
+   * marketing).
+   */
+  @ApiProperty({ type: [PharmacyContactPersonDto] })
+  executives!: PharmacyContactPersonDto[];
 }
 
 /** Un producto del catálogo, con su medicamento del vademécum resuelto. */

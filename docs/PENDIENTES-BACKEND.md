@@ -73,3 +73,9 @@ son de este carril), pero si el CI de docs corre `check-breaking`/`docs:links`/`
 como gate bloqueante, **cualquier PR contra `dev` esta noche —no sólo el de farmacia— va a fallar
 en ese paso** hasta que alguien resuelva estas tres cosas. Se documenta acá para que no se
 confunda con una regresión introducida por este carril.
+
+## 2026-09-26 — Carril M1: vigilante de autodespliegue de `test`, comprobación
+
+Commit de una línea para comprobar que el vigilante de `test` (M1, H2) detecta un push
+real en su próxima pasada programada, sin intervención manual. Ver
+`tools/autodeploy/vps-autodeploy-test.sh`.

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PractitionerSpecialties } from '../entities';
 import { createdBy } from '../../../common';
@@ -90,6 +91,23 @@ export class PractitionerSpecialtiesRepository {
     id: string,
   ): Promise<PractitionerSpecialties | null> {
     return em.findOne(PractitionerSpecialties, { id });
+  }
+
+  /** La especialidad con la fila bloqueada, para corregirla o retirarla. */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerSpecialties | null> {
+    return em.findOne(
+      PractitionerSpecialties,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Borrado físico: la regla de cuándo se puede vive en el servicio. */
+  remove(em: EntityManager, row: PractitionerSpecialties): void {
+    em.remove(row);
   }
 
   /** Especialidad activa duplicada (uq_practitioner_specialty_active, valid_to IS NULL). */

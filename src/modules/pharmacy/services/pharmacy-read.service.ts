@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { requireTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  CONCEPTS,
+  requireTenantId,
+  ResourceNotFoundException,
+} from '../../../common';
 import type { Addresses } from '../../common/entities';
+import { DOCUMENT_TYPE_CODE_BY_ROLE } from '../../directory/affiliation-documents';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   Pharmacies,
@@ -98,9 +103,10 @@ export class PharmacyReadService {
       });
     }
 
-    const [sites, productOwners] = await Promise.all([
+    const [sites, productOwners, legal] = await Promise.all([
       this.readRepo.findActiveSites(em, [pharmacy.id]),
       this.readRepo.findActiveProductOwners(em, [pharmacy.id]),
+      this.resolveLegalProfile(em, pharmacy.tenantId),
     ]);
     const { addressBySite, conceptById } = await this.resolveSiteContext(
       em,
@@ -118,6 +124,80 @@ export class PharmacyReadService {
       sites: sites.map((site) =>
         this.toSiteItem(site, addressBySite.get(site.id), conceptById),
       ),
+      ...legal,
+    };
+  }
+
+  /**
+   * La ficha legal de la farmacia, leída de su organización: NIT (documento
+   * `NIT_EXHIBICION` del alta institucional), forma societaria
+   * (`directory.tenants`) y casa matriz (`common.addresses` de uso laboral).
+   *
+   * Sólo se atribuye cuando la organización dueña **es una farmacia**
+   * (`TENANT_TYPE_PHARMACY`): si la farmacia cuelga de otra clase de
+   * organización, esos datos son de otra entidad y servirlos como de esta
+   * farmacia sería afirmar algo falso. Lo que no está llega `null`.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización dueña de la farmacia.
+   */
+  private async resolveLegalProfile(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<PharmacyLegalProfile> {
+    const tenant = await this.readRepo.findTenant(em, tenantId);
+    if (
+      !tenant ||
+      tenant.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_PHARMACY
+    ) {
+      return NO_LEGAL_PROFILE;
+    }
+
+    const [documents, headquarters] = await Promise.all([
+      this.readRepo.findActiveAffiliationDocuments(em, tenant.id),
+      this.readRepo.findHeadquartersAddress(em, tenant.id, new Date()),
+    ]);
+    const concepts = await this.readRepo.findConcepts(
+      em,
+      unique([
+        tenant.legalEntityTypeConceptId,
+        ...documents.map((document) => document.documentTypeConceptId),
+      ]),
+    );
+    const conceptById = new Map(
+      concepts.map((concept) => [concept.id, concept]),
+    );
+
+    // Los documentos vienen del más nuevo al más viejo: ante dos NIT activos
+    // (una corrección cargada sin dar de baja el anterior) gana el último.
+    const taxDocument = documents.find(
+      (document) =>
+        conceptById.get(document.documentTypeConceptId)?.code ===
+        TAX_DOCUMENT_TYPE_CODE,
+    );
+    let taxId = nonBlank(taxDocument?.documentNumber);
+    if (taxId === null && taxDocument?.identifierId) {
+      const [identifier] = await this.readRepo.findIdentifiers(em, [
+        taxDocument.identifierId,
+      ]);
+      taxId = nonBlank(identifier?.value);
+    }
+
+    const latitude = coordinate(headquarters?.latitude);
+    const longitude = coordinate(headquarters?.longitude);
+    return {
+      taxId,
+      // La genérica `COMPANY` es la de las filas anteriores al diccionario de
+      // formas societarias: nadie la eligió, así que no se sirve como una.
+      companyType:
+        tenant.legalEntityTypeConceptId === CONCEPTS.LEGAL_ENTITY_COMPANY
+          ? null
+          : optionalConcept(conceptById, tenant.legalEntityTypeConceptId),
+      legalAddressText: headquarters ? addressText(headquarters) : null,
+      headquarters:
+        latitude !== null && longitude !== null
+          ? { latitude, longitude }
+          : null,
     };
   }
 
@@ -490,6 +570,29 @@ export class PharmacyReadService {
       pickupAvailable: site.pickupAvailable ?? null,
     };
   }
+}
+
+/** Código del tipo de documento de afiliación que lleva el NIT. */
+const TAX_DOCUMENT_TYPE_CODE = DOCUMENT_TYPE_CODE_BY_ROLE.TAX_IDENTIFIER_DOC;
+
+/** Los campos legales que el perfil suma sobre el item del directorio. */
+type PharmacyLegalProfile = Pick<
+  PharmacyDetailDto,
+  'taxId' | 'companyType' | 'legalAddressText' | 'headquarters'
+>;
+
+/** La ficha legal cuando no hay de dónde leerla: todo dicho `null`. */
+const NO_LEGAL_PROFILE: PharmacyLegalProfile = {
+  taxId: null,
+  companyType: null,
+  legalAddressText: null,
+  headquarters: null,
+};
+
+/** El texto recortado, o `null` si no queda nada. */
+function nonBlank(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
 }
 
 /** El nombre con que la farmacia se muestra: comercial, o la razón social. */

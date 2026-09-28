@@ -37,6 +37,11 @@ export {
   ReferralResponseDto,
   QualifyReferralDto,
   QualifyReferralResponseDto,
+  PromotionConceptDto,
+  MyPromotionDiscountDto,
+  MyPromotionCouponDto,
+  MyPromotionDto,
+  MyPromotionsResponseDto,
 } from './promotions.dto';
 export type {
   RewardMemberType,

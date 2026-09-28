@@ -11,6 +11,9 @@ import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
 // dónde vive un acceso compartido (`authz`).
 import { ProfilesModule } from '../profiles/profiles.module';
 import { AuthzModule } from '../authz/authz.module';
+// Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
+// `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
+import { CommonModule } from '../common/common.module';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
@@ -53,6 +56,7 @@ import {
     ]),
     ProfilesModule,
     AuthzModule,
+    CommonModule,
   ],
   controllers: [
     DiagnosticsSpecimensController,

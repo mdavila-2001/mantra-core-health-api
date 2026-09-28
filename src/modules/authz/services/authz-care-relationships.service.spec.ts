@@ -141,6 +141,22 @@ describe('AuthzCareRelationshipsService', () => {
       expect(rel.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
     });
 
+    it('una relación abierta (valid_to = null en la base) queda REVOKED con la vigencia cerrada, no EXPIRED', async () => {
+      // `null <= now` es verdadero: antes una relación sin fin se marcaba EXPIRED y
+      // su vigencia seguía abierta. Se encontró contra la base real (BR-20).
+      const d = build();
+      const rel: any = {
+        id: 'cr-abierta',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        validTo: null,
+        updatedAt: new Date(),
+      };
+      d.careRepo.findById.mockResolvedValue(rel);
+      await d.service.revokeCareRelationship('cr-abierta', actor);
+      expect(rel.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
+      expect(rel.validTo).toBeInstanceOf(Date);
+    });
+
     it('throws when the relationship does not exist', async () => {
       const d = build();
       d.careRepo.findById.mockResolvedValue(null);

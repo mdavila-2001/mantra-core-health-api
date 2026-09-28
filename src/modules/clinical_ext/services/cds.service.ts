@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+// BR-14 (CL-09): `checkInteractions` deja de persistir alertas (ver el
+// método). Los ids de la respuesta son efímeros, no de una fila guardada.
+import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -235,10 +238,20 @@ export class CdsService {
     });
   }
 
-  /** UC-18-04: detecta interacciones entre las sustancias y levanta alertas. */
+  /**
+   * UC-18-04: detecta interacciones entre las sustancias, antes de prescribir.
+   *
+   * BR-14 (CL-09) — D-BR14-03: **ya no persiste** ninguna fila en
+   * `clinical_ext.clinical_alerts`. Antes, cada llamada —incluida la que un
+   * clínico dispara sólo para ver si dos sustancias interactúan, sin llegar a
+   * prescribir— dejaba una alerta activa por cada par con interacción, aunque
+   * la receta se cancelara después: el chequeo previo ensuciaba la tabla de
+   * alertas del paciente con filas que no correspondían a nada prescrito.
+   * `evaluate` (UC-18-03) sigue siendo el único camino que persiste alertas.
+   */
   async checkInteractions(
     dto: CheckInteractionsDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<AlertBatchResponseDto> {
     this.logger.info(
       {
@@ -247,49 +260,30 @@ export class CdsService {
       },
       'Checking drug interactions',
     );
-    return this.em.transactional(async (tx) => {
-      const substances = dto.substanceConceptIds;
-      const now = new Date();
-      const alerts = [];
+    const substances = dto.substanceConceptIds;
+    const alerts: {
+      id: string;
+      alertTypeConceptId: string;
+      severityConceptId: string;
+    }[] = [];
 
-      for (let i = 0; i < substances.length; i++) {
-        for (let j = i + 1; j < substances.length; j++) {
-          const interaction = await this.interactionsRepo.findByPair(
-            tx,
-            substances[i],
-            substances[j],
-          );
-          if (!interaction) continue;
-          const alert = this.alertsRepo.create(tx, {
-            patientProfileId: dto.patientProfileId,
-            encounterId: dto.encounterId,
-            alertTypeConceptId: CEXT.ALERT_TYPE_DRUG_INTERACTION,
-            severityConceptId: interaction.severityConceptId,
-            sourceResourceType: 'medication_request',
-            sourceResourceId: dto.medicationRequestId,
-            triggerConceptId: CEXT.TRIGGER_CLINICAL_EVENT,
-            detailText: [interaction.mechanismText, interaction.managementText]
-              .filter(Boolean)
-              .join(' — '),
-            statusConceptId: CEXT.ALERT_ACTIVE,
-            detectedAt: now,
-            actorUserId: actor.id,
-          });
-          alerts.push(alert);
-        }
+    for (let i = 0; i < substances.length; i++) {
+      for (let j = i + 1; j < substances.length; j++) {
+        const interaction = await this.interactionsRepo.findByPair(
+          this.em,
+          substances[i],
+          substances[j],
+        );
+        if (!interaction) continue;
+        alerts.push({
+          id: randomUUID(),
+          alertTypeConceptId: CEXT.ALERT_TYPE_DRUG_INTERACTION,
+          severityConceptId: interaction.severityConceptId,
+        });
       }
-      await tx.flush();
+    }
 
-      return {
-        alerts: alerts.map((a) => ({
-          id: a.id,
-          alertTypeConceptId: a.alertTypeConceptId,
-          severityConceptId: a.severityConceptId,
-          ruleId: a.ruleId,
-        })),
-        count: alerts.length,
-      };
-    });
+    return { alerts, count: alerts.length };
   }
 
   /** Registra un par de interacción medicamentosa (dato de referencia para UC-18-04). */

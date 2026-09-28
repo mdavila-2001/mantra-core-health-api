@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { CareEpisodesRepository, EncountersRepository } from '../repositories';
 import {
+  AttachFileToEncounterDto,
   CheckInEncounterDto,
   CloseEncounterDto,
   EncounterResponseDto,
@@ -20,6 +21,14 @@ import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
 import { ClinicalReadService } from './clinical-read.service';
+// P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
+// calcado de `ProceduresService.attachFile`.
+import { FilesService } from '../../common/services';
+import {
+  OwnerType,
+  type FileLinkResponseDto,
+  type LinkedFilePageDto,
+} from '../../common/dto';
 
 /**
  * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
@@ -44,6 +53,7 @@ export class EncountersService {
    * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param filesService - Vincula archivos ya subidos al encuentro (P25).
    */
   constructor(
     private readonly em: EntityManager,
@@ -53,8 +63,70 @@ export class EncountersService {
     private readonly seal: EncounterSealService,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly filesService: FilesService,
   ) {
     this.logger.setContext(EncountersService.name);
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a este encuentro. 404 antes de
+   * autorizar; el paciente sale de la fila, nunca del cuerpo (MCH-007). Si el
+   * encuentro está cerrado y sellado, el vínculo no toca su contenido ni su
+   * hash: vive en `common.file_links`. La regla del sello sobre adjuntos
+   * posteriores es de BR-14 (CL-07) y no se decide acá.
+   */
+  async attachFile(
+    encounterId: string,
+    dto: AttachFileToEncounterDto,
+    actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    const encounter = await this.encountersRepo.findById(this.em, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    await this.clinicalRead.assertPuedeEscribirHistoria(
+      encounter.patientProfileId,
+      actor,
+    );
+    this.logger.info(
+      {
+        operation: 'clinical.encounter.attach_file',
+        encounterId,
+        fileId: dto.fileId,
+      },
+      'Attaching file to encounter',
+    );
+    return this.filesService.createLink(
+      dto.fileId,
+      { ownerType: OwnerType.ENCOUNTER, ownerId: encounter.id },
+      actor,
+    );
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de un encuentro, por la ruta clínica. 404
+   * antes de autorizar; listar es leer la historia (`assertPuedeLeerHistoria`).
+   */
+  async listAttachments(
+    encounterId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    const encounter = await this.encountersRepo.findById(this.em, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    await this.clinicalRead.assertPuedeLeerHistoria(
+      encounter.patientProfileId,
+      actor,
+    );
+    return this.filesService.listLinkedFilesOf(
+      OwnerType.ENCOUNTER,
+      encounter.id,
+    );
   }
 
   /** UC-08-02: abre (check-in) un encuentro con participantes y ubicación. */

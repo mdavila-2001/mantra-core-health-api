@@ -77,6 +77,23 @@ describe('resolveDataSources', () => {
       expect(sources.admin?.pool.max).toBe(2);
     });
 
+    it('trata las URL en blanco como ausentes, no como error', () => {
+      // Coolify materializa toda variable declarada en su panel dentro del
+      // contenedor aunque el operador la deje sin valor: llega como cadena
+      // vacía, no como variable inexistente. Sin este caso, un despliegue que
+      // nunca usó rutas separadas rompe en el arranque por una URL que nadie
+      // configuró.
+      const sources = resolveDataSources({
+        ...LEGACY,
+        POSTGRES_WRITE_URL: '',
+        POSTGRES_READ_URL: '',
+        POSTGRES_ADMIN_URL: '',
+      });
+
+      expect(sources.sharesConnection).toBe(true);
+      expect(sources.admin).toBeUndefined();
+    });
+
     it('hereda el pool de lectura del general y admite el suyo propio', () => {
       expect(
         resolveDataSources({ ...LEGACY, DB_POOL_MAX: '20' }).read.pool.max,

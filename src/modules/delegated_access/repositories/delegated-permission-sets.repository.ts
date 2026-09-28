@@ -62,6 +62,30 @@ export class DelegatedPermissionSetsRepository {
   }
 
   /**
+   * Página de sets de permisos delegados del tenant del actor, ordenada por
+   * `id` (keyset estable). CV-13: hasta ahora el hub `delegated-access` sólo
+   * podía publicar sets, nunca listarlos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del actor; nunca se lista el de otro tenant.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   */
+  findByTenantPage(
+    em: EntityManager,
+    tenantId: string,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<DelegatedPermissionSets[]> {
+    const where: Record<string, unknown> = { tenantId };
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(DelegatedPermissionSets, where, {
+      orderBy: { id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

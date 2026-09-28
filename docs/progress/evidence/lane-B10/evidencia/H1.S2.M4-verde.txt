@@ -1,0 +1,9 @@
+$ corepack yarn test --testPathPatterns="scheduling-catalog.dto"
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar acepta un cupo sembrado con id uuid5
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sigue aceptando ids uuid4
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) correr acepta un cupo sembrado con id uuid5
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) un texto que no es UUID sigue dando 400
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sin ningún cupo sigue dando 400
+Suites: 1 passed, 0 failed, 1 total
+Tests:  5 passed, 0 failed, 0 skipped, 5 total
+exit=0

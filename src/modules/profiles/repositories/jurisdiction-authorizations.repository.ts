@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { JurisdictionAuthorizations } from '../entities';
 import { createdBy } from '../../../common';
@@ -71,6 +72,23 @@ export class JurisdictionAuthorizationsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `JurisdictionAuthorizations`.
    */
+  /** La matrícula con la fila bloqueada: corregir o retirar no pisa a otra escritura. */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<JurisdictionAuthorizations | null> {
+    return em.findOne(
+      JurisdictionAuthorizations,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Borrado físico: la regla de cuándo se puede vive en el servicio. */
+  remove(em: EntityManager, row: JurisdictionAuthorizations): void {
+    em.remove(row);
+  }
+
   /**
    * Matrículas de un profesional.
    *

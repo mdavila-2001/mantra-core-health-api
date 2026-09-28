@@ -1,0 +1,5 @@
+$ corepack yarn test --testPathPatterns="forms|surveys"   # tras H3.S2
+Test Suites: 12 passed, 12 total
+Tests:       207 passed, 207 total
+Time:        7.153 s
+exit=0

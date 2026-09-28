@@ -17,3 +17,4 @@ export * from './create-resource-scope-grant.dto';
 export * from './invalidate-cache.dto';
 export * from './evaluate-decision.dto';
 export * from './authz-responses.dto';
+export * from './authz-me.dto';

@@ -1,8 +1,8 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -107,7 +107,7 @@ const CONVERSACIONES_POR_PRESENCIA = 100;
 @Injectable()
 @WebSocketGateway({ cors: { origin: false } })
 export class CommunityMessagingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayDisconnect
 {
   @WebSocketServer()
   private readonly server!: Server;
@@ -134,16 +134,40 @@ export class CommunityMessagingGateway
   }
 
   /**
-   * Autentica al conectar. Un socket sin token válido nunca llega a poder
-   * unirse a nada — se corta acá, no en cada mensaje.
+   * Autentica **antes** de que exista la conexión, como middleware de
+   * socket.io del namespace (no como `OnGatewayConnection.handleConnection`).
+   *
+   * ## Por qué no alcanza con `handleConnection`
+   *
+   * Nest despacha los `@SubscribeMessage` de un socket apenas socket.io emite
+   * su evento `connection` — no espera a que `handleConnection` (async)
+   * termine. Con la autenticación ahí, un cliente que emitía `join:inbox` en
+   * el mismo tick que el `connect` del lado navegador podía ganarle la
+   * carrera a `await this.wsAuth.authenticate(client)`: el handler corría con
+   * `client.data.user` todavía `undefined`, `usuarioDe()` devolvía nada, y
+   * `handleJoinInbox`/`handleJoinConversation` retornaban en silencio sin
+   * emitir `error` ni loguear nada — el cliente se quedaba esperando un
+   * evento que nunca iba a llegar. Se reprodujo así contra Postgres real
+   * (`community-realtime-chat.int-spec.ts`, intermitente según la carga
+   * concurrente de la corrida) y nunca contra el `EntityManager` simulado:
+   * el doble de `wsAuth.authenticate` resuelve sincrónicamente.
+   *
+   * El middleware de namespace corre durante el *handshake*, antes de que
+   * exista el socket conectado y antes de que socket.io pueda despachar
+   * ningún mensaje suyo: rechazarlo acá dispara `connect_error` del lado
+   * cliente en vez de un `connect` seguido de `disconnect`, pero
+   * `community-realtime-chat.int-spec.ts` ya contemplaba las dos formas.
    */
-  async handleConnection(client: Socket): Promise<void> {
-    try {
-      const user = await this.wsAuth.authenticate(client);
-      (client.data as GatewaySocketData).user = user;
-    } catch {
-      client.disconnect(true);
-    }
+  afterInit(server: Server): void {
+    server.use((client: Socket, next: (err?: Error) => void) => {
+      this.wsAuth
+        .authenticate(client)
+        .then((user) => {
+          (client.data as GatewaySocketData).user = user;
+          next();
+        })
+        .catch(() => next(new Error('Token inválido o expirado')));
+    });
   }
 
   /**

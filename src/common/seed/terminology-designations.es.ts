@@ -4,6 +4,7 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -54,7 +55,7 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  *
  * ## Cobertura, dicha en voz alta
  *
- * Cubre los **498 conceptos que componen los 65 conjuntos de valores** de
+ * Cubre los **526 conceptos que componen los 73 conjuntos de valores** de
  * `DYNAMIC_ENUM_CATALOG` — es decir, todo lo que el glosario puede llegar a
  * mostrar hoy navegando por etiquetas. El catálogo interno completo es mayor
  * (estados de auditoría, tipos de evento, cosas que ningún conjunto de valores
@@ -72,7 +73,10 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  * dos peldaños intermedios de la escalera de verificación) entraron igual. Y los
  * ocho de la consola de planes y coberturas (las dos monedas del plan y las seis
  * categorías de cobertura) también: llegaron acá porque su conjunto de valores
- * se publicó sin traducir y la prueba lo delató.
+ * se publicó sin traducir y la prueba lo delató. Lo mismo los doce del alta de
+ * laboratorios e imagenología (los dos tipos de unidad diagnóstica, las siete
+ * modalidades y el país de la organización) y de la visibilidad del documento
+ * del expediente para el paciente.
  */
 
 /** El nombre y la explicación de un concepto en castellano. */
@@ -4144,6 +4148,114 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Centro de diagnóstico',
       definition:
         'Centro de diagnóstico por imagen o de otro estudio que presta el servicio de la campaña.',
+    },
+  ],
+
+  // --- Unidades diagnósticas: tipo de unidad y modalidad ------------------
+  // Lo que declara el alta de un laboratorio o de un centro de imagenología.
+  // Las modalidades siguen la nomenclatura de radiología en castellano (la de
+  // la edición española de SNOMED CT para los procedimientos de imagen).
+  [
+    DUNIT.UNIT_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition:
+        'Unidad que analiza muestras del paciente —sangre, orina, otros fluidos o tejidos— y entrega resultados de laboratorio.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_IMAGING,
+    {
+      display: 'Centro de diagnóstico por imágenes',
+      definition:
+        'Unidad que obtiene e informa estudios por imagen del cuerpo, como radiografías, ecografías, tomografías o resonancias.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_LABORATORY,
+    {
+      display: 'Laboratorio',
+      definition:
+        'Estudios que se hacen sobre una muestra del paciente en el laboratorio, no sobre imágenes del cuerpo.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_XRAY,
+    {
+      display: 'Radiografía',
+      definition:
+        'Imagen obtenida con rayos X. Es la forma más habitual de ver huesos, tórax y abdomen; usa radiación ionizante en dosis baja.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_ULTRASOUND,
+    {
+      display: 'Ecografía',
+      definition:
+        'Imagen obtenida con ultrasonido. No usa radiación, por eso se prefiere en el embarazo y para ver órganos blandos del abdomen, el cuello o la pelvis.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_CT,
+    {
+      display: 'Tomografía computarizada',
+      definition:
+        'Estudio que combina muchas imágenes de rayos X para mostrar el cuerpo en cortes. Da más detalle que una radiografía y usa más radiación.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MRI,
+    {
+      display: 'Resonancia magnética',
+      definition:
+        'Estudio que obtiene imágenes con un campo magnético y ondas de radio, sin radiación. Es la de elección para cerebro, médula, articulaciones y tejidos blandos.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MAMMOGRAPHY,
+    {
+      display: 'Mamografía',
+      definition:
+        'Radiografía de la mama con dosis baja de rayos X. Se usa para el tamizaje y el diagnóstico del cáncer de mama.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_BONE_DENSITOMETRY,
+    {
+      display: 'Densitometría ósea',
+      definition:
+        'Estudio que mide la densidad mineral de los huesos, habitualmente de cadera y columna. Sirve para diagnosticar osteoporosis y estimar el riesgo de fractura.',
+    },
+  ],
+
+  // --- Organizaciones: país ----------------------------------------------
+  // ISO 3166-1. El nombre ya estaba en castellano; se añade la definición.
+  [
+    CONCEPTS.COUNTRY_BO,
+    {
+      display: 'Bolivia',
+      definition:
+        'Estado Plurinacional de Bolivia (código ISO BO). Es el país donde la organización está registrada y opera.',
+    },
+  ],
+
+  // --- Expediente: quién puede ver el documento ---------------------------
+  // Vocabulario del propio sistema. La definición se escribe para quien
+  // registra el documento: qué pasa con la historia del paciente al elegirla.
+  [
+    CHART.VISIBILITY_PATIENT_VISIBLE,
+    {
+      display: 'Visible para el paciente',
+      definition:
+        'El paciente puede ver este documento en su propia historia clínica desde el portal.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PROVIDER_ONLY,
+    {
+      display: 'Solo para el equipo de salud',
+      definition:
+        'El documento queda en la historia clínica pero el paciente no lo ve en el portal; solo lo consultan los profesionales autorizados.',
     },
   ],
 ];

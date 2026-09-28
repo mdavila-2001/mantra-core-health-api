@@ -8,6 +8,8 @@ import {
   ChartTemplatesController,
   ChartReadController,
   ChartEncountersController,
+  // BR-15 (CL-30/CL-31/CL-36): autoservicio del titular.
+  ChartMeController,
 } from './controllers';
 import {
   ChartNotesService,
@@ -17,6 +19,7 @@ import {
   ChartReadService,
   ChartNotesReadService,
   EncounterPdfService,
+  ChartMeReadService,
 } from './services';
 import {
   ClinicalNotesRepository,
@@ -64,6 +67,11 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
 // sale. Clase sin estado de `forms`, provista suelta (no se importa
 // `FormsModule` entero).
 import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
+// BR-15 (N-04): toda lectura/descarga de `charts/me` deja rastro en
+// `audit.data_access_log`. Clase sin estado por `EntityManager`, mismo
+// criterio que ya usa `ClinicalModule` (no se importa `AuditModule` entero:
+// no exporta este repositorio).
+import { DataAccessLogRepository } from '../audit/repositories';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -84,6 +92,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ChartTemplatesController,
     ChartReadController,
     ChartEncountersController,
+    ChartMeController,
   ],
   providers: [
     // Repositorios
@@ -98,6 +107,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     HealthPractitionerProfilesRepository,
     PersonsRepository,
     FormInstanceOriginValidator,
+    DataAccessLogRepository,
     // Servicios
     ChartNotesService,
     ChartDocumentsService,
@@ -106,6 +116,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ChartReadService,
     ChartNotesReadService,
     EncounterPdfService,
+    ChartMeReadService,
   ],
 })
 export class ChartModule {}
