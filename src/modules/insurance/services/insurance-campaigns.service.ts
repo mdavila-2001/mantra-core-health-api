@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { TransactionPropagation } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   ConflictException,
@@ -565,14 +566,20 @@ export class InsuranceCampaignsService {
     tenantId?: string,
     entityId?: string,
   ): Promise<void> {
-    await this.em.transactional((tx) =>
-      this.auditTrail.record(tx, actor, {
-        action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
-        entity: 'insurance_campaign',
-        entityId,
-        tenantId,
-        success: false,
-      }),
+    // `REQUIRES_NEW` y no el `required` por defecto: desde un camino que ya está
+    // dentro de `this.em.transactional` (cambiar estado, editar) la llamada se
+    // unía a la transacción del llamador, y el rollback de su 403 se llevaba la
+    // fila de auditoría.
+    await this.em.transactional(
+      (tx) =>
+        this.auditTrail.record(tx, actor, {
+          action: 'INSURANCE_CAMPAIGN_ACCESS_DENIED',
+          entity: 'insurance_campaign',
+          entityId,
+          tenantId,
+          success: false,
+        }),
+      { propagation: TransactionPropagation.REQUIRES_NEW },
     );
   }
 
