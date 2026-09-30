@@ -19,7 +19,9 @@ import { join } from 'node:path';
 import {
   HttpClient, cacheDir, ndjsonPath, nowIso, progressLogger, writeJson, writeNdjson,
 } from './lib/glossary-es/common.mjs';
-import { CODE_PROPERTIES, COMMONS_API, SPARQL_ENDPOINT, commonsImageInfo, sparqlBindings, sparqlFor } from './lib/glossary-es/wikidata.mjs';
+import {
+  CODE_PROPERTIES, COMMONS_API, EXPECTED_ENTITY_LABELS, SPARQL_ENDPOINT, assertEntityLabels, commonsImageInfo, entityLabelsUrl, sparqlBindings, sparqlFor,
+} from './lib/glossary-es/wikidata.mjs';
 
 const http = new HttpClient({ concurrency: 1, minDelayMs: 1000 });
 const CACHE = cacheDir('wikidata');
@@ -28,6 +30,9 @@ async function main() {
   const t0 = Date.now();
   const retrievedAt = nowIso();
   console.log('=== Wikidata + Commons → imágenes del glosario ===');
+
+  // Los ids de propiedad se contrastan con su etiqueta en Wikidata antes de consultar.
+  assertEntityLabels(await http.getJsonCached(entityLabelsUrl(Object.keys(EXPECTED_ENTITY_LABELS)), join(CACHE, 'entity-labels.json')));
 
   const queries = [
     ...Object.keys(CODE_PROPERTIES).map((p) => [p, 'P18']),

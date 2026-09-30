@@ -171,3 +171,18 @@ test('plan de carga: membresías a los value sets del glosario con los ids del b
   assert.ok(!props.includes('glossary-clinical-definition'), 'sin definición no se escribe la propiedad');
   assert.ok(propertiesFor(row).every((p) => p.value !== null && p.value !== undefined), 'value_json NOT NULL');
 });
+
+test('Anatomía Wikidata: verificación de dominio y de ids de propiedad', async () => {
+  const { anatomyRow } = await import('../lib/glossary-es/wikidata-anatomy.mjs');
+  const { assertEntityLabels, reachesClass } = await import('../lib/glossary-es/wikidata.mjs');
+  const base = { q: 'Q3880559', esLabel: 'Canon EF 100-400mm', esDesc: null, enLabel: null, imgs: new Set(), aliases: new Set(), ta98: new Set(), ta2: new Set(['4.5']) };
+  assert.throws(() => anatomyRow({ ...base, anatomyClassVerified: false }, new Map(), 'x'), /Fuera de dominio: Q3880559/);
+  const ok = anatomyRow({ ...base, q: 'Q9612', esLabel: 'fémur', anatomyClassVerified: true }, new Map(), 'x');
+  assert.equal(ok.categoryKey, 'anatomy');
+  // Recorrido de clases con ciclo: lente → zoom lens → lens (no llega); hueso → … → estructura anatómica.
+  const parents = new Map([['Q220310', ['Q192234']], ['Q192234', ['Q220310']], ['Q265868', ['Q4936952']]]);
+  assert.equal(reachesClass(['Q220310'], 'Q4936952', parents), false);
+  assert.equal(reachesClass(['Q265868'], 'Q4936952', parents), true);
+  // P7863 es «aperture», no TA2: la verificación de etiquetas lo detecta.
+  assert.throws(() => assertEntityLabels({ entities: { P7863: { labels: { en: { value: 'aperture' } } } } }, { P7863: 'TA2 ID' }), /P7863: esperado «TA2 ID», Wikidata dice «aperture»/);
+});

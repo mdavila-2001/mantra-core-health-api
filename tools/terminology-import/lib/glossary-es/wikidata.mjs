@@ -11,6 +11,69 @@ import { htmlToText } from './common.mjs';
 
 export const SPARQL_ENDPOINT = 'https://query.wikidata.org/sparql';
 export const COMMONS_API = 'https://commons.wikimedia.org/w/api.php';
+export const WIKIDATA_API = 'https://www.wikidata.org/w/api.php';
+
+/**
+ * Etiqueta inglesa ESPERADA de cada propiedad/clase de Wikidata que usan los
+ * importadores. Se contrasta contra la API en cada corrida
+ * (`assertEntityLabels`): un id equivocado (p. ej. P7863, que es «aperture» y no
+ * el identificador TA2) aborta la corrida en vez de colar datos fuera de dominio.
+ */
+export const EXPECTED_ENTITY_LABELS = {
+  P1323: 'Terminologia Anatomica 98 ID',
+  P7173: 'TA2 ID',
+  P4229: 'ICD-10-CM',
+  P494: 'ICD-10 ID',
+  P486: 'MeSH descriptor ID',
+  P267: 'ATC code',
+  P4338: 'LOINC ID',
+  P18: 'image',
+  P117: 'chemical structure',
+  P31: 'instance of',
+  P279: 'subclass of',
+  Q4936952: 'anatomical structure',
+};
+
+export function entityLabelsUrl(ids) {
+  return `${WIKIDATA_API}?action=wbgetentities&format=json&props=labels&languages=en&ids=${ids.join('|')}`;
+}
+
+/** Lanza si alguna entidad no tiene la etiqueta inglesa esperada. */
+export function assertEntityLabels(json, expected = EXPECTED_ENTITY_LABELS) {
+  const bad = [];
+  for (const [id, label] of Object.entries(expected)) {
+    const got = json?.entities?.[id]?.labels?.en?.value;
+    if (got !== label) bad.push(`${id}: esperado «${label}», Wikidata dice «${got ?? '—'}»`);
+  }
+  if (bad.length) throw new Error(`Ids de Wikidata que no son lo que se cree: ${bad.join('; ')}`);
+}
+
+/** `wbgetentities` (claims P279) → mapa clase → superclases directas. */
+export function parentClasses(json) {
+  const out = new Map();
+  for (const [id, ent] of Object.entries(json?.entities ?? {})) {
+    const parents = (ent.claims?.P279 ?? []).map((c) => c.mainsnak?.datavalue?.value?.id).filter(Boolean);
+    out.set(id, parents);
+  }
+  return out;
+}
+
+/**
+ * ¿Alguna de `startClasses` llega a `target` subiendo por P279? `parentsOf` es
+ * el mapa completo ya cargado. Recorrido en anchura con visitados (hay ciclos).
+ */
+export function reachesClass(startClasses, target, parentsOf) {
+  const seen = new Set();
+  const queue = [...startClasses];
+  while (queue.length) {
+    const c = queue.shift();
+    if (c === target) return true;
+    if (seen.has(c)) continue;
+    seen.add(c);
+    for (const p of parentsOf.get(c) ?? []) queue.push(p);
+  }
+  return false;
+}
 
 /** Propiedades de código que se consultan, con su nombre para la procedencia. */
 export const CODE_PROPERTIES = {
@@ -49,7 +112,9 @@ export function sparqlBindings(json, prop, imgProp) {
   }));
 }
 
-const FREE_LICENSE = /^(CC0|CC BY(-SA)?( \d(\.\d)?)?|CC-BY(-SA)?-\d(\.\d)?|Public domain|PD|GFDL|Attribution|FAL|Beerware|ODbL)/i;
+// Licencias libres que Commons acepta (https://commons.wikimedia.org/wiki/Commons:Licensing);
+// se valida igual y lo que no case (p. ej. licencia vacía) se descarta y se cuenta.
+const FREE_LICENSE = /^(CC0|CC BY(-SA)?( \d(\.\d)?)?|CC-BY(-SA)?-\d(\.\d)?|CC SA|Public domain|PD|GFDL|L?GPL|Attribution|FAL|Beerware|ODbL|No restrictions|Copyrighted free use|Licence Ouverte|OGL|CeCILL|Apache License)/i;
 
 /**
  * Página `imageinfo` de la API de Commons → mapa archivo → atribución.
