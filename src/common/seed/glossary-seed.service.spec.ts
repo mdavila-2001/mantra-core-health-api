@@ -10,41 +10,82 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { GlossarySeedService } from './glossary-seed.service';
 import { GLOSSARY_TERMS } from './glossary-terms.catalog';
-import { GLOSSARY_TAXONOMY } from './glossary-taxonomy';
+import {
+  GLOSSARY_TAXONOMY,
+  glossaryPreferredDesignationId,
+  glossaryPropertyId,
+  glossaryRelationshipId,
+  glossarySynonymDesignationId,
+  glossaryTermConceptId,
+  glossaryValueSetMemberId,
+  glossaryValueSetVersionId,
+} from './glossary-taxonomy';
+import {
+  GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  glossaryRelationTypeConceptId,
+} from '../../modules/terminology/glossary.constants';
+
+/** Filas por entidad y por id: el estado de la base de prueba. */
+type Store = Map<string, Map<string, any>>;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
  * patrón que `dynamic-enum-seed.service.spec.ts`: un `em` en memoria que
- * responde `find`/`create`/`flush` sin tocar una base real.
+ * responde `find`/`create`/`remove`/`flush` sin tocar una base real. Desde la
+ * reconciliación guarda las filas enteras, porque `find` ya no pregunta sólo
+ * por ids: compara contenido.
  *
- * @param existing - Identificadores que la base ya tiene.
- * @returns Servicio, filas creadas y cuántas veces se flusheó.
+ * @param initial - Filas que la base ya tiene, por entidad.
+ * @returns Servicio, filas creadas y quitadas, y el estado final.
  */
-function build(existing: Set<string> = new Set()) {
+function build(initial: Store = new Map()) {
+  const store: Store = new Map(
+    [...initial].map(([entity, rows]) => [
+      entity,
+      new Map([...rows].map(([id, row]) => [id, { ...row }])),
+    ]),
+  );
+  const table = (entity: string): Map<string, any> => {
+    if (!store.has(entity)) store.set(entity, new Map());
+    return store.get(entity)!;
+  };
+  const matches = (row: any, where: Record<string, any>): boolean =>
+    Object.entries(where).every(([key, value]) =>
+      value !== null && typeof value === 'object' && '$in' in value
+        ? (value.$in as unknown[]).includes(row[key])
+        : row[key] === value,
+    );
+
   const created: { entity: string; data: any }[] = [];
+  const removed: { entity: string; data: any }[] = [];
   let flushes = 0;
 
   const em = {
-    find: mockFn((entity: any, where: any) => {
-      const ids: string[] = where?.id?.$in ?? [];
-      return Promise.resolve(
-        ids.filter((id) => existing.has(id)).map((id) => ({ id })),
-      );
-    }),
+    find: mockFn((entity: any, where: any) =>
+      Promise.resolve(
+        [...table(entity.name).values()].filter((row) => matches(row, where)),
+      ),
+    ),
     create: mockFn((entity: any, data: any) => {
       created.push({ entity: entity.name, data });
+      table(entity.name).set(data.id, data);
       return data;
+    }),
+    remove: mockFn((row: any) => {
+      for (const [entity, rows] of store) {
+        if (rows.get(row.id) === row) {
+          rows.delete(row.id);
+          removed.push({ entity, data: row });
+        }
+      }
     }),
     flush: mockFn(() => {
       flushes += 1;
       return Promise.resolve();
     }),
     // `backfillTermCodeSystem` (FND-25-03) es un `UPDATE ... WHERE` de una
-    // sola sentencia: este doble no modela filas persistidas fuera de
-    // `created`, así que no hay nada que backfillear en este mundo de
-    // prueba — 0 es la respuesta correcta en los dos escenarios que cubre
-    // este archivo (base vacía, y reseed sobre lo que la propia corrida
-    // anterior ya sembró bajo el code system nuevo).
+    // sola sentencia: todo lo que siembra este doble ya cuelga del code
+    // system propio, así que no hay nada que backfillear — 0.
     nativeUpdate: mockFn(() => Promise.resolve(0)),
   };
   const orm = { em: { fork: mockFn(() => em) } };
@@ -54,13 +95,24 @@ function build(existing: Set<string> = new Set()) {
   return {
     service,
     created,
+    removed,
+    store,
     /** Filas creadas para una entidad concreta. */
     rowsOf: (entity: string) =>
       created.filter((row) => row.entity === entity).map((row) => row.data),
+    /** Filas que la base tiene ahora para una entidad. */
+    rowsIn: (entity: string) => [...table(entity).values()],
     /** Cuántas veces se flusheó. */
     flushes: () => flushes,
     logger,
   };
+}
+
+/** Una base ya sembrada con el catálogo actual. */
+async function seeded(): Promise<Store> {
+  const g = build();
+  await g.service.run();
+  return g.store;
 }
 
 /** Cuántas relaciones declara el catálogo curado (contando la huérfana conocida). */
@@ -172,19 +224,13 @@ describe('GlossarySeedService', () => {
   });
 
   it('re-sembrar sobre una base ya poblada no duplica ninguna fila (reseed idempotente)', async () => {
-    // Se siembra una vez para recoger los identificadores deterministas y se
-    // vuelve a correr declarándolos como existentes — mismo patrón que
-    // `DynamicEnumSeedService`.
-    const primera = build();
-    await primera.service.run();
-    const yaExisten = new Set<string>(
-      primera.created.map((row) => row.data.id as string),
-    );
-
-    const segunda = build(yaExisten);
+    // Se siembra una vez y se vuelve a correr sobre lo que quedó — mismo
+    // patrón que `DynamicEnumSeedService`.
+    const segunda = build(await seeded());
     const result = await segunda.service.run();
 
     expect(segunda.created).toEqual([]);
+    expect(segunda.removed).toEqual([]);
     expect(result).toEqual({
       valueSets: 0,
       terms: 0,
@@ -194,6 +240,8 @@ describe('GlossarySeedService', () => {
       relationships: 0,
       orphanRelationships: 1,
       codeSystemBackfilled: 0,
+      updated: 0,
+      removed: 0,
     });
   });
 
@@ -220,5 +268,206 @@ describe('GlossarySeedService', () => {
       }),
       expect.any(String),
     );
+  });
+
+  describe('reconciliación de una base sembrada con el catálogo anterior', () => {
+    const PT = 'tiempo-de-protrombina';
+    const HEMOGRAMA = 'hemograma-completo';
+
+    /**
+     * La base tal como la dejó el catálogo de antes de la auditoría del
+     * 2026-09-30: hemograma en «Pruebas diagnósticas», «Hipertermia» como
+     * sinónimo de fiebre, el INR como sinónimo del tiempo de protrombina, su
+     * nombre en inglés viejo, el resumen viejo de la warfarina y una relación
+     * entre curados que el catálogo ya no declara.
+     */
+    async function baseAnterior(): Promise<Store> {
+      const store = await seeded();
+      const rows = (entity: string) => store.get(entity)!;
+      const put = (entity: string, row: any) => rows(entity).set(row.id, row);
+
+      const hemograma = glossaryTermConceptId(HEMOGRAMA);
+      rows('ValueSetMembers').delete(
+        glossaryValueSetMemberId('glossary-category-lab', hemograma),
+      );
+      put('ValueSetMembers', {
+        id: glossaryValueSetMemberId(
+          'glossary-category-diagnostic-test',
+          hemograma,
+        ),
+        valueSetVersionId: glossaryValueSetVersionId(
+          'glossary-category-diagnostic-test',
+        ),
+        conceptId: hemograma,
+      });
+
+      put('ConceptDesignations', {
+        id: glossarySynonymDesignationId('fiebre', 1),
+        conceptId: glossaryTermConceptId('fiebre'),
+        value: 'Hipertermia',
+      });
+
+      rows('CatalogConcepts').get(glossaryTermConceptId(PT)).display =
+        'Prothrombin time (INR)';
+      rows('ConceptDesignations').get(
+        glossarySynonymDesignationId(PT, 0),
+      ).value = 'INR';
+      put('ConceptDesignations', {
+        id: glossarySynonymDesignationId(PT, 1),
+        conceptId: glossaryTermConceptId(PT),
+        value: 'TP',
+      });
+
+      rows('ConceptProperties').get(
+        glossaryPropertyId('warfarina', GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE),
+      ).valueJson = {
+        es: 'Es un medicamento que hace la sangre más líquida para evitar coágulos.',
+      };
+
+      put('ConceptRelationships', {
+        id: glossaryRelationshipId('dialisis', 'RELATED_TERM', 'corazon'),
+        sourceConceptId: glossaryTermConceptId('dialisis'),
+        targetConceptId: glossaryTermConceptId('corazon'),
+        relationshipTypeConceptId:
+          glossaryRelationTypeConceptId('RELATED_TERM'),
+      });
+      return store;
+    }
+
+    it('mueve la categoría, corrige textos y quita sinónimos y relaciones que ya no van', async () => {
+      const g = build(await baseAnterior());
+
+      const result = await g.service.run();
+
+      const hemograma = glossaryTermConceptId(HEMOGRAMA);
+      const categorias = g
+        .rowsIn('ValueSetMembers')
+        .filter(
+          (m) =>
+            m.conceptId === hemograma &&
+            [
+              glossaryValueSetVersionId('glossary-category-lab'),
+              glossaryValueSetVersionId('glossary-category-diagnostic-test'),
+            ].includes(m.valueSetVersionId),
+        )
+        .map((m) => m.valueSetVersionId);
+      expect(categorias).toEqual([
+        glossaryValueSetVersionId('glossary-category-lab'),
+      ]);
+
+      const designacion = (id: string) =>
+        g.rowsIn('ConceptDesignations').find((d) => d.id === id);
+      expect(
+        designacion(glossarySynonymDesignationId('fiebre', 1)),
+      ).toBeUndefined();
+      expect(designacion(glossarySynonymDesignationId(PT, 0))?.value).toBe(
+        'TP',
+      );
+      expect(designacion(glossarySynonymDesignationId(PT, 1))).toBeUndefined();
+
+      expect(
+        g
+          .rowsIn('CatalogConcepts')
+          .find((c) => c.id === glossaryTermConceptId(PT))?.display,
+      ).toBe('Prothrombin time (PT)');
+      expect(
+        g
+          .rowsIn('ConceptProperties')
+          .find(
+            (p) =>
+              p.id ===
+              glossaryPropertyId(
+                'warfarina',
+                GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+              ),
+          )?.valueJson.es,
+      ).toContain('tarde más en coagular');
+
+      expect(
+        g
+          .rowsIn('ConceptRelationships')
+          .some(
+            (r) =>
+              r.id ===
+              glossaryRelationshipId('dialisis', 'RELATED_TERM', 'corazon'),
+          ),
+      ).toBe(false);
+
+      // 1 membresía nueva (lab); 3 filas actualizadas (display, sinónimo,
+      // resumen); 4 quitadas (categoría vieja, 2 sinónimos, 1 relación).
+      expect(result.memberships).toBe(1);
+      expect(result.updated).toBe(3);
+      expect(result.removed).toBe(4);
+    });
+
+    it('una segunda corrida sobre la base reconciliada no escribe nada', async () => {
+      const primera = build(await baseAnterior());
+      await primera.service.run();
+
+      const segunda = build(primera.store);
+      const result = await segunda.service.run();
+
+      expect(segunda.created).toEqual([]);
+      expect(segunda.removed).toEqual([]);
+      expect(result.updated).toBe(0);
+      expect(result.removed).toBe(0);
+    });
+
+    it('no toca filas ajenas colgadas de un término curado', async () => {
+      const store = await seeded();
+      const fiebre = glossaryTermConceptId('fiebre');
+      const ajenas: [string, any][] = [
+        [
+          'ConceptDesignations',
+          { id: 'designacion-ajena', conceptId: fiebre, value: 'Calentura' },
+        ],
+        [
+          'ConceptProperties',
+          {
+            id: 'propiedad-ajena',
+            conceptId: fiebre,
+            propertyCode: 'nota-local',
+            valueJson: { es: 'x' },
+          },
+        ],
+        [
+          'ValueSetMembers',
+          {
+            id: 'membresia-ajena',
+            conceptId: fiebre,
+            valueSetVersionId: 'version-de-otro-value-set',
+          },
+        ],
+        [
+          'ConceptRelationships',
+          {
+            id: 'relacion-ajena',
+            sourceConceptId: fiebre,
+            targetConceptId: glossaryTermConceptId('corazon'),
+            relationshipTypeConceptId:
+              glossaryRelationTypeConceptId('RELATED_TERM'),
+          },
+        ],
+        [
+          'ConceptDesignations',
+          {
+            // Id fuera del espacio que este servicio genera para la preferida.
+            id: `${glossaryPreferredDesignationId('fiebre')}-copia`,
+            conceptId: fiebre,
+            value: 'Fiebre (copia)',
+          },
+        ],
+      ];
+      for (const [entity, row] of ajenas) store.get(entity)!.set(row.id, row);
+
+      const g = build(store);
+      const result = await g.service.run();
+
+      for (const [entity, row] of ajenas) {
+        expect(g.rowsIn(entity).find((r) => r.id === row.id)).toEqual(row);
+      }
+      expect(result.updated).toBe(0);
+      expect(result.removed).toBe(0);
+    });
   });
 });
