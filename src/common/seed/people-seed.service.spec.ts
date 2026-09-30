@@ -77,6 +77,12 @@ describe('PeopleSeedService', () => {
     expect(resultado.reason).toBe('not-configured');
   });
 
+  it('apagado y sin ruta explícita, no evalúa la ruta por defecto (en ESM no hay __dirname)', async () => {
+    const { service } = build();
+    const resultado = await service.run(false, '12345678');
+    expect(resultado.reason).toBe('not-configured');
+  });
+
   it('si no encuentra el padrón, lo dice y no falla', async () => {
     const { service } = build();
     const resultado = await service.run(true, '12345678', '/no/existe');
