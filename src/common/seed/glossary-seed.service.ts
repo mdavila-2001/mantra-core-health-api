@@ -65,8 +65,8 @@ function glossaryConceptCode(slug: string): string {
 }
 
 /**
- * Materializa el glosario médico curado (Carril 03): la taxonomía (27 value
- * sets — 11 categorías, 15 etiquetas, 1 paraguas) y los 64 términos de
+ * Materializa el glosario médico curado (Carril 03): la taxonomía (29 value
+ * sets — 12 categorías, 16 etiquetas, 1 paraguas) y los 69 términos de
  * `GLOSSARY_TERMS`, con sus designaciones, propiedades, membresías y
  * relaciones tipadas.
  *

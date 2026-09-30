@@ -9,7 +9,7 @@ import {
 
 /**
  * La taxonomía del glosario médico: 12 categorías (pertenencia exclusiva, una
- * por término — la duodécima, `other`, se sumó en FND-25-01), 15 etiquetas
+ * por término — la duodécima, `other`, se sumó en FND-25-01), 16 etiquetas
  * (N:N) y el value set paraguas que marca «esto es un término del glosario»
  * dentro de la tabla compartida de conceptos.
  *
@@ -125,7 +125,13 @@ export const GLOSSARY_CATEGORIES: readonly GlossaryTaxonomyEntry[] = [
   },
 ];
 
-/** Las 15 etiquetas del glosario. Un término puede llevar 0..N. */
+/**
+ * Las 16 etiquetas del glosario. Un término puede llevar 0..N.
+ *
+ * `urologic` se sumó el 2026-09-30 (auditoría del glosario): la próstata, el
+ * testículo y la función eréctil no son riñón, y colgarlos de `renal` mezclaba
+ * dos especialidades en un mismo filtro.
+ */
 export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
   { key: 'urgency', internalCode: 'glossary-tag-urgency', name: 'Urgencia' },
   { key: 'chronic', internalCode: 'glossary-tag-chronic', name: 'Crónico' },
@@ -170,6 +176,11 @@ export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
     name: 'Digestivo',
   },
   { key: 'renal', internalCode: 'glossary-tag-renal', name: 'Renal' },
+  {
+    key: 'urologic',
+    internalCode: 'glossary-tag-urologic',
+    name: 'Urológico',
+  },
   {
     key: 'dermatologic',
     internalCode: 'glossary-tag-dermatologic',
