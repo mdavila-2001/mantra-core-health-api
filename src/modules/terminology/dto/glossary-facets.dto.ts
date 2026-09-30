@@ -41,6 +41,13 @@ export class GlossaryFacetCategoryDto {
   @ApiProperty()
   count!: number;
 
+  /**
+   * Cuántos de ellos tienen nombre en castellano. Una categoría puede sumar
+   * miles de nombres oficiales en inglés: el total solo engaña.
+   */
+  @ApiProperty()
+  translatedCount!: number;
+
   /** Etiquetas que llevan sus términos, de la más frecuente a la menos. */
   @ApiProperty({ type: () => [GlossaryFacetTagDto] })
   tags!: GlossaryFacetTagDto[];

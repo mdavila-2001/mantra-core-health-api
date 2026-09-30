@@ -274,6 +274,13 @@ export class CatalogConceptsRepository {
    * corte salen de la misma consulta, así que la página 7 es de verdad lo que
    * sigue a la 6.
    *
+   * ## Castellano primero
+   *
+   * Los términos con nombre en el idioma pedido van antes que los que sólo
+   * tienen su nombre original (`es.value IS NULL`): «Enfermedades» suma las
+   * categorías ICD-10-CM en inglés, y su primera página no puede ser de ellas.
+   * Es el mismo criterio que el simulador (`justin/glosario-correcciones`).
+   *
    * ## Qué usa de los índices que ya existen
    *
    * - `uq_value_set_members_version_concept` para acotar al conjunto (y a la
@@ -358,7 +365,8 @@ export class CatalogConceptsRepository {
                  LIMIT 1
               ) es ON true
           WHERE ${conditions.join('\n            AND ')}
-          ORDER BY ${sqlSortKey('coalesce(es.value, c.display)')},
+          ORDER BY (es.value IS NULL),
+                   ${sqlSortKey('coalesce(es.value, c.display)')},
                    coalesce(es.value, c.display),
                    c.id
           LIMIT ? OFFSET ?`,

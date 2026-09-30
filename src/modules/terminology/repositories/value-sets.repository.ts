@@ -15,6 +15,8 @@ export interface GlossaryFacetRow {
   readonly categoryId: string | null;
   readonly tagId: string | null;
   readonly total: number;
+  /** Cuántos de esos términos tienen nombre preferido en el idioma pedido. */
+  readonly translated: number;
 }
 
 /** Datos mínimos para materializar un conjunto de valores. */
@@ -254,9 +256,11 @@ export class ValueSetsRepository {
     em: EntityManager,
     prefixes: { category: string; tag: string },
     stateConceptId: string,
+    languageConceptId: string,
   ): Promise<GlossaryFacetRow[]> {
-    const rows: (Omit<GlossaryFacetRow, 'total'> & {
+    const rows: (Omit<GlossaryFacetRow, 'total' | 'translated'> & {
       total: string | number;
+      translated: string | number;
     })[] = await em.getConnection().execute(
       `WITH vigentes AS (
          SELECT vs.id AS value_set_id, vv.id AS version_id,
@@ -267,7 +271,11 @@ export class ValueSetsRepository {
           WHERE vs.internal_code LIKE ? OR vs.internal_code LIKE ?
        ),
        pertenencias AS (
-         SELECT v.value_set_id, v.es_categoria, m.concept_id
+         SELECT v.value_set_id, v.es_categoria, m.concept_id,
+                EXISTS (SELECT 1 FROM terminology.concept_designations d
+                         WHERE d.concept_id = m.concept_id
+                           AND d.language_concept_id = ?
+                           AND d.preferred = true) AS traducido
            FROM vigentes v
            JOIN terminology.value_set_members m
              ON m.value_set_version_id = v.version_id AND m.included = true
@@ -275,17 +283,20 @@ export class ValueSetsRepository {
              ON c.id = m.concept_id AND c.state_concept_id = ?
        )
        SELECT 'category' AS kind, p.value_set_id AS "categoryId",
-              NULL::uuid AS "tagId", count(*) AS total
+              NULL::uuid AS "tagId", count(*) AS total,
+              count(*) FILTER (WHERE p.traducido) AS translated
          FROM pertenencias p
         WHERE p.es_categoria
         GROUP BY p.value_set_id
        UNION ALL
-       SELECT 'tag', NULL::uuid, p.value_set_id, count(*)
+       SELECT 'tag', NULL::uuid, p.value_set_id, count(*),
+              count(*) FILTER (WHERE p.traducido)
          FROM pertenencias p
         WHERE NOT p.es_categoria
         GROUP BY p.value_set_id
        UNION ALL
-       SELECT 'pair', cat.value_set_id, tag.value_set_id, count(*)
+       SELECT 'pair', cat.value_set_id, tag.value_set_id, count(*),
+              count(*) FILTER (WHERE cat.traducido)
          FROM pertenencias cat
          JOIN pertenencias tag
            ON tag.concept_id = cat.concept_id AND NOT tag.es_categoria
@@ -295,11 +306,16 @@ export class ValueSetsRepository {
         `${prefixes.category}%`,
         `${prefixes.category}%`,
         `${prefixes.tag}%`,
+        languageConceptId,
         stateConceptId,
       ],
     );
     // `count(*)` es `bigint` y el driver lo entrega como texto.
-    return rows.map((row) => ({ ...row, total: Number(row.total) }));
+    return rows.map((row) => ({
+      ...row,
+      total: Number(row.total),
+      translated: Number(row.translated),
+    }));
   }
 
   /**

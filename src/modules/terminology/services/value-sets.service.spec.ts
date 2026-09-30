@@ -903,8 +903,20 @@ describe('ValueSetsService.searchValueSets', () => {
     it('arma categorías con su conteo y sus etiquetas, desde una consulta agregada', async () => {
       const { service, valueSetsRepo } = build();
       valueSetsRepo.findGlossaryFacets.mockResolvedValue([
-        { kind: 'category', categoryId: 'cat-d', tagId: null, total: 1200 },
-        { kind: 'category', categoryId: 'cat-p', tagId: null, total: 30000 },
+        {
+          kind: 'category',
+          categoryId: 'cat-d',
+          tagId: null,
+          total: 1200,
+          translated: 201,
+        },
+        {
+          kind: 'category',
+          categoryId: 'cat-p',
+          tagId: null,
+          total: 30000,
+          translated: 30000,
+        },
         { kind: 'tag', categoryId: null, tagId: 'tag-c', total: 500 },
         { kind: 'tag', categoryId: null, tagId: 'tag-r', total: 700 },
         { kind: 'pair', categoryId: 'cat-d', tagId: 'tag-c', total: 400 },
@@ -918,6 +930,7 @@ describe('ValueSetsService.searchValueSets', () => {
         expect.anything(),
         { category: 'glossary-category-', tag: 'glossary-tag-' },
         CONCEPTS.TERM_ACTIVE,
+        CONCEPTS.LANG_ES,
       );
       expect(result.total).toBe(31200);
       expect(result.categories).toEqual([
@@ -926,6 +939,8 @@ describe('ValueSetsService.searchValueSets', () => {
           internalCode: 'glossary-category-disease',
           name: 'Enfermedades',
           count: 1200,
+          // Sólo 201 de las 1 200 tienen nombre en castellano: se dice.
+          translatedCount: 201,
           // De la más frecuente a la menos.
           tags: [
             {
@@ -948,6 +963,7 @@ describe('ValueSetsService.searchValueSets', () => {
           name: 'Farmacología clínica',
           description: 'Medicamentos',
           count: 30000,
+          translatedCount: 30000,
           tags: [],
         },
       ]);

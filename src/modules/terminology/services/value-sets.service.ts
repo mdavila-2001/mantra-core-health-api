@@ -33,6 +33,7 @@ import {
   GLOSSARY_CATEGORY_PREFIX,
   GLOSSARY_TAG_PREFIX,
 } from '../glossary.constants';
+import { LANGUAGE_CONCEPT_BY_CODE } from '../terminology.constants';
 
 /** Versión inicial que recibe todo conjunto de valores recién creado. */
 const INITIAL_VALUE_SET_VERSION = '1.0.0';
@@ -276,6 +277,7 @@ export class ValueSetsService {
       em,
       { category: GLOSSARY_CATEGORY_PREFIX, tag: GLOSSARY_TAG_PREFIX },
       CONCEPTS.TERM_ACTIVE,
+      LANGUAGE_CONCEPT_BY_CODE.ES,
     );
 
     const ids = new Set<string>();
@@ -324,6 +326,7 @@ export class ValueSetsService {
               ? { description: valueSet.description }
               : {}),
             count: row.total,
+            translatedCount: row.translated,
             tags: (tagsByCategory.get(valueSet.id) ?? []).sort(byCount),
           },
         ];
