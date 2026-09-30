@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
+import { SEED } from '../../src/common';
 import {
   bootstrapTestApp,
   bearer,
@@ -112,6 +113,22 @@ describe('FX-11 · la colección de notas de evolución (P18)', () => {
       })
       .expect(201);
     patientProfileId = paciente.body.profileId;
+
+    // Escribir en la historia exige un vínculo asistencial con el paciente
+    // (guard de PHI): sin él `POST /charts/notes` responde 403. Ambos médicos
+    // lo atienden, porque los dos escriben notas para él.
+    for (const medico of [medicoA, medicoB]) {
+      await http()
+        .post('/authz/care-relationships')
+        .set(bearer(ctx.adminToken))
+        .send({
+          tenantId: SEED.tenantId,
+          patientProfileId,
+          practitionerProfileId: medico.hpid,
+          relationshipType: 'TREATING',
+        })
+        .expect(201);
+    }
 
     // Primer lote: 3 notas de A, con una marca de tiempo después para poder
     // acotar la ventana entre este lote y el siguiente.

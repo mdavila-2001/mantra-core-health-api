@@ -188,6 +188,12 @@ export class InsuranceCampaignsRepository {
          left join terminology.catalog_concepts cond on cond.id = c.target_condition_concept_id
         where c.insurance_carrier_id = ? and c.id = ?`,
       [insuranceCarrierId, id],
+      // Con el contexto de la transacción: `crear`, `editar` y `cambiar estado`
+      // releen la campaña que acaban de escribir en la misma transacción, y sin
+      // él el SQL crudo corre en otra conexión, no ve la fila sin confirmar y
+      // responde 404 «Campaña no encontrada» tras un alta exitosa.
+      'all',
+      em.getTransactionContext(),
     );
     return filas[0] ?? null;
   }

@@ -7,6 +7,7 @@ import {
   camposObligatoriosDePaciente,
   identidadProfesional,
 } from './harness';
+import { SEED } from '../../src/common';
 
 /**
  * B.3 · PDF oficial de receta y su verificación pública, contra la base.
@@ -123,6 +124,19 @@ describe('B.3 · PDF oficial de receta y verificación pública (integración)',
       .set(bearer(medico.token))
       .expect(200);
     medicationConceptId = concepts.body.items[0].conceptId;
+
+    // Prescribir en la historia de la titular exige un vínculo asistencial
+    // (guard de PHI): sin él `POST /clinical/medication-requests` responde 403.
+    await http()
+      .post('/authz/care-relationships')
+      .set(bearer(ctx.adminToken))
+      .send({
+        tenantId: SEED.tenantId,
+        patientProfileId: titular.pid,
+        practitionerProfileId: medico.hpid,
+        relationshipType: 'TREATING',
+      })
+      .expect(201);
   });
 
   afterAll(async () => {

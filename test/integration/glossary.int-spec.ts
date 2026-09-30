@@ -303,11 +303,15 @@ describe('Glosario médico (integración)', () => {
     const draftConceptId = '00000000-0000-4000-9000-00000000dfd1';
     let categoryVersionId: string | undefined;
     let membershipId: string | undefined;
+    let allTermsMembershipId: string | undefined;
 
     afterAll(async () => {
       const em = orm.em.fork();
       if (membershipId) {
         await em.nativeDelete(ValueSetMembers, { id: membershipId });
+      }
+      if (allTermsMembershipId) {
+        await em.nativeDelete(ValueSetMembers, { id: allTermsMembershipId });
       }
       await em.nativeDelete(CatalogConcepts, { id: draftConceptId });
     });
@@ -343,6 +347,27 @@ describe('Glosario médico (integración)', () => {
         {
           id: membershipId,
           valueSetVersionId: categoryVersionId,
+          conceptId: draftConceptId,
+          included: true,
+          ordinal: 999,
+          ...createdBy(),
+        },
+        { partial: true },
+      );
+      // Como en la siembra real, todo término del glosario es también miembro del
+      // value set paraguas: `readConcept` sólo trata como glosario —y por eso
+      // oculta el borrador— lo que pertenece a `glossary-all-terms`.
+      allTermsMembershipId = glossaryValueSetMemberId(
+        GLOSSARY_ALL_TERMS.internalCode,
+        draftConceptId,
+      );
+      em.create(
+        ValueSetMembers,
+        {
+          id: allTermsMembershipId,
+          valueSetVersionId: glossaryValueSetVersionId(
+            GLOSSARY_ALL_TERMS.internalCode,
+          ),
           conceptId: draftConceptId,
           included: true,
           ordinal: 999,
