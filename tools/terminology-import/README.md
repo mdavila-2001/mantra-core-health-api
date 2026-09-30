@@ -133,7 +133,7 @@ Además `build-glossary-shards.mjs` arma los shards estáticos de la maqueta
 | `import-cie10es.mjs` | Ministerio de Sanidad, tablas de referencia CIE-10-ES 2026 (xlsx oficiales) | `cie10es-diagnosticos`, `cie10es-procedimientos` | Enfermedades, Signos y síntomas, Otros (dx); Procedimientos, Tratamientos, Pruebas diagnósticas, Imagenología (px) |
 | `import-cima.mjs` | AEMPS, API REST de CIMA | `cima` | Farmacología clínica (un término por principio activo VTM) |
 | `import-medlineplus-es.mjs` | NLM, XML de temas de salud + guías «Pruebas médicas» en español | `medlineplus-es`, `medlineplus-es-pruebas` | según grupo oficial / regla documentada |
-| `import-wikidata-anatomy.mjs` | Wikidata (CC0): ítems con id TA98/TA2 y etiqueta ES | `wikidata-anatomia` | Anatomía |
+| `import-wikidata-anatomy.mjs` | Wikidata (CC0): ítems con id TA98 (P1323)/TA2 (P7173), etiqueta ES y clase «estructura anatómica» (Q4936952) verificada | `wikidata-anatomia` | Anatomía |
 | `import-wikidata-images.mjs` | Wikidata P18/P117 + metadatos de Wikimedia Commons | `wikidata-images` (enriquecimiento) | — |
 | `import-loinc-es.mjs` | LOINC, variante lingüística ES (**archivo aportado por el usuario**) | `loinc-es` | Laboratorio / Imagenología |
 
@@ -187,11 +187,11 @@ node --test "tools/terminology-import/test/*.test.mjs"          # parseo con fix
 Un `terminology_sources` + `code_systems` + `code_system_versions` por
 `codeSystem` (URL canónica interna `https://mantracore.health/fhir/CodeSystem/<codeSystem>`),
 `catalog_concepts` (`display` = nombre ES, `definition`), designación preferida y
-sinónimos ES, `concept_properties` (`glossary-slug`, `glossary-clinical-definition`,
-`glossary-provenance`, `glossary-image` con el contrato de `glossary.constants.ts`,
-`glossary-images`, `glossary-hierarchy`, `glossary-source-flags`,
-`glossary-external-ids`, `glossary-definition-html`, `glossary-drug-facts` y, en
-Farmacología, `active_ingredients`/`dosage_form`/`route` que ya lee el front),
+sinónimos ES, `concept_properties` con los nombres que leen la API (#518) y el front
+(`glossary-slug`, `code_system`, `source`, `source_name`, `source_url`,
+`source_retrieved_at`, `source_license`, `glossary-clinical-definition`,
+`glossary-plain-summary`, `definition_source`, `definition_kind`, `sections`,
+`glossary-image`, `drug_facts`, …; lista completa en `glossary-data-build/SCHEMA.md`),
 membresías en `glossary-all-terms` + `glossary-category-<k>` + `glossary-tag-<t>`
 (mismos ids que `GlossarySeedService`, vía `deterministicId`), relaciones y un
 `catalog_import_batches` por capa. Requiere que la API haya arrancado al menos

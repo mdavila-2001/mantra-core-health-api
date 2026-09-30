@@ -130,48 +130,58 @@ function prop(slug, code, dataType, value) {
   return { id: md5uuid(`mantra:glossary-es:property:${code}:${slug}`), conceptId: conceptId(slug), code, dataType, value };
 }
 
-/** Propiedades (`concept_properties`) de una fila. `value_json` nunca va nulo. */
+/**
+ * Propiedades (`concept_properties`) de una fila. `value_json` nunca va nulo.
+ * Los códigos son los que ya leen la API (mantra-core-health-api#518) y el front
+ * (`glossary-term.ts`, `glossary-drug-facts.ts`): `glossary-image`, `drug_facts`,
+ * `source`, `source_name`, `source_url`, `source_retrieved_at`, `source_license`,
+ * `definition_source`, `definition_kind`, `sections` (+ `code_system`).
+ */
 export function propertiesFor(row) {
-  const out = [prop(row.slug, 'glossary-slug', 'string', row.slug)];
-  if (row.definition) out.push(prop(row.slug, 'glossary-clinical-definition', 'json', { es: row.definition }));
-  out.push(
-    // Nombre y licencia de la fuente viven una vez en `terminology_sources`
-    // (no se repiten en cada una de las ~185 000 filas).
-    prop(row.slug, 'glossary-provenance', 'json', {
-      source: row.source,
-      sourceUrl: row.sourceUrl,
-      retrievedAt: row.sourceRetrievedAt,
-      reviewStatus: row.reviewStatus,
-      definitionSource: row.definitionSource ?? null,
-      categoryRule: row.categoryRule ?? null,
-    }),
-  );
+  const str = (code, v) => (v == null || v === '' ? [] : [prop(row.slug, code, 'string', String(v))]);
+  const js = (code, v) => (v == null || (Array.isArray(v) && v.length === 0) ? [] : [prop(row.slug, code, 'json', v)]);
+  const out = [
+    ...str('glossary-slug', row.slug),
+    ...str('code_system', row.codeSystem),
+    ...str('source', row.source),
+    ...str('source_name', row.sourceName),
+    ...str('source_url', row.sourceUrl),
+    ...str('source_retrieved_at', row.sourceRetrievedAt),
+    ...str('source_license', row.sourceLicense),
+    ...(row.definition ? js('glossary-clinical-definition', { es: row.definition }) : []),
+    ...js('definition_source', row.definitionSource ?? null),
+    ...str('definition_kind', row.definitionKind ?? null),
+    ...(row.plainSummaryEs ? js('glossary-plain-summary', { es: row.plainSummaryEs }) : []),
+    ...js('plain_summary_source', row.plainSummarySource ?? null),
+    ...js('sections', row.sections ?? null),
+    ...js('glossary-provenance', { reviewStatus: row.reviewStatus, categoryRule: row.categoryRule ?? null, imageMatch: row.imageMatch ?? null }),
+  ];
   if (row.imageUrl) {
-    // Contrato declarado en glossary.constants.ts: { source, license, attribution, alt, status }.
+    // Lector: `imageFromProperty` (API) exige url + attribution + license.
     out.push(
       prop(row.slug, 'glossary-image', 'json', {
+        url: row.imageUrl,
         source: row.imageUrl,
-        thumbnail: row.imageThumbUrl,
+        thumbUrl: row.imageThumbUrl ?? null,
         license: row.imageLicense,
         licenseUrl: row.imageLicenseUrl ?? null,
         attribution: row.imageAttribution,
         sourcePage: row.imageSourcePage,
         origin: row.imageOrigin,
         alt: row.esName,
-        status: row.reviewStatus,
+        status: 'approved',
       }),
     );
   }
-  if (row.images?.length) out.push(prop(row.slug, 'glossary-images', 'json', row.images));
-  if (row.hierarchy?.length) out.push(prop(row.slug, 'glossary-hierarchy', 'json', row.hierarchy));
+  out.push(...js('glossary-images', row.images ?? null));
+  out.push(...js('glossary-hierarchy', row.hierarchy ?? null));
   if (row.flags && Object.keys(row.flags).length) out.push(prop(row.slug, 'glossary-source-flags', 'json', row.flags));
   const ext = Object.fromEntries(Object.entries(row.externalIds ?? {}).filter(([, v]) => v != null && !(Array.isArray(v) && v.length === 0)));
   if (Object.keys(ext).length) out.push(prop(row.slug, 'glossary-external-ids', 'json', ext));
   if (row.definitionHtml) out.push(prop(row.slug, 'glossary-definition-html', 'json', { es: row.definitionHtml }));
   if (row.drugFacts) {
-    out.push(prop(row.slug, 'glossary-drug-facts', 'json', row.drugFacts));
-    // Mismos códigos que lee el front (`GlossaryDrugFacts.drugFactsFrom`) y que
-    // escribe import-ndc.mjs. Valores = unión de lo que CIMA declara para el VTM.
+    out.push(prop(row.slug, 'drug_facts', 'json', row.drugFacts));
+    // Mismos códigos que escribe import-ndc.mjs y que el front ya sabe leer.
     out.push(prop(row.slug, 'active_ingredients', 'json', [row.drugFacts.vtmName]));
     if (row.drugFacts.dosageForms.length) out.push(prop(row.slug, 'dosage_form', 'string', row.drugFacts.dosageForms.join(' · ')));
     if (row.drugFacts.routes.length) out.push(prop(row.slug, 'route', 'json', row.drugFacts.routes));

@@ -30,12 +30,14 @@ export function toCard(row, hasDetail) {
     card.definitionSource = ds;
   }
   if (row.drugFacts) {
-    const { sections: _s, products, ...df } = row.drugFacts;
+    const { sections: _s, products, ...df } = row.drugFacts; // eslint-disable-line no-unused-vars
     card.drugFacts = {
       ...df,
       sectionCodes: (row.drugFacts.sections ?? []).map((s) => s.section),
-      products: products.map(({ presentations, ...p }) => ({ ...p, presentationCount: presentations?.length ?? 0 })),
+      // La lista de medicamentos (con fotos y presentaciones) sólo va en detail/.
+      productNames: products.slice(0, 20).map((p) => p.name),
     };
+    card.images = (row.images ?? []).slice(0, 8);
   }
   return card;
 }

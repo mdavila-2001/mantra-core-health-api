@@ -110,6 +110,8 @@ test('MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del t
   assert.ok(r.definition.startsWith('Un aborto inducido es un procedimiento para terminar un embarazo.'));
   assert.ok(r.externalIds.mesh?.length > 0, 'MeSH tomado del tema inglés mapeado');
   assert.ok(r.tagKeys.includes('gyn-ob'));
+  assert.ok(r.plainSummaryEs?.startsWith('Un aborto es un procedimiento médico'), 'resumen = meta-desc verbatim');
+  assert.equal(r.plainSummarySource.kind, 'medlineplus-meta-desc');
 });
 
 test('MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab', () => {
@@ -160,7 +162,7 @@ test('LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si falta
 });
 
 test('plan de carga: membresías a los value sets del glosario con los ids del backend', () => {
-  const row = { slug: 'cie10es-dx-j45-909', categoryKey: 'disease', tagKeys: ['respiratory'], esName: 'Asma', esSynonyms: [], definition: null, source: 's', sourceName: 's', sourceUrl: 'u', sourceRetrievedAt: 'd', sourceLicense: 'l', reviewStatus: 'external-source', imageUrl: null, externalIds: {} };
+  const row = { slug: 'cie10es-dx-j45-909', codeSystem: 'cie10es-diagnosticos-2026', categoryKey: 'disease', tagKeys: ['respiratory'], esName: 'Asma', esSynonyms: [], definition: null, source: 's', sourceName: 's', sourceUrl: 'u', sourceRetrievedAt: 'd', sourceLicense: 'l', reviewStatus: 'external-source', imageUrl: null, externalIds: {} };
   const m = membershipsFor(row);
   assert.deepEqual(m.map((x) => x.code), ['glossary-all-terms', 'glossary-category-disease', 'glossary-tag-respiratory']);
   assert.equal(m[0].versionId, valueSetVersionId('glossary-all-terms'));
@@ -170,6 +172,15 @@ test('plan de carga: membresías a los value sets del glosario con los ids del b
   assert.ok(props.includes('glossary-slug') && props.includes('glossary-provenance'));
   assert.ok(!props.includes('glossary-clinical-definition'), 'sin definición no se escribe la propiedad');
   assert.ok(propertiesFor(row).every((p) => p.value !== null && p.value !== undefined), 'value_json NOT NULL');
+  for (const code of ['source', 'source_name', 'source_url', 'source_retrieved_at', 'source_license', 'code_system']) assert.ok(props.includes(code), `falta ${code}`);
+  const withImg = propertiesFor({ ...row, imageUrl: 'https://u/i.jpg', imageThumbUrl: 'https://u/t.jpg', imageAttribution: 'A · CC BY 4.0', imageLicense: 'CC BY 4.0', imageSourcePage: 'p', imageOrigin: 'wikimedia-commons', definitionKind: 'wikidata-description', sections: [{ title: 't', text: 'x' }], drugFacts: { vtmName: 'v', dosageForms: [], routes: [] } });
+  const img = withImg.find((p) => p.code === 'glossary-image').value;
+  assert.equal(img.url, 'https://u/i.jpg');
+  assert.equal(img.attribution, 'A · CC BY 4.0');
+  assert.equal(img.license, 'CC BY 4.0');
+  const codes = withImg.map((p) => p.code);
+  for (const code of ['definition_kind', 'sections', 'drug_facts']) assert.ok(codes.includes(code), `falta ${code}`);
+  assert.ok(!codes.includes('glossary-drug-facts'));
 });
 
 test('Anatomía Wikidata: verificación de dominio y de ids de propiedad', async () => {

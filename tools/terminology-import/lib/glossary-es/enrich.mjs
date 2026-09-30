@@ -75,6 +75,12 @@ export function applyImage(row, idx) {
     wikidataDescriptionEs: hit.esDescription ?? null,
     images: [...(row.images ?? []), img],
   };
+  // Resumen breve: sólo si la fila no trae uno de su propia fuente y el ítem de
+  // Wikidata tiene descripción ES; con su procedencia (CC0, comunidad).
+  if (!row.plainSummaryEs && hit.esDescription && row.categoryKey !== 'anatomy') {
+    next.plainSummaryEs = hit.esDescription;
+    next.plainSummarySource = { name: `Wikidata ${hit.wikidataId} — descripción en castellano (comunidad de Wikidata, CC0)`, url: `https://www.wikidata.org/wiki/${hit.wikidataId}`, retrievedAt: hit.retrievedAt ?? null, kind: 'wikidata-description' };
+  }
   if (!row.imageUrl) {
     Object.assign(next, {
       imageUrl: img.url,
