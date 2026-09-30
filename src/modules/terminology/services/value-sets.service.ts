@@ -26,7 +26,13 @@ import {
   type ExpandValueSetResponseDto,
   type ReadValueSetExpansionResponseDto,
   type SearchValueSetsResponseDto,
+  type GlossaryFacetsResponseDto,
+  type GlossaryFacetTagDto,
 } from '../dto';
+import {
+  GLOSSARY_CATEGORY_PREFIX,
+  GLOSSARY_TAG_PREFIX,
+} from '../glossary.constants';
 
 /** Versión inicial que recibe todo conjunto de valores recién creado. */
 const INITIAL_VALUE_SET_VERSION = '1.0.0';
@@ -251,6 +257,92 @@ export class ValueSetsService {
         hasMore && last
           ? encodeKeysetCursor({ internalCode: last.internalCode })
           : null,
+    };
+  }
+
+  /**
+   * Las facetas del glosario: categorías con su conteo y sus etiquetas, y las
+   * etiquetas de todo el glosario — lo que la rejilla necesita, sin términos.
+   *
+   * Una consulta agregada y una lectura de nombres. Sólo cuenta lo publicado
+   * (`TERM_ACTIVE`), que es lo único que la búsqueda del glosario deja ver:
+   * un conteo que incluyera borradores prometería términos que no aparecen.
+   *
+   * @returns Categorías (con al menos un término) y etiquetas, con sus conteos.
+   */
+  async readGlossaryFacets(): Promise<GlossaryFacetsResponseDto> {
+    const em = this.em.fork();
+    const rows = await this.valueSetsRepo.findGlossaryFacets(
+      em,
+      { category: GLOSSARY_CATEGORY_PREFIX, tag: GLOSSARY_TAG_PREFIX },
+      CONCEPTS.TERM_ACTIVE,
+    );
+
+    const ids = new Set<string>();
+    for (const row of rows) {
+      if (row.categoryId !== null) ids.add(row.categoryId);
+      if (row.tagId !== null) ids.add(row.tagId);
+    }
+    const valueSets = await this.valueSetsRepo.findByIds(em, [...ids]);
+
+    const tagRef = (id: string, count: number): GlossaryFacetTagDto | null => {
+      const valueSet = valueSets.get(id);
+      return valueSet === undefined
+        ? null
+        : {
+            id,
+            internalCode: valueSet.internalCode,
+            name: valueSet.name,
+            count,
+          };
+    };
+    const byCount = (a: GlossaryFacetTagDto, b: GlossaryFacetTagDto) =>
+      b.count - a.count || a.name.localeCompare(b.name, 'es');
+
+    const tagsByCategory = new Map<string, GlossaryFacetTagDto[]>();
+    for (const row of rows) {
+      if (row.kind !== 'pair' || row.categoryId === null || row.tagId === null)
+        continue;
+      const ref = tagRef(row.tagId, row.total);
+      if (ref === null) continue;
+      const list = tagsByCategory.get(row.categoryId) ?? [];
+      list.push(ref);
+      tagsByCategory.set(row.categoryId, list);
+    }
+
+    const categories = rows
+      .filter((row) => row.kind === 'category' && row.categoryId !== null)
+      .flatMap((row) => {
+        const valueSet = valueSets.get(row.categoryId as string);
+        if (valueSet === undefined) return [];
+        return [
+          {
+            id: valueSet.id,
+            internalCode: valueSet.internalCode,
+            name: valueSet.name,
+            ...(valueSet.description
+              ? { description: valueSet.description }
+              : {}),
+            count: row.total,
+            tags: (tagsByCategory.get(valueSet.id) ?? []).sort(byCount),
+          },
+        ];
+      })
+      .sort((a, b) => a.internalCode.localeCompare(b.internalCode));
+
+    const tags = rows
+      .filter((row) => row.kind === 'tag' && row.tagId !== null)
+      .map((row) => tagRef(row.tagId as string, row.total))
+      .filter((ref): ref is GlossaryFacetTagDto => ref !== null)
+      .sort(byCount);
+
+    return {
+      categories,
+      tags,
+      // Pertenencia exclusiva: cada término tiene exactamente una categoría,
+      // así que la suma de las categorías es el total del glosario sin una
+      // consulta más.
+      total: categories.reduce((suma, categoria) => suma + categoria.count, 0),
     };
   }
 
