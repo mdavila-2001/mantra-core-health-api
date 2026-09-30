@@ -57,6 +57,80 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
       display: 'Imaging category',
     },
 
+    // --- Tipo de espécimen (specimens.specimen_type_concept_id) ---
+    // Recepción de muestras: hasta acá el DTO pedía un uuid que nada sembraba.
+    // Los códigos son los de la tabla HL7 v2-0487 (Specimen Type), salvo
+    // `UR24`, que es de este proyecto: la tabla modela la orina de 24 horas
+    // como `UR` con período de recolección, y en el mostrador es otra muestra
+    // (otro frasco, otra instrucción al paciente).
+    SPECIMEN_TYPE_BLOOD_VENOUS: {
+      code: 'BLDV',
+      display: 'Venous blood (whole blood)',
+    },
+    SPECIMEN_TYPE_BLOOD_ARTERIAL: { code: 'BLDA', display: 'Arterial blood' },
+    SPECIMEN_TYPE_BLOOD_CAPILLARY: {
+      code: 'BLDC',
+      display: 'Capillary blood',
+    },
+    SPECIMEN_TYPE_SERUM: { code: 'SER', display: 'Serum' },
+    SPECIMEN_TYPE_PLASMA: { code: 'PLAS', display: 'Plasma' },
+    SPECIMEN_TYPE_URINE: { code: 'UR', display: 'Urine (random sample)' },
+    SPECIMEN_TYPE_URINE_24H: { code: 'UR24', display: '24-hour urine' },
+    SPECIMEN_TYPE_STOOL: { code: 'STL', display: 'Stool' },
+    SPECIMEN_TYPE_CSF: { code: 'CSF', display: 'Cerebrospinal fluid' },
+    SPECIMEN_TYPE_SPUTUM: { code: 'SPT', display: 'Sputum' },
+    SPECIMEN_TYPE_THROAT_SWAB: { code: 'THRT', display: 'Throat swab' },
+
+    // --- Tipo de contenedor (specimen_containers / specimens.container_type_concept_id) ---
+    // Tubos por color de tapa según la convención ISO 6710 que usan los
+    // fabricantes de tubos al vacío: el color dice el aditivo, y el aditivo
+    // dice para qué sirve la muestra.
+    CONTAINER_TYPE_TUBE_LAVENDER_EDTA: {
+      code: 'TUBE_LAVENDER_EDTA',
+      display: 'Lavender-top tube (K2/K3 EDTA)',
+    },
+    CONTAINER_TYPE_TUBE_LIGHT_BLUE_CITRATE: {
+      code: 'TUBE_LIGHT_BLUE_CITRATE',
+      display: 'Light blue-top tube (3.2% sodium citrate)',
+    },
+    CONTAINER_TYPE_TUBE_RED_PLAIN: {
+      code: 'TUBE_RED_PLAIN',
+      display: 'Red-top tube (no additive / clot activator)',
+    },
+    CONTAINER_TYPE_TUBE_GOLD_SST: {
+      code: 'TUBE_GOLD_SST',
+      display: 'Gold-top tube (serum separator gel)',
+    },
+    CONTAINER_TYPE_TUBE_GREEN_HEPARIN: {
+      code: 'TUBE_GREEN_HEPARIN',
+      display: 'Green-top tube (lithium heparin)',
+    },
+    CONTAINER_TYPE_TUBE_GRAY_FLUORIDE: {
+      code: 'TUBE_GRAY_FLUORIDE',
+      display: 'Gray-top tube (sodium fluoride / potassium oxalate)',
+    },
+    CONTAINER_TYPE_SYRINGE_BLOOD_GAS: {
+      code: 'SYRINGE_BLOOD_GAS',
+      display: 'Heparinized blood gas syringe',
+    },
+    CONTAINER_TYPE_CUP_URINE_STERILE: {
+      code: 'CUP_URINE_STERILE',
+      display: 'Sterile urine cup',
+    },
+    CONTAINER_TYPE_JUG_URINE_24H: {
+      code: 'JUG_URINE_24H',
+      display: '24-hour urine container',
+    },
+    CONTAINER_TYPE_CUP_STOOL: { code: 'CUP_STOOL', display: 'Stool container' },
+    CONTAINER_TYPE_TUBE_STERILE: {
+      code: 'TUBE_STERILE',
+      display: 'Sterile screw-cap tube',
+    },
+    CONTAINER_TYPE_SWAB_TRANSPORT: {
+      code: 'SWAB_TRANSPORT',
+      display: 'Swab with transport medium',
+    },
+
     // --- Cadena de custodia (specimen_chain_of_custody_events.custody_event_type_concept_id) ---
     CUSTODY_RECEPTION: {
       code: 'CUSTODY_RECEPTION',
@@ -250,4 +324,46 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
 export const CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_LAB,
   DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+];
+
+/**
+ * Las categorías de orden que llegan a la **recepción de muestras**: las que
+ * tienen un espécimen que recibir. Imagenología queda afuera (una radiografía
+ * no trae tubo) y anatomía patológica entra, porque su pieza también se recibe,
+ * se rotula y se custodia.
+ */
+export const CATEGORIAS_CON_ESPECIMEN: readonly string[] = [
+  CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+  CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+];
+
+/** Tipos de espécimen publicados como catálogo (`specimen-type`). */
+export const SPECIMEN_TYPE_CONCEPTS: readonly string[] = [
+  DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+  DIAG.SPECIMEN_TYPE_SERUM,
+  DIAG.SPECIMEN_TYPE_PLASMA,
+  DIAG.SPECIMEN_TYPE_URINE,
+  DIAG.SPECIMEN_TYPE_URINE_24H,
+  DIAG.SPECIMEN_TYPE_BLOOD_ARTERIAL,
+  DIAG.SPECIMEN_TYPE_BLOOD_CAPILLARY,
+  DIAG.SPECIMEN_TYPE_STOOL,
+  DIAG.SPECIMEN_TYPE_CSF,
+  DIAG.SPECIMEN_TYPE_SPUTUM,
+  DIAG.SPECIMEN_TYPE_THROAT_SWAB,
+];
+
+/** Tipos de contenedor publicados como catálogo (`specimen-container-type`). */
+export const CONTAINER_TYPE_CONCEPTS: readonly string[] = [
+  DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+  DIAG.CONTAINER_TYPE_TUBE_GOLD_SST,
+  DIAG.CONTAINER_TYPE_TUBE_RED_PLAIN,
+  DIAG.CONTAINER_TYPE_TUBE_LIGHT_BLUE_CITRATE,
+  DIAG.CONTAINER_TYPE_TUBE_GREEN_HEPARIN,
+  DIAG.CONTAINER_TYPE_TUBE_GRAY_FLUORIDE,
+  DIAG.CONTAINER_TYPE_SYRINGE_BLOOD_GAS,
+  DIAG.CONTAINER_TYPE_CUP_URINE_STERILE,
+  DIAG.CONTAINER_TYPE_JUG_URINE_24H,
+  DIAG.CONTAINER_TYPE_CUP_STOOL,
+  DIAG.CONTAINER_TYPE_TUBE_STERILE,
+  DIAG.CONTAINER_TYPE_SWAB_TRANSPORT,
 ];

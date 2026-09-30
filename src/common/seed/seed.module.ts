@@ -72,6 +72,13 @@ import {
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PeopleSeedService } from './people-seed.service';
+import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
+import { InsuranceModule } from '../../modules/insurance/insurance.module';
+import { PracticeModule } from '../../modules/practice/practice.module';
+import { ProfilesModule } from '../../modules/profiles/profiles.module';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
+import { Files, FileVersions } from '../../modules/common/entities';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -130,11 +137,17 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
       DynamicFieldDefinitions,
       FieldAssignments,
       AuthzPermissions,
+      // Pack de stickers (AG-17): filas de metadatos, sin bytes.
+      Files,
+      FileVersions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
     // aquí los parámetros del hash.
     IamModule,
+    InsuranceModule,
+    PracticeModule,
+    ProfilesModule,
   ],
   providers: [
     TerminologySeedService,
@@ -159,6 +172,9 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
     SeedBootstrapService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
+    PeopleSeedService,
+    DirectoryNetworksSeedService,
+    StickerPackSeedService,
   ],
   exports: [
     SeedBootstrapService,
@@ -183,6 +199,9 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
+    PeopleSeedService,
+    DirectoryNetworksSeedService,
+    StickerPackSeedService,
   ],
 })
 export class SeedModule {}

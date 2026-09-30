@@ -227,6 +227,62 @@ export class AssignmentsRepository {
   }
 
   /**
+   * Una asignación por id. Quién puede tocarla lo decide el servicio por el
+   * tenant de la fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la asignación.
+   * @returns La asignación, o `null`.
+   */
+  findAssignmentById(
+    em: EntityManager,
+    id: string,
+  ): Promise<FieldAssignments | null> {
+    return em.findOne(FieldAssignments, { id });
+  }
+
+  /**
+   * Las asignaciones **activas y propias de un tenant** para un target, en su
+   * orden de presentación: lo que el generador reordena (CL-61). Las globales
+   * quedan fuera a propósito: el estándar no se reordena desde un consultorio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetResourceConceptId - Target cuyas asignaciones se piden.
+   * @param tenantId - Tenant dueño de las asignaciones.
+   * @returns Asignaciones activas del tenant, ordenadas por `ordinal`.
+   */
+  findActiveOwnAssignmentsForTarget(
+    em: EntityManager,
+    targetResourceConceptId: string,
+    tenantId: string,
+  ): Promise<FieldAssignments[]> {
+    return em.find(
+      FieldAssignments,
+      {
+        targetResourceConceptId,
+        tenantId,
+        stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
+      },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
+   * Todas las asignaciones (activas o no) de un campo: para saber a quién
+   * pertenece un campo antes de dejar editar su definición (CL-69).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldId - Campo cuyas asignaciones se piden.
+   * @returns Asignaciones del campo.
+   */
+  findAssignmentsByField(
+    em: EntityManager,
+    fieldId: string,
+  ): Promise<FieldAssignments[]> {
+    return em.find(FieldAssignments, { fieldId });
+  }
+
+  /**
    * Secciones por id, en lote, para nombrar las que las asignaciones o los
    * miembros de un set referencian.
    *

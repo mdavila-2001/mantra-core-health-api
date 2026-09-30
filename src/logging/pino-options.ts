@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Params } from 'nestjs-pino';
 import { loadLoggingEnv } from './logging.env';
 import { currentTraceContext } from '../observability/trace-context.service';
@@ -51,6 +53,44 @@ function isPrettyAvailable(): boolean {
   }
 }
 
+/**
+ * Cabecera de correlación por petición. `X-Request-Id` en minúsculas: Node
+ * normaliza los nombres de cabecera al recibirlos.
+ */
+const REQUEST_ID_HEADER = 'x-request-id';
+
+/**
+ * Un `req.id` por petición (TX-14).
+ *
+ * Sin `genReqId`, pino-http numera las peticiones con un contador de proceso:
+ * se reinicia en cada deploy y se repite entre réplicas, así que el mismo
+ * "3" de la pantalla puede señalar líneas de log distintas según a qué
+ * instancia le tocó. Un UUID no colisiona nunca.
+ *
+ * El `x-request-id` que trae la petición **sólo** se respeta detrás de un
+ * proxy de confianza (`TRUST_PROXY_HOPS > 0`, el mismo interruptor que ya usa
+ * `main.ts` para `app.set('trust proxy', …)`): es nginx quien lo generó
+ * (`$request_id`), nunca el navegador — aceptarlo sin ese resguardo dejaría
+ * que cualquier cliente eligiera el id con el que se lo busca en el log. Sin
+ * proxy de confianza, siempre se genera uno nuevo.
+ *
+ * El id se escribe en la respuesta acá mismo, no en un middleware aparte:
+ * `genReqId` es lo primero que corre por petición y es donde `res` todavía
+ * admite cabeceras nuevas sin que nada las haya cerrado.
+ *
+ * @param req - Petición entrante.
+ * @param res - Respuesta en curso.
+ * @returns El id de la petición: el heredado del proxy, o un UUID v4 nuevo.
+ */
+export function genReqId(req: IncomingMessage, res: ServerResponse): string {
+  const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS ?? 0);
+  const inbound = req.headers[REQUEST_ID_HEADER];
+  const inboundId = Array.isArray(inbound) ? inbound[0] : inbound;
+  const id = trustProxyHops > 0 && inboundId ? inboundId : randomUUID();
+  res.setHeader('X-Request-Id', id);
+  return id;
+}
+
 /** Opciones de pino derivadas del entorno validado. */
 export function buildPinoOptions(): Params {
   const env = loadLoggingEnv();
@@ -59,6 +99,7 @@ export function buildPinoOptions(): Params {
   return {
     pinoHttp: {
       level: env.level,
+      genReqId,
       redact: { paths: REDACT_PATHS, remove: true },
 
       // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade

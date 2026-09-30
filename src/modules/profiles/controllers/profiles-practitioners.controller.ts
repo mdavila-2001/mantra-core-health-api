@@ -35,9 +35,12 @@ import {
   JurisdictionAuthorizationResponseDto,
   VerifyCredentialDto,
   CredentialResponseDto,
+  ListPendingCredentialsResponseDto,
   AddSpecialtyDto,
   AddOwnCredentialDto,
   UpdateOwnCredentialDto,
+  UpdateOwnSpecialtyDto,
+  UpdateOwnLicenseDto,
   OwnCredentialResponseDto,
   SpecialtyResponseDto,
   CreateAffiliationDto,
@@ -572,6 +575,110 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SpecialtyResponseDto> {
     return this.practitionersService.setOwnPrimarySpecialty(specialtyId, actor);
+  }
+
+  /**
+   * Corregir una especialidad propia pendiente. `isPrimary` no se acepta acá
+   * (400 por la lista blanca): para eso está `…/:specialtyId/primary`.
+   */
+  @Patch('practitioners/me/specialties/:specialtyId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Corregir una especialidad propia pendiente de verificación',
+    description:
+      '`404` si no existe o es ajena. `422` si ya no está pendiente o el concepto no es una especialidad del catálogo. `409` si ya tiene esa especialidad vigente.',
+  })
+  @ApiParam({ name: 'specialtyId', format: 'uuid' })
+  updateOwnSpecialty(
+    @Param('specialtyId', ParseUUIDPipe) specialtyId: string,
+    @Body() dto: UpdateOwnSpecialtyDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.updateOwnSpecialty(
+      specialtyId,
+      dto,
+      actor,
+    );
+  }
+
+  /** Retirar una especialidad propia pendiente; no promueve otra como principal. */
+  @Delete('practitioners/me/specialties/:specialtyId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Retirar una especialidad propia pendiente de verificación',
+    description:
+      '`404` si no existe o es ajena. `422` si ya no está pendiente.',
+  })
+  @ApiParam({ name: 'specialtyId', format: 'uuid' })
+  removeOwnSpecialty(
+    @Param('specialtyId', ParseUUIDPipe) specialtyId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.removeOwnSpecialty(specialtyId, actor);
+  }
+
+  /** Corregir una matrícula propia pendiente y sin verificación en curso. */
+  @Patch('practitioners/me/jurisdiction-authorizations/:licenseId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Corregir una matrícula propia pendiente de verificación',
+    description:
+      '`404` si no existe o es ajena. `422` si no está pendiente o tiene una verificación en curso.',
+  })
+  @ApiParam({ name: 'licenseId', format: 'uuid' })
+  updateOwnLicense(
+    @Param('licenseId', ParseUUIDPipe) licenseId: string,
+    @Body() dto: UpdateOwnLicenseDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.updateOwnLicense(licenseId, dto, actor);
+  }
+
+  /** Retirar una matrícula propia pendiente; con historial de auditoría, 422. */
+  @Delete('practitioners/me/jurisdiction-authorizations/:licenseId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Retirar una matrícula propia pendiente de verificación',
+    description:
+      '`404` si no existe o es ajena. `422` si no está pendiente, tiene una verificación en curso o ya tiene historial de auditoría.',
+  })
+  @ApiParam({ name: 'licenseId', format: 'uuid' })
+  removeOwnLicense(
+    @Param('licenseId', ParseUUIDPipe) licenseId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionersService.removeOwnLicense(licenseId, actor);
+  }
+
+  /** CV-20: cola de credenciales pendientes de verificación. */
+  @Get('credentials')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar credenciales pendientes de verificación' })
+  @ApiQuery({
+    name: 'state',
+    required: false,
+    description: 'Concepto de estado (por defecto, pendiente)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Credenciales por página',
+  })
+  listPendingCredentials(
+    @Query('state') stateConceptId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPendingCredentialsResponseDto> {
+    return this.practitionersService.listPendingCredentials({
+      stateConceptId,
+      cursor,
+      limit,
+    });
   }
 
   /** UC-05-05. */

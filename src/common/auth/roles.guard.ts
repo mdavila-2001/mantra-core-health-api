@@ -6,7 +6,43 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
-import type { AuthenticatedRequest } from './authenticated-user.interface';
+import type {
+  AuthenticatedRequest,
+  AuthenticatedUser,
+} from './authenticated-user.interface';
+
+/**
+ * Si un rol del actor lo autoriza en el tenant resuelto (MCH-001).
+ *
+ * Es la regla de {@link RolesGuard}, expuesta para los guards de dominio que
+ * combinan un rol con otra condición (una membresía, por ejemplo) y no deben
+ * reescribirla: un código presente en `scopedRoles` sólo vale en el tenant que
+ * lo indexa; uno que no aparece en ningún tenant es una excepción global.
+ *
+ * No aplica el comodín `SUPERADMIN`: eso lo decide quien llama.
+ *
+ * @param user - Sujeto autenticado (puede faltar).
+ * @param role - Código de rol exigido.
+ * @param tenantId - Tenant resuelto del request.
+ * @returns `true` si el rol autoriza en ese tenant.
+ */
+export function roleAuthorizesInTenant(
+  user: AuthenticatedUser | undefined,
+  role: string,
+  tenantId: string | undefined,
+): boolean {
+  if (!(user?.roles ?? []).includes(role)) return false;
+  const scoped = user?.scopedRoles;
+  const tenantsWithRole = scoped
+    ? Object.entries(scoped)
+        .filter(([, codes]) => codes.includes(role))
+        .map(([tid]) => tid)
+    : [];
+  // No aparece en scopedRoles: excepción global, autoriza siempre.
+  if (tenantsWithRole.length === 0) return true;
+  // Aparece con ámbito: sólo autoriza si el tenant resuelto es uno de ellos.
+  return tenantId !== undefined && tenantsWithRole.includes(tenantId);
+}
 
 /**
  * Exige que el actor tenga uno de los roles declarados con `@Roles(...)`.
@@ -40,20 +76,9 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const scoped = request.user?.scopedRoles;
     const tenantId = request.resolvedTenantId;
-    const authorizes = (role: string): boolean => {
-      if (!roles.includes(role)) return false;
-      const tenantsWithRole = scoped
-        ? Object.entries(scoped)
-            .filter(([, codes]) => codes.includes(role))
-            .map(([tid]) => tid)
-        : [];
-      // No aparece en scopedRoles: excepción global, autoriza siempre.
-      if (tenantsWithRole.length === 0) return true;
-      // Aparece con ámbito: sólo autoriza si el tenant resuelto es uno de ellos.
-      return tenantId !== undefined && tenantsWithRole.includes(tenantId);
-    };
+    const authorizes = (role: string): boolean =>
+      roleAuthorizesInTenant(request.user, role, tenantId);
 
     if (!required.some(authorizes)) {
       throw new ForbiddenException('Rol insuficiente para la operación');

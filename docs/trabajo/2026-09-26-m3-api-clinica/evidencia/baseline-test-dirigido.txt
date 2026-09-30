@@ -1,0 +1,5 @@
+$ corepack yarn test --testPathPatterns="allergy-intolerances.service|medications.service|chart-notes.service|chart-care-plans.service|surveys-templates.service|forms-assignments.service|forms-fields.service|clinical-read.service|encounters.service"   # baseline
+Test Suites: 10 passed, 10 total
+Tests:       174 passed, 174 total
+Time:        25.726 s
+exit=0

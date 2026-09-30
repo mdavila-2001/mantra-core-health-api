@@ -405,6 +405,24 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'OWNER_PROCEDURE',
     'Procedure',
   ),
+  // P25 (BR-11): adjuntos de receta, alergia y encuentro. Mismo criterio que
+  // OWNER_CONDITION: el archivo se liga al recurso clínico puntual, y el
+  // listado del genérico los rechaza (ver `CLINICAL_RECORD_OWNER_TYPES`).
+  OWNER_MEDICATION_REQUEST: def(
+    'common:owner-type:medication-request',
+    'OWNER_MEDICATION_REQUEST',
+    'Medication request',
+  ),
+  OWNER_ALLERGY_INTOLERANCE: def(
+    'common:owner-type:allergy-intolerance',
+    'OWNER_ALLERGY_INTOLERANCE',
+    'Allergy intolerance',
+  ),
+  OWNER_ENCOUNTER: def(
+    'common:owner-type:encounter',
+    'OWNER_ENCOUNTER',
+    'Encounter',
+  ),
 
   // --- Common: identificadores oficiales ---
   ID_TYPE_NATIONAL: def(

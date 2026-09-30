@@ -17,8 +17,8 @@ export interface RegistrationLegalRepresentative {
   readonly personId: string;
   /** Su CI, si el alta lo declaró (`common.identifiers`). */
   readonly ciIdentifierId?: string;
-  /** El PDF del poder, pre-cargado sin sesión. */
-  readonly powerOfAttorneyFileId: string;
+  /** El PDF del poder, pre-cargado sin sesión. Ausente sólo en una unipersonal. */
+  readonly powerOfAttorneyFileId?: string;
 }
 
 /** Una gerencia de contacto declarada por el alta, con su persona ya creada. */
@@ -129,14 +129,16 @@ export class TenantLegalRepresentativesService {
 
     if (legalRepresentative) {
       const powerOfAttorneyDocumentId =
-        await this.documents.attachPowerOfAttorney(tx, {
-          tenantId: input.tenantId,
-          ownerUserId: input.ownerUserId,
-          legalEntityType: input.legalEntityType,
-          fileId: legalRepresentative.powerOfAttorneyFileId,
-          relatedPersonId: legalRepresentative.personId,
-          alreadyDeclaredFileIds: input.alreadyDeclaredFileIds,
-        });
+        legalRepresentative.powerOfAttorneyFileId === undefined
+          ? undefined
+          : await this.documents.attachPowerOfAttorney(tx, {
+              tenantId: input.tenantId,
+              ownerUserId: input.ownerUserId,
+              legalEntityType: input.legalEntityType,
+              fileId: legalRepresentative.powerOfAttorneyFileId,
+              relatedPersonId: legalRepresentative.personId,
+              alreadyDeclaredFileIds: input.alreadyDeclaredFileIds,
+            });
       // El documento tiene que existir en la base antes de que la fila del
       // representante lo nombre: la FK es inmediata.
       await tx.flush();

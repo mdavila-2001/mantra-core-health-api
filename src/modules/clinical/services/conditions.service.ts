@@ -17,6 +17,9 @@ import {
 } from '../dto';
 import { Conditions } from '../entities';
 import { ClinicalReadService } from './clinical-read.service';
+// BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
+// referencien. Archivo y servicio nuevos, independientes.
+import { EncounterSealGuardService } from './encounter-seal-guard.service';
 import { CLIN } from '../clinical.concepts';
 import { AuditTrailService } from '../../audit/services';
 import { HistoryRepository } from '../../audit/repositories';
@@ -91,6 +94,7 @@ export class ConditionsService {
    * @param logger - Valor de logger requerido por la operación.
    * @param filesService - Liga un archivo ya subido a esta condición (ALV-033).
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param encounterSealGuard - Rechaza la escritura si el encuentro está sellado (BR-14/CL-07).
    */
   constructor(
     private readonly em: EntityManager,
@@ -101,6 +105,7 @@ export class ConditionsService {
     private readonly logger: PinoLogger,
     private readonly filesService: FilesService,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ConditionsService.name);
   }
@@ -162,6 +167,9 @@ export class ConditionsService {
         encounterId: dto.encounterId,
       });
     }
+    // BR-14 (CL-07): el encuentro tiene que seguir abierto para admitir un
+    // diagnóstico nuevo contra él.
+    await this.encounterSealGuard.assertEncounterWritable(tx, dto.encounterId);
   }
 
   /** UC-08-08: registra una condición evitando duplicados activos por código. */
@@ -324,7 +332,16 @@ export class ConditionsService {
         condition.id,
         {
           operationConceptId: AUD.OPERATION_UPDATE,
-          dataSnapshot: this.snapshot(condition),
+          // BR-14 (CL-10), decisión (b) — D-BR14-04: sin columna nueva en
+          // `clinical.conditions` (sin DDL en la API), el motivo se guarda
+          // dentro del registro append-only de `audit.conditions_history`.
+          // `audit.conditions_history.data_snapshot` es jsonb de forma libre
+          // (ver `HistoryRepository.append`): agregar una clave acá no exige
+          // cambiar el modelo.
+          dataSnapshot: {
+            ...this.snapshot(condition),
+            statusChangeReasonText: dto.reasonText,
+          },
           changedByUserId: actor.id,
         },
       );
@@ -335,7 +352,8 @@ export class ConditionsService {
           conditionId,
           fromStatus,
           toStatus: dto.newClinicalStatusConceptId,
-          reason: dto.reasonText,
+          // BR-14 (CL-10): nada de texto libre en el log — sólo ids y
+          // conceptos (regla 90.2.7). El motivo va en la auditoría, no acá.
         },
         'Condition clinical status changed',
       );

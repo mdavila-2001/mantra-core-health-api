@@ -23,7 +23,9 @@ import {
  */
 describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => {
   let ctx: TestContext;
-  const suffix = randomUUID().slice(0, 8);
+  // En mayúsculas: `CreateInsuranceCampaignDto.code` sólo admite A-Z, dígitos y guiones,
+  // y un UUID en hexadecimal minúscula lo rechazaba (400) en casi todas las corridas.
+  const suffix = randomUUID().slice(0, 8).toUpperCase();
   const created: { userId: string; tenantId: string }[] = [];
   const organizations: Array<{
     tenantId: string;

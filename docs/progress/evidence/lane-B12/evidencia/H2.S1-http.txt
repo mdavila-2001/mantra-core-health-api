@@ -1,0 +1,8 @@
+$ corepack yarn test --testPathPatterns="public-catalog.http"
+PASS Fichas públicas por HTTP (M4 · H2) GET /public/profiles/o/:slug/services sin token → 200 con la envoltura pública
+PASS Fichas públicas por HTTP (M4 · H2) GET /public/profiles/f/:slug/products sin token → 200; el agotado viaja inStock=false
+PASS Fichas públicas por HTTP (M4 · H2) un slug inexistente y uno de otro tipo responden el mismo 404
+PASS Fichas públicas por HTTP (M4 · H2) limit fuera de rango, un parámetro no declarado o un cursor corrupto → 400
+Suites: 1 passed, 0 failed, 1 total
+Tests:  4 passed, 0 failed, 0 skipped, 4 total
+exit=0

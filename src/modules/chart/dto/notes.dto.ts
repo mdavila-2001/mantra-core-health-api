@@ -36,11 +36,17 @@ export class CreateNoteDto {
   patientProfileId!: string;
 
   /**
-   * Identificador asociado a author profile.
+   * Perfil del clínico autor. Opcional (CL-20): el autor es el profesional de
+   * la sesión; si viaja y difiere, la API responde 403.
    */
-  @ApiProperty({ format: 'uuid', description: 'Perfil del clínico autor' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403',
+  })
+  @IsOptional()
   @IsUUID()
-  authorProfileId!: string;
+  authorProfileId?: string;
 
   /**
    * Identificador asociado a encounter.
@@ -120,11 +126,16 @@ export class CreateNoteDto {
 /** Cuerpo de `PUT /charts/notes/{noteId}/versions` (UC-15-02): nueva versión borrador. */
 export class AddVersionDto {
   /**
-   * Identificador asociado a author profile.
+   * Perfil del clínico autor. Opcional (CL-20): sale de la sesión.
    */
-  @ApiProperty({ format: 'uuid', description: 'Perfil del clínico autor' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403',
+  })
+  @IsOptional()
   @IsUUID()
-  authorProfileId!: string;
+  authorProfileId?: string;
 
   /**
    * Valor de chief complaint text mantenido por la instancia.
@@ -235,14 +246,16 @@ export class CosignVersionDto {
 /** Cuerpo de `POST /charts/notes/{noteId}/amendments` (UC-15-05). */
 export class AmendNoteDto {
   /**
-   * Identificador asociado a author profile.
+   * Perfil del clínico que enmienda. Opcional (CL-20): sale de la sesión.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Perfil del clínico que enmienda',
+    description:
+      'Perfil del clínico que enmienda. Se toma de la sesión; si viaja otro, 403',
   })
+  @IsOptional()
   @IsUUID()
-  authorProfileId!: string;
+  authorProfileId?: string;
 
   /**
    * Valor de amendment reason text mantenido por la instancia.

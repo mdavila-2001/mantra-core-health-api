@@ -13,7 +13,30 @@ export enum OwnerType {
   CONDITION = 'CONDITION',
   /** Un procedimiento puntual (`clinical.procedures`), incluida la odontología. */
   PROCEDURE = 'PROCEDURE',
+  /** Una receta puntual (`clinical.medication_requests`) — P25. */
+  MEDICATION_REQUEST = 'MEDICATION_REQUEST',
+  /** Una alergia puntual (`clinical.allergy_intolerances`) — P25. */
+  ALLERGY_INTOLERANCE = 'ALLERGY_INTOLERANCE',
+  /** Un encuentro (`clinical.encounters`) — P25. */
+  ENCOUNTER = 'ENCOUNTER',
 }
+
+/**
+ * Tipos de dueño que son **historia clínica**: listar sus adjuntos es leer la
+ * historia, y eso exige relación asistencial o titularidad. El listado
+ * genérico (`GET /common/files/links`) no recibe al actor ni puede evaluar esa
+ * política, así que para estos tipos responde 403 y el front lista por la ruta
+ * clínica del recurso (BR-11 §1.C, cierre del IDOR para los tipos nuevos).
+ *
+ * `CONDITION` y `PROCEDURE` **no** están acá a propósito: el front los lista hoy
+ * por el genérico y cerrar ese hueco preexistente es de otro carril (queda
+ * registrado como observación, no se corrige de paso).
+ */
+export const CLINICAL_RECORD_OWNER_TYPES: ReadonlySet<OwnerType> = new Set([
+  OwnerType.MEDICATION_REQUEST,
+  OwnerType.ALLERGY_INTOLERANCE,
+  OwnerType.ENCOUNTER,
+]);
 
 /** Tipo de identificador oficial. */
 export enum IdentifierType {

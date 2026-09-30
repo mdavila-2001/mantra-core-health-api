@@ -17,6 +17,7 @@ import { InsuranceModule } from '../insurance/insurance.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
 import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
@@ -82,6 +83,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     PatientRepresentationService,
     MedicalSpecialtyCatalogService,
     AdministrativeAreaCatalogService,
+    HealthFacilityCatalogService,
     ProfilesAffiliationsService,
     LinkableOrganizationsService,
     // El emisor de avisos del vínculo entra por su puerto: el servicio que
@@ -115,6 +117,9 @@ import { MessagingModule } from '../messaging/messaging.module';
   // repositorios y no el servicio porque `registerPatient` de este módulo es
   // admin-only y abre su propia transacción.
   exports: [
+    // `DirectoryNetworksSeedService` (H3) carga los consultorios de las redes
+    // con el mismo caso de uso que el alta administrativa de una afiliación.
+    ProfilesPractitionersService,
     PersonsRepository,
     PersonProfilesRepository,
     PatientProfilesRepository,

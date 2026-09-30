@@ -18,6 +18,10 @@ export interface CreateCarePlanData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
@@ -209,6 +213,7 @@ export class CarePlansRepository {
         patientProfileId: data.patientProfileId,
         conditionId: data.conditionId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         statusConceptId: data.statusConceptId,
         intentConceptId: data.intentConceptId,
         goalText: data.goalText,

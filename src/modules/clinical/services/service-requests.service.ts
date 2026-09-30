@@ -26,6 +26,8 @@ import {
   DuplicateStudyDetector,
 } from './duplicate-study-detector';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
+// P43: la orden puede declarar de qué formulario médico cerrado sale.
+import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -56,6 +58,7 @@ export class ServiceRequestsService {
    * @param logger - Valor de logger requerido por la operación.
    * @param outbox - Publicación transaccional del hecho (MCH-027).
    * @param clinicalNotifications - Aviso in-app al paciente (MCH-027).
+   * @param formOrigin - Valida la instancia de formulario de origen (P43).
    */
   constructor(
     private readonly em: EntityManager,
@@ -66,6 +69,7 @@ export class ServiceRequestsService {
     private readonly logger: PinoLogger,
     private readonly outbox: OutboxService,
     private readonly clinicalNotifications: ClinicalNotificationsService,
+    private readonly formOrigin: FormInstanceOriginValidator,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -201,6 +205,14 @@ export class ServiceRequestsService {
     );
     return this.em.transactional(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // P43: sólo si viaja; 422 antes de escribir nada.
+      if (dto.formInstanceId !== undefined) {
+        await this.formOrigin.assertUsableOrigin(
+          tx,
+          dto.formInstanceId,
+          dto.encounterId,
+        );
+      }
 
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
 
@@ -208,6 +220,7 @@ export class ServiceRequestsService {
         custodianTenantId: dto.custodianTenantId,
         patientProfileId: dto.patientProfileId,
         encounterId: dto.encounterId,
+        formInstanceId: dto.formInstanceId,
         codeConceptId: dto.codeConceptId,
         categoryConceptId: dto.categoryConceptId,
         intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
@@ -273,6 +286,7 @@ export class ServiceRequestsService {
       return {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
+        formInstanceId: sr.formInstanceId ?? null,
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
         createdAt: sr.createdAt,

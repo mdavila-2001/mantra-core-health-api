@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
+import { LabStaffGuard } from '../guards';
 import { DiagnosticsSpecimensService } from '../services';
 import {
   CreateSpecimenDto,
@@ -18,16 +25,23 @@ import {
   ContainerCustodyEventDto,
   ResourceCreatedDto,
   AccessionCreatedDto,
+  AccessionDetailDto,
+  SpecimenDetailDto,
 } from '../dto';
 
 /**
  * Endpoints del agregado de especímenes: alta (soporte), acesión (UC-20-01),
  * rechazo (UC-20-02), alta de contenedor (soporte) y cadena de custodia
  * (UC-20-03). Capa fina: valida parámetros y delega en el servicio.
+ *
+ * Autoriza `LabStaffGuard` en lugar de `@Roles('CLINICIAN', 'PRACTITIONER')`:
+ * esos dos roles siguen pasando igual, y además el personal de un laboratorio
+ * (`DIAGNOSTIC_CENTER`) por su membresía — sin ella, el laboratorio que se
+ * registraba no podía recibir una muestra en su propia recepción.
  */
 @ApiTags('diagnostics-specimens')
 @ApiBearerAuth()
-@Roles('CLINICIAN', 'PRACTITIONER')
+@UseGuards(LabStaffGuard)
 @Controller('diagnostics')
 export class DiagnosticsSpecimensController {
   /**
@@ -46,6 +60,35 @@ export class DiagnosticsSpecimensController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     return this.service.createSpecimen(dto, actor);
+  }
+
+  /**
+   * Lectura (CL-47): detalle de una acesión con sus especímenes, contenedores
+   * y cadena de custodia. Antes de esta ruta, `diagnostics` sólo tenía `POST`
+   * para el circuito de especímenes: abrir el detalle de una acesión concreta
+   * no tenía dónde ir.
+   */
+  @Get('accessions/:id')
+  @ApiOperation({
+    summary: 'Detalle de una acesión (especímenes, contenedores y custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getAccession(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AccessionDetailDto> {
+    return this.service.getAccession(id, requireTenantId());
+  }
+
+  /** Lectura (CL-47): detalle de un espécimen con su cadena de custodia. */
+  @Get('specimens/:id')
+  @ApiOperation({
+    summary: 'Detalle de un espécimen (con su cadena de custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getSpecimen(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SpecimenDetailDto> {
+    return this.service.getSpecimen(id, requireTenantId());
   }
 
   /** UC-20-01. */

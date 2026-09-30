@@ -63,6 +63,16 @@ export class CreateAffiliationDto {
   practiceSiteId?: string;
 
   /**
+   * Establecimiento del padrón oficial (`VS_BO_HEALTH_FACILITY`) cuando se
+   * eligió de la lista. Fuera del padrón responde 422; el mismo establecimiento
+   * con el mismo cargo e inicio, 409.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  healthFacilityConceptId?: string;
+
+  /**
    * Tipo de vínculo (concept id).
    */
   @ApiPropertyOptional({
@@ -104,7 +114,11 @@ export class CreateAffiliationDto {
  * `endDate: null` vuelve vigente el vínculo; omitirlo lo deja como estaba.
  */
 export class UpdateAffiliationDto extends PartialType(
-  OmitType(CreateAffiliationDto, ['practiceSiteId', 'endDate'] as const),
+  OmitType(CreateAffiliationDto, [
+    'practiceSiteId',
+    'healthFacilityConceptId',
+    'endDate',
+  ] as const),
 ) {
   @ApiPropertyOptional({
     description:
@@ -147,6 +161,12 @@ export class AffiliationResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   practiceSiteId!: string | null;
+
+  /**
+   * Establecimiento del padrón oficial, si se eligió de la lista.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  healthFacilityConceptId!: string | null;
 
   /**
    * Tipo de vínculo.

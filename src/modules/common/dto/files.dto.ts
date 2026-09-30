@@ -487,6 +487,33 @@ export class ListFileLinksQueryDto {
 }
 
 /**
+ * Parámetros opcionales de la URL que emite `GET /common/files/:id/download-url`.
+ *
+ * Sin ellos, `GET /common/files/:id/content` sirve por autoría como siempre. Si
+ * llega alguno, los tres tienen que venir y la firma se **valida** (TX-09): la
+ * URL se emitía y nadie la comprobaba. Sigue exigiendo sesión: la firma no
+ * reemplaza al bearer, así que cada lectura queda con su actor.
+ */
+export class SignedDownloadQueryDto {
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  versionId?: string;
+
+  @ApiPropertyOptional({ description: 'Vencimiento, en milisegundos epoch' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  expires?: string;
+
+  @ApiPropertyOptional({ description: 'HMAC-SHA256 en hexadecimal' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  signature?: string;
+}
+
+/**
  * Un archivo adjunto a un recurso: el vínculo y el archivo, resueltos juntos.
  *
  * Se devuelven en la misma fila —y no el vínculo con un `fileId` que la

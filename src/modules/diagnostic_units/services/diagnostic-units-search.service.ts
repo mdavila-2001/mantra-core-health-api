@@ -183,6 +183,34 @@ export class DiagnosticUnitsSearchService {
       ahora,
     );
 
+    // CL-45/CL-51: ciudad de cada sede, siguiendo el mismo salto que ya usa la
+    // consola de administración (C16): sede del centro → sede de `practice` →
+    // dirección de `common`.
+    const practiceSites = await this.readRepo.findPracticeSites(
+      em,
+      sitios.map((sitio) => sitio.practiceSiteId),
+    );
+    const addressIds = practiceSites
+      .map((ps) => ps.addressId)
+      .filter((id): id is string => id !== undefined);
+    const addresses = await this.readRepo.findAddresses(em, addressIds);
+    const ciudadPorAddressId = new Map(
+      addresses
+        .filter((a) => a.city !== undefined && a.city !== '')
+        .map((a) => [a.id, a.city as string]),
+    );
+    const ciudadPorPracticeSiteId = new Map(
+      practiceSites
+        .map((ps): [string, string] | undefined =>
+          ps.addressId === undefined
+            ? undefined
+            : ciudadPorAddressId.has(ps.addressId)
+              ? [ps.id, ciudadPorAddressId.get(ps.addressId) as string]
+              : undefined,
+        )
+        .filter((par): par is [string, string] => par !== undefined),
+    );
+
     const conceptoPorId = new Map(
       conceptos.map((concepto) => [concepto.id, concepto]),
     );
@@ -195,6 +223,12 @@ export class DiagnosticUnitsSearchService {
         cronograma.diagnosticUnitId,
       ]),
     );
+    const monedaPorCronograma = new Map(
+      cronogramas.map((cronograma) => [
+        cronograma.id,
+        cronograma.currencyConceptId,
+      ]),
+    );
 
     const sitiosPorUnidad = contarPor(sitios, (s) => s.diagnosticUnitId);
     const estudiosPorUnidad = contarPor(ofertas, (o) => o.diagnosticUnitId);
@@ -202,7 +236,17 @@ export class DiagnosticUnitsSearchService {
       unidadPorSitio.get(e.diagnosticUnitSiteId),
     );
 
+    const ciudadesPorUnidad = new Map<string, Set<string>>();
+    for (const sitio of sitios) {
+      const ciudad = ciudadPorPracticeSiteId.get(sitio.practiceSiteId);
+      if (ciudad === undefined) continue;
+      const set = ciudadesPorUnidad.get(sitio.diagnosticUnitId) ?? new Set();
+      set.add(ciudad);
+      ciudadesPorUnidad.set(sitio.diagnosticUnitId, set);
+    }
+
     const minimoPorUnidad = new Map<string, number>();
+    const monedaMinimaPorUnidad = new Map<string, string | undefined>();
     for (const precio of precios) {
       const unidadId = unidadPorCronograma.get(precio.priceScheduleId);
       if (unidadId === undefined) continue;
@@ -214,14 +258,27 @@ export class DiagnosticUnitsSearchService {
       const previo = minimoPorUnidad.get(unidadId);
       if (previo === undefined || importe < previo) {
         minimoPorUnidad.set(unidadId, importe);
+        monedaMinimaPorUnidad.set(
+          unidadId,
+          monedaPorCronograma.get(precio.priceScheduleId),
+        );
       }
     }
+    const conceptosMoneda = await this.readRepo.findConcepts(em, [
+      ...new Set(
+        [...monedaMinimaPorUnidad.values()].filter(
+          (id): id is string => id !== undefined,
+        ),
+      ),
+    ]);
+    const monedaConceptoPorId = new Map(conceptosMoneda.map((c) => [c.id, c]));
 
     return unidades.map((unidad) => {
       const nota =
         unidad.publicProfileId === undefined
           ? undefined
           : notas.get(unidad.publicProfileId);
+      const monedaConceptoId = monedaMinimaPorUnidad.get(unidad.id);
       return {
         id: unidad.id,
         tenantId: unidad.tenantId,
@@ -237,6 +294,11 @@ export class DiagnosticUnitsSearchService {
         rating: nota?.average ?? null,
         ratingCount: nota?.count ?? 0,
         minAmount: minimoPorUnidad.get(unidad.id) ?? null,
+        minAmountCurrency:
+          monedaConceptoId === undefined
+            ? null
+            : (monedaConceptoPorId.get(monedaConceptoId)?.code ?? null),
+        cities: [...(ciudadesPorUnidad.get(unidad.id) ?? [])].sort(),
       };
     });
   }

@@ -38,7 +38,10 @@ import {
   PharmacyOrderSubstitutionsRepository,
 } from '../repositories';
 import { PharmacyReadRepository } from '../../pharmacy/repositories';
-import { isRetailList } from '../../pharmacy/services/pharmacy-read.service';
+import {
+  addressText,
+  isRetailList,
+} from '../../pharmacy/services/pharmacy-read.service';
 import {
   multiplyAmounts,
   payableAmount,
@@ -53,6 +56,7 @@ import type {
   CreatePharmacyOrderDto,
   DispensePharmacyOrderDto,
   PharmacyOrderDto,
+  PharmacyOrderPrescriberDto,
   PharmacyOrderLineDto,
   PharmacyOrderListResponseDto,
   PharmacyOrderSubstitutionDto,
@@ -2234,7 +2238,32 @@ export class PharmacyOrdersService {
   ): Promise<PharmacyOrderDto[]> {
     if (orders.length === 0) return [];
 
-    const [lines, sites, pharmacies, patientNames] = await Promise.all([
+    // Quién firmó cada receta: primero el prescriptor de cada una (una
+    // consulta), para que su nombre entre al MISMO lote que el del paciente y
+    // su especialidad al mismo lote de terminología — sin N+1 ni lotes extra.
+    const requestIds = uniqueIds(
+      orders.map((order) => order.medicationRequestId),
+    );
+    const prescriberByRequest =
+      requestIds.length === 0
+        ? new Map<string, string>()
+        : await this.ordersRepo.findPrescriberProfileIdsByRequestIds(
+            em,
+            requestIds,
+          );
+    const prescriberIds = [...new Set(prescriberByRequest.values())];
+    const deliveryAddressIds = uniqueIds(
+      orders.map((order) => order.deliveryAddressId),
+    );
+
+    const [
+      lines,
+      sites,
+      pharmacies,
+      personNames,
+      specialtyByPrescriber,
+      deliveryAddresses,
+    ] = await Promise.all([
       this.ordersRepo.findLinesByReservationIds(
         em,
         orders.map((order) => order.id),
@@ -2245,15 +2274,26 @@ export class PharmacyOrdersService {
       this.ordersRepo.findPharmaciesByIdsInTenant(em, tenantId, [
         ...new Set(orders.map((order) => order.pharmacyId)),
       ]),
-      // El nombre del paciente, en lote: la bandeja FAR-E2 lo pinta y un
-      // uuid no se pinta.
+      // El nombre del paciente —y el del prescriptor—, en lote: la bandeja
+      // FAR-E2 lo pinta y un uuid no se pinta.
       this.ordersRepo.findPersonNamesByProfileIds(em, [
-        ...new Set(
-          orders
+        ...new Set([
+          ...orders
             .map((order) => order.patientProfileId)
             .filter((id): id is string => Boolean(id)),
-        ),
+          ...prescriberIds,
+        ]),
       ]),
+      prescriberIds.length === 0
+        ? Promise.resolve(new Map<string, string>())
+        : this.ordersRepo.findPrimarySpecialtyConceptIds(
+            em,
+            prescriberIds,
+            new Date(),
+          ),
+      deliveryAddressIds.length === 0
+        ? Promise.resolve([])
+        : this.ordersRepo.findAddressesByIds(em, deliveryAddressIds),
     ]);
     // La historia de sustituciones viaja con el pedido; sus productos entran
     // al mismo lote de nombres.
@@ -2282,6 +2322,7 @@ export class PharmacyOrdersService {
           ...substitutions.map(
             (substitution) => substitution.currencyConceptId,
           ),
+          ...specialtyByPrescriber.values(),
         ].filter((id): id is string => Boolean(id)),
       ),
     ]);
@@ -2313,11 +2354,33 @@ export class PharmacyOrdersService {
       concepts.map((concept) => [concept.id, concept]),
     );
 
+    const addressById = new Map(
+      deliveryAddresses.map((address) => [address.id, address]),
+    );
+    const prescriberOf = (
+      order: InventoryReservations,
+    ): PharmacyOrderPrescriberDto | null => {
+      const profileId = order.medicationRequestId
+        ? prescriberByRequest.get(order.medicationRequestId)
+        : undefined;
+      if (!profileId) return null;
+      const specialtyId = specialtyByPrescriber.get(profileId);
+      return {
+        name: personNames.get(profileId) ?? null,
+        specialty: specialtyId
+          ? (conceptById.get(specialtyId)?.display ?? null)
+          : null,
+      };
+    };
+
     const items: PharmacyOrderDto[] = [];
     for (const order of orders) {
       const pharmacy = pharmacyById.get(order.pharmacyId);
       if (!pharmacy) continue;
       const site = siteById.get(order.pharmacySiteId);
+      const deliveryAddress = order.deliveryAddressId
+        ? addressById.get(order.deliveryAddressId)
+        : undefined;
       items.push(
         toOrderDto(
           order,
@@ -2328,14 +2391,25 @@ export class PharmacyOrdersService {
           productById,
           conceptById,
           order.patientProfileId
-            ? (patientNames.get(order.patientProfileId) ?? null)
+            ? (personNames.get(order.patientProfileId) ?? null)
             : null,
           viewer,
+          {
+            prescriber: prescriberOf(order),
+            deliveryAddressText: deliveryAddress
+              ? addressText(deliveryAddress)
+              : null,
+          },
         ),
       );
     }
     return items;
   }
+}
+
+/** Ids presentes y sin repetir, en el orden en que aparecen. */
+function uniqueIds(ids: readonly (string | null | undefined)[]): string[] {
+  return [...new Set(ids.filter((id): id is string => Boolean(id)))];
 }
 
 /** Saldo por retirar de una línea: lo reservado menos lo ya entregado. */
@@ -2436,6 +2510,10 @@ function toOrderDto(
   conceptById: ReadonlyMap<string, CatalogConcepts>,
   patientName: string | null,
   viewer: OrderViewer,
+  resolved: Pick<PharmacyOrderDto, 'prescriber' | 'deliveryAddressText'> = {
+    prescriber: null,
+    deliveryAddressText: null,
+  },
 ): PharmacyOrderDto {
   const grouped = new Map<string, InventoryReservationLines[]>();
   for (const line of lines) {
@@ -2509,10 +2587,12 @@ function toOrderDto(
     pharmacyId: pharmacy.id,
     pharmacyName: pharmacyName(pharmacy),
     medicationRequestId: order.medicationRequestId ?? null,
+    prescriber: resolved.prescriber,
     patientName,
     deliveryMode: order.deliveryModeConceptId
       ? moduleConcept(order.deliveryModeConceptId)
       : null,
+    deliveryAddressText: resolved.deliveryAddressText,
     // La prueba de posesión es del titular: el staff la sirve null siempre.
     pickupCode: viewer === 'owner' ? (order.pickupCode ?? null) : null,
     totalAmount: order.totalAmount ?? null,

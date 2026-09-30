@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -12,6 +13,7 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 import {
   MAX_REASON_LENGTH,
@@ -925,6 +927,41 @@ export class ListWaitlistResponseDto {
 }
 
 /**
+ * P42 · De qué consulta sale una reconsulta (`followUpOf` de la cita directa).
+ *
+ * Mismos nombres que `FollowUpOrigin` del frontend. Sólo `bookingId` decide:
+ * el encuentro de origen lo resuelve el servidor desde esa reserva, así que
+ * `encounterId` se acepta (el cliente lo manda) pero no se guarda ni se usa
+ * para validar — una sola verdad, la de la base.
+ */
+export class FollowUpOriginDto {
+  /** La reserva de la que nace esta reconsulta. */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  bookingId!: string;
+
+  /**
+   * El encuentro de esa reserva, tal como lo conoce el cliente. Informativo:
+   * el servidor lo resuelve desde `bookingId`.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
+  @IsOptional()
+  @IsUUID()
+  encounterId?: string | null;
+
+  /**
+   * P43: la instancia CERRADA del formulario médico de la consulta de origen
+   * de la que sale la reconsulta. Opcional para la API (la pantalla lo exige);
+   * si viaja, debe existir, estar cerrada y ser del encuentro de la consulta
+   * de origen (422 `PRECONDITION_FAILED` si no).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  formInstanceId?: string;
+}
+
+/**
  * Cuerpo de `POST /scheduling/appointments/direct` — la cita puntual (AG-2).
  *
  * El doctor asigna: «volvé el jueves a las 10». La cita ya se acordó en el
@@ -989,6 +1026,21 @@ export class CreateDirectAppointmentDto {
   @IsOptional()
   @IsIn(APPOINTMENT_CHANNELS as readonly string[])
   channel?: AppointmentChannel;
+
+  /**
+   * P42 · La reconsulta: la cita nace atada a la consulta de la que sale.
+   *
+   * Sólo cuando viene corren cuatro rechazos: 403 si la agenda no es del
+   * profesional de la sesión; 404 si la cita de origen no existe; 422 si el
+   * paciente no es el de esa cita o `startAt` no es futuro; 409 si esa
+   * consulta ya tiene una reconsulta por venir y no cancelada. Sin él, la cita
+   * puntual se crea exactamente como antes.
+   */
+  @ApiPropertyOptional({ type: () => FollowUpOriginDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => FollowUpOriginDto)
+  followUpOf?: FollowUpOriginDto;
 }
 
 /** Respuesta de la cita puntual. */

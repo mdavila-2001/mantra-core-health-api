@@ -21,6 +21,9 @@ import {
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalReadService } from './clinical-read.service';
+// BR-14 (CL-07): un encuentro sellado no admite más escrituras que lo
+// referencien. Archivo y servicio nuevos, independientes.
+import { EncounterSealGuardService } from './encounter-seal-guard.service';
 
 /** Campos de valor recibidos por DTO (números; el modelo persiste string). */
 interface ValueLike {
@@ -78,6 +81,7 @@ export class ObservationsService {
     private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterSealGuard: EncounterSealGuardService,
   ) {
     this.logger.setContext(ObservationsService.name);
   }
@@ -150,6 +154,12 @@ export class ObservationsService {
           encounterId: dto.encounterId,
         });
       }
+      // BR-14 (CL-07): el encuentro tiene que seguir abierto para admitir una
+      // observación nueva contra él.
+      await this.encounterSealGuard.assertEncounterWritable(
+        tx,
+        dto.encounterId,
+      );
     }
     if (dto.basedOnServiceRequestId) {
       const order = await this.serviceRequestsRepo.findById(

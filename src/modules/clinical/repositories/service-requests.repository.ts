@@ -20,6 +20,10 @@ export interface CreateServiceRequestData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a code concept.
    */
   codeConceptId: string;
@@ -91,6 +95,7 @@ export class ServiceRequestsRepository {
         custodianTenantId: data.custodianTenantId,
         patientProfileId: data.patientProfileId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         codeConceptId: data.codeConceptId,
         categoryConceptId: data.categoryConceptId,
         intentConceptId: data.intentConceptId,

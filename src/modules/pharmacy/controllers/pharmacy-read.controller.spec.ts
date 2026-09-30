@@ -12,8 +12,18 @@ function build() {
     searchProducts: mockFn().mockResolvedValue({}),
     getSitePrices: mockFn().mockResolvedValue({}),
   };
-  const controller = new PharmacyReadController(readService as any);
-  return { controller, readService };
+  const staffReadService = {
+    listLicenses: mockFn().mockResolvedValue({ items: [], count: 0 }),
+    getContacts: mockFn().mockResolvedValue({
+      legalRepresentative: null,
+      executives: [],
+    }),
+  };
+  const controller = new PharmacyReadController(
+    readService as any,
+    staffReadService as any,
+  );
+  return { controller, readService, staffReadService };
 }
 
 describe('PharmacyReadController', () => {
@@ -100,6 +110,28 @@ describe('PharmacyReadController', () => {
       expect(d.readService.searchProducts).toHaveBeenCalledWith(
         { search: 'amox', conceptId: undefined, pharmacyId: undefined },
         50,
+      );
+    });
+  });
+
+  describe('lecturas del personal (licencias y contactos)', () => {
+    const actor = { id: 'user-1', roles: ['USER'] } as any;
+
+    it('delegates the license folder with the actor, without deciding scope', async () => {
+      const d = build();
+      await d.controller.listLicenses('ph-1', actor);
+      expect(d.staffReadService.listLicenses).toHaveBeenCalledWith(
+        'ph-1',
+        actor,
+      );
+    });
+
+    it('delegates the contacts with the actor, without deciding scope', async () => {
+      const d = build();
+      await d.controller.getContacts('ph-1', actor);
+      expect(d.staffReadService.getContacts).toHaveBeenCalledWith(
+        'ph-1',
+        actor,
       );
     });
   });
