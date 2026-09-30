@@ -23,6 +23,7 @@ import {
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
   GLOSSARY_SLUG_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
+  glossaryRelationTypeFromConceptId,
   type GlossaryBilingualText,
 } from '../../modules/terminology/glossary.constants';
 import {
@@ -59,6 +60,48 @@ const GLOSSARY_VALUE_SET_VERSION = '1.0.0';
 const JSON_DATA_TYPE = 'json';
 const STRING_DATA_TYPE = 'string';
 
+/**
+ * Cuántos índices de sinónimo se reconocen como propios al reconciliar. Un
+ * sinónimo sembrado tiene id `glossary:designation:synonym:<slug>:<i>`; el que
+ * pasó ese tope no lo escribió nunca este servicio. Ningún término curado
+ * declara más de tres.
+ */
+const MAX_OWNED_SYNONYM_INDEX = 32;
+
+/** Los siete códigos de propiedad que este servicio escribe. */
+const OWNED_PROPERTY_CODES = [
+  GLOSSARY_SLUG_PROPERTY_CODE,
+  GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
+  GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
+  GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
+  GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
+  GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE,
+] as const;
+
+/** Igualdad estructural de dos valores jsonb (el orden de las claves no cuenta). */
+function sameJson(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (
+    typeof a !== 'object' ||
+    typeof b !== 'object' ||
+    a === null ||
+    b === null
+  ) {
+    return false;
+  }
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  return keysA.every((key) =>
+    sameJson(
+      (a as Record<string, unknown>)[key],
+      (b as Record<string, unknown>)[key],
+    ),
+  );
+}
+
 /** El código FHIR de un concepto de término, derivado de su slug. */
 function glossaryConceptCode(slug: string): string {
   return `GLOSSARY_${slug.toUpperCase().replace(/-/g, '_')}`;
@@ -77,7 +120,9 @@ function glossaryConceptCode(slug: string): string {
  *
  * Idempotente por el mismo mecanismo que el resto del seed: todo id es
  * determinista (UUIDv5 sobre una clave estable), así que una corrida repetida
- * compara por id e inserta sólo lo que falta. Corre **después** de
+ * compara por id e inserta sólo lo que falta. Después **reconcilia** (ver
+ * `reconcile`): una corrección del catálogo —texto, sinónimos, categoría,
+ * etiquetas, relaciones— también llega a una base ya sembrada. Corre **después** de
  * `TerminologySeedService` (necesita `CONCEPTS.TERM_ACTIVE` y el resto de los
  * conceptos de estado ya materializados) — el orquestador
  * (`SeedBootstrapService`) impone ese orden. Desde FND-25-03 este servicio ya
@@ -122,6 +167,10 @@ export class GlossarySeedService {
     orphanRelationships: number;
     /** Conceptos de término migrados de `mantra-core` al code system propio del glosario (FND-25-03). */
     codeSystemBackfilled: number;
+    /** Filas ya sembradas cuyo contenido se actualizó para coincidir con el catálogo. */
+    updated: number;
+    /** Filas sembradas que el catálogo ya no declara y se quitaron. */
+    removed: number;
   }> {
     this.assertUniqueSlugs();
 
@@ -136,6 +185,8 @@ export class GlossarySeedService {
       relationships: 0,
       orphanRelationships: 0,
       codeSystemBackfilled: 0,
+      updated: 0,
+      removed: 0,
     };
 
     // --- Nivel 0: procedencia propia del catálogo curado (FND-25-03) ---
@@ -250,6 +301,11 @@ export class GlossarySeedService {
     counters.relationships += relResult.created;
     counters.orphanRelationships += relResult.orphans;
 
+    // --- Nivel 8: reconciliación de una base ya sembrada ---
+    const reconciled = await this.reconcile(em, relResult.declaredIds, now);
+    counters.updated += reconciled.updated;
+    counters.removed += reconciled.removed;
+
     if (
       counters.valueSets +
         counters.terms +
@@ -257,7 +313,9 @@ export class GlossarySeedService {
         counters.properties +
         counters.memberships +
         counters.relationships +
-        counters.codeSystemBackfilled >
+        counters.codeSystemBackfilled +
+        counters.updated +
+        counters.removed >
       0
     ) {
       this.logger.info(
@@ -597,7 +655,7 @@ export class GlossarySeedService {
   private async seedRelationships(
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
-  ): Promise<{ created: number; orphans: number }> {
+  ): Promise<{ created: number; orphans: number; declaredIds: Set<string> }> {
     const slugToConceptId = new Map(
       GLOSSARY_TERMS.map((term) => [
         term.slug,
@@ -669,7 +727,203 @@ export class GlossarySeedService {
       created += 1;
     }
     await em.flush();
-    return { created, orphans };
+    return {
+      created,
+      orphans,
+      declaredIds: new Set(resolved.map((row) => row.id)),
+    };
+  }
+
+  /**
+   * Lleva una base ya sembrada al estado que declara el catálogo.
+   *
+   * Los niveles anteriores sólo insertan lo que falta: una corrección del
+   * catálogo —un sinónimo quitado, una categoría cambiada, un resumen
+   * reescrito— no llegaba nunca a una base existente. Esto compara lo que hay
+   * contra lo declarado y actualiza o quita la diferencia.
+   *
+   * Sólo toca filas que este servicio escribió, y lo prueba por el id: todo id
+   * sembrado es determinista (`glossary-taxonomy.ts`), así que una fila es
+   * propia sólo si su id es exactamente el que la fórmula daría para ese
+   * término. Una designación, propiedad, membresía o relación que otro agregó
+   * sobre un término curado tiene otro id y no se toca. Idempotente: con la
+   * base ya reconciliada no encuentra diferencias y no escribe nada.
+   *
+   * Las actualizaciones pasan por la unidad de trabajo (no `nativeUpdate`)
+   * para que `row_version` avance como en cualquier otra escritura.
+   */
+  private async reconcile(
+    em: ReturnType<MikroORM['em']['fork']>,
+    declaredRelationshipIds: Set<string>,
+    now: Date,
+  ): Promise<{ updated: number; removed: number }> {
+    const slugByConceptId = new Map(
+      GLOSSARY_TERMS.map((term) => [glossaryTermConceptId(term.slug), term]),
+    );
+    const conceptIds = [...slugByConceptId.keys()];
+    let updated = 0;
+    let removed = 0;
+    const touch = <T extends { updatedAt: Date }>(row: T): void => {
+      row.updatedAt = now;
+      updated += 1;
+    };
+
+    // Nombre en inglés del concepto (`display`).
+    const concepts = await em.find(CatalogConcepts, {
+      id: { $in: conceptIds },
+    });
+    for (const concept of concepts) {
+      const term = slugByConceptId.get(concept.id);
+      if (term !== undefined && concept.display !== term.enDisplay) {
+        concept.display = term.enDisplay;
+        touch(concept);
+      }
+    }
+
+    // Designaciones: la preferida y los sinónimos, por índice.
+    const desiredDesignations = new Map<string, string>();
+    const ownedDesignations = new Set<string>();
+    for (const term of GLOSSARY_TERMS) {
+      const preferredId = glossaryPreferredDesignationId(term.slug);
+      desiredDesignations.set(preferredId, term.esName);
+      ownedDesignations.add(preferredId);
+      (term.esSynonyms ?? []).forEach((synonym, index) =>
+        desiredDesignations.set(
+          glossarySynonymDesignationId(term.slug, index),
+          synonym,
+        ),
+      );
+      for (let index = 0; index < MAX_OWNED_SYNONYM_INDEX; index += 1) {
+        ownedDesignations.add(glossarySynonymDesignationId(term.slug, index));
+      }
+    }
+    const designations = await em.find(ConceptDesignations, {
+      conceptId: { $in: conceptIds },
+    });
+    for (const designation of designations) {
+      if (!ownedDesignations.has(designation.id)) continue;
+      const value = desiredDesignations.get(designation.id);
+      if (value === undefined) {
+        em.remove(designation);
+        removed += 1;
+      } else if (designation.value !== value) {
+        designation.value = value;
+        touch(designation);
+      }
+    }
+
+    // Propiedades: definición, resumen, slug y ficha de medicamento.
+    const desiredProperties = new Map<string, unknown>();
+    const ownedProperties = new Set<string>();
+    for (const term of GLOSSARY_TERMS) {
+      for (const code of OWNED_PROPERTY_CODES) {
+        ownedProperties.add(glossaryPropertyId(term.slug, code));
+      }
+      for (const [code, value] of this.declaredProperties(term)) {
+        desiredProperties.set(glossaryPropertyId(term.slug, code), value);
+      }
+    }
+    const properties = await em.find(ConceptProperties, {
+      conceptId: { $in: conceptIds },
+    });
+    for (const property of properties) {
+      if (!ownedProperties.has(property.id)) continue;
+      if (!desiredProperties.has(property.id)) {
+        em.remove(property);
+        removed += 1;
+        continue;
+      }
+      const value = desiredProperties.get(property.id);
+      if (!sameJson(property.valueJson, value)) {
+        property.valueJson = value;
+        touch(property);
+      }
+    }
+
+    // Membresías: la categoría vieja y las etiquetas que ya no van se quitan
+    // (las nuevas ya las insertó `seedMemberships`).
+    const internalCodeByVersionId = new Map(
+      GLOSSARY_TAXONOMY.map((entry) => [
+        glossaryValueSetVersionId(entry.internalCode),
+        entry.internalCode,
+      ]),
+    );
+    const desiredMemberships = new Set(
+      this.resolveMemberships().map((membership) =>
+        glossaryValueSetMemberId(membership.internalCode, membership.conceptId),
+      ),
+    );
+    const memberships = await em.find(ValueSetMembers, {
+      conceptId: { $in: conceptIds },
+      valueSetVersionId: { $in: [...internalCodeByVersionId.keys()] },
+    });
+    for (const membership of memberships) {
+      const internalCode = internalCodeByVersionId.get(
+        membership.valueSetVersionId,
+      );
+      const owned =
+        internalCode !== undefined &&
+        membership.id ===
+          glossaryValueSetMemberId(internalCode, membership.conceptId);
+      if (owned && !desiredMemberships.has(membership.id)) {
+        em.remove(membership);
+        removed += 1;
+      }
+    }
+
+    // Relaciones entre términos curados que el catálogo ya no declara.
+    const relationships = await em.find(ConceptRelationships, {
+      sourceConceptId: { $in: conceptIds },
+    });
+    for (const relationship of relationships) {
+      const source = slugByConceptId.get(relationship.sourceConceptId);
+      const target = slugByConceptId.get(relationship.targetConceptId);
+      const type = glossaryRelationTypeFromConceptId(
+        relationship.relationshipTypeConceptId,
+      );
+      const owned =
+        source !== undefined &&
+        target !== undefined &&
+        type !== undefined &&
+        relationship.id ===
+          glossaryRelationshipId(source.slug, type, target.slug);
+      if (owned && !declaredRelationshipIds.has(relationship.id)) {
+        em.remove(relationship);
+        removed += 1;
+      }
+    }
+
+    await em.flush();
+    return { updated, removed };
+  }
+
+  /** Las propiedades que el catálogo declara para un término, por código. */
+  private declaredProperties(
+    term: GlossaryTermSeed,
+  ): readonly (readonly [string, unknown])[] {
+    const clinicalDefinition: GlossaryBilingualText = term.clinicalDefinitionEn
+      ? { es: term.clinicalDefinitionEs, en: term.clinicalDefinitionEn }
+      : { es: term.clinicalDefinitionEs };
+    const plainSummary: GlossaryBilingualText = term.plainSummaryEn
+      ? { es: term.plainSummaryEs, en: term.plainSummaryEn }
+      : { es: term.plainSummaryEs };
+    const rows: (readonly [string, unknown])[] = [
+      [GLOSSARY_SLUG_PROPERTY_CODE, term.slug],
+      [GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE, clinicalDefinition],
+      [GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE, plainSummary],
+    ];
+    if (term.drugFacts !== undefined) {
+      rows.push(
+        [
+          GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
+          term.drugFacts.activeIngredients,
+        ],
+        [GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE, term.drugFacts.dosageForm],
+        [GLOSSARY_DRUG_ROUTE_PROPERTY_CODE, term.drugFacts.route],
+        [GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE, term.drugFacts.manufacturer],
+      );
+    }
+    return rows;
   }
 
   /**
