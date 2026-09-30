@@ -1,5 +1,5 @@
 import { describe, it, expect, jest } from '@jest/globals';
-import { ConceptsService } from './concepts.service';
+import { ConceptsService, imageFromProperty } from './concepts.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -10,6 +10,7 @@ import {
 import {
   GLOSSARY_ALL_TERMS_CODE,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
+  GLOSSARY_IMAGE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
   GLOSSARY_SLUG_PROPERTY_CODE,
 } from '../glossary.constants';
@@ -31,6 +32,7 @@ function build() {
     findByVersionAndCode: jest.fn(),
     findByIds: jest.fn(() => Promise.resolve(new Map())),
     search: jest.fn(() => Promise.resolve([])),
+    searchGlossaryPage: jest.fn(() => Promise.resolve({ ids: [], total: 0 })),
   } as any;
   const designationsRepo = {
     createDesignation: jest.fn(),
@@ -55,6 +57,7 @@ function build() {
     findIncludedConceptIdsByValueSet: jest.fn(() => Promise.resolve([])),
     findById: jest.fn(() => Promise.resolve(null)),
     findByInternalCode: jest.fn(() => Promise.resolve(null)),
+    findDefaultVersion: jest.fn(() => Promise.resolve({ id: 'vsv-1' })),
   } as any;
   const codeSystemsRepo = { findByCanonicalUrl: jest.fn() } as any;
   const versionsRepo = { findDefaultActiveVersion: jest.fn() } as any;
@@ -922,23 +925,29 @@ describe('ConceptsService', () => {
       it('acotada a un value set del glosario trae slug/categoría/etiquetas/resumen/estado y filtra por activo', async () => {
         const { service, conceptsRepo, designationsRepo, valueSetsRepo, em } =
           build();
-        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
-          'concept-1',
-        ]);
         valueSetsRepo.findById.mockResolvedValue({
           internalCode: 'glossary-category-anatomy',
         });
-        conceptsRepo.search.mockResolvedValue([
-          {
-            id: 'concept-1',
-            code: 'GLOSSARY_CORAZON',
-            display: 'Heart',
-            definition: undefined,
-            selectable: true,
-            codeSystemVersionId: 'v1',
-            stateConceptId: CONCEPTS.TERM_ACTIVE,
-          },
-        ]);
+        conceptsRepo.searchGlossaryPage.mockResolvedValue({
+          ids: ['concept-1'],
+          total: 1,
+        });
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            [
+              'concept-1',
+              {
+                id: 'concept-1',
+                code: 'GLOSSARY_CORAZON',
+                display: 'Heart',
+                definition: undefined,
+                selectable: true,
+                codeSystemVersionId: 'v1',
+                stateConceptId: CONCEPTS.TERM_ACTIVE,
+              },
+            ],
+          ]),
+        );
         valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
           new Map([['concept-1', glossaryValueSets]]),
         );
@@ -972,11 +981,22 @@ describe('ConceptsService', () => {
           { valueSetId: 'vs-1' },
         );
 
-        expect(conceptsRepo.search).toHaveBeenCalledWith(
+        expect(conceptsRepo.searchGlossaryPage).toHaveBeenCalledWith(
           em,
-          expect.objectContaining({ stateConceptId: CONCEPTS.TERM_ACTIVE }),
+          expect.objectContaining({
+            valueSetVersionId: 'vsv-1',
+            stateConceptId: CONCEPTS.TERM_ACTIVE,
+          }),
           50,
+          0,
         );
+        // Ya no se pasa por la lista de ids del conjunto: con cientos de miles
+        // de términos, eso era un `IN` del tamaño del glosario.
+        expect(
+          valueSetsRepo.findIncludedConceptIdsByValueSet,
+        ).not.toHaveBeenCalled();
+        expect(conceptsRepo.search).not.toHaveBeenCalled();
+        expect(result).toMatchObject({ count: 1, total: 1, offset: 0 });
         expect(result.items[0]).toMatchObject({
           slug: 'corazon',
           category: {
@@ -1004,23 +1024,29 @@ describe('ConceptsService', () => {
           id: 'vs-umbrella',
           internalCode: GLOSSARY_ALL_TERMS_CODE,
         });
-        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
-          'concept-1',
-        ]);
         valueSetsRepo.findById.mockResolvedValue({
           internalCode: GLOSSARY_ALL_TERMS_CODE,
         });
-        conceptsRepo.search.mockResolvedValue([
-          {
-            id: 'concept-1',
-            code: 'GLOSSARY_PARACETAMOL',
-            display: 'Paracetamol',
-            definition: undefined,
-            selectable: true,
-            codeSystemVersionId: 'v1',
-            stateConceptId: CONCEPTS.TERM_ACTIVE,
-          },
-        ]);
+        conceptsRepo.searchGlossaryPage.mockResolvedValue({
+          ids: ['concept-1'],
+          total: 1,
+        });
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            [
+              'concept-1',
+              {
+                id: 'concept-1',
+                code: 'GLOSSARY_PARACETAMOL',
+                display: 'Paracetamol',
+                definition: undefined,
+                selectable: true,
+                codeSystemVersionId: 'v1',
+                stateConceptId: CONCEPTS.TERM_ACTIVE,
+              },
+            ],
+          ]),
+        );
 
         const result = await service.searchConcepts(
           'paracetamol',
@@ -1034,10 +1060,14 @@ describe('ConceptsService', () => {
           em,
           GLOSSARY_ALL_TERMS_CODE,
         );
-        expect(conceptsRepo.search).toHaveBeenCalledWith(
+        expect(conceptsRepo.searchGlossaryPage).toHaveBeenCalledWith(
           em,
-          expect.objectContaining({ stateConceptId: CONCEPTS.TERM_ACTIVE }),
+          expect.objectContaining({
+            query: 'paracetamol',
+            stateConceptId: CONCEPTS.TERM_ACTIVE,
+          }),
           200,
+          0,
         );
         expect(Object.keys(result.items[0])).toEqual(
           expect.arrayContaining([
@@ -1133,6 +1163,197 @@ describe('ConceptsService', () => {
         expect(Object.keys(result.items[0])).not.toContain('slug');
         expect(Object.keys(result.items[0])).not.toContain('category');
         expect(Object.keys(result.items[0])).not.toContain('status');
+      });
+    });
+
+    describe('búsqueda paginada (glosario de cientos de miles de términos)', () => {
+      const corazon = {
+        id: 'concept-1',
+        code: 'GLOSSARY_CORAZON',
+        display: 'Heart',
+        definition: undefined,
+        selectable: true,
+        codeSystemVersionId: 'v1',
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+      };
+      const aorta = { ...corazon, id: 'concept-2', code: 'GLOSSARY_AORTA' };
+
+      it('pasa el desplazamiento y devuelve el total, no sólo lo de la página', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-anatomy',
+        });
+        conceptsRepo.searchGlossaryPage.mockResolvedValue({
+          ids: ['concept-2', 'concept-1'],
+          total: 1234,
+        });
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-1', corazon],
+            ['concept-2', aorta],
+          ]),
+        );
+
+        const result = await service.searchConcepts(
+          'cora',
+          undefined,
+          24,
+          undefined,
+          { valueSetId: 'vs-cat', offset: 48, language: 'ES' },
+        );
+
+        expect(conceptsRepo.searchGlossaryPage).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ query: 'cora' }),
+          24,
+          48,
+        );
+        expect(result).toMatchObject({
+          count: 2,
+          total: 1234,
+          offset: 48,
+          limit: 24,
+        });
+      });
+
+      it('conserva el orden de la base, sin reordenar la página en memoria', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-anatomy',
+        });
+        // La base dijo «corazón» antes que «aorta» (por ejemplo, porque el
+        // nombre en castellano ordena distinto que el `display` inglés).
+        conceptsRepo.searchGlossaryPage.mockResolvedValue({
+          ids: ['concept-1', 'concept-2'],
+          total: 2,
+        });
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-2', { ...aorta, display: 'Aorta' }],
+            ['concept-1', { ...corazon, display: 'Zzz' }],
+          ]),
+        );
+
+        const result = await service.searchConcepts(
+          undefined,
+          undefined,
+          50,
+          undefined,
+          { valueSetId: 'vs-cat', language: 'ES' },
+        );
+
+        expect(result.items.map((item) => item.conceptId)).toEqual([
+          'concept-1',
+          'concept-2',
+        ]);
+      });
+
+      it('una etiqueta se resuelve a su versión vigente y se intersecta en la base', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-disease',
+        });
+        valueSetsRepo.findDefaultVersion.mockImplementation(
+          (_em: unknown, id: string) =>
+            Promise.resolve({ id: id === 'vs-tag' ? 'vsv-tag' : 'vsv-cat' }),
+        );
+
+        await service.searchConcepts(undefined, undefined, 50, undefined, {
+          valueSetId: 'vs-cat',
+          tagValueSetId: 'vs-tag',
+        });
+
+        expect(conceptsRepo.searchGlossaryPage).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            valueSetVersionId: 'vsv-cat',
+            tagValueSetVersionId: 'vsv-tag',
+          }),
+          50,
+          0,
+        );
+      });
+
+      it('una etiqueta sin versión vigente es 404, no una lista sin filtrar', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-disease',
+        });
+        valueSetsRepo.findDefaultVersion.mockImplementation(
+          (_em: unknown, id: string) =>
+            Promise.resolve(id === 'vs-tag' ? null : { id: 'vsv-cat' }),
+        );
+
+        await expect(
+          service.searchConcepts(undefined, undefined, 50, undefined, {
+            valueSetId: 'vs-cat',
+            tagValueSetId: 'vs-tag',
+          }),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(conceptsRepo.searchGlossaryPage).not.toHaveBeenCalled();
+      });
+
+      it('una categoría del glosario sin versión vigente, pedida explícitamente, es 404', async () => {
+        const { service, valueSetsRepo } = build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-disease',
+        });
+        valueSetsRepo.findDefaultVersion.mockResolvedValue(null);
+
+        await expect(
+          service.searchConcepts(undefined, undefined, 50, undefined, {
+            valueSetId: 'vs-cat',
+          }),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+
+      it('trae la miniatura de la imagen del término, si la tiene', async () => {
+        const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
+          build();
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: GLOSSARY_ALL_TERMS_CODE,
+        });
+        conceptsRepo.searchGlossaryPage.mockResolvedValue({
+          ids: ['concept-1', 'concept-2'],
+          total: 2,
+        });
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-1', corazon],
+            ['concept-2', aorta],
+          ]),
+        );
+        designationsRepo.findPropertyForConcepts.mockImplementation(
+          (_em: unknown, _ids: string[], propertyCode: string) =>
+            Promise.resolve(
+              propertyCode === GLOSSARY_IMAGE_PROPERTY_CODE
+                ? [
+                    {
+                      conceptId: 'concept-1',
+                      valueJson: {
+                        url: 'https://upload.wikimedia.org/heart.jpg',
+                        thumbUrl: 'https://upload.wikimedia.org/heart-320.jpg',
+                        attribution: 'Autor X',
+                        license: 'CC BY-SA 4.0',
+                      },
+                    },
+                  ]
+                : [],
+            ),
+        );
+
+        const result = await service.searchConcepts(
+          undefined,
+          undefined,
+          50,
+          undefined,
+          { includeValueSets: true, valueSetId: 'vs-umbrella' },
+        );
+
+        expect(result.items[0]).toMatchObject({
+          imageThumbnailUrl: 'https://upload.wikimedia.org/heart-320.jpg',
+        });
+        expect(result.items[1]).not.toHaveProperty('imageThumbnailUrl');
       });
     });
 
@@ -1330,6 +1551,89 @@ describe('ConceptsService', () => {
         expect(ficha.conceptId).toBe('concept-1');
         expect(ficha.category).toBeNull();
       });
+
+      it('publica la imagen del término con su atribución y licencia, y deja `properties` intacto', async () => {
+        const { service, designationsRepo } = setUpGlossaryTermFicha();
+        const imagen = {
+          url: 'https://upload.wikimedia.org/heart.jpg',
+          thumbUrl: 'https://upload.wikimedia.org/heart-320.jpg',
+          attribution: 'Patrick J. Lynch',
+          license: 'CC BY 2.5',
+          sourcePage: 'https://commons.wikimedia.org/wiki/File:Heart.jpg',
+        };
+        designationsRepo.findPropertiesByConcept.mockResolvedValue([
+          { propertyCode: GLOSSARY_IMAGE_PROPERTY_CODE, valueJson: imagen },
+          { propertyCode: 'source_url', valueJson: 'https://cima.aemps.es/' },
+        ]);
+
+        const ficha = await service.readConcept('concept-1', 'ES');
+
+        expect(ficha.image).toEqual({
+          source: imagen.url,
+          thumbnailSource: imagen.thumbUrl,
+          attribution: imagen.attribution,
+          license: imagen.license,
+          sourcePage: imagen.sourcePage,
+          // Sin alt propio, se arma con el nombre que muestra la ficha.
+          alt: 'Imagen ilustrativa: Heart',
+          status: 'approved',
+        });
+        expect(ficha.properties).toMatchObject({
+          [GLOSSARY_IMAGE_PROPERTY_CODE]: imagen,
+          source_url: 'https://cima.aemps.es/',
+        });
+      });
+    });
+  });
+
+  describe('imageFromProperty', () => {
+    const completa = {
+      url: 'https://x/y.jpg',
+      attribution: 'Autor',
+      license: 'CC0',
+    };
+
+    it('sin atribución o sin licencia no publica la imagen', () => {
+      expect(
+        imageFromProperty({ url: 'https://x/y.jpg', license: 'CC0' }),
+      ).toBeUndefined();
+      expect(
+        imageFromProperty({ url: 'https://x/y.jpg', attribution: 'Autor' }),
+      ).toBeUndefined();
+      expect(
+        imageFromProperty({ attribution: 'A', license: 'B' }),
+      ).toBeUndefined();
+    });
+
+    it('acepta las grafías del importador (`imageUrl`, `imageThumbUrl`, …)', () => {
+      expect(
+        imageFromProperty({
+          imageUrl: 'https://x/y.jpg',
+          imageThumbUrl: 'https://x/y-t.jpg',
+          imageAttribution: 'Autor',
+          imageLicense: 'CC BY 4.0',
+          imageSourcePage: 'https://x/pagina',
+        }),
+      ).toMatchObject({
+        source: 'https://x/y.jpg',
+        thumbnailSource: 'https://x/y-t.jpg',
+        sourcePage: 'https://x/pagina',
+      });
+    });
+
+    it('una imagen rechazada en revisión no se publica', () => {
+      expect(
+        imageFromProperty({ ...completa, status: 'rejected' }),
+      ).toBeUndefined();
+      expect(
+        imageFromProperty({ ...completa, status: 'pending' }),
+      ).toMatchObject({ status: 'pending' });
+    });
+
+    it('un valor que no es objeto es «sin imagen», no un error', () => {
+      expect(imageFromProperty('https://x/y.jpg')).toBeUndefined();
+      expect(imageFromProperty(null)).toBeUndefined();
+      expect(imageFromProperty([completa])).toBeUndefined();
     });
   });
 });

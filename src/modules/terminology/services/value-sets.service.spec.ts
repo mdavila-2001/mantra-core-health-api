@@ -39,6 +39,8 @@ function build() {
     searchPage: jest.fn(() => Promise.resolve([])),
     findDefaultVersionsByValueSetIds: jest.fn(() => Promise.resolve(new Map())),
     countMembersByVersionIds: jest.fn(() => Promise.resolve(new Map())),
+    findGlossaryFacets: jest.fn(() => Promise.resolve([])),
+    findByIds: jest.fn(() => Promise.resolve(new Map())),
     findValueSetsByConceptIds: jest.fn(() => Promise.resolve(new Map())),
   } as any;
   const conceptsRepo = {
@@ -859,5 +861,126 @@ describe('ValueSetsService.searchValueSets', () => {
       { internalCode: undefined, query: undefined, afterInternalCode: 'a' },
       2,
     );
+  });
+
+  describe('readGlossaryFacets', () => {
+    const valueSets = new Map([
+      [
+        'cat-d',
+        {
+          id: 'cat-d',
+          internalCode: 'glossary-category-disease',
+          name: 'Enfermedades',
+        },
+      ],
+      [
+        'cat-p',
+        {
+          id: 'cat-p',
+          internalCode: 'glossary-category-pharmacology',
+          name: 'Farmacología clínica',
+          description: 'Medicamentos',
+        },
+      ],
+      [
+        'tag-c',
+        {
+          id: 'tag-c',
+          internalCode: 'glossary-tag-cardiovascular',
+          name: 'Cardiovascular',
+        },
+      ],
+      [
+        'tag-r',
+        {
+          id: 'tag-r',
+          internalCode: 'glossary-tag-respiratory',
+          name: 'Respiratorio',
+        },
+      ],
+    ]);
+
+    it('arma categorías con su conteo y sus etiquetas, desde una consulta agregada', async () => {
+      const { service, valueSetsRepo } = build();
+      valueSetsRepo.findGlossaryFacets.mockResolvedValue([
+        {
+          kind: 'category',
+          categoryId: 'cat-d',
+          tagId: null,
+          total: 1200,
+          translated: 201,
+        },
+        {
+          kind: 'category',
+          categoryId: 'cat-p',
+          tagId: null,
+          total: 30000,
+          translated: 30000,
+        },
+        { kind: 'tag', categoryId: null, tagId: 'tag-c', total: 500 },
+        { kind: 'tag', categoryId: null, tagId: 'tag-r', total: 700 },
+        { kind: 'pair', categoryId: 'cat-d', tagId: 'tag-c', total: 400 },
+        { kind: 'pair', categoryId: 'cat-d', tagId: 'tag-r', total: 650 },
+      ]);
+      valueSetsRepo.findByIds.mockResolvedValue(valueSets);
+
+      const result = await service.readGlossaryFacets();
+
+      expect(valueSetsRepo.findGlossaryFacets).toHaveBeenCalledWith(
+        expect.anything(),
+        { category: 'glossary-category-', tag: 'glossary-tag-' },
+        CONCEPTS.TERM_ACTIVE,
+        CONCEPTS.LANG_ES,
+      );
+      expect(result.total).toBe(31200);
+      expect(result.categories).toEqual([
+        {
+          id: 'cat-d',
+          internalCode: 'glossary-category-disease',
+          name: 'Enfermedades',
+          count: 1200,
+          // Sólo 201 de las 1 200 tienen nombre en castellano: se dice.
+          translatedCount: 201,
+          // De la más frecuente a la menos.
+          tags: [
+            {
+              id: 'tag-r',
+              internalCode: 'glossary-tag-respiratory',
+              name: 'Respiratorio',
+              count: 650,
+            },
+            {
+              id: 'tag-c',
+              internalCode: 'glossary-tag-cardiovascular',
+              name: 'Cardiovascular',
+              count: 400,
+            },
+          ],
+        },
+        {
+          id: 'cat-p',
+          internalCode: 'glossary-category-pharmacology',
+          name: 'Farmacología clínica',
+          description: 'Medicamentos',
+          count: 30000,
+          translatedCount: 30000,
+          tags: [],
+        },
+      ]);
+      expect(result.tags.map((tag) => tag.id)).toEqual(['tag-r', 'tag-c']);
+    });
+
+    it('un conjunto que ya no existe no aparece, en vez de salir sin nombre', async () => {
+      const { service, valueSetsRepo } = build();
+      valueSetsRepo.findGlossaryFacets.mockResolvedValue([
+        { kind: 'category', categoryId: 'cat-fantasma', tagId: null, total: 3 },
+        { kind: 'tag', categoryId: null, tagId: 'tag-fantasma', total: 3 },
+      ]);
+      valueSetsRepo.findByIds.mockResolvedValue(new Map());
+
+      const result = await service.readGlossaryFacets();
+
+      expect(result).toEqual({ categories: [], tags: [], total: 0 });
+    });
   });
 });

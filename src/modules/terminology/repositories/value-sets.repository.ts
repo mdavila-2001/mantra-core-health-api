@@ -9,6 +9,16 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/** Una fila de las facetas del glosario; ver `findGlossaryFacets`. */
+export interface GlossaryFacetRow {
+  readonly kind: 'category' | 'tag' | 'pair';
+  readonly categoryId: string | null;
+  readonly tagId: string | null;
+  readonly total: number;
+  /** Cuántos de esos términos tienen nombre preferido en el idioma pedido. */
+  readonly translated: number;
+}
+
 /** Datos mínimos para materializar un conjunto de valores. */
 export interface CreateValueSetData {
   /**
@@ -182,20 +192,19 @@ export class ValueSetsRepository {
   }
 
   /**
-   * Cuántos conceptos incluye cada versión, en una sola consulta.
+   * Cuántos conceptos incluye cada versión, en una sola consulta agregada.
    *
    * El listado de conjuntos lo necesita para poder mostrar el conteo junto a
    * cada categoría. Un `em.count` por conjunto serían tantas consultas como
    * filas tenga la página —hoy, medio centenar— en el camino de la pantalla que
    * más se abre del glosario.
    *
-   * Se traen sólo los identificadores de versión y se agrupan acá en vez de
-   * pedirle un `GROUP BY` a la base. Es una consulta igual, y a cambio se queda
-   * dentro del `em.find` tipado que usa el resto del repositorio. El coste es
-   * traer una fila por miembro en vez de una por versión: con el catálogo actual
-   * son un par de centenares de uuid, despreciable. **Si algún día un conjunto
-   * de valores tiene decenas de miles de miembros, esto se cambia por un
-   * `GROUP BY`** — el lugar es este método y no hay otro llamador.
+   * Hasta el 2026-09-30 traía una fila por **miembro** y las agrupaba acá; el
+   * comentario de entonces decía que el día que un conjunto tuviera decenas de
+   * miles de miembros había que pasarlo a `GROUP BY`. Ese día llegó con el
+   * glosario en castellano de cientos de miles de términos: traer un uuid por
+   * término para contar doce categorías era leer la tabla entera en memoria.
+   * Ahora cuenta la base, sobre `ix_value_set_members_value_set_version_id`.
    *
    * @param em - Contexto de persistencia.
    * @param valueSetVersionIds - Versiones cuyos miembros se cuentan.
@@ -207,20 +216,122 @@ export class ValueSetsRepository {
     valueSetVersionIds: string[],
   ): Promise<Map<string, number>> {
     if (valueSetVersionIds.length === 0) return new Map();
-    const rows = await em.find(
-      ValueSetMembers,
-      { valueSetVersionId: { $in: valueSetVersionIds }, included: true },
-      { fields: ['valueSetVersionId'] },
-    );
-
-    const conteo = new Map<string, number>();
-    for (const row of rows) {
-      conteo.set(
-        row.valueSetVersionId,
-        (conteo.get(row.valueSetVersionId) ?? 0) + 1,
+    const rows: { valueSetVersionId: string; total: string | number }[] =
+      await em.getConnection().execute(
+        `SELECT value_set_version_id AS "valueSetVersionId", count(*) AS total
+           FROM terminology.value_set_members
+          WHERE value_set_version_id IN (?)
+            AND included = true
+          GROUP BY value_set_version_id`,
+        [valueSetVersionIds],
       );
-    }
-    return conteo;
+    // `count(*)` es `bigint` y el driver lo entrega como texto para no perder
+    // precisión; ningún conjunto se acerca a 2^53.
+    return new Map(
+      rows.map((row) => [row.valueSetVersionId, Number(row.total)]),
+    );
+  }
+
+  /**
+   * Las facetas del glosario en **una** consulta agregada: cuántos términos
+   * publicados tiene cada categoría y cada etiqueta, y cuántos de cada
+   * categoría llevan cada etiqueta.
+   *
+   * Es lo que pinta la rejilla de categorías —el conteo y los chips de las
+   * etiquetas que de verdad aparecen adentro— sin traer un solo término. Antes
+   * la pantalla derivaba los chips recorriendo el corpus entero que había
+   * cargado; con cientos de miles de términos eso ya no se carga.
+   *
+   * Cuenta sólo lo publicado (`stateConceptId`): la rejilla no puede prometer
+   * «1 200 términos» y mostrar 1 150 porque 50 son borradores que la búsqueda
+   * no deja pasar.
+   *
+   * @param em - Contexto de persistencia.
+   * @param prefixes - Prefijos de código interno de categorías y etiquetas.
+   * @param stateConceptId - Estado publicado que se cuenta.
+   * @returns Una fila por categoría (`kind: 'category'`), por etiqueta en todo
+   *   el glosario (`'tag'`) y por par categoría-etiqueta que aparece (`'pair'`).
+   */
+  async findGlossaryFacets(
+    em: EntityManager,
+    prefixes: { category: string; tag: string },
+    stateConceptId: string,
+    languageConceptId: string,
+  ): Promise<GlossaryFacetRow[]> {
+    const rows: (Omit<GlossaryFacetRow, 'total' | 'translated'> & {
+      total: string | number;
+      translated: string | number;
+    })[] = await em.getConnection().execute(
+      `WITH vigentes AS (
+         SELECT vs.id AS value_set_id, vv.id AS version_id,
+                (vs.internal_code LIKE ?) AS es_categoria
+           FROM terminology.value_sets vs
+           JOIN terminology.value_set_versions vv
+             ON vv.value_set_id = vs.id AND vv.is_default = true
+          WHERE vs.internal_code LIKE ? OR vs.internal_code LIKE ?
+       ),
+       pertenencias AS (
+         SELECT v.value_set_id, v.es_categoria, m.concept_id,
+                EXISTS (SELECT 1 FROM terminology.concept_designations d
+                         WHERE d.concept_id = m.concept_id
+                           AND d.language_concept_id = ?
+                           AND d.preferred = true) AS traducido
+           FROM vigentes v
+           JOIN terminology.value_set_members m
+             ON m.value_set_version_id = v.version_id AND m.included = true
+           JOIN terminology.catalog_concepts c
+             ON c.id = m.concept_id AND c.state_concept_id = ?
+       )
+       SELECT 'category' AS kind, p.value_set_id AS "categoryId",
+              NULL::uuid AS "tagId", count(*) AS total,
+              count(*) FILTER (WHERE p.traducido) AS translated
+         FROM pertenencias p
+        WHERE p.es_categoria
+        GROUP BY p.value_set_id
+       UNION ALL
+       SELECT 'tag', NULL::uuid, p.value_set_id, count(*),
+              count(*) FILTER (WHERE p.traducido)
+         FROM pertenencias p
+        WHERE NOT p.es_categoria
+        GROUP BY p.value_set_id
+       UNION ALL
+       SELECT 'pair', cat.value_set_id, tag.value_set_id, count(*),
+              count(*) FILTER (WHERE cat.traducido)
+         FROM pertenencias cat
+         JOIN pertenencias tag
+           ON tag.concept_id = cat.concept_id AND NOT tag.es_categoria
+        WHERE cat.es_categoria
+        GROUP BY cat.value_set_id, tag.value_set_id`,
+      [
+        `${prefixes.category}%`,
+        `${prefixes.category}%`,
+        `${prefixes.tag}%`,
+        languageConceptId,
+        stateConceptId,
+      ],
+    );
+    // `count(*)` es `bigint` y el driver lo entrega como texto.
+    return rows.map((row) => ({
+      ...row,
+      total: Number(row.total),
+      translated: Number(row.translated),
+    }));
+  }
+
+  /**
+   * Varios conjuntos por id, en una consulta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ids - Conjuntos a leer.
+   * @returns Mapa `id -> conjunto`; los inexistentes no aparecen.
+   */
+  async findByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, ValueSets>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(ValueSets, { id: { $in: ids } });
+    return new Map(rows.map((row) => [row.id, row]));
   }
 
   /**
