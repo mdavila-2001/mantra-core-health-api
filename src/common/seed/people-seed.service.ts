@@ -101,23 +101,11 @@ export class PeopleSeedService {
   async run(
     enabled = process.env.SEED_PEOPLE_ENABLED === 'true',
     password = process.env.SEED_PEOPLE_PASSWORD,
-    // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
-    // `dist/`, no corre desde `src/`), así que hacen falta cinco `..` para
-    // salir del worktree entero y llegar al hermano `mantra-core-health-model`
-    // — cuatro sólo llegan a la raíz del propio repo. `SEED_PEOPLE_SOURCE_DIR`
-    // existe justamente para no depender de esta cuenta en un entorno con otro
-    // layout (p. ej. bajo test con `ts-node`, donde no hay `dist/`).
-    sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR ??
-      join(
-        __dirname,
-        '..',
-        '..',
-        '..',
-        '..',
-        '..',
-        'mantra-core-health-model',
-        'markdown_convertidos',
-      ),
+    // Ruta del padrón. Sin valor, se resuelve MÁS ABAJO y sólo si el seed está
+    // activo: como valor por defecto del parámetro se evaluaba SIEMPRE, y bajo
+    // Jest en ESM (`test:integration`) `__dirname` no existe, así que cada
+    // arranque del harness fallaba aunque `SEED_PEOPLE_ENABLED` estuviera apagado.
+    sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR,
   ): Promise<PeopleSeedResult> {
     const vacio: PeopleSeedResult = {
       practitionersCreated: 0,
@@ -130,17 +118,41 @@ export class PeopleSeedService {
       return { ...vacio, reason: 'not-configured' };
     }
 
+    // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
+    // `dist/`, no corre desde `src/`), así que hacen falta cinco `..` para
+    // salir del worktree entero y llegar al hermano `mantra-core-health-model`
+    // — cuatro sólo llegan a la raíz del propio repo. `SEED_PEOPLE_SOURCE_DIR`
+    // existe justamente para no depender de esta cuenta en un entorno con otro
+    // layout (bajo Jest en ESM `__dirname` no está definido).
+    const origen =
+      sourceDir ??
+      (typeof __dirname === 'string'
+        ? join(
+            __dirname,
+            '..',
+            '..',
+            '..',
+            '..',
+            '..',
+            'mantra-core-health-model',
+            'markdown_convertidos',
+          )
+        : undefined);
+    if (!origen) {
+      return { ...vacio, reason: 'source-not-found' };
+    }
+
     let medicosTexto: string;
     let pacientesTexto: string;
     try {
-      medicosTexto = readFileSync(join(sourceDir, ARCHIVO_MEDICOS), 'utf-8');
+      medicosTexto = readFileSync(join(origen, ARCHIVO_MEDICOS), 'utf-8');
       pacientesTexto = readFileSync(
-        join(sourceDir, ARCHIVO_PACIENTES),
+        join(origen, ARCHIVO_PACIENTES),
         'utf-8',
       );
     } catch (error) {
       this.logger.warn(
-        { operation: 'seed.people', sourceDir, err: error },
+        { operation: 'seed.people', sourceDir: origen, err: error },
         'No se encontró el padrón; SEED_PEOPLE_ENABLED no tiene efecto sin él',
       );
       return { ...vacio, reason: 'source-not-found' };
