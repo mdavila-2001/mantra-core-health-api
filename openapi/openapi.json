@@ -92438,7 +92438,7 @@
           "bodyText": {
             "type": "string",
             "description": "Texto del post (sin PHI identificable)",
-            "maxLength": 5000
+            "maxLength": 20000
           },
           "postType": {
             "type": "string",
