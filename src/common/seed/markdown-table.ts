@@ -68,7 +68,7 @@ export function columna(fila: MarkdownTableRow, ...nombres: string[]): string {
   for (const nombre of nombres) {
     const objetivo = normalizar(nombre);
     const i = fila.header.findIndex((h) => normalizar(h) === objetivo);
-    if (i >= 0 && i < fila.cells.length) return fila.cells[i]!.trim();
+    if (i >= 0 && i < fila.cells.length) return fila.cells[i].trim();
   }
   return '';
 }
