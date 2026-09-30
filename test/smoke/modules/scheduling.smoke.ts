@@ -406,7 +406,11 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'happy: cancelar la cita',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/cancel`,
-    body: () => ({ cancelledBy: 'PATIENT', isNoShow: false }),
+    body: () => ({
+      cancelledBy: 'PATIENT',
+      isNoShow: false,
+      reasonText: 'El paciente ya no puede asistir',
+    }),
     expectedStatus: 200,
   },
   {
@@ -415,7 +419,10 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'límite: cancelar dos veces',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/cancel`,
-    body: () => ({ cancelledBy: 'PATIENT' }),
+    body: () => ({
+      cancelledBy: 'PATIENT',
+      reasonText: 'El paciente ya no puede asistir',
+    }),
     expectedStatus: 409,
   },
   {
