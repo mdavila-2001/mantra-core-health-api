@@ -83,6 +83,7 @@
     "smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest-cli/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:terminology-import": "node --test \"tools/terminology-import/test/*.test.mjs\"",
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",

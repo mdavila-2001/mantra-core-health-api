@@ -1,0 +1,362 @@
+{
+ "list": [
+  {
+   "nregistro": "15419",
+   "nombre": "FARMAPROINA 1.200.000 UI POLVO PARA SUSPENSIÓN INYECTABLE",
+   "labtitular": "Laboratorio Reig Jofre, S.A.",
+   "labcomercializador": "Laboratorio Reig Jofre, S.A.",
+   "cpresc": "Medicamento Sujeto A Prescripción Médica",
+   "estado": {
+    "aut": -594522000000
+   },
+   "comerc": true,
+   "receta": true,
+   "generico": false,
+   "conduc": false,
+   "triangulo": false,
+   "huerfano": false,
+   "biosimilar": false,
+   "nosustituible": {
+    "id": 0,
+    "nombre": "N/A"
+   },
+   "psum": false,
+   "notas": false,
+   "materialesInf": false,
+   "ema": false,
+   "docs": [
+    {
+     "tipo": 1,
+     "url": "https://cima.aemps.es/cima/pdfs/ft/15419/FT_15419.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/ft/15419/FT_15419.html",
+     "secc": true,
+     "fecha": 1776337562000
+    },
+    {
+     "tipo": 2,
+     "url": "https://cima.aemps.es/cima/pdfs/p/15419/P_15419.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/p/15419/P_15419.html",
+     "secc": true,
+     "fecha": 1776338047000
+    }
+   ],
+   "viasAdministracion": [
+    {
+     "id": 30,
+     "nombre": "VÍA INTRAMUSCULAR"
+    }
+   ],
+   "formaFarmaceutica": {
+    "id": 218,
+    "nombre": "POLVO PARA SUSPENSIÓN INYECTABLE"
+   },
+   "formaFarmaceuticaSimplificada": {
+    "id": 34,
+    "nombre": "INYECTABLE"
+   },
+   "vtm": {
+    "id": 449005,
+    "nombre": "bencilpenicilina procaína"
+   },
+   "dosis": "1.200.000 UI"
+  },
+  {
+   "nregistro": "50161",
+   "nombre": "FARMAPROINA 600.000 UI POLVO PARA SUSPENSIÓN INYECTABLE",
+   "labtitular": "Laboratorio Reig Jofre, S.A.",
+   "labcomercializador": "Laboratorio Reig Jofre, S.A.",
+   "cpresc": "Medicamento Sujeto A Prescripción Médica",
+   "estado": {
+    "aut": -594522000000
+   },
+   "comerc": true,
+   "receta": true,
+   "generico": false,
+   "conduc": false,
+   "triangulo": false,
+   "huerfano": false,
+   "biosimilar": false,
+   "nosustituible": {
+    "id": 0,
+    "nombre": "N/A"
+   },
+   "psum": false,
+   "notas": false,
+   "materialesInf": false,
+   "ema": false,
+   "docs": [
+    {
+     "tipo": 1,
+     "url": "https://cima.aemps.es/cima/pdfs/ft/50161/FT_50161.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/ft/50161/FT_50161.html",
+     "secc": true,
+     "fecha": 1776338717000
+    },
+    {
+     "tipo": 2,
+     "url": "https://cima.aemps.es/cima/pdfs/p/50161/P_50161.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/p/50161/P_50161.html",
+     "secc": true,
+     "fecha": 1776338817000
+    }
+   ],
+   "viasAdministracion": [
+    {
+     "id": 30,
+     "nombre": "VÍA INTRAMUSCULAR"
+    }
+   ],
+   "formaFarmaceutica": {
+    "id": 219,
+    "nombre": "POLVO Y DISOLVENTE PARA SOLUCIÓN INYECTABLE"
+   },
+   "formaFarmaceuticaSimplificada": {
+    "id": 34,
+    "nombre": "INYECTABLE"
+   },
+   "vtm": {
+    "id": 449005,
+    "nombre": "bencilpenicilina procaína"
+   },
+   "dosis": "600 kilo UI"
+  }
+ ],
+ "detail": {
+  "15419": {
+   "nregistro": "15419",
+   "nombre": "FARMAPROINA 1.200.000 UI POLVO PARA SUSPENSIÓN INYECTABLE",
+   "pactivos": "BENCILPENICILINA PROCAINA",
+   "labtitular": "Laboratorio Reig Jofre, S.A.",
+   "labcomercializador": "Laboratorio Reig Jofre, S.A.",
+   "cpresc": "Medicamento Sujeto A Prescripción Médica",
+   "estado": {
+    "aut": -594522000000
+   },
+   "comerc": true,
+   "receta": true,
+   "generico": false,
+   "conduc": false,
+   "triangulo": false,
+   "huerfano": false,
+   "biosimilar": false,
+   "nosustituible": {
+    "id": 0,
+    "nombre": "N/A"
+   },
+   "psum": false,
+   "notas": false,
+   "materialesInf": false,
+   "ema": false,
+   "docs": [
+    {
+     "tipo": 1,
+     "url": "https://cima.aemps.es/cima/pdfs/ft/15419/FT_15419.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/ft/15419/FT_15419.html",
+     "secc": true,
+     "fecha": 1776337562000
+    },
+    {
+     "tipo": 2,
+     "url": "https://cima.aemps.es/cima/pdfs/p/15419/P_15419.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/p/15419/P_15419.html",
+     "secc": true,
+     "fecha": 1776338047000
+    }
+   ],
+   "atcs": [
+    {
+     "codigo": "J01C",
+     "nombre": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+     "nivel": 3
+    },
+    {
+     "codigo": "J01CE",
+     "nombre": "Penicilinas sensibles a la betalactamasa",
+     "nivel": 4
+    },
+    {
+     "codigo": "J01CE09",
+     "nombre": "Penicilina procaina",
+     "nivel": 5
+    }
+   ],
+   "principiosActivos": [
+    {
+     "id": 106,
+     "codigo": "106PM",
+     "nombre": "BENCILPENICILINA PROCAINA",
+     "cantidad": "1,2",
+     "unidad": "MILLONES UI",
+     "orden": 2
+    }
+   ],
+   "viasAdministracion": [
+    {
+     "id": 30,
+     "nombre": "VÍA INTRAMUSCULAR"
+    }
+   ],
+   "presentaciones": [
+    {
+     "cn": "700721",
+     "nombre": "FARMAPROINA 1.200.000 UI POLVO PARA SUSPENSIÓN INYECTABLE, 1 vial ",
+     "estado": {
+      "aut": 1531087200000
+     },
+     "comerc": true,
+     "psum": false
+    },
+    {
+     "cn": "605345",
+     "nombre": "FARMAPROINA 1.200.000 UI POLVO PARA SUSPENSIÓN INYECTABLE, 100 viales ",
+     "estado": {
+      "aut": -594522000000
+     },
+     "comerc": false,
+     "psum": false,
+     "envaseClinico": true
+    }
+   ],
+   "formaFarmaceutica": {
+    "id": 218,
+    "nombre": "POLVO PARA SUSPENSIÓN INYECTABLE"
+   },
+   "formaFarmaceuticaSimplificada": {
+    "id": 34,
+    "nombre": "INYECTABLE"
+   },
+   "vtm": {
+    "id": 449005,
+    "nombre": "bencilpenicilina procaína"
+   },
+   "dosis": "1.200.000 UI"
+  },
+  "50161": {
+   "nregistro": "50161",
+   "nombre": "FARMAPROINA 600.000 UI POLVO PARA SUSPENSIÓN INYECTABLE",
+   "pactivos": "BENCILPENICILINA PROCAINA",
+   "labtitular": "Laboratorio Reig Jofre, S.A.",
+   "labcomercializador": "Laboratorio Reig Jofre, S.A.",
+   "cpresc": "Medicamento Sujeto A Prescripción Médica",
+   "estado": {
+    "aut": -594522000000
+   },
+   "comerc": true,
+   "receta": true,
+   "generico": false,
+   "conduc": false,
+   "triangulo": false,
+   "huerfano": false,
+   "biosimilar": false,
+   "nosustituible": {
+    "id": 0,
+    "nombre": "N/A"
+   },
+   "psum": false,
+   "notas": false,
+   "materialesInf": false,
+   "ema": false,
+   "docs": [
+    {
+     "tipo": 1,
+     "url": "https://cima.aemps.es/cima/pdfs/ft/50161/FT_50161.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/ft/50161/FT_50161.html",
+     "secc": true,
+     "fecha": 1776338717000
+    },
+    {
+     "tipo": 2,
+     "url": "https://cima.aemps.es/cima/pdfs/p/50161/P_50161.pdf",
+     "urlHtml": "https://cima.aemps.es/cima/dochtml/p/50161/P_50161.html",
+     "secc": true,
+     "fecha": 1776338817000
+    }
+   ],
+   "atcs": [
+    {
+     "codigo": "J01C",
+     "nombre": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+     "nivel": 3
+    },
+    {
+     "codigo": "J01CE",
+     "nombre": "Penicilinas sensibles a la betalactamasa",
+     "nivel": 4
+    },
+    {
+     "codigo": "J01CE09",
+     "nombre": "Penicilina procaina",
+     "nivel": 5
+    }
+   ],
+   "principiosActivos": [
+    {
+     "id": 106,
+     "codigo": "106PM",
+     "nombre": "BENCILPENICILINA PROCAINA",
+     "cantidad": "600",
+     "unidad": "kilo UI",
+     "orden": 2
+    }
+   ],
+   "viasAdministracion": [
+    {
+     "id": 30,
+     "nombre": "VÍA INTRAMUSCULAR"
+    }
+   ],
+   "presentaciones": [
+    {
+     "cn": "700720",
+     "nombre": "FARMAPROINA 600.000 UI POLVO PARA SUSPENSIÓN INYECTABLE, 1 vial",
+     "estado": {
+      "aut": 1531087200000
+     },
+     "comerc": true,
+     "psum": false
+    },
+    {
+     "cn": "604702",
+     "nombre": "FARMAPROINA 600.000 UI POLVO PARA SUSPENSIÓN INYECTABLE, 100 viales",
+     "estado": {
+      "aut": 76201200000
+     },
+     "comerc": false,
+     "psum": false,
+     "envaseClinico": true
+    }
+   ],
+   "formaFarmaceutica": {
+    "id": 219,
+    "nombre": "POLVO Y DISOLVENTE PARA SOLUCIÓN INYECTABLE"
+   },
+   "formaFarmaceuticaSimplificada": {
+    "id": 34,
+    "nombre": "INYECTABLE"
+   },
+   "vtm": {
+    "id": 449005,
+    "nombre": "bencilpenicilina procaína"
+   },
+   "dosis": "600 kilo UI"
+  }
+ },
+ "sections": {
+  "4.1": [
+   {
+    "seccion": "4.1",
+    "titulo": "Indicaciones terapéuticas",
+    "contenido": "<div>\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Procesos infecciosos producidos por microorganismos sensibles a la penicilina, tales como:</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Infecciones del tracto respiratorio.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Infecciones otorrinolaringol&#243;gicas y odontol&#243;gicas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Infecciones ginecol&#243;gicas, infecciones digestivas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Infecciones dermatol&#243;gicas y ven&#233;reas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Infecciones vasculares centrales y perif&#233;ricas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Profilaxis infecciosa, en relaci&#243;n con intervenciones quir&#250;rgicas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">En particular est&#225; indicada en el tratamiento de las siguientes infecciones:</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Carbunco.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">S&#237;filis (todas las fases).</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Bejel.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">- Pinta.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Pian.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">- Difteria (como coadyuvante de las antitoxinas).</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Endocarditis bacteriana subaguda.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Erisipela.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Gingivoestomatitis necrotizante ulcerosa.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Gonorrea aguda y cr&#243;nica (sin bacteriemia).</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Faringitis bacteriana.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Neumon&#237;a neumoc&#243;cica.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Neumon&#237;a estreptoc&#243;cica.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Neumon&#237;a meningoc&#243;cica.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Infecciones de piel y tejidos blandos.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-indent:-7.1pt; text-align:justify; line-height:115%; padding-left:7.1pt; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Fiebre recurrente.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-Fiebre por mordedura de rata.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Bencilpenicilina proca&#237;na parenteral</span> <strong><span style=\"font-family:Times New Roman; font-size:11pt;\">no</span></strong> <span style=\"font-family:Times New Roman; font-size:11pt\">est&#225; indicada en el tratamiento de la meningitis.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify\"><span style=\"font-family:Times New Roman; font-size:11pt; font-weight:normal\">Deben tenerse en cuenta las recomendaciones oficiales sobre el uso adecuado de los antibacterianos.</span></p>\r\n\r\n    <p style=\"margin:0pt; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n  </div>",
+    "orden": 2
+   }
+  ],
+  "4.3": [
+   {
+    "seccion": "4.3",
+    "titulo": "Contraindicaciones",
+    "contenido": "<div>\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">Hipersensibilidad al principio activo o a alguno de los excipientes incluidos en la secci&#243;n 6.1.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Hipersensibilidad o alergia a las penicilinas.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Hipersensibilidad o alergia a la proca&#237;na u otros anest&#233;sicos locales de tipo &#233;ster.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">Deber&#225; tambi&#233;n tenerse en cuenta la alergia cruzada a otros beta-lact&#225;micos c&#243;mo las cefalosporinas. Aunque la alergia a cefalosporinas no presupone la existencia de alergia a esta penicilina, deber&#237;a determinarse si el paciente ha experimentado con anterioridad reacciones al&#233;rgicas inmediatas, moderadas o graves, tras la administraci&#243;n de una cefalosporina, en cuyo caso ser&#237;a recomendable evitar el uso de esta penicilina.</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">&#xa0;</span></p>\r\n\r\n    <p style=\"margin:0pt; text-align:justify; line-height:115%; font-size:11pt\"><span style=\"font-family:Times New Roman; font-size:11pt\">-</span><span style=\"font-family:Times New Roman; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:Times New Roman; font-size:11pt\">No administrar en ning&#250;n caso el medicamento por v&#237;a intravenosa, intraarterial o en zonas cercanas a nervios perif&#233;ricos o vasos sangu&#237;neos, ya que se pueden producir da&#241;os neurovasculares (necrosis) severos y/o irreversibles.</span></p>\r\n  </div>",
+    "orden": 6
+   }
+  ]
+ }
+}
