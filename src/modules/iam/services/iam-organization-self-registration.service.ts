@@ -10,6 +10,7 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   TokenService,
   type AuthenticatedUser,
 } from '../../../common';
@@ -48,6 +49,42 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Los documentos que exige el tipo societario, comprobados **antes** de crear
+ * nada (CL-43).
+ *
+ * El DTO deja opcionales la escritura de constitución y el poder del
+ * representante porque una empresa unipersonal no tiene ni una ni otro; el
+ * resto de las formas (SRL, S.A., ...) los exige. Vive acá y no en un
+ * `@ValidateIf` del DTO porque el bloque `legalDocuments` no ve el
+ * `legalEntityType`, que está un nivel más arriba. Responde 422 nombrando el
+ * documento faltante y, al correr antes de cualquier escritura, no queda
+ * ninguna cuenta a medias.
+ */
+function assertLegalDocumentsForEntityType(
+  organization: RegisterOrganizationDto['organization'],
+): void {
+  if (organization.legalEntityType === 'UNIPERSONAL') return;
+  if (
+    organization.legalDocuments &&
+    organization.legalDocuments.constitutionFileId === undefined
+  ) {
+    throw new PreconditionFailedException(
+      'Falta la escritura de constitución: sólo una empresa unipersonal puede omitirla',
+      { document: 'constitutionFileId' },
+    );
+  }
+  if (
+    organization.legalRepresentative &&
+    organization.legalRepresentative.powerOfAttorneyFileId === undefined
+  ) {
+    throw new PreconditionFailedException(
+      'Falta el poder notariado del representante legal: sólo una empresa unipersonal puede omitirlo',
+      { document: 'powerOfAttorneyFileId' },
+    );
+  }
+}
 
 /**
  * Auto-registro de organizaciones (UC-04-01 en su variante self-service).
@@ -198,6 +235,7 @@ export class IamOrganizationSelfRegistrationService {
       // inexistente sólo lo delataba la FK, ya dentro del INSERT, y salía
       // como 500 sin decir qué campo era.
       this.typeProfile.assertProfileMatchesType(dto.organization);
+      assertLegalDocumentsForEntityType(dto.organization);
       await this.typeProfile.assertConceptsExist(
         tx,
         this.typeProfile.declaredConcepts(dto.organization),
@@ -322,7 +360,9 @@ export class IamOrganizationSelfRegistrationService {
                 ownerUserId: user.id,
                 legalEntityType: dto.organization.legalEntityType,
                 legalDocumentFileIds: dto.organization.legalDocuments
-                  ? Object.values(dto.organization.legalDocuments)
+                  ? Object.values(dto.organization.legalDocuments).filter(
+                      (fileId): fileId is string => fileId !== undefined,
+                    )
                   : [],
                 legalRepresentative: dto.organization.legalRepresentative,
                 executives: dto.organization.executives,

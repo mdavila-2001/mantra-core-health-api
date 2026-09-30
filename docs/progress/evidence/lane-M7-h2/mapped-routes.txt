@@ -1,0 +1,6 @@
+Mapped {/profiles/practitioners/:profileId/jurisdiction-authorizations, POST} route
+Mapped {/profiles/practitioners/me/jurisdiction-authorizations/:licenseId, DELETE} route
+Mapped {/profiles/practitioners/me/jurisdiction-authorizations/:licenseId, PATCH} route
+Mapped {/profiles/practitioners/me/specialties/:specialtyId, DELETE} route
+Mapped {/profiles/practitioners/me/specialties/:specialtyId, PATCH} route
+Mapped {/profiles/practitioners/me/specialties/:specialtyId/primary, PATCH} route

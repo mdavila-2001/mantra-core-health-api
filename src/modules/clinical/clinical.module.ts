@@ -25,6 +25,7 @@ import { AuthzModule } from '../authz/authz.module';
 import { TerminologyModule } from '../terminology/terminology.module';
 import {
   ClinicalEncountersController,
+  ClinicalMedicalAspectsController,
   ClinicalObservationsController,
   ClinicalOrdersController,
   ClinicalPrescriptionPoliciesController,
@@ -38,12 +39,14 @@ import {
   CareEpisodesService,
   EncountersService,
   EncounterSealService,
+  EncounterSealGuardService,
   ObservationsService,
   ServiceRequestsService,
   DiagnosticReportsService,
   ConditionsService,
   AllergyIntolerancesService,
   MedicationsService,
+  MedicalAspectsService,
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
@@ -65,8 +68,12 @@ import {
   DiagnosticReportsRepository,
   ConditionsRepository,
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones para el resumen; independiente de
+  // `AllergyIntolerancesRepository` (de M3).
+  AllergyReactionsReadRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
+  PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
@@ -125,6 +132,16 @@ import {
 // que se provee directo acá y en `InsuranceModule` sin importar ese módulo
 // entero — mismo criterio que el resto de este archivo.
 import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
+// N-04 (M3) — la lectura del resumen clínico asienta su acceso en
+// `audit.data_access_log`. `AuditModule` exporta sólo la cadena WORM de
+// mutaciones (`AuditTrailService`, `AuditLogRepository`, `HistoryRepository`),
+// así que el repositorio del log de acceso se provee acá con el mismo
+// criterio del resto del archivo: clase sin estado por `EntityManager`.
+import { DataAccessLogRepository } from '../audit/repositories';
+// P43 — receta y orden pueden declarar de qué formulario médico cerrado salen.
+// La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
+// se provee suelta, sin importar `FormsModule` entero, igual que el resto.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -143,6 +160,10 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
   ],
   controllers: [
     ClinicalEncountersController,
+    // D-B (FT-22): `GET|PUT /clinical/me/medical-aspects`. Sin `@Roles`, el
+    // titular sale del vínculo de la cuenta. `clinical.module.spec.ts` exige
+    // que esté acá: importarlo no lo publica.
+    ClinicalMedicalAspectsController,
     ClinicalObservationsController,
     ClinicalOrdersController,
     ClinicalPrescriptionPoliciesController,
@@ -153,6 +174,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
   ],
   providers: [
     // Repositorios
+    FormInstanceOriginValidator,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,
@@ -168,8 +190,10 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     DiagnosticReportsRepository,
     ConditionsRepository,
     AllergyIntolerancesRepository,
+    AllergyReactionsReadRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
+    PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
@@ -181,16 +205,19 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     PractitionerSpecialtiesRepository,
     JurisdictionAuthorizationsRepository,
     DeclaredCoveragesReader,
+    DataAccessLogRepository,
     // Servicios
     CareEpisodesService,
     EncountersService,
     EncounterSealService,
+    EncounterSealGuardService,
     ObservationsService,
     ServiceRequestsService,
     DiagnosticReportsService,
     ConditionsService,
     AllergyIntolerancesService,
     MedicationsService,
+    MedicalAspectsService,
     PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
@@ -221,6 +248,9 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
   // interno de este módulo. Sin esto, el arranque revienta con
   // `UnknownDependenciesException` apenas `ChartModule` intenta instanciar el
   // guard (confirmado reproduciendo el arranque real, no sólo leyendo el DI).
+  // `EncounterSealGuardService` se exporta por lo mismo (BR-14/CL-07):
+  // `ChartModule` la usa desde `chart-care-plans.service.ts` y
+  // `chart-documents.service.ts`.
   exports: [
     ConditionsService,
     ProceduresService,
@@ -228,6 +258,7 @@ import { DeclaredCoveragesReader } from '../insurance/services/declared-coverage
     EncountersRepository,
     ClinicalReadService,
     ClinicalRecordAccessGuard,
+    EncounterSealGuardService,
     DuplicateStudyDetector,
   ],
 })

@@ -25,12 +25,15 @@ const PASOS = [
   'vademecum',
   'messaging',
   'audioAssets',
+  'stickerPack',
   'identityVerification',
   'clinicalRoles',
   'platformPermissions',
   'clinicalForms',
   'bootstrapAdmin',
   'providerAccounts',
+  'people',
+  'directoryNetworks',
   'practiceDefaultServices',
 ] as const;
 
@@ -82,6 +85,7 @@ function armar(fallan: Paso[] = []) {
     dobles.boliviaFeeSchedule as never,
     dobles.messaging as never,
     dobles.audioAssets as never,
+    dobles.stickerPack as never,
     dobles.vademecum as never,
     dobles.identityVerification as never,
     dobles.clinicalRoles as never,
@@ -90,6 +94,8 @@ function armar(fallan: Paso[] = []) {
     dobles.providerAccounts as never,
     dobles.clinicalForms as never,
     dobles.practiceDefaultServices as never,
+    dobles.people as never,
+    dobles.directoryNetworks as never,
     logger as never,
   );
 
@@ -102,9 +108,12 @@ const CONTENIDO: readonly Paso[] = [
   'boliviaFacilities',
   'boliviaInsurance',
   'boliviaFeeSchedule',
+  'stickerPack',
   'vademecum',
   'clinicalForms',
   'providerAccounts',
+  'people',
+  'directoryNetworks',
   'practiceDefaultServices',
 ];
 

@@ -99,6 +99,22 @@ export class CareRelationshipsRepository {
   }
 
   /** Solicitudes PENDIENTES de un paciente (para su bandeja de aprobaciones). */
+  /**
+   * Todas las relaciones del paciente, de cualquier organización y estado salvo
+   * las solicitudes pendientes (que tienen su propia bandeja): «quién ve mi
+   * historia».
+   */
+  findAllByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<CareRelationships[]> {
+    return em.find(
+      CareRelationships,
+      { patientProfileId, statusConceptId: { $ne: CONCEPTS.STATE_PENDING } },
+      { orderBy: { validFrom: 'DESC' }, limit: 200 },
+    );
+  }
+
   findPendingByPatient(
     em: EntityManager,
     patientProfileId: string,

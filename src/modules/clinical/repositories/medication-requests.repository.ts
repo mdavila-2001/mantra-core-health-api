@@ -20,6 +20,10 @@ export interface CreateMedicationRequestData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a medication concept.
    */
   medicationConceptId: string;
@@ -75,6 +79,10 @@ export interface CreateMedicationRequestData {
    * Condición que motiva la prescripción (Patch v4.1.6).
    */
   indicationConditionId?: string;
+  /**
+   * Motivo escrito a mano cuando no hay condición codificada (P24).
+   */
+  indicationText?: string;
   /**
    * Valor de issued at mantenido por la instancia.
    */
@@ -191,6 +199,7 @@ export class MedicationRequestsRepository {
         custodianTenantId: data.custodianTenantId,
         patientProfileId: data.patientProfileId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         medicationConceptId: data.medicationConceptId,
         substanceAtcConceptId: data.substanceAtcConceptId,
         intentConceptId: data.intentConceptId,
@@ -205,6 +214,7 @@ export class MedicationRequestsRepository {
         validTo: data.validTo,
         patientInstructionsText: data.patientInstructionsText,
         indicationConditionId: data.indicationConditionId,
+        indicationText: data.indicationText,
         issuedAt: data.issuedAt,
         statusReasonText: data.statusReasonText,
         replacesRequestId: data.replacesRequestId,

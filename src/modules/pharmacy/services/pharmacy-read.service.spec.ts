@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import {
+  CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
@@ -52,6 +53,10 @@ function build() {
     findPracticeSites: mockFn().mockResolvedValue([]),
     findAddresses: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([]),
+    findTenant: mockFn().mockResolvedValue(null),
+    findActiveAffiliationDocuments: mockFn().mockResolvedValue([]),
+    findIdentifiers: mockFn().mockResolvedValue([]),
+    findHeadquartersAddress: mockFn().mockResolvedValue(null),
   };
   const service = new PharmacyReadService(em as any, repo as any);
   return { service, repo, fork };
@@ -165,6 +170,136 @@ describe('PharmacyReadService', () => {
     // La sede sin dirección lo dice con null, no con un hueco inventado.
     expect(result.sites[1].addressText).toBeNull();
     expect(result.sites[1].latitude).toBeNull();
+  });
+
+  describe('la ficha legal (NIT, forma societaria, casa matriz)', () => {
+    const SRL = {
+      id: CONCEPTS.LEGAL_ENTITY_SRL,
+      code: 'SRL',
+      display: 'S.R.L.',
+    };
+    const NIT_DOC = {
+      id: 'concept-nit-doc',
+      code: 'NIT_EXHIBICION',
+      display: 'NIT',
+    };
+    const OTRO_DOC = {
+      id: 'concept-seprec',
+      code: 'MATRICULA_SEPREC',
+      display: 'SEPREC',
+    };
+
+    function pharmacyTenant(extra: Record<string, unknown> = {}) {
+      return {
+        id: 'tenant-a',
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PHARMACY,
+        legalEntityTypeConceptId: SRL.id,
+        ...extra,
+      };
+    }
+
+    it('serves NIT, company type and headquarters of a pharmacy organization', async () => {
+      const d = build();
+      d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+      d.repo.findTenant.mockResolvedValue(pharmacyTenant());
+      d.repo.findActiveAffiliationDocuments.mockResolvedValue([
+        { documentTypeConceptId: OTRO_DOC.id, documentNumber: '999' },
+        { documentTypeConceptId: NIT_DOC.id, documentNumber: ' 1020304025 ' },
+      ]);
+      d.repo.findHeadquartersAddress.mockResolvedValue({
+        lines: 'Calle Comercio 45',
+        city: 'La Paz',
+        latitude: '-16.4955',
+        longitude: '-68.1336',
+      });
+      d.repo.findConcepts.mockResolvedValue([TIPO, SRL, NIT_DOC, OTRO_DOC]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getPharmacy('1'),
+      );
+
+      expect(d.repo.findTenant).toHaveBeenCalledWith(d.fork, 'tenant-a');
+      // El número del documento del NIT, no el de otro papel de la carpeta.
+      expect(result.taxId).toBe('1020304025');
+      expect(result.companyType).toEqual({ code: 'SRL', display: 'S.R.L.' });
+      expect(result.legalAddressText).toBe('Calle Comercio 45, La Paz');
+      expect(result.headquarters?.latitude).toBeCloseTo(-16.4955);
+      expect(result.headquarters?.longitude).toBeCloseTo(-68.1336);
+    });
+
+    it('falls back to the linked identifier when the NIT document has no number', async () => {
+      const d = build();
+      d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+      d.repo.findTenant.mockResolvedValue(pharmacyTenant());
+      d.repo.findActiveAffiliationDocuments.mockResolvedValue([
+        { documentTypeConceptId: NIT_DOC.id, identifierId: 'ident-1' },
+      ]);
+      d.repo.findIdentifiers.mockResolvedValue([
+        { id: 'ident-1', value: '7788990011' },
+      ]);
+      d.repo.findConcepts.mockResolvedValue([SRL, NIT_DOC]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getPharmacy('1'),
+      );
+
+      expect(d.repo.findIdentifiers).toHaveBeenCalledWith(d.fork, ['ident-1']);
+      expect(result.taxId).toBe('7788990011');
+      // Sin casa matriz registrada: dicho null, sin punto inventado.
+      expect(result.legalAddressText).toBeNull();
+      expect(result.headquarters).toBeNull();
+    });
+
+    it('does not serve the generic legacy COMPANY as a chosen company type', async () => {
+      const d = build();
+      d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+      d.repo.findTenant.mockResolvedValue(
+        pharmacyTenant({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
+        }),
+      );
+      d.repo.findHeadquartersAddress.mockResolvedValue({
+        lines: 'Av. Sin Coordenadas 1',
+      });
+      d.repo.findConcepts.mockResolvedValue([
+        {
+          id: CONCEPTS.LEGAL_ENTITY_COMPANY,
+          code: 'COMPANY',
+          display: 'Company',
+        },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getPharmacy('1'),
+      );
+
+      expect(result.companyType).toBeNull();
+      expect(result.taxId).toBeNull();
+      expect(result.legalAddressText).toBe('Av. Sin Coordenadas 1');
+      // Una dirección sin coordenadas no es un punto en el mapa.
+      expect(result.headquarters).toBeNull();
+    });
+
+    it('does not attribute the legal data of an owner that is not a pharmacy', async () => {
+      const d = build();
+      d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
+      d.repo.findTenant.mockResolvedValue(
+        pharmacyTenant({ tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PROVIDER }),
+      );
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.getPharmacy('1'),
+      );
+
+      expect(result).toMatchObject({
+        taxId: null,
+        companyType: null,
+        legalAddressText: null,
+        headquarters: null,
+      });
+      expect(d.repo.findActiveAffiliationDocuments).not.toHaveBeenCalled();
+      expect(d.repo.findHeadquartersAddress).not.toHaveBeenCalled();
+    });
   });
 
   it('searches products declaring the cut and resolving the vademecum', async () => {

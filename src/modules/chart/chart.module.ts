@@ -8,6 +8,8 @@ import {
   ChartTemplatesController,
   ChartReadController,
   ChartEncountersController,
+  // BR-15 (CL-30/CL-31/CL-36): autoservicio del titular.
+  ChartMeController,
 } from './controllers';
 import {
   ChartNotesService,
@@ -17,6 +19,7 @@ import {
   ChartReadService,
   ChartNotesReadService,
   EncounterPdfService,
+  ChartMeReadService,
 } from './services';
 import {
   ClinicalNotesRepository,
@@ -60,6 +63,14 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { PatientProfilesRepository } from '../profiles/repositories/patient-profiles.repository';
 import { HealthPractitionerProfilesRepository } from '../profiles/repositories/health-practitioner-profiles.repository';
 import { PersonsRepository } from '../profiles/repositories/persons.repository';
+// BR-15 (N-04): toda lectura/descarga de `charts/me` deja rastro en
+// `audit.data_access_log`. Clase sin estado por `EntityManager`, mismo
+// criterio que ya usa `ClinicalModule` (no se importa `AuditModule` entero:
+// no exporta este repositorio).
+import { DataAccessLogRepository } from '../audit/repositories';
+// P43 — el plan de cuidado puede declarar de qué formulario médico cerrado
+// sale. Mismo criterio: clase sin estado de `forms`, provista suelta.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Chart (15): notas clínicas versionadas y firmadas, liberación al
@@ -80,6 +91,7 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
     ChartTemplatesController,
     ChartReadController,
     ChartEncountersController,
+    ChartMeController,
   ],
   providers: [
     // Repositorios
@@ -93,6 +105,8 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
     PatientProfilesRepository,
     HealthPractitionerProfilesRepository,
     PersonsRepository,
+    DataAccessLogRepository,
+    FormInstanceOriginValidator,
     // Servicios
     ChartNotesService,
     ChartDocumentsService,
@@ -101,6 +115,7 @@ import { PersonsRepository } from '../profiles/repositories/persons.repository';
     ChartReadService,
     ChartNotesReadService,
     EncounterPdfService,
+    ChartMeReadService,
   ],
 })
 export class ChartModule {}

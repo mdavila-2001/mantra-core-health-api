@@ -8,6 +8,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { CoverageRepository, CatalogRepository } from '../repositories';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../../profiles/repositories';
 import { INS } from '../insurance.concepts';
 import {
   CreateCoverageDto,
@@ -15,6 +19,7 @@ import {
   CreateCobDto,
   CreatedResourceDto,
   ResourceStatusDto,
+  MyCoverageDto,
 } from '../dto';
 
 const RELATIONSHIP_CONCEPT: Record<string, string> = {
@@ -41,9 +46,40 @@ export class CoverageService {
     private readonly em: EntityManager,
     private readonly repo: CoverageRepository,
     private readonly catalog: CatalogRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CoverageService.name);
+  }
+
+  /**
+   * CV-11 — «Mi cobertura»: las coberturas del paciente autenticado. La
+   * persona sale de la cuenta (`person_account_links`), nunca de un id de la
+   * ruta o el query, igual que {@link ReferralsService.listMine}. Sin cuenta
+   * vinculada a un perfil de paciente, la respuesta es una lista vacía.
+   */
+  async listMine(actor: AuthenticatedUser): Promise<MyCoverageDto[]> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) return [];
+    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    if (!patient) return [];
+    const coverages = await this.repo.findByPatient(em, patient.profileId);
+    return coverages.map((c) => ({
+      id: c.id,
+      insurancePlanId: c.insurancePlanId,
+      insuranceBrokerId: c.insuranceBrokerId,
+      memberIdentifier: c.memberIdentifier,
+      policyIdentifier: c.policyIdentifier,
+      coverageOrder: c.coverageOrder,
+      relationshipToSubscriberConceptId: c.relationshipToSubscriberConceptId,
+      effectiveFrom: c.effectiveFrom,
+      effectiveTo: c.effectiveTo,
+      verificationStatusConceptId: c.verificationStatusConceptId,
+      status: c.statusConceptId,
+      createdAt: c.createdAt,
+    }));
   }
 
   /** UC-26-02: registrar cobertura del paciente y sus dependientes. */

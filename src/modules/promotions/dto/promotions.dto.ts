@@ -1667,3 +1667,108 @@ export class MyPointsLedgerPageResponseDto {
   })
   nextCursor?: string;
 }
+
+// --- Lectura del paciente: GET /promotions/me ---
+
+/** Un concepto ya resuelto a su forma legible. */
+export class PromotionConceptDto {
+  /** Código canónico del concepto. */
+  @ApiProperty()
+  code!: string;
+
+  /** Etiqueta legible del concepto. */
+  @ApiProperty()
+  display!: string;
+}
+
+/** Una regla de descuento de la promoción, sin uuids crudos. */
+export class MyPromotionDiscountDto {
+  /** `DISC_PERCENT`, `DISC_FIXED` o `DISC_BOGO`, resuelto. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  type!: PromotionConceptDto | null;
+
+  /** Porcentaje, texto exacto (numeric de BD), si la regla es porcentual. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  percentage!: string | null;
+
+  /** Monto fijo, texto exacto, si la regla es de monto fijo. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  fixedAmount!: string | null;
+
+  /** Moneda del monto, resuelta. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  currency!: PromotionConceptDto | null;
+
+  /** Compra mínima para que aplique, texto exacto. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  minPurchaseAmount!: string | null;
+
+  /** Tope del descuento, texto exacto. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  maxDiscountAmount!: string | null;
+
+  /** Sobre qué aplica (`TARGET_ORDER`, `TARGET_ITEM`, `TARGET_CATEGORY`). */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  appliesTo!: PromotionConceptDto | null;
+}
+
+/** Un cupón personal del titular. */
+export class MyPromotionCouponDto {
+  /** El código que la persona presenta en caja. */
+  @ApiProperty()
+  code!: string;
+
+  /** Hasta cuándo vale el cupón, si declara fin. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validTo!: string | null;
+}
+
+/** Una promoción vigente para el paciente autenticado. */
+export class MyPromotionDto {
+  /** Identificador de la promoción. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Código de la promoción. */
+  @ApiProperty()
+  code!: string;
+
+  /** Nombre visible. */
+  @ApiProperty()
+  name!: string;
+
+  /** Descripción, si la tiene. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  description!: string | null;
+
+  /** `PROMO_AUTO` o `PROMO_COUPON`, resuelto. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  type!: PromotionConceptDto | null;
+
+  /** Desde cuándo rige, si declara inicio. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validFrom!: string | null;
+
+  /** Hasta cuándo rige, si declara fin. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validTo!: string | null;
+
+  /** Reglas de descuento. */
+  @ApiProperty({ type: [MyPromotionDiscountDto] })
+  discounts!: MyPromotionDiscountDto[];
+
+  /** Los cupones personales del titular para esta promoción. */
+  @ApiProperty({ type: [MyPromotionCouponDto] })
+  coupons!: MyPromotionCouponDto[];
+}
+
+/** Las promociones vigentes para el paciente autenticado. */
+export class MyPromotionsResponseDto {
+  /** Promociones vigentes. */
+  @ApiProperty({ type: [MyPromotionDto] })
+  items!: MyPromotionDto[];
+
+  /** Cantidad servida. */
+  @ApiProperty()
+  count!: number;
+}

@@ -1,0 +1,26 @@
+src/common/seed/markdown-table.ts | @typescript-eslint/no-unnecessary-type-assertion | This assertion is unnecessary since it does not change the type of the expression.
+src/common/seed/people-seed.service.ts | @typescript-eslint/no-redundant-type-constituents | "created" is overridden by string in this union type.
+src/common/seed/people-seed.service.ts | @typescript-eslint/no-redundant-type-constituents | "existing" is overridden by string in this union type.
+src/common/seed/people-seed.service.ts | prettier/prettier | Replace `⏎········join(origen,·ARCHIVO_PACIENTES),⏎········'utf-8',⏎······` with `join(origen,·ARCHIVO_PACIENTES),·'utf-8'`
+src/modules/forms/controllers/forms-controllers.spec.ts | @typescript-eslint/unbound-method | A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object. Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. If a function does not access `this`, it can be annotated with `this: void`.
+src/modules/insurance/services/claims-read.service.spec.ts | prettier/prettier | Replace `CLAIM` with `⏎··········CLAIM,⏎········`
+src/modules/insurance/services/claims-read.service.spec.ts | prettier/prettier | Replace `{}` with `⏎··········{},⏎········`
+src/modules/insurance/services/claims-read.service.ts | prettier/prettier | Replace `⏎············em,⏎············[],⏎············id,⏎············[],⏎············scope.carrierId,⏎··········` with `em,·[],·id,·[],·scope.carrierId`
+test/integration/br14-encuentros-seguridad-clinica.int-spec.ts | prettier/prettier | Delete `··`
+test/integration/br14-encuentros-seguridad-clinica.int-spec.ts | prettier/prettier | Replace `ReturnType<typeof·camposObligatoriosDePaciente>` with `⏎····ReturnType<typeof·camposObligatoriosDePaciente>⏎··`
+test/integration/br14-encuentros-seguridad-clinica.int-spec.ts | prettier/prettier | Replace `⏎········.getConnection()⏎········` with `.getConnection()`
+test/integration/community-realtime-chat.int-spec.ts | prettier/prettier | Delete `··`
+test/integration/community-realtime-chat.int-spec.ts | prettier/prettier | Replace `'disconnect'·|·'connect_error'·|·null>(` with `⏎········'disconnect'·|·'connect_error'·|·null`
+test/integration/community-realtime-chat.int-spec.ts | prettier/prettier | Replace `··` with `>(`
+test/integration/community-realtime-chat.int-spec.ts | prettier/prettier | Replace `··},⏎······` with `}`
+test/integration/community-realtime-chat.int-spec.ts | prettier/prettier | Replace `············` with `··········`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Delete `]`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Delete `··>(⏎`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Insert `··`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `.getConnection().execute<⏎······Array<{·action:·string;·entity_id:·string;·tenant_id:·string·}>` with `⏎······.getConnection()⏎······.execute<Array<{·action:·string;·entity_id:·string;·tenant_id:·string·}>>(`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `.getConnection()` with `⏎······.getConnection()⏎······`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `list.body.items.map((item:·{·code:·string·})·=>·item.code)).not.toContain(⏎······`CMP-${suffix}`,⏎····` with `⏎······list.body.items.map((item:·{·code:·string·})·=>·item.code),⏎····).not.toContain(`CMP-${suffix}``
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `tenantId` with `[tenantId]`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `userId,·`session-${label}`,·[...globalRoles],·[` with `⏎··········userId,⏎··········`session-${label}`,⏎··········[...globalRoles],`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `······` with `········`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `⏎······.get('/insurance/campaigns/active')⏎······` with `.get('/insurance/campaigns/active')`

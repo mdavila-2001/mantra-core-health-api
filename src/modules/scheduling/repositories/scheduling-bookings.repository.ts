@@ -108,6 +108,14 @@ export interface CreateBookingData {
    */
   reasonText?: string;
   /**
+   * P42: la consulta de la que sale esta reconsulta.
+   */
+  followUpOfBookingId?: string;
+  /**
+   * P43: instancia de formulario de la consulta de origen (ya validada).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -293,10 +301,79 @@ export class SchedulingBookingsRepository {
         bookingPolicyId: data.bookingPolicyId,
         cancellationPolicySnapshot: data.cancellationPolicySnapshot,
         reasonText: data.reasonText,
+        followUpOfBookingId: data.followUpOfBookingId,
+        formInstanceId: data.formInstanceId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
     );
+  }
+
+  /**
+   * P42: citas con su slot resuelto, por id, en lote. Es la lectura de los
+   * orígenes de las reconsultas de una página: una consulta por tabla, no una
+   * por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Citas a leer (sin repetidos).
+   * @returns Las que existen, con su slot (o `null`).
+   */
+  async findBookingsWithSlotsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    if (ids.length === 0) return [];
+    const bookings = await em.find(AppointmentBookings, {
+      id: { $in: [...ids] },
+    });
+    return this.conSlots(em, bookings);
+  }
+
+  /**
+   * P42: las reconsultas de estas citas en los estados pedidos, de la más
+   * reciente a la más antigua, con su slot resuelto (el instante vive en el
+   * slot). Sirve para el 409 de «una reconsulta por consulta» y para derivar
+   * `followUpBookingId` al leer.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param originIds - Citas de origen.
+   * @param statusConceptIds - Estados que cuentan como reconsulta viva.
+   * @returns Las reconsultas con su slot.
+   */
+  async findFollowUpsOf(
+    em: EntityManager,
+    originIds: readonly string[],
+    statusConceptIds: readonly string[],
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    if (originIds.length === 0) return [];
+    const bookings = await em.find(
+      AppointmentBookings,
+      {
+        followUpOfBookingId: { $in: [...originIds] },
+        statusConceptId: { $in: [...statusConceptIds] },
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+    return this.conSlots(em, bookings);
+  }
+
+  /** Resuelve el slot de cada cita en una sola consulta. */
+  private async conSlots(
+    em: EntityManager,
+    bookings: AppointmentBookings[],
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    const slotIds = [
+      ...new Set(bookings.map((b) => b.bookableSlotId).filter(Boolean)),
+    ];
+    const slots =
+      slotIds.length > 0
+        ? await em.find(BookableSlots, { id: { $in: slotIds } })
+        : [];
+    const slotById = new Map(slots.map((slot) => [slot.id, slot]));
+    return bookings.map((booking) => ({
+      booking,
+      slot: slotById.get(booking.bookableSlotId) ?? null,
+    }));
   }
 
   /**
@@ -803,6 +880,10 @@ export class SchedulingBookingsRepository {
       timeZone: string | null;
       patientProfileId: string;
     }[] = await em.getConnection().execute(
+      // El recurso sale del CUPO (`bookable_slots.resource_id`, NOT NULL), igual
+      // que el horario: `appointment_bookings.resource_id` es NULLable y la
+      // reprogramación lo dejaba en el recurso viejo, así que unir por ahí
+      // volvía invisible una cita para la regla madre (M4 · H1.S1.M4).
       `SELECT b.id,
               s.start_at          AS "startAt",
               s.end_at            AS "endAt",
@@ -812,7 +893,7 @@ export class SchedulingBookingsRepository {
               b.patient_profile_id AS "patientProfileId"
          FROM scheduling.appointment_bookings b
          JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
-         JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
+         JOIN scheduling.schedulable_resources r ON r.id = s.resource_id
         WHERE r.resource_ref_id = ?
           AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
           AND b.status_concept_id IN (?)

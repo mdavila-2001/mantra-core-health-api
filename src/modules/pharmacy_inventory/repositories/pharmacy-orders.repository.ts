@@ -9,7 +9,12 @@ import {
 } from '../../pharmacy/entities';
 import { CatalogConcepts } from '../../terminology/entities';
 import { MedicationRequests } from '../../clinical/entities';
-import { PersonProfiles, Persons } from '../../profiles/entities';
+import { Addresses } from '../../common/entities';
+import {
+  PersonProfiles,
+  Persons,
+  PractitionerSpecialties,
+} from '../../profiles/entities';
 
 /**
  * Acceso a datos del pedido de farmacia del paciente (FAR-E1).
@@ -277,6 +282,74 @@ export class PharmacyOrdersRepository {
       id: medicationRequestId,
     });
     return request?.prescriberProfileId ?? null;
+  }
+
+  /**
+   * El prescriptor de cada receta, en lote: `medication_request_id →
+   * prescriber_profile_id`. Una receta sin prescriptor declarado no entra al
+   * mapa.
+   */
+  async findPrescriberProfileIdsByRequestIds(
+    em: EntityManager,
+    medicationRequestIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    if (medicationRequestIds.length === 0) return result;
+    const requests = await em.find(MedicationRequests, {
+      id: { $in: [...medicationRequestIds] },
+    });
+    for (const request of requests) {
+      if (request.prescriberProfileId) {
+        result.set(request.id, request.prescriberProfileId);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * La especialidad principal vigente de cada profesional, en lote:
+   * `practitioner_profile_id → specialty_concept_id`. Gana la marcada como
+   * principal; si ninguna lo está, la más antigua. Una especialidad con
+   * `valid_to` ya pasado no cuenta.
+   */
+  async findPrimarySpecialtyConceptIds(
+    em: EntityManager,
+    practitionerProfileIds: readonly string[],
+    now: Date,
+  ): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    if (practitionerProfileIds.length === 0) return result;
+    const rows = await em.find(
+      PractitionerSpecialties,
+      {
+        practitionerProfileId: { $in: [...practitionerProfileIds] },
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
+      },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+    // Filas de la más antigua a la más nueva: la primera principal gana; sin
+    // ninguna principal queda la primera fila del profesional.
+    const withPrimary = new Set<string>();
+    for (const row of rows) {
+      const id = row.practitionerProfileId;
+      if (withPrimary.has(id)) continue;
+      if (row.isPrimary === true) {
+        result.set(id, row.specialtyConceptId);
+        withPrimary.add(id);
+      } else if (!result.has(id)) {
+        result.set(id, row.specialtyConceptId);
+      }
+    }
+    return result;
+  }
+
+  /** Direcciones por id (`common.addresses`), para la entrega del pedido. */
+  findAddressesByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Addresses[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Addresses, { id: { $in: [...ids] } });
   }
 
   /** Conceptos por id, para resolver `{code, display}` en lote. */

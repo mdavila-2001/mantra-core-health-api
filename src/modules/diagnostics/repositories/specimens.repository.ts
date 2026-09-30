@@ -12,6 +12,16 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/** Un espécimen acesionado, con sus contenedores y su cadena de custodia (lectura). */
+export interface SpecimenWithCustody {
+  /** El espécimen. */
+  specimen: Specimens;
+  /** Sus contenedores (puede no tener ninguno todavía). */
+  containers: SpecimenContainers[];
+  /** Su cadena de custodia, del evento más viejo al más nuevo. */
+  custodyEvents: SpecimenChainOfCustodyEvents[];
+}
+
 /** Datos para dar de alta un espécimen (endpoint de soporte). */
 export interface CreateSpecimenData {
   /**
@@ -184,6 +194,75 @@ export class SpecimensRepository {
     id: string,
   ): Promise<SpecimenContainers | null> {
     return em.findOne(SpecimenContainers, { id });
+  }
+
+  /**
+   * Acesión de un tenant, o `null` si no existe **o es de otro tenant** — a
+   * propósito: el detalle de la acesión (CL-47) no puede confirmarle a un
+   * laboratorio que el id de otro laboratorio existe.
+   */
+  findAccessionForTenant(
+    em: EntityManager,
+    id: string,
+    custodianTenantId: string,
+  ): Promise<LaboratoryAccessions | null> {
+    return em.findOne(LaboratoryAccessions, { id, custodianTenantId });
+  }
+
+  /** Items de la acesión (espécimen ↔ acesión), en el orden en que se agregaron. */
+  findAccessionSpecimens(
+    em: EntityManager,
+    laboratoryAccessionId: string,
+  ): Promise<AccessionSpecimens[]> {
+    return em.find(
+      AccessionSpecimens,
+      { laboratoryAccessionId },
+      { orderBy: { sequenceNumber: 'ASC' } },
+    );
+  }
+
+  /** Espécimen de un tenant, o `null` si no existe o es de otro (mismo criterio que la acesión). */
+  findSpecimenForTenant(
+    em: EntityManager,
+    id: string,
+    custodianTenantId: string,
+  ): Promise<Specimens | null> {
+    return em.findOne(Specimens, { id, custodianTenantId });
+  }
+
+  /** Especímenes por id, en lote (para poblar el detalle de una acesión). */
+  findSpecimensByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Specimens[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Specimens, { id: { $in: [...ids] } });
+  }
+
+  /** Contenedores de uno o más especímenes. */
+  findContainersBySpecimenIds(
+    em: EntityManager,
+    specimenIds: readonly string[],
+  ): Promise<SpecimenContainers[]> {
+    if (specimenIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      SpecimenContainers,
+      { specimenId: { $in: [...specimenIds] } },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+  }
+
+  /** Cadena de custodia de uno o más especímenes, del evento más viejo al más nuevo. */
+  findCustodyEventsBySpecimenIds(
+    em: EntityManager,
+    specimenIds: readonly string[],
+  ): Promise<SpecimenChainOfCustodyEvents[]> {
+    if (specimenIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      SpecimenChainOfCustodyEvents,
+      { specimenId: { $in: [...specimenIds] } },
+      { orderBy: { occurredAt: 'ASC' } },
+    );
   }
 
   /**

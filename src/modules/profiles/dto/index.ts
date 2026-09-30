@@ -6,6 +6,8 @@ export * from './verify-credential.dto';
 export * from './add-specialty.dto';
 export * from './own-credential.dto';
 export * from './update-own-credential.dto';
+export * from './update-own-specialty.dto';
+export * from './update-own-license.dto';
 export * from './affiliation.dto';
 export * from './add-identity-link.dto';
 export * from './merge-patients.dto';

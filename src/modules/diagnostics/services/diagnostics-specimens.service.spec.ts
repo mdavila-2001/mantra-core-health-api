@@ -9,7 +9,11 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsSpecimensService } from './diagnostics-specimens.service';
-import { DIAG } from '../diagnostics.concepts';
+import {
+  CONTAINER_TYPE_CONCEPTS,
+  DIAG,
+  SPECIMEN_TYPE_CONCEPTS,
+} from '../diagnostics.concepts';
 import {
   ResourceNotFoundException,
   PreconditionFailedException,
@@ -23,7 +27,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const forked = {};
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => forked),
+  };
   const repo = {
     findSpecimen: mockFn(),
     findAccession: mockFn(),
@@ -36,6 +44,12 @@ function build() {
     createContainer: mockFn(),
     recordContainerEvent: mockFn(),
     cancelTestsForSpecimen: mockFn().mockResolvedValue(0),
+    findAccessionForTenant: mockFn(),
+    findAccessionSpecimens: mockFn().mockResolvedValue([]),
+    findSpecimenForTenant: mockFn(),
+    findSpecimensByIds: mockFn().mockResolvedValue([]),
+    findContainersBySpecimenIds: mockFn().mockResolvedValue([]),
+    findCustodyEventsBySpecimenIds: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new DiagnosticsSpecimensService(
@@ -47,6 +61,107 @@ function build() {
 }
 
 describe('DiagnosticsSpecimensService', () => {
+  describe('catálogos de tipo de espécimen y de contenedor', () => {
+    const alta = (specimenTypeConceptId: string) => ({
+      patientProfileId: 'p1',
+      custodianTenantId: 't1',
+      specimenTypeConceptId,
+    });
+
+    it('correcto: un tipo del catálogo `specimen-type` da de alta', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+      });
+      await d.service.createSpecimen(alta(DIAG.SPECIMEN_TYPE_SERUM), actor);
+      expect(d.repo.createSpecimen).toHaveBeenCalled();
+    });
+
+    it('correcto: un tipo del catálogo `specimen-container-type` crea el contenedor', async () => {
+      const d = build();
+      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.createContainer.mockReturnValue({
+        id: 'c1',
+        statusConceptId: DIAG.CONTAINER_ACTIVE,
+      });
+      const res = await d.service.createContainer(
+        's1',
+        {
+          containerIdentifier: 'TUBO-1',
+          containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+        },
+        actor,
+      );
+      expect(res).toEqual({ id: 'c1', status: DIAG.CONTAINER_ACTIVE });
+    });
+
+    it('límite: el primero y el último de cada catálogo se aceptan', async () => {
+      const d = build();
+      d.repo.createSpecimen.mockReturnValue({ id: 's1' });
+      d.repo.findSpecimen.mockResolvedValue({ id: 's1' });
+      d.repo.createContainer.mockReturnValue({ id: 'c1' });
+      for (const type of [
+        SPECIMEN_TYPE_CONCEPTS[0],
+        SPECIMEN_TYPE_CONCEPTS[SPECIMEN_TYPE_CONCEPTS.length - 1],
+      ]) {
+        await expect(
+          d.service.createSpecimen(alta(type), actor),
+        ).resolves.toBeDefined();
+      }
+      for (const type of [
+        CONTAINER_TYPE_CONCEPTS[0],
+        CONTAINER_TYPE_CONCEPTS[CONTAINER_TYPE_CONCEPTS.length - 1],
+      ]) {
+        await expect(
+          d.service.createContainer(
+            's1',
+            { containerIdentifier: 'T', containerTypeConceptId: type },
+            actor,
+          ),
+        ).resolves.toBeDefined();
+      }
+    });
+
+    it('inválido: un concepto que existe pero no es un tipo de espécimen → 422 con motivo estable, sin abrir la transacción', async () => {
+      const d = build();
+      const error = await d.service
+        .createSpecimen(alta(DIAG.SPECIMEN_COLLECTED), actor)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      const body = (error as PreconditionFailedException).getResponse();
+      expect((error as PreconditionFailedException).getStatus()).toBe(422);
+      expect(body).toMatchObject({
+        code: 'PRECONDITION_FAILED',
+        details: {
+          reason: 'SPECIMEN_TYPE_NOT_IN_CATALOG',
+          field: 'specimenTypeConceptId',
+          catalog: 'specimen-type',
+        },
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+    });
+
+    it('inválido: un tipo de espécimen usado como contenedor → 422 CONTAINER_TYPE_NOT_IN_CATALOG', async () => {
+      const d = build();
+      const error = await d.service
+        .createContainer(
+          's1',
+          {
+            containerIdentifier: 'TUBO-1',
+            containerTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(
+        (error as PreconditionFailedException).getResponse(),
+      ).toMatchObject({ details: { reason: 'CONTAINER_TYPE_NOT_IN_CATALOG' } });
+      expect(d.repo.createContainer).not.toHaveBeenCalled();
+    });
+  });
+
   describe('createSpecimen (soporte)', () => {
     it('creates a collected specimen and flushes', async () => {
       const d = build();
@@ -58,7 +173,7 @@ describe('DiagnosticsSpecimensService', () => {
         {
           patientProfileId: 'p1',
           custodianTenantId: 't1',
-          specimenTypeConceptId: 'c1',
+          specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
         },
         actor,
       );
@@ -193,6 +308,119 @@ describe('DiagnosticsSpecimensService', () => {
       expect(res.id).toBe('cust1');
       expect(container.statusConceptId).toBe(DIAG.CONTAINER_STORED);
       expect(d.repo.recordContainerEvent).toHaveBeenCalled();
+    });
+  });
+
+  describe('getAccession (CL-47, lectura)', () => {
+    it('aceptado: arma el detalle con especímenes, contenedores y custodia', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue({
+        id: 'acc1',
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        accessionNumber: 'ACC-1',
+        receivedAt: new Date('2026-01-01'),
+        priorityConceptId: 'prio1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+      d.repo.findAccessionSpecimens.mockResolvedValue([
+        {
+          id: 'as1',
+          specimenId: 's1',
+          sequenceNumber: 1,
+          statusConceptId: 'st1',
+        },
+      ]);
+      d.repo.findSpecimensByIds.mockResolvedValue([
+        {
+          id: 's1',
+          patientProfileId: 'p1',
+          specimenTypeConceptId: 'type1',
+          statusConceptId: DIAG.SPECIMEN_RECEIVED,
+        },
+      ]);
+      d.repo.findContainersBySpecimenIds.mockResolvedValue([
+        {
+          id: 'c1',
+          specimenId: 's1',
+          containerIdentifier: 'CONT-1',
+          containerTypeConceptId: 'ct1',
+          statusConceptId: DIAG.CONTAINER_ACTIVE,
+        },
+      ]);
+      d.repo.findCustodyEventsBySpecimenIds.mockResolvedValue([
+        {
+          id: 'cust1',
+          specimenId: 's1',
+          custodyEventTypeConceptId: DIAG.CUSTODY_RECEPTION,
+          occurredAt: new Date('2026-01-01'),
+        },
+      ]);
+
+      const res = await d.service.getAccession('acc1', 't1');
+
+      expect(res.id).toBe('acc1');
+      expect(res.specimens).toHaveLength(1);
+      expect(res.specimens[0].specimen.containers).toHaveLength(1);
+      expect(res.specimens[0].specimen.custodyEvents).toHaveLength(1);
+    });
+
+    it('límite: una acesión sin especímenes todavía devuelve la lista vacía', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue({
+        id: 'acc1',
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        accessionNumber: 'ACC-1',
+        receivedAt: new Date('2026-01-01'),
+        priorityConceptId: 'prio1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+
+      const res = await d.service.getAccession('acc1', 't1');
+
+      expect(res.specimens).toEqual([]);
+    });
+
+    it('inválido: 404 si la acesión no existe o es de otro tenant', async () => {
+      const d = build();
+      d.repo.findAccessionForTenant.mockResolvedValue(null);
+      await expect(d.service.getAccession('acc1', 't1')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.repo.findAccessionForTenant).toHaveBeenCalledWith(
+        expect.anything(),
+        'acc1',
+        't1',
+      );
+    });
+  });
+
+  describe('getSpecimen (CL-47, lectura)', () => {
+    it('aceptado: arma el detalle con contenedores y custodia', async () => {
+      const d = build();
+      d.repo.findSpecimenForTenant.mockResolvedValue({
+        id: 's1',
+        patientProfileId: 'p1',
+        specimenTypeConceptId: 'type1',
+        statusConceptId: DIAG.SPECIMEN_RECEIVED,
+      });
+      d.repo.findContainersBySpecimenIds.mockResolvedValue([]);
+      d.repo.findCustodyEventsBySpecimenIds.mockResolvedValue([]);
+
+      const res = await d.service.getSpecimen('s1', 't1');
+
+      expect(res.id).toBe('s1');
+      expect(res.containers).toEqual([]);
+      expect(res.custodyEvents).toEqual([]);
+    });
+
+    it('inválido: 404 si el espécimen no existe o es de otro tenant', async () => {
+      const d = build();
+      d.repo.findSpecimenForTenant.mockResolvedValue(null);
+      await expect(d.service.getSpecimen('s1', 't2')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
     });
   });
 });

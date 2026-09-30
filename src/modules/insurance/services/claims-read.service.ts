@@ -182,13 +182,7 @@ export class ClaimsReadService {
     const scope = await this.resolveScope();
     const claim =
       scope.type === 'carrier'
-        ? await this.claimRepo.findClaimInScope(
-            em,
-            [],
-            id,
-            [],
-            scope.carrierId,
-          )
+        ? await this.claimRepo.findClaimInScope(em, [], id, [], scope.carrierId)
         : await this.claimRepo.findClaimInScope(
             em,
             scope.practiceIds,

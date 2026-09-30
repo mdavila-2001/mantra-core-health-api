@@ -79,6 +79,7 @@ export {
   MAX_DELAY_MINUTES,
   MAX_DELAY_MESSAGE_LENGTH,
   CreateDirectAppointmentDto,
+  FollowUpOriginDto,
   DirectAppointmentResponseDto,
 } from './scheduling-bookings.dto';
 export type { BookingInfoRequest } from './scheduling-bookings.dto';
@@ -103,6 +104,7 @@ export {
   ResourceAgendaResponseDto,
   BookingStatusReasonDto,
   BookingDelayNoticeDto,
+  BookingFollowUpOriginDto,
   BookingInsuranceClaimDto,
   BookingItemDto,
   SearchBookingsResponseDto,

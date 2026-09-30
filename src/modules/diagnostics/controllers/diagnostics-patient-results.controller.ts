@@ -2,15 +2,19 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -137,13 +141,58 @@ export class DiagnosticsPatientResultsController {
   @ApiOperation({
     summary: 'Un resultado del titular, con sus archivos',
     description:
-      'Cada `fileId` se descarga por `GET /common/files/{id}/content`.',
+      'Cada `fileId` se descarga por ' +
+      '`GET /diagnostic-results/me/{reportId}/files/{fileId}/content`. ' +
+      'La vía genérica `/common/files/{id}/content` es sólo para quien subió ' +
+      'el archivo: el laboratorio lo subió, no el titular.',
   })
   getOwnResult(
     @CurrentUser() actor: AuthenticatedUser,
     @Param('reportId', ParseUUIDPipe) reportId: string,
   ): Promise<PatientDiagnosticResultDto> {
     return this.results.getOwnResult(actor, reportId);
+  }
+
+  /**
+   * Los bytes de un archivo de un resultado del titular (CL-40).
+   *
+   * @param actor - Usuario autenticado.
+   * @param reportId - Informe.
+   * @param fileId - Archivo del informe.
+   * @param res - Respuesta cruda: se envían bytes, no JSON.
+   */
+  @Get('me/:reportId/files/:fileId/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar un archivo de un resultado del titular',
+    description:
+      'Autoriza por titularidad y versión liberada y visible, no por autoría ' +
+      'del archivo. Todo lo que no cumpla responde 404.',
+  })
+  @ApiOkResponse({ description: 'Bytes del archivo' })
+  @ApiNotFoundResponse({
+    description:
+      'No es del titular, no está liberado, o el archivo no cuelga del informe',
+  })
+  async getOwnResultFileContent(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Param('reportId', ParseUUIDPipe) reportId: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.results.getOwnResultFileContent(
+      actor,
+      reportId,
+      fileId,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
+      );
+    }
+    res.send(content.buffer);
   }
 
   /**

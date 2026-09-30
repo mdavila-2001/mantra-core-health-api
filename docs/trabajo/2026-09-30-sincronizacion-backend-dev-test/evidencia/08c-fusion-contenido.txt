@@ -1,0 +1,16 @@
+HEAD=2a64b873 tree=fb0bd9097bfa0a798d6154c1ca276738e6157563
+esperado=fb0bd9097bfa0a798d6154c1ca276738e6157563
+D|R vs dev: 0
+D|R vs test: 0
+solo-dev: 60 archivos
+solo-dev byte-identicos a dev: exit=0
+solo-test: 552 archivos
+solo-test byte-identicos a test: exit=0
+insurance == test: exit=0
+ .../2026-09-19_v4221_aseguradoras_codigo_unico.sql | 32 ++++++++-
+ .../patches/2026-09-26_v4232_form_instance_id.sql  | 82 ++++++++++++++++++++++
+ ...6_v4236_service_requests_performer_read_rls.sql | 64 +++++++++++++++++
+ .../2026-09-26_v4237_appointment_follow_up_of.sql  | 46 ++++++++++++
+ 4 files changed, 221 insertions(+), 3 deletions(-)
+commits origin/test..HEAD: 15
+commits origin/dev..HEAD: 150

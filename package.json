@@ -20,6 +20,8 @@
     "start": "nest start",
     "seed:boot": "nest start --entryFile seed-cli",
     "seed:boot:prod": "node dist/src/seed-cli.js",
+    "seed:datasets": "python tools/bolivia-datasets/extract_datasets.py",
+    "seed:datasets:check": "python tools/bolivia-datasets/extract_datasets.py --check",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",

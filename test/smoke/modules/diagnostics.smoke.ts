@@ -1,6 +1,7 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
 import { CONCEPTS } from '../../../src/common';
+import { DIAG } from '../../../src/modules/diagnostics/diagnostics.concepts';
 
 /**
  * Concepto real ya sembrado (terminology.catalog_concepts) reutilizado como
@@ -41,7 +42,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -58,7 +59,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 401,
   },
@@ -85,7 +86,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: c.vars.patientProfileId,
       custodianTenantId: c.tenantId,
-      specimenTypeConceptId: CID,
+      specimenTypeConceptId: DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -154,7 +155,7 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     path: (c) => `/diagnostics/specimens/${c.vars.diagSpecimenId}/containers`,
     body: () => ({
       containerIdentifier: `CT-${Date.now()}`,
-      containerTypeConceptId: CID,
+      containerTypeConceptId: DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -184,6 +185,40 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) => `/diagnostics/containers/${UUID_ABSENT}/custody-events`,
     body: (c) => ({ specimenId: c.vars.diagSpecimenId }),
+    expectedStatus: 404,
+  },
+
+  // ---- Lecturas (CL-47): antes sólo había POST en el circuito ---------------
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/accessions/{id}',
+    name: 'happy: detalle de acesión (especímenes, contenedor, custodia)',
+    method: 'get',
+    path: (c) => `/diagnostics/accessions/${c.vars.diagAccessionId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/accessions/{id}',
+    name: 'límite: acesión inexistente',
+    method: 'get',
+    path: () => `/diagnostics/accessions/${UUID_ABSENT}`,
+    expectedStatus: 404,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/specimens/{id}',
+    name: 'happy: detalle de espécimen (con su custodia)',
+    method: 'get',
+    path: (c) => `/diagnostics/specimens/${c.vars.diagSpecimenId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Diagnostics',
+    endpoint: 'GET /diagnostics/specimens/{id}',
+    name: 'límite: espécimen inexistente',
+    method: 'get',
+    path: () => `/diagnostics/specimens/${UUID_ABSENT}`,
     expectedStatus: 404,
   },
 

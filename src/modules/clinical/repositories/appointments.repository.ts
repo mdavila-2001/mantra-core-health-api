@@ -40,6 +40,11 @@ export interface CreateAppointmentData {
    */
   channelConceptId?: string;
   /**
+   * Tipología de la actividad (P42: la reconsulta nace `ACT_FOLLOW_UP`).
+   * Ausente deja la columna en NULL, como hasta hoy.
+   */
+  typeConceptId?: string;
+  /**
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
@@ -81,6 +86,7 @@ export class AppointmentsRepository {
         endAt: data.endAt,
         reasonText: data.reasonText,
         channelConceptId: data.channelConceptId,
+        typeConceptId: data.typeConceptId,
         createdAt: ahora,
         updatedAt: ahora,
         createdByUserId: data.actorUserId,

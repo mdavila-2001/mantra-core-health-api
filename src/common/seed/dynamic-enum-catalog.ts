@@ -4,6 +4,11 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { INS } from '../../modules/insurance/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
+import {
+  CONTAINER_TYPE_CONCEPTS,
+  SPECIMEN_TYPE_CONCEPTS,
+} from '../../modules/diagnostics/diagnostics.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /**
@@ -1307,6 +1312,92 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     defaultConceptId: CHART.RELEASE_NOT_RELEASED,
     targets: ['chart.clinical_note_headers.patient_release_status_concept_id'],
+  },
+  // --- Alta pública de laboratorios y centros de imagenología (BR-09) -------
+  // El alta es anónima y sus selectores necesitan los ids de estos conceptos:
+  // sin estas enumeraciones el front tendría que hardcodearlos. Se publican por
+  // los mismos `GET /system-context/dynamic-enums` (públicos) que el resto.
+  {
+    code: 'diagnostic-unit-type',
+    name: 'Tipo de unidad diagnóstica',
+    description:
+      'Si la unidad es un laboratorio clínico o un centro de diagnóstico por imágenes.',
+    concepts: [DUNIT.UNIT_TYPE_LABORATORY, DUNIT.UNIT_TYPE_IMAGING],
+    targets: [
+      'diagnostic_units.diagnostic_units.diagnostic_unit_type_concept_id',
+    ],
+  },
+  {
+    code: 'diagnostic-modality',
+    name: 'Modalidad diagnóstica',
+    description:
+      'Las modalidades que un alta puede declarar (`diagnostic-unit-modalities.ts`); una fuera de la lista responde 422.',
+    concepts: [
+      DUNIT.MODALITY_LABORATORY,
+      DUNIT.MODALITY_XRAY,
+      DUNIT.MODALITY_ULTRASOUND,
+      DUNIT.MODALITY_CT,
+      DUNIT.MODALITY_MRI,
+      DUNIT.MODALITY_MAMMOGRAPHY,
+      DUNIT.MODALITY_BONE_DENSITOMETRY,
+    ],
+    targets: [
+      'diagnostic_units.diagnostic_study_offerings.modality_concept_id',
+    ],
+  },
+  {
+    code: 'tenant-country',
+    name: 'País de la organización',
+    description:
+      'Los tipos territoriales (laboratorio, imagenología, hospital) exigen país. Hoy sólo Bolivia: no es el `VS_COUNTRY` universal, que sigue sin miembros.',
+    concepts: [CONCEPTS.COUNTRY_BO],
+    defaultConceptId: CONCEPTS.COUNTRY_BO,
+    targets: ['directory.tenants.country_concept_id'],
+  },
+  /* --- BR-16 (CL-36) ---------------------------------------------------------
+     `chart-documents.service.ts` ya acepta y persiste `patientVisibilityConceptId`
+     (default `VISIBILITY_PROVIDER_ONLY`) desde antes de este carril; lo que
+     faltaba era publicarlo para que una pantalla pudiera ofrecerlo como
+     selector en vez de tener que adivinar el uuid. Sin columna ni tabla nueva:
+     los dos conceptos ya existen en `chart.concepts.ts`. */
+  {
+    code: 'chart-document-patient-visibility',
+    name: 'Visibilidad del documento para el paciente',
+    description:
+      'Si el titular puede ver este documento del expediente en su propia historia.',
+    concepts: [
+      CHART.VISIBILITY_PATIENT_VISIBLE,
+      CHART.VISIBILITY_PROVIDER_ONLY,
+    ],
+    defaultConceptId: CHART.VISIBILITY_PROVIDER_ONLY,
+    targets: ['chart.document_records.patient_visibility_concept_id'],
+  },
+  /* --- Recepción de muestras del laboratorio (M20) ---------------------------
+     `POST /diagnostics/specimens` y `POST .../containers` pedían un uuid de
+     tipo de espécimen y de contenedor que nada sembraba: la pantalla de
+     recepción no tenía de dónde ofrecer «Sangre venosa» ni «Tubo tapa lila».
+     Los conceptos los declara `diagnostics.concepts.ts` (HL7 v2-0487 para el
+     espécimen; color de tapa ISO 6710 para el tubo). Sin DDL: lo materializa el
+     seed al arrancar. El tipo de contenedor gobierna las dos columnas que lo
+     guardan: la del contenedor y la copia en el propio espécimen. */
+  {
+    code: 'specimen-type',
+    name: 'Tipo de espécimen',
+    description:
+      'Qué muestra se tomó al paciente: sangre, suero, orina, heces, líquido cefalorraquídeo, etc.',
+    concepts: SPECIMEN_TYPE_CONCEPTS,
+    targets: ['diagnostics.specimens.specimen_type_concept_id'],
+  },
+  {
+    code: 'specimen-container-type',
+    name: 'Tipo de contenedor de la muestra',
+    description:
+      'Tubo o frasco en el que viaja la muestra; en los tubos, el color de la tapa indica el aditivo.',
+    concepts: CONTAINER_TYPE_CONCEPTS,
+    targets: [
+      'diagnostics.specimen_containers.container_type_concept_id',
+      'diagnostics.specimens.container_type_concept_id',
+    ],
   },
 ];
 

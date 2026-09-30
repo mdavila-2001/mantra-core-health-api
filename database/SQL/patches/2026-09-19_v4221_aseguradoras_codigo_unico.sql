@@ -141,6 +141,24 @@ DECLARE
   v_huerfanas   integer;
 BEGIN
   SELECT count(*) INTO v_total     FROM insurance.insurance_carriers;
+
+  -- Base recién creada: no hay NINGUNA aseguradora, así que no hay nada que
+  -- reconciliar ni verificar. `postgres-init` aplica este patch ANTES de que
+  -- `api-migrate` siembre las 17 canónicas, y el nombre del archivo no dice
+  -- `backfill`, así que no se omite en una base nueva. Las secciones A y B ya
+  -- no tocaron nada (los pares salen vacíos) y la API siembra después con los
+  -- mismos códigos que el paquete, de modo que el duplicado no puede nacer.
+  -- Corregido 2026-09-28: la aserción de abajo exigía 17 canónicas en
+  -- cualquier base y reventaba el despliegue desde cero con «se esperaban 17
+  -- aseguradoras canónicas y hay 0» (salida 3; reproducido en el servidor de
+  -- test y contra un volcado --schema-only de su base). La salida es SÓLO para
+  -- `v_total = 0`: una base con filas viejas (`ALIANZA_VIDA`…) y 0 canónicas
+  -- sigue reventando, porque ahí la API nunca sembró y repuntar es imposible.
+  IF v_total = 0 THEN
+    RAISE NOTICE 'v4.2.21: base sin aseguradoras (despliegue desde cero) — nada que reconciliar; las canónicas las siembra la API después';
+    RETURN;
+  END IF;
+
   SELECT count(*) INTO v_canonicas FROM insurance.insurance_carriers
    WHERE carrier_code ~ '^BO_ASEG_';
   SELECT count(*) INTO v_sobrantes FROM insurance.insurance_carriers
@@ -149,9 +167,17 @@ BEGIN
   IF v_canonicas <> 17 THEN
     RAISE EXCEPTION 'v4.2.21: se esperaban 17 aseguradoras canónicas y hay %', v_canonicas;
   END IF;
-  -- Sólo puede sobrevivir la aseguradora de demostración (sección C).
-  IF v_sobrantes <> 1 THEN
-    RAISE EXCEPTION 'v4.2.21: se esperaba 1 fila no canónica (la demo) y hay %', v_sobrantes;
+  -- Sólo puede sobrevivir la aseguradora de demostración (sección C), y sólo
+  -- si ya existía: ningún seed la crea (no tiene código BO_ASEG_, nació de
+  -- una corrida de prueba manual), así que en una base que nunca la tuvo el
+  -- resultado correcto es 0, no 1. Lo que este patch no tolera es que sobreviva
+  -- MÁS de una fila no canónica -- eso sí sería el duplicado real que vino a
+  -- limpiar. Corregido 2026-09-26 (M1): la aserción original exigía
+  -- exactamente 1 y reventaba en cualquier entorno sin ese registro histórico
+  -- (reproducido corriendo el patch contra una base con las 17 canónicas
+  -- recién sembradas y 0 filas demo).
+  IF v_sobrantes > 1 THEN
+    RAISE EXCEPTION 'v4.2.21: se esperaban 0 o 1 filas no canónicas (la demo, si existía) y hay %', v_sobrantes;
   END IF;
 
   -- Ninguna fila de negocio puede haber quedado apuntando a una aseguradora

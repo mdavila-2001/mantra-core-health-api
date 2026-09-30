@@ -14,7 +14,7 @@ export type { IssuedTokens, TokenDisplayData } from './auth/token.service';
 export { JwtAuthGuard } from './auth/jwt-auth.guard';
 export { WsJwtGuard } from './auth/ws-jwt.guard';
 export type { AuthenticatedSocketData } from './auth/ws-jwt.guard';
-export { RolesGuard } from './auth/roles.guard';
+export { RolesGuard, roleAuthorizesInTenant } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
@@ -181,6 +181,10 @@ export {
   SALUD_UUID_NAMESPACE,
 } from './constants/concepts';
 export type { ConceptName } from './constants/concepts';
+
+// Pack de stickers del producto (AG-17, BR-22)
+export { STICKER_PACK, STICKER_PACK_FILE_IDS } from './constants/sticker-pack';
+export type { StickerPackEntry } from './constants/sticker-pack';
 
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)

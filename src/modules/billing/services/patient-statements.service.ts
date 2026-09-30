@@ -1,18 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ConflictException, type AuthenticatedUser } from '../../../common';
+import {
+  ConflictException,
+  ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   PatientStatementsRepository,
   InvoicesRepository,
   BillingDocumentLinksRepository,
 } from '../repositories';
+import { PracticeTenantLookupService } from '../../practice/services';
 import {
   GeneratePatientStatementDto,
   PatientStatementResponseDto,
+  ListPatientStatementsResponseDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
 import { fromCents, sumAmounts, toCents } from '../money.util';
+
+/** Tope de estados de cuenta por página cuando el cliente no pide uno (CV-12). */
+const DEFAULT_STATEMENTS_PAGE_SIZE = 50;
 
 /**
  * UC-17-09: genera el estado de cuenta del paciente para un periodo. Suma cargos
@@ -37,6 +48,7 @@ export class PatientStatementsService {
     private readonly statementsRepo: PatientStatementsRepository,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PatientStatementsService.name);
@@ -140,5 +152,59 @@ export class PatientStatementsService {
         closingBalance: statement.closingBalance ?? '0.00',
       };
     });
+  }
+
+  /**
+   * CV-12 — página de estados de cuenta de la práctica.
+   *
+   * Aislamiento: mismo criterio que
+   * `InvoicesService.listByPractice`/`assertPracticeInTenant` — `practiceId`
+   * nunca autoriza por sí solo; se confirma contra el tenant del actor antes
+   * de leer nada, con 404 sin distinguir "no existe" de "es de otro tenant".
+   */
+  async listByPractice(
+    practiceId: string,
+    tenantId: string,
+    options: { cursor?: string; limit?: number },
+  ): Promise<ListPatientStatementsResponseDto> {
+    const owner =
+      await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+    if (owner !== tenantId) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
+    const em = this.em.fork();
+    const limit = options.limit ?? DEFAULT_STATEMENTS_PAGE_SIZE;
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    const rows = await this.statementsRepo.findByPracticePage(
+      em,
+      practiceId,
+      afterId,
+      limit + 1,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      items: page.map((statement) => ({
+        id: statement.id,
+        patientProfileId: statement.patientProfileId,
+        periodStart: statement.periodStart.toISOString().slice(0, 10),
+        periodEnd: statement.periodEnd.toISOString().slice(0, 10),
+        openingBalance: statement.openingBalance ?? '0.00',
+        charges: statement.charges ?? '0.00',
+        payments: statement.payments ?? '0.00',
+        closingBalance: statement.closingBalance ?? '0.00',
+      })),
+      count: page.length,
+      limit,
+      nextCursor: hasMore && last ? encodeKeysetCursor({ id: last.id }) : null,
+    };
   }
 }

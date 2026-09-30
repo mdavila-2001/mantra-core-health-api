@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { MedicalVisitorsService } from './medical-visitors.service';
 import { PHL } from '../pharma_lab.concepts';
-import { CONCEPTS } from '../../../common';
+import { CONCEPTS, ConflictException } from '../../../common';
 
 const LAB = '11111111-1111-1111-1111-111111111111';
 const TENANT = '22222222-2222-2222-2222-222222222222';
@@ -119,6 +119,19 @@ function build(
   const notifications = { notify: mockFn(), notifyAll: mockFn() };
   const audit = { record: mockFn(async () => undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // AG-31: por defecto la asignación sale bien y hay algo que revocar, para
+  // que los specs que no prueban esta regla no tengan que doblarla entera.
+  const authzGrants = { assignRole: mockFn(async () => ({ id: 'assign-1' })) };
+  const rolesRepo = {
+    findByCode: mockFn(async () => ({ id: 'role-medical-visitor' })),
+  };
+  const assignmentsRepo = {
+    findActive: mockFn(async () => ({
+      id: 'assignment-1',
+      validTo: undefined,
+    })),
+    revoke: mockFn(),
+  };
 
   const em: any = {
     transactional: mockFn((cb: any) => cb(em)),
@@ -146,6 +159,9 @@ function build(
     access as any,
     notifications as any,
     audit as any,
+    authzGrants as any,
+    rolesRepo as any,
+    assignmentsRepo as any,
     logger as any,
   );
 
@@ -156,6 +172,9 @@ function build(
     visitsRepo,
     notifications,
     audit,
+    authzGrants,
+    rolesRepo,
+    assignmentsRepo,
     labRow,
     visitorRow,
     userRow,
@@ -181,6 +200,49 @@ describe('MedicalVisitorsService', () => {
           ACTOR,
         ),
       ).rejects.toThrow('El laboratorio no está activo');
+    });
+
+    it('AG-31: vincular asigna MEDICAL_VISITOR en el tenant del laboratorio', async () => {
+      const { service, repo, authzGrants } = build();
+      repo.findVisitorByUser.mockResolvedValue(null);
+
+      await service.createVisitor(
+        LAB,
+        {
+          userId: USER,
+          fullName: 'Ana Quiroga',
+          internalCode: 'VM-001',
+          startedOn: '2026-01-05',
+        } as any,
+        ACTOR,
+      );
+
+      expect(authzGrants.assignRole).toHaveBeenCalledWith(
+        USER,
+        { roleCode: 'MEDICAL_VISITOR', tenantId: TENANT },
+        ACTOR,
+      );
+    });
+
+    it('AG-31: si ya tenía el rol en ese ámbito, no lanza (idempotente)', async () => {
+      const { service, repo, authzGrants } = build();
+      repo.findVisitorByUser.mockResolvedValue(null);
+      authzGrants.assignRole.mockRejectedValue(
+        new ConflictException('ya asignado', {}),
+      );
+
+      await expect(
+        service.createVisitor(
+          LAB,
+          {
+            userId: USER,
+            fullName: 'Ana Quiroga',
+            internalCode: 'VM-001',
+            startedOn: '2026-01-05',
+          } as any,
+          ACTOR,
+        ),
+      ).resolves.toBeDefined();
     });
   });
 
@@ -290,6 +352,38 @@ describe('MedicalVisitorsService', () => {
         service.unlinkVisitor(LAB, VISITOR, { reason: 'Baja' }, ACTOR),
       ).rejects.toThrow('ya está desvinculado');
     });
+
+    it('AG-31: desvincular revoca la asignación de MEDICAL_VISITOR de ese tenant', async () => {
+      const { service, rolesRepo, assignmentsRepo } = build();
+
+      await service.unlinkVisitor(LAB, VISITOR, { reason: 'Baja' }, ACTOR);
+
+      expect(rolesRepo.findByCode).toHaveBeenCalledWith(
+        expect.anything(),
+        'MEDICAL_VISITOR',
+      );
+      expect(assignmentsRepo.findActive).toHaveBeenCalledWith(
+        expect.anything(),
+        USER,
+        'role-medical-visitor',
+        { tenantId: TENANT },
+      );
+      expect(assignmentsRepo.revoke).toHaveBeenCalledWith(
+        expect.anything(),
+        { id: 'assignment-1', validTo: undefined },
+        ACTOR.id,
+      );
+    });
+
+    it('AG-31: sin asignación activa que revocar, no hace nada (no lanza)', async () => {
+      const { service, assignmentsRepo } = build();
+      assignmentsRepo.findActive.mockResolvedValue(null);
+
+      await expect(
+        service.unlinkVisitor(LAB, VISITOR, { reason: 'Baja' }, ACTOR),
+      ).resolves.toBeDefined();
+      expect(assignmentsRepo.revoke).not.toHaveBeenCalled();
+    });
   });
 
   describe('revinculación', () => {
@@ -332,6 +426,24 @@ describe('MedicalVisitorsService', () => {
           ACTOR,
         ),
       ).rejects.toThrow('ya está vinculado');
+    });
+
+    it('AG-31: revincular vuelve a asignar MEDICAL_VISITOR', async () => {
+      const visitorRow = visitor({ statusConceptId: PHL.LINK_TERMINATED });
+      const { service, authzGrants } = build({ visitorRow });
+
+      await service.relinkVisitor(
+        LAB,
+        VISITOR,
+        { startedOn: '2026-09-01', authorization: 'Acta 12/2026' },
+        ACTOR,
+      );
+
+      expect(authzGrants.assignRole).toHaveBeenCalledWith(
+        USER,
+        { roleCode: 'MEDICAL_VISITOR', tenantId: TENANT },
+        ACTOR,
+      );
     });
   });
 });

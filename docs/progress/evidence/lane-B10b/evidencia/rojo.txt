@@ -1,0 +1,26 @@
+$ corepack yarn test --testPathPatterns="scheduling-catalog.repository"
+FAIL SchedulingCatalogRepository · retireTemplate conserva el cupo del que se reprogramó una cita, aunque ya no tenga cita
+   Error: expect(received).toEqual(expected) // deep equality
+   
+   - Expected  - 0
+   + Received  + 1
+   
+     Array [
+FAIL SchedulingCatalogRepository · retireTemplate conserva también el cupo DESTINO de una reprogramación
+   Error: expect(received).toEqual(expected) // deep equality
+   
+   - Expected  - 0
+   + Received  + 1
+   
+     Array [
+PASS SchedulingCatalogRepository · retireTemplate sin citas ni reprogramaciones suelta todos los cupos y sus holds
+FAIL SchedulingCatalogRepository · retireTemplate si todos los cupos tienen historia no borra nada
+   Error: expect(jest.fn()).not.toHaveBeenCalled()
+   
+   Expected number of calls: 0
+   Received number of calls: 2
+   
+   1: [Function SlotHolds], {"bookableSlotId": {"$in": ["s-2"]}}
+Suites: 0 passed, 1 failed, 1 total
+Tests:  1 passed, 3 failed, 0 skipped, 4 total
+exit=1

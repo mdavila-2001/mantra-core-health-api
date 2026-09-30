@@ -102,6 +102,9 @@ function build() {
     findOwnMedicationRequest: mockFn(async () => null),
     findPrescriberProfileId: mockFn(async () => null),
     findPersonNamesByProfileIds: mockFn(async () => new Map()),
+    findPrescriberProfileIdsByRequestIds: mockFn(async () => new Map()),
+    findPrimarySpecialtyConceptIds: mockFn(async () => new Map()),
+    findAddressesByIds: mockFn(async () => []),
     findPharmaciesByTenant: mockFn(async () => [FARMACIA]),
     findOrdersForPharmacies: mockFn(async () => []),
   };

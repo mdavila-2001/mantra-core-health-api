@@ -23,7 +23,9 @@ import {
  */
 describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => {
   let ctx: TestContext;
-  const suffix = randomUUID().slice(0, 8);
+  // En mayúsculas: `CreateInsuranceCampaignDto.code` sólo admite A-Z, dígitos y guiones,
+  // y un UUID en hexadecimal minúscula lo rechazaba (400) en casi todas las corridas.
+  const suffix = randomUUID().slice(0, 8).toUpperCase();
   const created: { userId: string; tenantId: string }[] = [];
   const organizations: Array<{
     tenantId: string;
@@ -132,9 +134,12 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
       userId,
       token: ctx.app
         .get(TokenService)
-        .signAccessToken(userId, `session-${label}`, [...globalRoles], [
-          tenantId,
-        ]),
+        .signAccessToken(
+          userId,
+          `session-${label}`,
+          [...globalRoles],
+          [tenantId],
+        ),
     };
   }
 
@@ -204,9 +209,9 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
       .get('/insurance/campaigns')
       .set(auth(orgB.token, orgB.tenantId))
       .expect(200);
-    expect(list.body.items.map((item: { code: string }) => item.code)).not.toContain(
-      `CMP-${suffix}`,
-    );
+    expect(
+      list.body.items.map((item: { code: string }) => item.code),
+    ).not.toContain(`CMP-${suffix}`);
   });
 
   it('CA-02.b: B lee o cambia de estado la campaña de A → 403 y auditoría en audit.audit_log', async () => {
@@ -229,14 +234,14 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
       .send({ status: 'ACTIVE' })
       .expect(403);
 
-    const audit = await ctx.orm.em.getConnection().execute<
-      Array<{ action: string; entity_id: string; tenant_id: string }>
-    >(
-      `select action, entity_id::text, tenant_id::text from audit.audit_log
+    const audit = await ctx.orm.em
+      .getConnection()
+      .execute<Array<{ action: string; entity_id: string; tenant_id: string }>>(
+        `select action, entity_id::text, tenant_id::text from audit.audit_log
         where action = 'INSURANCE_CAMPAIGN_ACCESS_DENIED' and entity_id = ?
         order by recorded_at desc`,
-      [campaignId],
-    );
+        [campaignId],
+      );
     expect(audit.length).toBeGreaterThanOrEqual(2);
     expect(audit[0]?.tenant_id).toBe(orgB.tenantId);
 
@@ -317,14 +322,14 @@ describe('campañas preventivas de la aseguradora (CA-01, CA-02, CA-04)', () => 
 
     // activarla directo estaría vencida: se marca ACTIVE por SQL, exactamente
     // el caso «alguien la activó cuando aún era válida y venció después».
-    await ctx.orm.em.getConnection().execute(
-      `update insurance.insurance_campaigns set status_concept_id = ? where id = ?`,
-      [INS.CAMPAIGN_ACTIVE, vencida.body.id],
-    );
+    await ctx.orm.em
+      .getConnection()
+      .execute(
+        `update insurance.insurance_campaigns set status_concept_id = ? where id = ?`,
+        [INS.CAMPAIGN_ACTIVE, vencida.body.id],
+      );
 
-    const active = await http()
-      .get('/insurance/campaigns/active')
-      .expect(200);
+    const active = await http().get('/insurance/campaigns/active').expect(200);
     expect(
       active.body.map((item: { code: string }) => item.code),
     ).not.toContain(`CMP-VENCIDA-${suffix}`);
