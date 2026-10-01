@@ -781,9 +781,14 @@ export class InsurancePortabilityService {
         )
       : claims;
 
-    const approvedCount = filtered.filter(
-      (claim) =>
-        outcomeConceptIdByClaim.get(claim.claimId) === INS.ADJ_OUTCOME_APPROVED,
+    // Una aprobación parcial es una aprobación: sin contarla acá, el resumen
+    // la dejaría entre las pendientes, que es lo contrario de lo que pasó.
+    const approvedConceptIds: ReadonlySet<string | null | undefined> = new Set([
+      INS.ADJ_OUTCOME_APPROVED,
+      INS.ADJ_OUTCOME_PARTIAL,
+    ]);
+    const approvedCount = filtered.filter((claim) =>
+      approvedConceptIds.has(outcomeConceptIdByClaim.get(claim.claimId)),
     ).length;
     const deniedCount = filtered.filter(
       (claim) =>

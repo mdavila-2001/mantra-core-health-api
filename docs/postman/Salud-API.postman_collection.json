@@ -18581,7 +18581,7 @@
       ]
     },
     {
-      "name": "clinical (29)",
+      "name": "clinical (30)",
       "item": [
         {
           "name": "clinical-encounters",
@@ -19942,6 +19942,74 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.changeStatuId);",
                       "  if (id) pm.environment.set('changeStatuId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /clinical/conditions/{id}/verification · Confirmar o refutar un diagnóstico presuntivo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/conditions/:id/verification",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "conditions",
+                    ":id",
+                    "verification"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{conditionId}}",
+                      "description": "Identificador de ruta · variable `{{conditionId}}`"
+                    }
+                  ]
+                },
+                "description": "409 si ya estaba confirmado o refutado; 422 si falta motivo o evidencia, las fechas al confirmar, o la evidencia no es del paciente.\n\n`POST /clinical/conditions/{id}/verification`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClinicalRecordsController_verifyCondition`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"CONFIRMED\",\n  \"reasonText\": \"reasonText-ejemplo\",\n  \"basedOn\": {\n    \"kind\": \"NOTE\",\n    \"noteId\": \"{{noteId}}\",\n    \"encounterId\": \"{{encounterId}}\",\n    \"serviceRequestId\": \"{{serviceRequestId}}\",\n    \"diagnosticReportId\": \"{{diagnosticReportId}}\"\n  },\n  \"onsetAt\": \"2026-01-01T00:00:00.000Z\",\n  \"expectedResolutionAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{conditionId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.conditionId);",
+                      "  if (id) pm.environment.set('conditionId', id);",
                       "}"
                     ]
                   }
@@ -42528,7 +42596,7 @@
       ]
     },
     {
-      "name": "insurance (4)",
+      "name": "insurance (6)",
       "item": [
         {
           "name": "GET /insurance/analytics/loss-ratio · Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo",
@@ -42599,6 +42667,53 @@
           ]
         },
         {
+          "name": "GET /insurance/received-claims · Solicitudes de seguro recibidas por la aseguradora activa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/received-claims",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "received-claims"
+              ]
+            },
+            "description": "Sin parámetros: la aseguradora sale del tenant activo. Importes como cadena decimal. Tope de 500 filas con `truncated: true` si hay más.\n\n`GET /insurance/received-claims`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `InsurerReceivedClaimsController_listReceivedClaims`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.receivedClaims || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('receivedClaimId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "POST /insurance/portability/export · Exportar el historial de póliza y siniestralidad del titular a 1 clic",
           "request": {
             "method": "POST",
@@ -42652,6 +42767,74 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.exportId);",
                   "  if (id) pm.environment.set('exportId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /insurance/received-claims/{id}/decision · Dictaminar una solicitud recibida (definitivo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance/received-claims/:id/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance",
+                "received-claims",
+                ":id",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{receivedClaimId}}",
+                  "description": "Identificador de ruta · variable `{{receivedClaimId}}`"
+                }
+              ]
+            },
+            "description": "`PARTIAL` exige `approvedAmount` mayor que cero y menor que lo solicitado; `PARTIAL` y `REJECTED` exigen `reason` de al menos 5 caracteres.\n\n`POST /insurance/received-claims/{id}/decision`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `InsurerReceivedClaimsController_decideReceivedClaim`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"APPROVED\",\n  \"approvedAmount\": \"200.00\",\n  \"reason\": \"reason-ejemplo\",\n  \"policyClauseReference\": \"policyClauseReference-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{receivedClaimId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.receivedClaimId);",
+                  "  if (id) pm.environment.set('receivedClaimId', id);",
                   "}"
                 ]
               }
@@ -65777,7 +65960,7 @@
       ]
     },
     {
-      "name": "profiles (40)",
+      "name": "profiles (46)",
       "item": [
         {
           "name": "profiles-patients",
@@ -65903,6 +66086,113 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/dependent-candidates · Buscar por nombre a quién pedirle que deje representarla",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependent-candidates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependent-candidates"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "ana per",
+                      "description": "Parte del nombre de la persona. Con menos de tres letras la respuesta es vacía",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Buscar por nombre a quién pedirle que deje representarla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/dependent-candidates`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesDependentRequestsController_listDependentCandidates`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dependentCandidates || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dependentCandidateId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/dependent-requests/incoming · Listar las solicitudes de dependiente recibidas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependent-requests/incoming",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependent-requests",
+                    "incoming"
+                  ]
+                },
+                "description": "Listar las solicitudes de dependiente recibidas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/dependent-requests/incoming`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesDependentRequestsController_listIncomingDependentLinkRequests`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dependentRequests || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dependentRequestId', first.id);",
                       "}"
                     ]
                   }
@@ -66129,6 +66419,67 @@
               ]
             },
             {
+              "name": "POST /profiles/patients/me/dependent-requests · Pedir representar a una persona que ya tiene cuenta",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependent-requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependent-requests"
+                  ]
+                },
+                "description": "Pedir representar a una persona que ya tiene cuenta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/dependent-requests`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesDependentRequestsController_requestDependentLink`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nationalId\": \"7654321\",\n  \"patientProfileId\": \"{{patientProfileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dependentRequestId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dependentRequestId);",
+                      "  if (id) pm.environment.set('dependentRequestId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /profiles/patients/me/dependents · Registrar un dependiente (menor o adulto mayor tutelado)",
               "request": {
                 "method": "POST",
@@ -66243,6 +66594,180 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.patientId);",
                       "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/search · UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/search",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "search"
+                  ]
+                },
+                "description": "Igual que `GET /profiles/patients`, pero el nombre y el documento viajan en el cuerpo y no en la URL. `CLINICIAN` y `PRACTITIONER` deben aportar `q` o `nationalId`: sin ninguno responde 422.\n\n`POST /profiles/patients/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_searchPatientsByBody`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"q\": \"q-ejemplo\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"cursor\": \"cursor-ejemplo\",\n  \"limit\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{patientId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.patientId);",
+                      "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/dependent-requests/{id}/accept · Aceptar una solicitud de dependiente",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependent-requests/:id/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependent-requests",
+                    ":id",
+                    "accept"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{dependentRequestId}}",
+                      "description": "Identificador de ruta · variable `{{dependentRequestId}}`"
+                    }
+                  ]
+                },
+                "description": "Aceptar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/dependent-requests/{id}/accept`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `ProfilesDependentRequestsController_acceptDependentLinkRequest`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dependentRequestId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dependentRequestId);",
+                      "  if (id) pm.environment.set('dependentRequestId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/dependent-requests/{id}/reject · Rechazar una solicitud de dependiente",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/dependent-requests/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "dependent-requests",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{dependentRequestId}}",
+                      "description": "Identificador de ruta · variable `{{dependentRequestId}}`"
+                    }
+                  ]
+                },
+                "description": "Rechazar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/dependent-requests/{id}/reject`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `ProfilesDependentRequestsController_rejectDependentLinkRequest`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dependentRequestId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dependentRequestId);",
+                      "  if (id) pm.environment.set('dependentRequestId', id);",
                       "}"
                     ]
                   }

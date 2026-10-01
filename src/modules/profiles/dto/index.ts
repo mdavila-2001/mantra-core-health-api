@@ -26,3 +26,4 @@ export * from './affiliation-request.dto';
 export * from './linkable-organization.dto';
 export * from './create-dependent.dto';
 export * from './dependent-summary.dto';
+export * from './dependent-link-request.dto';

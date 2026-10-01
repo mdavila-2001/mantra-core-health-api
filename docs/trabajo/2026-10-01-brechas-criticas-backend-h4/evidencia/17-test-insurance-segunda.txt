@@ -1,0 +1,30 @@
+﻿node.exe : (node:20364) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:20364) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:34620) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 5 passed, 5 total
+Tests:       136 passed, 136 total
+Snapshots:   0 total
+Time:        17.044 s, estimated 18 s
+Ran all test suites matching src/modules/insurance/services/insurer-received-claims.service.spec.ts|src/modules/insuran
+ce/controllers/insurer-received-claims.controller.spec.ts|src/modules/insurance/dto/received-claims.dto.spec.ts|src/mod
+ules/insurance/services/insurance-portability.service.spec.ts|src/modules/insurance/services/received-claim-settlement.
+spec.ts.

@@ -6,3 +6,4 @@ export * from './linkable-organizations.service';
 export * from './guardian-related-person';
 export * from './contact-person';
 export * from './patient-representation.service';
+export * from './dependent-link-requests.service';

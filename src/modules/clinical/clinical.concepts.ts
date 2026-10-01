@@ -489,6 +489,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Condition recurrence',
     },
     CONDITION_RELAPSE: { code: 'COND_RELAPSE', display: 'Condition relapse' },
+    /* Estado de verificación (HL7 FHIR `condition-ver-status`), completado más
+       allá de `CONDITION_CONFIRMED`: un diagnóstico presuntivo (`PROVISIONAL`)
+       se decide con `POST /clinical/conditions/:id/verification` y termina
+       confirmado o refutado. `REFUTED` es terminal: lo descartado no vuelve a
+       estudio, se registra de nuevo si reaparece. */
+    CONDITION_PROVISIONAL: {
+      code: 'COND_PROVISIONAL',
+      display: 'Condition provisional',
+    },
+    CONDITION_REFUTED: {
+      code: 'COND_REFUTED',
+      display: 'Condition refuted',
+    },
     /* Curso clínico: eje distinto del estado. Decide qué transiciones son
        clínicamente válidas (una condición `CHRONIC` no pasa a `RESOLVED`) y si
        tiene sentido ofrecer una fecha esperada de resolución. No es un concepto

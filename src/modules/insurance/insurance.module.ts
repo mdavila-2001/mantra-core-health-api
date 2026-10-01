@@ -7,6 +7,10 @@ import { DirectoryAuthorizationModule } from '../directory/directory-authorizati
 // castellano; se importa el módulo entero en vez de proveer el repo suelto
 // porque ya lo hace `TerminologyModule` y es su dueño.
 import { TerminologyModule } from '../terminology/terminology.module';
+// Hito 4 §A: un dictamen favorable publica `InsuranceClaimDecided` por el outbox
+// transaccional. `MessagingModule` sólo importa MikroORM, así que no cierra
+// ningún ciclo con `insurance`.
+import { MessagingModule } from '../messaging/messaging.module';
 import * as entities from './entities';
 import { LinkedClaimOrderService } from './services/linked-claim-order.service';
 import { LinkedClaimAccessService } from './services/linked-claim-access.service';
@@ -30,6 +34,7 @@ import {
   InsurancePortabilityPublicController,
   PractitionerSettlementBatchesController,
   InsuranceCampaignsController,
+  InsurerReceivedClaimsController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -49,6 +54,7 @@ import {
   InsurancePortabilityPdfService,
   PractitionerSettlementBatchesService,
   InsuranceCampaignsService,
+  InsurerReceivedClaimsService,
 } from './services';
 import {
   CatalogRepository,
@@ -104,6 +110,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     TerminologyModule,
     CommonModule,
     AuditModule,
+    MessagingModule,
   ],
   controllers: [
     InsuranceBackboneController,
@@ -121,6 +128,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurancePortabilityPublicController,
     PractitionerSettlementBatchesController,
     InsuranceCampaignsController,
+    InsurerReceivedClaimsController,
   ],
   providers: [
     // Repositorios
@@ -167,6 +175,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurancePortabilityPdfService,
     PractitionerSettlementBatchesService,
     InsuranceCampaignsService,
+    InsurerReceivedClaimsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.
