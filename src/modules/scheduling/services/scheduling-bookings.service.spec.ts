@@ -2935,6 +2935,107 @@ describe('SchedulingBookingsService', () => {
       expect(res.items[0].patientName).toBe('Marisol Quispe');
     });
 
+    describe('v4.2.40 · el servicio reservado en la lectura', () => {
+      const snapshot = {
+        offeringId: 'oferta-1',
+        serviceName: 'Ecocardiograma Doppler',
+        price: '480.00',
+        currencyConceptId: 'bob',
+        minDurationMinutes: 30,
+        maxDurationMinutes: 45,
+        requiresApproval: false,
+        // Una clave que mañana alguien agregue al snapshot NO tiene que salir por la API.
+        capturedAt: '2026-10-01T10:00:00.000Z',
+        internalNote: 'no debe viajar',
+      };
+
+      /** Una página con una reserva de servicio colgada del recurso `res-1`. */
+      function paginaDeServicio(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'perfil-medico',
+        });
+        d.bookingsRepo.findBookings.mockResolvedValue({
+          rows: [
+            {
+              booking: {
+                ...guardada,
+                id: 'bk-servicio',
+                resourceId: 'res-1',
+                serviceSnapshot: snapshot,
+              },
+              slot: null,
+            },
+          ],
+          fetchCapReached: false,
+        });
+        return d;
+      }
+
+      it('el profesional de la agenda ve el servicio, proyectado campo a campo', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(res.items[0].service).toEqual({
+          offeringId: 'oferta-1',
+          name: 'Ecocardiograma Doppler',
+          price: '480.00',
+          currencyConceptId: 'bob',
+          minDurationMinutes: 30,
+          maxDurationMinutes: 45,
+          requiresApproval: false,
+        });
+        expect(res.items[0].service).not.toHaveProperty('internalNote');
+        expect(res.items[0].service).not.toHaveProperty('capturedAt');
+      });
+
+      it('el paciente titular también lo ve', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          { id: 'u-pac', roles: ['PATIENT'], patientProfileId: PATIENT } as any,
+        );
+
+        expect(res.items[0].service?.name).toBe('Ecocardiograma Doppler');
+      });
+
+      it('otro profesional NO lo ve: el nombre de un servicio puede revelar un dato de salud', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('otro-medico') as any,
+        );
+
+        expect(res.items[0]).not.toHaveProperty('service');
+      });
+
+      it('una consulta no trae `service`', async () => {
+        const d = build();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'perfil-medico',
+        });
+        d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(res.items[0]).not.toHaveProperty('service');
+      });
+    });
+
     describe('P42 · el vínculo de reconsulta en la lectura', () => {
       function conRecurso(d: ReturnType<typeof build>) {
         d.catalogRepo.findResourceById.mockResolvedValue({

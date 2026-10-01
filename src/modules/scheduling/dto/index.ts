@@ -109,6 +109,7 @@ export {
   BookingFollowUpOriginDto,
   BookingInsuranceClaimDto,
   BookingItemDto,
+  BookingServiceDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';
 

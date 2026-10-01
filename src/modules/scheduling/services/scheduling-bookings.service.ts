@@ -90,6 +90,7 @@ import {
   BookingFollowUpOriginDto,
   BookingInsuranceClaimDto,
   BookingItemDto,
+  BookingServiceDto,
   BookingStatusReasonDto,
   BookingDelayNoticeDto,
   SearchBookingsResponseDto,
@@ -316,6 +317,36 @@ const PAYMENT_STATE_LABEL: Readonly<Record<PaymentState, string>> = {
  * que no, se agrega acá y las pruebas lo dicen enseguida.
  */
 const ESTADOS_SIN_PAGO: readonly string[] = [CONCEPTS.BOOKING_CANCELLED];
+
+/**
+ * La copia congelada de un servicio reservado, a lo que ve el cliente.
+ *
+ * El snapshot es `jsonb` libre: se proyecta campo a campo y nunca se devuelve
+ * tal cual, para que una clave que mañana se agregue al snapshot no salga por
+ * la API sin que nadie lo haya decidido.
+ */
+function proyectarServicioReservado(snapshot: unknown): BookingServiceDto {
+  const s = snapshot as Partial<{
+    offeringId: string;
+    serviceName: string;
+    price: string;
+    currencyConceptId: string;
+    minDurationMinutes: number;
+    maxDurationMinutes: number;
+    requiresApproval: boolean;
+  }>;
+  return {
+    offeringId: s.offeringId ?? '',
+    name: s.serviceName ?? '',
+    price: s.price ?? '0.00',
+    ...(s.currencyConceptId === undefined
+      ? {}
+      : { currencyConceptId: s.currencyConceptId }),
+    minDurationMinutes: s.minDurationMinutes ?? 0,
+    maxDurationMinutes: s.maxDurationMinutes ?? 0,
+    requiresApproval: s.requiresApproval === true,
+  };
+}
 
 /**
  * De la fila guardada a lo que ve el cliente.
@@ -3634,6 +3665,17 @@ export class SchedulingBookingsService {
             followUpOf: reconsultas.followUpOf(booking),
             followUpBookingId: reconsultas.followUpBookingId(booking),
           }
+        : {}),
+      // v4.2.40: el servicio que se reservó, de la copia congelada. Misma compuerta
+      // que el motivo: el nombre de un servicio puede revelar un dato de salud.
+      ...(booking.serviceSnapshot != null &&
+      puedeVerElMotivoDeLaCita(
+        booking,
+        actor,
+        profesionalDeLaAgenda,
+        pacientesRepresentados,
+      )
+        ? { service: proyectarServicioReservado(booking.serviceSnapshot) }
         : {}),
       ...(tipoDeLaCita === undefined ? {} : { typeConceptId: tipoDeLaCita }),
       ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
