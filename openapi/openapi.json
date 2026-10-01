@@ -3783,6 +3783,68 @@
         "description": "Alta de persona y perfil de paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/patients/search": {
+      "post": {
+        "description": "Igual que `GET /profiles/patients`, pero el nombre y el documento viajan en el cuerpo y no en la URL. `CLINICIAN` y `PRACTITIONER` deben aportar `q` o `nationalId`: sin ninguno responde 422.",
+        "operationId": "ProfilesPatientsController_searchPatientsByBody",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPatientsQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPatientsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo",
+        "tags": [
+          "profiles-patients"
+        ]
+      }
+    },
     "/profiles/patients/merge-events": {
       "get": {
         "description": "Devuelve el `id` que exige POST /profiles/patients/merge/{eventId}/reverse. Sin esta lectura, una fusión sólo era reversible mientras la respuesta del POST siguiera a la vista.",
@@ -4343,6 +4405,297 @@
           "profiles-patients"
         ],
         "description": "Registrar defunción y anonimización de una persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependent-requests": {
+      "post": {
+        "operationId": "ProfilesDependentRequestsController_requestDependentLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDependentLinkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "La solicitud quedó pendiente y a esa cuenta le llegó un aviso. `404` es «no hay cuenta con ese CI»; `422`, «ese CI es el tuyo».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentLinkRequestSentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "No hay cuenta de paciente con ese CI"
+          },
+          "409": {
+            "description": "Ya la representa, o ya hay una solicitud pendiente"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pedir representar a una persona que ya tiene cuenta",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Pedir representar a una persona que ya tiene cuenta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependent-candidates": {
+      "get": {
+        "operationId": "ProfilesDependentRequestsController_listDependentCandidates",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Parte del nombre de la persona. Con menos de tres letras la respuesta es vacía",
+            "schema": {
+              "maxLength": 100,
+              "example": "ana per",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hasta ocho cuentas de paciente activas, con el CI enmascarado. `[]` si el texto tiene menos de tres letras.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DependentCandidateDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "La cuenta no es de un paciente"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar por nombre a quién pedirle que deje representarla",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Buscar por nombre a quién pedirle que deje representarla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependent-requests/incoming": {
+      "get": {
+        "operationId": "ProfilesDependentRequestsController_listIncomingDependentLinkRequests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IncomingDependentLinkRequestDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las solicitudes de dependiente recibidas",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Listar las solicitudes de dependiente recibidas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependent-requests/{id}/accept": {
+      "post": {
+        "operationId": "ProfilesDependentRequestsController_acceptDependentLinkRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentLinkRequestDecisionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "No existe o no es de esta cuenta"
+          },
+          "409": {
+            "description": "Ya fue respondida"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aceptar una solicitud de dependiente",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Aceptar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/dependent-requests/{id}/reject": {
+      "post": {
+        "operationId": "ProfilesDependentRequestsController_rejectDependentLinkRequest",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DependentLinkRequestDecisionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "No existe o no es de esta cuenta"
+          },
+          "409": {
+            "description": "Ya fue respondida"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rechazar una solicitud de dependiente",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Rechazar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/practitioners/me/summary": {
@@ -17799,6 +18152,73 @@
         "description": "Cambiar el estado clínico de una condición. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/clinical/conditions/{id}/verification": {
+      "post": {
+        "description": "409 si ya estaba confirmado o refutado; 422 si falta motivo o evidencia, las fechas al confirmar, o la evidencia no es del paciente.",
+        "operationId": "ClinicalRecordsController_verifyCondition",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyConditionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirmar o refutar un diagnóstico presuntivo",
+        "tags": [
+          "clinical-records"
+        ]
+      }
+    },
     "/clinical/conditions/{id}/attachments": {
       "post": {
         "operationId": "ClinicalRecordsController_attachFileToCondition",
@@ -22547,6 +22967,123 @@
           "insurance-campaigns"
         ],
         "description": "Activar, pausar o finalizar una campaña (transiciones cerradas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/received-claims": {
+      "get": {
+        "description": "Sin parámetros: la aseguradora sale del tenant activo. Importes como cadena decimal. Tope de 500 filas con `truncated: true` si hay más.",
+        "operationId": "InsurerReceivedClaimsController_listReceivedClaims",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivedClaimListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "La organización activa no es una aseguradora, o la sesión no tiene permiso sobre ella."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Solicitudes de seguro recibidas por la aseguradora activa",
+        "tags": [
+          "insurer-received-claims"
+        ]
+      }
+    },
+    "/insurance/received-claims/{id}/decision": {
+      "post": {
+        "description": "`PARTIAL` exige `approvedAmount` mayor que cero y menor que lo solicitado; `PARTIAL` y `REJECTED` exigen `reason` de al menos 5 caracteres.",
+        "operationId": "InsurerReceivedClaimsController_decideReceivedClaim",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceivedClaimDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivedClaimDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "No es una aseguradora sobre la que la sesión tenga permiso."
+          },
+          "404": {
+            "description": "La solicitud no existe o es de otra aseguradora."
+          },
+          "409": {
+            "description": "Ya tiene dictamen: `details.reason` es `ALREADY_DECIDED`. No hay ruta para revertirlo."
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "description": "El monto o el motivo no son los que pide el resultado, o el pedido de origen cambió."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dictaminar una solicitud recibida (definitivo)",
+        "tags": [
+          "insurer-received-claims"
+        ]
       }
     },
     "/practices": {
@@ -85946,6 +86483,10 @@
     {
       "name": "workflow",
       "description": "Operaciones del dominio funcional workflow. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "insurer-received-claims",
+      "description": "Operaciones del dominio funcional insurer received claims. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     }
   ],
   "servers": [
@@ -88779,6 +89320,102 @@
           "relationshipConceptId"
         ]
       },
+      "SearchPatientsQueryDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Texto a buscar en el código de paciente o el nombre"
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad exacto (`common.identifiers.value`)"
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Departamento que expidió el documento; sólo tiene efecto junto a nationalId"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Cursor opaco devuelto por la página anterior"
+          },
+          "limit": {
+            "type": "number",
+            "default": 50,
+            "maximum": 500
+          }
+        }
+      },
+      "PatientListItemDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientCode": {
+            "type": "string",
+            "description": "Código único de paciente"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nombre visible de la persona"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "personStatusConceptId": {
+            "type": "string",
+            "description": "Concept id del estado de la persona",
+            "format": "uuid"
+          },
+          "deceased": {
+            "type": "boolean",
+            "description": "Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología"
+          }
+        },
+        "required": [
+          "profileId",
+          "personId",
+          "patientCode",
+          "deceased"
+        ]
+      },
+      "SearchPatientsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientListItemDto"
+            }
+          },
+          "count": {
+            "type": "number",
+            "description": "Cantidad devuelta en esta página"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Tope de resultados aplicado"
+          },
+          "nextCursor": {
+            "type": "object",
+            "description": "Cursor opaco para la página siguiente; `null` cuando no hay más",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "count",
+          "limit"
+        ]
+      },
       "CreatePatientDto": {
         "type": "object",
         "properties": {
@@ -88995,6 +89632,105 @@
             "default": false
           }
         }
+      },
+      "RequestDependentLinkDto": {
+        "type": "object",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad de la persona a representar. Obligatorio si no se manda `patientProfileId`",
+            "example": "7654321",
+            "maxLength": 60
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Perfil de paciente devuelto por `dependent-candidates`. Alternativa a `nationalId`: se manda uno u otro"
+          }
+        }
+      },
+      "DependentLinkRequestSentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      },
+      "DependentCandidateDto": {
+        "type": "object",
+        "properties": {
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nombre visible de la persona"
+          },
+          "maskedNationalId": {
+            "type": "string",
+            "description": "Documento enmascarado: sólo las últimas tres cifras",
+            "example": "••••321"
+          }
+        },
+        "required": [
+          "patientProfileId",
+          "displayName"
+        ]
+      },
+      "IncomingDependentLinkRequestDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requesterDisplayName": {
+            "type": "string",
+            "description": "Nombre de quien pide representarla"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "requesterDisplayName",
+          "createdAt"
+        ]
+      },
+      "DependentLinkRequestDecisionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
       },
       "PractitionerSpecialtyDto": {
         "type": "object",
@@ -94133,6 +94869,11 @@
             "description": "Curso clínico: agudo/crónico/subagudo/recurrente (concept id). Sin declarar es un dato legítimo, no un olvido.",
             "format": "uuid"
           },
+          "verificationStatusConceptId": {
+            "type": "string",
+            "description": "Estado de verificación del alta: COND_PROVISIONAL (presuntivo) o COND_CONFIRMED. Por omisión, confirmado",
+            "format": "uuid"
+          },
           "onsetAt": {
             "type": "string",
             "description": "Inicio de la condición",
@@ -94170,6 +94911,71 @@
         "required": [
           "newClinicalStatusConceptId",
           "reasonText"
+        ]
+      },
+      "DiagnosisEvidenceDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "NOTE",
+              "ANALYSIS"
+            ]
+          },
+          "noteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "encounterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "diagnosticReportId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "VerifyConditionDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "REFUTED"
+            ]
+          },
+          "reasonText": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "basedOn": {
+            "$ref": "#/components/schemas/DiagnosisEvidenceDto"
+          },
+          "onsetAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedResolutionAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clinicalCourseConceptId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "outcome"
         ]
       },
       "AttachFileToConditionDto": {
@@ -98600,6 +99406,253 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "ReceivedClaimPractitionerDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "specialty"
+        ]
+      },
+      "ReceivedClaimLineDto": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "number"
+          },
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "billedAmount": {
+            "$ref": "#/components/schemas/MoneyDto"
+          }
+        },
+        "required": [
+          "sequence",
+          "code",
+          "display",
+          "quantity",
+          "unitPrice",
+          "billedAmount"
+        ]
+      },
+      "ReceivedClaimDecisionViewDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedBy": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "outcome",
+          "decidedAt",
+          "decidedBy",
+          "reason"
+        ]
+      },
+      "ReceivedClaimDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimIdentifier": {
+            "type": "string",
+            "example": "CLM-2026-1042"
+          },
+          "patient": {
+            "$ref": "#/components/schemas/ClaimPatientDto"
+          },
+          "practitioner": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReceivedClaimPractitionerDto"
+              }
+            ]
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "service": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceConceptDto"
+              }
+            ]
+          },
+          "additionalServiceCount": {
+            "type": "number"
+          },
+          "billedTotal": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "approvedTotal": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "serviceDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "policyIdentifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "planName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceConceptDto"
+              }
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivedClaimLineDto"
+            }
+          },
+          "decision": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReceivedClaimDecisionViewDto"
+              }
+            ]
+          },
+          "invoice": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true,
+            "description": "Siempre null hasta que se decida dónde persiste la factura de la aseguradora"
+          }
+        },
+        "required": [
+          "id",
+          "claimIdentifier",
+          "patient",
+          "practitioner",
+          "providerName",
+          "service",
+          "additionalServiceCount",
+          "billedTotal",
+          "approvedTotal",
+          "submittedAt",
+          "serviceDate",
+          "policyIdentifier",
+          "planName",
+          "status",
+          "lines",
+          "decision",
+          "invoice"
+        ]
+      },
+      "ReceivedClaimListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivedClaimDto"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "truncated"
+        ]
+      },
+      "ReceivedClaimDecisionDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          },
+          "approvedAmount": {
+            "type": "string",
+            "example": "200.00"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "policyClauseReference": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "outcome"
         ]
       },
       "CreatePracticeDto": {
