@@ -76,6 +76,16 @@ const CLINICAL_STATUS_TRANSITIONS: Readonly<Record<string, readonly string[]>> =
     [CLIN.CONDITION_RESOLVED]: [CLIN.CONDITION_RECURRENCE],
   };
 
+/**
+ * Estados de verificación con los que puede nacer un diagnóstico. Refutado no
+ * está: un diagnóstico no se registra ya descartado, se descarta después de
+ * estudiarlo.
+ */
+const CREATION_VERIFICATION_STATUSES: readonly string[] = [
+  CLIN.CONDITION_PROVISIONAL,
+  CLIN.CONDITION_CONFIRMED,
+];
+
 /** Cursos clínicos del catálogo: lo único que la verificación acepta como curso. */
 const CLINICAL_COURSES: readonly string[] = [
   CLIN.CONDITION_COURSE_ACUTE,
@@ -200,6 +210,16 @@ export class ConditionsService {
       },
       'Recording condition',
     );
+    // Antes de abrir la transacción: es una regla del cuerpo, no del paciente.
+    if (
+      dto.verificationStatusConceptId !== undefined &&
+      !CREATION_VERIFICATION_STATUSES.includes(dto.verificationStatusConceptId)
+    ) {
+      throw new PreconditionFailedException(
+        'Un diagnóstico se registra presuntivo o confirmado.',
+        { field: 'verificationStatusConceptId' },
+      );
+    }
     return this.em.transactional(async (tx) => {
       // El encuentro se valida antes que el duplicado: un encuentro ajeno no
       // debe enterarse, vía 409, de que el paciente ya tiene esa condición.
@@ -229,7 +249,8 @@ export class ConditionsService {
         codeConceptId: dto.codeConceptId,
         categoryConceptId: dto.categoryConceptId,
         clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
-        verificationStatusConceptId: CLIN.CONDITION_CONFIRMED,
+        verificationStatusConceptId:
+          dto.verificationStatusConceptId ?? CLIN.CONDITION_CONFIRMED,
         severityConceptId: dto.severityConceptId,
         lateralityConceptId: dto.lateralityConceptId,
         clinicalCourseConceptId: dto.clinicalCourseConceptId,

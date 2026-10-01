@@ -102,6 +102,96 @@ describe('ConditionsService (UC-08-08)', () => {
     );
   });
 
+  describe('alta como presuntivo (Hito 4 §B)', () => {
+    const cuerpo = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'code1',
+    };
+
+    /** Una condición recién creada con el estado de verificación dado. */
+    function creada(verificationStatusConceptId: string) {
+      return {
+        id: 'cond1',
+        patientProfileId: 'p1',
+        custodianTenantId: 't1',
+        clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+        verificationStatusConceptId,
+        createdAt: new Date(),
+      };
+    }
+
+    it('nace provisional —en estudio, y activa— si el cuerpo lo pide', async () => {
+      const d = build();
+      d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
+      d.conditionsRepo.create.mockReturnValue(
+        creada(CLIN.CONDITION_PROVISIONAL),
+      );
+
+      const res = await d.service.create(
+        {
+          ...cuerpo,
+          verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
+        },
+        actor,
+      );
+
+      expect(d.conditionsRepo.create.mock.calls[0][1]).toMatchObject({
+        verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
+        clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
+      });
+      expect(res.verificationStatus).toBe(CLIN.CONDITION_PROVISIONAL);
+    });
+
+    it('sin el campo sigue naciendo confirmado: el contrato anterior no cambia', async () => {
+      const d = build();
+      d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
+      d.conditionsRepo.create.mockReturnValue(creada(CLIN.CONDITION_CONFIRMED));
+
+      await d.service.create(cuerpo, actor);
+
+      expect(d.conditionsRepo.create.mock.calls[0][1]).toMatchObject({
+        verificationStatusConceptId: CLIN.CONDITION_CONFIRMED,
+      });
+    });
+
+    it('confirmado explícito equivale a omitirlo', async () => {
+      const d = build();
+      d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
+      d.conditionsRepo.create.mockReturnValue(creada(CLIN.CONDITION_CONFIRMED));
+
+      await d.service.create(
+        { ...cuerpo, verificationStatusConceptId: CLIN.CONDITION_CONFIRMED },
+        actor,
+      );
+
+      expect(d.conditionsRepo.create.mock.calls[0][1]).toMatchObject({
+        verificationStatusConceptId: CLIN.CONDITION_CONFIRMED,
+      });
+    });
+
+    it.each([
+      [
+        'un refutado, que se descarta después de estudiarlo',
+        CLIN.CONDITION_REFUTED,
+      ],
+      ['un concepto que no es de verificación', CLIN.CONDITION_ACTIVE],
+      ['un uuid cualquiera', '2f3c6a52-6a0e-4c0e-9c8e-3d9c8e1f5a77'],
+    ])('no se registra %s: 422 y no escribe nada', async (_caso, valor) => {
+      const d = build();
+
+      await expect(
+        d.service.create(
+          { ...cuerpo, verificationStatusConceptId: valor },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.conditionsRepo.create).not.toHaveBeenCalled();
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+      expect(d.historyRepo.append).not.toHaveBeenCalled();
+    });
+  });
+
   it('rejects a duplicate active condition', async () => {
     const d = build();
     d.conditionsRepo.findActiveByCode.mockResolvedValue({ id: 'existing' });

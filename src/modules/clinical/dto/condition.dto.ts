@@ -97,6 +97,22 @@ export class CreateConditionDto {
   clinicalCourseConceptId?: string;
 
   /**
+   * Estado de verificación con el que nace el diagnóstico.
+   *
+   * Sólo se admiten `COND_PROVISIONAL` (presuntivo: queda «en estudio» hasta
+   * que `POST conditions/:id/verification` lo confirme o lo rechace) y
+   * `COND_CONFIRMED`. Sin el campo nace confirmado, como siempre.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Estado de verificación del alta: COND_PROVISIONAL (presuntivo) o COND_CONFIRMED. Por omisión, confirmado',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  verificationStatusConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({
