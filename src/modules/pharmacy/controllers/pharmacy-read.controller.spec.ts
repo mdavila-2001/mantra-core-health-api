@@ -19,14 +19,31 @@ function build() {
       executives: [],
     }),
   };
+  const catalogSearch = {
+    search: mockFn().mockResolvedValue({
+      items: [],
+      limit: 20,
+      truncated: false,
+    }),
+  };
   const controller = new PharmacyReadController(
     readService as any,
     staffReadService as any,
+    catalogSearch as any,
   );
-  return { controller, readService, staffReadService };
+  return { controller, readService, staffReadService, catalogSearch };
 }
 
 describe('PharmacyReadController', () => {
+  describe('searchCatalogProducts (catálogo universal)', () => {
+    it('delegates the validated query to the catalog search service', async () => {
+      const d = build();
+      const query = { search: 'paracetamol', atc: 'N02BE01', limit: 5 } as any;
+      await d.controller.searchCatalogProducts(query);
+      expect(d.catalogSearch.search).toHaveBeenCalledWith(query);
+    });
+  });
+
   describe('listSites (carril A, H4)', () => {
     it('rejects lat without lng, and lng without lat', () => {
       const d = build();

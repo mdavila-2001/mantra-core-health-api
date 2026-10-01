@@ -19,11 +19,14 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import {
+  MedicineCatalogSearchService,
   PharmacyReadService,
   PharmacyStaffReadService,
   type GeoPoint,
 } from '../services';
 import {
+  CatalogProductPageDto,
+  CatalogProductQueryDto,
   PharmacyContactsResponseDto,
   PharmacyDetailDto,
   PharmacyLicenseListResponseDto,
@@ -51,10 +54,12 @@ export class PharmacyReadController {
    *
    * @param readService - Lecturas del directorio de farmacias.
    * @param staffReadService - Lecturas reservadas al personal de la farmacia.
+   * @param catalogSearch - Búsqueda en el catálogo universal de medicamentos.
    */
   constructor(
     private readonly readService: PharmacyReadService,
     private readonly staffReadService: PharmacyStaffReadService,
+    private readonly catalogSearch: MedicineCatalogSearchService,
   ) {}
 
   /** E2: el directorio de farmacias publicadas. */
@@ -155,6 +160,22 @@ export class PharmacyReadController {
       origin: parseOrigin(lat, lng),
       limit: limit ?? 50,
     });
+  }
+
+  /**
+   * El catálogo universal de medicamentos: lo que una farmacia busca para dar
+   * de alta un producto en vez de tipearlo. Registros sanitarios oficiales, uno
+   * por fuente; los que ya no están vigentes se listan con `selectable: false`.
+   */
+  @Get('catalog-products')
+  @ApiOperation({
+    summary: 'Buscar en el catálogo universal de medicamentos',
+  })
+  @ApiOkResponse({ type: CatalogProductPageDto })
+  searchCatalogProducts(
+    @Query() query: CatalogProductQueryDto,
+  ): Promise<CatalogProductPageDto> {
+    return this.catalogSearch.search(query);
   }
 
   /** E2: búsqueda de productos por texto, por medicamento o por farmacia. */

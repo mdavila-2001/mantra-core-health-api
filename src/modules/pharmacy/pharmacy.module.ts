@@ -17,12 +17,14 @@ import {
   PharmacyReadService,
   PharmacyStaffReadService,
   PharmacyMarketplaceService,
+  MedicineCatalogSearchService,
 } from './services';
 import {
   PharmaciesRepository,
   PharmacyLicensesRepository,
   PharmacySitesRepository,
   PharmacyProductsRepository,
+  MedicineCatalogRepository,
   PharmacyProductIdentifiersRepository,
   PharmacyPriceListsRepository,
   PharmacyProductPricesRepository,
@@ -58,6 +60,7 @@ import {
     PharmacyLicensesRepository,
     PharmacySitesRepository,
     PharmacyProductsRepository,
+    MedicineCatalogRepository,
     PharmacyProductIdentifiersRepository,
     PharmacyPriceListsRepository,
     PharmacyProductPricesRepository,
@@ -75,6 +78,7 @@ import {
     PharmacyReadService,
     PharmacyStaffReadService,
     PharmacyMarketplaceService,
+    MedicineCatalogSearchService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.
