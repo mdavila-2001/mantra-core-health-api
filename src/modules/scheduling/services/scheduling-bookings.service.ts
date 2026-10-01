@@ -20,6 +20,7 @@ import { PractitionerAffiliationGateService } from './practitioner-affiliation-g
 import { puedeVerElMotivoDeLaCita } from '../policies/booking-reason-visibility.policy';
 import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
 import { SchedulingWaitlistService } from './scheduling-waitlist.service';
+import { SchedulingServiceAgendaService } from './scheduling-service-agenda.service';
 import {
   HistoryRepository,
   type HistoryRevision,
@@ -223,7 +224,7 @@ const ROLES_DEL_PRESTADOR: readonly string[] = [
  * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín: excluirlo
  * acá le negaría en el servicio lo que el guard ya le concedió.
  */
-const ROLES_DE_AGENDA: readonly string[] = [
+export const ROLES_DE_AGENDA: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SCHEDULING_AGENT',
   'SUPERADMIN',
@@ -382,6 +383,10 @@ export class SchedulingBookingsService {
     // P43 — valida la instancia de formulario de origen de una reconsulta.
     // Clase sin estado de `forms`, provista suelta en `SchedulingModule`.
     private readonly formOrigin: FormInstanceOriginValidator,
+    // v4.2.40 — los servicios con duración dinámica retraen cupos de consulta y,
+    // cuando dejan de ocupar tiempo, los devuelven. Va al FINAL: los specs arman
+    // este servicio con argumentos posicionales.
+    private readonly serviceAgenda: SchedulingServiceAgendaService,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
   }
@@ -467,6 +472,14 @@ export class SchedulingBookingsService {
         throw new PreconditionFailedException('El slot está bloqueado', {
           slotId,
         });
+      }
+      // Un cupo retraído lo pisa un servicio que el profesional ya comprometió: se
+      // dejó de ofrecer, pero un id leído hace rato todavía puede llegar acá.
+      if (slot.statusConceptId === SCHED.SLOT_RETRACTED) {
+        throw new PreconditionFailedException(
+          'Ese horario ya no está disponible.',
+          { slotId },
+        );
       }
       if (slot.remainingCapacity <= 0) {
         throw new ConflictException('El slot no tiene cupos disponibles', {
@@ -835,6 +848,19 @@ export class SchedulingBookingsService {
         );
       }
 
+      // v4.2.40 — si el cupo es de un servicio, la oferta manda: de ella salen la
+      // modalidad, lo que el paciente aceptó y si la reserva espera aprobación. Se
+      // lee del CUPO y no del pedido del cliente: el navegador no decide el precio.
+      const delServicio = slot.practitionerServiceOfferingId
+        ? await this.serviceAgenda.ofertaDelCupo(
+            tx,
+            slot.practitionerServiceOfferingId,
+          )
+        : null;
+      const efectivo = delServicio
+        ? this.planDeServicio(plan, delServicio.oferta.requiresApproval)
+        : plan;
+
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
         policyId: policy?.id,
         policyRowVersion: policy?.rowVersion,
@@ -858,7 +884,15 @@ export class SchedulingBookingsService {
         startAt: slot.startAt,
         endAt: slot.endAt,
         reasonText: plan.reasonText,
-        statusConceptId: plan.appointmentStatusConceptId,
+        statusConceptId: efectivo.appointmentStatusConceptId,
+        ...(delServicio
+          ? {
+              typeConceptId: CLIN.ACTIVITY_PROCEDURE,
+              ...(delServicio.oferta.channelConceptId === undefined
+                ? {}
+                : { channelConceptId: delServicio.oferta.channelConceptId }),
+            }
+          : {}),
         actorUserId: actor.id,
       });
       // **Persistir la cita antes de crear la reserva.** `appointment_id` es una
@@ -877,10 +911,16 @@ export class SchedulingBookingsService {
         serviceConceptId: slot.serviceConceptId,
         bookingChannelConceptId: CHANNEL_CONCEPT[plan.channel],
         bookedByUserId: actor.id,
-        statusConceptId: plan.statusConceptId,
-        confirmedAt: plan.confirmedAt,
+        statusConceptId: efectivo.statusConceptId,
+        confirmedAt: efectivo.confirmedAt,
         bookingPolicyId: policy?.id,
         cancellationPolicySnapshot,
+        ...(delServicio
+          ? {
+              practitionerServiceOfferingId: delServicio.oferta.id,
+              serviceSnapshot: this.congelarServicio(delServicio, slot),
+            }
+          : {}),
         reasonText: plan.reasonText,
         actorUserId: actor.id,
       });
@@ -899,7 +939,7 @@ export class SchedulingBookingsService {
       touch(slot, actor.id);
 
       // Los recordatorios se programan junto con la cita (UC-41-13 va incluido aquí).
-      const offsets = plan.reminderOffsetsMinutes;
+      const offsets = efectivo.reminderOffsetsMinutes;
       for (const offset of offsets) {
         this.bookingsRepo.createReminder(tx, {
           bookingId: booking.id,
@@ -914,7 +954,7 @@ export class SchedulingBookingsService {
       return {
         id: booking.id,
         bookableSlotId: hold.bookableSlotId,
-        statusConceptId: plan.statusConceptId,
+        statusConceptId: efectivo.statusConceptId,
         remindersScheduled: offsets.length,
       };
     });
@@ -1214,7 +1254,9 @@ export class SchedulingBookingsService {
         CONCEPTS.SLOT_OPEN,
       );
       for (const libre of libres) {
-        libre.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        // Retraído y no bloqueado: al bloqueado nadie lo devuelve, y al retraído sí
+        // cuando esta cita se cancela (ver `descartarCupoPuntual`).
+        libre.statusConceptId = SCHED.SLOT_RETRACTED;
         touch(libre, actor.id);
         retractedSlots += 1;
       }
@@ -1337,6 +1379,12 @@ export class SchedulingBookingsService {
         );
         if (!slot) continue;
         slot.remainingCapacity += 1;
+        if (slot.practitionerServiceOfferingId) {
+          // El cupo de un servicio nació para esta retención: no se reofrece, muere
+          // con ella y devuelve las consultas que había retraído.
+          await this.descartarCupoPuntual(tx, slot, undefined);
+          continue;
+        }
         if (slot.statusConceptId === CONCEPTS.SLOT_HELD) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
         }
@@ -1410,6 +1458,7 @@ export class SchedulingBookingsService {
       }
 
       const fromSlotId = booking.bookableSlotId;
+      await this.assertNoEsUnServicio(tx, fromSlotId, 'reprogramar');
       if (fromSlotId === dto.toSlotId) {
         throw new PreconditionFailedException(
           'El slot destino es el mismo que el actual',
@@ -1739,7 +1788,10 @@ export class SchedulingBookingsService {
           // AG-2: el cupo de una cita puntual muere con ella. Nunca estuvo
           // ofrecido —nació para esa cita— y reabrirlo dejaría un horario
           // ofertándose que nadie pidió publicar: un cupo fantasma.
-          slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+          //
+          // Y se devuelven las consultas que retrajo: antes quedaban bloqueadas
+          // para siempre, aunque el rato que las pisaba ya estuviera libre.
+          await this.descartarCupoPuntual(tx, slot, actor.id);
         } else if (slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
           // Sólo el cupo que vuelve a ofrecerse: el de una cita puntual queda
@@ -2145,10 +2197,14 @@ export class SchedulingBookingsService {
       );
       if (suSlot) {
         suSlot.remainingCapacity += 1;
-        if (suSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
-          suSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+        if (suSlot.practitionerServiceOfferingId) {
+          await this.descartarCupoPuntual(tx, suSlot, actor.id);
+        } else {
+          if (suSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
+            suSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+          }
+          touch(suSlot, actor.id);
         }
-        touch(suSlot, actor.id);
       }
 
       canceladas.push(booking.id);
@@ -2294,6 +2350,11 @@ export class SchedulingBookingsService {
       this.asegurarPendiente(fromState, bookingId);
 
       const origenId = booking.bookableSlotId;
+      await this.assertNoEsUnServicio(
+        tx,
+        origenId,
+        'proponer otro horario para',
+      );
       if (dto.proposedSlotId === origenId) {
         throw new PreconditionFailedException(
           'El horario propuesto es el que ya tiene la solicitud',
@@ -2489,6 +2550,7 @@ export class SchedulingBookingsService {
 
       booking.statusConceptId = SCHED.BOOKING_COMPLETED;
       touch(booking, actor.id);
+      await this.liberarSobranteDelServicio(tx, booking, actor.id);
       await this.sincronizarCitaClinica(
         tx,
         booking,
@@ -2774,6 +2836,153 @@ export class SchedulingBookingsService {
     if (!perteneceAlAlcance) {
       throw new ForbiddenException(
         'La agenda indicada pertenece a otra organización.',
+      );
+    }
+  }
+
+  /**
+   * El plan de una reserva de servicio.
+   *
+   * Pedir un turno nace pendiente de aceptación, y para una consulta eso es
+   * siempre así. Un servicio lo decide su oferta: si **no** requiere aprobación,
+   * la reserva nace confirmada —con los recordatorios de una cita confirmada—,
+   * porque obligar al profesional a aceptar una nebulización es fricción sin
+   * criterio clínico. Si la requiere, o si quien reserva ya traía un plan
+   * confirmado (el mostrador), se respeta lo que había.
+   */
+  private planDeServicio<
+    P extends {
+      statusConceptId: string;
+      appointmentStatusConceptId: string;
+      confirmedAt?: Date;
+      reminderOffsetsMinutes: readonly number[];
+    },
+  >(plan: P, requiereAprobacion: boolean): P {
+    const esSolicitud =
+      plan.statusConceptId === SCHED.BOOKING_PENDING_CONFIRMATION;
+    if (!esSolicitud || requiereAprobacion) return plan;
+    return {
+      ...plan,
+      statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      appointmentStatusConceptId: CLIN.APPOINTMENT_BOOKED,
+      confirmedAt: new Date(),
+      reminderOffsetsMinutes: DEFAULT_REMINDER_OFFSETS,
+    };
+  }
+
+  /** Lo que el paciente aceptó, congelado: un cambio posterior de la oferta no lo reescribe. */
+  private congelarServicio(
+    delServicio: NonNullable<
+      Awaited<ReturnType<SchedulingServiceAgendaService['ofertaDelCupo']>>
+    >,
+    slot: BookableSlots,
+  ): Record<string, unknown> {
+    const { oferta, catalogo } = delServicio;
+    return {
+      offeringId: oferta.id,
+      serviceCatalogId: oferta.serviceCatalogId,
+      serviceCode: catalogo?.code,
+      serviceName: catalogo?.name,
+      price: catalogo?.defaultPrice,
+      currencyConceptId: catalogo?.currencyConceptId,
+      minDurationMinutes: oferta.minDurationMinutes,
+      maxDurationMinutes: oferta.maxDurationMinutes,
+      prepMinutes: oferta.prepMinutes ?? 0,
+      cleanupMinutes: oferta.cleanupMinutes ?? 0,
+      requiresApproval: oferta.requiresApproval,
+      startAt: slot.startAt.toISOString(),
+      endAt: slot.endAt?.toISOString(),
+      capturedAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * El cupo puntual —el de un servicio o el de una cita que el doctor asignó— que
+   * deja de ocupar tiempo.
+   *
+   * Nació para una sola reserva y nunca estuvo ofrecido, así que **no se reabre**
+   * (sería un cupo fantasma): queda bloqueado. Lo que sí se hace es devolver las
+   * consultas que había retraído y que ya no chocan con nada.
+   *
+   * El `flush` va antes de reabrir porque la lectura de lo ocupado es SQL: si la
+   * cancelación sigue sólo en la unidad de trabajo, esa lectura todavía vería la
+   * reserva viva y no reabriría nada.
+   */
+  private async descartarCupoPuntual(
+    tx: EntityManager,
+    slot: BookableSlots,
+    actorUserId: string | undefined,
+  ): Promise<void> {
+    slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+    touch(slot, actorUserId);
+    await tx.flush();
+    await this.reabrirConsultasRetraidasDe(tx, slot, actorUserId);
+  }
+
+  /** Devuelve las consultas retraídas que el rango de este cupo ya no pisa. */
+  private async reabrirConsultasRetraidasDe(
+    tx: EntityManager,
+    slot: BookableSlots,
+    actorUserId: string | undefined,
+  ): Promise<void> {
+    await this.serviceAgenda.reabrirTramo(
+      tx,
+      slot,
+      slot.startAt,
+      slot.endAt ?? slot.startAt,
+      actorUserId,
+    );
+  }
+
+  /**
+   * Terminar antes de lo reservado libera el sobrante.
+   *
+   * Un servicio se reserva por su duración **máxima**; si el profesional lo da por
+   * cumplido antes, el cupo se recorta a ese instante y el tiempo que sobraba vuelve
+   * a estar disponible —y las consultas que ese tiempo pisaba, a ofrecerse—. Sólo
+   * aplica a cupos de servicio: el de una consulta mide lo que la plantilla dijo.
+   */
+  private async liberarSobranteDelServicio(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    actorUserId: string | undefined,
+  ): Promise<void> {
+    const slot = await this.bookingsRepo.findSlotForUpdate(
+      tx,
+      booking.bookableSlotId,
+    );
+    if (!slot?.practitionerServiceOfferingId || !slot.endAt) return;
+
+    const ahora = new Date();
+    const terminaAntes =
+      ahora.getTime() > slot.startAt.getTime() &&
+      ahora.getTime() < slot.endAt.getTime();
+    if (!terminaAntes) return;
+
+    const finReservado = slot.endAt;
+    slot.endAt = ahora;
+    touch(slot, actorUserId);
+    await tx.flush();
+    await this.serviceAgenda.reabrirTramo(
+      tx,
+      slot,
+      ahora,
+      finReservado,
+      actorUserId,
+    );
+  }
+
+  /** Un servicio no se mueve de horario: se cancela y se pide otro. */
+  private async assertNoEsUnServicio(
+    tx: EntityManager,
+    slotId: string,
+    accion: string,
+  ): Promise<void> {
+    const slot = await this.bookingsRepo.findSlotById(tx, slotId);
+    if (slot?.practitionerServiceOfferingId) {
+      throw new PreconditionFailedException(
+        `Todavía no se puede ${accion} un servicio: cancelá la reserva y pedí otro horario.`,
+        { slotId },
       );
     }
   }

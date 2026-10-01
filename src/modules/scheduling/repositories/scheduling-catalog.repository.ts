@@ -193,6 +193,8 @@ export interface CreateRuleData {
    * Minutos de respiro entre un turno y el siguiente. Anulable: ausente ≡ 0.
    */
   gapMinutes?: number;
+  /** Qué admite la franja (concepto). Ausente ≡ solo consultas. */
+  bookingModeConceptId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -237,6 +239,10 @@ export interface CreateExceptionData {
  * Describe el contrato estructural de create slot data.
  */
 export interface CreateSlotData {
+  /**
+   * La oferta de servicio de la que es el cupo (v4.2.40). Ausente ≡ cupo de consulta.
+   */
+  practitionerServiceOfferingId?: string;
   /**
    * Identificador asociado a resource.
    */
@@ -479,6 +485,7 @@ export class SchedulingCatalogRepository {
         slotMinutes: data.slotMinutes,
         capacityPerSlot: data.capacityPerSlot,
         gapMinutes: data.gapMinutes,
+        bookingModeConceptId: data.bookingModeConceptId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -701,6 +708,7 @@ export class SchedulingCatalogRepository {
         resourceId: data.resourceId,
         scheduleTemplateId: data.scheduleTemplateId,
         serviceConceptId: data.serviceConceptId,
+        practitionerServiceOfferingId: data.practitionerServiceOfferingId,
         startAt: data.startAt,
         endAt: data.endAt,
         capacity: data.capacity,

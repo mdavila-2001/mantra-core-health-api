@@ -272,15 +272,24 @@ function validar(
   paso: number,
 ): void {
   const { minDurationMinutes: min, maxDurationMinutes: max } = servicio;
-  if (!Number.isInteger(min) || !Number.isInteger(max) || min <= 0 || max < min) {
+  if (
+    !Number.isInteger(min) ||
+    !Number.isInteger(max) ||
+    min <= 0 ||
+    max < min
+  ) {
     throw new RangeError(
       `Duración inválida: mínimo ${min} y máximo ${max} (0 < mín ≤ máx)`,
     );
   }
   if (prep < 0 || limpieza < 0) {
-    throw new RangeError('La preparación y la limpieza no pueden ser negativas');
+    throw new RangeError(
+      'La preparación y la limpieza no pueden ser negativas',
+    );
   }
   if (!Number.isInteger(paso) || paso <= 0) {
-    throw new RangeError(`El paso de inicios debe ser un entero positivo: ${paso}`);
+    throw new RangeError(
+      `El paso de inicios debe ser un entero positivo: ${paso}`,
+    );
   }
 }

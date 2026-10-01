@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 117 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 118 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -42,6 +42,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['bookable_slots', 'ix_bookable_slots_resource_id', ['resource_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_schedule_template_id', ['schedule_template_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_service_concept_id', ['service_concept_id'], false, 'btree'],
+  ['bookable_slots', 'ix_bookable_slots_practitioner_service_offering_id', ['practitioner_service_offering_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],

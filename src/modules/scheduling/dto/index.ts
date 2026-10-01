@@ -4,6 +4,8 @@ export {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   ScheduleRuleDto,
+  RULE_BOOKING_MODES,
+  type RuleBookingMode,
   CreateTemplateDto,
   UpdateTemplateDto,
   TemplateResponseDto,
@@ -127,3 +129,5 @@ export {
   WalkInAppointmentDto,
   WalkInAppointmentResponseDto,
 } from './scheduling-walk-in.dto';
+
+export * from './scheduling-service-offerings.dto';

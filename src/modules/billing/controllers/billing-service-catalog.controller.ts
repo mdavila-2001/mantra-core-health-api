@@ -123,9 +123,16 @@ export class BillingServiceCatalogController {
    * @returns Servicio recién creado.
    */
   @Post()
-  @Roles('SECURITY_ADMIN')
+  // El alta es de la administración de la organización. Un profesional entra también,
+  // pero sólo sobre su consultorio propio: el servicio lo comprueba y responde 404 en
+  // cualquier otra práctica. El rol solo no alcanza para decidirlo.
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Dar de alta un servicio en el catálogo maestro' })
+  @ApiOperation({
+    summary: 'Dar de alta un servicio en el catálogo maestro',
+    description:
+      'La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.',
+  })
   create(
     @Body() dto: CreateServiceCatalogItemDto,
     @CurrentUser() actor: AuthenticatedUser,

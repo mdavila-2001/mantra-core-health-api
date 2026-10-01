@@ -71,8 +71,8 @@ describe('proponerHorariosDeServicio', () => {
   });
 
   it('el último inicio es el que todavía entra completo en la franja', () => {
-    const inicios = proponerHorariosDeServicio({ ...base, servicio }).map(
-      (h) => h.startAt.toISOString().slice(11, 16),
+    const inicios = proponerHorariosDeServicio({ ...base, servicio }).map((h) =>
+      h.startAt.toISOString().slice(11, 16),
     );
     // 45 min dentro de 08:00–10:00 con paso de 15: el último arranca a las 09:15.
     expect(inicios[inicios.length - 1]).toBe('09:15');
