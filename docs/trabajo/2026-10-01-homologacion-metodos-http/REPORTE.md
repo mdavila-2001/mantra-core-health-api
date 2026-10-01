@@ -1,6 +1,6 @@
 # Reporte — Hito 3 (API): `PATCH /pharmacies/{pharmacyId}/products/{productId}`
 
-> **AVANCE: 14 / 17 — 82,4 %.** Código, pruebas y contrato listos; faltan commit, push, PR y la consulta de mergeable (H2.S4.M3 a M5).
+> **AVANCE: 16 / 17 — 94,1 %.** Código, pruebas, contrato y PR (#527) listos; el gate de entrega queda A MEDIAS porque un check externo está en rojo (ver A medias).
 
 - Fecha: 2026-10-01 · Plan: PLAN.md · Rama: `marcelo/fix-homologacion-metodos-http`, desde `origin/dev` (`f4fea3e6`) · PR gemelo en `mantra-core-health` (mismo nombre de rama)
 - Peldaño de evidencia alcanzado: **TESTED** para el código (pruebas unitarias con `EntityManager` mockeado). **No** alcanza VERIFIED: no se ejercitó el endpoint HTTP ni la persistencia contra una base.
@@ -23,18 +23,20 @@
 | H2.S3.M2 | Documentos derivados | generadores de endpoints, módulos y Postman; Redocly; detector de incompatibles | índices y `pharmacy.md` (`10`); Postman por fusión en tres vías (`11`); lint: 2 errores previos idénticos a `HEAD` (`12`, `12b`); sin cambios incompatibles (`13`) |
 | H2.S4.M1 | Regresión del módulo | `yarn typecheck` · `yarn lint --max-warnings=0` · `yarn test src/modules/pharmacy` · `--findRelatedTests` | exit 0 · exit 0 · 19 suites y 245 pruebas · 15 suites y 209 pruebas (`04`, `05`, `06`, `14`) |
 | H2.S4.M2 | Este reporte | — | en disco |
+| H2.S4.M3 | Commit `faa03633` con rutas explícitas y push | `git push -u origin marcelo/fix-homologacion-metodos-http` | rama en `origin`; `origin/dev` sin cambios antes y después |
+| H2.S4.M4 | PR a `dev` con los dos revisores | `gh pr create --reviewer jsaldias39,PabloArauzCaballero` | PR #527, no es draft |
 
 ## A medias
 
-Ninguna.
+### H2.S4.M5 — Gate mergeable
+- **Qué anda:** PR #527 abierto hacia `dev`, no es draft, `mergeable: MERGEABLE`, sin conflictos; `Jsaldias39` y `PabloArauzCaballero` figuran como revisores solicitados. `mergeStateStatus: BLOCKED` con `reviewDecision: REVIEW_REQUIRED`: falta la aprobación humana. En el CI, Compilar, Verificar tipos y Lint TypeScript quedaron en verde.
+- **Qué no anda:** el check `docs` está en rojo en el paso «Auditoría de dependencias runtime» (`undici` entre 8.0.0 y 8.10.2, GHSA-rx4f-c7p8-82vq, que llega por `node-gyp`). Clase EXTERNAL: el mismo paso falló en tres corridas de ramas de `dev` sin este cambio y este PR no toca dependencias (`evidencia/17`).
+- **Qué falta exactamente:** resolver el aviso de `undici` en un cambio aparte (actualizar la dependencia o fijarla con una resolución) y la aprobación humana. Hasta entonces los pasos posteriores del job (guardrails, pruebas con cobertura, contrato OpenAPI, artefactos al día) no se pueden observar en CI.
+- **Dónde quedó:** rama `marcelo/fix-homologacion-metodos-http` en `origin`, PR #527; el estado se vuelve a consultar tras cada push.
 
 ## Pendiente
 
-| ID | Estado | Qué lo destraba |
-|---|---|---|
-| H2.S4.M3 | TODO | commit con rutas explícitas y `git push -u origin marcelo/fix-homologacion-metodos-http` |
-| H2.S4.M4 | TODO | `gh pr create` hacia `dev` con `jsaldias39` y `PabloArauzCaballero` |
-| H2.S4.M5 | TODO | `gh pr view` y `gh pr checks` tras el push; se pega la salida aquí y en `evidencia/` |
+Ninguna.
 
 ## Evidencia
 
@@ -64,7 +66,7 @@ $ node tools/openapi/check-breaking.mjs --base <origin/dev> --head openapi/opena
 Sin cambios incompatibles no aprobados en el contrato OpenAPI.
 ```
 
-Índice de `evidencia/`: `01` rama · `02` y `03` baselines · `04` typecheck · `05` pruebas del módulo · `06` lint · `07` build · `08` generación del contrato · `09` injerto · `10` generadores de documentación · `11` Postman · `12` y `12b` lint de Redocly (con y sin el cambio) · `13` incompatibles · `14` pruebas relacionadas · `15` cobertura documental y enlaces.
+Índice de `evidencia/`: `01` rama · `02` y `03` baselines · `04` typecheck · `05` pruebas del módulo · `06` lint · `07` build · `08` generación del contrato · `09` injerto · `10` generadores de documentación · `11` Postman · `12` y `12b` lint de Redocly (con y sin el cambio) · `13` incompatibles · `14` pruebas relacionadas · `15` cobertura documental y enlaces · `16` estado del PR · `17` clasificación de los checks.
 
 ## Gate de seguridad (área: medicamentos y catálogo)
 
@@ -85,7 +87,7 @@ Riesgo residual: la autorización sigue siendo «rol global `SECURITY_ADMIN`», 
 3. **Suite unitaria completa (548 suites).** Se lanzó y se detuvo a los 35 minutos sin resultado: `maxWorkers` está en 2 a propósito para esta máquina y la tarea en segundo plano tiene un tope de 30. Se sustituyó por las 19 suites del módulo y las 15 relacionadas por grafo de imports. El CI sí correrá la completa.
 4. **Generador oficial de OpenAPI.** No corrió: necesita almacenes, Docker está caído y el `.env` apunta a Neon y Atlas, que no se usan sin autorización. Se usó el modo `preview` de Nest.
 5. **`yarn test:integration` y `yarn smoke`.** No se corrieron: exigen Postgres y truncan o mutan datos.
-6. **CI.** No se corrió. El job `docs` ya estaba en rojo en `dev` por `yarn npm audit` (corridas 36784392323, 36872393440 y 36872589204) y los pasos posteriores no llegan a ejecutarse.
+6. **CI completo.** Corrió sobre el PR: Compilar, Verificar tipos y Lint en verde; el job `docs` falla en la auditoría de dependencias, igual que en las corridas 36784392323, 36872393440 y 36872589204 de ramas de `dev`, y los pasos posteriores (guardrails, pruebas con cobertura, contrato OpenAPI, artefactos al día) no llegan a ejecutarse.
 7. **Cobertura documental y enlaces.** `yarn docs:coverage` falla con 4 problemas (módulos `ops_console` y `public` sin página) y `yarn docs:links` con 15 hallazgos, todos en archivos que este trabajo no toca (`evidencia/15`). Este trabajo suma dos páginas huérfanas (PLAN y REPORTE), como las demás de `docs/trabajo`.
 
 ## Desvíos del plan

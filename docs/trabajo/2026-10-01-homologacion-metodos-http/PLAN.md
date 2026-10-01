@@ -59,9 +59,9 @@
 |---|---|---|---|---|
 | H2.S4.M1 | `yarn typecheck`, `yarn lint --max-warnings=0`, `yarn test src/modules/pharmacy` | exit 0 | los tres comandos → typecheck exit 0 (`04`), lint con 0 advertencias exit 0 (`06`), `yarn test src/modules/pharmacy`: 19 suites y 245 pruebas, exit 0 (`05`) y 15 suites relacionadas por grafo de imports, 209 pruebas, exit 0 (`14-test-relacionadas.txt`). La suite completa no terminó: ver REPORTE | HECHO |
 | H2.S4.M2 | `REPORTE.md` (avance en la primera línea; No cubierto: persistencia y runtime) | archivo en disco | — → `REPORTE.md` en disco, con avance en la primera línea y «No cubierto» | HECHO |
-| H2.S4.M3 | Commit con rutas explícitas (nunca `git add -A`) y push | rama en `origin` | `git push -u origin marcelo/fix-homologacion-metodos-http` | TODO |
-| H2.S4.M4 | PR a `dev` con `jsaldias39` y `PabloArauzCaballero` | PR abierto | `gh pr create …` | TODO |
-| H2.S4.M5 | Gate mergeable | `mergeable` = `MERGEABLE`; checks clasificados | `gh pr view <n> --json …` y `gh pr checks <n>` | TODO |
+| H2.S4.M3 | Commit con rutas explícitas (nunca `git add -A`) y push | rama en `origin` | `git push -u origin marcelo/fix-homologacion-metodos-http` → commit `faa03633` con rutas explícitas; `git push -u`: rama en `origin`, `origin/dev` sin cambios antes y después | HECHO |
+| H2.S4.M4 | PR a `dev` con `jsaldias39` y `PabloArauzCaballero` | PR abierto | `gh pr create …` → PR #527 hacia `dev`, no es draft, con `Jsaldias39` y `PabloArauzCaballero` | HECHO |
+| H2.S4.M5 | Gate mergeable | `mergeable` = `MERGEABLE`; checks clasificados | `gh pr view <n> --json …` y `gh pr checks <n>` → `MERGEABLE`, `BLOCKED` por la revisión humana requerida; el check `docs` falla en la auditoría de dependencias (EXTERNAL, previo): `evidencia/16`, `17` | A MEDIAS |
 
 ## Gate de seguridad (área sensible: medicamentos y catálogo)
 
