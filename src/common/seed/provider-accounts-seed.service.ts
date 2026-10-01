@@ -5,10 +5,13 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuthenticationCredentials } from '../../modules/iam/entities';
 import { Roles, UserRoleAssignments } from '../../modules/authz/entities';
 import { TenantMemberships } from '../../modules/directory/entities';
-import { DIR } from '../../modules/directory/directory.concepts';
+import {
+  DIR,
+  TENANT_ROLE_CONCEPT_BY_CODE,
+} from '../../modules/directory/directory.concepts';
 import { IamUsersService } from '../../modules/iam/services';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
-import { createdBy } from '../persistence/audit-fields';
+import { createdBy, touch } from '../persistence/audit-fields';
 import {
   PROVIDER_ACCOUNTS,
   type ProviderAccountSeed,
@@ -144,7 +147,7 @@ export class ProviderAccountsSeedService {
       externalSubject: cuenta.email,
     });
     if (existente) {
-      await this.ensureMembership(em, existente.userId);
+      await this.ensureMembership(em, existente.userId, cuenta.tenantRole);
       return false;
     }
 
@@ -164,7 +167,7 @@ export class ProviderAccountsSeedService {
     // Sin membresía en un tenant, la sesión entra pero no tiene organización
     // activa: toda pantalla que dependa de `tenantId` queda bloqueada pidiendo
     // que se elija una que la cuenta no tiene.
-    await this.ensureMembership(em, creado.id);
+    await this.ensureMembership(em, creado.id, cuenta.tenantRole);
     await this.ensureRole(em, creado.id, cuenta.initialRole);
 
     this.logger.info(
@@ -178,23 +181,38 @@ export class ProviderAccountsSeedService {
     return true;
   }
 
-  /** Hace a la cuenta miembro del tenant semilla, si no lo era ya. */
+  /**
+   * Hace a la cuenta miembro del tenant semilla con el rol que declara el
+   * catálogo.
+   *
+   * Si la membresía ya existe con otro rol, la lleva al declarado: las bases
+   * ya sembradas tienen a la aseguradora como `STAFF`, y sin converger seguiría
+   * sin poder administrar su catálogo.
+   */
   private async ensureMembership(
     em: EntityManager,
     userId: string,
+    tenantRole: ProviderAccountSeed['tenantRole'],
   ): Promise<void> {
+    const tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[tenantRole];
     const existente = await em.findOne(TenantMemberships, {
       userId,
       tenantId: SEED.tenantId,
     });
-    if (existente) return;
+    if (existente) {
+      if (existente.tenantRoleConceptId === tenantRoleConceptId) return;
+      existente.tenantRoleConceptId = tenantRoleConceptId;
+      touch(existente, SEED_ACTOR_ID);
+      await em.flush();
+      return;
+    }
 
     em.create(
       TenantMemberships,
       {
         userId,
         tenantId: SEED.tenantId,
-        tenantRoleConceptId: DIR.ROLE_STAFF,
+        tenantRoleConceptId,
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
