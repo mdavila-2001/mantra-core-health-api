@@ -20,6 +20,12 @@ export interface ProviderAccountSeed {
   readonly initialRole: string;
   /** Qué socio comercial representa, para el mensaje del log. */
   readonly organizacion: string;
+  /**
+   * Su rol dentro de la organización (`directory.tenant_memberships`). Es lo
+   * que decide si puede **administrarla**: sólo `OWNER` y `ADMIN` pasan
+   * `TenantAdministrationService.canAdminister`.
+   */
+  readonly tenantRole: 'OWNER' | 'ADMIN' | 'STAFF';
 }
 
 /**
@@ -42,23 +48,31 @@ export const PROVIDER_ACCOUNTS: readonly ProviderAccountSeed[] = [
     displayName: 'Operador de Farmacia (demo)',
     initialRole: 'PHARMACY_OPERATOR',
     organizacion: 'farmacia',
+    tenantRole: 'STAFF',
   },
   {
     email: 'laboratorio.demo@alovida.test',
     displayName: 'Operador de Laboratorio (demo)',
     initialRole: 'LAB_OPERATOR',
     organizacion: 'laboratorio de sangre',
+    tenantRole: 'STAFF',
   },
   {
     email: 'imagen.demo@alovida.test',
     displayName: 'Operador de Imagen (demo)',
     initialRole: 'RADIOLOGIST',
     organizacion: 'centro de análisis por imagen',
+    tenantRole: 'STAFF',
   },
   {
     email: 'aseguradora.demo@alovida.test',
     displayName: 'Operador de Aseguradora (demo)',
     initialRole: 'INSURANCE_OPERATOR',
     organizacion: 'aseguradora de salud',
+    // ADMIN y no STAFF: la consola de la aseguradora (catálogo, primas,
+    // cláusulas y sus reglas) sólo deja editar a quien administra la
+    // organización. Como STAFF la API devolvía `canAdminister: false` y la
+    // demo mostraba el catálogo en solo lectura, sin un botón de editar.
+    tenantRole: 'ADMIN',
   },
 ];
