@@ -335,6 +335,8 @@ test('INLASA: análisis a pacientes con código oficial y precio en Bs; nombre v
   assert.equal(row.definition, null);
   assert.equal(displayCase('RT-PCR EN TIEMPO REAL PARA VIRUS DEL NILO OCCIDENTAL'), 'RT-PCR en tiempo real para virus del Nilo occidental');
   assert.equal(displayCase('FISH: SÍNDROME DI GEORGE DELECIÓN 22q11'), 'FISH: síndrome Di George deleción 22q11');
+  assert.equal(displayCase('FISH: CROMOSOMA Y'), 'FISH: cromosoma Y');
+  assert.equal(displayCase('LEGIONELLA SPP. POR PCR EN TIEMPO REAL'), 'Legionella spp. por PCR en tiempo real');
   assert.equal(displayCase('ELISA PARA ANTICUERPOS ANTI ANTIGENO DE SUPERFICIE (ANTI HBs)'), 'ELISA para anticuerpos anti antigeno de superficie (anti HBs)');
   assert.deepEqual(inlasaRow(items.find((i) => i.code === 'LTB-002'), 'x').tagKeys, ['infectious', 'respiratory']);
 });

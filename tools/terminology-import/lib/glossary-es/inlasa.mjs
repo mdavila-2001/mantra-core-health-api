@@ -75,10 +75,18 @@ const SPANISH_SHORT_WORDS = new Set([
   'A', 'AL', 'CON', 'DE', 'DEL', 'EL', 'EN', 'LA', 'LAS', 'LOS', 'O', 'PARA', 'POR', 'SIN', 'U', 'Y', 'E', 'DOS', 'TRES', 'UNA', 'UN',
   'GEN', 'PIE', 'OJO', 'ORAL', 'REAL', 'ANTI', 'TEST', 'TOMA', 'MOCO', 'ALTO', 'BAJO', 'NO', 'UREA', 'ZIKA',
 ]);
-/** Nombres propios (epónimos, lugares, virus con nombre de lugar): mayúscula inicial. */
+/**
+ * Nombres propios (epónimos, lugares, virus con nombre de lugar) y géneros de
+ * microorganismos (nomenclatura binomial: el género va con mayúscula inicial,
+ * la especie en minúscula): mayúscula inicial.
+ */
 const PROPER_NOUNS = new Map(
-  ['Epstein', 'Barr', 'Chagas', 'Graham', 'Widal', 'Coombs', 'Papanicolaou', 'Kato', 'Kaz', 'Nilo', 'Machupo', 'Chapare', 'Mayaro', 'Oropouche', 'Di', 'George', 'Gram', 'Ogawa', 'Illumina']
-    .map((n) => [n.toUpperCase(), n]),
+  [
+    'Epstein', 'Barr', 'Chagas', 'Graham', 'Widal', 'Coombs', 'Papanicolaou', 'Kato', 'Kaz', 'Nilo', 'Machupo', 'Chapare', 'Mayaro',
+    'Oropouche', 'Di', 'George', 'Gram', 'Ogawa', 'Illumina',
+    'Bordetella', 'Chlamydia', 'Chlamydophila', 'Clostridium', 'Cryptosporidium', 'Entamoeba', 'Giardia', 'Haemophilus', 'Helicobacter',
+    'Legionella', 'Leishmania', 'Mycoplasma', 'Neisseria', 'Plasmodium', 'Streptococcus', 'Toxocara', 'Trypanosoma',
+  ].map((n) => [n.toUpperCase(), n]),
 );
 
 /**
@@ -92,10 +100,16 @@ const PROPER_NOUNS = new Map(
 export function displayCase(name) {
   const tokens = name.split(/(\s+|[(),/–-])/);
   let first = true;
+  let previous = '';
   return tokens
     .map((tok) => {
       if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(tok)) return tok;
       const bare = tok.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9-]/g, '');
+      const after = previous;
+      previous = bare;
+      // «CROMOSOMA Y» es el cromosoma, no la conjunción.
+      if (after === 'CROMOSOMA' && /^[XY]$/.test(bare)) return tok;
+      if (bare === 'SPP') return tok.toLowerCase();
       if (PROPER_NOUNS.has(bare)) {
         first = false;
         return tok.replace(bare, PROPER_NOUNS.get(bare));
