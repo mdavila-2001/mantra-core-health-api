@@ -58973,7 +58973,7 @@
       ]
     },
     {
-      "name": "pharmacies (11)",
+      "name": "pharmacies (12)",
       "item": [
         {
           "name": "POST /pharmacies · Alta de farmacia con licencia inicial",
@@ -59633,6 +59633,72 @@
                   "  const id = body && (body.id || body.siteId);",
                   "  if (id) pm.environment.set('siteId', id);",
                   "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /pharmacies/{pharmacyId}/products/{productId} · Editar los datos descriptivos de un producto del catálogo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/products/:productId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "products",
+                ":productId"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "productId",
+                  "value": "{{productId}}",
+                  "description": "Identificador de ruta · variable `{{productId}}`"
+                }
+              ]
+            },
+            "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.\n\n`PATCH /pharmacies/{pharmacyId}/products/{productId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `PharmacyController_updateProduct`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brandName\": \"brandName-ejemplo\",\n  \"genericName\": \"genericName-ejemplo\",\n  \"strengthText\": \"strengthText-ejemplo\",\n  \"packageSizeText\": \"packageSizeText-ejemplo\",\n  \"requiresPrescription\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }

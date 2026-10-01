@@ -1,0 +1,20 @@
+$ yarn docs:coverage
+MISSING MODULE DOC: docs/modules/ops_console.md (real module src/modules/ops_console)
+MODULE NOT IN CATALOG: ops_console missing from docs/modules/index.md
+MISSING MODULE DOC: docs/modules/public.md (real module src/modules/public)
+MODULE NOT IN CATALOG: public missing from docs/modules/index.md
+
+Verificados: 323 páginas de docs/, 70 módulos reales.
+4 problemas de cobertura documental.
+exit=1
+
+$ yarn docs:links
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-26-m3-api-clinica\evidencia\pr-body.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-26-p43-form-instance-id\PLAN.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-30-glosario-es-importadores\PLAN.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-09-30-sincronizacion-backend-dev-test\REPORTE.md
+  - D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\docs\trabajo\2026-10-01-homologacion-metodos-http\PLAN.md
+
+795 enlaces internos verificados en 323 páginas.
+15 enlaces rotos.
+exit=1

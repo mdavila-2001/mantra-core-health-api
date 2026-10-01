@@ -16,6 +16,7 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 | UC-24-06 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices` | Fijar/versionar precio |
 | UC-24-07 | `POST /pharmacies/{pharmacyId}/integration-connections` | Establecer conexión de integración |
 | UC-24-08 | `POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings` | Mapear producto a código externo |
+| P47 §2 | `PATCH /pharmacies/{pharmacyId}/products/{productId}` | Editar marca, genérico, concentración, empaque y receta de un producto activo (`null` borra el dato) |
 | UC-24-09 | `DELETE /pharmacies/{pharmacyId}/products/{productId}` | Retirar (soft-delete) producto en cascada |
 | UC-24-10 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close` | Cerrar/expirar lista de precios |
 | UC-24-11 | `POST /pharmacies/{pharmacyId}/projections` | Proyectar catálogo y precios a read-model |
