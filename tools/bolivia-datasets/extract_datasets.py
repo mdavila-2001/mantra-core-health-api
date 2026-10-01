@@ -821,8 +821,10 @@ def extraer_aranceles(fuente: Path) -> dict:
                 "concepto": concepto_corregido,
                 "uma": float(uma.replace(",", ".")),
                 # Tras corregir las letras, ¿queda algo que el OCR rompió? El importe
-                # nunca se corrige: si la fila es dudosa, se revisa contra el PDF.
-                "ocrSospechoso": sospechoso_de_ocr(concepto_corregido),
+                # nunca se corrige: si la fila es dudosa, se revisa contra el PDF. Un
+                # importe 0 no es un precio («o artrodesis» leído como número, o una
+                # nota del pliego): la fila queda, con su id, pero marcada.
+                "ocrSospechoso": sospechoso_de_ocr(concepto_corregido) or float(uma.replace(",", ".")) == 0,
                 **({"conceptoOriginal": concepto, "correccionesOcr": cambios} if cambios else {}),
                 **({"grupoOriginal": grupo} if grupo and grupo_corregido != grupo else {}),
                 **procedencia(archivo_honorarios, indice),

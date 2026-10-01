@@ -12284,7 +12284,7 @@
         "grupo": "ESÓFAGO",
         "concepto": "En procedimiento realizado por video endoscopia (toracoscopia lagaroscopia) se añade 50% al arancel",
         "uma": 0.0,
-        "ocrSospechoso": false,
+        "ocrSospechoso": true,
         "conceptoOriginal": "En procedimiento realizado por video endoscopia (toracoscopia lagaroscopia) se afiade 50% al arancel",
         "correccionesOcr": [
           "afiade→añade"
@@ -19476,7 +19476,7 @@
         "grupo": "ATENCION MEDICA",
         "concepto": "Atención de pacionte crítico ventilado en uti por turno de 24 horas",
         "uma": 0.0,
-        "ocrSospechoso": false,
+        "ocrSospechoso": true,
         "conceptoOriginal": "Atencién de pacionte critico ventilado en uti por tumo de 24 horas",
         "correccionesOcr": [
           "Atencién→Atención",
@@ -27411,7 +27411,7 @@
         "grupo": null,
         "concepto": "Electroretinografia —",
         "uma": 0.0,
-        "ocrSospechoso": false,
+        "ocrSospechoso": true,
         "grupoOriginal": "Electroneuromigrafia especial por segmento 2:15.13 \\",
         "source_file": "Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md",
         "source_row": 2299
@@ -50964,7 +50964,7 @@
         "grupo": null,
         "concepto": "Artroplastia de interfalángicas de dedos menores tipo duvries o artrodesis",
         "uma": 0.0,
-        "ocrSospechoso": false,
+        "ocrSospechoso": true,
         "conceptoOriginal": "Artroplastia de interfalangicas de dedos menores tipo duvries 0 ar- trodesis",
         "correccionesOcr": [
           "interfalangicas→interfalángicas",
