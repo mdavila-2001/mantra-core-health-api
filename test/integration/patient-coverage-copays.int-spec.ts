@@ -305,6 +305,7 @@ isolated('Coberturas y copagos: HTTP → PostgreSQL aislado', () => {
       {
         benefitCategoryConceptId: INS.BENEFIT_CATEGORY_OUTPATIENT,
         serviceConceptId: DUNIT.STUDY_COMPLETE_BLOOD_COUNT,
+        effectiveFrom: '2020-01-01',
         coveragePercent: '80.25',
         copayAmount: '0',
         deductibleAmount: '10.50',
