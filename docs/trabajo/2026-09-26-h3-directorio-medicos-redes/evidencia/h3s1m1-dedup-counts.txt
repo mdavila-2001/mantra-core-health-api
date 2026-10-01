@@ -1,0 +1,38 @@
+$ python3 -c "
+import sys
+sys.path.insert(0, '.')
+from extract_datasets import extraer_redes
+from pathlib import Path
+fuente = Path('../../../mantra-core-health-model/markdown_convertidos')
+data = extraer_redes(fuente)
+for red in data['redes']:
+    profs = red['profesionales']
+    multi = sum(1 for p in profs if len(p['sedes']) > 1)
+    print(f\"{red['aseguradora']}: {len(profs)} profesionales distintos, {multi} con >1 sede\")
+"
+Alianza: 454 profesionales distintos, 83 con >1 sede
+Nacional Seguros: 507 profesionales distintos, 176 con >1 sede
+
+--- filas crudas por archivo, sin colisiones de escritura ---
+
+Alianza_Medicos_Habilitados filas totales: 671
+  con nombre util: 671   descartadas: 0
+  distintos por clave normalizada: 454
+  claves con variantes de escritura distintas (posible colision): 0
+Nacional_Seguros_Red_Medica_Bolivia filas totales: 745
+  con nombre util: 745   descartadas: 0
+  distintos por clave normalizada: 507
+  claves con variantes de escritura distintas (posible colision): 0
+
+--- misma medición contra la copia congelada de la raíz del checkout (idéntica) ---
+
+Alianza_Medicos_Habilitados filas totales (copia raiz): 671
+  distintos por clave normalizada (copia raiz): 454
+Nacional_Seguros_Red_Medica_Bolivia filas totales (copia raiz): 745
+  distintos por clave normalizada (copia raiz): 507
+
+Conclusión: el encargo declara 672/747 filas -> 455/508 distintos. La medición real,
+contra ambas copias del markdown, da 671/745 filas -> 454/507 distintos, con 0
+colisiones de escritura (ninguna clave normalizada agrupa dos nombres distintos que
+deberían ser personas diferentes). El desvío es exactamente -1 en ambos archivos, en
+fila total y en distintos por igual — ver AMB-H3-01 en PLAN.md.
