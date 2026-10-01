@@ -14,13 +14,32 @@ import {
   PharmacyProductIdentifiersRepository,
   PharmacyProductPricesRepository,
   PharmacyExternalProductMappingsRepository,
+  PharmacyReadRepository,
 } from '../repositories';
 import { IDENTIFIER_TYPE_CONCEPT_BY_CODE, PHARM } from '../pharmacy.concepts';
-import { CreateProductDto, ProductResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateProductDto,
+  PharmacyProductReadDto,
+  ProductResponseDto,
+  StatusResultDto,
+  UpdateProductDto,
+} from '../dto';
+import { displayName, toProductReadDto } from './pharmacy-read.service';
+
+/** Los datos descriptivos que el `PATCH` puede cambiar: los de `UpdateProductDto`. */
+const EDITABLE_FIELDS = [
+  'brandName',
+  'genericName',
+  'strengthText',
+  'packageSizeText',
+  'requiresPrescription',
+] as const;
 
 /**
  * Catálogo de productos de una farmacia.
  *  - UC-24-04: publicar producto con identificadores (padre + N hijos).
+ *  - P47 §2: editar los datos descriptivos de un producto activo (marca, genérico,
+ *    concentración, empaque y receta).
  *  - UC-24-09: retirar (soft-delete) un producto, superseder sus precios vigentes
  *    e inactivar sus mapeos externos en la misma transacción.
  */
@@ -35,6 +54,7 @@ export class PharmacyProductsService {
    * @param identifiersRepo - Valor de identifiers repo requerido por la operación.
    * @param pricesRepo - Valor de prices repo requerido por la operación.
    * @param mappingsRepo - Valor de mappings repo requerido por la operación.
+   * @param readRepo - Lecturas del catálogo, para devolver el producto como lo lista la búsqueda.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -44,6 +64,7 @@ export class PharmacyProductsService {
     private readonly identifiersRepo: PharmacyProductIdentifiersRepository,
     private readonly pricesRepo: PharmacyProductPricesRepository,
     private readonly mappingsRepo: PharmacyExternalProductMappingsRepository,
+    private readonly readRepo: PharmacyReadRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacyProductsService.name);
@@ -138,6 +159,76 @@ export class PharmacyProductsService {
         identifierCount: identifiers.length,
         createdAt: product.createdAt,
       };
+    });
+  }
+
+  /**
+   * P47 §2: corrige los datos descriptivos de un producto activo.
+   *
+   * Cada clave del cuerpo es opcional: una ausente deja el dato como está y
+   * `null` lo borra. Un cuerpo vacío no cambia nada y no toca las marcas de
+   * modificación. Responde el producto como lo lista la búsqueda.
+   */
+  async updateProduct(
+    pharmacyId: string,
+    productId: string,
+    dto: UpdateProductDto,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyProductReadDto> {
+    this.logger.info(
+      { operation: 'pharmacy.product.update', pharmacyId, productId },
+      'Updating pharmacy product',
+    );
+    return this.em.transactional(async (tx) => {
+      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
+      const product = await this.productsRepo.findById(tx, productId);
+      if (!product || product.pharmacyId !== pharmacyId) {
+        throw new ResourceNotFoundException('Producto no encontrado', {
+          productId,
+        });
+      }
+      if (product.statusConceptId !== PHARM.PRODUCT_ACTIVE) {
+        throw new PreconditionFailedException('El producto no está activo', {
+          productId,
+        });
+      }
+
+      const changed = EDITABLE_FIELDS.filter(
+        (field) => dto[field] !== undefined,
+      );
+      if (changed.length > 0) {
+        // `null` borra el dato; la entidad generada tipa estas columnas como
+        // `T | undefined`, así que se asigna por `Object.assign`.
+        for (const field of changed) {
+          Object.assign(product, { [field]: dto[field] });
+        }
+        touch(product, actor.id);
+        await tx.flush();
+      }
+
+      const concepts = await this.readRepo.findConcepts(
+        tx,
+        [product.medicationConceptId, product.dosageFormConceptId].filter(
+          (id): id is string => Boolean(id),
+        ),
+      );
+      this.logger.info(
+        {
+          operation: 'pharmacy.product.update',
+          productId,
+          changedFields: changed,
+        },
+        'Pharmacy product updated',
+      );
+      return toProductReadDto(
+        product,
+        displayName(pharmacy),
+        new Map(concepts.map((concept) => [concept.id, concept])),
+      );
     });
   }
 

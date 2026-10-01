@@ -6,9 +6,15 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   PharmaciesService,
@@ -29,12 +35,14 @@ import {
   CreateProductDto,
   CreateSiteDto,
   MappingResponseDto,
+  PharmacyProductReadDto,
   PharmacyResponseDto,
   PriceListResponseDto,
   PriceResponseDto,
   ProductResponseDto,
   SiteResponseDto,
   StatusResultDto,
+  UpdateProductDto,
   VerifyLicenseDto,
 } from '../dto';
 
@@ -120,6 +128,29 @@ export class PharmacyController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProductResponseDto> {
     return this.productsService.publishProduct(pharmacyId, dto, actor);
+  }
+
+  /** P47 §2. */
+  @Patch(':pharmacyId/products/:productId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Editar los datos descriptivos de un producto del catálogo',
+    description:
+      'Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.',
+  })
+  @ApiOkResponse({ type: PharmacyProductReadDto })
+  updateProduct(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @Body() dto: UpdateProductDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyProductReadDto> {
+    return this.productsService.updateProduct(
+      pharmacyId,
+      productId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-24-09. */

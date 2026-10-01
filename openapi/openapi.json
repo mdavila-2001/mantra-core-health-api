@@ -61471,6 +61471,86 @@
       }
     },
     "/pharmacies/{pharmacyId}/products/{productId}": {
+      "patch": {
+        "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.",
+        "operationId": "PharmacyController_updateProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyUpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyProductReadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar los datos descriptivos de un producto del catálogo",
+        "tags": [
+          "pharmacy"
+        ]
+      },
       "delete": {
         "operationId": "PharmacyController_retireProduct",
         "parameters": [
@@ -119290,6 +119370,44 @@
         "required": [
           "productCode"
         ]
+      },
+      "PharmacyUpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "brandName": {
+            "type": "string",
+            "description": "Marca comercial; `null` la borra",
+            "minLength": 1,
+            "maxLength": 300,
+            "nullable": true
+          },
+          "genericName": {
+            "type": "string",
+            "description": "Nombre genérico; `null` lo borra",
+            "minLength": 1,
+            "maxLength": 300,
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "string",
+            "description": "Concentración (texto libre); `null` la borra",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "string",
+            "description": "Tamaño de empaque (texto libre); `null` lo borra",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "requiresPrescription": {
+            "type": "boolean",
+            "description": "Requiere receta; `null` lo borra",
+            "nullable": true
+          }
+        }
       },
       "CreatePriceListDto": {
         "type": "object",
