@@ -88,8 +88,8 @@
 | H5.S1.M4 | Comparación mock↔API | las 9 rutas en `Matched`; `Missing in Backend` baja de 71 a ≤ 62 | `python …\compare_mock_api.py` | HECHO (Matched 581, Missing 62; faltan solo las 2 de factura) |
 | H5.S1.M5 | Artefactos del CI: injerto de operaciones nuevas en `openapi/`, `docs/modules`, `docs/postman` | cambian sólo líneas propias | `git status --short` acotado | HECHO |
 | H5.S1.M6 | `REPORTE.md` con avance en la primera línea | archivo en disco | — | HECHO |
-| H5.S1.M7 | Commit por rutas explícitas y push; `origin/dev` igual antes y después | rama en `origin` | `git push -u origin marcelo/feat-brechas-criticas-backend-h4` | TODO |
-| H5.S1.M8 | PR a `dev` con reviewers y gate mergeable | `MERGEABLE`; `BLOCKED` sólo por la revisión humana | `gh pr view --json …`; `gh pr checks` | TODO |
+| H5.S1.M7 | Commit por rutas explícitas y push; `origin/dev` igual antes y después | rama en `origin` | `git push -u origin marcelo/feat-brechas-criticas-backend-h4` | HECHO (`origin/dev` 502dcbf7 antes y después) |
+| H5.S1.M8 | PR a `dev` con reviewers y gate mergeable | `MERGEABLE`; `BLOCKED` sólo por la revisión humana | `gh pr view --json …`; `gh pr checks` | HECHO (PR #530, MERGEABLE/BLOCKED por revisión; check docs pendiente; evidencia 30 y 31) |
 
 ## Gate de seguridad (áreas sensibles: historia clínica, datos de pacientes, seguros)
 

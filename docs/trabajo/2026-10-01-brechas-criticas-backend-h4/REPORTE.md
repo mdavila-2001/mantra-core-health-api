@@ -1,8 +1,9 @@
-> **AVANCE: 25 / 29 microtareas HECHO (86 %). 1 BLOQUEADA, 1 NO CUBIERTA, 2 de entrega (push y PR) en curso.**
+> **AVANCE: 27 / 29 microtareas HECHO (93 %). 1 BLOQUEADA (rutas de factura, decisión de modelo), 1 NO CUBIERTA (int-spec sin base).**
 
 # REPORTE — Hito 4: cierre de brechas críticas en la API
 
 - Fecha: 2026-10-01 · Repo: `mantra-core-health-api` · Rama: `marcelo/feat-brechas-criticas-backend-h4` (desde `origin/dev` `502dcbf7`)
+- PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/530 (base `dev`, `MERGEABLE`, `BLOCKED` solo por la revisión humana; evidencia 30 y 31). El check `docs` estaba **pendiente** al cerrar este reporte: no está clasificado.
 - Resultado: **9 de las 11 rutas** pasan de `Missing in Backend` a `Matched`. Las 2 rutas de factura quedan **BLOQUEADAS por una decisión de modelo** que no es mía.
 - Escalera de evidencia: **TESTED** para las 9 rutas (specs unitarios de DTO, controlador y servicio). **No llega a VERIFIED**: ninguna se observó contra una base viva (ver «No cubierto»).
 

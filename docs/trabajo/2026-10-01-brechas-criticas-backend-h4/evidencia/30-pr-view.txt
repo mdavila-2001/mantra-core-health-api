@@ -1,0 +1,1 @@
+﻿{"baseRefName":"dev","isDraft":false,"mergeStateStatus":"BLOCKED","mergeable":"MERGEABLE","number":530,"reviewRequests":[{"__typename":"User","login":"Jsaldias39"},{"__typename":"User","login":"PabloArauzCaballero"}],"title":"feat(api): Hito 4, cierre de brechas criticas (9 de 11 rutas; facturas bloqueadas por modelo)"}
