@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PharmacyProductsService } from './pharmacy-products.service';
+import { BadRequestException } from '@nestjs/common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -28,7 +29,12 @@ function build() {
   const productsRepo = {
     findByPharmacyAndCode: mockFn(),
     findById: mockFn(),
+    findByPharmacyAndCatalog: mockFn().mockResolvedValue(null),
     create: mockFn(),
+  };
+  const catalogRepo = {
+    findProductById: mockFn(),
+    findVademecumConceptIdByAtc: mockFn().mockResolvedValue(null),
   };
   const identifiersRepo = { create: mockFn() };
   const pricesRepo = { findActiveByProduct: mockFn().mockResolvedValue([]) };
@@ -43,6 +49,7 @@ function build() {
     pricesRepo as any,
     mappingsRepo as any,
     readRepo as any,
+    catalogRepo as any,
     logger as any,
   );
   return {
@@ -50,6 +57,7 @@ function build() {
     tx,
     pharmaciesRepo,
     productsRepo,
+    catalogRepo,
     identifiersRepo,
     pricesRepo,
     mappingsRepo,
@@ -111,6 +119,265 @@ describe('PharmacyProductsService', () => {
       expect(res).toMatchObject({ id: 'pr1', identifierCount: 1 });
       expect(d.identifiersRepo.create).toHaveBeenCalledTimes(1);
       expect(d.tx.flush).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('publishProduct desde el catálogo universal', () => {
+    /** Un producto real del catálogo (CIMA) con dos presentaciones vendibles. */
+    const catalogProduct = {
+      id: 'cat-1',
+      source: 'cima',
+      code: '60885',
+      display: 'DALSYDOL 400 MG COMPRIMIDOS',
+      strengthText: '400 mg',
+      requiresPrescription: true,
+      activeIngredients: [{ name: 'IBUPROFENO', amount: '400', unit: 'mg' }],
+      atc: ['M01AE01'],
+      presentations: [
+        {
+          code: '700001',
+          name: 'DALSYDOL 400 mg, 20 comprimidos',
+          gtin: null,
+          active: true,
+        },
+        {
+          code: '700002',
+          name: 'DALSYDOL 400 mg, 40 comprimidos',
+          gtin: null,
+          active: true,
+        },
+        { code: '700003', name: 'dada de baja', gtin: null, active: false },
+      ],
+      regulatoryStatus: 'ACTIVE',
+      selectable: true,
+    };
+
+    function ready() {
+      const d = build();
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
+      d.productsRepo.findByPharmacyAndCode.mockResolvedValue(null);
+      d.productsRepo.create.mockReturnValue({
+        id: 'pr1',
+        pharmacyId: 'ph1',
+        productCode: 'SKU-1',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+        createdAt: new Date(),
+      });
+      d.catalogRepo.findProductById.mockResolvedValue(catalogProduct);
+      d.catalogRepo.findVademecumConceptIdByAtc.mockResolvedValue('vad-ibu');
+      return d;
+    }
+
+    it('deriva marca, genérico, concentración, presentación, receta y vademécum del registro oficial', async () => {
+      const d = ready();
+      await d.service.publishProduct(
+        'ph1',
+        {
+          productCode: 'SKU-1',
+          catalogProductId: 'cat-1',
+          catalogPresentationCode: '700002',
+        } as any,
+        actor,
+      );
+      expect(d.catalogRepo.findVademecumConceptIdByAtc).toHaveBeenCalledWith(
+        d.tx,
+        ['M01AE01'],
+      );
+      expect(d.productsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          catalogProductConceptId: 'cat-1',
+          catalogPresentationCode: '700002',
+          brandName: 'DALSYDOL 400 MG COMPRIMIDOS',
+          genericName: 'IBUPROFENO',
+          strengthText: '400 mg',
+          packageSizeText: 'DALSYDOL 400 mg, 40 comprimidos',
+          requiresPrescription: true,
+          medicationConceptId: 'vad-ibu',
+        }),
+      );
+    });
+
+    it('rechaza (404) un id que no es del catálogo', async () => {
+      const d = ready();
+      d.catalogRepo.findProductById.mockResolvedValue(null);
+      await expect(
+        d.service.publishProduct(
+          'ph1',
+          { productCode: 'SKU-1', catalogProductId: 'nope' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.productsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza (422) un registro sanitario que no está vigente', async () => {
+      const d = ready();
+      d.catalogRepo.findProductById.mockResolvedValue({
+        ...catalogProduct,
+        selectable: false,
+        regulatoryStatus: 'REVOKED',
+      });
+      await expect(
+        d.service.publishProduct(
+          'ph1',
+          { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it.each([
+      'brandName',
+      'genericName',
+      'strengthText',
+      'packageSizeText',
+      'requiresPrescription',
+      'medicationConceptId',
+    ])(
+      'rechaza (400) que se mande %s junto al id del catálogo',
+      async (field) => {
+        const d = ready();
+        await expect(
+          d.service.publishProduct(
+            'ph1',
+            {
+              productCode: 'SKU-1',
+              catalogProductId: 'cat-1',
+              catalogPresentationCode: '700001',
+              [field]: 'x',
+            } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(d.productsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('con más de una presentación vendible exige elegir cuál (400)', async () => {
+      const d = ready();
+      await expect(
+        d.service.publishProduct(
+          'ph1',
+          { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rechaza (400) una presentación ajena o dada de baja', async () => {
+      const d = ready();
+      for (const code of ['999999', '700003']) {
+        await expect(
+          d.service.publishProduct(
+            'ph1',
+            {
+              productCode: 'SKU-1',
+              catalogProductId: 'cat-1',
+              catalogPresentationCode: code,
+            } as any,
+            actor,
+          ),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      }
+    });
+
+    it('rechaza (400) una presentación sin producto del catálogo', async () => {
+      const d = ready();
+      await expect(
+        d.service.publishProduct(
+          'ph1',
+          { productCode: 'SKU-1', catalogPresentationCode: '700001' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rechaza (409) cargar dos veces el mismo producto y presentación', async () => {
+      const d = ready();
+      d.productsRepo.findByPharmacyAndCatalog.mockResolvedValue({ id: 'ya' });
+      await expect(
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'SKU-2',
+            catalogProductId: 'cat-1',
+            catalogPresentationCode: '700001',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.productsRepo.findByPharmacyAndCatalog).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        'cat-1',
+        '700001',
+      );
+    });
+
+    it('un producto con una sola presentación no obliga a elegirla, y sin ATC conocido queda sin medicamento', async () => {
+      const d = ready();
+      d.catalogRepo.findProductById.mockResolvedValue({
+        ...catalogProduct,
+        presentations: [catalogProduct.presentations[0]],
+      });
+      d.catalogRepo.findVademecumConceptIdByAtc.mockResolvedValue(null);
+      await d.service.publishProduct(
+        'ph1',
+        { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+        actor,
+      );
+      const data = d.productsRepo.create.mock.calls[0][1];
+      expect(data.medicationConceptId).toBeUndefined();
+      expect(data.packageSizeText).toBeUndefined();
+      expect(d.productsRepo.findByPharmacyAndCatalog).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        'cat-1',
+        null,
+      );
+    });
+
+    it('sin catalogProductId el alta sigue como antes (producto cargado a mano)', async () => {
+      const d = ready();
+      await d.service.publishProduct(
+        'ph1',
+        { productCode: 'SKU-1', brandName: 'Manual', genericName: 'X' } as any,
+        actor,
+      );
+      expect(d.catalogRepo.findProductById).not.toHaveBeenCalled();
+      expect(d.productsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ brandName: 'Manual', genericName: 'X' }),
+      );
+    });
+  });
+
+  describe('updateProduct sobre un producto del catálogo universal', () => {
+    it('rechaza (400) corregir los datos oficiales de un producto vinculado al catálogo', async () => {
+      const d = build();
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
+      d.productsRepo.findById.mockResolvedValue({
+        id: 'pr1',
+        pharmacyId: 'ph1',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+        catalogProductConceptId: 'cat-1',
+      });
+      await expect(
+        d.service.updateProduct(
+          'ph1',
+          'pr1',
+          { brandName: 'Otra' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
 

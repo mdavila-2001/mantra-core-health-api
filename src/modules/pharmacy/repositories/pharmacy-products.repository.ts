@@ -54,6 +54,15 @@ export interface CreateProductData {
    */
   coldChainRequired?: boolean;
   /**
+   * Producto del catálogo universal de medicamentos del que viene
+   * (`terminology.catalog_concepts`). Nulo en un producto cargado a mano.
+   */
+  catalogProductConceptId?: string;
+  /**
+   * Código de la presentación elegida del catálogo (CN, CUM…).
+   */
+  catalogPresentationCode?: string;
+  /**
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
@@ -90,6 +99,24 @@ export class PharmacyProductsRepository {
   }
 
   /** Crea el producto en la unidad de trabajo (sin flush). */
+  /**
+   * Un producto del catálogo ya cargado por la farmacia con esa presentación.
+   * Sin presentación (`null`) busca el que tampoco la tiene: son los dos
+   * índices únicos parciales de `v4.2.32`.
+   */
+  findByPharmacyAndCatalog(
+    em: EntityManager,
+    pharmacyId: string,
+    catalogProductConceptId: string,
+    catalogPresentationCode: string | null,
+  ): Promise<PharmacyProducts | null> {
+    return em.findOne(PharmacyProducts, {
+      pharmacyId,
+      catalogProductConceptId,
+      catalogPresentationCode,
+    });
+  }
+
   create(em: EntityManager, data: CreateProductData): PharmacyProducts {
     return em.create(
       PharmacyProducts,
@@ -106,6 +133,8 @@ export class PharmacyProductsRepository {
         packageSizeText: data.packageSizeText,
         requiresPrescription: data.requiresPrescription,
         coldChainRequired: data.coldChainRequired,
+        catalogProductConceptId: data.catalogProductConceptId,
+        catalogPresentationCode: data.catalogPresentationCode,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
       },

@@ -3,6 +3,7 @@ export * from './create-site.dto';
 export * from './verify-license.dto';
 export * from './create-product.dto';
 export * from './update-product.dto';
+export * from './catalog-product.dto';
 export * from './create-price-list.dto';
 export * from './create-price.dto';
 export * from './create-connection.dto';
