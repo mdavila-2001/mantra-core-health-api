@@ -216,3 +216,39 @@ faltante. No actualiza filas existentes.
 | MedlinePlus: Enciclopedia A.D.A.M. y monografías de medicamentos | Con copyright (no son dominio público). Sólo se usan temas de salud y pruebas médicas. |
 | SNOMED CT (edición en español) | Requiere licencia de país miembro. |
 | Cuidados de enfermería | No se encontró una fuente oficial libre en castellano con términos de enfermería; la categoría queda sin aportes de esta importación. |
+
+## Catálogo universal de medicamentos (2026-10-01)
+
+Productos de farmacia que **no se tipean**: salen de registros sanitarios oficiales. Dos etapas, como el
+glosario, y una carpeta de descargas fuera de git (`glossary-data-build/`).
+
+| Etapa | Script | Qué hace |
+|---|---|---|
+| 1 | `build-medicine-catalog.mjs` | Normaliza lo ya descargado a un **registro común** (`lib/medicine-catalog/common.mjs`), uno por fuente. Sin red. |
+| 2 | `load-medicine-catalog.mjs` | Carga a `terminology.*`: un `code_system` por fuente, un concepto por registro, propiedades `medicine_*`. Idempotente (`--dry-run` sin base). |
+
+| Fuente | `codeSystem` | Entrada | Registros |
+|---|---|---|---|
+| CIMA (AEMPS, España) | `cima-medicamentos` | `cache/cima/detail/*.json` (de `import-cima.mjs`) | 25 470 |
+| INVIMA (Colombia), CUM vigentes | `invima-medicamentos` | `medicines-sources/invima-cum/cum_vigentes.csv` | 9 520 (de 155 807 filas) |
+| ANVISA (Brasil) | `anvisa-medicamentos` | `medicines-sources/anvisa/DADOS_ABERTOS_MEDICAMENTOS.csv` | 32 774 (10 806 filas sin nº de registro, descartadas) |
+| **AGEMED (Bolivia)** | `agemed-medicamentos` | **no descargada** | — |
+
+Reglas que siguen (igual que el glosario): **nada se redacta ni se infiere** — lo que la fuente no trae queda
+en `null` (ANVISA no trae concentración ni ATC; CIMA publica el Código Nacional, no el GTIN). El INVIMA viene
+por presentación×ingrediente y se **agrupa por registro sanitario**; la muestra médica no cuenta como
+presentación vendible. Los registros suspendidos, revocados o inactivos se cargan con `selectable: false`.
+Las fuentes **no se fusionan**: el único ancla común es el ATC nivel 5 exacto.
+
+AGEMED no se descargó porque su portal consulta de a un registro y exige reCAPTCHA (ver
+`glossary-data-build/medicines-sources/SOURCES.md`): hay que pedir la base por acceso a información pública.
+
+```sh
+node tools/terminology-import/build-medicine-catalog.mjs                # ~30 s, sin red
+node tools/terminology-import/load-medicine-catalog.mjs --dry-run       # plan y conteos, sin base
+node tools/terminology-import/load-medicine-catalog.mjs                 # carga real (.env DB_*; exige el stack)
+node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pruebas con filas reales
+```
+
+**Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
+**No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
