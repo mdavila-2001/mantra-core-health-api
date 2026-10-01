@@ -155,6 +155,17 @@ describe('SchedulingServiceOfferingsService', () => {
       ).rejects.toThrow(/para vos/);
     });
 
+    it('quien atiende Y administra agendas crea la suya sin repetir su propio id', async () => {
+      const d = build();
+      const ambas = { ...medico, roles: ['PRACTITIONER', 'SCHEDULING_ADMIN'] };
+
+      await d.service.create(dto, ambas);
+
+      expect(d.repo.createOffering.mock.calls[0][1].practitionerProfileId).toBe(
+        MEDICO,
+      );
+    });
+
     it('quien administra agendas debe decir de qué profesional es la oferta', async () => {
       const d = build();
       await expect(d.service.create(dto, admin)).rejects.toThrow(

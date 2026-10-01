@@ -235,22 +235,26 @@ export class SchedulingServiceOfferingsService {
     const administra = actor.roles.some((rol) =>
       ROLES_QUE_ADMINISTRAN_AGENDAS.includes(rol),
     );
-    if (administra) {
-      if (pedido === undefined) {
-        throw new PreconditionFailedException(
-          'Indicá de qué profesional es la oferta.',
-          {},
-        );
+    const propio = actor.practitionerProfileId;
+
+    // Pidió una oferta para OTRO profesional: sólo quien administra agendas puede.
+    if (pedido !== undefined && pedido !== propio) {
+      if (!administra) {
+        throw new ForbiddenException('Sólo podés crear ofertas para vos.');
       }
       return pedido;
     }
-    if (actor.practitionerProfileId === undefined) {
-      throw new ForbiddenException('Sólo un profesional ofrece servicios.');
+    // Sin pedido explícito la oferta es de quien atiende. Hay quien atiende Y
+    // administra agendas (el consultorio propio): exigirle su propio id sería
+    // pedirle un dato que el servidor ya tiene.
+    if (propio !== undefined) return propio;
+    if (administra) {
+      throw new PreconditionFailedException(
+        'Indicá de qué profesional es la oferta.',
+        {},
+      );
     }
-    if (pedido !== undefined && pedido !== actor.practitionerProfileId) {
-      throw new ForbiddenException('Sólo podés crear ofertas para vos.');
-    }
-    return actor.practitionerProfileId;
+    throw new ForbiddenException('Sólo un profesional ofrece servicios.');
   }
 
   private assertEsSuya(
