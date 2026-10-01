@@ -1,0 +1,11 @@
+$ corepack yarn docs:openapi:generate
+(build OK, dist/ generado)
+[Nest] ERROR [ExceptionHandler] UnknownDependenciesException [Error]: Nest can't resolve
+dependencies of the PractitionerSettlementBatchesService (?, SettlementRepository,
+CatalogRepository, LinkedClaimAccessService, PracticeTenantLookupService). Please make sure
+that the argument Function at index [0] is available in the InsuranceModule module.
+
+Causa: falla al bootstrapear InsuranceModule (módulo ajeno a este carril, no tocado).
+Preexistente en origin/dev @ 343795cc, antes de cualquier cambio de este carril: no se toca
+(regla 00 §3, fuera de alcance). Bloquea cualquier generación de OpenAPI/Postman que necesite
+levantar la app completa, no sólo la de pharmacy.
