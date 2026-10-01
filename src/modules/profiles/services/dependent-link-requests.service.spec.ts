@@ -49,6 +49,7 @@ function build(
     solicitud?: unknown;
     sinPaciente?: string[];
     sinCuenta?: string[];
+    candidatas?: unknown[];
   } = {},
 ) {
   const tx = { flush: fn(async () => undefined), marca: 'tx' };
@@ -100,6 +101,9 @@ function build(
     ),
     findById: fn().mockResolvedValue(opciones.solicitud ?? null),
     listPendingForPatient: fn().mockResolvedValue([]),
+    searchRepresentableByName: fn().mockResolvedValue(
+      opciones.candidatas ?? [],
+    ),
   };
   const notifications = {
     emitInApp: fn().mockResolvedValue({ suppressed: false }),
@@ -137,7 +141,134 @@ function pendienteDelAbuelo(extra: Record<string, unknown> = {}) {
   };
 }
 
+/** Una fila como la devuelve la consulta de candidatas (SQL cruda, `snake_case`). */
+function candidata(extra: Record<string, unknown> = {}) {
+  return {
+    patient_profile_id: 'person-abuelo',
+    display_name: 'Luis Pérez',
+    name: 'Luis',
+    middle_name: null,
+    last_name: 'Pérez',
+    mother_last_name: null,
+    national_id: '7654321',
+    ...extra,
+  };
+}
+
 describe('DependentLinkRequestsService', () => {
+  describe('findCandidates', () => {
+    it('busca por las palabras escritas, sin tildes ni mayúsculas, acotado al titular', async () => {
+      const { service, portalProxiesRepo } = build({
+        candidatas: [candidata()],
+      });
+
+      const r = await service.findCandidates('  Luis   PÉREZ ', madre);
+
+      expect(portalProxiesRepo.searchRepresentableByName).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          ownerPersonId: 'person-madre',
+          proxyUserId: 'user-madre',
+          tokens: ['luis', 'perez'],
+          now: expect.any(Date),
+          limit: 8,
+        },
+      );
+      expect(r).toEqual([
+        {
+          patientProfileId: 'person-abuelo',
+          displayName: 'Luis Pérez',
+          maskedNationalId: '••••321',
+        },
+      ]);
+    });
+
+    it('nunca devuelve el CI entero, y lo omite si la persona no declaró uno', async () => {
+      const { service } = build({
+        candidatas: [
+          candidata({ national_id: '7654321' }),
+          candidata({ patient_profile_id: 'p-2', national_id: null }),
+          candidata({ patient_profile_id: 'p-3', national_id: '' }),
+        ],
+      });
+
+      const r = await service.findCandidates('luis', madre);
+
+      expect(JSON.stringify(r)).not.toContain('7654321');
+      expect(r[0]).toHaveProperty('maskedNationalId', '••••321');
+      expect(r[1]).not.toHaveProperty('maskedNationalId');
+      expect(r[2]).not.toHaveProperty('maskedNationalId');
+    });
+
+    it('un CI de tres cifras o menos se tapa por completo', async () => {
+      const { service } = build({
+        candidatas: [candidata({ national_id: '123' })],
+      });
+
+      const [c] = await service.findCandidates('luis', madre);
+
+      expect(c.maskedNationalId).toBe('•••');
+    });
+
+    it('compone el nombre si la fila no trae el visible', async () => {
+      const { service } = build({
+        candidatas: [
+          candidata({ display_name: null, name: 'Luis', last_name: 'Pérez' }),
+        ],
+      });
+
+      const [c] = await service.findCandidates('luis', madre);
+
+      expect(c.displayName).toBe('Luis Pérez');
+    });
+
+    it('con menos de tres letras no consulta nada: no es un listado del padrón', async () => {
+      const { service, portalProxiesRepo } = build({
+        candidatas: [candidata()],
+      });
+
+      for (const texto of [undefined, '', '   ', 'a', 'an', 'a b', '%_']) {
+        await expect(service.findCandidates(texto, madre)).resolves.toEqual([]);
+      }
+      expect(
+        portalProxiesRepo.searchRepresentableByName,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('con exactamente tres letras ya busca', async () => {
+      const { service, portalProxiesRepo } = build();
+
+      await service.findCandidates('ana', madre);
+
+      expect(portalProxiesRepo.searchRepresentableByName).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+
+    it('ningún comodín de LIKE llega a la consulta: las palabras sólo traen letras y dígitos', async () => {
+      const { service, portalProxiesRepo } = build();
+
+      await service.findCandidates("ana% _\\ o'brien", madre);
+
+      const { tokens } =
+        portalProxiesRepo.searchRepresentableByName.mock.calls[0][1];
+      expect(tokens).toEqual(['ana', 'o', 'brien']);
+    });
+
+    it('una cuenta sin perfil de paciente no busca: 403 y no consulta', async () => {
+      const { service, portalProxiesRepo } = build({
+        sinPaciente: ['person-madre'],
+      });
+
+      await expect(
+        service.findCandidates('luis', madre),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(
+        portalProxiesRepo.searchRepresentableByName,
+      ).not.toHaveBeenCalled();
+    });
+  });
+
   describe('request', () => {
     it('deja un apoderamiento PENDIENTE, sin vigencia, y le avisa a esa cuenta', async () => {
       const { service, portalProxiesRepo, notifications, identifiersRepo } =
@@ -232,6 +363,90 @@ describe('DependentLinkRequestsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(portalProxiesRepo.create).not.toHaveBeenCalled();
       expect(notifications.emitInApp).not.toHaveBeenCalled();
+    });
+
+    describe('por el perfil elegido de la búsqueda por nombre (patientProfileId)', () => {
+      it('deja el mismo apoderamiento pendiente, avisa, y no consulta documentos', async () => {
+        const { service, portalProxiesRepo, notifications, identifiersRepo } =
+          build();
+
+        const r = await service.request(
+          { patientProfileId: 'person-abuelo' },
+          madre,
+        );
+
+        expect(r).toEqual({ id: REQUEST_ID, status: 'PENDING' });
+        expect(identifiersRepo.findActiveDuplicate).not.toHaveBeenCalled();
+        expect(portalProxiesRepo.create.mock.calls[0][1]).toMatchObject({
+          patientProfileId: 'person-abuelo',
+          proxyUserId: 'user-madre',
+          statusConceptId: PROF.PROXY_PENDING,
+        });
+        expect(notifications.emitInApp).toHaveBeenCalledWith(
+          expect.objectContaining({
+            recipientUserId: 'user-abuelo',
+            destination: { type: 'DEPENDENT_LINK_REQUEST', id: REQUEST_ID },
+          }),
+        );
+      });
+
+      it('un perfil inexistente, sin cuenta o sin perfil de paciente responde lo mismo: 404', async () => {
+        const casos = [
+          { opciones: {}, perfil: 'person-inventado' },
+          {
+            opciones: { sinCuenta: ['person-abuelo'] },
+            perfil: 'person-abuelo',
+          },
+          {
+            opciones: { sinPaciente: ['person-abuelo'] },
+            perfil: 'person-abuelo',
+          },
+        ];
+        const mensajes: string[] = [];
+        for (const { opciones, perfil } of casos) {
+          const { service, portalProxiesRepo, notifications } = build(opciones);
+
+          const error = await service
+            .request({ patientProfileId: perfil }, madre)
+            .catch((e: unknown) => e);
+
+          expect(error).toBeInstanceOf(ResourceNotFoundException);
+          mensajes.push((error as Error).message);
+          expect(portalProxiesRepo.create).not.toHaveBeenCalled();
+          expect(notifications.emitInApp).not.toHaveBeenCalled();
+        }
+        // Nada de lo que conteste distingue un perfil que no existe de uno que
+        // existe sin cuenta: no es un buscador de perfiles.
+        expect(new Set(mensajes).size).toBe(1);
+      });
+
+      it('el perfil propio es 422 y no escribe nada', async () => {
+        const { service, portalProxiesRepo, notifications } = build();
+
+        await expect(
+          service.request({ patientProfileId: 'person-madre' }, madre),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(portalProxiesRepo.create).not.toHaveBeenCalled();
+        expect(notifications.emitInApp).not.toHaveBeenCalled();
+      });
+
+      it('si ya la representa, 409; si ya hay una pendiente, 409 y no se duplica el aviso', async () => {
+        const vigente = build({ vigente: { id: 'proxy-viejo' } });
+        await expect(
+          vigente.service.request({ patientProfileId: 'person-abuelo' }, madre),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(vigente.portalProxiesRepo.create).not.toHaveBeenCalled();
+
+        const pendiente = build({ pendiente: pendienteDelAbuelo() });
+        await expect(
+          pendiente.service.request(
+            { patientProfileId: 'person-abuelo' },
+            madre,
+          ),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(pendiente.portalProxiesRepo.create).not.toHaveBeenCalled();
+        expect(pendiente.notifications.emitInApp).not.toHaveBeenCalled();
+      });
     });
 
     it('una cuenta sin perfil de paciente no puede pedir: 403', async () => {

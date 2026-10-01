@@ -61,7 +61,9 @@ describe('Solicitudes de dependiente con cuenta (integración)', () => {
         ...camposDePaciente,
         nationalId,
         password,
-        displayName: `Paciente ${etiqueta}`,
+        // Con la marca de la corrida: la base no se trunca, y la búsqueda por
+        // nombre tiene que encontrar a ESTA persona y no a la de una corrida vieja.
+        displayName: `Paciente ${etiqueta} ${marca}`,
         email: `dl-${etiqueta}-${marca}@example.test`,
       })
       .expect(201);
@@ -238,5 +240,94 @@ describe('Solicitudes de dependiente con cuenta (integración)', () => {
       .get(`/clinical/patients/${tia.patientProfileId}/summary`)
       .set(bearer(madre.token))
       .expect(403);
+  });
+
+  describe('búsqueda por nombre y solicitud por el perfil elegido', () => {
+    /** Los últimos tres caracteres del documento, que es lo único que se ve. */
+    const mascara = (p: Paciente) => `••••${p.nationalId.slice(-3)}`;
+
+    const candidatos = (quien: Paciente, q: string) =>
+      http()
+        .get('/profiles/patients/me/dependent-candidates')
+        .query({ q })
+        .set(bearer(quien.token));
+
+    it('encuentra a quien tiene cuenta, con el CI enmascarado, y no ofrece al titular ni a quien ya lo representa', async () => {
+      // La madre ya representa al abuelo (aceptó arriba) y es quien pregunta:
+      // quedan la tía (rechazó, así que sigue siendo candidata) y el ajeno.
+      const res = await candidatos(madre, `paciente ${marca}`).expect(200);
+
+      expect(res.body).toEqual([
+        {
+          patientProfileId: ajeno.patientProfileId,
+          displayName: `Paciente ajeno ${marca}`,
+          maskedNationalId: mascara(ajeno),
+        },
+        {
+          patientProfileId: tia.patientProfileId,
+          displayName: `Paciente tia ${marca}`,
+          maskedNationalId: mascara(tia),
+        },
+      ]);
+      // El documento entero nunca viaja.
+      expect(JSON.stringify(res.body)).not.toContain(ajeno.nationalId);
+    });
+
+    it('con menos de tres letras no devuelve nada', async () => {
+      const res = await candidatos(madre, 'pa').expect(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('pedir por el perfil elegido deja la solicitud pendiente, y la persona sale de los candidatos', async () => {
+      const pedido = await http()
+        .post('/profiles/patients/me/dependent-requests')
+        .set(bearer(madre.token))
+        .send({ patientProfileId: ajeno.patientProfileId })
+        .expect(201);
+      expect(pedido.body).toEqual({
+        id: expect.any(String),
+        status: 'PENDING',
+      });
+
+      const delAjeno = await http()
+        .get('/profiles/patients/me/dependent-requests/incoming')
+        .set(bearer(ajeno.token))
+        .expect(200);
+      expect(delAjeno.body).toEqual([
+        expect.objectContaining({ id: pedido.body.id }),
+      ]);
+
+      const res = await candidatos(madre, `ajeno ${marca}`).expect(200);
+      expect(res.body).toEqual([]);
+
+      await http()
+        .post('/profiles/patients/me/dependent-requests')
+        .set(bearer(madre.token))
+        .send({ patientProfileId: ajeno.patientProfileId })
+        .expect(409);
+    });
+
+    it('el perfil propio es 422, uno inventado es 404, y el documento junto al perfil es 400', async () => {
+      await http()
+        .post('/profiles/patients/me/dependent-requests')
+        .set(bearer(madre.token))
+        .send({ patientProfileId: madre.patientProfileId })
+        .expect(422);
+
+      await http()
+        .post('/profiles/patients/me/dependent-requests')
+        .set(bearer(madre.token))
+        .send({ patientProfileId: randomUUID() })
+        .expect(404);
+
+      await http()
+        .post('/profiles/patients/me/dependent-requests')
+        .set(bearer(madre.token))
+        .send({
+          nationalId: tia.nationalId,
+          patientProfileId: tia.patientProfileId,
+        })
+        .expect(400);
+    });
   });
 });

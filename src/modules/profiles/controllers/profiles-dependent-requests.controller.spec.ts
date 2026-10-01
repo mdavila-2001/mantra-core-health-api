@@ -5,7 +5,7 @@ import { ArgumentMetadata, ParseUUIDPipe } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ConflictException } from '../../../common';
-import { RequestDependentLinkDto } from '../dto';
+import { DependentCandidatesQueryDto, RequestDependentLinkDto } from '../dto';
 import { ProfilesDependentRequestsController } from './profiles-dependent-requests.controller';
 
 const actor = { id: 'user-1', roles: ['USER', 'PATIENT'] } as any;
@@ -20,6 +20,7 @@ function build() {
   const requests = {
     request: fn().mockResolvedValue({ id: ID, status: 'PENDING' }),
     listIncoming: fn().mockResolvedValue([]),
+    findCandidates: fn().mockResolvedValue([]),
     accept: fn().mockResolvedValue({ id: ID, status: 'ACCEPTED' }),
     reject: fn().mockResolvedValue({ id: ID, status: 'REJECTED' }),
   };
@@ -66,6 +67,66 @@ describe('ProfilesDependentRequestsController', () => {
     expect(requests.reject).toHaveBeenCalledWith(ID, actor);
   });
 
+  describe('candidatos por nombre', () => {
+    /**
+     * Los errores de validación del filtro, como los vería el `ValidationPipe`.
+     *
+     * @param query - Lo que mandaría el cliente en la query string.
+     * @returns Las propiedades que no pasaron.
+     */
+    async function erroresDeQuery(query: unknown): Promise<string[]> {
+      const dto = plainToInstance(DependentCandidatesQueryDto, query);
+      const errores = await validate(dto, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      });
+      return errores.map((e) => e.property);
+    }
+
+    it('delega el texto y la sesión, sin tomar a nadie del cliente', async () => {
+      const { controller, requests } = build();
+      requests.findCandidates.mockResolvedValue([
+        { patientProfileId: ID, displayName: 'Luis Pérez' },
+      ]);
+
+      await expect(
+        controller.listDependentCandidates({ q: 'luis' }, actor),
+      ).resolves.toEqual([{ patientProfileId: ID, displayName: 'Luis Pérez' }]);
+      expect(requests.findCandidates).toHaveBeenCalledWith('luis', actor);
+    });
+
+    it('sin texto delega `undefined`: el servicio responde vacío', async () => {
+      const { controller, requests } = build();
+
+      await controller.listDependentCandidates({}, actor);
+
+      expect(requests.findCandidates).toHaveBeenCalledWith(undefined, actor);
+    });
+
+    it('acepta el texto y hasta 100 caracteres', async () => {
+      expect(await erroresDeQuery({ q: 'luis' })).toEqual([]);
+      expect(await erroresDeQuery({})).toEqual([]);
+      expect(await erroresDeQuery({ q: 'a'.repeat(100) })).toEqual([]);
+    });
+
+    it('rechaza un texto de más de 100 caracteres y las claves que el contrato no declara', async () => {
+      expect(await erroresDeQuery({ q: 'a'.repeat(101) })).toEqual(['q']);
+      expect(await erroresDeQuery({ q: 'luis', limit: '500' })).toEqual([
+        'limit',
+      ]);
+    });
+
+    it('la búsqueda tiene su propio freno de frecuencia', () => {
+      const handler = Object.getOwnPropertyDescriptor(
+        ProfilesDependentRequestsController.prototype,
+        'listDependentCandidates',
+      )?.value as object;
+      const limite = Reflect.getMetadata('THROTTLER:LIMITdefault', handler);
+
+      expect(limite).toBe(30);
+    });
+  });
+
   it('propaga el 409 del servicio tal cual', async () => {
     const { controller, requests } = build();
     requests.accept.mockRejectedValue(new ConflictException('ya respondida'));
@@ -98,9 +159,35 @@ describe('ProfilesDependentRequestsController', () => {
     });
 
     it('rechaza claves que el contrato no declara', async () => {
+      expect(await erroresDe({ nationalId: '7654321', role: 'ADMIN' })).toEqual(
+        ['role'],
+      );
+      expect(await erroresDe({ patientProfileId: ID, tenantId: ID })).toEqual([
+        'tenantId',
+      ]);
+    });
+
+    it('acepta el perfil elegido de la búsqueda por nombre, solo', async () => {
+      expect(await erroresDe({ patientProfileId: ID })).toEqual([]);
+    });
+
+    it('el perfil tiene que ser un uuid', async () => {
+      expect(await erroresDe({ patientProfileId: 'no-es-uuid' })).toEqual([
+        'patientProfileId',
+      ]);
+      expect(await erroresDe({ patientProfileId: '' })).toEqual([
+        'patientProfileId',
+      ]);
+    });
+
+    it('rechaza mandar el documento y el perfil juntos: una sola vía por pedido', async () => {
       expect(
         await erroresDe({ nationalId: '7654321', patientProfileId: ID }),
       ).toEqual(['patientProfileId']);
+    });
+
+    it('rechaza no mandar ninguno de los dos', async () => {
+      expect(await erroresDe({})).toEqual(['nationalId']);
     });
   });
 

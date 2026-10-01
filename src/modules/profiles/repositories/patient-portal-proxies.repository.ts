@@ -3,6 +3,11 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { PatientPortalProxies } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
 import { PROF } from '../profiles.concepts';
+import {
+  containsPattern,
+  sqlSearchKey,
+  sqlSortKey,
+} from '../../terminology/repositories/glossary-search.sql';
 
 /** Datos de un proxy de portal delegado a un representante. */
 export interface CreatePortalProxyData {
@@ -98,6 +103,47 @@ export interface PendingRequestRow {
   readonly mother_last_name: string | null;
   /** Nombre visible ya compuesto. */
   readonly display_name: string | null;
+}
+
+/**
+ * Los criterios de {@link PatientPortalProxiesRepository.searchRepresentableByName}.
+ */
+export interface RepresentableSearch {
+  /** Persona del titular, que no es candidata de sí misma. */
+  readonly ownerPersonId: string;
+  /** Cuenta del titular, para excluir a quien ya representa o ya pidió. */
+  readonly proxyUserId: string;
+  /**
+   * Palabras de la búsqueda, ya sin tildes ni mayúsculas y sólo con letras y
+   * dígitos: cada una tiene que abrir alguna palabra del nombre.
+   */
+  readonly tokens: readonly string[];
+  /** Instante contra el que se mide la vigencia de la representación. */
+  readonly now: Date;
+  /** Tope de filas. */
+  readonly limit: number;
+}
+
+/**
+ * Una fila de {@link PatientPortalProxiesRepository.searchRepresentableByName}.
+ *
+ * Nombres en `snake_case` por ser SQL cruda.
+ */
+export interface RepresentableCandidateRow {
+  /** Perfil de paciente del candidato (es `persons.id`). */
+  readonly patient_profile_id: string;
+  /** Nombre visible ya compuesto. */
+  readonly display_name: string | null;
+  /** Nombre de pila. */
+  readonly name: string | null;
+  /** Segundo nombre. */
+  readonly middle_name: string | null;
+  /** Apellido paterno. */
+  readonly last_name: string | null;
+  /** Apellido materno. */
+  readonly mother_last_name: string | null;
+  /** Documento de identidad vigente, si lo declaró. */
+  readonly national_id: string | null;
 }
 
 /** Acceso a datos de `profiles.patient_portal_proxies`. */
@@ -317,6 +363,84 @@ export class PatientPortalProxiesRepository {
           and pr.status_concept_id = ?
         order by pr.created_at desc`,
       [PROF.ACCOUNT_LINK_ACTIVE, patientProfileId, PROF.PROXY_PENDING],
+    );
+  }
+
+  /**
+   * Las cuentas de paciente cuyo nombre coincide con lo escrito y a las que el
+   * titular todavía puede pedirles que lo dejen representarlas.
+   *
+   * Una candidata es una **persona con cuenta activa y perfil de paciente**: un
+   * dependiente sin cuenta no puede aceptar nada, y ofrecerlo sería prometer un
+   * vínculo imposible. Quedan fuera el propio titular y quien ya lo tiene como
+   * representante vigente o ya tiene una solicitud suya pendiente.
+   *
+   * Todas las palabras escritas deben abrir alguna palabra del nombre (en
+   * cualquier orden): «ana per» encuentra a «Ana María Pérez». La comparación
+   * pliega mayúsculas y tildes con `translate` —no hay `unaccent`— igual que el
+   * glosario. Las palabras llegan ya limpias a letras y dígitos, así que ningún
+   * comodín de `LIKE` pasa de la entrada a la consulta.
+   *
+   * SQL cruda por lo mismo que {@link listActiveDependentsOfUser}: cruza tablas
+   * de dos agregados con FK que son columnas uuid planas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param search - Quién pregunta, qué palabras y hasta cuántas filas.
+   * @returns Las candidatas, por nombre y con desempate estable por id.
+   */
+  searchRepresentableByName(
+    em: EntityManager,
+    search: RepresentableSearch,
+  ): Promise<RepresentableCandidateRow[]> {
+    // Sin palabras no hay criterio: devolver todo el padrón sería enumerarlo.
+    if (search.tokens.length === 0) return Promise.resolve([]);
+    const nameKey = sqlSearchKey(`coalesce(p.display_name, '')`);
+    const wordPrefix = search.tokens.map(
+      () => `(' ' || ${nameKey}) like ? escape '\\'`,
+    );
+    return em.getConnection().execute<RepresentableCandidateRow[]>(
+      `select p.id                as patient_profile_id,
+              p.display_name      as display_name,
+              p.name              as name,
+              p.middle_name       as middle_name,
+              p.last_name         as last_name,
+              p.mother_last_name  as mother_last_name,
+              (select i.value from common.identifiers i
+                where i.owner_id = p.id
+                  and i.type_concept_id = ?
+                  and i.state_concept_id = ?
+                order by i.created_at limit 1) as national_id
+         from profiles.persons p
+         join profiles.patient_profiles pp on pp.profile_id = p.id
+        where p.id <> ?
+          and exists (select 1 from profiles.person_account_links pal
+                       where pal.person_id = p.id
+                         and pal.status_concept_id = ?)
+          and not exists (select 1 from profiles.patient_portal_proxies pr
+                           where pr.patient_profile_id = p.id
+                             and pr.proxy_user_id = ?
+                             and (pr.status_concept_id = ?
+                                  or (pr.status_concept_id = ?
+                                      and (pr.valid_from is null or pr.valid_from <= ?)
+                                      and (pr.valid_to is null or pr.valid_to > ?))))
+          and ${wordPrefix.join(' and ')}
+        order by ${sqlSortKey(`coalesce(p.display_name, '')`)}, p.id
+        limit ?`,
+      [
+        CONCEPTS.ID_TYPE_NATIONAL,
+        CONCEPTS.STATE_ACTIVE,
+        search.ownerPersonId,
+        PROF.ACCOUNT_LINK_ACTIVE,
+        search.proxyUserId,
+        PROF.PROXY_PENDING,
+        PROF.PROXY_ACTIVE,
+        search.now,
+        search.now,
+        ...search.tokens.map(
+          (token) => `% ${containsPattern(token).slice(1, -1)}%`,
+        ),
+        search.limit,
+      ],
     );
   }
 

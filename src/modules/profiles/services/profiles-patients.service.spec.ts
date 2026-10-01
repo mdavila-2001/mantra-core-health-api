@@ -125,6 +125,7 @@ function build() {
     findById: mockFn().mockResolvedValue(null),
     findPendingByProxyUserAndPatient: mockFn().mockResolvedValue(null),
     listPendingForPatient: mockFn().mockResolvedValue([]),
+    searchRepresentableByName: mockFn().mockResolvedValue([]),
   };
   // El teléfono y el domicilio del paciente viven en `common`: el perfil propio
   // los lee y los reemplaza, y sin estos dobles no se puede probar ni que cierre

@@ -12,7 +12,9 @@ import {
 } from '../../../common';
 import { IdentifiersRepository } from '../../common/repositories';
 import { NotificationsService } from '../../messaging/services';
+import { normalizeSearchText } from '../../terminology/repositories/glossary-search.sql';
 import type {
+  DependentCandidateDto,
   DependentLinkRequestDecisionDto,
   DependentLinkRequestSentDto,
   IncomingDependentLinkRequestDto,
@@ -28,6 +30,7 @@ import {
   PersonsRepository,
   RelatedPersonsRepository,
   type PendingRequestRow,
+  type RepresentableCandidateRow,
 } from '../repositories';
 
 /** La cuenta autenticada, resuelta a su persona y su perfil de paciente. */
@@ -108,49 +111,29 @@ export class DependentLinkRequestsService {
     dto: RequestDependentLinkDto,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestSentDto> {
-    const documento = dto.nationalId.trim();
-
     const resultado = await this.em.transactional(async (tx) => {
       const titular = await this.pacientePropio(tx, actor);
       if (!titular) {
         throw new ForbiddenException('Esta cuenta no tiene perfil de paciente');
       }
 
-      const identificador = await this.identifiersRepo.findActiveDuplicate(tx, {
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        value: documento,
-      });
-      // El documento propio se contesta antes que «no existe»: quien escribe
-      // su CI por error merece saber qué hizo, y no hay nada que ocultarle.
-      if (identificador?.ownerId === titular.person.id) {
-        throw new PreconditionFailedException(
-          'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
-        );
-      }
-
-      // «No hay cuenta» cubre tres casos a propósito —nadie tiene ese CI, lo
-      // tiene alguien sin cuenta (un dependiente de otro), o alguien sin perfil
-      // de paciente—: distinguirlos le diría al que pregunta más de lo que le
-      // corresponde saber de un tercero.
-      const noHayCuenta = () =>
-        new ResourceNotFoundException(
-          'No hay ninguna cuenta registrada con ese CI.',
-        );
-      if (!identificador) throw noHayCuenta();
-      const cuenta = await this.accountLinksRepo.findActiveByPerson(
-        tx,
-        identificador.ownerId,
-      );
-      const paciente = await this.patientProfilesRepo.findById(
-        tx,
-        identificador.ownerId,
-      );
-      if (!cuenta || !paciente) throw noHayCuenta();
-      if (cuenta.userId === actor.id) {
-        throw new PreconditionFailedException(
-          'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
-        );
-      }
+      // Una sola vía por pedido (el DTO lo exige): el documento escrito o el
+      // perfil elegido de la búsqueda por nombre. Las dos terminan en la misma
+      // regla de «cuenta de paciente activa» y en las mismas reglas de abajo.
+      const { cuenta, paciente } =
+        dto.patientProfileId === undefined
+          ? await this.destinatarioPorDocumento(
+              tx,
+              (dto.nationalId ?? '').trim(),
+              titular,
+              actor,
+            )
+          : await this.destinatarioPorPerfil(
+              tx,
+              dto.patientProfileId,
+              titular,
+              actor,
+            );
 
       const ahora = new Date();
       const vigente =
@@ -235,6 +218,46 @@ export class DependentLinkRequestsService {
       yo.patientProfileId,
     );
     return filas.map((fila) => aIncoming(fila));
+  }
+
+  /**
+   * Cuentas cuyo nombre coincide con lo escrito, para elegir a quién pedirle
+   * que deje representarla.
+   *
+   * Poco expuesta a propósito, porque es una búsqueda de personas: nada por
+   * debajo de {@link MIN_LETTERS_TO_SEARCH} letras, a lo sumo
+   * {@link MAX_CANDIDATES} filas, el CI enmascarado, y sin el propio titular ni
+   * quien ya lo representa o ya recibió su pedido. Cada candidata es una cuenta
+   * de paciente activa: un dependiente sin cuenta no puede aceptar.
+   *
+   * @param query - Parte del nombre de la persona.
+   * @param actor - La cuenta que busca.
+   * @returns Las candidatas; vacío si el texto es corto o nadie coincide.
+   * @throws ForbiddenException si la cuenta no tiene perfil de paciente.
+   */
+  async findCandidates(
+    query: string | undefined,
+    actor: AuthenticatedUser,
+  ): Promise<DependentCandidateDto[]> {
+    const em = this.em.fork();
+    const titular = await this.pacientePropio(em, actor);
+    if (!titular) {
+      throw new ForbiddenException('Esta cuenta no tiene perfil de paciente');
+    }
+
+    const tokens = searchTokens(query ?? '');
+    // «Ma» da medio padrón: la longitud se mide sobre lo que se escribió, no
+    // sobre cuántas palabras salieron.
+    if (tokens.join('').length < MIN_LETTERS_TO_SEARCH) return [];
+
+    const filas = await this.portalProxiesRepo.searchRepresentableByName(em, {
+      ownerPersonId: titular.person.id,
+      proxyUserId: actor.id,
+      tokens,
+      now: new Date(),
+      limit: MAX_CANDIDATES,
+    });
+    return filas.map((fila) => aCandidato(fila));
   }
 
   /**
@@ -354,6 +377,106 @@ export class DependentLinkRequestsService {
   }
 
   /**
+   * La cuenta de paciente que tiene ese documento.
+   *
+   * @param em - Transacción activa.
+   * @param documento - El CI ya sin espacios.
+   * @param titular - Quien pide.
+   * @param actor - La cuenta que pide.
+   * @returns La cuenta y el perfil de paciente del destinatario.
+   * @throws PreconditionFailedException (422) si el documento es el propio.
+   * @throws ResourceNotFoundException si no hay cuenta de paciente con él.
+   */
+  private async destinatarioPorDocumento(
+    em: EntityManager,
+    documento: string,
+    titular: PacientePropio,
+    actor: AuthenticatedUser,
+  ) {
+    const identificador = await this.identifiersRepo.findActiveDuplicate(em, {
+      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+      value: documento,
+    });
+    // El documento propio se contesta antes que «no existe»: quien escribe
+    // su CI por error merece saber qué hizo, y no hay nada que ocultarle.
+    if (identificador?.ownerId === titular.person.id) {
+      throw new PreconditionFailedException(
+        'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
+      );
+    }
+
+    // «No hay cuenta» cubre tres casos a propósito —nadie tiene ese CI, lo
+    // tiene alguien sin cuenta (un dependiente de otro), o alguien sin perfil
+    // de paciente—: distinguirlos le diría al que pregunta más de lo que le
+    // corresponde saber de un tercero.
+    const noHayCuenta = () =>
+      new ResourceNotFoundException(
+        'No hay ninguna cuenta registrada con ese CI.',
+      );
+    if (!identificador) throw noHayCuenta();
+    const cuenta = await this.accountLinksRepo.findActiveByPerson(
+      em,
+      identificador.ownerId,
+    );
+    const paciente = await this.patientProfilesRepo.findById(
+      em,
+      identificador.ownerId,
+    );
+    if (!cuenta || !paciente) throw noHayCuenta();
+    if (cuenta.userId === actor.id) {
+      throw new PreconditionFailedException(
+        'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
+      );
+    }
+    return { cuenta, paciente };
+  }
+
+  /**
+   * La cuenta de paciente del perfil que el titular eligió de los candidatos.
+   *
+   * Un perfil que no es de una cuenta de paciente activa —nunca existió, es de
+   * un dependiente sin cuenta, o su cuenta se dio de baja— responde lo mismo
+   * que un uuid inventado: nada de lo que el cliente mande confirma que un
+   * perfil existe.
+   *
+   * @param em - Transacción activa.
+   * @param patientProfileId - El perfil elegido.
+   * @param titular - Quien pide.
+   * @param actor - La cuenta que pide.
+   * @returns La cuenta y el perfil de paciente del destinatario.
+   * @throws PreconditionFailedException (422) si el perfil es el propio.
+   * @throws ResourceNotFoundException si no es de una cuenta de paciente activa.
+   */
+  private async destinatarioPorPerfil(
+    em: EntityManager,
+    patientProfileId: string,
+    titular: PacientePropio,
+    actor: AuthenticatedUser,
+  ) {
+    const propio = () =>
+      new PreconditionFailedException(
+        'Esa persona sos vos: no podés registrarte como tu propio dependiente.',
+      );
+    if (patientProfileId === titular.patientProfileId) throw propio();
+
+    const cuenta = await this.accountLinksRepo.findActiveByPerson(
+      em,
+      patientProfileId,
+    );
+    const paciente = await this.patientProfilesRepo.findById(
+      em,
+      patientProfileId,
+    );
+    if (!cuenta || !paciente) {
+      throw new ResourceNotFoundException(
+        'Esa persona ya no tiene una cuenta registrada.',
+      );
+    }
+    if (cuenta.userId === actor.id) throw propio();
+    return { cuenta, paciente };
+  }
+
+  /**
    * La solicitud, sólo si es de esta cuenta y sigue pendiente.
    *
    * Una solicitud ajena responde lo mismo que una inexistente: confirmar que
@@ -439,6 +562,59 @@ export class DependentLinkRequestsService {
       debounceKey: `dependent-link:${requestId}:${decision.toLowerCase()}`,
     });
   }
+}
+
+/** Cuántas letras hacen falta para buscar personas por nombre. */
+const MIN_LETTERS_TO_SEARCH = 3;
+
+/** Cuántas candidatas devuelve como máximo la búsqueda por nombre. */
+const MAX_CANDIDATES = 8;
+
+/**
+ * Las palabras de una búsqueda: sin tildes, en minúsculas y sólo con letras y
+ * dígitos, que es lo que garantiza que ningún comodín llegue a la consulta.
+ *
+ * @param text - Lo que escribió la persona.
+ * @returns Las palabras, sin vacías.
+ */
+function searchTokens(text: string): string[] {
+  return normalizeSearchText(text)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((palabra) => palabra !== '');
+}
+
+/**
+ * El documento con sólo las últimas cifras a la vista.
+ *
+ * @param documento - El documento completo.
+ * @returns `••••` más las últimas tres, o `•••` si es demasiado corto.
+ */
+function maskNationalId(documento: string): string {
+  return documento.length <= 3 ? '•••' : `••••${documento.slice(-3)}`;
+}
+
+/**
+ * Traduce una fila de candidata al contrato del cliente.
+ *
+ * @param fila - Lo que devolvió la consulta.
+ * @returns La candidata, con el documento enmascarado si lo declaró.
+ */
+function aCandidato(fila: RepresentableCandidateRow): DependentCandidateDto {
+  return {
+    patientProfileId: fila.patient_profile_id,
+    displayName:
+      fila.display_name ??
+      composePersonDisplayName({
+        name: fila.name ?? undefined,
+        middleName: fila.middle_name ?? undefined,
+        lastName: fila.last_name ?? undefined,
+        motherLastName: fila.mother_last_name ?? undefined,
+      }) ??
+      '',
+    ...(fila.national_id === null || fila.national_id === ''
+      ? {}
+      : { maskedNationalId: maskNationalId(fila.national_id) }),
+  };
 }
 
 /**
