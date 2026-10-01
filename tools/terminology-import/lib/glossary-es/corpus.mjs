@@ -9,7 +9,7 @@ import { existsSync } from 'node:fs';
 import { assertRow, ndjsonPath, readNdjson } from './common.mjs';
 import { applyImage, indexImages } from './enrich.mjs';
 import { applyDxHierarchy, inheritTagsFromDiseases, tagAnatomyByTa98 } from './graph.mjs';
-import { applyRelationEdges } from './wikidata-relations.mjs';
+import { applyConceptIdentities, applyRelationEdges } from './wikidata-relations.mjs';
 import { CATEGORY_KEYS, TAG_NAMES, isGlossaryDxLevel } from './taxonomy.mjs';
 
 /**
@@ -31,6 +31,9 @@ export const TERM_LAYERS = [
 
 /** Aristas de Wikidata (enfermedad → síntoma, medicamento, especialidad…); ver `wikidata-relations.mjs`. */
 export const RELATION_EDGES_LAYER = 'wikidata-relaciones';
+
+/** Identidades CIE-10 ↔ MeSH de Wikidata (una ficha CIE-10-ES = un tema de MedlinePlus). */
+export const IDENTITIES_LAYER = 'wikidata-identidades';
 
 /** Filtro por capa: qué filas de la fuente son fichas del glosario. */
 const LAYER_FILTERS = {
@@ -72,6 +75,9 @@ export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
   } else {
     log(`[corpus] capa ausente (se omite): ${RELATION_EDGES_LAYER}`);
   }
+  let identityStats = null;
+  if (existsSync(ndjsonPath(IDENTITIES_LAYER))) identityStats = applyConceptIdentities(rows, readNdjson(ndjsonPath(IDENTITIES_LAYER)));
+  else log(`[corpus] capa ausente (se omite): ${IDENTITIES_LAYER}`);
   let orphans = 0;
   for (const r of rows) {
     if (!r.relations?.length) continue;
@@ -81,5 +87,5 @@ export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
   }
   const graph = { jerarquiaCie10: applyDxHierarchy(rows), anatomiaTa98: tagAnatomyByTa98(rows), etiquetasHeredadas: inheritTagsFromDiseases(rows) };
   for (const r of rows) r.relations?.sort((x, y) => x.type.localeCompare(y.type) || x.targetSlug.localeCompare(y.targetSlug));
-  return { rows, perLayer, orphanRelations: orphans, imagesIndexed: idx.size, relationStats, graph };
+  return { rows, perLayer, orphanRelations: orphans, imagesIndexed: idx.size, relationStats, identityStats, graph };
 }

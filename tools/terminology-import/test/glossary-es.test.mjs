@@ -293,3 +293,27 @@ test('Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vincula
   assert.deepEqual(farmaco.tagKeys, ['cardiovascular']); // 2 de 3: mayoría; endocrino 1 de 3: no
   assert.match(farmaco.categoryRule, /más de la mitad de sus 3 enfermedades/);
 });
+
+test('Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada', async () => {
+  const { applyConceptIdentities, conceptIdentities, looksEnglish } = await import('../lib/glossary-es/wikidata-relations.mjs');
+  // Q35869 (asma) declara ICD-10-CM J45 y MeSH D001249 (ver fixture real de relaciones).
+  const identities = conceptIdentities({ results: { bindings: [
+    { d: { value: 'http://www.wikidata.org/entity/Q35869' }, icdCm: { value: 'J45' }, mesh: { value: 'D001249' }, desc: { value: 'enfermedad inflamatoria a largo plazo de las vías respiratorias de los pulmones' } },
+    { d: { value: 'http://www.wikidata.org/entity/Q35869' }, icdCm: { value: 'J45.909' }, mesh: { value: 'D001249' } },
+  ] } });
+  assert.deepEqual(identities, [{ q: 'Q35869', icd10: [], icd10cm: ['J45', 'J45.909'], mesh: ['D001249'], descEs: 'enfermedad inflamatoria a largo plazo de las vías respiratorias de los pulmones' }]);
+  const dx = glossaryRow('cie10es-dx-j45', 'J45', 'cie10es-diagnosticos-2026', 'disease', { definition: null, plainSummaryEs: null });
+  const topic = glossaryRow('medlineplus-es-1', '1', 'medlineplus-es', 'disease', {
+    esName: 'Asma', definition: 'El asma es una enfermedad pulmonar crónica.', definitionSource: { name: 'MedlinePlus en español — «Asma»', url: 'https://medlineplus.gov/spanish/asthma.html', retrievedAt: 'x', license: 'NLM' },
+    externalIds: { mesh: ['D001249'] },
+  });
+  const stats = applyConceptIdentities([dx, topic], identities);
+  assert.deepEqual(stats, { identidades: 1, unidas: 1, definicionesTomadas: 1, resumenesWikidata: 1 });
+  assert.equal(dx.definition, 'El asma es una enfermedad pulmonar crónica.');
+  assert.equal(dx.definitionKind, 'same-concept-medlineplus');
+  assert.match(dx.definitionSource.name, /el mismo concepto según Wikidata Q35869$/);
+  assert.equal(dx.definitionSource.url, 'https://medlineplus.gov/spanish/asthma.html');
+  assert.deepEqual(topic.relations.map((r) => [r.type, r.targetSlug]), [['RELATED_TERM', 'cie10es-dx-j45']]);
+  assert.equal(looksEnglish('chronic disease of the airways'), true);
+  assert.equal(looksEnglish('enfermedad crónica de las vías respiratorias'), false);
+});

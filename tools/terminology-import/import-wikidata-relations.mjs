@@ -18,7 +18,7 @@
 import { join } from 'node:path';
 import { HttpClient, cacheDir, ndjsonPath, nowIso, writeJson, writeNdjson } from './lib/glossary-es/common.mjs';
 import { SPARQL_ENDPOINT, assertEntityLabels, entityLabelsUrl } from './lib/glossary-es/wikidata.mjs';
-import { RELATION_PROPERTIES, relationEdges, relationSparql } from './lib/glossary-es/wikidata-relations.mjs';
+import { IDENTITY_SPARQL, RELATION_PROPERTIES, conceptIdentities, relationEdges, relationSparql } from './lib/glossary-es/wikidata-relations.mjs';
 
 const http = new HttpClient({ concurrency: 1, minDelayMs: 1500 });
 const CACHE = cacheDir('wikidata');
@@ -41,12 +41,19 @@ async function main() {
     edges.push(...list);
   }
   await writeNdjson(ndjsonPath('wikidata-relaciones'), edges);
+
+  // Identidades: un ítem con CIE-10 y MeSH a la vez une la ficha CIE-10-ES con la de MedlinePlus.
+  const idJson = await http.getJsonCached(`${SPARQL_ENDPOINT}?format=json&query=${encodeURIComponent(IDENTITY_SPARQL)}`, join(CACHE, 'sparql-identities-icd-v2.json'));
+  const identities = conceptIdentities(idJson);
+  await writeNdjson(ndjsonPath('wikidata-identidades'), identities);
+  console.log(`[wikidata-relaciones] ítems con CIE-10 (identidades): ${identities.length}`);
   const meta = {
     source: 'wikidata',
     retrievedAt,
     sparql: SPARQL_ENDPOINT,
     license: 'CC0 1.0',
     aristas: edges.length,
+    identidades: identities.length,
     porPropiedad,
     regla: 'Sólo aristas cuyo destino tiene etiqueta en castellano. La resolución contra el glosario es por código idéntico (CIE-10, ICD-10-CM, ATC, MeSH, Q-id de anatomía) y la hace corpus.mjs.',
     segundos: Math.round((Date.now() - t0) / 1000),

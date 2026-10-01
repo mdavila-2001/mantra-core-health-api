@@ -60,7 +60,36 @@ export function relationSparql(prop) {
 }`;
 }
 
+/**
+ * Ítems con código CIE-10 (P494/P4229), con su descriptor MeSH (P486) y su
+ * descripción en castellano si los tienen. Con MeSH, son la misma enfermedad
+ * vista desde CIE-10-ES y desde MedlinePlus.
+ */
+export const IDENTITY_SPARQL = `SELECT ?d ?icd ?icdCm ?mesh ?desc WHERE {
+  { ?d wdt:P494 ?icd } UNION { ?d wdt:P4229 ?icdCm }
+  OPTIONAL { ?d wdt:P486 ?mesh }
+  OPTIONAL { ?d schema:description ?desc FILTER(LANG(?desc) = "es") }
+}`;
+
 const qid = (uri) => String(uri ?? '').split('/').pop() || null;
+
+/** Bindings de `IDENTITY_SPARQL` → una identidad por ítem, códigos ordenados. */
+export function conceptIdentities(json) {
+  const byQ = new Map();
+  for (const b of json?.results?.bindings ?? []) {
+    const q = qid(b.d?.value);
+    if (!q) continue;
+    const it = byQ.get(q) ?? { q, icd10: new Set(), icd10cm: new Set(), mesh: new Set(), descEs: null };
+    it.descEs ??= b.desc?.value ?? null;
+    if (b.icd?.value) it.icd10.add(b.icd.value);
+    if (b.icdCm?.value) it.icd10cm.add(b.icdCm.value);
+    if (b.mesh?.value) it.mesh.add(b.mesh.value);
+    byQ.set(q, it);
+  }
+  return [...byQ.values()]
+    .map((it) => ({ q: it.q, icd10: [...it.icd10].sort(), icd10cm: [...it.icd10cm].sort(), mesh: [...it.mesh].sort(), descEs: it.descEs }))
+    .sort((a, b) => a.q.localeCompare(b.q));
+}
 const add = (set, v) => (v ? set.add(v) : set);
 
 /**
@@ -159,6 +188,11 @@ const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export function isUntranslatedLabel(es, en) {
   if (!en || es.trim().toLowerCase() !== en.trim().toLowerCase()) return false;
   return /\b(and|of|the|for|with)\b|ology\b|tion\b|\bmedicine\b|\bsurgery\b/i.test(es);
+}
+
+/** ¿Un texto «en castellano» de Wikidata está en realidad en inglés? Marcas inequívocas del inglés. */
+export function looksEnglish(text) {
+  return /\b(the|of|and|with|which|caused by|disease|disorder)\b/i.test(text ?? '');
 }
 
 /** Etiqueta con la misma palabra pegada dos veces («Aminofilinaaminofilina»): error de carga en Wikidata. */
@@ -262,5 +296,54 @@ export function applyRelationEdges(rows, edges, { retrievedAt } = {}) {
     }
   }
   stats.fichasCreadas = created.size;
+  return stats;
+}
+
+/**
+ * Une la ficha CIE-10-ES y la de MedlinePlus de una misma enfermedad cuando un
+ * ítem de Wikidata declara los dos códigos (RELATED_TERM, en los dos sentidos).
+ * Si la ficha CIE-10-ES no tiene definición —la fuente no publica ninguna— toma
+ * la de MedlinePlus **citando a MedlinePlus**: es la definición del mismo
+ * concepto por su propia fuente, no una redacción nueva. Y si no tiene resumen
+ * breve, usa la descripción en castellano del ítem (CC0), como ya hace
+ * `enrich.mjs` con los ítems que aportan imagen.
+ */
+export function applyConceptIdentities(rows, identities) {
+  const idx = indexCorpus(rows);
+  const bySlug = new Map(rows.map((r) => [r.slug, r]));
+  const stats = { identidades: identities.length, unidas: 0, definicionesTomadas: 0, resumenesWikidata: 0 };
+  const link = (from, to, provenance) => {
+    const row = bySlug.get(from);
+    row.relations ??= [];
+    if (row.relations.some((r) => r.targetSlug === to)) return false;
+    row.relations.push({ type: 'RELATED_TERM', targetSlug: to, provenance });
+    return true;
+  };
+  for (const it of identities) {
+    const icd = firstHit(idx.icd, [...it.icd10, ...it.icd10cm].map((c) => c.toUpperCase()));
+    if (!icd) continue;
+    const icdRow = bySlug.get(icd.slug);
+    if (!icdRow.plainSummaryEs && it.descEs && !looksEnglish(it.descEs)) {
+      icdRow.plainSummaryEs = it.descEs;
+      icdRow.plainSummarySource = { name: `Wikidata ${it.q} — descripción en castellano (comunidad de Wikidata, CC0)`, url: `https://www.wikidata.org/wiki/${it.q}`, retrievedAt: null, kind: 'wikidata-description' };
+      stats.resumenesWikidata++;
+    }
+    const mesh = firstHit(idx.mesh, it.mesh);
+    if (!mesh || icd.slug === mesh.slug) continue;
+    const dx = bySlug.get(icd.slug);
+    const topic = bySlug.get(mesh.slug);
+    if (dx.codeSystem !== 'cie10es-diagnosticos-2026' || !String(topic.codeSystem).startsWith('medlineplus')) continue;
+    const prov = `wikidata:identidad ${it.q} (CIE-10 = ${icd.via}; MeSH = ${mesh.via})`;
+    if (link(dx.slug, topic.slug, prov)) stats.unidas++;
+    link(topic.slug, dx.slug, prov);
+    if (!dx.definition && topic.definition) {
+      dx.definition = topic.definition;
+      dx.definitionHtml = topic.definitionHtml ?? null;
+      dx.definitionKind = 'same-concept-medlineplus';
+      const base = topic.definitionSource ?? { name: topic.sourceName, url: topic.sourceUrl, retrievedAt: topic.sourceRetrievedAt, license: topic.sourceLicense };
+      dx.definitionSource = { ...base, name: `${base.name} — «${topic.esName}», el mismo concepto según Wikidata ${it.q}` };
+      stats.definicionesTomadas++;
+    }
+  }
   return stats;
 }
