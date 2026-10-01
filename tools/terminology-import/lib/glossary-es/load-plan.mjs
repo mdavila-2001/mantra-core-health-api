@@ -36,6 +36,8 @@ export const RELATION_TYPE = {
   TREATMENT: deterministicId('terminology:relationship:treatment'),
   ANATOMY: deterministicId('terminology:relationship:anatomy'),
   DIAGNOSTIC_TEST: deterministicId('terminology:relationship:diagnostic-test'),
+  SYMPTOM: deterministicId('terminology:relationship:symptom'),
+  SPECIALTY: deterministicId('terminology:relationship:specialty'),
 };
 
 /** Ids de value set / versión / miembro, idénticos a `dynamic-enum-catalog.ts`. */

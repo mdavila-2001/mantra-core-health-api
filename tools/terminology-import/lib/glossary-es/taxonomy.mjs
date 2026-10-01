@@ -24,13 +24,15 @@ export const CATEGORY_NAMES = {
   lab: 'Laboratorio', imaging: 'Imagenología', care: 'Cuidados de enfermería', other: 'Otros términos',
 };
 
-/** Las 15 etiquetas (espejo de GLOSSARY_TAGS). */
+/** Las 21 etiquetas (espejo de GLOSSARY_TAGS). */
 export const TAG_NAMES = {
   urgency: 'Urgencia', chronic: 'Crónico', pediatric: 'Pediatría', cardiovascular: 'Cardiovascular',
   respiratory: 'Respiratorio', endocrine: 'Endocrino', infectious: 'Infeccioso',
   'mental-health': 'Salud mental', musculoskeletal: 'Musculoesquelético', digestive: 'Digestivo',
-  renal: 'Renal', dermatologic: 'Dermatológico', oncologic: 'Oncológico', 'gyn-ob': 'Ginecoobstétrico',
-  neurologic: 'Neurológico',
+  renal: 'Renal', urologic: 'Urológico', dermatologic: 'Dermatológico', oncologic: 'Oncológico',
+  'gyn-ob': 'Ginecoobstétrico', neurologic: 'Neurológico', hematologic: 'Hematológico e inmunitario',
+  ophthalmologic: 'Oftalmológico', ent: 'Otorrinolaringológico', congenital: 'Congénito',
+  trauma: 'Traumatismos y envenenamientos',
 };
 
 // --- CIE-10-ES Diagnósticos (traducción de ICD-10-CM) -----------------------------
@@ -43,12 +45,15 @@ export const TAG_NAMES = {
 const DX_CHAPTERS = [
   { from: 'A00', to: 'B99', chapter: 1, categoryKey: 'disease', tags: ['infectious'] },
   { from: 'C00', to: 'D49', chapter: 2, categoryKey: 'disease', tags: ['oncologic'] },
-  { from: 'D50', to: 'D89', chapter: 3, categoryKey: 'disease', tags: [] },
+  // Cap. 3 «Enfermedades de la sangre y órganos hematopoyéticos y ciertos trastornos
+  // que afectan al mecanismo inmunológico».
+  { from: 'D50', to: 'D89', chapter: 3, categoryKey: 'disease', tags: ['hematologic'] },
   { from: 'E00', to: 'E89', chapter: 4, categoryKey: 'disease', tags: ['endocrine'] },
   { from: 'F01', to: 'F99', chapter: 5, categoryKey: 'disease', tags: ['mental-health'] },
   { from: 'G00', to: 'G99', chapter: 6, categoryKey: 'disease', tags: ['neurologic'] },
-  { from: 'H00', to: 'H59', chapter: 7, categoryKey: 'disease', tags: [] },
-  { from: 'H60', to: 'H95', chapter: 8, categoryKey: 'disease', tags: [] },
+  // Cap. 7 «Enfermedades del ojo y sus anexos»; cap. 8 «… del oído y de la apófisis mastoides».
+  { from: 'H00', to: 'H59', chapter: 7, categoryKey: 'disease', tags: ['ophthalmologic'] },
+  { from: 'H60', to: 'H95', chapter: 8, categoryKey: 'disease', tags: ['ent'] },
   { from: 'I00', to: 'I99', chapter: 9, categoryKey: 'disease', tags: ['cardiovascular'] },
   { from: 'J00', to: 'J99', chapter: 10, categoryKey: 'disease', tags: ['respiratory'] },
   { from: 'K00', to: 'K95', chapter: 11, categoryKey: 'disease', tags: ['digestive'] },
@@ -56,23 +61,26 @@ const DX_CHAPTERS = [
   { from: 'M00', to: 'M99', chapter: 13, categoryKey: 'disease', tags: ['musculoskeletal'] },
   // Cap. 14 «Enfermedades del aparato genitourinario»: sólo los bloques N00-N39
   // (riñón y vías urinarias) llevan «Renal»; N60-N98 (mama y órganos pélvicos
-  // femeninos) llevan «Ginecoobstétrico». N40-N53 (órganos genitales masculinos) sin etiqueta.
+  // femeninos) llevan «Ginecoobstétrico». N40-N53 (órganos genitales masculinos) → «Urológico».
   { from: 'N00', to: 'N39', chapter: 14, categoryKey: 'disease', tags: ['renal'] },
-  { from: 'N40', to: 'N59', chapter: 14, categoryKey: 'disease', tags: [] },
+  { from: 'N40', to: 'N59', chapter: 14, categoryKey: 'disease', tags: ['urologic'] },
   { from: 'N60', to: 'N99', chapter: 14, categoryKey: 'disease', tags: ['gyn-ob'] },
   { from: 'O00', to: 'O9A', chapter: 15, categoryKey: 'disease', tags: ['gyn-ob'] },
   { from: 'P00', to: 'P96', chapter: 16, categoryKey: 'disease', tags: ['pediatric'] },
-  { from: 'Q00', to: 'Q99', chapter: 17, categoryKey: 'disease', tags: [] },
-  // Cap. 18 «Síntomas, signos y resultados anormales…» → Signos y síntomas.
+  // Cap. 17 «Malformaciones congénitas, deformidades y anomalías cromosómicas».
+  { from: 'Q00', to: 'Q99', chapter: 17, categoryKey: 'disease', tags: ['congenital'] },
+  // Cap. 18 «Síntomas, signos y resultados anormales…» → Signos y síntomas. Las
+  // etiquetas salen del BLOQUE oficial (`R_BLOCK_TAGS`), no del capítulo.
   { from: 'R00', to: 'R99', chapter: 18, categoryKey: 'signs-symptoms', tags: [] },
   // Cap. 19 «Lesiones traumáticas, envenenamientos…»: se clasifican como Enfermedades
   // (es la categoría de «condición»; no existe una categoría de lesiones).
-  { from: 'S00', to: 'T88', chapter: 19, categoryKey: 'disease', tags: [] },
+  { from: 'S00', to: 'T88', chapter: 19, categoryKey: 'disease', tags: ['trauma'] },
   // Cap. 22 «Códigos para propósitos especiales» (U00-U85, p. ej. COVID-19 U07.1).
   { from: 'U00', to: 'U85', chapter: 22, categoryKey: 'disease', tags: [] },
   // Cap. 20 «Causas externas de morbilidad» y cap. 21 «Factores que influyen en el
   // estado de salud y contacto con los servicios sanitarios»: no son enfermedades.
-  { from: 'V00', to: 'Y99', chapter: 20, categoryKey: 'other', tags: [] },
+  // El cap. 20 son accidentes, agresiones y lesiones autoinfligidas: «Traumatismos».
+  { from: 'V00', to: 'Y99', chapter: 20, categoryKey: 'other', tags: ['trauma'] },
   { from: 'Z00', to: 'Z99', chapter: 21, categoryKey: 'other', tags: [] },
 ];
 
@@ -82,13 +90,51 @@ export function dxChapterOf(code) {
 }
 
 /**
+ * Bloques oficiales del cap. 18 de CIE-10-ES 2026 (título del bloque, tal cual
+ * lo trae la lista tabular) → etiquetas. Los bloques de signos generales
+ * (R50-R69), otros líquidos (R83-R89), imagen (R90-R94) y mortalidad (R99) no
+ * nombran un aparato: quedan sin etiqueta.
+ */
+const R_BLOCK_TAGS = [
+  { from: 'R00', to: 'R09', tags: ['cardiovascular', 'respiratory'] }, // aparatos circulatorio y respiratorio
+  { from: 'R10', to: 'R19', tags: ['digestive'] }, // aparato digestivo y abdomen
+  { from: 'R20', to: 'R23', tags: ['dermatologic'] }, // piel y tejido celular subcutáneo
+  { from: 'R25', to: 'R29', tags: ['musculoskeletal', 'neurologic'] }, // sistemas nervioso y musculoesquelético
+  { from: 'R30', to: 'R39', tags: ['renal', 'urologic'] }, // aparato genitourinario
+  { from: 'R40', to: 'R46', tags: ['mental-health', 'neurologic'] }, // funciones cognitivas, percepción, emoción y conducta
+  { from: 'R47', to: 'R49', tags: ['neurologic'] }, // habla y voz
+  { from: 'R70', to: 'R79', tags: ['hematologic'] }, // resultados anormales en análisis de sangre
+  { from: 'R80', to: 'R82', tags: ['renal'] }, // resultados anormales en análisis de orina
+  { from: 'R97', to: 'R97', tags: ['oncologic'] }, // marcadores tumorales anormales
+];
+
+/** Etiquetas del bloque oficial del capítulo R al que pertenece el código. */
+export function rBlockTags(code) {
+  const c3 = String(code).slice(0, 3).toUpperCase();
+  return R_BLOCK_TAGS.find((b) => c3 >= b.from && c3 <= b.to)?.tags ?? [];
+}
+
+/**
+ * Nivel de un código CIE-10 que entra al glosario. Bolivia notifica con la
+ * CIE-10 de la OMS (SNIS), que llega a categoría (3 caracteres) y subcategoría
+ * (4); los niveles de 5 a 7 son extensiones de ICD-10-CM (lateralidad, episodio
+ * de atención). Esos siguen siendo conceptos de terminología, pero no fichas del
+ * glosario: 90 080 filas sin definición que tapaban a las 12 051 que sí se buscan.
+ */
+export const GLOSSARY_MAX_DX_CODE_LENGTH = 4;
+
+export function isGlossaryDxLevel(code) {
+  return String(code).replace('.', '').length <= GLOSSARY_MAX_DX_CODE_LENGTH;
+}
+
+/**
  * Categoría y etiquetas de un código diagnóstico. Suma las etiquetas que
  * derivan de los marcadores oficiales del propio Excel (Pediátrico, Obstétrico,
  * Perinatal).
  */
 export function dxTaxonomy(code, flags = {}) {
   const ch = dxChapterOf(code);
-  const tags = new Set(ch?.tags ?? []);
+  const tags = new Set([...(ch?.tags ?? []), ...(ch?.chapter === 18 ? rBlockTags(code) : [])]);
   if (flags.pediatric || flags.perinatal) tags.add('pediatric');
   if (flags.obstetric) tags.add('gyn-ob');
   return { categoryKey: ch?.categoryKey ?? 'other', tagKeys: [...tags].sort(), chapter: ch?.chapter ?? null };

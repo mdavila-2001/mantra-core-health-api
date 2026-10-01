@@ -8,18 +8,34 @@
 import { existsSync } from 'node:fs';
 import { assertRow, ndjsonPath, readNdjson } from './common.mjs';
 import { applyImage, indexImages } from './enrich.mjs';
-import { CATEGORY_KEYS, TAG_NAMES } from './taxonomy.mjs';
+import { applyDxHierarchy, inheritTagsFromDiseases, tagAnatomyByTa98 } from './graph.mjs';
+import { applyRelationEdges } from './wikidata-relations.mjs';
+import { CATEGORY_KEYS, TAG_NAMES, isGlossaryDxLevel } from './taxonomy.mjs';
 
-/** Capas de términos, en orden de precedencia (si un slug se repitiera, gana la primera). */
+/**
+ * Capas de términos, en orden de precedencia (si un slug se repitiera, gana la primera).
+ *
+ * `cie10es-procedimientos` (78 948 códigos ICD-10-PCS de España) ya no entra:
+ * Bolivia no codifica procedimientos con PCS, la fuente no trae definiciones y
+ * el 97 % quedaba sin etiqueta. Su NDJSON se sigue generando por si se quiere
+ * como sistema de códigos, pero no es glosario.
+ */
 export const TERM_LAYERS = [
   'cie10es-diagnosticos',
-  'cie10es-procedimientos',
   'cima',
   'medlineplus-es',
   'medlineplus-es-pruebas',
   'wikidata-anatomia',
   'loinc-es',
 ];
+
+/** Aristas de Wikidata (enfermedad → síntoma, medicamento, especialidad…); ver `wikidata-relations.mjs`. */
+export const RELATION_EDGES_LAYER = 'wikidata-relaciones';
+
+/** Filtro por capa: qué filas de la fuente son fichas del glosario. */
+const LAYER_FILTERS = {
+  'cie10es-diagnosticos': (row) => isGlossaryDxLevel(row.code),
+};
 
 export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
   const imagesPath = ndjsonPath('wikidata-images');
@@ -34,7 +50,9 @@ export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
       continue;
     }
     let n = 0;
+    const keep = LAYER_FILTERS[layer] ?? (() => true);
     for (const raw of readNdjson(p)) {
+      if (!keep(raw)) continue;
       const row = applyImage(assertRow(raw), idx);
       if (!CATEGORY_KEYS.includes(row.categoryKey)) throw new Error(`categoryKey inválida en ${row.slug}: ${row.categoryKey}`);
       for (const t of row.tagKeys) if (!TAG_NAMES[t]) throw new Error(`tagKey inválida en ${row.slug}: ${t}`);
@@ -45,6 +63,15 @@ export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
     }
     perLayer[layer] = n;
   }
+  let relationStats = null;
+  const edgesPath = ndjsonPath(RELATION_EDGES_LAYER);
+  if (existsSync(edgesPath)) {
+    relationStats = applyRelationEdges(rows, readNdjson(edgesPath));
+    for (const r of rows.slice(rows.length - relationStats.fichasCreadas)) seen.add(r.slug);
+    perLayer[`${RELATION_EDGES_LAYER} (fichas creadas)`] = relationStats.fichasCreadas;
+  } else {
+    log(`[corpus] capa ausente (se omite): ${RELATION_EDGES_LAYER}`);
+  }
   let orphans = 0;
   for (const r of rows) {
     if (!r.relations?.length) continue;
@@ -52,5 +79,7 @@ export function loadCorpus({ layers = TERM_LAYERS, log = console.warn } = {}) {
     orphans += r.relations.length - kept.length;
     r.relations = kept;
   }
-  return { rows, perLayer, orphanRelations: orphans, imagesIndexed: idx.size };
+  const graph = { jerarquiaCie10: applyDxHierarchy(rows), anatomiaTa98: tagAnatomyByTa98(rows), etiquetasHeredadas: inheritTagsFromDiseases(rows) };
+  for (const r of rows) r.relations?.sort((x, y) => x.type.localeCompare(y.type) || x.targetSlug.localeCompare(y.targetSlug));
+  return { rows, perLayer, orphanRelations: orphans, imagesIndexed: idx.size, relationStats, graph };
 }

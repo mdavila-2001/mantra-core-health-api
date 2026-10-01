@@ -197,3 +197,99 @@ test('Anatomía Wikidata: verificación de dominio y de ids de propiedad', async
   // P7863 es «aperture», no TA2: la verificación de etiquetas lo detecta.
   assert.throws(() => assertEntityLabels({ entities: { P7863: { labels: { en: { value: 'aperture' } } } } }, { P7863: 'TA2 ID' }), /P7863: esperado «TA2 ID», Wikidata dice «aperture»/);
 });
+
+// --- Relaciones de Wikidata, jerarquía CIE-10 y etiquetas estructurales (2026-10-01) ---
+
+import { applyRelationEdges, hasUsableSpanishLabel, isDoubledLabel, isUntranslatedLabel, relationEdges, relationSparql } from '../lib/glossary-es/wikidata-relations.mjs';
+import { applyDxHierarchy, inheritTagsFromDiseases, tagAnatomyByTa98 } from '../lib/glossary-es/graph.mjs';
+import { isGlossaryDxLevel, rBlockTags } from '../lib/glossary-es/taxonomy.mjs';
+
+const WD = JSON.parse(fx('wikidata-relations-Q35869.json')); // respuestas REALES del 2026-10-01 para asma (Q35869)
+
+function glossaryRow(slug, code, codeSystem, categoryKey, extra = {}) {
+  return { slug, code, codeSystem, categoryKey, esName: code, tagKeys: [], relations: [], externalIds: {}, ...extra };
+}
+
+test('Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado', () => {
+  const sintomas = relationEdges(WD.P780, 'P780');
+  const tos = sintomas.find((e) => e.targetEs === 'tos');
+  assert.equal(tos.diseaseQ, 'Q35869');
+  assert.deepEqual(tos.disease.icd10cm, ['J45', 'J45.90', 'J45.909']);
+  assert.deepEqual(tos.disease.mesh, ['D001249']);
+  const salbutamol = relationEdges(WD.P2176, 'P2176').find((e) => e.targetEs === 'salbutamol');
+  assert.deepEqual(salbutamol.target.atc, ['R03AC02', 'R03CC02']);
+  // La especialidad exige la clase «especialidad médica» (Q930752) en la consulta.
+  assert.match(relationSparql('P1995'), /wdt:P31\/wdt:P279\* wd:Q930752/);
+  assert.doesNotMatch(relationSparql('P780'), /Q930752/);
+});
+
+test('Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos', () => {
+  const rows = [
+    glossaryRow('cie10es-dx-j45', 'J45', 'cie10es-diagnosticos-2026', 'disease', { tagKeys: ['respiratory'] }),
+    glossaryRow('cima-vtm-1', '1', 'cima-vtm', 'pharmacology', { externalIds: { atc: ['R03AC02'] } }),
+  ];
+  const edges = [...relationEdges(WD.P780, 'P780'), ...relationEdges(WD.P1995, 'P1995'), ...relationEdges(WD.P2176, 'P2176')].map((e) => ({ ...e, retrievedAt: '2026-10-01T00:00:00.000Z' }));
+  const stats = applyRelationEdges(rows, edges);
+  const asma = rows.find((r) => r.slug === 'cie10es-dx-j45');
+  const types = (t) => asma.relations.filter((r) => r.type === t).map((r) => rows.find((x) => x.slug === r.targetSlug).esName);
+  // Salbutamol se resuelve contra la ficha CIMA por ATC; no se crea una de Wikidata.
+  assert.ok(asma.relations.some((r) => r.type === 'TREATMENT' && r.targetSlug === 'cima-vtm-1'));
+  assert.ok(!rows.some((r) => r.slug === 'wikidata-medicamento-q410358'));
+  assert.ok(types('SYMPTOM').includes('Tos') && types('SYMPTOM').includes('Sibilancia'));
+  assert.deepEqual(types('SPECIALTY').sort(), ['Inmunología', 'Neumología']);
+  // Inversa: la tos apunta a la enfermedad.
+  const tos = rows.find((r) => r.esName === 'Tos');
+  assert.deepEqual(tos.relations.map((r) => [r.type, r.targetSlug]), [['DISEASE', 'cie10es-dx-j45']]);
+  assert.match(tos.relations[0].provenance, /^wikidata:P780 Q35869→Q\d+ \(CIE-10 = J45; Wikidata = Q\d+\)$/);
+  // «Aminofilinaaminofilina» es un error de carga de Wikidata: no se crea ficha.
+  assert.ok(!rows.some((r) => /aminofilinaaminofilina/i.test(r.esName)));
+  assert.equal(new Set(rows.map((r) => r.slug)).size, rows.length);
+  assert.ok(stats.fichasCreadas > 0 && stats.sinOrigen === 0);
+});
+
+test('Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas', () => {
+  assert.equal(isUntranslatedLabel('Oral and maxillofacial surgery', 'Oral and maxillofacial surgery'), true);
+  assert.equal(isUntranslatedLabel('Nephrology', 'nephrology'), true);
+  assert.equal(isUntranslatedLabel('Necrosis', 'necrosis'), false); // se escribe igual en castellano
+  assert.equal(isUntranslatedLabel('Neumología', 'pulmonology'), false);
+  assert.equal(isDoubledLabel('Aminofilinaaminofilina'), true);
+  assert.equal(isDoubledLabel('Salbutamol'), false);
+  assert.equal(hasUsableSpanishLabel({ targetEs: 'Rituximab', targetEn: 'rituximab' }), true);
+});
+
+test('CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R', () => {
+  assert.equal(isGlossaryDxLevel('J45'), true);
+  assert.equal(isGlossaryDxLevel('J45.0'), true);
+  assert.equal(isGlossaryDxLevel('J45.90'), false);
+  assert.equal(isGlossaryDxLevel('S72.001A'), false);
+  assert.deepEqual(rBlockTags('R05.1'), ['cardiovascular', 'respiratory']); // tos: bloque R00-R09
+  assert.deepEqual(rBlockTags('R51'), []); // signos generales R50-R69: sin aparato
+  assert.deepEqual(dxTaxonomy('R10.9').tagKeys, ['digestive']);
+  assert.deepEqual(dxTaxonomy('H25.9').tagKeys, ['ophthalmologic']);
+  assert.deepEqual(dxTaxonomy('S72.0').tagKeys, ['trauma']);
+  const rows = [
+    glossaryRow('cie10es-dx-j45', 'J45', 'cie10es-diagnosticos-2026', 'disease'),
+    glossaryRow('cie10es-dx-j45-0', 'J45.0', 'cie10es-diagnosticos-2026', 'disease'),
+  ];
+  assert.equal(applyDxHierarchy(rows), 1);
+  assert.deepEqual(rows[1].relations.map((r) => [r.type, r.targetSlug]), [['RELATED_TERM', 'cie10es-dx-j45']]);
+  assert.deepEqual(rows[0].relations.map((r) => [r.type, r.targetSlug]), [['RELATED_TERM', 'cie10es-dx-j45-0']]);
+});
+
+test('Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas', () => {
+  const aorta = glossaryRow('wikidata-anatomia-q101004', 'Q101004', 'wikidata-anatomia', 'anatomy', { externalIds: { ta98: ['A12.2.01.001'] } });
+  const ojo = glossaryRow('wikidata-anatomia-q7364', 'Q7364', 'wikidata-anatomia', 'anatomy', { externalIds: { ta98: ['A15.2.00.001'] } });
+  const general = glossaryRow('wikidata-anatomia-q9649', 'Q9649', 'wikidata-anatomia', 'anatomy', { externalIds: { ta98: ['A01.1.00.001'] } });
+  assert.equal(tagAnatomyByTa98([aorta, ojo, general]), 2);
+  assert.deepEqual([aorta.tagKeys, ojo.tagKeys, general.tagKeys], [['cardiovascular'], ['ophthalmologic'], []]);
+
+  const d1 = glossaryRow('d1', 'I10', 'cie10es-diagnosticos-2026', 'disease', { tagKeys: ['cardiovascular'] });
+  const d2 = glossaryRow('d2', 'I50', 'cie10es-diagnosticos-2026', 'disease', { tagKeys: ['cardiovascular'] });
+  const d3 = glossaryRow('d3', 'E11', 'cie10es-diagnosticos-2026', 'disease', { tagKeys: ['endocrine'] });
+  const farmaco = glossaryRow('f', 'Q1', 'wikidata-medicamento', 'pharmacology', {
+    relations: ['d1', 'd2', 'd3'].map((s) => ({ type: 'DISEASE', targetSlug: s })),
+  });
+  assert.equal(inheritTagsFromDiseases([d1, d2, d3, farmaco]), 1);
+  assert.deepEqual(farmaco.tagKeys, ['cardiovascular']); // 2 de 3: mayoría; endocrino 1 de 3: no
+  assert.match(farmaco.categoryRule, /más de la mitad de sus 3 enfermedades/);
+});
