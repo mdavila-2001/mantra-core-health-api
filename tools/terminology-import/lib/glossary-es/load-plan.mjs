@@ -156,6 +156,8 @@ export function propertiesFor(row) {
     ...(row.plainSummaryEs ? js('glossary-plain-summary', { es: row.plainSummaryEs }) : []),
     ...js('plain_summary_source', row.plainSummarySource ?? null),
     ...js('sections', row.sections ?? null),
+    ...str('official_name', row.officialName ?? null),
+    ...js('reference_price', row.referencePrice ?? null),
     ...js('glossary-provenance', { reviewStatus: row.reviewStatus, categoryRule: row.categoryRule ?? null, imageMatch: row.imageMatch ?? null }),
   ];
   if (row.imageUrl) {

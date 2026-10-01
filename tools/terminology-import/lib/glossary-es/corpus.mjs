@@ -27,6 +27,7 @@ export const TERM_LAYERS = [
   'medlineplus-es-pruebas',
   'wikidata-anatomia',
   'loinc-es',
+  'inlasa-aranceles',
 ];
 
 /** Aristas de Wikidata (enfermedad → síntoma, medicamento, especialidad…); ver `wikidata-relations.mjs`. */

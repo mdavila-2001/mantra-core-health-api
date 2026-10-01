@@ -317,3 +317,24 @@ test('Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus
   assert.equal(looksEnglish('chronic disease of the airways'), true);
   assert.equal(looksEnglish('enfermedad crónica de las vías respiratorias'), false);
 });
+
+test('INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia', async () => {
+  const { displayCase, inlasaRow, isPatientTest, parseInlasaTable } = await import('../lib/glossary-es/inlasa.mjs');
+  const items = parseInlasaTable(fx('inlasa-aranceles-2026-recorte.html'));
+  assert.equal(items.length, 11);
+  const kept = items.filter(isPatientTest).map((i) => i.code);
+  // Fuera: servicios a laboratorios (LAC-059 verificación de equipos), cepas (LBC-001),
+  // parasitología en heces de animales (LEP-010), «solo investigación» (LEP-035), y áreas no clínicas (ADM-001).
+  assert.deepEqual(kept.sort(), ['CGM-013', 'LAC-001', 'LAC-028', 'LINM-014', 'LTB-002', 'LVIR-054']);
+  const row = inlasaRow(items.find((i) => i.code === 'LAC-028'), '2026-10-01T00:00:00.000Z');
+  assert.equal(row.slug, 'inlasa-lac-028');
+  assert.equal(row.categoryKey, 'lab');
+  assert.equal(row.officialName, 'HEMOGLOBINA A1C (GLICOHEMOGLOBINA)');
+  assert.equal(row.esName, 'Hemoglobina A1C (glicohemoglobina)');
+  assert.deepEqual(row.referencePrice, { amount: '119.00', currency: 'BOB', schedule: 'INLASA 2026', priceText: '119 Bs.' });
+  assert.equal(row.definition, null);
+  assert.equal(displayCase('RT-PCR EN TIEMPO REAL PARA VIRUS DEL NILO OCCIDENTAL'), 'RT-PCR en tiempo real para virus del Nilo occidental');
+  assert.equal(displayCase('FISH: SÍNDROME DI GEORGE DELECIÓN 22q11'), 'FISH: síndrome Di George deleción 22q11');
+  assert.equal(displayCase('ELISA PARA ANTICUERPOS ANTI ANTIGENO DE SUPERFICIE (ANTI HBs)'), 'ELISA para anticuerpos anti antigeno de superficie (anti HBs)');
+  assert.deepEqual(inlasaRow(items.find((i) => i.code === 'LTB-002'), 'x').tagKeys, ['infectious', 'respiratory']);
+});
