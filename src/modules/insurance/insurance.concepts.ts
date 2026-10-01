@@ -152,6 +152,14 @@ export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
       code: 'ADJUDICATION_DENIED',
       display: 'Adjudicación denegada',
     },
+    // La aseguradora aprobó una parte del monto solicitado (Hito 4 §A,
+    // `POST /insurance/received-claims/:id/decision`). Antes sólo existían los
+    // dos extremos y «parcial» se leía como una aprobación con líneas denegadas;
+    // la pantalla de la aseguradora necesita nombrarlo.
+    ADJ_OUTCOME_PARTIAL: {
+      code: 'ADJUDICATION_PARTIAL',
+      display: 'Adjudicación aprobada parcialmente',
+    },
     LINE_DECISION_APPROVED: {
       code: 'LINE_DECISION_APPROVED',
       display: 'Línea aprobada',
