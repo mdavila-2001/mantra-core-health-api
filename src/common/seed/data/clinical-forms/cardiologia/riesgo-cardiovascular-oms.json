@@ -1,11 +1,8 @@
 {
   "code": "CARDIO_RIESGO_CV_OMS",
   "name": "Evaluación del riesgo cardiovascular (OMS/OPS)",
-  "specialty": {
-    "code": "CARDIOLOGIA",
-    "display": "Cardiología"
-  },
-  "version": 1,
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Prevención de las enfermedades cardiovasculares: directrices para la evaluación y el manejo del riesgo cardiovascular",
     "organization": "Organización Panamericana de la Salud / Organización Mundial de la Salud (OPS/OMS)",
@@ -13,64 +10,93 @@
     "license": "CC BY-NC-SA 3.0 IGO (publicación OPS/OMS)",
     "sourceVersion": "Tablas OMS 2019 · HEARTS en las Américas",
     "retrievedAt": "2026-08-14",
-    "note": "Captura las variables de entrada de las tablas de predicción. El cálculo del riesgo lo hace la calculadora OPS: https://www.paho.org/en/paho-cardiovascular-risk-calculator"
+    "note": "Captura las variables de entrada de las tablas de predicción. El cálculo del riesgo lo hace la calculadora OPS: https://www.paho.org/en/paho-cardiovascular-risk-calculator v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "edad",
       "name": "Edad (años)",
       "dataType": "integer",
-      "required": true
+      "required": true,
+      "description": "Las tablas cubren de 40 a 74 años."
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "sexo",
       "name": "Sexo",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": ["Mujer", "Hombre"]
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "fumador_actual",
-      "name": "Fumador actual",
+      "name": "Fumador actual (o dejó hace menos de un año)",
       "dataType": "boolean",
       "required": true
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "diabetes",
       "name": "Diabetes",
       "dataType": "boolean",
       "required": true
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "presion_arterial_sistolica",
       "name": "Presión arterial sistólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
+      "code": "colesterol_disponible",
+      "name": "¿Hay colesterol total medido?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "colesterol_total",
       "name": "Colesterol total (mmol/L)",
       "dataType": "decimal",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "colesterol_disponible", "equals": true }
     },
     {
+      "section": "Datos para la tabla OMS/OPS",
       "code": "indice_masa_corporal",
       "name": "Índice de masa corporal (kg/m²)",
       "dataType": "decimal",
-      "required": false
+      "required": true,
+      "description": "La tabla sin laboratorio usa el IMC.",
+      "showWhen": { "field": "colesterol_disponible", "equals": false }
     },
     {
+      "section": "Resultado",
       "code": "riesgo_a_10_anios",
-      "name": "Riesgo cardiovascular a 10 años (%)",
+      "name": "Riesgo a 10 años (%)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Resultado",
       "code": "categoria_de_riesgo",
       "name": "Categoría de riesgo",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "options": [
+        "< 5 %",
+        "5 % a < 10 %",
+        "10 % a < 20 %",
+        "20 % a < 30 %",
+        "≥ 30 %"
+      ]
     },
     {
+      "section": "Resultado",
       "code": "recomendaciones",
       "name": "Recomendaciones",
       "dataType": "text",

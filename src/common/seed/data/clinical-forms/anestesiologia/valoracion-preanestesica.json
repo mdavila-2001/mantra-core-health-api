@@ -1,11 +1,8 @@
 {
   "code": "ANEST_VALORACION_PREANESTESICA",
   "name": "Valoración preanestésica",
-  "specialty": {
-    "code": "ANESTESIOLOGIA",
-    "display": "Anestesiología"
-  },
-  "version": 1,
+  "specialty": { "code": "ANESTESIOLOGIA", "display": "Anestesiología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico preoperatorio",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,112 +10,362 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, antecedentes patológicos, alergias, medicación habitual, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad el procedimiento previsto, el ayuno en horas, la evaluación de la vía aérea (Mallampati, apertura bucal, movilidad cervical), las piezas dentarias en riesgo, las experiencias anestésicas previas y sus complicaciones, la clasificación ASA registrada como texto libre y el plan anestésico propuesto."
+    "note": "De la norma sale la estructura común de la consulta: motivo, antecedentes patológicos, alergias, medicación habitual, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad el procedimiento previsto, el ayuno en horas, la evaluación de la vía aérea (Mallampati, apertura bucal, movilidad cervical), las piezas dentarias en riesgo, las experiencias anestésicas previas y sus complicaciones, la clasificación ASA registrada como texto libre y el plan anestésico propuesto. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA, Mallampati, distancia tiromentoniana de Patil."
   },
   "fields": [
     {
+      "section": "Procedimiento",
       "code": "motivo_consulta",
-      "name": "Motivo de consulta",
+      "name": "Motivo de la valoración",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Procedimiento",
       "code": "procedimiento_previsto",
       "name": "Procedimiento previsto",
       "dataType": "string",
       "required": true
     },
     {
+      "section": "Procedimiento",
+      "code": "tipo_de_cirugia",
+      "name": "Tipo de cirugía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Programada", "Urgencia"]
+    },
+    {
+      "section": "Antecedentes",
       "code": "antecedentes_patologicos",
       "name": "Antecedentes patológicos",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Comorbilidades",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes",
+        "Cardiopatía",
+        "Asma o EPOC",
+        "Apnea del sueño",
+        "Enfermedad renal",
+        "Hepatopatía",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Medicamentos", "Látex", "Alimentos", "Antisépticos"],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "alergias",
-      "name": "Alergias",
+      "name": "Alergias — detalle y reacción",
       "dataType": "text",
       "required": true
     },
     {
-      "code": "medicacion_habitual",
-      "name": "Medicación habitual",
-      "dataType": "text",
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "farmacos_a_suspender",
+      "name": "Fármacos que requieren manejo perioperatorio",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Anticoagulantes",
+        "Antiagregantes",
+        "Hipoglucemiantes o insulina",
+        "IECA o ARA II",
+        "Corticoides",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Antecedentes",
       "code": "habitos_toxicos",
       "name": "Hábitos tóxicos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "anestesias_previas",
+      "name": "Anestesias previas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
       "code": "experiencias_anestesicas_previas",
-      "name": "Experiencias anestésicas previas",
+      "name": "¿Cuáles y cuándo?",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "anestesias_previas", "equals": true }
     },
     {
+      "section": "Antecedentes",
+      "code": "hubo_complicaciones",
+      "name": "¿Hubo complicaciones?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "anestesias_previas", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "complicaciones_anestesicas_previas",
-      "name": "Complicaciones anestésicas previas",
+      "name": "¿Cuáles? (vía aérea difícil, náuseas, hipertermia maligna, despertar prolongado)",
       "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "hubo_complicaciones", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "hipertermia_maligna_familiar",
+      "name": "Familiar con hipertermia maligna o complicación anestésica grave",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "hipertermia_quien",
+      "name": "¿Quién y qué pasó?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hipertermia_maligna_familiar", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "ayuno_en_horas",
-      "name": "Ayuno en horas",
+      "name": "Ayuno (horas)",
+      "dataType": "integer",
+      "required": false,
+      "description": "Sólidos 6–8 h; líquidos claros 2 h."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "apnea_sintomas",
+      "name": "Sospecha de apnea del sueño",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ronquido fuerte",
+        "Somnolencia diurna",
+        "Apneas observadas por otra persona",
+        "Obesidad",
+        "Cuello ancho",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Vía aérea",
+      "code": "via_aerea_mallampati",
+      "name": "Mallampati",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Clase I — paladar blando, fauces, úvula y pilares visibles",
+        "Clase II — paladar blando, fauces y úvula",
+        "Clase III — paladar blando y base de la úvula",
+        "Clase IV — sólo paladar duro"
+      ]
+    },
+    {
+      "section": "Vía aérea",
+      "code": "apertura_bucal",
+      "name": "Apertura bucal (distancia interincisiva)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Mayor a 3 cm", "Entre 2 y 3 cm", "Menor a 2 cm"]
+    },
+    {
+      "section": "Vía aérea",
+      "code": "distancia_tiromentoniana",
+      "name": "Distancia tiromentoniana (Patil)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Mayor a 6,5 cm", "Entre 6 y 6,5 cm", "Menor a 6 cm"]
+    },
+    {
+      "section": "Vía aérea",
+      "code": "movilidad_cervical",
+      "name": "Movilidad cervical",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Limitada", "Muy limitada"]
+    },
+    {
+      "section": "Vía aérea",
+      "code": "protesis_dental",
+      "name": "Prótesis o piezas dentarias flojas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Vía aérea",
+      "code": "piezas_dentarias_en_riesgo",
+      "name": "¿Cuáles?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "protesis_dental", "equals": true }
+    },
+    {
+      "section": "Evaluación",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
       "dataType": "integer",
       "required": false
     },
     {
-      "code": "via_aerea_mallampati",
-      "name": "Vía aérea — Mallampati",
-      "dataType": "string",
+      "section": "Evaluación",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
       "required": false
     },
     {
-      "code": "apertura_bucal",
-      "name": "Apertura bucal",
-      "dataType": "string",
+      "section": "Evaluación",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
       "required": false
     },
     {
-      "code": "movilidad_cervical",
-      "name": "Movilidad cervical",
-      "dataType": "string",
+      "section": "Evaluación",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
       "required": false
     },
     {
-      "code": "piezas_dentarias_en_riesgo",
-      "name": "Piezas dentarias en riesgo",
-      "dataType": "text",
+      "section": "Evaluación",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
       "required": false
     },
     {
+      "section": "Evaluación",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación",
       "code": "examen_cardiorrespiratorio",
       "name": "Examen cardiorrespiratorio",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Evaluación",
+      "code": "capacidad_funcional",
+      "name": "Capacidad funcional",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "4 METs o más (sube 2 pisos sin parar)",
+        "Menos de 4 METs",
+        "No evaluable"
+      ]
+    },
+    {
+      "section": "Evaluación",
       "code": "laboratorio_relevante",
-      "name": "Laboratorio relevante",
+      "name": "Laboratorio y ECG relevantes",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Evaluación",
       "code": "clasificacion_asa",
       "name": "Clasificación ASA",
       "dataType": "string",
+      "required": true,
+      "options": [
+        "ASA I — sano",
+        "ASA II — enfermedad sistémica leve",
+        "ASA III — enfermedad sistémica grave",
+        "ASA IV — enfermedad sistémica grave, amenaza constante para la vida",
+        "ASA V — moribundo, no sobrevive sin la operación",
+        "ASA VI — muerte encefálica, donante de órganos"
+      ]
+    },
+    {
+      "section": "Evaluación",
+      "code": "asa_urgencia",
+      "name": "Modificador E (urgencia)",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Conclusión",
       "code": "diagnostico",
       "name": "Diagnóstico",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Conclusión",
+      "code": "tecnica_propuesta",
+      "name": "Técnica anestésica propuesta",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "General",
+        "Regional neuroaxial",
+        "Bloqueo periférico",
+        "Sedación",
+        "Local con monitoreo"
+      ]
+    },
+    {
+      "section": "Conclusión",
       "code": "plan_de_tratamiento",
       "name": "Plan anestésico propuesto",
       "dataType": "text",

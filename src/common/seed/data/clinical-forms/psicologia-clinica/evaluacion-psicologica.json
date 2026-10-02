@@ -1,8 +1,11 @@
 {
   "code": "PSICO_EVALUACION_BASE",
   "name": "Evaluación psicológica",
-  "specialty": { "code": "PSICOLOGIA_CLINICA", "display": "Psicología Clínica" },
-  "version": 1,
+  "specialty": {
+    "code": "PSICOLOGIA_CLINICA",
+    "display": "Psicología Clínica"
+  },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes personales y familiares y examen mental",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,25 +13,424 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se toma la estructura común de la historia clínica: motivo de consulta, tiempo de evolución, antecedentes personales y familiares, examen, diagnóstico y conducta. Son agregados propios de la especialidad la descripción en prosa del estado de ánimo y la ansiedad, el sueño, el apetito, la situación vital actual, la red de apoyo y el riesgo referido, tomados de la entrevista psicológica de consultorio."
+    "note": "De la norma se toma la estructura común de la historia clínica: motivo de consulta, tiempo de evolución, antecedentes personales y familiares, examen, diagnóstico y conducta. Son agregados propios de la especialidad la descripción en prosa del estado de ánimo y la ansiedad, el sueño, el apetito, la situación vital actual, la red de apoyo y el riesgo referido, tomados de la entrevista psicológica de consultorio. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS), SRQ-20 (OMS)."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "antecedentes_tratamiento_psicologico", "name": "Antecedentes de tratamiento psicológico", "dataType": "text", "required": false },
-    { "code": "antecedentes_tratamiento_psiquiatrico", "name": "Antecedentes de tratamiento psiquiátrico", "dataType": "text", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares_salud_mental", "name": "Antecedentes familiares de salud mental", "dataType": "text", "required": false },
-    { "code": "situacion_vital_actual", "name": "Situación vital actual", "dataType": "text", "required": false },
-    { "code": "estado_de_animo", "name": "Estado de ánimo referido", "dataType": "text", "required": true },
-    { "code": "ansiedad", "name": "Ansiedad referida", "dataType": "text", "required": false },
-    { "code": "sueno", "name": "Sueño", "dataType": "text", "required": false },
-    { "code": "apetito", "name": "Apetito", "dataType": "text", "required": false },
-    { "code": "consumo_de_sustancias", "name": "Consumo de sustancias referido", "dataType": "text", "required": false },
-    { "code": "red_de_apoyo", "name": "Red de apoyo", "dataType": "text", "required": false },
-    { "code": "riesgo_referido", "name": "Riesgo referido en la entrevista", "dataType": "text", "required": false },
-    { "code": "observaciones_de_la_entrevista", "name": "Observaciones de la entrevista", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Impresión diagnóstica", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_tratamiento_psicologico",
+      "name": "Tratamiento psicológico previo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_tratamiento_psiquiatrico",
+      "name": "Tratamiento psiquiátrico previo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_actual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_familiares_salud_mental",
+      "name": "Antecedentes familiares de salud mental",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "situacion_vital_actual",
+      "name": "Situación vital actual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "srq20_respuestas_si",
+      "name": "SRQ-20 (OMS): preguntas respondidas «sí» en el último mes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "¿Tiene frecuentes dolores de cabeza?",
+        "¿Tiene mal apetito?",
+        "¿Duerme mal?",
+        "¿Se asusta con facilidad?",
+        "¿Sufre de temblor de manos?",
+        "¿Se siente nervioso, tenso o aburrido?",
+        "¿Sufre de mala digestión?",
+        "¿No puede pensar con claridad?",
+        "¿Se siente triste?",
+        "¿Llora usted con mucha frecuencia?",
+        "¿Tiene dificultad en disfrutar sus actividades diarias?",
+        "¿Tiene dificultad para tomar decisiones?",
+        "¿Tiene dificultad en hacer su trabajo?",
+        "¿Es incapaz de desempeñar un papel útil en su vida?",
+        "¿Ha perdido interés en las cosas?",
+        "¿Siente que usted es una persona inútil?",
+        "¿Ha tenido la idea de acabar con su vida?",
+        "¿Se siente cansado todo el tiempo?",
+        "¿Tiene sensaciones desagradables en su estómago?",
+        "¿Se cansa con facilidad?"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "srq20_puntaje",
+      "name": "SRQ-20 — total (0–20)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "estado_de_animo",
+      "name": "Estado de ánimo",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "ansiedad",
+      "name": "Ansiedad",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "sueno_calidad",
+      "name": "Sueño",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Normal",
+        "Insomnio de conciliación",
+        "Despertares",
+        "Hipersomnia"
+      ]
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "sueno",
+      "name": "Sueño — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "apetito",
+      "name": "Apetito",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "consumo_de_sustancias",
+      "name": "Consumo de sustancias — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "red_de_apoyo",
+      "name": "Red de apoyo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "riesgo_autolesion",
+      "name": "Riesgo de autolesión",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin ideación",
+        "Ideación sin plan",
+        "Ideación con plan",
+        "Intento reciente"
+      ]
+    },
+    {
+      "section": "Tamizaje y áreas",
+      "code": "riesgo_referido",
+      "name": "Riesgo — detalle y derivación urgente",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "riesgo_autolesion",
+        "equals": ["Ideación con plan", "Intento reciente"]
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Trastorno mental común (ansiedad, depresión)",
+        "Duelo",
+        "Estrés postraumático",
+        "Violencia",
+        "Problemas de conducta en niños o adolescentes"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tmc_predominio",
+      "name": "Predominio",
+      "dataType": "string",
+      "required": true,
+      "options": ["Depresivo", "Ansioso", "Mixto", "Somático"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno mental común (ansiedad, depresión)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tmc_meses",
+      "name": "Meses de evolución",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno mental común (ansiedad, depresión)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "duelo_perdida",
+      "name": "Pérdida y fecha",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Duelo" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "duelo_complicado",
+      "name": "Más de 12 meses con deterioro funcional",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Duelo" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tept",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Reexperimentación",
+        "Evitación",
+        "Hiperalerta",
+        "Cambios negativos del ánimo"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Estrés postraumático"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "violencia_tipo",
+      "name": "Tipo",
+      "dataType": "json",
+      "required": true,
+      "options": ["Física", "Psicológica", "Sexual", "Económica"],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "violencia_riesgo_inminente",
+      "name": "Riesgo inminente",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "violencia_denuncia",
+      "name": "Orientada a la denuncia (Ley 348)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "conducta_contexto",
+      "name": "Contexto escolar y familiar",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Problemas de conducta en niños o adolescentes"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "observaciones_de_la_entrevista",
+      "name": "Observaciones de la entrevista",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

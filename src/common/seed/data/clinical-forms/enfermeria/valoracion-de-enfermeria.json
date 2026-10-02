@@ -2,7 +2,7 @@
   "code": "ENFER_VALORACION_BASE",
   "name": "Valoración de enfermería",
   "specialty": { "code": "ENFERMERIA", "display": "Enfermería" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, registro de funciones vitales y notas de enfermería",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,257 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se toman la estructura común (motivo de la valoración, antecedentes, examen, diagnóstico y conducta) y el registro de funciones vitales de la nota de enfermería. Son agregados propios de la especialidad el dolor referido en escala de 0 a 10, el estado de la piel, la presencia de accesos vasculares, la descripción en prosa del riesgo de caídas, el grado de autonomía, las necesidades identificadas y las intervenciones realizadas."
+    "note": "De la norma se toman la estructura común (motivo de la valoración, antecedentes, examen, diagnóstico y conducta) y el registro de funciones vitales de la nota de enfermería. Son agregados propios de la especialidad el dolor referido en escala de 0 a 10, el estado de la piel, la presencia de accesos vasculares, la descripción en prosa del riesgo de caídas, el grado de autonomía, las necesidades identificadas y las intervenciones realizadas. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de la valoración", "dataType": "text", "required": true },
-    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
-    { "code": "alergias_referidas", "name": "Alergias referidas", "dataType": "text", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": true },
-    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca (lpm)", "dataType": "integer", "required": false },
-    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria (rpm)", "dataType": "integer", "required": false },
-    { "code": "temperatura_c", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
-    { "code": "dolor_intensidad_referida", "name": "Intensidad del dolor referida (0 a 10)", "dataType": "integer", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "text", "required": false },
-    { "code": "estado_de_la_piel", "name": "Estado de la piel", "dataType": "text", "required": false },
-    { "code": "accesos_vasculares", "name": "Accesos vasculares", "dataType": "boolean", "required": false },
-    { "code": "riesgo_de_caidas", "name": "Riesgo de caídas", "dataType": "text", "required": false },
-    { "code": "autonomia", "name": "Autonomía para las actividades básicas", "dataType": "text", "required": false },
-    { "code": "necesidades_identificadas", "name": "Necesidades identificadas", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico de enfermería", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Intervenciones de enfermería", "dataType": "text", "required": false }
+    {
+      "section": "Motivo",
+      "code": "motivo_consulta",
+      "name": "Motivo de atención",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Motivo",
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Motivo",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Motivo",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Motivo",
+      "code": "alergias_referidas",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Motivo",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Motivo",
+      "code": "medicacion_actual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Signos vitales",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg, sistólica/diastólica)",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 120/80."
+    },
+    {
+      "section": "Signos vitales",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Signos vitales",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Signos vitales",
+      "code": "temperatura_c",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Signos vitales",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Signos vitales",
+      "code": "dolor_intensidad_referida",
+      "name": "Dolor (0 a 10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Valoración",
+      "code": "conciencia",
+      "name": "Estado de conciencia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Alerta", "Somnoliento", "Confuso", "Estupor", "Coma"]
+    },
+    {
+      "section": "Valoración",
+      "code": "estado_de_conciencia",
+      "name": "Conciencia — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración",
+      "code": "piel_integridad",
+      "name": "Integridad de la piel",
+      "dataType": "string",
+      "required": false,
+      "options": ["Íntegra", "Lesión por presión", "Herida", "Quemadura"]
+    },
+    {
+      "section": "Valoración",
+      "code": "upp_estadio",
+      "name": "Estadio (si es lesión por presión)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "No aplica",
+        "Estadio 1",
+        "Estadio 2",
+        "Estadio 3",
+        "Estadio 4",
+        "No estadificable"
+      ],
+      "showWhen": {
+        "field": "piel_integridad",
+        "equals": ["Lesión por presión", "Herida", "Quemadura"]
+      }
+    },
+    {
+      "section": "Valoración",
+      "code": "estado_de_la_piel",
+      "name": "Localización y descripción",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "piel_integridad",
+        "equals": ["Lesión por presión", "Herida", "Quemadura"]
+      }
+    },
+    {
+      "section": "Valoración",
+      "code": "riesgo_lesion_presion",
+      "name": "Riesgo de lesión por presión (escala del establecimiento)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sin riesgo", "Bajo", "Moderado", "Alto"]
+    },
+    {
+      "section": "Valoración",
+      "code": "accesos_vasculares",
+      "name": "Accesos vasculares o dispositivos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Valoración",
+      "code": "dispositivos",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Vía periférica",
+        "Catéter central",
+        "Sonda vesical",
+        "Sonda nasogástrica",
+        "Drenaje",
+        "Ostomía"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "accesos_vasculares", "equals": true }
+    },
+    {
+      "section": "Valoración",
+      "code": "dispositivos_fecha",
+      "name": "Fecha de colocación",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "accesos_vasculares", "equals": true }
+    },
+    {
+      "section": "Valoración",
+      "code": "riesgo_caidas_nivel",
+      "name": "Riesgo de caídas (escala del establecimiento)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Bajo", "Medio", "Alto"]
+    },
+    {
+      "section": "Valoración",
+      "code": "riesgo_de_caidas",
+      "name": "Riesgo de caídas — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración",
+      "code": "autonomia_nivel",
+      "name": "Autonomía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Independiente", "Ayuda parcial", "Dependiente"]
+    },
+    {
+      "section": "Valoración",
+      "code": "autonomia",
+      "name": "Autonomía — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración",
+      "code": "necesidades_identificadas",
+      "name": "Necesidades identificadas (Henderson)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico enfermero y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico de enfermería (NANDA)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico enfermero y plan",
+      "code": "conducta",
+      "name": "Intervenciones y evaluación",
+      "dataType": "text",
+      "required": false
+    }
   ]
 }

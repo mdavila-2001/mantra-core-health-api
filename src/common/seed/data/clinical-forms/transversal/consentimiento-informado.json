@@ -5,7 +5,7 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Modelo de consentimiento informado — Resolución 1738",
     "organization": "Ministerio de Salud y Protección Social de Colombia",
@@ -13,70 +13,122 @@
     "license": "Documento oficial de acceso público",
     "sourceVersion": "Resolución 1738",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de los campos del modelo oficial. El texto legal de cada procedimiento lo aporta la organización."
+    "note": "Transcripción de los campos del modelo oficial. El texto legal de cada procedimiento lo aporta la organización. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Procedimiento",
       "code": "procedimiento_propuesto",
-      "name": "Procedimiento o tratamiento propuesto",
+      "name": "Procedimiento propuesto",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Procedimiento",
       "code": "diagnostico_que_lo_motiva",
       "name": "Diagnóstico que lo motiva",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Procedimiento",
       "code": "beneficios_esperados",
       "name": "Beneficios esperados",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Procedimiento",
       "code": "riesgos_y_complicaciones",
-      "name": "Riesgos y complicaciones posibles",
+      "name": "Riesgos y complicaciones frecuentes y graves",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Procedimiento",
       "code": "alternativas_disponibles",
       "name": "Alternativas disponibles",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Procedimiento",
       "code": "consecuencias_de_no_aceptar",
       "name": "Consecuencias de no aceptar",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "preguntas_del_paciente",
-      "name": "Preguntas formuladas por el paciente",
-      "dataType": "text",
+      "section": "Procedimiento",
+      "code": "hubo_preguntas",
+      "name": "¿El paciente hizo preguntas?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Procedimiento",
+      "code": "preguntas_del_paciente",
+      "name": "¿Cuáles y qué se respondió?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "hubo_preguntas", "equals": true }
+    },
+    {
+      "section": "Decisión",
       "code": "acepta_el_procedimiento",
-      "name": "El paciente acepta el procedimiento",
+      "name": "Acepta el procedimiento",
       "dataType": "boolean",
       "required": true
     },
     {
+      "section": "Decisión",
+      "code": "motivo_de_rechazo",
+      "name": "Motivo del rechazo (disentimiento)",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "acepta_el_procedimiento", "equals": false }
+    },
+    {
+      "section": "Decisión",
       "code": "otorgado_por_representante",
-      "name": "Lo otorga un representante legal",
+      "name": "Lo otorga un representante",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Decisión",
       "code": "nombre_del_representante",
-      "name": "Nombre del representante legal",
+      "name": "Nombre del representante",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "otorgado_por_representante", "equals": true }
     },
     {
+      "section": "Decisión",
+      "code": "representante_vinculo",
+      "name": "Vínculo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Padre o madre",
+        "Tutor legal",
+        "Cónyuge",
+        "Hijo o hija",
+        "Otro familiar"
+      ],
+      "showWhen": { "field": "otorgado_por_representante", "equals": true }
+    },
+    {
+      "section": "Decisión",
+      "code": "representante_motivo",
+      "name": "Motivo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Menor de edad", "Incapacidad para decidir", "Urgencia"],
+      "showWhen": { "field": "otorgado_por_representante", "equals": true }
+    },
+    {
+      "section": "Decisión",
       "code": "fecha_de_otorgamiento",
       "name": "Fecha de otorgamiento",
       "dataType": "date",

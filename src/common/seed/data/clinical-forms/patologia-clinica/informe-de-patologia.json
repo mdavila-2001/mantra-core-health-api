@@ -1,11 +1,8 @@
 {
   "code": "PATOL_INFORME_BASE",
   "name": "Informe de anatomía patológica",
-  "specialty": {
-    "code": "PATOLOGIA_CLINICA",
-    "display": "Patología Clínica"
-  },
-  "version": 1,
+  "specialty": { "code": "PATOLOGIA_CLINICA", "display": "Patología Clínica" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, informe de exámenes auxiliares y estudios anatomopatológicos",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,108 +10,190 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad la trazabilidad de la muestra (tipo, procedencia anatómica, fecha de toma, tipo de fijación, estado de la muestra) y la separación entre descripción macroscópica, descripción microscópica y técnicas especiales."
+    "note": "De la norma sale la estructura común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad la trazabilidad de la muestra (tipo, procedencia anatómica, fecha de toma, tipo de fijación, estado de la muestra) y la separación entre descripción macroscópica, descripción microscópica y técnicas especiales. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Solicitud",
       "code": "motivo_consulta",
-      "name": "Motivo del estudio o indicación clínica",
+      "name": "Indicación del estudio",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Solicitud",
       "code": "diagnostico_clinico_presuntivo",
-      "name": "Diagnóstico clínico presuntivo del solicitante",
+      "name": "Diagnóstico clínico presuntivo",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "tipo_de_muestra",
       "name": "Tipo de muestra",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": [
+        "Biopsia",
+        "Pieza quirúrgica",
+        "Citología",
+        "Punción aspirativa con aguja fina",
+        "Autopsia"
+      ]
     },
     {
+      "section": "Solicitud",
       "code": "procedencia_anatomica",
-      "name": "Procedencia anatómica de la muestra",
+      "name": "Procedencia anatómica",
       "dataType": "string",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "procedimiento_de_obtencion",
       "name": "Procedimiento de obtención",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": [
+        "Biopsia incisional",
+        "Biopsia escisional",
+        "Endoscopía",
+        "Punción",
+        "Resección quirúrgica",
+        "Raspado"
+      ]
     },
     {
+      "section": "Solicitud",
       "code": "fecha_de_toma",
-      "name": "Fecha de toma de la muestra",
+      "name": "Fecha de toma",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "fecha_de_recepcion",
-      "name": "Fecha de recepción en el laboratorio",
+      "name": "Fecha de recepción",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "numero_de_frascos",
-      "name": "Número de frascos o contenedores recibidos",
+      "name": "Número de frascos",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "tipo_de_fijacion",
-      "name": "Tipo de fijación y conservación",
+      "name": "Fijación",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Formol al 10 %", "Alcohol", "En fresco", "Otra"]
     },
     {
+      "section": "Solicitud",
+      "code": "estado_muestra",
+      "name": "Estado de la muestra",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuada", "Insuficiente", "Mal fijada", "Rechazada"]
+    },
+    {
+      "section": "Solicitud",
       "code": "estado_de_la_muestra",
-      "name": "Estado de la muestra al recibirla",
+      "name": "¿Por qué?",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": {
+        "field": "estado_muestra",
+        "equals": ["Insuficiente", "Mal fijada", "Rechazada"]
+      }
     },
     {
+      "section": "Informe",
       "code": "descripcion_macroscopica",
       "name": "Descripción macroscópica",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Informe",
       "code": "descripcion_microscopica",
       "name": "Descripción microscópica",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Informe",
+      "code": "hubo_tecnicas_especiales",
+      "name": "Se usaron técnicas especiales",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Informe",
       "code": "tecnicas_especiales",
-      "name": "Técnicas especiales realizadas",
+      "name": "¿Cuáles? (inmunohistoquímica, tinciones)",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "hubo_tecnicas_especiales", "equals": true }
     },
     {
+      "section": "Informe",
       "code": "estudio_comparativo_previo",
-      "name": "Comparación con estudios anatomopatológicos previos",
+      "name": "Estudio comparativo previo",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Informe",
+      "code": "malignidad",
+      "name": "Malignidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Benigno",
+        "Displasia o lesión precursora",
+        "Maligno",
+        "Indeterminado"
+      ]
+    },
+    {
+      "section": "Informe",
+      "code": "margenes",
+      "name": "Márgenes",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "malignidad", "equals": "Maligno" }
+    },
+    {
+      "section": "Informe",
+      "code": "grado_histologico",
+      "name": "Grado histológico",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "malignidad", "equals": "Maligno" }
+    },
+    {
+      "section": "Informe",
       "code": "observaciones",
-      "name": "Observaciones y limitaciones del estudio",
+      "name": "Observaciones",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Informe",
       "code": "diagnostico",
-      "name": "Diagnóstico anatomopatológico o conclusión",
+      "name": "Diagnóstico anatomopatológico",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Informe",
       "code": "conducta",
-      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "name": "Recomendación",
       "dataType": "text",
       "required": false
     }

@@ -2,7 +2,7 @@
   "code": "NEURO_EVALUACION_BASE",
   "name": "Evaluación neurológica",
   "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del sistema nervioso",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,466 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta y el apartado de examen del sistema nervioso: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose del examen neurológico en campos separados (estado de conciencia, pares craneales, fuerza muscular, sensibilidad, reflejos, coordinación y marcha) y la anamnesis dirigida de cefalea y episodios convulsivos."
+    "note": "De la norma salen la estructura común de la consulta y el apartado de examen del sistema nervioso: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose del examen neurológico en campos separados (estado de conciencia, pares craneales, fuerza muscular, sensibilidad, reflejos, coordinación y marcha) y la anamnesis dirigida de cefalea y episodios convulsivos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de coma de Glasgow, escala de Cincinnati, banderas rojas SNOOP, escala de fuerza MRC, maniobra de Dix-Hallpike."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_neurologicos", "name": "Antecedentes neurológicos personales y familiares", "dataType": "text", "required": false },
-    { "code": "cefalea", "name": "Cefalea (presencia)", "dataType": "boolean", "required": false },
-    { "code": "caracteristicas_cefalea", "name": "Características de la cefalea (localización, tipo, irradiación, factores)", "dataType": "text", "required": false },
-    { "code": "convulsiones", "name": "Episodios convulsivos (presencia)", "dataType": "boolean", "required": false },
-    { "code": "descripcion_convulsiones", "name": "Descripción de los episodios convulsivos", "dataType": "text", "required": false },
-    { "code": "mareo_o_vertigo", "name": "Mareo o vértigo", "dataType": "boolean", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia y orientación", "dataType": "text", "required": true },
-    { "code": "lenguaje", "name": "Lenguaje y habla", "dataType": "text", "required": false },
-    { "code": "pares_craneales", "name": "Examen de pares craneales", "dataType": "text", "required": false },
-    { "code": "fuerza_muscular", "name": "Fuerza muscular por segmentos", "dataType": "text", "required": false },
-    { "code": "sensibilidad", "name": "Sensibilidad superficial y profunda", "dataType": "text", "required": false },
-    { "code": "reflejos_osteotendinosos", "name": "Reflejos osteotendinosos", "dataType": "text", "required": false },
-    { "code": "coordinacion_y_marcha", "name": "Coordinación, equilibrio y marcha", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true,
+      "description": "Inicio, curso y síntomas acompañantes, en orden cronológico."
+    },
+    {
+      "section": "Síntomas",
+      "code": "antecedentes_neurologicos",
+      "name": "Antecedentes neurológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "cefalea",
+      "name": "Cefalea",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "caracteristicas_cefalea",
+      "name": "Cefalea — localización, carácter, frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "cefalea", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "convulsiones",
+      "name": "Convulsiones",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "descripcion_convulsiones",
+      "name": "Descripción de las crisis (testigos)",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "convulsiones", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "mareo_o_vertigo",
+      "name": "Mareo o vértigo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "vertigo_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Vértigo rotatorio", "Inestabilidad", "Presíncope"],
+      "showWhen": { "field": "mareo_o_vertigo", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "glasgow",
+      "name": "Escala de Glasgow (3–15)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "estado_de_conciencia",
+      "name": "Estado de conciencia y orientación",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "lenguaje",
+      "name": "Lenguaje",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "pares_craneales",
+      "name": "Pares craneales",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "fuerza_mrc",
+      "name": "Fuerza (escala MRC, peor segmento)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "5 — normal",
+        "4 — vence algo de resistencia",
+        "3 — vence la gravedad",
+        "2 — sin gravedad",
+        "1 — contracción sin movimiento",
+        "0 — sin contracción"
+      ]
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "fuerza_muscular",
+      "name": "Fuerza muscular — detalle por segmento",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "sensibilidad",
+      "name": "Sensibilidad",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "reflejos_osteotendinosos",
+      "name": "Reflejos osteotendinosos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "coordinacion_y_marcha",
+      "name": "Coordinación y marcha",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "signos_meningeos",
+      "name": "Signos meníngeos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Examen neurológico",
+      "code": "signos_meningeos_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Rigidez de nuca", "Kernig", "Brudzinski"],
+      "multiple": true,
+      "showWhen": { "field": "signos_meningeos", "equals": true }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Accidente cerebrovascular",
+        "Cefalea primaria",
+        "Epilepsia o crisis convulsiva",
+        "Deterioro cognitivo",
+        "Enfermedad de Parkinson",
+        "Neuropatía periférica",
+        "Vértigo"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_cincinnati",
+      "name": "Escala de Cincinnati",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría facial",
+        "Caída de un brazo",
+        "Alteración del habla",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_hora_inicio",
+      "name": "Hora de inicio o de la última vez visto bien",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_glasgow",
+      "name": "Escala de Glasgow (3–15)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_glucemia",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cefalea_snoop",
+      "name": "Banderas rojas (SNOOP)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Síntomas sistémicos (fiebre, pérdida de peso)",
+        "Déficit neurológico focal o confusión",
+        "Inicio súbito, en trueno",
+        "Inicio después de los 50 años",
+        "Cambio de patrón o empeora con Valsalva o posición",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cefalea primaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cefalea_tipo",
+      "name": "Fenotipo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Migraña sin aura",
+        "Migraña con aura",
+        "Tensional",
+        "En racimos",
+        "Por abuso de analgésicos",
+        "No definido"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cefalea primaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cefalea_dias_mes",
+      "name": "Días de cefalea por mes",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cefalea primaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_tipo",
+      "name": "Tipo de crisis",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Tónico-clónica generalizada",
+        "Focal sin pérdida de conciencia",
+        "Focal con alteración de conciencia",
+        "Ausencia",
+        "No definido"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Epilepsia o crisis convulsiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_duracion_minutos",
+      "name": "Duración (minutos)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Epilepsia o crisis convulsiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_primera",
+      "name": "Es la primera crisis",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Epilepsia o crisis convulsiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_desencadenantes",
+      "name": "Posibles desencadenantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Falta de sueño",
+        "Alcohol",
+        "Abandono de la medicación",
+        "Ninguno conocido"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Epilepsia o crisis convulsiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cognitivo_prueba",
+      "name": "Prueba cognitiva aplicada y puntaje",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Deterioro cognitivo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cognitivo_funcional",
+      "name": "Repercusión funcional",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Ninguna",
+        "En actividades instrumentales",
+        "En actividades básicas"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Deterioro cognitivo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "parkinson_signos",
+      "name": "Signos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Bradicinesia",
+        "Temblor de reposo",
+        "Rigidez",
+        "Inestabilidad postural"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad de Parkinson"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neuropatia_patron",
+      "name": "Patrón",
+      "dataType": "string",
+      "required": true,
+      "options": ["En guante y calcetín", "Mononeuropatía", "Multineuritis"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Neuropatía periférica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neuropatia_diabetes",
+      "name": "Diabetes asociada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Neuropatía periférica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dix_hallpike",
+      "name": "Maniobra de Dix-Hallpike",
+      "dataType": "string",
+      "required": true,
+      "options": ["Positiva", "Negativa", "No realizada"],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Vértigo" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "vertigo_signos_centrales",
+      "name": "Signos centrales (diplopía, disartria, ataxia)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Vértigo" }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

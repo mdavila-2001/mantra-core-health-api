@@ -5,7 +5,7 @@
     "code": "PSIQUIATRIA",
     "display": "Psiquiatría y salud mental"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, evaluación de salud mental",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,112 +13,511 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura del examen mental y la anamnesis psiquiátrica. Los instrumentos con puntaje (PHQ-9, GAD-7, Beck, MMSE) NO se cargaron: ver los pendientes de licencia en el README."
+    "note": "Estructura del examen mental y la anamnesis psiquiátrica. Los instrumentos con puntaje (PHQ-9, GAD-7, Beck, MMSE) NO se cargaron: ver los pendientes de licencia en el README. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS), SRQ-20 (OMS)."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Motivo de consulta",
       "code": "enfermedad_actual",
-      "name": "Enfermedad actual",
+      "name": "Relato de la enfermedad actual",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
       "code": "antecedentes_psiquiatricos",
       "name": "Antecedentes psiquiátricos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "internaciones_previas",
+      "name": "Internaciones psiquiátricas previas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "internaciones_numero",
+      "name": "¿Cuántas?",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": { "field": "internaciones_previas", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "tratamientos_previos",
       "name": "Tratamientos previos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "consumo_de_sustancias",
-      "name": "Consumo de sustancias",
+      "name": "Consumo de sustancias — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
       "code": "red_de_apoyo",
       "name": "Red de apoyo",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Tamizaje",
+      "code": "srq20_respuestas_si",
+      "name": "SRQ-20 (OMS): preguntas respondidas «sí» en el último mes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "¿Tiene frecuentes dolores de cabeza?",
+        "¿Tiene mal apetito?",
+        "¿Duerme mal?",
+        "¿Se asusta con facilidad?",
+        "¿Sufre de temblor de manos?",
+        "¿Se siente nervioso, tenso o aburrido?",
+        "¿Sufre de mala digestión?",
+        "¿No puede pensar con claridad?",
+        "¿Se siente triste?",
+        "¿Llora usted con mucha frecuencia?",
+        "¿Tiene dificultad en disfrutar sus actividades diarias?",
+        "¿Tiene dificultad para tomar decisiones?",
+        "¿Tiene dificultad en hacer su trabajo?",
+        "¿Es incapaz de desempeñar un papel útil en su vida?",
+        "¿Ha perdido interés en las cosas?",
+        "¿Siente que usted es una persona inútil?",
+        "¿Ha tenido la idea de acabar con su vida?",
+        "¿Se siente cansado todo el tiempo?",
+        "¿Tiene sensaciones desagradables en su estómago?",
+        "¿Se cansa con facilidad?"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Tamizaje",
+      "code": "srq20_puntaje",
+      "name": "SRQ-20 — total (0–20)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen mental",
       "code": "aspecto_y_actitud",
-      "name": "Aspecto general y actitud",
+      "name": "Aspecto y actitud",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen mental",
       "code": "conciencia_y_orientacion",
       "name": "Conciencia y orientación",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen mental",
       "code": "atencion_y_memoria",
       "name": "Atención y memoria",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen mental",
       "code": "lenguaje",
       "name": "Lenguaje",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen mental",
       "code": "pensamiento_curso_y_contenido",
       "name": "Pensamiento: curso y contenido",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "sensopercepcion",
-      "name": "Sensopercepción",
-      "dataType": "text",
+      "section": "Examen mental",
+      "code": "alucinaciones",
+      "name": "Alteraciones de la sensopercepción",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Examen mental",
+      "code": "alucinaciones_tipo",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Auditivas", "Visuales", "Táctiles", "Olfativas"],
+      "multiple": true,
+      "showWhen": { "field": "alucinaciones", "equals": true }
+    },
+    {
+      "section": "Examen mental",
+      "code": "sensopercepcion",
+      "name": "Sensopercepción — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "alucinaciones", "equals": true }
+    },
+    {
+      "section": "Examen mental",
       "code": "afecto_y_estado_de_animo",
       "name": "Afecto y estado de ánimo",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen mental",
+      "code": "insight",
+      "name": "Juicio e insight",
+      "dataType": "string",
+      "required": false,
+      "options": ["Conservado", "Parcial", "Ausente"]
+    },
+    {
+      "section": "Examen mental",
       "code": "juicio_e_insight",
-      "name": "Juicio de realidad e insight",
+      "name": "Juicio e insight — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Riesgo",
       "code": "riesgo_suicida",
       "name": "Riesgo suicida",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": [
+        "Sin ideación",
+        "Ideación sin plan",
+        "Ideación con plan",
+        "Intento reciente"
+      ]
     },
     {
+      "section": "Riesgo",
+      "code": "suicidio_factores",
+      "name": "Factores",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Acceso a medios letales",
+        "Intentos previos",
+        "Vive solo",
+        "Consumo de alcohol",
+        "Desesperanza"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "riesgo_suicida",
+        "equals": ["Ideación con plan", "Intento reciente"]
+      }
+    },
+    {
+      "section": "Riesgo",
+      "code": "suicidio_plan_seguridad",
+      "name": "Plan de seguridad acordado",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "riesgo_suicida",
+        "equals": ["Ideación con plan", "Intento reciente"]
+      }
+    },
+    {
+      "section": "Riesgo",
       "code": "riesgo_de_heteroagresion",
       "name": "Riesgo de heteroagresión",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Bajo", "Moderado", "Alto"]
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Episodio depresivo",
+        "Trastorno de ansiedad",
+        "Trastorno bipolar",
+        "Psicosis",
+        "Trastorno por consumo de alcohol",
+        "Trastorno por consumo de otras sustancias"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "depresion_criterios",
+      "name": "Síntomas (2 semanas o más)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ánimo deprimido",
+        "Anhedonia",
+        "Alteración del sueño",
+        "Alteración del apetito",
+        "Fatiga",
+        "Culpa o inutilidad",
+        "Dificultad para concentrarse",
+        "Enlentecimiento o agitación",
+        "Ideas de muerte"
+      ],
+      "multiple": true,
+      "description": "5 o más, incluido ánimo o anhedonia.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Episodio depresivo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ansiedad_tipo",
+      "name": "Presentación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Generalizada",
+        "Crisis de pánico",
+        "Fobia social",
+        "Fobia específica"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno de ansiedad"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ansiedad_meses",
+      "name": "Meses de evolución",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno de ansiedad"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "mania",
+      "name": "Síntomas maníacos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ánimo elevado o irritable",
+        "Menos necesidad de dormir",
+        "Verborrea",
+        "Fuga de ideas",
+        "Grandiosidad",
+        "Conductas de riesgo"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno bipolar"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "psicosis_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Delirios",
+        "Alucinaciones",
+        "Discurso desorganizado",
+        "Conducta desorganizada",
+        "Síntomas negativos"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psicosis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "psicosis_primer_episodio",
+      "name": "Primer episodio",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psicosis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "audit_total",
+      "name": "AUDIT completo (0–40)",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno por consumo de alcohol"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "abstinencia",
+      "name": "Signos de abstinencia",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno por consumo de alcohol"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sustancia_principal",
+      "name": "Sustancia principal",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno por consumo de otras sustancias"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sustancia_via_frecuencia",
+      "name": "Vía y frecuencia",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno por consumo de otras sustancias"
+      }
+    },
+    {
+      "section": "Impresión y plan",
       "code": "impresion_diagnostica",
-      "name": "Impresión diagnóstica",
+      "name": "Impresión diagnóstica (CIE-10)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Impresión y plan",
       "code": "plan_terapeutico",
       "name": "Plan terapéutico",
       "dataType": "text",

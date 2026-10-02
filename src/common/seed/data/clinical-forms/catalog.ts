@@ -126,6 +126,23 @@ export interface StandardFormSpecialty {
  */
 export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number] | 'json';
 
+/**
+ * Cuándo se muestra un campo: la semántica de `enableWhen` de HL7 FHIR
+ * Questionnaire con operador `=` y comportamiento `SHOW` —la misma que declara
+ * `CreateFieldDependencyDto` con `EQ`/`SHOW`—.
+ *
+ * Se cumple si el campo `field` vale `equals`. Si `field` es de varias
+ * respuestas, se cumple cuando la respuesta **incluye** el valor; si `equals`
+ * es una lista, basta con que coincida uno. Un campo cuyo padre está oculto
+ * también se oculta.
+ */
+export interface StandardFormShowWhen {
+  /** Código del campo del que depende, dentro de la misma ficha. */
+  field: string;
+  /** El valor (o los valores) que lo muestran. */
+  equals: string | boolean | readonly (string | boolean)[];
+}
+
 /** Un campo del esquema, tal como lo acepta `POST /charts/templates`. */
 export interface StandardFormField {
   /** Código del campo dentro del formulario. */
@@ -134,8 +151,24 @@ export interface StandardFormField {
   name: string;
   /** Tipo de dato técnico. */
   dataType: StandardFormDataType;
-  /** Si es obligatorio al completar. */
+  /** Si es obligatorio al completar (sólo cuando está a la vista). */
   required?: boolean;
+  /** La sección de la ficha en la que va: motivo, antecedentes, examen… */
+  section?: string;
+  /**
+   * Las respuestas ofrecidas, para un campo de lista cerrada. Con una sola
+   * respuesta el tipo es `string` (se guarda la opción); con varias es `json`
+   * (se guarda la lista).
+   */
+  options?: readonly string[];
+  /** Si se pueden elegir varias opciones. */
+  multiple?: boolean;
+  /** Si además de las opciones se ofrece «Otro» con texto libre. */
+  allowOther?: boolean;
+  /** La ayuda que se muestra bajo el campo. */
+  description?: string;
+  /** Cuándo se muestra; ausente = siempre. */
+  showWhen?: StandardFormShowWhen;
 }
 
 /** Un formulario estándar del catálogo, con su ficha y su esquema. */
@@ -159,9 +192,10 @@ export interface StandardFormDefinition {
  * ensanchan a `string`, así que `dataType` llega sin estrechar. `validar` es lo
  * que cierra esa brecha.
  */
-type RawForm = Omit<StandardFormDefinition, 'fields'> & {
-  fields: readonly (Omit<StandardFormField, 'dataType'> & {
+export type RawForm = Omit<StandardFormDefinition, 'fields'> & {
+  fields: readonly (Omit<StandardFormField, 'dataType' | 'showWhen'> & {
     dataType: string;
+    showWhen?: { field: string; equals: unknown };
   })[];
 };
 
@@ -173,24 +207,107 @@ type RawForm = Omit<StandardFormDefinition, 'fields'> & {
  * `.json` mal tipeado tiene que decir cuál es, no dejar una plantilla a medio
  * crear en la base.
  */
-function validar(form: RawForm): StandardFormDefinition {
+export function validar(form: RawForm): StandardFormDefinition {
+  const anteriores = new Map<string, RawForm['fields'][number]>();
   const fields = form.fields.map((field) => {
-    const conControl =
-      field.dataType === 'json' &&
-      (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
-    if (
-      !conControl &&
-      !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
-    ) {
+    const falla = (motivo: string): never => {
       throw new Error(
-        `Formulario ${form.code}: el campo "${field.code}" declara el tipo ` +
-          `"${field.dataType}", que no está entre los admitidos ` +
-          `(${TIPOS_ADMITIDOS.join(', ')}).`,
+        `Formulario ${form.code}: el campo "${field.code}" ${motivo}.`,
       );
+    };
+    validarTipo(field, falla);
+    validarOpciones(field, falla);
+    if (field.showWhen !== undefined) {
+      validarCondicion(field.showWhen, anteriores, falla);
     }
-    return { ...field, dataType: field.dataType as StandardFormDataType };
+    anteriores.set(field.code, field);
+    return field as StandardFormField;
   });
   return { ...form, fields };
+}
+
+/** El tipo tiene que ser uno que el motor sepa dibujar. */
+function validarTipo(
+  field: RawForm['fields'][number],
+  falla: (motivo: string) => never,
+): void {
+  const conControl =
+    field.dataType === 'json' &&
+    (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
+  const esListaMultiple =
+    field.dataType === 'json' &&
+    field.multiple === true &&
+    (field.options?.length ?? 0) > 0;
+  if (
+    !conControl &&
+    !esListaMultiple &&
+    !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
+  ) {
+    falla(
+      `declara el tipo "${field.dataType}", que no está entre los admitidos ` +
+        `(${TIPOS_ADMITIDOS.join(', ')}; json sólo para listas de varias respuestas)`,
+    );
+  }
+}
+
+/**
+ * Una lista cerrada no puede venir vacía ni repetir opciones, y su tipo dice
+ * dónde se guarda la respuesta: `string` para una, `json` para varias.
+ */
+function validarOpciones(
+  field: RawForm['fields'][number],
+  falla: (motivo: string) => never,
+): void {
+  if (field.options === undefined) {
+    if (field.multiple === true)
+      falla('declara varias respuestas sin opciones');
+    return;
+  }
+  if (field.options.length === 0) falla('declara una lista de opciones vacía');
+  if (new Set(field.options).size !== field.options.length) {
+    falla('repite una opción');
+  }
+  const tipoEsperado = field.multiple === true ? 'json' : 'string';
+  if (field.dataType !== tipoEsperado) {
+    falla(
+      `es de ${field.multiple === true ? 'varias respuestas' : 'una respuesta'} y debe ser ${tipoEsperado}`,
+    );
+  }
+}
+
+/**
+ * La condición apunta a un campo **anterior** de la misma ficha, y a un valor
+ * que ese campo puede tomar: `true`/`false` si es sí/no, una de sus opciones si
+ * es de lista. Cualquier otra cosa dejaría un campo que nunca se muestra.
+ */
+function validarCondicion(
+  showWhen: { field: string; equals: unknown },
+  anteriores: ReadonlyMap<string, RawForm['fields'][number]>,
+  falla: (motivo: string) => never,
+): void {
+  const padre = anteriores.get(showWhen.field);
+  if (padre === undefined) {
+    falla(`depende de "${showWhen.field}", que no está antes en la ficha`);
+  }
+  const valores = Array.isArray(showWhen.equals)
+    ? (showWhen.equals as unknown[])
+    : [showWhen.equals];
+  if (valores.length === 0) falla('tiene una condición sin valores');
+  for (const valor of valores) {
+    if (padre.dataType === 'boolean') {
+      if (typeof valor !== 'boolean') {
+        falla(`depende del sí/no "${padre.code}" con un valor que no es sí/no`);
+      }
+    } else if (padre.options !== undefined) {
+      if (typeof valor !== 'string' || !padre.options.includes(valor)) {
+        falla(
+          `depende de "${padre.code}" con «${String(valor)}», que no es una de sus opciones`,
+        );
+      }
+    } else {
+      falla(`depende de "${padre.code}", que no es sí/no ni de lista`);
+    }
+  }
 }
 
 /**

@@ -1,11 +1,8 @@
 {
   "code": "CIRGEN_EVALUACION_BASE",
   "name": "Evaluación de cirugía general",
-  "specialty": {
-    "code": "CIRUGIA_GENERAL",
-    "display": "Cirugía General"
-  },
-  "version": 1,
+  "specialty": { "code": "CIRUGIA_GENERAL", "display": "Cirugía General" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen por aparatos del abdomen",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,110 +10,529 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los ítems quirúrgicos: características del dolor abdominal, tránsito intestinal, hernias, cirugías previas, riesgo quirúrgico descrito en prosa e indicación quirúrgica propuesta."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los ítems quirúrgicos: características del dolor abdominal, tránsito intestinal, hernias, cirugías previas, riesgo quirúrgico descrito en prosa e indicación quirúrgica propuesta. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA, escala de Alvarado."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Con las palabras del paciente."
     },
     {
+      "section": "Motivo de consulta",
       "code": "tiempo_de_evolucion",
       "name": "Tiempo de evolución",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
     },
     {
+      "section": "Síntomas",
       "code": "dolor_abdominal",
       "name": "Dolor abdominal",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_localizacion",
+      "name": "Dolor — ¿dónde se localiza?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_abdominal_irradiado", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_abdominal_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas",
       "code": "caracteristicas_del_dolor",
-      "name": "Características del dolor (localización, irradiación, atenuantes)",
+      "name": "Dolor — otras observaciones",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "nauseas_o_vomitos",
       "name": "Náuseas o vómitos",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "transito_intestinal",
       "name": "Tránsito intestinal",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": [
+        "Conservado",
+        "Constipación",
+        "Diarrea",
+        "Sin gases ni heces (obstrucción)"
+      ]
     },
     {
+      "section": "Síntomas",
       "code": "fiebre",
       "name": "Fiebre",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
+      "code": "temperatura_maxima",
+      "name": "Temperatura máxima (°C)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "fiebre", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tuvo_cirugias",
+      "name": "¿Tuvo cirugías previas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
       "code": "cirugias_previas",
-      "name": "Cirugías previas",
+      "name": "¿Cuáles y en qué año?",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "tuvo_cirugias", "equals": true }
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Enfermedades crónicas conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Asma",
+        "EPOC",
+        "Cardiopatía",
+        "Enfermedad renal crónica",
+        "Enfermedad tiroidea",
+        "Cáncer",
+        "Tuberculosis",
+        "Enfermedad de Chagas",
+        "Epilepsia",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
       "code": "antecedentes_patologicos",
-      "name": "Antecedentes patológicos",
+      "name": "Antecedentes patológicos — detalle",
       "dataType": "text",
+      "required": false,
+      "description": "Año de diagnóstico, tratamiento y si está controlada."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "alergias",
-      "name": "Alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
       "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Examen",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
       "code": "examen_del_abdomen",
-      "name": "Examen del abdomen (inspección, palpación, percusión, auscultación)",
+      "name": "Examen del abdomen",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen",
+      "code": "signos_peritoneales",
+      "name": "Signos peritoneales",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Defensa",
+        "Rebote (Blumberg)",
+        "Rovsing",
+        "Psoas",
+        "Murphy",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Examen",
+      "code": "hay_hernia",
+      "name": "Hernia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "hernia_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Inguinal",
+        "Crural",
+        "Umbilical",
+        "Epigástrica",
+        "Incisional"
+      ],
+      "showWhen": { "field": "hay_hernia", "equals": true }
+    },
+    {
+      "section": "Examen",
+      "code": "hernia_estado",
+      "name": "Estado",
+      "dataType": "string",
+      "required": true,
+      "options": ["Reductible", "Incarcerada", "Estrangulada"],
+      "showWhen": { "field": "hay_hernia", "equals": true }
+    },
+    {
+      "section": "Examen",
       "code": "hernias",
-      "name": "Hernias de la pared abdominal (ubicación y hallazgos)",
+      "name": "Hernia — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": { "field": "hay_hernia", "equals": true }
     },
     {
+      "section": "Examen",
       "code": "examenes_complementarios",
-      "name": "Exámenes complementarios disponibles",
+      "name": "Exámenes complementarios",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Apendicitis aguda",
+        "Colecistitis o colelitiasis",
+        "Hernia de pared abdominal",
+        "Obstrucción intestinal",
+        "Abdomen agudo inespecífico",
+        "Patología anorrectal"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "alvarado",
+      "name": "Escala de Alvarado",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Migración del dolor a fosa ilíaca derecha",
+        "Anorexia",
+        "Náuseas o vómitos",
+        "Dolor en fosa ilíaca derecha (2)",
+        "Rebote",
+        "Fiebre > 37,3 °C",
+        "Leucocitosis > 10 000 (2)",
+        "Desviación a la izquierda"
+      ],
+      "multiple": true,
+      "description": "7 o más puntos: probable apendicitis.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Apendicitis aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "murphy_cirugia",
+      "name": "Signo de Murphy",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Colecistitis o colelitiasis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eco_vesicula",
+      "name": "Ecografía — hallazgo",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Colecistitis o colelitiasis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hernia_dolor_cronico",
+      "name": "Dolor crónico en la hernia",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hernia de pared abdominal"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "obstruccion_signos",
+      "name": "Signos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Distensión",
+        "Vómitos fecaloides",
+        "Ruidos aumentados metálicos",
+        "Silencio abdominal",
+        "Cicatriz previa"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Obstrucción intestinal"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "abdomen_agudo_imagen",
+      "name": "Imagen solicitada",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Abdomen agudo inespecífico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "anorrectal_tipo",
+      "name": "Sospecha",
+      "dataType": "string",
+      "required": true,
+      "options": ["Hemorroides", "Fisura", "Absceso", "Fístula"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Patología anorrectal"
+      }
+    },
+    {
+      "section": "Plan quirúrgico",
+      "code": "riesgo_asa",
+      "name": "Riesgo anestésico ASA",
+      "dataType": "string",
+      "required": false,
+      "options": ["ASA I", "ASA II", "ASA III", "ASA IV", "ASA V"]
+    },
+    {
+      "section": "Plan quirúrgico",
       "code": "riesgo_quirurgico",
-      "name": "Riesgo quirúrgico descrito",
+      "name": "Riesgo quirúrgico — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Plan quirúrgico",
       "code": "indicacion_quirurgica_propuesta",
       "name": "Indicación quirúrgica propuesta",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Plan quirúrgico",
       "code": "diagnostico",
-      "name": "Diagnóstico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Plan quirúrgico",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta y plan",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }
