@@ -397,17 +397,6 @@
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",
-      "code": "acv_glucemia",
-      "name": "Glucemia capilar (mg/dL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Accidente cerebrovascular"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
       "code": "trauma_mecanismo",
       "name": "Mecanismo de alta energía",
       "dataType": "string",

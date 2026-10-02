@@ -133,7 +133,8 @@
       "code": "caracteristicas_del_dolor",
       "name": "Dolor — otras observaciones",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
     },
     {
       "section": "Síntomas digestivos",

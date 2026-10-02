@@ -20,6 +20,7 @@ import {
   quirurgicos,
   s,
   seccion,
+  sin,
   si,
   socrates,
   sospecha,
@@ -261,7 +262,6 @@ export const CLINICAS = {
         Neumonía: NEUMONIA(),
         Anemia: ANEMIA(),
         'Síndrome febril prolongado': [
-          i('sfp_dias', 'Días de fiebre', { req: true }),
           varias('sfp_estudios', 'Estudios ya realizados', [
             'Hemocultivos',
             'Urocultivo',
@@ -291,10 +291,12 @@ export const CLINICAS = {
     seccion('Síntomas cardiovasculares', [
       b('dolor_toracico', 'Dolor torácico'),
       ...socrates('dolor_toracico', 'dolor_toracico', true, { sitio: false }),
-      t(
-        'caracteristicas_del_dolor',
-        'Características del dolor — otras observaciones',
-      ),
+      ...si('dolor_toracico', true, [
+        t(
+          'caracteristicas_del_dolor',
+          'Características del dolor — otras observaciones',
+        ),
+      ]),
       b('disnea', 'Disnea'),
       ...si('disnea', true, [
         una('nyha_clase_funcional', 'Clase funcional NYHA', NYHA, {
@@ -341,14 +343,6 @@ export const CLINICAS = {
         s('familiar_coronario_quien', '¿Quién y a qué edad?', { req: true }),
       ]),
       b('chagas_riesgo', 'Vivió en zona endémica de Chagas'),
-      ...si('chagas_riesgo', true, [
-        una(
-          'chagas_serologia_cardio',
-          'Serología para Chagas',
-          ['Positiva', 'Negativa', 'Nunca se hizo'],
-          { req: true },
-        ),
-      ]),
       alergias('alergias'),
       medicacion(),
     ]),
@@ -376,7 +370,10 @@ export const CLINICAS = {
       'Diagnóstico presuntivo y observaciones',
       sospecha({
         'Síndrome coronario o angina': DOLOR_TORACICO(),
-        'Insuficiencia cardíaca': IC(),
+        // La NYHA ya se preguntó bajo «Disnea = Sí»: no se repite.
+        'Insuficiencia cardíaca': IC().filter(
+          (c) => c.code !== 'ic_clase_nyha',
+        ),
         'Hipertensión arterial': HTA(),
         Arritmia: [
           una(
@@ -529,7 +526,7 @@ export const CLINICAS = {
       'Diagnóstico presuntivo y observaciones',
       sospecha({
         Asma: ASMA(),
-        EPOC: EPOC(),
+        EPOC: sin(EPOC(), 'epoc_mmrc'),
         Neumonía: NEUMONIA(),
         'Tuberculosis pulmonar': TBC(),
         'Enfermedad pulmonar intersticial': [
@@ -565,7 +562,9 @@ export const CLINICAS = {
     seccion('Síntomas digestivos', [
       b('dolor_abdominal', 'Dolor abdominal'),
       ...socrates('dolor_abdominal', 'dolor_abdominal', true),
-      t('caracteristicas_del_dolor', 'Dolor — otras observaciones'),
+      ...si('dolor_abdominal', true, [
+        t('caracteristicas_del_dolor', 'Dolor — otras observaciones'),
+      ]),
       una('bristol', 'Forma de las heces (escala de Bristol)', [
         'Tipo 1 — bolitas duras',
         'Tipo 2 — salchicha grumosa',
@@ -969,7 +968,7 @@ export const CLINICAS = {
     seccion(
       'Diagnóstico presuntivo y observaciones',
       sospecha({
-        'Accidente cerebrovascular': ACV(),
+        'Accidente cerebrovascular': sin(ACV(), 'acv_glasgow'),
         'Cefalea primaria': CEFALEA(),
         'Epilepsia o crisis convulsiva': CONVULSION(),
         'Deterioro cognitivo': [
@@ -1196,7 +1195,7 @@ export const CLINICAS = {
     seccion(
       'Diagnóstico presuntivo y observaciones',
       sospecha({
-        Dengue: DENGUE(),
+        Dengue: sin(DENGUE(), 'dengue_dias_de_fiebre'),
         'Chikungunya o zika': [
           b('chik_artralgia', 'Artralgias intensas', { req: true }),
           b('zika_embarazo', 'Embarazo en curso'),

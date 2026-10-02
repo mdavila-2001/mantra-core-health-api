@@ -319,21 +319,6 @@
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",
-      "code": "epoc_mmrc",
-      "name": "Disnea (escala mMRC)",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Grado 0 — disnea sólo con ejercicio intenso",
-        "Grado 1 — al caminar rápido o subir una pendiente",
-        "Grado 2 — camina más despacio que sus pares o se detiene en llano",
-        "Grado 3 — se detiene a los 100 metros o a los pocos minutos",
-        "Grado 4 — no sale de casa o se ahoga al vestirse"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "EPOC" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
       "code": "epoc_exacerbaciones_anio",
       "name": "Exacerbaciones en el último año",
       "dataType": "integer",

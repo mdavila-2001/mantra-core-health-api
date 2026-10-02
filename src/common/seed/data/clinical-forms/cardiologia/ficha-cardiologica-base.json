@@ -117,7 +117,8 @@
       "code": "caracteristicas_del_dolor",
       "name": "Características del dolor — otras observaciones",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": { "field": "dolor_toracico", "equals": true }
     },
     {
       "section": "Síntomas cardiovasculares",
@@ -352,15 +353,6 @@
     },
     {
       "section": "Factores de riesgo",
-      "code": "chagas_serologia_cardio",
-      "name": "Serología para Chagas",
-      "dataType": "string",
-      "required": true,
-      "options": ["Positiva", "Negativa", "Nunca se hizo"],
-      "showWhen": { "field": "chagas_riesgo", "equals": true }
-    },
-    {
-      "section": "Factores de riesgo",
       "code": "tiene_alergias",
       "name": "¿Tiene alergias conocidas?",
       "dataType": "boolean",
@@ -557,23 +549,6 @@
       "showWhen": {
         "field": "diagnostico_presuntivo",
         "equals": "Síndrome coronario o angina"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ic_clase_nyha",
-      "name": "Clase funcional NYHA",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Clase I — sin limitación de la actividad física",
-        "Clase II — limitación leve: síntomas con la actividad ordinaria",
-        "Clase III — limitación marcada: síntomas con actividad menor a la ordinaria",
-        "Clase IV — síntomas en reposo"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia cardíaca"
       }
     },
     {
