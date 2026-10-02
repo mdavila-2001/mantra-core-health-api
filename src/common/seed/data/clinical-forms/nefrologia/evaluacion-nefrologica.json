@@ -2,7 +2,7 @@
   "code": "NEFRO_EVALUACION_BASE",
   "name": "Evaluación nefrológica",
   "specialty": { "code": "NEFROLOGIA", "display": "Nefrología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato genitourinario",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,405 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el interrogatorio dirigido de diuresis, edemas y hematuria, el antecedente de litiasis, la presión arterial registrada en consulta y la referencia a estudios de función renal previos."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el interrogatorio dirigido de diuresis, edemas y hematuria, el antecedente de litiasis, la presión arterial registrada en consulta y la referencia a estudios de función renal previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: KDIGO."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "edemas", "name": "Edemas (localización y evolución)", "dataType": "text", "required": false },
-    { "code": "diuresis", "name": "Diuresis referida", "dataType": "text", "required": false },
-    { "code": "nicturia", "name": "Nicturia", "dataType": "boolean", "required": false },
-    { "code": "hematuria", "name": "Hematuria", "dataType": "boolean", "required": false },
-    { "code": "espuma_en_la_orina", "name": "Espuma en la orina", "dataType": "boolean", "required": false },
-    { "code": "dolor_lumbar", "name": "Dolor lumbar", "dataType": "text", "required": false },
-    { "code": "antecedente_de_litiasis", "name": "Antecedente de litiasis renal", "dataType": "text", "required": false },
-    { "code": "antecedentes_de_hipertension_o_diabetes", "name": "Antecedentes de hipertensión o diabetes", "dataType": "text", "required": false },
-    { "code": "medicacion_nefrotoxica", "name": "Medicación potencialmente nefrotóxica en uso", "dataType": "text", "required": false },
-    { "code": "presion_arterial_sistolica", "name": "Presión arterial sistólica (mmHg)", "dataType": "integer", "required": true },
-    { "code": "presion_arterial_diastolica", "name": "Presión arterial diastólica (mmHg)", "dataType": "integer", "required": true },
-    { "code": "peso", "name": "Peso (kg)", "dataType": "decimal", "required": false },
-    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": false },
-    { "code": "funcion_renal_previa", "name": "Función renal previa registrada", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Síntomas",
+      "code": "tiene_edemas",
+      "name": "Edemas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "edema_localizacion",
+      "name": "Localización",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Palpebral",
+        "Miembros inferiores",
+        "Generalizado (anasarca)"
+      ],
+      "showWhen": { "field": "tiene_edemas", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "edemas",
+      "name": "Edemas — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "tiene_edemas", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "volumen_de_diuresis",
+      "name": "Diuresis",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Normal",
+        "Disminuida (oliguria)",
+        "Aumentada (poliuria)",
+        "Anuria"
+      ]
+    },
+    {
+      "section": "Síntomas",
+      "code": "diuresis",
+      "name": "Diuresis — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "nicturia",
+      "name": "Nicturia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "hematuria",
+      "name": "Hematuria",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "espuma_en_la_orina",
+      "name": "Espuma en la orina",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar",
+      "name": "Dolor lumbar",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedente_de_litiasis",
+      "name": "Antecedente de litiasis",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_de_hipertension_o_diabetes",
+      "name": "Hipertensión o diabetes — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "nefrotoxicos",
+      "name": "Nefrotóxicos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "AINE",
+        "Contraste yodado reciente",
+        "Aminoglucósidos",
+        "Medicina tradicional o hierbas",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_nefrotoxica",
+      "name": "Medicación nefrotóxica — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "peso",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "examen_fisico",
+      "name": "Examen físico",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Enfermedad renal crónica",
+        "Lesión renal aguda",
+        "Síndrome nefrótico",
+        "Síndrome nefrítico",
+        "Litiasis renal",
+        "Infección urinaria"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "creatinina",
+      "name": "Creatinina (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tfg",
+      "name": "Filtrado glomerular estimado (mL/min/1,73 m²)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "erc_estadio_kdigo",
+      "name": "Estadio KDIGO",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "G1 (≥ 90)",
+        "G2 (60–89)",
+        "G3a (45–59)",
+        "G3b (30–44)",
+        "G4 (15–29)",
+        "G5 (< 15)"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "albuminuria",
+      "name": "Albuminuria",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "A1 (< 30 mg/g)",
+        "A2 (30–300 mg/g)",
+        "A3 (> 300 mg/g)",
+        "No medida"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lra_causa",
+      "name": "Causa probable",
+      "dataType": "string",
+      "required": true,
+      "options": ["Prerrenal", "Renal intrínseca", "Posrenal (obstructiva)"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lesión renal aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lra_creatinina_basal",
+      "name": "Creatinina basal (mg/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lesión renal aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "proteinuria_24h",
+      "name": "Proteinuria de 24 h (g)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome nefrótico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "albumina_serica",
+      "name": "Albúmina sérica (g/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome nefrótico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "nefritico_hta",
+      "name": "Hipertensión",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome nefrítico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "nefritico_infeccion_previa",
+      "name": "Infección faríngea o cutánea reciente",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome nefrítico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "litiasis_colico",
+      "name": "Cólico renal",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Litiasis renal"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "litiasis_imagen",
+      "name": "Imagen — tamaño y ubicación del lito",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Litiasis renal"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_sintomas",
+      "name": "Síntomas urinarios",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Disuria",
+        "Polaquiuria",
+        "Urgencia miccional",
+        "Hematuria",
+        "Dolor suprapúbico"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_fiebre_o_lumbar",
+      "name": "Fiebre o dolor lumbar (sospecha de pielonefritis)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_punopercusion",
+      "name": "Puñopercusión lumbar",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "No evaluada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_embarazo",
+      "name": "¿Embarazo posible?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No", "No aplica"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "funcion_renal_previa",
+      "name": "Función renal previa",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

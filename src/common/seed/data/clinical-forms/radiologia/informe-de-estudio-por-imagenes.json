@@ -1,11 +1,8 @@
 {
   "code": "RADIO_INFORME_BASE",
   "name": "Informe de estudio por imágenes",
-  "specialty": {
-    "code": "RADIOLOGIA",
-    "display": "Radiología e Imagenología"
-  },
-  "version": 1,
+  "specialty": { "code": "RADIOLOGIA", "display": "Radiología e Imagenología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, informe de exámenes auxiliares por imágenes",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,96 +10,169 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad los ítems de identificación técnica del estudio (estudio realizado, región anatómica, técnica y proyecciones, uso de medio de contraste, calidad del estudio) y la comparación con estudios previos."
+    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, descripción de lo observado, conclusión diagnóstica y conducta o recomendación. Son agregados propios de la especialidad los ítems de identificación técnica del estudio (estudio realizado, región anatómica, técnica y proyecciones, uso de medio de contraste, calidad del estudio) y la comparación con estudios previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: categorías BI-RADS."
   },
   "fields": [
     {
+      "section": "Solicitud",
       "code": "motivo_consulta",
-      "name": "Motivo del estudio o indicación clínica",
+      "name": "Indicación del estudio",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Solicitud",
       "code": "antecedentes_relevantes",
       "name": "Antecedentes relevantes",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "estudio_realizado",
       "name": "Estudio realizado",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": [
+        "Radiografía",
+        "Ecografía",
+        "Tomografía",
+        "Resonancia magnética",
+        "Mamografía",
+        "Densitometría",
+        "Fluoroscopía"
+      ]
     },
     {
+      "section": "Solicitud",
       "code": "region_anatomica",
-      "name": "Región anatómica explorada",
+      "name": "Región anatómica",
       "dataType": "string",
       "required": true
     },
     {
+      "section": "Solicitud",
       "code": "fecha_del_estudio",
       "name": "Fecha del estudio",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Técnica",
       "code": "tecnica_y_proyecciones",
-      "name": "Técnica y proyecciones realizadas",
+      "name": "Técnica y proyecciones",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Técnica",
       "code": "uso_de_contraste",
-      "name": "Uso de medio de contraste",
+      "name": "Uso de contraste",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Técnica",
       "code": "medio_de_contraste_utilizado",
-      "name": "Medio de contraste utilizado y vía de administración",
+      "name": "¿Qué contraste y por qué vía?",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "uso_de_contraste", "equals": true }
     },
     {
+      "section": "Técnica",
+      "code": "reaccion_al_contraste",
+      "name": "Hubo reacción al contraste",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "uso_de_contraste", "equals": true }
+    },
+    {
+      "section": "Técnica",
+      "code": "calidad",
+      "name": "Calidad del estudio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Óptima", "Adecuada", "Limitada"]
+    },
+    {
+      "section": "Técnica",
       "code": "calidad_del_estudio",
-      "name": "Calidad del estudio y limitaciones técnicas",
+      "name": "¿Por qué es limitada?",
       "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "calidad", "equals": "Limitada" }
+    },
+    {
+      "section": "Técnica",
+      "code": "hay_previos",
+      "name": "Hay estudios previos para comparar",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Técnica",
       "code": "comparacion_estudios_previos",
-      "name": "Comparación con estudios previos",
+      "name": "Comparación",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "hay_previos", "equals": true }
     },
     {
+      "section": "Informe",
       "code": "hallazgos",
       "name": "Hallazgos",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Informe",
       "code": "hallazgos_incidentales",
       "name": "Hallazgos incidentales",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Informe",
       "code": "incidentes_durante_el_estudio",
       "name": "Incidentes durante el estudio",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Informe",
+      "code": "categoria_birads",
+      "name": "BI-RADS (sólo mama)",
+      "dataType": "string",
+      "required": false,
+      "options": ["No aplica", "0", "1", "2", "3", "4", "5", "6"]
+    },
+    {
+      "section": "Informe",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Informe",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿Cuál, a quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    },
+    {
+      "section": "Informe",
       "code": "diagnostico",
-      "name": "Impresión diagnóstica o conclusión",
+      "name": "Conclusión",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Informe",
       "code": "conducta",
-      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "name": "Recomendación",
       "dataType": "text",
       "required": false
     }

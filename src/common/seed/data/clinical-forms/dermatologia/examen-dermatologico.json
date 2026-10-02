@@ -1,11 +1,8 @@
 {
   "code": "DERMA_EXAMEN_BASE",
   "name": "Examen dermatológico — versión general base",
-  "specialty": {
-    "code": "DERMATOLOGIA",
-    "display": "Dermatología"
-  },
-  "version": 1,
+  "specialty": { "code": "DERMATOLOGIA", "display": "Dermatología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen de piel y faneras",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,110 +10,389 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de la descripción semiológica de la lesión elemental, su distribución y su evolución."
+    "note": "Estructura de la descripción semiológica de la lesión elemental, su distribución y su evolución. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: fototipos de Fitzpatrick, regla ABCDE del melanoma."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Con las palabras del paciente."
     },
     {
+      "section": "Motivo de consulta",
       "code": "tiempo_de_evolucion",
       "name": "Tiempo de evolución",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
     },
     {
+      "section": "Síntomas",
       "code": "prurito",
       "name": "Prurito",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
+      "code": "prurito_intensidad",
+      "name": "Intensidad del prurito (0 a 10)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "prurito", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "prurito_nocturno",
+      "name": "Empeora de noche",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "prurito", "equals": true }
+    },
+    {
+      "section": "Síntomas",
       "code": "dolor_local",
       "name": "Dolor local",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Lesión",
       "code": "lesion_elemental",
-      "name": "Lesión elemental predominante",
+      "name": "Lesión elemental",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": [
+        "Mácula",
+        "Pápula",
+        "Placa",
+        "Nódulo",
+        "Vesícula",
+        "Ampolla",
+        "Pústula",
+        "Habón",
+        "Escama",
+        "Costra",
+        "Úlcera",
+        "Cicatriz"
+      ]
     },
     {
+      "section": "Lesión",
       "code": "descripcion_de_la_lesion",
-      "name": "Descripción de la lesión",
+      "name": "Descripción (color, bordes, superficie)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Lesión",
       "code": "localizacion",
       "name": "Localización",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Lesión",
       "code": "distribucion",
       "name": "Distribución",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": [
+        "Localizada",
+        "Generalizada",
+        "Simétrica",
+        "Dermatómica",
+        "Fotoexpuesta",
+        "Flexural"
+      ]
     },
     {
+      "section": "Lesión",
       "code": "numero_de_lesiones",
       "name": "Número de lesiones",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Lesión",
       "code": "tamano_mayor_mm",
-      "name": "Tamaño de la lesión mayor (mm)",
+      "name": "Tamaño de la mayor (mm)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Lesión",
+      "code": "fototipo",
+      "name": "Fototipo de Fitzpatrick",
+      "dataType": "string",
+      "required": false,
+      "options": ["I", "II", "III", "IV", "V", "VI"]
+    },
+    {
+      "section": "Lesión",
       "code": "compromiso_de_mucosas",
       "name": "Compromiso de mucosas",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Lesión",
+      "code": "mucosas_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Oral", "Genital", "Conjuntival", "Nasal"],
+      "multiple": true,
+      "showWhen": { "field": "compromiso_de_mucosas", "equals": true }
+    },
+    {
+      "section": "Lesión",
       "code": "compromiso_de_faneras",
-      "name": "Compromiso de uñas o cabello",
+      "name": "Compromiso de pelo o uñas",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Lesión",
+      "code": "faneras_cuales",
+      "name": "¿Qué?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Caída de pelo", "Uñas"],
+      "multiple": true,
+      "showWhen": { "field": "compromiso_de_faneras", "equals": true }
+    },
+    {
+      "section": "Lesión",
       "code": "factores_desencadenantes",
       "name": "Factores desencadenantes",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Lesión",
       "code": "tratamientos_previos",
       "name": "Tratamientos previos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Lesión pigmentada (descartar melanoma)",
+        "Dermatitis (atópica o de contacto)",
+        "Psoriasis",
+        "Acné",
+        "Micosis superficial",
+        "Leishmaniasis cutánea",
+        "Carcinoma de piel no melanoma"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "abcde",
+      "name": "Criterios ABCDE",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría",
+        "Bordes irregulares",
+        "Color heterogéneo",
+        "Diámetro > 6 mm",
+        "Evolución (cambió)"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lesión pigmentada (descartar melanoma)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dermatoscopia",
+      "name": "Dermatoscopía realizada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lesión pigmentada (descartar melanoma)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "atopia",
+      "name": "Antecedente de atopia",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dermatitis (atópica o de contacto)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dermatitis_contactante",
+      "name": "Posible contactante",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dermatitis (atópica o de contacto)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "pasi",
+      "name": "PASI",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "superficie_corporal",
+      "name": "Superficie corporal afectada (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "psoriasis_artritis",
+      "name": "Dolor articular",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acne_grado",
+      "name": "Grado",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Comedoniano",
+        "Papulopustuloso leve",
+        "Papulopustuloso moderado",
+        "Noduloquístico"
+      ],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Acné" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "micosis_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Tiña corporal",
+        "Tiña pedis",
+        "Onicomicosis",
+        "Pitiriasis versicolor",
+        "Candidiasis"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Micosis superficial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "koh",
+      "name": "KOH o cultivo realizado",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Micosis superficial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "leish_cutanea_lesiones",
+      "name": "Número de úlceras",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Leishmaniasis cutánea"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "leish_mucosa",
+      "name": "Compromiso nasal o bucal",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Leishmaniasis cutánea"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "leish_procedencia",
+      "name": "Zona donde se expuso",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Leishmaniasis cutánea"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cpnm_tipo",
+      "name": "Sospecha",
+      "dataType": "string",
+      "required": true,
+      "options": ["Basocelular", "Espinocelular", "Queratosis actínica"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Carcinoma de piel no melanoma"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cpnm_biopsia",
+      "name": "Biopsia indicada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Carcinoma de piel no melanoma"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
       "code": "estudios_solicitados",
       "name": "Estudios solicitados",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico y plan",
       "code": "diagnostico",
-      "name": "Diagnóstico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Diagnóstico y plan",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta y plan",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }

@@ -5,7 +5,7 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Resolución 1995 de 1999 — normas para el manejo de la historia clínica: epicrisis y resumen de egreso",
     "organization": "Ministerio de Salud de Colombia",
@@ -13,80 +13,133 @@
     "license": "Norma estatal de acceso público",
     "sourceVersion": "1995 de 1999",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción del contenido mínimo que la norma exige en el resumen de egreso."
+    "note": "Transcripción del contenido mínimo que la norma exige en el resumen de egreso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Internación",
       "code": "fecha_de_ingreso",
       "name": "Fecha de ingreso",
       "dataType": "date",
       "required": true
     },
     {
+      "section": "Internación",
       "code": "fecha_de_egreso",
       "name": "Fecha de egreso",
       "dataType": "date",
       "required": true
     },
     {
+      "section": "Internación",
       "code": "motivo_de_ingreso",
       "name": "Motivo de ingreso",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Internación",
       "code": "diagnostico_de_ingreso",
       "name": "Diagnóstico de ingreso",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Internación",
       "code": "diagnostico_de_egreso",
-      "name": "Diagnóstico de egreso",
+      "name": "Diagnóstico de egreso (CIE-10)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Internación",
       "code": "resumen_de_la_evolucion",
       "name": "Resumen de la evolución",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Internación",
+      "code": "hubo_procedimientos",
+      "name": "Se realizaron procedimientos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Internación",
       "code": "procedimientos_realizados",
-      "name": "Procedimientos realizados",
+      "name": "¿Cuáles y cuándo?",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "hubo_procedimientos", "equals": true }
     },
     {
+      "section": "Internación",
       "code": "hallazgos_relevantes",
-      "name": "Hallazgos de laboratorio e imágenes relevantes",
+      "name": "Hallazgos relevantes",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "tratamiento_al_egreso",
-      "name": "Tratamiento indicado al egreso",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "recomendaciones",
-      "name": "Recomendaciones al paciente",
-      "dataType": "text",
+      "section": "Internación",
+      "code": "hubo_complicaciones",
+      "name": "Hubo complicaciones",
+      "dataType": "boolean",
       "required": false
     },
     {
-      "code": "control_ambulatorio",
-      "name": "Fecha de control ambulatorio",
-      "dataType": "date",
-      "required": false
+      "section": "Internación",
+      "code": "complicaciones",
+      "name": "¿Cuáles?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "hubo_complicaciones", "equals": true }
     },
     {
+      "section": "Egreso",
       "code": "condicion_al_egreso",
       "name": "Condición al egreso",
       "dataType": "string",
+      "required": true,
+      "options": [
+        "Alta médica — mejorado",
+        "Alta médica — igual",
+        "Alta voluntaria",
+        "Referido a otro establecimiento",
+        "Fallecido"
+      ]
+    },
+    {
+      "section": "Egreso",
+      "code": "referido_a",
+      "name": "¿A qué establecimiento y por qué?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "condicion_al_egreso",
+        "equals": "Referido a otro establecimiento"
+      }
+    },
+    {
+      "section": "Egreso",
+      "code": "tratamiento_al_egreso",
+      "name": "Tratamiento al egreso",
+      "dataType": "text",
       "required": true
+    },
+    {
+      "section": "Egreso",
+      "code": "recomendaciones",
+      "name": "Recomendaciones y signos de alarma explicados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Egreso",
+      "code": "control_ambulatorio",
+      "name": "Fecha del control ambulatorio",
+      "dataType": "date",
+      "required": false
     }
   ]
 }

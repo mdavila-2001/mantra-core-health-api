@@ -2,7 +2,7 @@
   "code": "GERIA_VALORACION_BASE",
   "name": "Valoración geriátrica",
   "specialty": { "code": "GERIATRIA", "display": "Geriatría" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen del adulto mayor",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,542 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la autonomía en actividades de la vida diaria, el antecedente de caídas, el recuento de fármacos en uso, la descripción en prosa del estado cognitivo y del ánimo, la continencia y el soporte social."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la autonomía en actividades de la vida diaria, el antecedente de caídas, el recuento de fármacos en uso, la descripción en prosa del estado cognitivo y del ánimo, la continencia y el soporte social. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: SRQ-20 (OMS), índice de Katz, escala de Lawton, fenotipo de fragilidad de Fried, criterios de Beers/STOPP."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "antecedentes_personales", "name": "Antecedentes personales relevantes", "dataType": "text", "required": false },
-    { "code": "autonomia_actividades_basicas", "name": "Autonomía en actividades básicas de la vida diaria", "dataType": "text", "required": true },
-    { "code": "autonomia_actividades_instrumentales", "name": "Autonomía en actividades instrumentales de la vida diaria", "dataType": "text", "required": false },
-    { "code": "marcha_y_equilibrio", "name": "Marcha y equilibrio", "dataType": "text", "required": false },
-    { "code": "caidas_en_el_ultimo_ano", "name": "Caídas en el último año (número)", "dataType": "integer", "required": false },
-    { "code": "numero_de_farmacos_en_uso", "name": "Número de fármacos en uso", "dataType": "integer", "required": false },
-    { "code": "farmacos_en_uso", "name": "Fármacos en uso", "dataType": "text", "required": false },
-    { "code": "estado_cognitivo", "name": "Estado cognitivo (descripción)", "dataType": "text", "required": false },
-    { "code": "estado_de_animo", "name": "Estado de ánimo (descripción)", "dataType": "text", "required": false },
-    { "code": "continencia", "name": "Continencia urinaria y fecal", "dataType": "text", "required": false },
-    { "code": "alimentacion_y_peso", "name": "Alimentación y cambios de peso", "dataType": "text", "required": false },
-    { "code": "vision_y_audicion", "name": "Visión y audición", "dataType": "text", "required": false },
-    { "code": "soporte_social", "name": "Soporte social y convivencia", "dataType": "text", "required": false },
-    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Enfermedades crónicas conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Asma",
+        "EPOC",
+        "Cardiopatía",
+        "Enfermedad renal crónica",
+        "Enfermedad tiroidea",
+        "Cáncer",
+        "Tuberculosis",
+        "Enfermedad de Chagas",
+        "Epilepsia",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_personales",
+      "name": "Antecedentes personales — detalle",
+      "dataType": "text",
+      "required": false,
+      "description": "Año de diagnóstico, tratamiento y si está controlada."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "alergias_detalle",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "katz_dependiente",
+      "name": "Actividades básicas en las que necesita ayuda (Katz)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Bañarse",
+        "Vestirse",
+        "Usar el baño",
+        "Movilizarse",
+        "Continencia",
+        "Alimentarse",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "autonomia_actividades_basicas",
+      "name": "Actividades básicas — detalle",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "lawton_dependiente",
+      "name": "Actividades instrumentales en las que necesita ayuda (Lawton)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Usar el teléfono",
+        "Hacer compras",
+        "Preparar la comida",
+        "Tareas de la casa",
+        "Lavar la ropa",
+        "Usar transporte",
+        "Manejar su medicación",
+        "Manejar su dinero",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "autonomia_actividades_instrumentales",
+      "name": "Actividades instrumentales — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "velocidad_de_marcha",
+      "name": "Velocidad de marcha en 4 m (m/s)",
+      "dataType": "decimal",
+      "required": false,
+      "description": "Menos de 0,8 m/s: riesgo de fragilidad."
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "marcha_y_equilibrio",
+      "name": "Marcha y equilibrio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración funcional",
+      "code": "caidas_en_el_ultimo_ano",
+      "name": "Caídas en el último año",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Fármacos",
+      "code": "numero_de_farmacos_en_uso",
+      "name": "Número de fármacos en uso",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Fármacos",
+      "code": "farmacos_en_uso",
+      "name": "Fármacos en uso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Fármacos",
+      "code": "farmacos_inapropiados",
+      "name": "Algún fármaco potencialmente inapropiado (Beers/STOPP)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Fármacos",
+      "code": "farmacos_inapropiados_cuales",
+      "name": "¿Cuál?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "farmacos_inapropiados", "equals": true }
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "prueba_cognitiva",
+      "name": "Prueba cognitiva aplicada y puntaje",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "estado_cognitivo",
+      "name": "Estado cognitivo — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "animo_bajo",
+      "name": "Ánimo bajo o pérdida de interés en el último mes",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "estado_de_animo",
+      "name": "Estado de ánimo — detalle",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "animo_bajo", "equals": true }
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "incontinencia",
+      "name": "Incontinencia",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Urinaria de esfuerzo",
+        "Urinaria de urgencia",
+        "Fecal",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "continencia",
+      "name": "Continencia — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "perdida_de_peso",
+      "name": "Pérdida de peso no intencionada",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "perdida_de_peso_kg_geria",
+      "name": "¿Cuántos kg en los últimos 6 meses?",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "perdida_de_peso", "equals": true }
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "alimentacion_y_peso",
+      "name": "Alimentación y peso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "deficit_sensorial",
+      "name": "Déficit sensorial",
+      "dataType": "json",
+      "required": false,
+      "options": ["Visual", "Auditivo", "Ninguno"],
+      "multiple": true
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "vision_y_audicion",
+      "name": "Visión y audición — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "vive",
+      "name": "Con quién vive",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Solo",
+        "Con pareja",
+        "Con hijos o familiares",
+        "En un hogar o residencia"
+      ]
+    },
+    {
+      "section": "Valoración mental y social",
+      "code": "soporte_social",
+      "name": "Soporte social",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "examen_fisico",
+      "name": "Examen físico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Síndrome de fragilidad",
+        "Caídas",
+        "Deterioro cognitivo o demencia",
+        "Delirium",
+        "Polifarmacia",
+        "Depresión del adulto mayor"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "fried",
+      "name": "Criterios de Fried",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Pérdida de peso no intencionada",
+        "Agotamiento",
+        "Debilidad (prensión)",
+        "Marcha lenta",
+        "Baja actividad física"
+      ],
+      "multiple": true,
+      "description": "3 o más: frágil · 1–2: prefrágil.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome de fragilidad"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "caidas_riesgo",
+      "name": "Factores de riesgo",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Alteración de la marcha",
+        "Hipotensión ortostática",
+        "Psicofármacos",
+        "Déficit visual",
+        "Riesgos en el hogar"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Caídas" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "caidas_fractura",
+      "name": "Fractura en alguna caída",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Caídas" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "demencia_prueba",
+      "name": "Prueba y puntaje",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Deterioro cognitivo o demencia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "demencia_conducta",
+      "name": "Síntomas conductuales",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Deterioro cognitivo o demencia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "delirium_rasgos",
+      "name": "Rasgos de delirium",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Inicio agudo y curso fluctuante",
+        "Inatención",
+        "Pensamiento desorganizado",
+        "Alteración del nivel de conciencia"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Delirium" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "polifarmacia_revision",
+      "name": "Fármacos a suspender o ajustar",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Polifarmacia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "srq20_respuestas_si",
+      "name": "SRQ-20 (OMS): marque las preguntas que respondió «sí» en el último mes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "¿Tiene frecuentes dolores de cabeza?",
+        "¿Tiene mal apetito?",
+        "¿Duerme mal?",
+        "¿Se asusta con facilidad?",
+        "¿Sufre de temblor de manos?",
+        "¿Se siente nervioso, tenso o aburrido?",
+        "¿Sufre de mala digestión?",
+        "¿No puede pensar con claridad?",
+        "¿Se siente triste?",
+        "¿Llora usted con mucha frecuencia?",
+        "¿Tiene dificultad en disfrutar sus actividades diarias?",
+        "¿Tiene dificultad para tomar decisiones?",
+        "¿Tiene dificultad en hacer su trabajo?",
+        "¿Es incapaz de desempeñar un papel útil en su vida?",
+        "¿Ha perdido interés en las cosas?",
+        "¿Siente que usted es una persona inútil?",
+        "¿Ha tenido la idea de acabar con su vida?",
+        "¿Se siente cansado todo el tiempo?",
+        "¿Tiene sensaciones desagradables en su estómago?",
+        "¿Se cansa con facilidad?"
+      ],
+      "multiple": true,
+      "description": "8 o más respuestas positivas: probable trastorno mental común. La pregunta 17 positiva exige evaluar riesgo suicida.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Depresión del adulto mayor"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "srq20_puntaje",
+      "name": "SRQ-20 — total de respuestas «sí» (0–20)",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Depresión del adulto mayor"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ideacion_suicida",
+      "name": "Ideación suicida actual",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Depresión del adulto mayor"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

@@ -1,8 +1,11 @@
 {
   "code": "EMERG_ATENCION_BASE",
   "name": "Atención en emergencia",
-  "specialty": { "code": "MEDICINA_EMERGENCIA", "display": "Medicina de Emergencia" },
-  "version": 1,
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, registro de la atención de urgencias y emergencias",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +13,631 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común del registro: motivo, tiempo de evolución, antecedentes, alergias, medicación, signos vitales, diagnóstico y conducta. Son agregados propios de la especialidad la hora de llegada, la forma de llegada, la evaluación inicial y el nivel de prioridad asignado, que se registra como texto libre tal como lo escriba el profesional."
+    "note": "De la norma se transcribe la estructura común del registro: motivo, tiempo de evolución, antecedentes, alergias, medicación, signos vitales, diagnóstico y conducta. Son agregados propios de la especialidad la hora de llegada, la forma de llegada, la evaluación inicial y el nivel de prioridad asignado, que se registra como texto libre tal como lo escriba el profesional. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de coma de Glasgow, escala de Cincinnati, guía de dengue OPS/OMS 2016, qSOFA (Sepsis-3)."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "hora_de_llegada", "name": "Hora de llegada", "dataType": "string", "required": true },
-    { "code": "forma_de_llegada", "name": "Forma de llegada", "dataType": "string", "required": false },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": false },
-    { "code": "nivel_de_prioridad_asignado", "name": "Nivel de prioridad asignado", "dataType": "string", "required": false },
-    { "code": "evaluacion_inicial", "name": "Evaluación inicial", "dataType": "text", "required": true },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "string", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial", "dataType": "string", "required": false },
-    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca", "dataType": "integer", "required": false },
-    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria", "dataType": "integer", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
-    { "code": "temperatura", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
-    { "code": "dolor_presente", "name": "Dolor presente", "dataType": "boolean", "required": false },
-    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
-    { "code": "alergias", "name": "Alergias", "dataType": "text", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Llegada",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Llegada",
+      "code": "hora_de_llegada",
+      "name": "Hora de llegada",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Llegada",
+      "code": "forma_de_llegada",
+      "name": "Forma de llegada",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Por sus medios",
+        "Ambulancia",
+        "Traído por terceros",
+        "Policía"
+      ]
+    },
+    {
+      "section": "Llegada",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Llegada",
+      "code": "nivel_de_prioridad_asignado",
+      "name": "Prioridad asignada en el triaje del establecimiento",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "evaluacion_inicial",
+      "name": "Evaluación inicial",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "via_aerea",
+      "name": "A — vía aérea",
+      "dataType": "string",
+      "required": false,
+      "options": ["Permeable", "Comprometida"]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "respiracion",
+      "name": "B — respiración",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuada", "Dificultad respiratoria", "Apnea"]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "circulacion",
+      "name": "C — circulación",
+      "dataType": "string",
+      "required": false,
+      "options": ["Estable", "Signos de shock", "Hemorragia activa"]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "estado_de_conciencia",
+      "name": "D — conciencia (AVPU)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Alerta",
+        "Responde a la voz",
+        "Responde al dolor",
+        "No responde"
+      ]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "glasgow_ocular",
+      "name": "Glasgow — apertura ocular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "4 — espontánea",
+        "3 — a la voz",
+        "2 — al dolor",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "glasgow_verbal",
+      "name": "Glasgow — respuesta verbal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "5 — orientada",
+        "4 — confusa",
+        "3 — palabras inapropiadas",
+        "2 — sonidos incomprensibles",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "glasgow_motora",
+      "name": "Glasgow — respuesta motora",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "6 — obedece órdenes",
+        "5 — localiza el dolor",
+        "4 — retira al dolor",
+        "3 — flexión anormal",
+        "2 — extensión",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg, sistólica/diastólica)",
+      "dataType": "string",
+      "required": false,
+      "description": "Por ejemplo: 120/80."
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "dolor_presente",
+      "name": "Dolor",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "dolor_intensidad",
+      "name": "Intensidad (0 a 10)",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": { "field": "dolor_presente", "equals": true }
+    },
+    {
+      "section": "Evaluación primaria (ABCDE)",
+      "code": "dolor_localizacion",
+      "name": "Localización",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "dolor_presente", "equals": true }
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "medicacion_actual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "ultima_ingesta",
+      "name": "Última ingesta (hora)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Antecedentes (SAMPLE)",
+      "code": "embarazo_emergencia",
+      "name": "¿Embarazo posible?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No", "No aplica"]
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Dolor torácico agudo",
+        "Accidente cerebrovascular",
+        "Politraumatismo",
+        "Dificultad respiratoria",
+        "Sepsis",
+        "Dengue con signos de alarma",
+        "Convulsión",
+        "Intoxicación"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_tipo",
+      "name": "Tipo de dolor torácico",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Típico: retroesternal, con el esfuerzo, cede con reposo o nitratos",
+        "Atípico: cumple dos de los tres criterios",
+        "No anginoso: cumple uno o ninguno"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dolor torácico agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_acompanantes",
+      "name": "Acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diaforesis",
+        "Náuseas o vómitos",
+        "Disnea",
+        "Síncope o presíncope",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dolor torácico agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_ecg",
+      "name": "ECG de 12 derivaciones — hallazgo principal",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dolor torácico agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "troponina",
+      "name": "Troponina",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dolor torácico agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_cincinnati",
+      "name": "Escala de Cincinnati",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría facial",
+        "Caída de un brazo",
+        "Alteración del habla",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_hora_inicio",
+      "name": "Hora de inicio o de la última vez visto bien",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acv_glasgow",
+      "name": "Escala de Glasgow (3–15)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Accidente cerebrovascular"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "trauma_mecanismo",
+      "name": "Mecanismo de alta energía",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Politraumatismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "trauma_lesiones",
+      "name": "Lesiones",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Craneoencefálica",
+        "Torácica",
+        "Abdominal",
+        "Pélvica",
+        "Extremidades",
+        "Columna"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Politraumatismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dr_causa",
+      "name": "Causa probable",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Asma o EPOC",
+        "Neumonía",
+        "Insuficiencia cardíaca",
+        "Anafilaxia",
+        "Embolia pulmonar"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dificultad respiratoria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "qsofa_emerg",
+      "name": "qSOFA",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Frecuencia respiratoria ≥ 22",
+        "Alteración del estado mental",
+        "PAS ≤ 100 mmHg"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Sepsis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lactato",
+      "name": "Lactato (mmol/L)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Sepsis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dengue_dias_de_fiebre",
+      "name": "Días de fiebre",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dengue con signos de alarma"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dengue_signos_de_alarma",
+      "name": "Signos de alarma (OPS/OMS)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor abdominal intenso y continuo",
+        "Vómitos persistentes",
+        "Acumulación de líquidos (ascitis, derrame)",
+        "Sangrado de mucosas",
+        "Letargia o irritabilidad",
+        "Hepatomegalia mayor a 2 cm",
+        "Aumento del hematocrito con caída de plaquetas",
+        "Hipotensión postural",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dengue con signos de alarma"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dengue_torniquete",
+      "name": "Prueba del torniquete",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "No realizada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dengue con signos de alarma"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dengue_grupo",
+      "name": "Clasificación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Grupo A — sin signos de alarma",
+        "Grupo B — con signos de alarma o condición asociada",
+        "Grupo C — dengue grave"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dengue con signos de alarma"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_tipo",
+      "name": "Tipo de crisis",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Tónico-clónica generalizada",
+        "Focal sin pérdida de conciencia",
+        "Focal con alteración de conciencia",
+        "Ausencia",
+        "No definido"
+      ],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Convulsión" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_duracion_minutos",
+      "name": "Duración (minutos)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Convulsión" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_primera",
+      "name": "Es la primera crisis",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Convulsión" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "convulsion_desencadenantes",
+      "name": "Posibles desencadenantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Falta de sueño",
+        "Alcohol",
+        "Abandono de la medicación",
+        "Ninguno conocido"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Convulsión" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "intox_sustancia",
+      "name": "Sustancia y cantidad",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Intoxicación"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "intox_hora",
+      "name": "Hora de exposición",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Intoxicación"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "intox_via",
+      "name": "Vía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Oral", "Inhalatoria", "Cutánea", "Parenteral"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Intoxicación"
+      }
+    },
+    {
+      "section": "Diagnóstico y conducta",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y conducta",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    },
+    {
+      "section": "Diagnóstico y conducta",
+      "code": "destino",
+      "name": "Destino",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Alta",
+        "Observación",
+        "Internación",
+        "Terapia intensiva",
+        "Referencia a otro establecimiento",
+        "Quirófano"
+      ]
+    }
   ]
 }

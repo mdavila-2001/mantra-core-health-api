@@ -35,9 +35,7 @@ Tres criterios que se aplicaron al escribir las 28 nuevas y que conviene respeta
   estructura de toda historia clínica (motivo, evolución, examen dirigido, diagnóstico, conducta)
   sale de ahí, y cada ficha declara en su `note` qué ítems son agregado propio de la disciplina.
   No se incorporó ninguna fuente nueva.
-- **Las escalas van como campo libre, nunca como catálogo.** ASA, ECOG, Mallampati o el dolor
-  0-10 se registran como `string`/`integer`: un value set nuevo es vocabulario del modelo y entra
-  por el pipeline canónico, no por un `.json` de contenido.
+- ~~Las escalas van como campo libre.~~ **Reemplazado en la v2 (2026-10-02)**, ver abajo.
 - **Emergencia no promete tiempos.** `EMERG_ATENCION_BASE` registra prioridad como texto libre y
   **no** enumera niveles de triage ni compromete tiempos de atención: es una decisión de producto
   que nadie tomó (regla 6 del diagnóstico del documento ecosistémico).
@@ -46,9 +44,40 @@ Las tres fichas de **informe** (radiología, patología, laboratorio) respetan i
 —empiezan en `motivo_consulta`, cierran en `diagnostico`— aunque ahí signifiquen «indicación del
 estudio» y «conclusión»: el motor y el selector no distinguen tipos de ficha.
 
+## v2 (2026-10-02) — fichas que preguntan lo que corresponde
+
+El propietario revisó la vista previa: 413 de 723 campos eran texto libre, ninguno tenía opciones
+y ningún «sí» preguntaba «¿cuál?». La v2 se escribe con **`tools/clinical-forms/build-forms.mjs`**
+(`node tools/clinical-forms/build-forms.mjs`, y `--check` para comprobar que los `.json` están al
+día). **Los `.json` se editan desde ahí, no a mano.**
+
+- **Secciones SOAP / NT 022**: motivo → antecedentes → hábitos → examen → diagnóstico presuntivo →
+  observaciones → plan (`section`).
+- **Listas cerradas** (`options`): una respuesta = `string`, varias = `json` + `multiple`. No se
+  usa `code`: escribe en `value_concept_id` y estas opciones no son conceptos sembrados.
+- **«¿Cuál?» condicional** (`showWhen: { field, equals }`): semántica de FHIR `enableWhen` con
+  operador `=` y `SHOW` (la misma de `CreateFieldDependencyDto`). Con padre de varias respuestas
+  se cumple si la respuesta incluye el valor; `equals` puede ser una lista. Un campo con el padre
+  oculto también se oculta, y `required` sólo vale cuando está a la vista.
+- **Diagnóstico presuntivo** con 5 a 8 cuadros frecuentes por especialidad; cada uno abre las
+  observaciones que su guía pide (`tools/clinical-forms/sindromes.mjs`): dengue con signos de
+  alarma OPS/OMS 2016, neumonía con CURB-65, IC con NYHA y Framingham, EPOC con mMRC, asma con
+  GINA, ACV con Cincinnati y Glasgow, diarrea con planes A/B/C, niño con signos de peligro AIEPI,
+  tamizaje mental con SRQ-20, alcohol con AUDIT-C (OMS).
+- **Un código existente no cambia de tipo** (lo verifica el script): lo que cambia de naturaleza
+  entra con código nuevo y la siembra retira el viejo (`visible = false`) sin borrarlo.
+- **Dónde se guarda**: la definición del campo no tiene columnas para nada de esto, así que viaja
+  en el `default_value_json` de `__catalog__` (`fieldPresentation`), junto a la procedencia, y
+  `ChartTemplatesService` lo devuelve en cada campo (`section`, `options`, `multiple`,
+  `allowOther`, `description`, `showWhen { fieldId, equals }`).
+- **Instrumentos con licencia comercial no confirmada no entran**: además de los de la tabla de
+  abajo, se dejaron afuera STOP-BANG, IIEF-5, Braden, Morse, MUST, criterios de Roma y CAM; donde
+  hacían falta, la ficha pregunta lo clínico sin el instrumento (lo prueba `catalog.spec.ts`).
+
 ## Agregar un formulario
 
-1. Crear `<especialidad>/<formulario>.json` con la forma de `StandardFormDefinition`.
+1. Crear `<especialidad>/<formulario>.json` con la ficha de procedencia y escribir sus campos en
+   `tools/clinical-forms/` (luego correr `build-forms.mjs`).
 2. Sumar su `import` a `catalog.ts` y su entrada a `STANDARD_FORMS`.
 3. Nada más: `ClinicalFormsSeedService` lo siembra en el próximo arranque, y si la especialidad
    todavía no existe como concepto de terminología, la siembra también.

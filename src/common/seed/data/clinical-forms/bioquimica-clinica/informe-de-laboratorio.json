@@ -5,7 +5,7 @@
     "code": "BIOQUIMICA_CLINICA",
     "display": "Bioquímica Clínica"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, registro e informe de exámenes auxiliares de laboratorio",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,114 +13,192 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, resultado de lo observado, conclusión y conducta o recomendación. Son agregados propios de la especialidad los ítems de la fase preanalítica (tipo de muestra, condiciones de la toma, ayuno, fecha y hora de toma, medicación en curso) y la distinción entre determinaciones solicitadas, resultados en prosa, valores fuera del rango de referencia y observaciones preanalíticas."
+    "note": "De la norma sale el molde común del documento clínico: motivo o indicación del estudio, resultado de lo observado, conclusión y conducta o recomendación. Son agregados propios de la especialidad los ítems de la fase preanalítica (tipo de muestra, condiciones de la toma, ayuno, fecha y hora de toma, medicación en curso) y la distinción entre determinaciones solicitadas, resultados en prosa, valores fuera del rango de referencia y observaciones preanalíticas. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Solicitud",
       "code": "motivo_consulta",
-      "name": "Motivo del estudio o indicación clínica",
+      "name": "Indicación",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Solicitud",
       "code": "diagnostico_presuntivo_solicitante",
       "name": "Diagnóstico presuntivo del solicitante",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Solicitud",
       "code": "determinaciones_solicitadas",
       "name": "Determinaciones solicitadas",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Fase preanalítica",
       "code": "tipo_de_muestra",
       "name": "Tipo de muestra",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "options": [
+        "Sangre venosa",
+        "Sangre capilar",
+        "Orina",
+        "Heces",
+        "Esputo",
+        "Líquido cefalorraquídeo",
+        "Hisopado",
+        "Otro líquido biológico"
+      ]
     },
     {
+      "section": "Fase preanalítica",
       "code": "condiciones_de_la_toma",
       "name": "Condiciones de la toma",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Fase preanalítica",
       "code": "ayuno",
-      "name": "Paciente en ayuno",
+      "name": "En ayunas",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Fase preanalítica",
       "code": "horas_de_ayuno",
-      "name": "Horas de ayuno referidas",
+      "name": "Horas de ayuno",
       "dataType": "integer",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "ayuno", "equals": true }
     },
     {
+      "section": "Fase preanalítica",
       "code": "fecha_de_toma",
-      "name": "Fecha de toma de la muestra",
+      "name": "Fecha de toma",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Fase preanalítica",
       "code": "hora_de_toma",
-      "name": "Hora de toma de la muestra",
+      "name": "Hora de toma",
       "dataType": "string",
       "required": false
     },
     {
+      "section": "Fase preanalítica",
       "code": "medicacion_en_curso",
-      "name": "Medicación en curso referida por el paciente",
+      "name": "Medicación en curso",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Fase preanalítica",
+      "code": "aspecto_muestra",
+      "name": "Estado de la muestra",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Adecuada",
+        "Hemolizada",
+        "Lipémica",
+        "Ictérica",
+        "Coagulada",
+        "Volumen insuficiente"
+      ]
+    },
+    {
+      "section": "Fase preanalítica",
       "code": "estado_de_la_muestra",
-      "name": "Estado de la muestra al recibirla",
+      "name": "Interferencia esperada",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": {
+        "field": "aspecto_muestra",
+        "equals": [
+          "Hemolizada",
+          "Lipémica",
+          "Ictérica",
+          "Coagulada",
+          "Volumen insuficiente"
+        ]
+      }
     },
     {
-      "code": "metodo_analitico",
-      "name": "Método analítico utilizado",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "resultados",
-      "name": "Resultados",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "valores_fuera_de_rango",
-      "name": "Valores fuera del rango de referencia",
-      "dataType": "text",
-      "required": false
-    },
-    {
+      "section": "Fase preanalítica",
       "code": "observaciones_preanaliticas",
       "name": "Observaciones preanalíticas",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Resultados",
+      "code": "metodo_analitico",
+      "name": "Método analítico",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Resultados",
+      "code": "resultados",
+      "name": "Resultados con unidades y valores de referencia",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Resultados",
+      "code": "hay_fuera_de_rango",
+      "name": "Hay valores fuera de rango",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Resultados",
+      "code": "valores_fuera_de_rango",
+      "name": "¿Cuáles?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "hay_fuera_de_rango", "equals": true }
+    },
+    {
+      "section": "Resultados",
+      "code": "valor_critico",
+      "name": "Alguno es un valor crítico",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "hay_fuera_de_rango", "equals": true }
+    },
+    {
+      "section": "Resultados",
+      "code": "valor_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "valor_critico", "equals": true }
+    },
+    {
+      "section": "Resultados",
       "code": "comparacion_con_estudios_previos",
       "name": "Comparación con estudios previos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Resultados",
       "code": "diagnostico",
-      "name": "Conclusión o interpretación del informe",
+      "name": "Interpretación",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Resultados",
       "code": "conducta",
-      "name": "Recomendaciones y estudios complementarios sugeridos",
+      "name": "Recomendación",
       "dataType": "text",
       "required": false
     }

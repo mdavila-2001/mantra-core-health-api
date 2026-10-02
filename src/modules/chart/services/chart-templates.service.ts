@@ -15,6 +15,7 @@ import {
   AssignmentResponseDto,
   AssignTemplateDto,
   CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
+  ChartTemplateShowWhenDto,
   ChartTemplateFieldDto,
   ChartTemplateProvenanceDto,
   ChartTemplateResponseDto,
@@ -266,6 +267,7 @@ export class ChartTemplatesService {
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
 
     let provenance: ChartTemplateProvenanceDto | undefined;
+    let presentacion: Presentaciones = new Map();
     const fields: ChartTemplateFieldDto[] = [];
 
     for (const assignment of assignments) {
@@ -276,8 +278,14 @@ export class ChartTemplatesService {
       // `dynamic_field_definitions` es una tabla global; se compara el sufijo.
       if (esClaveDeCatalogo(field.code)) {
         provenance = leerProcedencia(field.defaultValueJson);
+        presentacion = leerPresentacion(field.defaultValueJson);
         continue;
       }
+
+      // Un campo que una versión nueva del catálogo dejó de preguntar se
+      // retira con `visible = false`: sigue existiendo para leer lo capturado,
+      // pero no se ofrece.
+      if (assignment.visible === false) continue;
 
       fields.push({
         assignmentId: assignment.id,
@@ -294,7 +302,7 @@ export class ChartTemplatesService {
       });
     }
 
-    return { fields, provenance };
+    return { fields: aplicarPresentacion(fields, presentacion), provenance };
   }
 
   /**
@@ -379,4 +387,77 @@ function leerProcedencia(
     retrievedAt: raw.retrievedAt as string,
     note: typeof raw.note === 'string' ? raw.note : undefined,
   };
+}
+
+/** Lo que el catálogo dice de cada campo, por código sin prefijo. */
+type Presentaciones = ReadonlyMap<string, Record<string, unknown>>;
+
+/** El código de un campo sin el prefijo de su plantilla. */
+function codigoPelado(code: string): string {
+  const punto = code.indexOf('.');
+  return punto === -1 ? code : code.slice(punto + 1);
+}
+
+/**
+ * Lee `fieldPresentation` del `default_value_json` de la clave de catálogo.
+ * Como con la procedencia, lo malformado se ignora en vez de lanzar: se pierde
+ * la lista o la condición, no el formulario.
+ */
+function leerPresentacion(value: unknown): Presentaciones {
+  if (typeof value !== 'object' || value === null) return new Map();
+  const raw = (value as Record<string, unknown>).fieldPresentation;
+  if (typeof raw !== 'object' || raw === null) return new Map();
+  return new Map(
+    Object.entries(raw as Record<string, unknown>).filter(
+      (entrada): entrada is [string, Record<string, unknown>] =>
+        typeof entrada[1] === 'object' && entrada[1] !== null,
+    ),
+  );
+}
+
+/**
+ * Pega a cada campo su presentación. La condición se publica con el `fieldId`
+ * del campo del que depende —es lo que el cliente tiene a mano para leer su
+ * valor—; si ese campo no está en la respuesta, la condición se descarta y el
+ * campo queda siempre visible, que es el error menos dañino.
+ */
+function aplicarPresentacion(
+  fields: ChartTemplateFieldDto[],
+  presentacion: Presentaciones,
+): ChartTemplateFieldDto[] {
+  if (presentacion.size === 0) return fields;
+  const idPorCodigo = new Map(
+    fields.map((f) => [codigoPelado(f.code), f.fieldId]),
+  );
+
+  return fields.map((field) => {
+    const p = presentacion.get(codigoPelado(field.code));
+    if (p === undefined || field.own) return field;
+
+    const extra: Partial<ChartTemplateFieldDto> = {};
+    if (typeof p.section === 'string') extra.section = p.section;
+    if (
+      Array.isArray(p.options) &&
+      p.options.every((o) => typeof o === 'string')
+    ) {
+      extra.options = p.options;
+      extra.multiple = p.multiple === true;
+    }
+    if (p.allowOther === true) extra.allowOther = true;
+    if (typeof p.description === 'string') extra.description = p.description;
+
+    const condicion = p.showWhen as
+      { field?: unknown; equals?: unknown } | undefined;
+    const padre =
+      typeof condicion?.field === 'string'
+        ? idPorCodigo.get(condicion.field)
+        : undefined;
+    if (padre !== undefined && condicion?.equals !== undefined) {
+      extra.showWhen = {
+        fieldId: padre,
+        equals: condicion.equals as ChartTemplateShowWhenDto['equals'],
+      };
+    }
+    return { ...field, ...extra };
+  });
 }

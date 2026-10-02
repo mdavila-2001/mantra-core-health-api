@@ -1,11 +1,8 @@
 {
   "code": "PEDIA_CONTROL_NINO_SANO",
   "name": "Control de niño sano",
-  "specialty": {
-    "code": "PEDIATRIA",
-    "display": "Pediatría"
-  },
-  "version": 1,
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, atención integral del niño",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,96 +10,450 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS)."
+    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS). v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Datos del control",
       "code": "edad_en_meses",
       "name": "Edad (meses)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "peso_kg",
       "name": "Peso (kg)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "talla_cm",
-      "name": "Talla / longitud (cm)",
+      "name": "Talla (cm)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "perimetro_cefalico_cm",
       "name": "Perímetro cefálico (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
-      "code": "alimentacion",
-      "name": "Alimentación actual",
-      "dataType": "text",
-      "required": false
+      "section": "Datos del control",
+      "code": "estado_nutricional",
+      "name": "Estado nutricional (curvas OMS)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Normal",
+        "Riesgo de desnutrición",
+        "Desnutrición aguda moderada",
+        "Desnutrición aguda grave",
+        "Talla baja",
+        "Sobrepeso",
+        "Obesidad"
+      ]
     },
     {
+      "section": "Alimentación",
       "code": "lactancia_materna_exclusiva",
-      "name": "Lactancia materna exclusiva",
+      "name": "Lactancia materna exclusiva (menores de 6 meses)",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Alimentación",
+      "code": "alimentacion_tipo",
+      "name": "Alimentación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Lactancia exclusiva",
+        "Lactancia y fórmula",
+        "Fórmula",
+        "Lactancia y alimentación complementaria",
+        "Dieta familiar"
+      ]
+    },
+    {
+      "section": "Alimentación",
+      "code": "alimentacion",
+      "name": "Alimentación — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Alimentación",
+      "code": "suplementos",
+      "name": "Recibe suplementos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Alimentación",
+      "code": "suplementos_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Hierro", "Vitamina A", "Chispitas nutricionales", "Zinc"],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "suplementos", "equals": true }
+    },
+    {
+      "section": "Vacunas y desarrollo",
       "code": "vacunas_al_dia",
-      "name": "Esquema de vacunación al día",
+      "name": "Vacunas al día según el esquema nacional",
       "dataType": "boolean",
       "required": true
     },
     {
+      "section": "Vacunas y desarrollo",
+      "code": "vacunas_faltantes",
+      "name": "¿Cuáles faltan?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "BCG",
+        "Pentavalente",
+        "Antipolio",
+        "Rotavirus",
+        "Neumococo",
+        "SRP",
+        "Fiebre amarilla",
+        "Influenza",
+        "Varicela"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "vacunas_al_dia", "equals": false }
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "desarrollo_global",
+      "name": "Desarrollo psicomotor para la edad",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuado", "Con alerta", "Con retraso"]
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "desarrollo_areas",
+      "name": "¿En qué áreas?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Motor grueso", "Motor fino", "Lenguaje", "Social"],
+      "multiple": true,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
+    },
+    {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_motor",
-      "name": "Desarrollo motor",
+      "name": "Motor — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_del_lenguaje",
-      "name": "Desarrollo del lenguaje",
+      "name": "Lenguaje — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_social",
-      "name": "Desarrollo social",
+      "name": "Social — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "agudeza_visual",
       "name": "Tamizaje visual",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Normal", "Alterado", "No realizado"]
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "tamizaje_auditivo",
       "name": "Tamizaje auditivo",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Normal", "Alterado", "No realizado"]
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "salud_bucal",
       "name": "Salud bucal",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Signos de peligro (AIEPI)",
+      "code": "signos_de_peligro",
+      "name": "Signos generales de peligro",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "No puede beber ni tomar el pecho",
+        "Vomita todo",
+        "Convulsiones",
+        "Letárgico o inconsciente",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Cualquiera presente: referencia urgente."
+    },
+    {
+      "section": "Signos de peligro (AIEPI)",
       "code": "signos_de_alarma",
-      "name": "Signos de alarma detectados",
+      "name": "Otros signos de alarma — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Motivo agregado y observaciones",
+      "code": "motivo_agregado",
+      "name": "Motivo agregado al control",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Niño sano, sin otro motivo",
+        "Infección respiratoria aguda",
+        "Enfermedad diarreica aguda",
+        "Anemia",
+        "Desnutrición"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "centor_fiebre",
+      "name": "Fiebre mayor a 38 °C",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "centor_sin_tos",
+      "name": "Ausencia de tos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "centor_adenopatias",
+      "name": "Adenopatías cervicales anteriores dolorosas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "centor_exudado",
+      "name": "Exudado o tumefacción amigdalina",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "ira_rinorrea",
+      "name": "Rinorrea",
+      "dataType": "string",
+      "required": false,
+      "options": ["Ausente", "Acuosa", "Purulenta"],
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "fr_por_minuto",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": true,
+      "description": "Respiración rápida: ≥ 50 de 2 a 11 meses; ≥ 40 de 1 a 4 años.",
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "tiraje",
+      "name": "Tiraje subcostal",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Infección respiratoria aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "eda_deposiciones_24h",
+      "name": "Deposiciones líquidas en las últimas 24 horas",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "eda_sangre_en_heces",
+      "name": "Sangre en las heces (disentería)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "eda_vomitos",
+      "name": "Vómitos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "eda_hidratacion",
+      "name": "Estado de hidratación (OMS)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin deshidratación — Plan A",
+        "Algún grado de deshidratación — Plan B",
+        "Deshidratación grave — Plan C"
+      ],
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "eda_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "motivo_agregado",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "anemia_hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "description": "Ajustar por altitud de residencia.",
+      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "anemia_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Astenia",
+        "Disnea de esfuerzo",
+        "Palpitaciones",
+        "Pica",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "anemia_perdidas",
+      "name": "Posibles pérdidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Menstruación abundante",
+        "Sangrado digestivo",
+        "Parasitosis",
+        "Ninguna conocida"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "anemia_vcm",
+      "name": "VCM y ferritina, si se conocen",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "z_peso_talla",
+      "name": "Puntaje Z peso/talla",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "motivo_agregado", "equals": "Desnutrición" }
+    },
+    {
+      "section": "Motivo agregado y observaciones",
+      "code": "edema_bilateral",
+      "name": "Edema bilateral (kwashiorkor)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "motivo_agregado", "equals": "Desnutrición" }
+    },
+    {
+      "section": "Próximo control",
       "code": "proximo_control",
-      "name": "Fecha del próximo control",
+      "name": "Próximo control",
       "dataType": "date",
       "required": false
     }

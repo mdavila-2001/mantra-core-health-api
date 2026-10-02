@@ -2,7 +2,7 @@
   "code": "GASTRO_EVALUACION_BASE",
   "name": "Evaluación gastroenterológica",
   "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, funciones biológicas y examen del abdomen",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,674 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta y el apartado de funciones biológicas y examen del abdomen: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose de las características del dolor abdominal, el hábito intestinal, los signos de hemorragia digestiva y el examen del abdomen separado en inspección, auscultación, palpación y tacto rectal."
+    "note": "De la norma salen la estructura común de la consulta y el apartado de funciones biológicas y examen del abdomen: motivo, tiempo de evolución, antecedentes, examen, diagnóstico y conducta. Son agregados propios de la especialidad el desglose de las características del dolor abdominal, el hábito intestinal, los signos de hemorragia digestiva y el examen del abdomen separado en inspección, auscultación, palpación y tacto rectal. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS), escala de Bristol."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_digestivos", "name": "Antecedentes digestivos personales y quirúrgicos", "dataType": "text", "required": false },
-    { "code": "medicacion_habitual", "name": "Medicación habitual (antiinflamatorios, antiácidos, otros)", "dataType": "text", "required": false },
-    { "code": "dolor_abdominal", "name": "Dolor abdominal (presencia)", "dataType": "boolean", "required": false },
-    { "code": "caracteristicas_del_dolor", "name": "Características del dolor (localización, tipo, irradiación, relación con las comidas)", "dataType": "text", "required": false },
-    { "code": "habito_intestinal", "name": "Hábito intestinal (frecuencia y consistencia de las deposiciones)", "dataType": "text", "required": false },
-    { "code": "nauseas_o_vomitos", "name": "Náuseas o vómitos", "dataType": "boolean", "required": false },
-    { "code": "pirosis_o_reflujo", "name": "Pirosis o reflujo", "dataType": "boolean", "required": false },
-    { "code": "hemorragia_digestiva", "name": "Signos de hemorragia digestiva (hematemesis, melena, rectorragia)", "dataType": "text", "required": false },
-    { "code": "ictericia", "name": "Ictericia", "dataType": "boolean", "required": false },
-    { "code": "inspeccion_del_abdomen", "name": "Inspección del abdomen", "dataType": "text", "required": false },
-    { "code": "auscultacion_del_abdomen", "name": "Auscultación (ruidos hidroaéreos)", "dataType": "text", "required": false },
-    { "code": "palpacion_del_abdomen", "name": "Palpación (dolor, defensa, visceromegalias)", "dataType": "text", "required": true },
-    { "code": "tacto_rectal", "name": "Tacto rectal", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true,
+      "description": "Inicio, curso y síntomas acompañantes, en orden cronológico."
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal",
+      "name": "Dolor abdominal",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_localizacion",
+      "name": "Dolor — ¿dónde se localiza?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_abdominal_irradiado", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "dolor_abdominal_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "caracteristicas_del_dolor",
+      "name": "Dolor — otras observaciones",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "bristol",
+      "name": "Forma de las heces (escala de Bristol)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Tipo 1 — bolitas duras",
+        "Tipo 2 — salchicha grumosa",
+        "Tipo 3 — salchicha con grietas",
+        "Tipo 4 — salchicha lisa",
+        "Tipo 5 — trozos blandos",
+        "Tipo 6 — pastosa",
+        "Tipo 7 — líquida"
+      ]
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "deposiciones_por_dia",
+      "name": "Deposiciones por día",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "habito_intestinal",
+      "name": "Hábito intestinal — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "nauseas_o_vomitos",
+      "name": "Náuseas o vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "pirosis_o_reflujo",
+      "name": "Pirosis o reflujo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "hubo_hemorragia",
+      "name": "Hemorragia digestiva",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "hemorragia_tipo",
+      "name": "¿Cómo se manifestó?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hematemesis",
+        "Melena",
+        "Hematoquecia",
+        "Sangre oculta en heces"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "hubo_hemorragia", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "hemorragia_digestiva",
+      "name": "Hemorragia — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "hubo_hemorragia", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "ictericia",
+      "name": "Ictericia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "ictericia_acompanantes",
+      "name": "Acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Coluria",
+        "Acolia",
+        "Prurito",
+        "Fiebre",
+        "Dolor en hipocondrio derecho"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "ictericia", "equals": true }
+    },
+    {
+      "section": "Síntomas digestivos",
+      "code": "signos_de_alarma_digestivos",
+      "name": "Signos de alarma",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Pérdida de peso",
+        "Disfagia",
+        "Anemia",
+        "Vómitos persistentes",
+        "Masa palpable",
+        "Edad > 50 con síntomas nuevos",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_digestivos",
+      "name": "Antecedentes digestivos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Examen del abdomen",
+      "code": "inspeccion_del_abdomen",
+      "name": "Inspección",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen del abdomen",
+      "code": "auscultacion_del_abdomen",
+      "name": "Auscultación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen del abdomen",
+      "code": "palpacion_del_abdomen",
+      "name": "Palpación",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Examen del abdomen",
+      "code": "tacto_rectal",
+      "name": "Tacto rectal",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Dispepsia o gastritis",
+        "Enfermedad por reflujo gastroesofágico",
+        "Enfermedad diarreica",
+        "Síndrome de intestino irritable",
+        "Hemorragia digestiva",
+        "Hepatopatía o ictericia",
+        "Colelitiasis o colecistitis"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "helicobacter",
+      "name": "Prueba de Helicobacter pylori realizada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dispepsia o gastritis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "aines",
+      "name": "Consume AINE",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dispepsia o gastritis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "erge_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Pirosis",
+        "Regurgitación",
+        "Tos crónica",
+        "Disfonía",
+        "Dolor torácico no cardíaco"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad por reflujo gastroesofágico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_deposiciones_24h",
+      "name": "Deposiciones líquidas en las últimas 24 horas",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_sangre_en_heces",
+      "name": "Sangre en las heces (disentería)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_vomitos",
+      "name": "Vómitos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_hidratacion",
+      "name": "Estado de hidratación (OMS)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin deshidratación — Plan A",
+        "Algún grado de deshidratación — Plan B",
+        "Deshidratación grave — Plan C"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sii_caracteristicas",
+      "name": "Dolor abdominal recurrente: características",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Mejora o empeora con la defecación",
+        "Se asocia a cambio en la frecuencia",
+        "Se asocia a cambio en la forma de las heces"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome de intestino irritable"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sii_meses",
+      "name": "Meses de evolución",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome de intestino irritable"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hd_estabilidad",
+      "name": "Estabilidad hemodinámica",
+      "dataType": "string",
+      "required": true,
+      "options": ["Estable", "Taquicardia", "Hipotensión o shock"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hemorragia digestiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hd_hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hemorragia digestiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hep_estigmas",
+      "name": "Estigmas de hepatopatía",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Arañas vasculares",
+        "Eritema palmar",
+        "Ascitis",
+        "Encefalopatía",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hepatopatía o ictericia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hep_serologias",
+      "name": "Serologías virales",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hepatopatía o ictericia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "murphy",
+      "name": "Signo de Murphy positivo",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Colelitiasis o colecistitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "colico_posprandial",
+      "name": "Dolor posprandial en hipocondrio derecho",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Colelitiasis o colecistitis"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

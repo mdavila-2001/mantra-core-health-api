@@ -1,11 +1,8 @@
 {
   "code": "CARDIO_FICHA_BASE",
   "name": "Ficha cardiológica — versión general base",
-  "specialty": {
-    "code": "CARDIOLOGIA",
-    "display": "Cardiología"
-  },
-  "version": 1,
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, evaluación cardiovascular",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,128 +10,756 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de anamnesis y examen cardiovascular del formato oficial. No incluye ninguna escala de sociedad científica."
+    "note": "Estructura de anamnesis y examen cardiovascular del formato oficial. No incluye ninguna escala de sociedad científica. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clase funcional NYHA, escala de Levine, criterios de Framingham."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": false,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Síntomas cardiovasculares",
       "code": "dolor_toracico",
       "name": "Dolor torácico",
       "dataType": "boolean",
       "required": false
     },
     {
-      "code": "caracteristicas_del_dolor",
-      "name": "Características del dolor torácico",
-      "dataType": "text",
-      "required": false
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_toracico", "equals": true }
     },
     {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_toracico_irradiado", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "dolor_toracico_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "caracteristicas_del_dolor",
+      "name": "Características del dolor — otras observaciones",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_toracico", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
       "code": "disnea",
       "name": "Disnea",
       "dataType": "boolean",
       "required": false
     },
     {
-      "code": "clase_funcional_nyha",
-      "name": "Clase funcional (I–IV)",
-      "dataType": "integer",
-      "required": false
+      "section": "Síntomas cardiovasculares",
+      "code": "nyha_clase_funcional",
+      "name": "Clase funcional NYHA",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Clase I — sin limitación de la actividad física",
+        "Clase II — limitación leve: síntomas con la actividad ordinaria",
+        "Clase III — limitación marcada: síntomas con actividad menor a la ordinaria",
+        "Clase IV — síntomas en reposo"
+      ],
+      "showWhen": { "field": "disnea", "equals": true }
     },
     {
+      "section": "Síntomas cardiovasculares",
+      "code": "disnea_tipo",
+      "name": "Tipo de disnea",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "De esfuerzo",
+        "Ortopnea",
+        "Disnea paroxística nocturna",
+        "En reposo"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "disnea", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
       "code": "palpitaciones",
       "name": "Palpitaciones",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas cardiovasculares",
+      "code": "arritmia_inicio_fin",
+      "name": "Inicio y fin de las palpitaciones",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbitos", "Graduales"],
+      "showWhen": { "field": "palpitaciones", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "arritmia_ritmo",
+      "name": "Ritmo referido o palpado",
+      "dataType": "string",
+      "required": false,
+      "options": ["Regular", "Irregular"],
+      "showWhen": { "field": "palpitaciones", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "arritmia_sincope",
+      "name": "Se acompañó de síncope",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "palpitaciones", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "arritmia_ecg",
+      "name": "ECG — ritmo registrado",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "palpitaciones", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
       "code": "sincope",
-      "name": "Síncope o presíncope",
+      "name": "Síncope",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas cardiovasculares",
+      "code": "sincope_contexto",
+      "name": "Contexto",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "De pie prolongado o calor",
+        "Tras orinar, toser o defecar",
+        "Durante el esfuerzo",
+        "En decúbito",
+        "Sin desencadenante"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "sincope", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "sincope_prodromos",
+      "name": "Pródromos (mareo, visión borrosa, sudoración)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "sincope", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "sincope_palpitaciones_previas",
+      "name": "Palpitaciones previas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "sincope", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "sincope_duracion_segundos",
+      "name": "Duración de la pérdida de conciencia (segundos)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "sincope", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
       "code": "edema_de_miembros_inferiores",
       "name": "Edema de miembros inferiores",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas cardiovasculares",
+      "code": "edema_grado",
+      "name": "Edema (fóvea)",
+      "dataType": "string",
+      "required": true,
+      "options": ["+ (2 mm)", "++ (4 mm)", "+++ (6 mm)", "++++ (8 mm)"],
+      "showWhen": { "field": "edema_de_miembros_inferiores", "equals": true }
+    },
+    {
+      "section": "Síntomas cardiovasculares",
+      "code": "edema_lateralidad",
+      "name": "Lateralidad",
+      "dataType": "string",
+      "required": false,
+      "options": ["Bilateral", "Unilateral"],
+      "showWhen": { "field": "edema_de_miembros_inferiores", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
       "code": "hipertension_arterial",
-      "name": "Antecedente de hipertensión arterial",
+      "name": "Hipertensión arterial",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Factores de riesgo",
+      "code": "hta_tratamiento",
+      "name": "¿Qué tratamiento recibe?",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "hipertension_arterial", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
       "code": "diabetes",
-      "name": "Antecedente de diabetes",
+      "name": "Diabetes",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Factores de riesgo",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": { "field": "diabetes", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
       "code": "dislipidemia",
-      "name": "Antecedente de dislipidemia",
+      "name": "Dislipidemia",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Factores de riesgo",
+      "code": "ldl",
+      "name": "Último colesterol LDL (mg/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": { "field": "dislipidemia", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
       "code": "tabaquismo",
       "name": "Tabaquismo",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Factores de riesgo",
+      "code": "paquetes_anio",
+      "name": "Paquetes-año",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaquismo", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
       "code": "antecedente_familiar_coronario",
-      "name": "Antecedente familiar de enfermedad coronaria precoz",
+      "name": "Familiar de primer grado con enfermedad coronaria precoz",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Factores de riesgo",
+      "code": "familiar_coronario_quien",
+      "name": "¿Quién y a qué edad?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "antecedente_familiar_coronario", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "chagas_riesgo",
+      "name": "Vivió en zona endémica de Chagas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Factores de riesgo",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Examen físico",
       "code": "presion_arterial_sistolica",
       "name": "Presión arterial sistólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Examen físico",
       "code": "presion_arterial_diastolica",
       "name": "Presión arterial diastólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Examen físico",
       "code": "frecuencia_cardiaca",
       "name": "Frecuencia cardíaca (lpm)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Examen físico",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
       "code": "ruidos_cardiacos",
       "name": "Ruidos cardíacos",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "soplos",
-      "name": "Soplos",
-      "dataType": "text",
+      "section": "Examen físico",
+      "code": "hay_soplo",
+      "name": "Soplo",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Examen físico",
+      "code": "soplo_grado_levine",
+      "name": "Intensidad (Levine)",
+      "dataType": "string",
+      "required": true,
+      "options": ["I/VI", "II/VI", "III/VI", "IV/VI", "V/VI", "VI/VI"],
+      "showWhen": { "field": "hay_soplo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "soplo_tiempo",
+      "name": "Tiempo",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sistólico", "Diastólico", "Continuo"],
+      "showWhen": { "field": "hay_soplo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "soplos",
+      "name": "Foco e irradiación",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "hay_soplo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
       "code": "pulsos_perifericos",
       "name": "Pulsos periféricos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen físico",
       "code": "ecg_hallazgos",
-      "name": "Electrocardiograma — hallazgos",
+      "name": "ECG — hallazgos",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "conducta",
-      "name": "Conducta",
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Síndrome coronario o angina",
+        "Insuficiencia cardíaca",
+        "Hipertensión arterial",
+        "Arritmia",
+        "Cardiopatía chagásica",
+        "Valvulopatía"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_tipo",
+      "name": "Tipo de dolor torácico",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Típico: retroesternal, con el esfuerzo, cede con reposo o nitratos",
+        "Atípico: cumple dos de los tres criterios",
+        "No anginoso: cumple uno o ninguno"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome coronario o angina"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_acompanantes",
+      "name": "Acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diaforesis",
+        "Náuseas o vómitos",
+        "Disnea",
+        "Síncope o presíncope",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome coronario o angina"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dt_ecg",
+      "name": "ECG de 12 derivaciones — hallazgo principal",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome coronario o angina"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_signos",
+      "name": "Signos y síntomas (Framingham)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ortopnea",
+        "Disnea paroxística nocturna",
+        "Ingurgitación yugular",
+        "Crepitantes pulmonares",
+        "Tercer ruido (galope)",
+        "Edema de miembros inferiores",
+        "Hepatomegalia"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_edema_grado",
+      "name": "Edema (fóvea)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sin edema",
+        "+ (2 mm)",
+        "++ (4 mm)",
+        "+++ (6 mm)",
+        "++++ (8 mm)"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_peso_seco",
+      "name": "Peso de referencia (kg)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_organo_blanco",
+      "name": "Síntomas de daño de órgano blanco",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Cefalea intensa",
+        "Dolor torácico",
+        "Disnea",
+        "Alteración visual",
+        "Déficit neurológico",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma la medicación todos los días",
+        "Olvida dosis",
+        "Abandonó el tratamiento",
+        "Sin tratamiento todavía"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_registros_domiciliarios",
+      "name": "Registros de presión en domicilio (promedio)",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "arr_tipo",
+      "name": "Ritmo documentado",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Fibrilación auricular",
+        "Flutter auricular",
+        "Taquicardia supraventricular",
+        "Extrasístoles",
+        "Bloqueo AV",
+        "No documentado"
+      ],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Arritmia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "arr_anticoagulado",
+      "name": "Recibe anticoagulación",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Arritmia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_serologia",
+      "name": "Serología para Chagas",
+      "dataType": "string",
+      "required": true,
+      "options": ["Positiva", "Negativa", "Pendiente", "No realizada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cardiopatía chagásica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_compromiso",
+      "name": "Compromiso orgánico",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cardíaco (arritmia, bloqueo, insuficiencia)",
+        "Digestivo (megaesófago, megacolon)",
+        "Sin compromiso aparente"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cardiopatía chagásica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_tratamiento_previo",
+      "name": "Recibió benznidazol o nifurtimox",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cardiopatía chagásica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_vivienda_endemica",
+      "name": "Vivió en vivienda con vinchucas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Cardiopatía chagásica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "valv_valvula",
+      "name": "Válvula comprometida",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Valvulopatía"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "valv_eco",
+      "name": "Ecocardiograma — hallazgo principal",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Valvulopatía"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
-      "required": false
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }
