@@ -242,17 +242,6 @@
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",
-      "code": "acv_glasgow",
-      "name": "Escala de Glasgow (3–15)",
-      "dataType": "integer",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Accidente cerebrovascular"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
       "code": "acv_glucemia",
       "name": "Glucemia capilar (mg/dL)",
       "dataType": "decimal",

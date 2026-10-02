@@ -72,6 +72,13 @@ function campo(code, name, dataType, extra) {
   };
 }
 
+/**
+ * Un bloque sin los campos que la ficha ya preguntó antes: el mismo dato dos
+ * veces en una ficha es una contradicción esperando a pasar.
+ */
+export const sin = (bloque, ...codigos) =>
+  bloque.filter((c) => !codigos.includes(c.code));
+
 /** Marca como obligatorio. */
 export const obl = (c) => ({ ...c, required: true });
 

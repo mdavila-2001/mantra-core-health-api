@@ -17,6 +17,7 @@ import {
   quirurgicos,
   s,
   seccion,
+  sin,
   si,
   socrates,
   sospecha,
@@ -64,7 +65,9 @@ export const PROCEDIMIENTO = {
     seccion('Síntomas', [
       b('dolor_abdominal', 'Dolor abdominal'),
       ...socrates('dolor_abdominal', 'dolor_abdominal', true),
-      t('caracteristicas_del_dolor', 'Dolor — otras observaciones'),
+      ...si('dolor_abdominal', true, [
+        t('caracteristicas_del_dolor', 'Dolor — otras observaciones'),
+      ]),
       b('nauseas_o_vomitos', 'Náuseas o vómitos'),
       una('transito_intestinal', 'Tránsito intestinal', [
         'Conservado',
@@ -876,7 +879,7 @@ export const PROCEDIMIENTO = {
           ...DOLOR_TORACICO(),
           s('troponina', 'Troponina'),
         ],
-        'Accidente cerebrovascular': ACV(),
+        'Accidente cerebrovascular': sin(ACV(), 'acv_glucemia'),
         Politraumatismo: [
           s('trauma_mecanismo', 'Mecanismo de alta energía', { req: true }),
           varias('trauma_lesiones', 'Lesiones', [

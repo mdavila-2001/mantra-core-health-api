@@ -625,17 +625,6 @@
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",
-      "code": "sfp_dias",
-      "name": "Días de fiebre",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome febril prolongado"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
       "code": "sfp_estudios",
       "name": "Estudios ya realizados",
       "dataType": "json",

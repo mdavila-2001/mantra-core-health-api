@@ -232,14 +232,6 @@
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dengue_dias_de_fiebre",
-      "name": "Días de fiebre",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Dengue" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
       "code": "dengue_signos_de_alarma",
       "name": "Signos de alarma (OPS/OMS)",
       "dataType": "json",
