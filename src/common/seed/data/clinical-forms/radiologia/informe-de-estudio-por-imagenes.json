@@ -1,6 +1,6 @@
 {
   "code": "RADIO_INFORME_BASE",
-  "name": "Informe de estudio por imágenes",
+  "name": "Radiología e Imagenología — informe general de estudio por imágenes (ficha base)",
   "specialty": { "code": "RADIOLOGIA", "display": "Radiología e Imagenología" },
   "version": 2,
   "provenance": {
@@ -176,5 +176,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

@@ -1,0 +1,190 @@
+{
+  "code": "NEUMO_CTRL_NEUMONIA",
+  "name": "Neumonía adquirida en la comunidad: evaluación y control",
+  "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Gravedad por CURB-65 (British Thoracic Society) y respuesta al tratamiento a las 48–72 horas."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de neumonía",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "neumonia_crepitantes",
+      "name": "Crepitantes o soplo tubario localizados",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "curb65",
+      "name": "Criterios CURB-65 presentes",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Confusión de reciente aparición",
+        "Urea > 42 mg/dL (BUN > 19 mg/dL)",
+        "Frecuencia respiratoria ≥ 30 rpm",
+        "PAS < 90 o PAD ≤ 60 mmHg",
+        "Edad ≥ 65 años",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "0–1: ambulatorio · 2: valorar internación · 3 o más: neumonía grave."
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "neumonia_expectoracion",
+      "name": "Expectoración purulenta",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "temperatura",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "respuesta_48h",
+      "name": "Respuesta a las 48–72 h",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Mejoría",
+        "Sin cambios",
+        "Empeoramiento",
+        "Todavía no corresponde"
+      ]
+    },
+    {
+      "section": "Evaluación: neumonía",
+      "code": "rx_torax",
+      "name": "Radiografía de tórax — hallazgo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Afebril", "Saturación ≥ 92 %", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Completar el antibiótico", "Signos de alarma"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

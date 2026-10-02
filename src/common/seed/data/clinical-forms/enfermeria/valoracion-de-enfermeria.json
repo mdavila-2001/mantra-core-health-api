@@ -1,6 +1,6 @@
 {
   "code": "ENFER_VALORACION_BASE",
-  "name": "Valoración de enfermería",
+  "name": "Enfermería — valoración de enfermería (ficha base)",
   "specialty": { "code": "ENFERMERIA", "display": "Enfermería" },
   "version": 2,
   "provenance": {
@@ -262,5 +262,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

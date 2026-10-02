@@ -1,6 +1,6 @@
 {
   "code": "PSICO_EVALUACION_BASE",
-  "name": "Evaluación psicológica",
+  "name": "Psicología Clínica — consulta inicial (ficha base)",
   "specialty": {
     "code": "PSICOLOGIA_CLINICA",
     "display": "Psicología Clínica"
@@ -314,101 +314,7 @@
         "Problemas de conducta en niños o adolescentes"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tmc_predominio",
-      "name": "Predominio",
-      "dataType": "string",
-      "required": true,
-      "options": ["Depresivo", "Ansioso", "Mixto", "Somático"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno mental común (ansiedad, depresión)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tmc_meses",
-      "name": "Meses de evolución",
-      "dataType": "integer",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno mental común (ansiedad, depresión)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "duelo_perdida",
-      "name": "Pérdida y fecha",
-      "dataType": "string",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Duelo" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "duelo_complicado",
-      "name": "Más de 12 meses con deterioro funcional",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Duelo" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tept",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Reexperimentación",
-        "Evitación",
-        "Hiperalerta",
-        "Cambios negativos del ánimo"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Estrés postraumático"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "violencia_tipo",
-      "name": "Tipo",
-      "dataType": "json",
-      "required": true,
-      "options": ["Física", "Psicológica", "Sexual", "Económica"],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "violencia_riesgo_inminente",
-      "name": "Riesgo inminente",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "violencia_denuncia",
-      "name": "Orientada a la denuncia (Ley 348)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Violencia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "conducta_contexto",
-      "name": "Contexto escolar y familiar",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Problemas de conducta en niños o adolescentes"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -432,5 +338,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

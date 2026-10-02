@@ -1,6 +1,6 @@
 {
   "code": "OBST_CONTROL_BASE",
-  "name": "Control obstétrico",
+  "name": "Obstetricia — control obstétrico (ficha base)",
   "specialty": { "code": "OBSTETRICIA", "display": "Obstetricia" },
   "version": 2,
   "provenance": {
@@ -175,172 +175,7 @@
         "Infección urinaria en el embarazo"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "proteinuria_obst",
-      "name": "Proteinuria",
-      "dataType": "string",
-      "required": true,
-      "options": ["Negativa", "+", "++", "+++"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno hipertensivo del embarazo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "preeclampsia_grave",
-      "name": "Criterios de gravedad",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "PA ≥ 160/110",
-        "Cefalea o alteración visual",
-        "Dolor en epigastrio",
-        "Plaquetas < 100 000",
-        "Oliguria",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno hipertensivo del embarazo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "contracciones_hora",
-      "name": "Contracciones por hora",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Amenaza de parto prematuro"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cervix",
-      "name": "Cuello: dilatación y borramiento",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Amenaza de parto prematuro"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hemorragia_trimestre",
-      "name": "Trimestre",
-      "dataType": "string",
-      "required": true,
-      "options": ["Primero", "Segundo", "Tercero"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hemorragia del embarazo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hemorragia_dolor",
-      "name": "Con dolor",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hemorragia del embarazo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_glucemia_capilar",
-      "name": "Glucemia capilar (mg/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes gestacional"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_hba1c",
-      "name": "Última HbA1c (%)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes gestacional"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_sintomas",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Poliuria",
-        "Polidipsia",
-        "Pérdida de peso",
-        "Visión borrosa",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes gestacional"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_pie",
-      "name": "Examen del pie",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Sensibilidad conservada (monofilamento)",
-        "Sensibilidad disminuida",
-        "Úlcera o lesión presente",
-        "No evaluado"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes gestacional"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_hipoglucemias",
-      "name": "Episodios de hipoglucemia desde el último control",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes gestacional"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_obst",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Disuria",
-        "Polaquiuria",
-        "Fiebre",
-        "Dolor lumbar",
-        "Asintomática con urocultivo positivo"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria en el embarazo"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -357,5 +192,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

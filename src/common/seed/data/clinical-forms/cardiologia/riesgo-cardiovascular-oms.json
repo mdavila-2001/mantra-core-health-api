@@ -102,5 +102,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "SPECIFIC"
 }

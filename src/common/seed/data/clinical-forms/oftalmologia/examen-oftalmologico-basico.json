@@ -1,6 +1,6 @@
 {
   "code": "OFTALMO_EXAMEN_BASE",
-  "name": "Examen oftalmológico — versión general base",
+  "name": "Oftalmología — consulta inicial (ficha base)",
   "specialty": { "code": "OFTALMOLOGIA", "display": "Oftalmología" },
   "version": 2,
   "provenance": {
@@ -155,122 +155,7 @@
         "Ojo rojo con signos de alarma"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "refraccion_tipo",
-      "name": "Tipo",
-      "dataType": "string",
-      "required": true,
-      "options": ["Miopía", "Hipermetropía", "Astigmatismo", "Presbicia"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Vicio de refracción"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "catarata_ojo",
-      "name": "Ojo",
-      "dataType": "string",
-      "required": true,
-      "options": ["OD", "OI", "Ambos"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Catarata" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "catarata_limita",
-      "name": "Limita las actividades diarias",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Catarata" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "excavacion",
-      "name": "Relación copa/disco",
-      "dataType": "string",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Glaucoma" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "campimetria",
-      "name": "Campimetría alterada",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Glaucoma" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "retinopatia_grado",
-      "name": "Grado",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Sin retinopatía",
-        "No proliferativa leve",
-        "No proliferativa moderada",
-        "No proliferativa grave",
-        "Proliferativa",
-        "Edema macular"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Retinopatía diabética o hipertensiva"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "conjuntivitis_tipo",
-      "name": "Tipo",
-      "dataType": "string",
-      "required": true,
-      "options": ["Viral", "Bacteriana", "Alérgica"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Conjuntivitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "conjuntivitis_bav",
-      "name": "Baja de visión o dolor (descartar otra causa)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Conjuntivitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "pterigion_grado",
-      "name": "Grado",
-      "dataType": "string",
-      "required": true,
-      "options": ["I", "II", "III", "IV"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Pterigión" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ojo_rojo_alarma",
-      "name": "Signos de alarma",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Dolor intenso",
-        "Baja de visión",
-        "Pupila arreactiva",
-        "Opacidad corneal",
-        "Trauma"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Ojo rojo con signos de alarma"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -287,5 +172,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

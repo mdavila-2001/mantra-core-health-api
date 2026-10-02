@@ -1,0 +1,112 @@
+{
+  "code": "MEDEP_PREPARTICIPATIVA",
+  "name": "Evaluación preparticipativa deportiva",
+  "specialty": {
+    "code": "MEDICINA_DEPORTIVA",
+    "display": "Medicina Deportiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Tamizaje cardiovascular para muerte súbita: síntomas con esfuerzo, antecedente familiar, examen y ECG."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "sintomas_esfuerzo",
+      "name": "Síntomas con el esfuerzo",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor torácico",
+        "Síncope",
+        "Disnea desproporcionada",
+        "Palpitaciones",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "muerte_subita_familiar",
+      "name": "Familiar con muerte súbita antes de los 50 años",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "soplo",
+      "name": "Soplo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "ecg",
+      "name": "ECG de reposo — hallazgo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: aptitud deportiva",
+      "code": "aptitud",
+      "name": "Aptitud",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Apto",
+        "Apto con restricciones",
+        "No apto temporal",
+        "No apto"
+      ]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

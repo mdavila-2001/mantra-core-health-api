@@ -1,6 +1,6 @@
 {
   "code": "INFECTO_EVALUACION_BASE",
-  "name": "Evaluación infectológica",
+  "name": "Infectología — consulta inicial (ficha base)",
   "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes epidemiológicos, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la descripción del patrón febril, el foco clínico probable, los antecedentes de viajes y exposiciones, el estado de vacunación y los tratamientos antimicrobianos previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: guía de dengue OPS/OMS 2016, qSOFA (Sepsis-3)."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes epidemiológicos, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la descripción del patrón febril, el foco clínico probable, los antecedentes de viajes y exposiciones, el estado de vacunación y los tratamientos antimicrobianos previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
@@ -228,242 +228,7 @@
         "Sepsis"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dengue_signos_de_alarma",
-      "name": "Signos de alarma (OPS/OMS)",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Dolor abdominal intenso y continuo",
-        "Vómitos persistentes",
-        "Acumulación de líquidos (ascitis, derrame)",
-        "Sangrado de mucosas",
-        "Letargia o irritabilidad",
-        "Hepatomegalia mayor a 2 cm",
-        "Aumento del hematocrito con caída de plaquetas",
-        "Hipotensión postural",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Dengue" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dengue_torniquete",
-      "name": "Prueba del torniquete",
-      "dataType": "string",
-      "required": false,
-      "options": ["Positiva", "Negativa", "No realizada"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Dengue" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dengue_grupo",
-      "name": "Clasificación",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Grupo A — sin signos de alarma",
-        "Grupo B — con signos de alarma o condición asociada",
-        "Grupo C — dengue grave"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Dengue" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chik_artralgia",
-      "name": "Artralgias intensas",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Chikungunya o zika"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "zika_embarazo",
-      "name": "Embarazo en curso",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Chikungunya o zika"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chik_exantema",
-      "name": "Exantema",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Chikungunya o zika"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "malaria_gota_gruesa",
-      "name": "Gota gruesa",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Positiva — P. vivax",
-        "Positiva — P. falciparum",
-        "Negativa",
-        "Pendiente"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Malaria" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "leish_forma",
-      "name": "Forma",
-      "dataType": "string",
-      "required": true,
-      "options": ["Cutánea", "Mucosa", "Visceral"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Leishmaniasis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "leish_lesiones",
-      "name": "Número de lesiones",
-      "dataType": "integer",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Leishmaniasis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tbc_dias_de_tos",
-      "name": "Días de tos con expectoración",
-      "dataType": "integer",
-      "required": true,
-      "description": "15 días o más: sintomático respiratorio, pedir baciloscopía.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Tuberculosis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tbc_sintomas",
-      "name": "Síntomas acompañantes",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Fiebre vespertina",
-        "Sudoración nocturna",
-        "Pérdida de peso",
-        "Hemoptisis",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Tuberculosis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tbc_contacto",
-      "name": "Contacto con un caso de tuberculosis",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Tuberculosis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tbc_baciloscopia",
-      "name": "Baciloscopía",
-      "dataType": "string",
-      "required": false,
-      "options": ["Positiva", "Negativa", "Pedida", "No pedida"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Tuberculosis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "vih_cd4",
-      "name": "CD4 (células/µL)",
-      "dataType": "string",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "VIH" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "vih_carga_viral",
-      "name": "Carga viral",
-      "dataType": "string",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "VIH" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "vih_tar",
-      "name": "En terapia antirretroviral",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "VIH" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ppb_signos",
-      "name": "Signos",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Eritema",
-        "Calor",
-        "Absceso fluctuante",
-        "Crepitación",
-        "Necrosis"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección de piel y partes blandas"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ppb_sistemico",
-      "name": "Compromiso sistémico",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección de piel y partes blandas"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "qsofa",
-      "name": "qSOFA",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Frecuencia respiratoria ≥ 22",
-        "Alteración del estado mental",
-        "PAS ≤ 100 mmHg"
-      ],
-      "multiple": true,
-      "description": "2 o más: alto riesgo.",
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Sepsis" }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -480,5 +245,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

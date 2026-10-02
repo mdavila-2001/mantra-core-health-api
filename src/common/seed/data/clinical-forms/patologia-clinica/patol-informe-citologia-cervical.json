@@ -1,0 +1,107 @@
+{
+  "code": "PATOL_INFORME_CITOLOGIA_CERVICAL",
+  "name": "Informe de citología cervical",
+  "specialty": { "code": "PATOLOGIA_CLINICA", "display": "Patología Clínica" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Directriz de la OMS para el tamizaje y tratamiento de lesiones precancerosas del cuello uterino (2021)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240030824",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Calidad de la muestra y categorías del sistema Bethesda."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: citología cervical",
+      "code": "calidad_muestra",
+      "name": "Calidad de la muestra",
+      "dataType": "string",
+      "required": true,
+      "options": ["Satisfactoria", "Insatisfactoria"]
+    },
+    {
+      "section": "Resultado: citología cervical",
+      "code": "bethesda",
+      "name": "Resultado (Bethesda)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Negativo para lesión intraepitelial o malignidad",
+        "ASC-US",
+        "ASC-H",
+        "LSIL",
+        "HSIL",
+        "Carcinoma escamoso",
+        "AGC",
+        "Adenocarcinoma"
+      ]
+    },
+    {
+      "section": "Resultado: citología cervical",
+      "code": "microorganismos",
+      "name": "Microorganismos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Trichomonas",
+        "Cándida",
+        "Vaginosis bacteriana",
+        "Cambios por herpes",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,147 @@
+{
+  "code": "BIOQ_INFORME_HEMOGRAMA",
+  "name": "Informe de hemograma",
+  "specialty": {
+    "code": "BIOQUIMICA_CLINICA",
+    "display": "Bioquímica Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Serie roja, blanca y plaquetas con valores de referencia; la hemoglobina se interpreta según la altitud."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "hematocrito",
+      "name": "Hematocrito (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "vcm",
+      "name": "VCM (fL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "hcm",
+      "name": "HCM (pg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "leucocitos",
+      "name": "Leucocitos (/µL)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "neutrofilos_pct",
+      "name": "Neutrófilos (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "linfocitos_pct",
+      "name": "Linfocitos (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "eosinofilos_pct",
+      "name": "Eosinófilos (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "plaquetas",
+      "name": "Plaquetas (/µL)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "frotis",
+      "name": "Frotis de sangre periférica",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Resultado: hemograma",
+      "code": "altitud",
+      "name": "Altitud del laboratorio (m s. n. m.)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

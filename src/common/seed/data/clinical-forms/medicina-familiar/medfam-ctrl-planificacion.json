@@ -1,0 +1,132 @@
+{
+  "code": "MEDFAM_CTRL_PLANIFICACION",
+  "name": "Consejería en planificación familiar",
+  "specialty": { "code": "MEDICINA_FAMILIAR", "display": "Medicina Familiar" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Criterios médicos de elegibilidad para el uso de anticonceptivos, 5.ª ed.",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549158",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Elegibilidad de cada método según los criterios médicos de la OMS (categorías 1 a 4)."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "metodo_actual",
+      "name": "Método actual",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Ninguno",
+        "Preservativo",
+        "Píldora combinada",
+        "Inyectable",
+        "Implante",
+        "DIU de cobre",
+        "DIU hormonal",
+        "Ligadura o vasectomía"
+      ]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "condiciones_mec",
+      "name": "Condiciones que cambian la elegibilidad",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fuma y tiene 35 años o más",
+        "Hipertensión",
+        "Migraña con aura",
+        "Antecedente de trombosis",
+        "Lactancia < 6 semanas",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "metodo_elegido",
+      "name": "Método elegido",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Preservativo",
+        "Píldora combinada",
+        "Píldora de progestágeno",
+        "Inyectable",
+        "Implante",
+        "DIU de cobre",
+        "DIU hormonal",
+        "Ligadura o vasectomía",
+        "Ninguno"
+      ]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "categoria_mec",
+      "name": "Categoría OMS del método elegido",
+      "dataType": "string",
+      "required": false,
+      "options": ["1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Uso correcto",
+        "Doble protección con preservativo",
+        "Anticoncepción de emergencia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

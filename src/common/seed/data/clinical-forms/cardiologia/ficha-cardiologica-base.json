@@ -1,6 +1,6 @@
 {
   "code": "CARDIO_FICHA_BASE",
-  "name": "Ficha cardiológica — versión general base",
+  "name": "Cardiología — consulta inicial (ficha base)",
   "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de anamnesis y examen cardiovascular del formato oficial. No incluye ninguna escala de sociedad científica. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clase funcional NYHA, escala de Levine, criterios de Framingham."
+    "note": "Estructura de anamnesis y examen cardiovascular del formato oficial. No incluye ninguna escala de sociedad científica. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clase funcional NYHA, escala de Levine."
   },
   "fields": [
     {
@@ -503,248 +503,7 @@
         "Valvulopatía"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dt_tipo",
-      "name": "Tipo de dolor torácico",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Típico: retroesternal, con el esfuerzo, cede con reposo o nitratos",
-        "Atípico: cumple dos de los tres criterios",
-        "No anginoso: cumple uno o ninguno"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome coronario o angina"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dt_acompanantes",
-      "name": "Acompañantes",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Diaforesis",
-        "Náuseas o vómitos",
-        "Disnea",
-        "Síncope o presíncope",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome coronario o angina"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dt_ecg",
-      "name": "ECG de 12 derivaciones — hallazgo principal",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome coronario o angina"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ic_signos",
-      "name": "Signos y síntomas (Framingham)",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Ortopnea",
-        "Disnea paroxística nocturna",
-        "Ingurgitación yugular",
-        "Crepitantes pulmonares",
-        "Tercer ruido (galope)",
-        "Edema de miembros inferiores",
-        "Hepatomegalia"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia cardíaca"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ic_edema_grado",
-      "name": "Edema (fóvea)",
-      "dataType": "string",
-      "required": false,
-      "options": [
-        "Sin edema",
-        "+ (2 mm)",
-        "++ (4 mm)",
-        "+++ (6 mm)",
-        "++++ (8 mm)"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia cardíaca"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ic_peso_seco",
-      "name": "Peso de referencia (kg)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia cardíaca"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hta_organo_blanco",
-      "name": "Síntomas de daño de órgano blanco",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Cefalea intensa",
-        "Dolor torácico",
-        "Disnea",
-        "Alteración visual",
-        "Déficit neurológico",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipertensión arterial"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hta_adherencia",
-      "name": "Adherencia al tratamiento",
-      "dataType": "string",
-      "required": false,
-      "options": [
-        "Toma la medicación todos los días",
-        "Olvida dosis",
-        "Abandonó el tratamiento",
-        "Sin tratamiento todavía"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipertensión arterial"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hta_registros_domiciliarios",
-      "name": "Registros de presión en domicilio (promedio)",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipertensión arterial"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "arr_tipo",
-      "name": "Ritmo documentado",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Fibrilación auricular",
-        "Flutter auricular",
-        "Taquicardia supraventricular",
-        "Extrasístoles",
-        "Bloqueo AV",
-        "No documentado"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Arritmia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "arr_anticoagulado",
-      "name": "Recibe anticoagulación",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Arritmia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chagas_serologia",
-      "name": "Serología para Chagas",
-      "dataType": "string",
-      "required": true,
-      "options": ["Positiva", "Negativa", "Pendiente", "No realizada"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Cardiopatía chagásica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chagas_compromiso",
-      "name": "Compromiso orgánico",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Cardíaco (arritmia, bloqueo, insuficiencia)",
-        "Digestivo (megaesófago, megacolon)",
-        "Sin compromiso aparente"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Cardiopatía chagásica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chagas_tratamiento_previo",
-      "name": "Recibió benznidazol o nifurtimox",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Cardiopatía chagásica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "chagas_vivienda_endemica",
-      "name": "Vivió en vivienda con vinchucas",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Cardiopatía chagásica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "valv_valvula",
-      "name": "Válvula comprometida",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Valvulopatía"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "valv_eco",
-      "name": "Ecocardiograma — hallazgo principal",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Valvulopatía"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -761,5 +520,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

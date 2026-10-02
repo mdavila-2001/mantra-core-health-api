@@ -266,5 +266,6 @@
       "dataType": "date",
       "required": false
     }
-  ]
+  ],
+  "kind": "SPECIFIC"
 }

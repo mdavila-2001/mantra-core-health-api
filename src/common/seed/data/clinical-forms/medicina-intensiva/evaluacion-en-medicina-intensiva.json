@@ -1,6 +1,6 @@
 {
   "code": "MEDINT_UCI_EVALUACION",
-  "name": "Evaluación en medicina intensiva",
+  "name": "Medicina Intensiva — evaluación de ingreso (ficha base)",
   "specialty": {
     "code": "MEDICINA_INTENSIVA",
     "display": "Medicina Intensiva"
@@ -13,7 +13,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común del registro: motivo, fecha de ingreso, signos vitales, evolución, diagnóstico y conducta. Son agregados propios de la especialidad el motivo de ingreso a la unidad, los días de estancia, el soporte ventilatorio, el soporte vasoactivo, la sedación, el balance hídrico y la evolución del turno. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: CURB-65 (British Thoracic Society), escala de coma de Glasgow, KDIGO, RASS, definición de Berlín del SDRA."
+    "note": "De la norma se transcribe la estructura común del registro: motivo, fecha de ingreso, signos vitales, evolución, diagnóstico y conducta. Son agregados propios de la especialidad el motivo de ingreso a la unidad, los días de estancia, el soporte ventilatorio, el soporte vasoactivo, la sedación, el balance hídrico y la evolución del turno. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de coma de Glasgow, RASS."
   },
   "fields": [
     {
@@ -275,177 +275,7 @@
         "Coma o daño neurológico agudo"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "foco_sepsis",
-      "name": "Foco",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Shock séptico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hemocultivos",
-      "name": "Hemocultivos tomados",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Shock séptico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "antibiotico_hora",
-      "name": "Antibiótico y hora de inicio",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Shock séptico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "sdra_berlin",
-      "name": "Gravedad (Berlín)",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Leve (PaO₂/FiO₂ 200–300)",
-        "Moderado (100–200)",
-        "Grave (< 100)"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome de distrés respiratorio agudo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "prono",
-      "name": "Ventilación en prono",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome de distrés respiratorio agudo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "neumonia_crepitantes",
-      "name": "Crepitantes o soplo tubario localizados",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Neumonía grave"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "curb65",
-      "name": "Criterios CURB-65 presentes",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Confusión de reciente aparición",
-        "Urea > 42 mg/dL (BUN > 19 mg/dL)",
-        "Frecuencia respiratoria ≥ 30 rpm",
-        "PAS < 90 o PAD ≤ 60 mmHg",
-        "Edad ≥ 65 años",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "description": "0–1: ambulatorio · 2: valorar internación · 3 o más: neumonía grave.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Neumonía grave"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "neumonia_expectoracion",
-      "name": "Expectoración purulenta",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Neumonía grave"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "kdigo_lra",
-      "name": "Estadio KDIGO",
-      "dataType": "string",
-      "required": true,
-      "options": ["1", "2", "3"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia renal aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "terapia_reemplazo",
-      "name": "Terapia de reemplazo renal",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Insuficiencia renal aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cirugia_realizada",
-      "name": "Cirugía realizada",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Posoperatorio de alto riesgo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "sangrado_postop",
-      "name": "Sangrado activo",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Posoperatorio de alto riesgo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "pupilas_simetricas",
-      "name": "Pupilas simétricas y reactivas",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Coma o daño neurológico agudo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tac_cerebro",
-      "name": "TAC de cerebro",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Coma o daño neurológico agudo"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Evolución y plan",
@@ -469,5 +299,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

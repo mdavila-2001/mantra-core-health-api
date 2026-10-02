@@ -1,0 +1,217 @@
+{
+  "code": "NEUMO_CTRL_TB",
+  "name": "Control de tratamiento de tuberculosis",
+  "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Programa Mundial contra la Tuberculosis — directrices consolidadas",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/teams/global-tuberculosis-programme",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Seguimiento del tratamiento: fase, baciloscopías de control, adherencia (tratamiento directamente observado) y reacciones adversas."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de tuberculosis",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tbc_dias_de_tos",
+      "name": "Días de tos con expectoración",
+      "dataType": "integer",
+      "required": true,
+      "description": "15 días o más: sintomático respiratorio, pedir baciloscopía."
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tbc_sintomas",
+      "name": "Síntomas acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre vespertina",
+        "Sudoración nocturna",
+        "Pérdida de peso",
+        "Hemoptisis",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tbc_contacto",
+      "name": "Contacto con un caso de tuberculosis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tbc_baciloscopia",
+      "name": "Baciloscopía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "Pedida", "No pedida"]
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tb_fase",
+      "name": "Fase del tratamiento",
+      "dataType": "string",
+      "required": true,
+      "options": ["Intensiva", "Continuación", "Terminado"]
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tb_mes",
+      "name": "Mes de tratamiento",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tb_taes",
+      "name": "Tratamiento directamente observado",
+      "dataType": "string",
+      "required": false,
+      "options": ["Diario sin faltas", "Con faltas", "No supervisado"]
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "vih_tb",
+      "name": "Prueba de VIH",
+      "dataType": "string",
+      "required": false,
+      "options": ["Negativa", "Positiva", "No realizada"]
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "ram_tb",
+      "name": "Reacciones adversas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hepatotoxicidad",
+        "Erupción",
+        "Neuropatía",
+        "Alteración visual",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Baciloscopía negativa al final de la fase intensiva",
+        "Sin faltas",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Adherencia",
+        "Estudio de contactos",
+        "Medidas de aislamiento respiratorio"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

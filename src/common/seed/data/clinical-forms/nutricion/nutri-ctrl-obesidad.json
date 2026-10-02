@@ -1,0 +1,172 @@
+{
+  "code": "NUTRI_CTRL_OBESIDAD",
+  "name": "Control nutricional de sobrepeso y obesidad",
+  "specialty": { "code": "NUTRICION", "display": "Nutrición y Dietética" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Obesidad y sobrepeso",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/health-topics/obesity",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Antropometría, cambio de peso, hábitos y metas."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de sobrepeso u obesidad",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "imc",
+      "name": "IMC (kg/m²)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "perimetro_abdominal_cm",
+      "name": "Perímetro abdominal (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "cambio_de_peso_kg",
+      "name": "Cambio desde el último control (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "consumo_frecuente",
+      "name": "Consumo frecuente",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Bebidas azucaradas",
+        "Frituras",
+        "Comida rápida",
+        "Frutas y verduras"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: sobrepeso u obesidad",
+      "code": "actividad_fisica",
+      "name": "Actividad física",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sedentario", "Menos de 150 min por semana", "150 min o más"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Bajó 5 % del peso",
+        "Sin bebidas azucaradas",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Plato saludable", "Porciones", "Actividad física"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

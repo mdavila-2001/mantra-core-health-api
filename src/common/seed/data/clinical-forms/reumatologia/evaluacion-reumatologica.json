@@ -1,6 +1,6 @@
 {
   "code": "REUMA_EVALUACION_BASE",
-  "name": "Evaluación reumatológica",
+  "name": "Reumatología — consulta inicial (ficha base)",
   "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
   "version": 2,
   "provenance": {
@@ -178,157 +178,7 @@
         "Fibromialgia"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ar_fr_ccp",
-      "name": "Factor reumatoide o anti-CCP positivo",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Artritis reumatoide"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ar_erosiones",
-      "name": "Erosiones en radiografía",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Artritis reumatoide"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ar_das28",
-      "name": "DAS28",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Artritis reumatoide"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "artrosis_sitio",
-      "name": "Articulaciones",
-      "dataType": "json",
-      "required": true,
-      "options": ["Rodilla", "Cadera", "Manos", "Columna"],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Artrosis" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "artrosis_crepitacion",
-      "name": "Crepitación",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Artrosis" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "acido_urico",
-      "name": "Ácido úrico (mg/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "gota_tofos",
-      "name": "Tofos",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "gota_podagra",
-      "name": "Compromiso de la primera metatarsofalángica",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "les_ana",
-      "name": "ANA positivo",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lupus eritematoso sistémico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "les_organos",
-      "name": "Órganos comprometidos",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Piel",
-        "Articulaciones",
-        "Riñón",
-        "Hematológico",
-        "Serosas",
-        "Neurológico"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lupus eritematoso sistémico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "espondilo_dolor_inflamatorio",
-      "name": "Lumbalgia inflamatoria de más de 3 meses",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Espondiloartritis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "espondilo_hla_b27",
-      "name": "HLA-B27 positivo",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Espondiloartritis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fibro_iid",
-      "name": "Índice de dolor generalizado (0–19)",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Fibromialgia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fibro_sss",
-      "name": "Escala de gravedad de síntomas (0–12)",
-      "dataType": "integer",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Fibromialgia"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -345,5 +195,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }
