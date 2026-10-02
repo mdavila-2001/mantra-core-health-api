@@ -1,6 +1,6 @@
 {
   "code": "ANEST_VALORACION_PREANESTESICA",
-  "name": "Valoración preanestésica",
+  "name": "Anestesiología — valoración preanestésica (ficha base)",
   "specialty": { "code": "ANESTESIOLOGIA", "display": "Anestesiología" },
   "version": 2,
   "provenance": {
@@ -371,5 +371,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

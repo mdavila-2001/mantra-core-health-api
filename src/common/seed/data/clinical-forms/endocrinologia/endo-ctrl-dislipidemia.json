@@ -1,0 +1,173 @@
+{
+  "code": "ENDO_CTRL_DISLIPIDEMIA",
+  "name": "Control de dislipidemia",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "HEARTS: paquete técnico para el manejo de las enfermedades cardiovasculares en la atención primaria de salud",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/hearts-technical-package",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Perfil lipídico y riesgo cardiovascular según el módulo de HEARTS."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de dislipidemia",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "colesterol_total",
+      "name": "Colesterol total (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "ldl",
+      "name": "LDL (mg/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "hdl",
+      "name": "HDL (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "trigliceridos",
+      "name": "Triglicéridos (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "riesgo_cv",
+      "name": "Riesgo cardiovascular a 10 años (tabla OMS/OPS)",
+      "dataType": "string",
+      "required": false,
+      "options": ["< 10 %", "10 % a < 20 %", "≥ 20 %", "Prevención secundaria"]
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "estatina",
+      "name": "Recibe estatina",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dislipidemia",
+      "code": "mialgias",
+      "name": "Mialgias con la estatina",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "estatina", "equals": true }
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "LDL en la meta según su riesgo",
+        "Triglicéridos < 150 mg/dL",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Alimentación", "Actividad física"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

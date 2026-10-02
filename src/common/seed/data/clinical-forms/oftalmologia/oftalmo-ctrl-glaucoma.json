@@ -1,0 +1,159 @@
+{
+  "code": "OFTALMO_CTRL_GLAUCOMA",
+  "name": "Control de glaucoma",
+  "specialty": { "code": "OFTALMOLOGIA", "display": "Oftalmología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Preferred Practice Pattern Guidelines",
+    "organization": "American Academy of Ophthalmology (AAO)",
+    "url": "https://www.aao.org/education/preferred-practice-pattern",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Presión intraocular, nervio óptico y campo visual."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de glaucoma",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: glaucoma",
+      "code": "pio_od",
+      "name": "Presión intraocular OD (mmHg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: glaucoma",
+      "code": "pio_oi",
+      "name": "Presión intraocular OI (mmHg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: glaucoma",
+      "code": "copa_disco",
+      "name": "Relación copa/disco OD/OI",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: glaucoma",
+      "code": "campo_visual",
+      "name": "Campo visual",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sin cambios", "Progresión", "No realizado"]
+    },
+    {
+      "section": "Evaluación: glaucoma",
+      "code": "angulo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": false,
+      "options": ["Ángulo abierto", "Ángulo cerrado"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Presión en la meta individual",
+        "Campo visual estable",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Gotas todos los días", "Técnica de aplicación"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

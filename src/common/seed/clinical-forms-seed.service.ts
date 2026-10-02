@@ -733,6 +733,8 @@ export class ClinicalFormsSeedService {
     );
 
     const desde = existente.version;
+    // El nombre es rótulo, no dato: la v2 unifica el de las fichas base.
+    existente.name = form.name;
     existente.version = form.version;
     existente.updatedAt = now;
     await em.flush();
@@ -842,5 +844,5 @@ export function fichaDeCatalogo(
     if (Object.keys(presentacion).length > 0)
       fieldPresentation[field.code] = presentacion;
   }
-  return { ...form.provenance, fieldPresentation };
+  return { ...form.provenance, kind: form.kind, fieldPresentation };
 }

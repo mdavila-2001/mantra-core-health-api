@@ -1,0 +1,140 @@
+{
+  "code": "GASTRO_CTRL_HEMORRAGIA",
+  "name": "Hemorragia digestiva: evaluación inicial",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Evaluación hemodinámica y puntaje de Glasgow-Blatchford (publicado, de uso libre) para decidir internación."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "hd_forma",
+      "name": "Cómo se manifestó",
+      "dataType": "json",
+      "required": true,
+      "options": ["Hematemesis", "Melena", "Hematoquecia"],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "hd_estabilidad",
+      "name": "Estado hemodinámico",
+      "dataType": "string",
+      "required": true,
+      "options": ["Estable", "Taquicardia", "Hipotensión o shock"]
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "urea",
+      "name": "Urea (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "glasgow_blatchford",
+      "name": "Puntaje de Glasgow-Blatchford",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hemorragia digestiva",
+      "code": "hd_factores",
+      "name": "Factores",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "AINE",
+        "Anticoagulantes",
+        "Cirrosis",
+        "Úlcera previa",
+        "Alcohol"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemodinámicamente estable",
+        "Endoscopía en menos de 24 h",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

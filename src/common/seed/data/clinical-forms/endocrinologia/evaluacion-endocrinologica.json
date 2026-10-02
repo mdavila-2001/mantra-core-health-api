@@ -1,6 +1,6 @@
 {
   "code": "ENDO_EVALUACION_BASE",
-  "name": "Evaluación endocrinológica",
+  "name": "Endocrinología — consulta inicial (ficha base)",
   "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: categorías TI-RADS."
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
@@ -240,183 +240,7 @@
         "Dislipidemia"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_glucemia_capilar",
-      "name": "Glucemia capilar (mg/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes mellitus"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_hba1c",
-      "name": "Última HbA1c (%)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes mellitus"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_sintomas",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Poliuria",
-        "Polidipsia",
-        "Pérdida de peso",
-        "Visión borrosa",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes mellitus"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_pie",
-      "name": "Examen del pie",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Sensibilidad conservada (monofilamento)",
-        "Sensibilidad disminuida",
-        "Úlcera o lesión presente",
-        "No evaluado"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes mellitus"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dm_hipoglucemias",
-      "name": "Episodios de hipoglucemia desde el último control",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Diabetes mellitus"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tsh",
-      "name": "TSH (mUI/L)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipotiroidismo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "t4l",
-      "name": "T4 libre (ng/dL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipotiroidismo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tsh_hiper",
-      "name": "TSH (mUI/L)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipertiroidismo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "oftalmopatia",
-      "name": "Oftalmopatía",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipertiroidismo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "nodulo_tirads",
-      "name": "Ecografía — categoría TI-RADS",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Nódulo tiroideo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "nodulo_puncion",
-      "name": "Punción con aguja fina indicada",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Nódulo tiroideo"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "sm_criterios",
-      "name": "Criterios de síndrome metabólico",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Perímetro abdominal aumentado",
-        "Triglicéridos ≥ 150 mg/dL",
-        "HDL bajo",
-        "PA ≥ 130/85",
-        "Glucemia en ayunas ≥ 100 mg/dL"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Obesidad y síndrome metabólico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ldl_endo",
-      "name": "LDL (mg/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Dislipidemia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "trigliceridos",
-      "name": "Triglicéridos (mg/dL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Dislipidemia"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -433,5 +257,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

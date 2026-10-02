@@ -1,6 +1,6 @@
 {
   "code": "NEFRO_EVALUACION_BASE",
-  "name": "Evaluación nefrológica",
+  "name": "Nefrología — consulta inicial (ficha base)",
   "specialty": { "code": "NEFROLOGIA", "display": "Nefrología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el interrogatorio dirigido de diuresis, edemas y hematuria, el antecedente de litiasis, la presión arterial registrada en consulta y la referencia a estudios de función renal previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: KDIGO."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el interrogatorio dirigido de diuresis, edemas y hematuria, el antecedente de litiasis, la presión arterial registrada en consulta y la referencia a estudios de función renal previos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
@@ -185,208 +185,7 @@
         "Infección urinaria"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "creatinina",
-      "name": "Creatinina (mg/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Enfermedad renal crónica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tfg",
-      "name": "Filtrado glomerular estimado (mL/min/1,73 m²)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Enfermedad renal crónica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "erc_estadio_kdigo",
-      "name": "Estadio KDIGO",
-      "dataType": "string",
-      "required": false,
-      "options": [
-        "G1 (≥ 90)",
-        "G2 (60–89)",
-        "G3a (45–59)",
-        "G3b (30–44)",
-        "G4 (15–29)",
-        "G5 (< 15)"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Enfermedad renal crónica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "albuminuria",
-      "name": "Albuminuria",
-      "dataType": "string",
-      "required": false,
-      "options": [
-        "A1 (< 30 mg/g)",
-        "A2 (30–300 mg/g)",
-        "A3 (> 300 mg/g)",
-        "No medida"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Enfermedad renal crónica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lra_causa",
-      "name": "Causa probable",
-      "dataType": "string",
-      "required": true,
-      "options": ["Prerrenal", "Renal intrínseca", "Posrenal (obstructiva)"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión renal aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lra_creatinina_basal",
-      "name": "Creatinina basal (mg/dL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión renal aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "proteinuria_24h",
-      "name": "Proteinuria de 24 h (g)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome nefrótico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "albumina_serica",
-      "name": "Albúmina sérica (g/dL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome nefrótico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "nefritico_hta",
-      "name": "Hipertensión",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome nefrítico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "nefritico_infeccion_previa",
-      "name": "Infección faríngea o cutánea reciente",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome nefrítico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "litiasis_colico",
-      "name": "Cólico renal",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Litiasis renal"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "litiasis_imagen",
-      "name": "Imagen — tamaño y ubicación del lito",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Litiasis renal"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_sintomas",
-      "name": "Síntomas urinarios",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Disuria",
-        "Polaquiuria",
-        "Urgencia miccional",
-        "Hematuria",
-        "Dolor suprapúbico"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_fiebre_o_lumbar",
-      "name": "Fiebre o dolor lumbar (sospecha de pielonefritis)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_punopercusion",
-      "name": "Puñopercusión lumbar",
-      "dataType": "string",
-      "required": false,
-      "options": ["Positiva", "Negativa", "No evaluada"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_embarazo",
-      "name": "¿Embarazo posible?",
-      "dataType": "string",
-      "required": false,
-      "options": ["Sí", "No", "No aplica"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -410,5 +209,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

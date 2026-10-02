@@ -1,0 +1,171 @@
+{
+  "code": "NEFRO_CTRL_LITIASIS",
+  "name": "Control de litiasis renal",
+  "specialty": { "code": "NEFROLOGIA", "display": "Nefrología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Episodios, tamaño y ubicación del lito, y estudio metabólico."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de litiasis renal",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "colicos_anio",
+      "name": "Cólicos en el último año",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "lito_tamano",
+      "name": "Imagen: tamaño y ubicación del lito",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "hidronefrosis",
+      "name": "Hidronefrosis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "fiebre_litiasis",
+      "name": "Fiebre (obstrucción infectada: urgencia)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "lito_composicion",
+      "name": "Composición",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Oxalato de calcio",
+        "Ácido úrico",
+        "Estruvita",
+        "Cistina",
+        "Desconocida"
+      ]
+    },
+    {
+      "section": "Evaluación: litiasis renal",
+      "code": "estudio_metabolico",
+      "name": "Estudio metabólico realizado",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diuresis > 2 litros por día",
+        "Sin cólicos",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Tomar agua", "Menos sal y proteína animal"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

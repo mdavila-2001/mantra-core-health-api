@@ -1,0 +1,107 @@
+{
+  "code": "OFTALMO_CTRL_RETINOPATIA",
+  "name": "Control de retinopatía diabética",
+  "specialty": { "code": "OFTALMOLOGIA", "display": "Oftalmología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Preferred Practice Pattern Guidelines",
+    "organization": "American Academy of Ophthalmology (AAO)",
+    "url": "https://www.aao.org/education/preferred-practice-pattern",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Escala internacional de retinopatía diabética y edema macular (categorías de la AAO)."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "agudeza_visual_od",
+      "name": "Agudeza visual OD",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "agudeza_visual_oi",
+      "name": "Agudeza visual OI",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "retinopatia_od",
+      "name": "Retinopatía OD",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin retinopatía",
+        "No proliferativa leve",
+        "No proliferativa moderada",
+        "No proliferativa grave",
+        "Proliferativa"
+      ]
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "retinopatia_oi",
+      "name": "Retinopatía OI",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin retinopatía",
+        "No proliferativa leve",
+        "No proliferativa moderada",
+        "No proliferativa grave",
+        "Proliferativa"
+      ]
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "edema_macular",
+      "name": "Edema macular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Ausente",
+        "Presente sin compromiso central",
+        "Presente con compromiso central"
+      ]
+    },
+    {
+      "section": "Evaluación: retinopatía diabética",
+      "code": "hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

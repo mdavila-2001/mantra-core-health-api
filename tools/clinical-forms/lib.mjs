@@ -502,3 +502,153 @@ export function validarFicha(ficha) {
 }
 
 export { OTRO };
+
+/* -- Fichas específicas por condición ------------------------------------ */
+
+/**
+ * El diagnóstico presuntivo de una ficha **base**: sólo la lista de lo que se
+ * sospecha. Lo que hay que observar de cada cuadro vive en su ficha específica
+ * de la especialidad, que es la que se usa en los controles.
+ */
+export function presuntivo(cuadros, { code = 'diagnostico_presuntivo' } = {}) {
+  return [
+    una(code, 'Diagnóstico presuntivo (lo que se sospecha)', cuadros, {
+      otro: true,
+      req: true,
+      ayuda:
+        'Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad.',
+    }),
+  ];
+}
+
+const TIPOS_DE_CONTROL = [
+  'Primera evaluación de la condición',
+  'Control programado',
+  'Descompensación o consulta no programada',
+  'Control posterior a internación',
+];
+
+const ADHERENCIA = [
+  'Toma el tratamiento como está indicado',
+  'Olvida dosis algunas veces',
+  'Abandonó el tratamiento',
+  'Todavía sin tratamiento',
+];
+
+/**
+ * El esqueleto de toda ficha de control de una condición, el de los programas
+ * de enfermedades crónicas (OPS HEARTS, OMS mhGAP): de qué tipo es el control,
+ * desde cuándo y con qué se trata, cómo lo está tomando y qué le hizo; después
+ * la evaluación propia del cuadro, sus complicaciones, y el cierre con metas,
+ * educación y próximo control.
+ */
+export function control({
+  condicion,
+  evaluacion,
+  complicaciones = [],
+  metas = [],
+  educacion = [],
+  modo = 'cronico',
+}) {
+  return [
+    seccion(TITULO_DE_INICIO[modo], INICIO[modo](condicion)),
+    seccion(`Evaluación: ${condicion}`, evaluacion),
+    ...(complicaciones.length > 0
+      ? [seccion('Complicaciones y daño de órgano', complicaciones)]
+      : []),
+    seccion(modo === 'cronico' ? 'Metas y plan' : 'Conclusión y plan', [
+      ...(metas.length > 0
+        ? [
+            varias('metas_cumplidas', 'Metas de control que cumple hoy', [
+              ...metas,
+              'Ninguna todavía',
+            ]),
+          ]
+        : []),
+      ...(educacion.length > 0
+        ? [
+            varias(
+              'educacion_brindada',
+              'Educación brindada en esta consulta',
+              educacion,
+            ),
+          ]
+        : []),
+      obl(t('diagnostico', 'Diagnóstico (con código CIE-10 si se conoce)')),
+      t('plan', 'Plan: tratamiento, estudios, interconsultas y destino'),
+      ...(modo === 'agudo' ? [] : [f('proximo_control', 'Próximo control')]),
+    ]),
+  ];
+}
+
+const TITULO_DE_INICIO = {
+  cronico: 'Seguimiento',
+  agudo: 'Evaluación inicial',
+  evaluacion: 'Consulta',
+};
+
+/**
+ * Cómo empieza cada tipo de ficha:
+ * - **crónico** (un control): desde cuándo, con qué se trata, cómo lo toma;
+ * - **agudo** (un cuadro que se evalúa ahora): cuándo empezó y qué recibió;
+ * - **evaluación** (un tamizaje, una consejería, un recién nacido): sólo si
+ *   es la primera vez o un control.
+ */
+const INICIO = {
+  cronico: (condicion) => [
+    una('tipo_de_control', 'Tipo de consulta', TIPOS_DE_CONTROL, { req: true }),
+    f('fecha_del_diagnostico', `Fecha del diagnóstico de ${condicion}`),
+    t('tratamiento_actual', 'Tratamiento actual (fármaco, dosis y frecuencia)'),
+    una('adherencia', 'Adherencia al tratamiento', ADHERENCIA),
+    b('efectos_adversos', '¿Tuvo efectos adversos del tratamiento?'),
+    ...si('efectos_adversos', true, [
+      t('efectos_adversos_cuales', '¿Cuáles y con qué fármaco?', { req: true }),
+    ]),
+    t('evolucion_desde_ultimo_control', 'Evolución desde el último control'),
+  ],
+  agudo: () => [
+    una(
+      'tipo_de_evaluacion',
+      'Tipo de evaluación',
+      ['Evaluación inicial', 'Reevaluación'],
+      { req: true },
+    ),
+    s('inicio_de_sintomas', 'Inicio de los síntomas (fecha u hora)', {
+      req: true,
+    }),
+    t('tratamiento_previo', 'Tratamiento recibido antes de esta consulta'),
+  ],
+  evaluacion: () => [
+    una('tipo_de_evaluacion', 'Tipo de consulta', ['Primera vez', 'Control'], {
+      req: true,
+    }),
+  ],
+};
+
+/**
+ * Un informe de estudio: indicación, resultado y conclusión. No lleva
+ * tratamiento, adherencia ni metas: no se atiende a nadie, se informa.
+ */
+export function informeDe(estudio, resultado) {
+  return [
+    seccion('Solicitud', [
+      obl(t('indicacion_del_estudio', 'Indicación del estudio')),
+      s(
+        'diagnostico_presuntivo_solicitante',
+        'Diagnóstico presuntivo del solicitante',
+      ),
+      f('fecha_del_estudio', 'Fecha del estudio'),
+    ]),
+    seccion(`Resultado: ${estudio}`, resultado),
+    seccion('Conclusión', [
+      obl(t('conclusion', 'Conclusión')),
+      t('recomendacion', 'Recomendación'),
+      b('hallazgo_critico', 'Hay un hallazgo crítico'),
+      ...si('hallazgo_critico', true, [
+        s('hallazgo_critico_comunicado', '¿A quién se comunicó y a qué hora?', {
+          req: true,
+        }),
+      ]),
+    ]),
+  ];
+}

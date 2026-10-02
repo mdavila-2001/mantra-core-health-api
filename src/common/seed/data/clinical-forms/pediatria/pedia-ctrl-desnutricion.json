@@ -1,0 +1,184 @@
+{
+  "code": "PEDIA_CTRL_DESNUTRICION",
+  "name": "Control de desnutrición aguda",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Malnutrición",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/health-topics/malnutrition",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Puntaje Z peso/talla, perímetro braquial, edema y prueba del apetito."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de desnutrición aguda",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "edad_en_meses",
+      "name": "Edad (meses)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "z_peso_talla",
+      "name": "Z peso/talla",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "perimetro_braquial",
+      "name": "Perímetro braquial (mm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "edema_bilateral",
+      "name": "Edema bilateral",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "prueba_apetito",
+      "name": "Prueba del apetito",
+      "dataType": "string",
+      "required": false,
+      "options": ["Pasa", "No pasa", "No realizada"]
+    },
+    {
+      "section": "Evaluación: desnutrición aguda",
+      "code": "desnutricion_clasificacion",
+      "name": "Clasificación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Aguda moderada",
+        "Aguda grave sin complicaciones",
+        "Aguda grave complicada"
+      ]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ganancia de peso ≥ 5 g/kg/día",
+        "Z peso/talla ≥ −2",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Alimento terapéutico", "Lactancia", "Higiene"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

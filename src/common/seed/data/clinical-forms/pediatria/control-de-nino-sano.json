@@ -1,6 +1,6 @@
 {
   "code": "PEDIA_CONTROL_NINO_SANO",
-  "name": "Control de niño sano",
+  "name": "Pediatría — control de niño sano (ficha base)",
   "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
   "version": 2,
   "provenance": {
@@ -234,7 +234,7 @@
     {
       "section": "Motivo agregado y observaciones",
       "code": "motivo_agregado",
-      "name": "Motivo agregado al control",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
       "dataType": "string",
       "required": true,
       "options": [
@@ -245,210 +245,7 @@
         "Desnutrición"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "centor_fiebre",
-      "name": "Fiebre mayor a 38 °C",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "centor_sin_tos",
-      "name": "Ausencia de tos",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "centor_adenopatias",
-      "name": "Adenopatías cervicales anteriores dolorosas",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "centor_exudado",
-      "name": "Exudado o tumefacción amigdalina",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "ira_rinorrea",
-      "name": "Rinorrea",
-      "dataType": "string",
-      "required": false,
-      "options": ["Ausente", "Acuosa", "Purulenta"],
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "fr_por_minuto",
-      "name": "Frecuencia respiratoria (rpm)",
-      "dataType": "integer",
-      "required": true,
-      "description": "Respiración rápida: ≥ 50 de 2 a 11 meses; ≥ 40 de 1 a 4 años.",
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "tiraje",
-      "name": "Tiraje subcostal",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Infección respiratoria aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "eda_deposiciones_24h",
-      "name": "Deposiciones líquidas en las últimas 24 horas",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Enfermedad diarreica aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "eda_sangre_en_heces",
-      "name": "Sangre en las heces (disentería)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Enfermedad diarreica aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "eda_vomitos",
-      "name": "Vómitos",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Enfermedad diarreica aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "eda_hidratacion",
-      "name": "Estado de hidratación (OMS)",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Sin deshidratación — Plan A",
-        "Algún grado de deshidratación — Plan B",
-        "Deshidratación grave — Plan C"
-      ],
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Enfermedad diarreica aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "eda_fiebre",
-      "name": "Fiebre",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "motivo_agregado",
-        "equals": "Enfermedad diarreica aguda"
-      }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "anemia_hemoglobina",
-      "name": "Hemoglobina (g/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "description": "Ajustar por altitud de residencia.",
-      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "anemia_sintomas",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Astenia",
-        "Disnea de esfuerzo",
-        "Palpitaciones",
-        "Pica",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "anemia_perdidas",
-      "name": "Posibles pérdidas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Menstruación abundante",
-        "Sangrado digestivo",
-        "Parasitosis",
-        "Ninguna conocida"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "anemia_vcm",
-      "name": "VCM y ferritina, si se conocen",
-      "dataType": "string",
-      "required": false,
-      "showWhen": { "field": "motivo_agregado", "equals": "Anemia" }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "z_peso_talla",
-      "name": "Puntaje Z peso/talla",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": { "field": "motivo_agregado", "equals": "Desnutrición" }
-    },
-    {
-      "section": "Motivo agregado y observaciones",
-      "code": "edema_bilateral",
-      "name": "Edema bilateral (kwashiorkor)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "motivo_agregado", "equals": "Desnutrición" }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Próximo control",
@@ -457,5 +254,6 @@
       "dataType": "date",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

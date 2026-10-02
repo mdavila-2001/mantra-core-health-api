@@ -1,6 +1,6 @@
 {
   "code": "FISIO_EVALUACION_BASE",
-  "name": "Evaluación kinesiológica",
+  "name": "Fisioterapia y Rehabilitación — consulta inicial (ficha base)",
   "specialty": {
     "code": "FISIOTERAPIA",
     "display": "Fisioterapia y Rehabilitación"
@@ -13,7 +13,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común: motivo de consulta, tiempo de evolución, antecedentes, examen físico dirigido a la región afectada, diagnóstico y conducta. Son agregados propios de la especialidad la intensidad de dolor referida por el paciente en escala de 0 a 10, la zona afectada, la descripción en prosa del rango de movimiento, la fuerza muscular, la marcha, la limitación funcional y los objetivos de rehabilitación. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de disnea mMRC, índice de Barthel, escala de fuerza MRC."
+    "note": "De la norma se transcribe la estructura común: motivo de consulta, tiempo de evolución, antecedentes, examen físico dirigido a la región afectada, diagnóstico y conducta. Son agregados propios de la especialidad la intensidad de dolor referida por el paciente en escala de 0 a 10, la zona afectada, la descripción en prosa del rango de movimiento, la fuerza muscular, la marcha, la limitación funcional y los objetivos de rehabilitación. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: escala de fuerza MRC."
   },
   "fields": [
     {
@@ -160,134 +160,7 @@
         "Rehabilitación respiratoria"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lumbalgia_banderas_rojas",
-      "name": "Banderas rojas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Edad menor a 20 o mayor a 55 años",
-        "Traumatismo importante",
-        "Fiebre",
-        "Pérdida de peso no explicada",
-        "Antecedente de cáncer",
-        "Déficit neurológico progresivo",
-        "Alteración de esfínteres o anestesia en silla de montar",
-        "Ninguna"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Lumbalgia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lumbalgia_ciatica",
-      "name": "Dolor irradiado por debajo de la rodilla",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Lumbalgia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lumbalgia_lasegue",
-      "name": "Signo de Lasègue",
-      "dataType": "string",
-      "required": false,
-      "options": ["Positivo", "Negativo", "No evaluado"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Lumbalgia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cervical_irradiada",
-      "name": "Irradiada al brazo",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Cervicalgia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cervical_mareo",
-      "name": "Mareo o cefalea asociada",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Cervicalgia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "posqx_cirugia",
-      "name": "Cirugía o fractura y fecha",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Posquirúrgico o posfractura"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "posqx_carga",
-      "name": "Carga permitida",
-      "dataType": "string",
-      "required": false,
-      "options": ["Sin carga", "Parcial", "Total"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Posquirúrgico o posfractura"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "barthel",
-      "name": "Barthel",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Independiente (100)",
-        "Dependencia leve (91–99)",
-        "Moderada (61–90)",
-        "Grave (21–60)",
-        "Total (0–20)"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Secuela neurológica (ACV, lesión medular)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "deporte_lesion",
-      "name": "Deporte y gesto lesivo",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión deportiva"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "disnea_mmrc_fisio",
-      "name": "mMRC",
-      "dataType": "string",
-      "required": true,
-      "options": ["0", "1", "2", "3", "4"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Rehabilitación respiratoria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "caminata_6min",
-      "name": "Prueba de caminata de 6 minutos (m)",
-      "dataType": "integer",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Rehabilitación respiratoria"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Plan",
@@ -310,5 +183,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

@@ -20,7 +20,7 @@ import {
   sin,
   si,
   socrates,
-  sospecha,
+  presuntivo,
   t,
   una,
   varias,
@@ -122,59 +122,14 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Apendicitis aguda': [
-          varias(
-            'alvarado',
-            'Escala de Alvarado',
-            [
-              'Migración del dolor a fosa ilíaca derecha',
-              'Anorexia',
-              'Náuseas o vómitos',
-              'Dolor en fosa ilíaca derecha (2)',
-              'Rebote',
-              'Fiebre > 37,3 °C',
-              'Leucocitosis > 10 000 (2)',
-              'Desviación a la izquierda',
-            ],
-            { req: true, ayuda: '7 o más puntos: probable apendicitis.' },
-          ),
-        ],
-        'Colecistitis o colelitiasis': [
-          b('murphy_cirugia', 'Signo de Murphy', { req: true }),
-          s('eco_vesicula', 'Ecografía — hallazgo'),
-        ],
-        'Hernia de pared abdominal': [
-          b('hernia_dolor_cronico', 'Dolor crónico en la hernia', {
-            req: true,
-          }),
-        ],
-        'Obstrucción intestinal': [
-          varias(
-            'obstruccion_signos',
-            'Signos',
-            [
-              'Distensión',
-              'Vómitos fecaloides',
-              'Ruidos aumentados metálicos',
-              'Silencio abdominal',
-              'Cicatriz previa',
-            ],
-            { req: true },
-          ),
-        ],
-        'Abdomen agudo inespecífico': [
-          s('abdomen_agudo_imagen', 'Imagen solicitada', { req: true }),
-        ],
-        'Patología anorrectal': [
-          una(
-            'anorrectal_tipo',
-            'Sospecha',
-            ['Hemorroides', 'Fisura', 'Absceso', 'Fístula'],
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Apendicitis aguda',
+        'Colecistitis o colelitiasis',
+        'Hernia de pared abdominal',
+        'Obstrucción intestinal',
+        'Abdomen agudo inespecífico',
+        'Patología anorrectal',
+      ]),
     ),
     seccion('Plan quirúrgico', [
       una('riesgo_asa', 'Riesgo anestésico ASA', [
@@ -239,59 +194,14 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Hiperplasia prostática benigna': [
-          s('volumen_prostatico', 'Volumen prostático estimado (mL)', {
-            req: true,
-          }),
-          d('residuo_posmiccional', 'Residuo posmiccional (mL)'),
-          b('retencion_previa', 'Retención urinaria previa'),
-        ],
-        'Sospecha de cáncer de próstata': [
-          d('psa', 'PSA total (ng/mL)', { req: true }),
-          una(
-            'tacto_prostata',
-            'Tacto rectal',
-            ['Normal', 'Nódulo', 'Indurada', 'No realizado'],
-            { req: true },
-          ),
-        ],
-        'Litiasis urinaria': [
-          s('lito_tamano', 'Tamaño y ubicación del lito', { req: true }),
-          b('lito_obstruccion', 'Hidronefrosis'),
-          b('lito_fiebre', 'Fiebre (urgencia)'),
-        ],
-        'Infección urinaria': [
-          varias(
-            'itu_uro',
-            'Síntomas',
-            [
-              'Disuria',
-              'Polaquiuria',
-              'Fiebre',
-              'Dolor perineal (prostatitis)',
-            ],
-            { req: true },
-          ),
-          s('urocultivo', 'Urocultivo'),
-        ],
-        'Hematuria en estudio': [
-          b('hematuria_tabaco', 'Fumador o exfumador', { req: true }),
-          s('hematuria_imagen', 'Imagen y cistoscopía'),
-        ],
-        'Disfunción eréctil': [
-          una('de_inicio', 'Inicio', ['Gradual', 'Brusco'], { req: true }),
-          b('de_erecciones_matinales', 'Conserva erecciones matinales'),
-          varias('de_factores', 'Factores asociados', [
-            'Diabetes',
-            'Hipertensión',
-            'Tabaquismo',
-            'Fármacos',
-            'Ansiedad o depresión',
-            'Ninguno',
-          ]),
-        ],
-      }),
+      presuntivo([
+        'Hiperplasia prostática benigna',
+        'Sospecha de cáncer de próstata',
+        'Litiasis urinaria',
+        'Infección urinaria',
+        'Hematuria en estudio',
+        'Disfunción eréctil',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -362,57 +272,15 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Otitis media aguda': [
-          b('oma_abombamiento', 'Membrana timpánica abombada', { req: true }),
-          b('oma_fiebre', 'Fiebre'),
-        ],
-        'Otitis externa': [
-          b('oe_dolor_trago', 'Dolor a la presión del trago', { req: true }),
-          b('oe_diabetes', 'Diabetes (riesgo de otitis maligna)'),
-        ],
-        Faringoamigdalitis: [
-          b('centor_fiebre_orl', 'Fiebre > 38 °C', { req: true }),
-          b('centor_exudado_orl', 'Exudado amigdalino'),
-          b('centor_adenopatias_orl', 'Adenopatías cervicales dolorosas'),
-          b('centor_sin_tos_orl', 'Ausencia de tos'),
-        ],
-        Rinosinusitis: [
-          i('rinosinusitis_dias', 'Días de evolución', {
-            req: true,
-            ayuda:
-              'Más de 10 días o empeoramiento tras mejoría: bacteriana probable.',
-          }),
-          varias('rinosinusitis_sintomas', 'Síntomas', [
-            'Rinorrea purulenta',
-            'Dolor facial',
-            'Hiposmia',
-            'Fiebre',
-          ]),
-        ],
-        'Rinitis alérgica': [
-          una(
-            'rinitis_aria',
-            'Clasificación ARIA',
-            [
-              'Intermitente leve',
-              'Intermitente moderada-grave',
-              'Persistente leve',
-              'Persistente moderada-grave',
-            ],
-            { req: true },
-          ),
-        ],
-        'Hipoacusia súbita': [s('audiometria', 'Audiometría', { req: true })],
-        'Vértigo periférico': [
-          una(
-            'dix_hallpike_orl',
-            'Dix-Hallpike',
-            ['Positiva', 'Negativa', 'No realizada'],
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Otitis media aguda',
+        'Otitis externa',
+        'Faringoamigdalitis',
+        'Rinosinusitis',
+        'Rinitis alérgica',
+        'Hipoacusia súbita',
+        'Vértigo periférico',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -641,60 +509,14 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        Fractura: [
-          s('fractura_hueso', 'Hueso y segmento', { req: true }),
-          una('fractura_tipo', 'Tipo', ['Cerrada', 'Expuesta']),
-          una('fractura_desplazamiento', 'Desplazamiento', [
-            'No desplazada',
-            'Desplazada',
-            'Conminuta',
-          ]),
-        ],
-        Esguince: [
-          una(
-            'esguince_grado',
-            'Grado',
-            ['I — distensión', 'II — rotura parcial', 'III — rotura completa'],
-            { req: true },
-          ),
-          b('ottawa', 'Reglas de Ottawa positivas (tobillo/rodilla)'),
-        ],
-        Luxación: [
-          s('luxacion_articulacion', 'Articulación', { req: true }),
-          b('luxacion_reducida', 'Reducida'),
-        ],
-        'Lesión meniscal o ligamentaria de rodilla': [
-          varias(
-            'rodilla_pruebas',
-            'Pruebas positivas',
-            [
-              'Lachman',
-              'Cajón anterior',
-              'McMurray',
-              'Bostezo varo/valgo',
-              'Ninguna',
-            ],
-            { req: true },
-          ),
-          b('rodilla_derrame', 'Derrame'),
-        ],
-        'Lumbalgia mecánica': [
-          varias(
-            'lumbalgia_banderas_trauma',
-            'Banderas rojas',
-            [
-              'Déficit neurológico',
-              'Alteración de esfínteres',
-              'Fiebre',
-              'Antecedente de cáncer',
-              'Ninguna',
-            ],
-            { req: true },
-          ),
-        ],
-        Tendinopatía: [s('tendon', 'Tendón afectado', { req: true })],
-      }),
+      presuntivo([
+        'Fractura',
+        'Esguince',
+        'Luxación',
+        'Lesión meniscal o ligamentaria de rodilla',
+        'Lumbalgia mecánica',
+        'Tendinopatía',
+      ]),
     ),
     seccion('Conducta', [
       obl(t('conducta', 'Conducta (inmovilización, cirugía, rehabilitación)')),
@@ -743,70 +565,15 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Vicio de refracción': [
-          una(
-            'refraccion_tipo',
-            'Tipo',
-            ['Miopía', 'Hipermetropía', 'Astigmatismo', 'Presbicia'],
-            { req: true },
-          ),
-        ],
-        Catarata: [
-          una('catarata_ojo', 'Ojo', ['OD', 'OI', 'Ambos'], { req: true }),
-          b('catarata_limita', 'Limita las actividades diarias'),
-        ],
-        Glaucoma: [
-          s('excavacion', 'Relación copa/disco', { req: true }),
-          b('campimetria', 'Campimetría alterada'),
-        ],
-        'Retinopatía diabética o hipertensiva': [
-          una(
-            'retinopatia_grado',
-            'Grado',
-            [
-              'Sin retinopatía',
-              'No proliferativa leve',
-              'No proliferativa moderada',
-              'No proliferativa grave',
-              'Proliferativa',
-              'Edema macular',
-            ],
-            { req: true },
-          ),
-        ],
-        Conjuntivitis: [
-          una(
-            'conjuntivitis_tipo',
-            'Tipo',
-            ['Viral', 'Bacteriana', 'Alérgica'],
-            { req: true },
-          ),
-          b(
-            'conjuntivitis_bav',
-            'Baja de visión o dolor (descartar otra causa)',
-          ),
-        ],
-        Pterigión: [
-          una('pterigion_grado', 'Grado', ['I', 'II', 'III', 'IV'], {
-            req: true,
-          }),
-        ],
-        'Ojo rojo con signos de alarma': [
-          varias(
-            'ojo_rojo_alarma',
-            'Signos de alarma',
-            [
-              'Dolor intenso',
-              'Baja de visión',
-              'Pupila arreactiva',
-              'Opacidad corneal',
-              'Trauma',
-            ],
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Vicio de refracción',
+        'Catarata',
+        'Glaucoma',
+        'Retinopatía diabética o hipertensiva',
+        'Conjuntivitis',
+        'Pterigión',
+        'Ojo rojo con signos de alarma',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -874,63 +641,16 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Dolor torácico agudo': [
-          ...DOLOR_TORACICO(),
-          s('troponina', 'Troponina'),
-        ],
-        'Accidente cerebrovascular': sin(ACV(), 'acv_glucemia'),
-        Politraumatismo: [
-          s('trauma_mecanismo', 'Mecanismo de alta energía', { req: true }),
-          varias('trauma_lesiones', 'Lesiones', [
-            'Craneoencefálica',
-            'Torácica',
-            'Abdominal',
-            'Pélvica',
-            'Extremidades',
-            'Columna',
-          ]),
-        ],
-        'Dificultad respiratoria': [
-          una(
-            'dr_causa',
-            'Causa probable',
-            [
-              'Asma o EPOC',
-              'Neumonía',
-              'Insuficiencia cardíaca',
-              'Anafilaxia',
-              'Embolia pulmonar',
-            ],
-            { req: true },
-          ),
-        ],
-        Sepsis: [
-          varias(
-            'qsofa_emerg',
-            'qSOFA',
-            [
-              'Frecuencia respiratoria ≥ 22',
-              'Alteración del estado mental',
-              'PAS ≤ 100 mmHg',
-            ],
-            { req: true },
-          ),
-          d('lactato', 'Lactato (mmol/L)'),
-        ],
-        'Dengue con signos de alarma': DENGUE(),
-        Convulsión: CONVULSION(),
-        Intoxicación: [
-          s('intox_sustancia', 'Sustancia y cantidad', { req: true }),
-          s('intox_hora', 'Hora de exposición'),
-          una('intox_via', 'Vía', [
-            'Oral',
-            'Inhalatoria',
-            'Cutánea',
-            'Parenteral',
-          ]),
-        ],
-      }),
+      presuntivo([
+        'Dolor torácico agudo',
+        'Accidente cerebrovascular',
+        'Politraumatismo',
+        'Dificultad respiratoria',
+        'Sepsis',
+        'Dengue con signos de alarma',
+        'Convulsión',
+        'Intoxicación',
+      ]),
     ),
     seccion('Diagnóstico y conducta', [
       cierre(),
@@ -1036,37 +756,14 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Shock séptico': [
-          s('foco_sepsis', 'Foco', { req: true }),
-          b('hemocultivos', 'Hemocultivos tomados'),
-          s('antibiotico_hora', 'Antibiótico y hora de inicio'),
-        ],
-        'Síndrome de distrés respiratorio agudo': [
-          una(
-            'sdra_berlin',
-            'Gravedad (Berlín)',
-            ['Leve (PaO₂/FiO₂ 200–300)', 'Moderado (100–200)', 'Grave (< 100)'],
-            { req: true },
-          ),
-          b('prono', 'Ventilación en prono'),
-        ],
-        'Neumonía grave': NEUMONIA(),
-        'Insuficiencia renal aguda': [
-          una('kdigo_lra', 'Estadio KDIGO', ['1', '2', '3'], { req: true }),
-          b('terapia_reemplazo', 'Terapia de reemplazo renal'),
-        ],
-        'Posoperatorio de alto riesgo': [
-          s('cirugia_realizada', 'Cirugía realizada', { req: true }),
-          b('sangrado_postop', 'Sangrado activo'),
-        ],
-        'Coma o daño neurológico agudo': [
-          b('pupilas_simetricas', 'Pupilas simétricas y reactivas', {
-            req: true,
-          }),
-          s('tac_cerebro', 'TAC de cerebro'),
-        ],
-      }),
+      presuntivo([
+        'Shock séptico',
+        'Síndrome de distrés respiratorio agudo',
+        'Neumonía grave',
+        'Insuficiencia renal aguda',
+        'Posoperatorio de alto riesgo',
+        'Coma o daño neurológico agudo',
+      ]),
     ),
     seccion('Evolución y plan', [
       obl(t('evolucion_del_turno', 'Evolución del turno')),
@@ -1159,78 +856,14 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Episodio depresivo': [
-          varias(
-            'depresion_criterios',
-            'Síntomas (2 semanas o más)',
-            [
-              'Ánimo deprimido',
-              'Anhedonia',
-              'Alteración del sueño',
-              'Alteración del apetito',
-              'Fatiga',
-              'Culpa o inutilidad',
-              'Dificultad para concentrarse',
-              'Enlentecimiento o agitación',
-              'Ideas de muerte',
-            ],
-            { req: true, ayuda: '5 o más, incluido ánimo o anhedonia.' },
-          ),
-        ],
-        'Trastorno de ansiedad': [
-          una(
-            'ansiedad_tipo',
-            'Presentación',
-            [
-              'Generalizada',
-              'Crisis de pánico',
-              'Fobia social',
-              'Fobia específica',
-            ],
-            { req: true },
-          ),
-          i('ansiedad_meses', 'Meses de evolución'),
-        ],
-        'Trastorno bipolar': [
-          varias(
-            'mania',
-            'Síntomas maníacos',
-            [
-              'Ánimo elevado o irritable',
-              'Menos necesidad de dormir',
-              'Verborrea',
-              'Fuga de ideas',
-              'Grandiosidad',
-              'Conductas de riesgo',
-            ],
-            { req: true },
-          ),
-        ],
-        Psicosis: [
-          varias(
-            'psicosis_sintomas',
-            'Síntomas',
-            [
-              'Delirios',
-              'Alucinaciones',
-              'Discurso desorganizado',
-              'Conducta desorganizada',
-              'Síntomas negativos',
-            ],
-            { req: true },
-          ),
-          b('psicosis_primer_episodio', 'Primer episodio'),
-        ],
-        'Trastorno por consumo de alcohol': [
-          i('audit_total', 'AUDIT completo (0–40)', { req: true }),
-          b('abstinencia', 'Signos de abstinencia'),
-        ],
-        'Trastorno por consumo de otras sustancias': [
-          s('sustancia_principal', 'Sustancia principal', { req: true }),
-          s('sustancia_via_frecuencia', 'Vía y frecuencia'),
-        ],
-      }),
+      presuntivo([
+        'Episodio depresivo',
+        'Trastorno de ansiedad',
+        'Trastorno bipolar',
+        'Psicosis',
+        'Trastorno por consumo de alcohol',
+        'Trastorno por consumo de otras sustancias',
+      ]),
     ),
     seccion('Impresión y plan', [
       obl(t('impresion_diagnostica', 'Impresión diagnóstica (CIE-10)')),
@@ -1299,47 +932,13 @@ export const PROCEDIMIENTO = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Trastorno mental común (ansiedad, depresión)': [
-          una(
-            'tmc_predominio',
-            'Predominio',
-            ['Depresivo', 'Ansioso', 'Mixto', 'Somático'],
-            { req: true },
-          ),
-          i('tmc_meses', 'Meses de evolución'),
-        ],
-        Duelo: [
-          s('duelo_perdida', 'Pérdida y fecha', { req: true }),
-          b('duelo_complicado', 'Más de 12 meses con deterioro funcional'),
-        ],
-        'Estrés postraumático': [
-          varias(
-            'tept',
-            'Síntomas',
-            [
-              'Reexperimentación',
-              'Evitación',
-              'Hiperalerta',
-              'Cambios negativos del ánimo',
-            ],
-            { req: true },
-          ),
-        ],
-        Violencia: [
-          varias(
-            'violencia_tipo',
-            'Tipo',
-            ['Física', 'Psicológica', 'Sexual', 'Económica'],
-            { req: true },
-          ),
-          b('violencia_riesgo_inminente', 'Riesgo inminente'),
-          b('violencia_denuncia', 'Orientada a la denuncia (Ley 348)'),
-        ],
-        'Problemas de conducta en niños o adolescentes': [
-          s('conducta_contexto', 'Contexto escolar y familiar', { req: true }),
-        ],
-      }),
+      presuntivo([
+        'Trastorno mental común (ansiedad, depresión)',
+        'Duelo',
+        'Estrés postraumático',
+        'Violencia',
+        'Problemas de conducta en niños o adolescentes',
+      ]),
     ),
     seccion('Diagnóstico y plan', [
       t('observaciones_de_la_entrevista', 'Observaciones de la entrevista'),

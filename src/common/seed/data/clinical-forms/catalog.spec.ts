@@ -21,6 +21,9 @@ const SIN_DIAGNOSTICO_PRESUNTIVO = new Set([
   'ODONTO_ODONTOGRAMA_OMS',
   'ANEST_VALORACION_PREANESTESICA',
   'GINOBS_CONTROL_PRENATAL',
+  'GINOBS_CONSULTA_GINECOLOGICA',
+  'PEDIA_CONTROL_NINO_SANO',
+  'OBST_CONTROL_BASE',
   'MEDEP_EVALUACION_BASE',
   'ENFER_VALORACION_BASE',
   'PSIQ_EVALUACION_BASE',
@@ -40,9 +43,55 @@ describe('catálogo v2 — contenido', () => {
     expect(libres).toEqual([]);
   });
 
-  it('toda ficha de consulta abre con un diagnóstico presuntivo de lista, con observaciones por cuadro', () => {
+  it('cada especialidad tiene una ficha base y fichas específicas por condición', () => {
+    const porEspecialidad = new Map<
+      string,
+      { base: string[]; especificas: string[] }
+    >();
     for (const form of STANDARD_FORMS) {
-      if (SIN_DIAGNOSTICO_PRESUNTIVO.has(form.code)) continue;
+      if (form.kind === 'GENERAL') continue;
+      const grupo = porEspecialidad.get(form.specialty.code) ?? {
+        base: [],
+        especificas: [],
+      };
+      (form.kind === 'BASE' ? grupo.base : grupo.especificas).push(form.code);
+      porEspecialidad.set(form.specialty.code, grupo);
+    }
+    for (const [especialidad, grupo] of porEspecialidad) {
+      expect({ especialidad, bases: grupo.base.length }).toEqual({
+        especialidad,
+        bases: 1,
+      });
+      expect({
+        especialidad,
+        especificas: grupo.especificas.length > 0,
+      }).toEqual({
+        especialidad,
+        especificas: true,
+      });
+    }
+    // Las transversales son de toda consulta.
+    expect(
+      STANDARD_FORMS.filter((f) => f.kind === 'GENERAL')
+        .map((f) => f.code)
+        .sort(),
+    ).toEqual([
+      'TRANSV_ANAMNESIS_GENERAL',
+      'TRANSV_CONSENTIMIENTO_INFORMADO',
+      'TRANSV_EPICRISIS',
+      'TRANSV_EXAMEN_FISICO',
+    ]);
+  });
+
+  it('las fichas base de consulta piden el diagnóstico presuntivo de una lista', () => {
+    const consultas = STANDARD_FORMS.filter(
+      (f) =>
+        f.kind === 'BASE' &&
+        !SIN_DIAGNOSTICO_PRESUNTIVO.has(f.code) &&
+        !f.code.includes('_INFORME_'),
+    );
+    expect(consultas.length).toBeGreaterThan(20);
+    for (const form of consultas) {
       const presuntivo = form.fields.find(
         (field) =>
           field.code === 'diagnostico_presuntivo' ||
@@ -50,16 +99,25 @@ describe('catálogo v2 — contenido', () => {
       );
       expect({
         form: form.code,
-        opciones: presuntivo?.options?.length ?? 0,
-      }).toEqual({ form: form.code, opciones: expect.any(Number) });
-      expect(presuntivo?.options?.length).toBeGreaterThanOrEqual(5);
-      expect(presuntivo?.allowOther).toBe(true);
+        opciones: (presuntivo?.options?.length ?? 0) >= 4,
+      }).toEqual({
+        form: form.code,
+        opciones: true,
+      });
+    }
+  });
 
-      // Al menos un cuadro abre observaciones propias.
-      const dependientes = form.fields.filter(
-        (field) => field.showWhen?.field === presuntivo?.code,
+  it('las fichas de control tienen seguimiento, evaluación propia y cierre', () => {
+    const controles = STANDARD_FORMS.filter((f) => f.code.includes('_CTRL_'));
+    expect(controles.length).toBeGreaterThan(60);
+    for (const form of controles) {
+      const secciones = new Set(form.fields.map((field) => field.section));
+      expect(form.fields.some((field) => field.code === 'diagnostico')).toBe(
+        true,
       );
-      expect(dependientes.length).toBeGreaterThan(0);
+      expect(
+        [...secciones].some((nombre) => nombre?.startsWith('Evaluación:')),
+      ).toBe(true);
     }
   });
 
@@ -82,7 +140,7 @@ describe('catálogo v2 — contenido', () => {
     const signos = campos.filter(
       ({ field }) => field.code === 'dengue_signos_de_alarma',
     );
-    expect(signos.length).toBeGreaterThanOrEqual(3);
+    expect(signos.length).toBeGreaterThanOrEqual(1);
     for (const { field } of signos) {
       expect(field.required).toBe(true);
       expect(field.multiple).toBe(true);

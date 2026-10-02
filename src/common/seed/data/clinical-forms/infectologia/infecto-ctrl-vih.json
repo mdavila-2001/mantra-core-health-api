@@ -1,0 +1,185 @@
+{
+  "code": "INFECTO_CTRL_VIH",
+  "name": "Control de VIH",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "VIH: directrices consolidadas de la OMS",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/health-topics/hiv-aids",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estadio clínico de la OMS, carga viral, CD4, adherencia a la terapia antirretroviral y profilaxis."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de VIH",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "estadio_oms_vih",
+      "name": "Estadio clínico OMS",
+      "dataType": "string",
+      "required": true,
+      "options": ["1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "carga_viral",
+      "name": "Última carga viral (copias/mL)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "cd4",
+      "name": "Último CD4 (células/µL)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_tamizajes",
+      "name": "Tamizajes al día",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Tuberculosis",
+        "Sífilis",
+        "Hepatitis B",
+        "Cáncer de cuello uterino"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "profilaxis_cotrimoxazol",
+      "name": "Recibe cotrimoxazol",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Pérdida de peso",
+        "Diarrea crónica",
+        "Tos",
+        "Lesiones orales",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Carga viral indetectable",
+        "Adherencia > 95 %",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Adherencia",
+        "Prevención de la transmisión",
+        "Pareja: prueba"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

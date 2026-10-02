@@ -1,0 +1,189 @@
+{
+  "code": "ONCO_CTRL_QUIMIOTERAPIA",
+  "name": "Control previo a cada ciclo de quimioterapia",
+  "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Common Terminology Criteria for Adverse Events (CTCAE)",
+    "organization": "National Cancer Institute (NCI/NIH)",
+    "url": "https://ctep.cancer.gov/protocoldevelopment/electronic_applications/ctc.htm",
+    "license": "Dominio público (Gobierno de los EE. UU.)",
+    "retrievedAt": "2026-10-02",
+    "note": "Toxicidad graduada por CTCAE (NCI, dominio público) y estado funcional ECOG antes de autorizar el ciclo."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de tratamiento oncológico",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "esquema",
+      "name": "Esquema y número de ciclo",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "ecog",
+      "name": "ECOG",
+      "dataType": "string",
+      "required": true,
+      "options": ["0", "1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "neutrofilos",
+      "name": "Neutrófilos (/µL)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "plaquetas",
+      "name": "Plaquetas (/µL)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "toxicidad",
+      "name": "Toxicidad desde el último ciclo",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Náuseas y vómitos",
+        "Mucositis",
+        "Diarrea",
+        "Neuropatía",
+        "Fiebre con neutropenia",
+        "Fatiga",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "toxicidad_grado",
+      "name": "Peor grado CTCAE",
+      "dataType": "string",
+      "required": false,
+      "options": ["0", "1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: tratamiento oncológico",
+      "code": "apto_ciclo",
+      "name": "¿Se autoriza el ciclo?",
+      "dataType": "string",
+      "required": true,
+      "options": ["Sí", "Se difiere", "Se ajusta la dosis"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre: consultar de inmediato",
+        "Higiene bucal",
+        "Hidratación"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

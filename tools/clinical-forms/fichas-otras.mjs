@@ -22,7 +22,7 @@ import {
   s,
   seccion,
   si,
-  sospecha,
+  presuntivo,
   t,
   una,
   varias,
@@ -598,26 +598,15 @@ export const OTRAS = {
     ]),
     seccion(
       'Motivo agregado y observaciones',
-      sospecha(
-        {
-          'Niño sano, sin otro motivo': [],
-          'Infección respiratoria aguda': [
-            ...IRA_ALTA(),
-            i('fr_por_minuto', 'Frecuencia respiratoria (rpm)', {
-              req: true,
-              ayuda:
-                'Respiración rápida: ≥ 50 de 2 a 11 meses; ≥ 40 de 1 a 4 años.',
-            }),
-            b('tiraje', 'Tiraje subcostal'),
-          ],
-          'Enfermedad diarreica aguda': EDA(),
-          Anemia: ANEMIA(),
-          Desnutrición: [
-            d('z_peso_talla', 'Puntaje Z peso/talla', { req: true }),
-            b('edema_bilateral', 'Edema bilateral (kwashiorkor)'),
-          ],
-        },
-        { code: 'motivo_agregado', nombre: 'Motivo agregado al control' },
+      presuntivo(
+        [
+          'Niño sano, sin otro motivo',
+          'Infección respiratoria aguda',
+          'Enfermedad diarreica aguda',
+          'Anemia',
+          'Desnutrición',
+        ],
+        { code: 'motivo_agregado' },
       ),
     ),
     seccion('Próximo control', [f('proximo_control', 'Próximo control')]),
@@ -797,53 +786,14 @@ export const OTRAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Embarazo normal': [],
-        'Trastorno hipertensivo del embarazo': [
-          una(
-            'proteinuria_obst',
-            'Proteinuria',
-            ['Negativa', '+', '++', '+++'],
-            { req: true },
-          ),
-          varias('preeclampsia_grave', 'Criterios de gravedad', [
-            'PA ≥ 160/110',
-            'Cefalea o alteración visual',
-            'Dolor en epigastrio',
-            'Plaquetas < 100 000',
-            'Oliguria',
-            'Ninguno',
-          ]),
-        ],
-        'Amenaza de parto prematuro': [
-          i('contracciones_hora', 'Contracciones por hora', { req: true }),
-          s('cervix', 'Cuello: dilatación y borramiento'),
-        ],
-        'Hemorragia del embarazo': [
-          una(
-            'hemorragia_trimestre',
-            'Trimestre',
-            ['Primero', 'Segundo', 'Tercero'],
-            { req: true },
-          ),
-          b('hemorragia_dolor', 'Con dolor'),
-        ],
-        'Diabetes gestacional': DM2(),
-        'Infección urinaria en el embarazo': [
-          varias(
-            'itu_obst',
-            'Síntomas',
-            [
-              'Disuria',
-              'Polaquiuria',
-              'Fiebre',
-              'Dolor lumbar',
-              'Asintomática con urocultivo positivo',
-            ],
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Embarazo normal',
+        'Trastorno hipertensivo del embarazo',
+        'Amenaza de parto prematuro',
+        'Hemorragia del embarazo',
+        'Diabetes gestacional',
+        'Infección urinaria en el embarazo',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -1017,46 +967,14 @@ export const OTRAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Sobrepeso u obesidad': [
-          una(
-            'obesidad_grado',
-            'Grado (IMC)',
-            [
-              'Sobrepeso (25–29,9)',
-              'Obesidad I (30–34,9)',
-              'Obesidad II (35–39,9)',
-              'Obesidad III (≥ 40)',
-            ],
-            { req: true },
-          ),
-        ],
-        'Desnutrición o riesgo nutricional': [
-          varias(
-            'riesgo_nutricional',
-            'Señales de riesgo nutricional',
-            [
-              'IMC menor a 20',
-              'Pérdida de más del 5 % del peso en 3 a 6 meses',
-              'Enfermedad aguda con poca o ninguna ingesta por más de 5 días',
-            ],
-            { req: true },
-          ),
-        ],
-        'Diabetes o resistencia a la insulina': DM2(),
-        Dislipidemia: [
-          d('ldl_nutri', 'LDL (mg/dL)', { req: true }),
-          d('tg_nutri', 'Triglicéridos (mg/dL)'),
-        ],
-        'Anemia nutricional': ANEMIA(),
-        'Embarazo o lactancia': [
-          i(
-            'nutri_embarazo_semanas',
-            'Semanas de gestación o meses de lactancia',
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Sobrepeso u obesidad',
+        'Desnutrición o riesgo nutricional',
+        'Diabetes o resistencia a la insulina',
+        'Dislipidemia',
+        'Anemia nutricional',
+        'Embarazo o lactancia',
+      ]),
     ),
     seccion('Plan', [
       t('objetivo_nutricional', 'Objetivo nutricional'),
@@ -1108,44 +1026,14 @@ export const OTRAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        Lumbalgia: LUMBALGIA(),
-        Cervicalgia: [
-          b('cervical_irradiada', 'Irradiada al brazo', { req: true }),
-          b('cervical_mareo', 'Mareo o cefalea asociada'),
-        ],
-        'Posquirúrgico o posfractura': [
-          s('posqx_cirugia', 'Cirugía o fractura y fecha', { req: true }),
-          una('posqx_carga', 'Carga permitida', [
-            'Sin carga',
-            'Parcial',
-            'Total',
-          ]),
-        ],
-        'Secuela neurológica (ACV, lesión medular)': [
-          una(
-            'barthel',
-            'Barthel',
-            [
-              'Independiente (100)',
-              'Dependencia leve (91–99)',
-              'Moderada (61–90)',
-              'Grave (21–60)',
-              'Total (0–20)',
-            ],
-            { req: true },
-          ),
-        ],
-        'Lesión deportiva': [
-          s('deporte_lesion', 'Deporte y gesto lesivo', { req: true }),
-        ],
-        'Rehabilitación respiratoria': [
-          una('disnea_mmrc_fisio', 'mMRC', ['0', '1', '2', '3', '4'], {
-            req: true,
-          }),
-          i('caminata_6min', 'Prueba de caminata de 6 minutos (m)'),
-        ],
-      }),
+      presuntivo([
+        'Lumbalgia',
+        'Cervicalgia',
+        'Posquirúrgico o posfractura',
+        'Secuela neurológica (ACV, lesión medular)',
+        'Lesión deportiva',
+        'Rehabilitación respiratoria',
+      ]),
     ),
     seccion('Plan', [
       t('objetivos_de_rehabilitacion', 'Objetivos de rehabilitación'),

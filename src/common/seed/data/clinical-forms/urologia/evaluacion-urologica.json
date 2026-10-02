@@ -1,6 +1,6 @@
 {
   "code": "URO_EVALUACION_BASE",
-  "name": "Evaluación urológica",
+  "name": "Urología — consulta inicial (ficha base)",
   "specialty": { "code": "UROLOGIA", "display": "Urología" },
   "version": 2,
   "provenance": {
@@ -262,190 +262,7 @@
         "Disfunción eréctil"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "volumen_prostatico",
-      "name": "Volumen prostático estimado (mL)",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hiperplasia prostática benigna"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "residuo_posmiccional",
-      "name": "Residuo posmiccional (mL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hiperplasia prostática benigna"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "retencion_previa",
-      "name": "Retención urinaria previa",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hiperplasia prostática benigna"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "psa",
-      "name": "PSA total (ng/mL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de cáncer de próstata"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tacto_prostata",
-      "name": "Tacto rectal",
-      "dataType": "string",
-      "required": true,
-      "options": ["Normal", "Nódulo", "Indurada", "No realizado"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de cáncer de próstata"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lito_tamano",
-      "name": "Tamaño y ubicación del lito",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Litiasis urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lito_obstruccion",
-      "name": "Hidronefrosis",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Litiasis urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lito_fiebre",
-      "name": "Fiebre (urgencia)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Litiasis urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "itu_uro",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Disuria",
-        "Polaquiuria",
-        "Fiebre",
-        "Dolor perineal (prostatitis)"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "urocultivo",
-      "name": "Urocultivo",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Infección urinaria"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hematuria_tabaco",
-      "name": "Fumador o exfumador",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hematuria en estudio"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hematuria_imagen",
-      "name": "Imagen y cistoscopía",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hematuria en estudio"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "de_inicio",
-      "name": "Inicio",
-      "dataType": "string",
-      "required": true,
-      "options": ["Gradual", "Brusco"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Disfunción eréctil"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "de_erecciones_matinales",
-      "name": "Conserva erecciones matinales",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Disfunción eréctil"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "de_factores",
-      "name": "Factores asociados",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Diabetes",
-        "Hipertensión",
-        "Tabaquismo",
-        "Fármacos",
-        "Ansiedad o depresión",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Disfunción eréctil"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -462,5 +279,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

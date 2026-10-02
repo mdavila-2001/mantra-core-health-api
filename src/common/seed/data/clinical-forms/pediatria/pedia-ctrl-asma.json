@@ -1,0 +1,167 @@
+{
+  "code": "PEDIA_CTRL_ASMA",
+  "name": "Control de asma en niños",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Global Strategy for Asthma Management and Prevention",
+    "organization": "Global Initiative for Asthma (GINA)",
+    "url": "https://ginasthma.org/reports/",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Control de síntomas de las últimas 4 semanas según las categorías de GINA y técnica con espaciador."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de asma",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: asma",
+      "code": "asma_control_4_semanas",
+      "name": "En las últimas 4 semanas (GINA)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Síntomas diurnos más de 2 veces por semana",
+        "Despertares nocturnos por asma",
+        "Uso de rescate más de 2 veces por semana",
+        "Limitación de la actividad",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Ninguno: controlada · 1–2: parcialmente controlada · 3–4: no controlada."
+    },
+    {
+      "section": "Evaluación: asma",
+      "code": "asma_crisis_anio",
+      "name": "Crisis que requirieron urgencias en el último año",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: asma",
+      "code": "asma_tratamiento_actual",
+      "name": "Inhaladores que usa",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: asma",
+      "code": "espaciador",
+      "name": "Usa espaciador",
+      "dataType": "string",
+      "required": true,
+      "options": ["Sí, correctamente", "Sí, con errores", "No"]
+    },
+    {
+      "section": "Evaluación: asma",
+      "code": "dias_escuela_perdidos",
+      "name": "Días de escuela perdidos en el mes",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Asma controlada", "Sin crisis", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Técnica con espaciador",
+        "Plan de acción",
+        "Evitar humo de tabaco y leña"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
