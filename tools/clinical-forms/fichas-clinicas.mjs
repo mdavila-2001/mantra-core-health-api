@@ -23,7 +23,7 @@ import {
   sin,
   si,
   socrates,
-  sospecha,
+  presuntivo,
   t,
   una,
   varias,
@@ -101,16 +101,16 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Infección respiratoria alta (resfrío, faringoamigdalitis)': IRA_ALTA(),
-        'Neumonía adquirida en la comunidad': NEUMONIA(),
-        'Enfermedad diarreica aguda': EDA(),
-        'Infección urinaria': ITU(),
-        'Hipertensión arterial': HTA(),
-        'Diabetes mellitus tipo 2': DM2(),
-        'Dengue o síndrome febril agudo': DENGUE(),
-        Lumbalgia: LUMBALGIA(),
-      }),
+      presuntivo([
+        'Infección respiratoria alta (resfrío, faringoamigdalitis)',
+        'Neumonía adquirida en la comunidad',
+        'Enfermedad diarreica aguda',
+        'Infección urinaria',
+        'Hipertensión arterial',
+        'Diabetes mellitus tipo 2',
+        'Dengue o síndrome febril agudo',
+        'Lumbalgia',
+      ]),
     ),
     seccion('Diagnóstico y plan', [
       t('examenes_auxiliares', 'Exámenes auxiliares solicitados'),
@@ -176,15 +176,15 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Infección respiratoria alta': IRA_ALTA(),
-        'Enfermedad diarreica aguda': EDA(),
-        'Hipertensión arterial': HTA(),
-        'Diabetes mellitus tipo 2': DM2(),
-        'Infección urinaria': ITU(),
-        'Trastorno mental común (ansiedad, depresión)': DEPRESION_ANSIEDAD(),
-        'Enfermedad de Chagas': CHAGAS(),
-      }),
+      presuntivo([
+        'Infección respiratoria alta',
+        'Enfermedad diarreica aguda',
+        'Hipertensión arterial',
+        'Diabetes mellitus tipo 2',
+        'Infección urinaria',
+        'Trastorno mental común (ansiedad, depresión)',
+        'Enfermedad de Chagas',
+      ]),
     ),
     seccion(
       'Diagnóstico y plan',
@@ -255,27 +255,15 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Insuficiencia cardíaca': IC(),
-        'Diabetes mellitus descompensada': DM2(),
-        'Hipertensión arterial': HTA(),
-        Neumonía: NEUMONIA(),
-        Anemia: ANEMIA(),
-        'Síndrome febril prolongado': [
-          varias('sfp_estudios', 'Estudios ya realizados', [
-            'Hemocultivos',
-            'Urocultivo',
-            'Serología VIH',
-            'Baciloscopía',
-            'Imágenes',
-            'Ninguno',
-          ]),
-        ],
-        'Enfermedad renal crónica': [
-          d('erc_creatinina', 'Creatinina (mg/dL)', { req: true }),
-          d('erc_tfg', 'Filtrado glomerular estimado (mL/min/1,73 m²)'),
-        ],
-      }),
+      presuntivo([
+        'Insuficiencia cardíaca',
+        'Diabetes mellitus descompensada',
+        'Hipertensión arterial',
+        'Neumonía',
+        'Anemia',
+        'Síndrome febril prolongado',
+        'Enfermedad renal crónica',
+      ]),
     ),
     seccion('Problemas y plan', [
       obl_(t('problemas_activos', 'Lista de problemas activos')),
@@ -368,35 +356,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Síndrome coronario o angina': DOLOR_TORACICO(),
-        // La NYHA ya se preguntó bajo «Disnea = Sí»: no se repite.
-        'Insuficiencia cardíaca': IC().filter(
-          (c) => c.code !== 'ic_clase_nyha',
-        ),
-        'Hipertensión arterial': HTA(),
-        Arritmia: [
-          una(
-            'arr_tipo',
-            'Ritmo documentado',
-            [
-              'Fibrilación auricular',
-              'Flutter auricular',
-              'Taquicardia supraventricular',
-              'Extrasístoles',
-              'Bloqueo AV',
-              'No documentado',
-            ],
-            { req: true },
-          ),
-          b('arr_anticoagulado', 'Recibe anticoagulación'),
-        ],
-        'Cardiopatía chagásica': CHAGAS(),
-        Valvulopatía: [
-          s('valv_valvula', 'Válvula comprometida', { req: true }),
-          s('valv_eco', 'Ecocardiograma — hallazgo principal'),
-        ],
-      }),
+      presuntivo([
+        'Síndrome coronario o angina',
+        'Insuficiencia cardíaca',
+        'Hipertensión arterial',
+        'Arritmia',
+        'Cardiopatía chagásica',
+        'Valvulopatía',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -524,35 +491,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        Asma: ASMA(),
-        EPOC: sin(EPOC(), 'epoc_mmrc'),
-        Neumonía: NEUMONIA(),
-        'Tuberculosis pulmonar': TBC(),
-        'Enfermedad pulmonar intersticial': [
-          b('epi_velcro', 'Crepitantes tipo «velcro»', { req: true }),
-          b('epi_hipocratismo', 'Hipocratismo digital'),
-        ],
-        'Apnea obstructiva del sueño': [
-          varias(
-            'apnea_sintomas',
-            'Síntomas y factores de apnea del sueño',
-            [
-              'Ronquido fuerte',
-              'Somnolencia diurna',
-              'Apneas observadas por otra persona',
-              'Hipertensión',
-              'Obesidad',
-              'Cuello ancho',
-            ],
-            { req: true },
-          ),
-          i(
-            'somnolencia_diurna_veces_semana',
-            'Veces por semana que se duerme sin querer de día',
-          ),
-        ],
-      }),
+      presuntivo([
+        'Asma',
+        'EPOC',
+        'Neumonía',
+        'Tuberculosis pulmonar',
+        'Enfermedad pulmonar intersticial',
+        'Apnea obstructiva del sueño',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -627,68 +573,15 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Dispepsia o gastritis': [
-          b('helicobacter', 'Prueba de Helicobacter pylori realizada'),
-          b('aines', 'Consume AINE'),
-        ],
-        'Enfermedad por reflujo gastroesofágico': [
-          varias(
-            'erge_sintomas',
-            'Síntomas',
-            [
-              'Pirosis',
-              'Regurgitación',
-              'Tos crónica',
-              'Disfonía',
-              'Dolor torácico no cardíaco',
-            ],
-            { req: true },
-          ),
-        ],
-        'Enfermedad diarreica': EDA(),
-        'Síndrome de intestino irritable': [
-          varias(
-            'sii_caracteristicas',
-            'Dolor abdominal recurrente: características',
-            [
-              'Mejora o empeora con la defecación',
-              'Se asocia a cambio en la frecuencia',
-              'Se asocia a cambio en la forma de las heces',
-            ],
-            { req: true },
-          ),
-          i('sii_meses', 'Meses de evolución'),
-        ],
-        'Hemorragia digestiva': [
-          una(
-            'hd_estabilidad',
-            'Estabilidad hemodinámica',
-            ['Estable', 'Taquicardia', 'Hipotensión o shock'],
-            { req: true },
-          ),
-          d('hd_hemoglobina', 'Hemoglobina (g/dL)'),
-        ],
-        'Hepatopatía o ictericia': [
-          varias(
-            'hep_estigmas',
-            'Estigmas de hepatopatía',
-            [
-              'Arañas vasculares',
-              'Eritema palmar',
-              'Ascitis',
-              'Encefalopatía',
-              'Ninguno',
-            ],
-            { req: true },
-          ),
-          s('hep_serologias', 'Serologías virales'),
-        ],
-        'Colelitiasis o colecistitis': [
-          b('murphy', 'Signo de Murphy positivo', { req: true }),
-          b('colico_posprandial', 'Dolor posprandial en hipocondrio derecho'),
-        ],
-      }),
+      presuntivo([
+        'Dispepsia o gastritis',
+        'Enfermedad por reflujo gastroesofágico',
+        'Enfermedad diarreica',
+        'Síndrome de intestino irritable',
+        'Hemorragia digestiva',
+        'Hepatopatía o ictericia',
+        'Colelitiasis o colecistitis',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -751,39 +644,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Diabetes mellitus': DM2(),
-        Hipotiroidismo: [
-          d('tsh', 'TSH (mUI/L)', { req: true }),
-          d('t4l', 'T4 libre (ng/dL)'),
-        ],
-        Hipertiroidismo: [
-          d('tsh_hiper', 'TSH (mUI/L)', { req: true }),
-          b('oftalmopatia', 'Oftalmopatía'),
-        ],
-        'Nódulo tiroideo': [
-          s('nodulo_tirads', 'Ecografía — categoría TI-RADS', { req: true }),
-          b('nodulo_puncion', 'Punción con aguja fina indicada'),
-        ],
-        'Obesidad y síndrome metabólico': [
-          varias(
-            'sm_criterios',
-            'Criterios de síndrome metabólico',
-            [
-              'Perímetro abdominal aumentado',
-              'Triglicéridos ≥ 150 mg/dL',
-              'HDL bajo',
-              'PA ≥ 130/85',
-              'Glucemia en ayunas ≥ 100 mg/dL',
-            ],
-            { req: true },
-          ),
-        ],
-        Dislipidemia: [
-          d('ldl_endo', 'LDL (mg/dL)', { req: true }),
-          d('trigliceridos', 'Triglicéridos (mg/dL)'),
-        ],
-      }),
+      presuntivo([
+        'Diabetes mellitus',
+        'Hipotiroidismo',
+        'Hipertiroidismo',
+        'Nódulo tiroideo',
+        'Obesidad y síndrome metabólico',
+        'Dislipidemia',
+      ]),
     ),
     seccion(
       'Diagnóstico y plan',
@@ -855,53 +723,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Enfermedad renal crónica': [
-          d('creatinina', 'Creatinina (mg/dL)', { req: true }),
-          d('tfg', 'Filtrado glomerular estimado (mL/min/1,73 m²)', {
-            req: true,
-          }),
-          una('erc_estadio_kdigo', 'Estadio KDIGO', [
-            'G1 (≥ 90)',
-            'G2 (60–89)',
-            'G3a (45–59)',
-            'G3b (30–44)',
-            'G4 (15–29)',
-            'G5 (< 15)',
-          ]),
-          una('albuminuria', 'Albuminuria', [
-            'A1 (< 30 mg/g)',
-            'A2 (30–300 mg/g)',
-            'A3 (> 300 mg/g)',
-            'No medida',
-          ]),
-        ],
-        'Lesión renal aguda': [
-          una(
-            'lra_causa',
-            'Causa probable',
-            ['Prerrenal', 'Renal intrínseca', 'Posrenal (obstructiva)'],
-            { req: true },
-          ),
-          d('lra_creatinina_basal', 'Creatinina basal (mg/dL)'),
-        ],
-        'Síndrome nefrótico': [
-          d('proteinuria_24h', 'Proteinuria de 24 h (g)', { req: true }),
-          d('albumina_serica', 'Albúmina sérica (g/dL)'),
-        ],
-        'Síndrome nefrítico': [
-          b('nefritico_hta', 'Hipertensión', { req: true }),
-          b(
-            'nefritico_infeccion_previa',
-            'Infección faríngea o cutánea reciente',
-          ),
-        ],
-        'Litiasis renal': [
-          b('litiasis_colico', 'Cólico renal', { req: true }),
-          s('litiasis_imagen', 'Imagen — tamaño y ubicación del lito'),
-        ],
-        'Infección urinaria': ITU(),
-      }),
+      presuntivo([
+        'Enfermedad renal crónica',
+        'Lesión renal aguda',
+        'Síndrome nefrótico',
+        'Síndrome nefrítico',
+        'Litiasis renal',
+        'Infección urinaria',
+      ]),
     ),
     seccion('Diagnóstico y plan', [
       t('funcion_renal_previa', 'Función renal previa'),
@@ -967,55 +796,15 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Accidente cerebrovascular': sin(ACV(), 'acv_glasgow'),
-        'Cefalea primaria': CEFALEA(),
-        'Epilepsia o crisis convulsiva': CONVULSION(),
-        'Deterioro cognitivo': [
-          s('cognitivo_prueba', 'Prueba cognitiva aplicada y puntaje', {
-            req: true,
-          }),
-          una('cognitivo_funcional', 'Repercusión funcional', [
-            'Ninguna',
-            'En actividades instrumentales',
-            'En actividades básicas',
-          ]),
-        ],
-        'Enfermedad de Parkinson': [
-          varias(
-            'parkinson_signos',
-            'Signos',
-            [
-              'Bradicinesia',
-              'Temblor de reposo',
-              'Rigidez',
-              'Inestabilidad postural',
-            ],
-            { req: true },
-          ),
-        ],
-        'Neuropatía periférica': [
-          una(
-            'neuropatia_patron',
-            'Patrón',
-            ['En guante y calcetín', 'Mononeuropatía', 'Multineuritis'],
-            { req: true },
-          ),
-          b('neuropatia_diabetes', 'Diabetes asociada'),
-        ],
-        Vértigo: [
-          una(
-            'dix_hallpike',
-            'Maniobra de Dix-Hallpike',
-            ['Positiva', 'Negativa', 'No realizada'],
-            { req: true },
-          ),
-          b(
-            'vertigo_signos_centrales',
-            'Signos centrales (diplopía, disartria, ataxia)',
-          ),
-        ],
-      }),
+      presuntivo([
+        'Accidente cerebrovascular',
+        'Cefalea primaria',
+        'Epilepsia o crisis convulsiva',
+        'Deterioro cognitivo',
+        'Enfermedad de Parkinson',
+        'Neuropatía periférica',
+        'Vértigo',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -1067,52 +856,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Artritis reumatoide': [
-          b('ar_fr_ccp', 'Factor reumatoide o anti-CCP positivo', {
-            req: true,
-          }),
-          b('ar_erosiones', 'Erosiones en radiografía'),
-          d('ar_das28', 'DAS28'),
-        ],
-        Artrosis: [
-          varias(
-            'artrosis_sitio',
-            'Articulaciones',
-            ['Rodilla', 'Cadera', 'Manos', 'Columna'],
-            { req: true },
-          ),
-          b('artrosis_crepitacion', 'Crepitación'),
-        ],
-        Gota: [
-          d('acido_urico', 'Ácido úrico (mg/dL)', { req: true }),
-          b('gota_tofos', 'Tofos'),
-          b('gota_podagra', 'Compromiso de la primera metatarsofalángica'),
-        ],
-        'Lupus eritematoso sistémico': [
-          b('les_ana', 'ANA positivo', { req: true }),
-          varias('les_organos', 'Órganos comprometidos', [
-            'Piel',
-            'Articulaciones',
-            'Riñón',
-            'Hematológico',
-            'Serosas',
-            'Neurológico',
-          ]),
-        ],
-        Espondiloartritis: [
-          b(
-            'espondilo_dolor_inflamatorio',
-            'Lumbalgia inflamatoria de más de 3 meses',
-            { req: true },
-          ),
-          b('espondilo_hla_b27', 'HLA-B27 positivo'),
-        ],
-        Fibromialgia: [
-          i('fibro_iid', 'Índice de dolor generalizado (0–19)', { req: true }),
-          i('fibro_sss', 'Escala de gravedad de síntomas (0–12)'),
-        ],
-      }),
+      presuntivo([
+        'Artritis reumatoide',
+        'Artrosis',
+        'Gota',
+        'Lupus eritematoso sistémico',
+        'Espondiloartritis',
+        'Fibromialgia',
+      ]),
     ),
     seccion(
       'Diagnóstico y plan',
@@ -1194,66 +945,16 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        Dengue: sin(DENGUE(), 'dengue_dias_de_fiebre'),
-        'Chikungunya o zika': [
-          b('chik_artralgia', 'Artralgias intensas', { req: true }),
-          b('zika_embarazo', 'Embarazo en curso'),
-          b('chik_exantema', 'Exantema'),
-        ],
-        Malaria: [
-          una(
-            'malaria_gota_gruesa',
-            'Gota gruesa',
-            [
-              'Positiva — P. vivax',
-              'Positiva — P. falciparum',
-              'Negativa',
-              'Pendiente',
-            ],
-            { req: true },
-          ),
-        ],
-        Leishmaniasis: [
-          una('leish_forma', 'Forma', ['Cutánea', 'Mucosa', 'Visceral'], {
-            req: true,
-          }),
-          i('leish_lesiones', 'Número de lesiones'),
-        ],
-        Tuberculosis: TBC(),
-        VIH: [
-          s('vih_cd4', 'CD4 (células/µL)', { req: true }),
-          s('vih_carga_viral', 'Carga viral'),
-          b('vih_tar', 'En terapia antirretroviral'),
-        ],
-        'Infección de piel y partes blandas': [
-          varias(
-            'ppb_signos',
-            'Signos',
-            [
-              'Eritema',
-              'Calor',
-              'Absceso fluctuante',
-              'Crepitación',
-              'Necrosis',
-            ],
-            { req: true },
-          ),
-          b('ppb_sistemico', 'Compromiso sistémico'),
-        ],
-        Sepsis: [
-          varias(
-            'qsofa',
-            'qSOFA',
-            [
-              'Frecuencia respiratoria ≥ 22',
-              'Alteración del estado mental',
-              'PAS ≤ 100 mmHg',
-            ],
-            { req: true, ayuda: '2 o más: alto riesgo.' },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Dengue',
+        'Chikungunya o zika',
+        'Malaria',
+        'Leishmaniasis',
+        'Tuberculosis',
+        'VIH',
+        'Infección de piel y partes blandas',
+        'Sepsis',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -1316,43 +1017,14 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Anemia ferropénica': ANEMIA(),
-        'Anemia megaloblástica': [
-          d('vcm_mega', 'VCM (fL)', { req: true }),
-          d('b12', 'Vitamina B12 (pg/mL)'),
-          b('mega_neuro', 'Síntomas neurológicos'),
-        ],
-        Trombocitopenia: [
-          i('plaquetas', 'Plaquetas (/µL)', { req: true }),
-          b('trombo_sangrado_activo', 'Sangrado activo'),
-        ],
-        'Trastorno de la coagulación': [
-          s('tp_inr', 'TP / INR', { req: true }),
-          s('ttpa', 'TTPa'),
-          b('anticoagulado', 'Recibe anticoagulantes'),
-        ],
-        'Sospecha de leucemia o linfoma': [
-          varias(
-            'sintomas_b',
-            'Síntomas B',
-            [
-              'Fiebre',
-              'Sudoración nocturna',
-              'Pérdida de más del 10 % del peso',
-            ],
-            { req: true },
-          ),
-          b('blastos', 'Blastos en el frotis'),
-        ],
-        Policitemia: [
-          d('hematocrito', 'Hematocrito (%)', {
-            req: true,
-            ayuda: 'Interpretar según la altitud de residencia.',
-          }),
-          s('residencia_altitud', 'Altitud de residencia (m s. n. m.)'),
-        ],
-      }),
+      presuntivo([
+        'Anemia ferropénica',
+        'Anemia megaloblástica',
+        'Trombocitopenia',
+        'Trastorno de la coagulación',
+        'Sospecha de leucemia o linfoma',
+        'Policitemia',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -1411,72 +1083,13 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Sospecha de neoplasia (estudio inicial)': [
-          varias(
-            'neo_alarma',
-            'Signos de alarma',
-            [
-              'Masa palpable',
-              'Adenopatía dura o fija',
-              'Sangrado no explicado',
-              'Pérdida de peso',
-              'Síntomas B',
-            ],
-            { req: true },
-          ),
-          s('neo_biopsia', 'Biopsia — estado'),
-        ],
-        'Toxicidad del tratamiento': [
-          varias(
-            'toxicidad',
-            'Toxicidad',
-            [
-              'Neutropenia febril',
-              'Mucositis',
-              'Náuseas y vómitos',
-              'Diarrea',
-              'Neuropatía',
-              'Cardiotoxicidad',
-            ],
-            { req: true },
-          ),
-          una('ctcae_grado', 'Grado CTCAE', ['1', '2', '3', '4']),
-        ],
-        'Progresión de enfermedad': [
-          s('progresion_sitio', 'Sitio de progresión', { req: true }),
-        ],
-        'Control de síntomas y cuidados paliativos': [
-          varias(
-            'paliativos_sintomas',
-            'Síntomas a controlar',
-            [
-              'Dolor',
-              'Disnea',
-              'Náuseas',
-              'Constipación',
-              'Delirio',
-              'Ansiedad',
-            ],
-            { req: true },
-          ),
-          b('voluntades', 'Conversación sobre voluntades anticipadas'),
-        ],
-        'Emergencia oncológica': [
-          una(
-            'emergencia_onco',
-            'Tipo',
-            [
-              'Compresión medular',
-              'Síndrome de vena cava superior',
-              'Hipercalcemia',
-              'Síndrome de lisis tumoral',
-              'Neutropenia febril',
-            ],
-            { req: true },
-          ),
-        ],
-      }),
+      presuntivo([
+        'Sospecha de neoplasia (estudio inicial)',
+        'Toxicidad del tratamiento',
+        'Progresión de enfermedad',
+        'Control de síntomas y cuidados paliativos',
+        'Emergencia oncológica',
+      ]),
     ),
     seccion('Diagnóstico y plan', cierre()),
   ],
@@ -1576,60 +1189,14 @@ export const CLINICAS = {
     seccion('Examen', [vitales(), obl_(t('examen_fisico', 'Examen físico'))]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Síndrome de fragilidad': [
-          varias(
-            'fried',
-            'Criterios de Fried',
-            [
-              'Pérdida de peso no intencionada',
-              'Agotamiento',
-              'Debilidad (prensión)',
-              'Marcha lenta',
-              'Baja actividad física',
-            ],
-            { req: true, ayuda: '3 o más: frágil · 1–2: prefrágil.' },
-          ),
-        ],
-        Caídas: [
-          varias(
-            'caidas_riesgo',
-            'Factores de riesgo',
-            [
-              'Alteración de la marcha',
-              'Hipotensión ortostática',
-              'Psicofármacos',
-              'Déficit visual',
-              'Riesgos en el hogar',
-            ],
-            { req: true },
-          ),
-          b('caidas_fractura', 'Fractura en alguna caída'),
-        ],
-        'Deterioro cognitivo o demencia': [
-          s('demencia_prueba', 'Prueba y puntaje', { req: true }),
-          b('demencia_conducta', 'Síntomas conductuales'),
-        ],
-        Delirium: [
-          varias(
-            'delirium_rasgos',
-            'Rasgos de delirium',
-            [
-              'Inicio agudo y curso fluctuante',
-              'Inatención',
-              'Pensamiento desorganizado',
-              'Alteración del nivel de conciencia',
-            ],
-            { req: true },
-          ),
-        ],
-        Polifarmacia: [
-          t('polifarmacia_revision', 'Fármacos a suspender o ajustar', {
-            req: true,
-          }),
-        ],
-        'Depresión del adulto mayor': DEPRESION_ANSIEDAD(),
-      }),
+      presuntivo([
+        'Síndrome de fragilidad',
+        'Caídas',
+        'Deterioro cognitivo o demencia',
+        'Delirium',
+        'Polifarmacia',
+        'Depresión del adulto mayor',
+      ]),
     ),
     seccion(
       'Diagnóstico y plan',
@@ -1712,74 +1279,15 @@ export const CLINICAS = {
     ]),
     seccion(
       'Diagnóstico presuntivo y observaciones',
-      sospecha({
-        'Lesión pigmentada (descartar melanoma)': [
-          varias(
-            'abcde',
-            'Criterios ABCDE',
-            [
-              'Asimetría',
-              'Bordes irregulares',
-              'Color heterogéneo',
-              'Diámetro > 6 mm',
-              'Evolución (cambió)',
-            ],
-            { req: true },
-          ),
-          b('dermatoscopia', 'Dermatoscopía realizada'),
-        ],
-        'Dermatitis (atópica o de contacto)': [
-          b('atopia', 'Antecedente de atopia', { req: true }),
-          s('dermatitis_contactante', 'Posible contactante'),
-        ],
-        Psoriasis: [
-          d('pasi', 'PASI', { req: true }),
-          d('superficie_corporal', 'Superficie corporal afectada (%)'),
-          b('psoriasis_artritis', 'Dolor articular'),
-        ],
-        Acné: [
-          una(
-            'acne_grado',
-            'Grado',
-            [
-              'Comedoniano',
-              'Papulopustuloso leve',
-              'Papulopustuloso moderado',
-              'Noduloquístico',
-            ],
-            { req: true },
-          ),
-        ],
-        'Micosis superficial': [
-          una(
-            'micosis_tipo',
-            'Tipo',
-            [
-              'Tiña corporal',
-              'Tiña pedis',
-              'Onicomicosis',
-              'Pitiriasis versicolor',
-              'Candidiasis',
-            ],
-            { req: true },
-          ),
-          b('koh', 'KOH o cultivo realizado'),
-        ],
-        'Leishmaniasis cutánea': [
-          i('leish_cutanea_lesiones', 'Número de úlceras', { req: true }),
-          b('leish_mucosa', 'Compromiso nasal o bucal'),
-          s('leish_procedencia', 'Zona donde se expuso'),
-        ],
-        'Carcinoma de piel no melanoma': [
-          una(
-            'cpnm_tipo',
-            'Sospecha',
-            ['Basocelular', 'Espinocelular', 'Queratosis actínica'],
-            { req: true },
-          ),
-          b('cpnm_biopsia', 'Biopsia indicada'),
-        ],
-      }),
+      presuntivo([
+        'Lesión pigmentada (descartar melanoma)',
+        'Dermatitis (atópica o de contacto)',
+        'Psoriasis',
+        'Acné',
+        'Micosis superficial',
+        'Leishmaniasis cutánea',
+        'Carcinoma de piel no melanoma',
+      ]),
     ),
     seccion('Diagnóstico y plan', [
       t('estudios_solicitados', 'Estudios solicitados'),

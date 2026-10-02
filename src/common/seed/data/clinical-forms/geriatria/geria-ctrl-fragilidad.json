@@ -1,0 +1,178 @@
+{
+  "code": "GERIA_CTRL_FRAGILIDAD",
+  "name": "Control de fragilidad y capacidad intrínseca (ICOPE)",
+  "specialty": { "code": "GERIATRIA", "display": "Geriatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Atención integrada para las personas mayores (ICOPE): guía de evaluación y planes de atención",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/WHO-FWC-ALC-19.1",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Los dominios de capacidad intrínseca del tamizaje ICOPE: cognición, movilidad, nutrición, visión, audición y ánimo."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de fragilidad",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: fragilidad",
+      "code": "icope_alterados",
+      "name": "Dominios ICOPE con tamizaje alterado",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Cognición",
+        "Movilidad (levantarse 5 veces de la silla)",
+        "Nutrición (pérdida de peso o apetito)",
+        "Visión",
+        "Audición",
+        "Síntomas depresivos",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: fragilidad",
+      "code": "silla_5_veces_segundos",
+      "name": "Levantarse 5 veces de la silla (segundos)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: fragilidad",
+      "code": "velocidad_de_marcha",
+      "name": "Velocidad de marcha en 4 m (m/s)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: fragilidad",
+      "code": "fried",
+      "name": "Criterios de Fried",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pérdida de peso no intencionada",
+        "Agotamiento",
+        "Debilidad",
+        "Marcha lenta",
+        "Baja actividad física"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: fragilidad",
+      "code": "numero_de_farmacos",
+      "name": "Fármacos en uso",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Plan de atención por cada dominio alterado",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ejercicio multicomponente",
+        "Alimentación con proteínas",
+        "Revisión de fármacos"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

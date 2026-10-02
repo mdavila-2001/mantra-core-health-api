@@ -1,0 +1,101 @@
+{
+  "code": "MEDINT_CTRL_SFP",
+  "name": "Síndrome febril prolongado",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Estudio escalonado de la fiebre de origen desconocido."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: síndrome febril prolongado",
+      "code": "dias_de_fiebre",
+      "name": "Días de fiebre",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: síndrome febril prolongado",
+      "code": "sfp_sintomas",
+      "name": "Acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pérdida de peso",
+        "Sudoración nocturna",
+        "Adenopatías",
+        "Artralgias",
+        "Lesiones de piel",
+        "Soplo nuevo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: síndrome febril prolongado",
+      "code": "sfp_estudios",
+      "name": "Estudios realizados",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hemocultivos",
+        "Urocultivo",
+        "Serología VIH",
+        "Baciloscopía",
+        "Serología Chagas",
+        "Gota gruesa",
+        "Imágenes",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: síndrome febril prolongado",
+      "code": "sfp_exposicion",
+      "name": "Exposiciones y viajes",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

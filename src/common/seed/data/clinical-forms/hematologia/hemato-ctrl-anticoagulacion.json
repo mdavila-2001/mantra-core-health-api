@@ -1,0 +1,173 @@
+{
+  "code": "HEMATO_CTRL_ANTICOAGULACION",
+  "name": "Control de anticoagulación oral",
+  "specialty": { "code": "HEMATOLOGIA", "display": "Hematología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "INR en rango terapéutico, sangrados e interacciones."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de anticoagulación",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "indicacion_anticoagulacion",
+      "name": "Indicación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Fibrilación auricular",
+        "Trombosis venosa profunda",
+        "Embolia pulmonar",
+        "Prótesis valvular",
+        "Otra"
+      ]
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "inr",
+      "name": "INR de hoy",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "inr_meta",
+      "name": "INR meta",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "sangrado",
+      "name": "Sangrado desde el último control",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "sangrado_gravedad",
+      "name": "Gravedad",
+      "dataType": "string",
+      "required": true,
+      "options": ["Menor", "Mayor"],
+      "showWhen": { "field": "sangrado", "equals": true }
+    },
+    {
+      "section": "Evaluación: anticoagulación",
+      "code": "farmacos_nuevos",
+      "name": "Fármacos o hierbas nuevos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["INR en rango", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dieta estable en verduras de hoja verde",
+        "Signos de sangrado",
+        "Avisar antes de procedimientos"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,277 @@
+{
+  "code": "CARDIO_CTRL_ISQUEMICA",
+  "name": "Control de cardiopatía isquémica (después de un infarto o angina)",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "HEARTS: paquete técnico para el manejo de las enfermedades cardiovasculares en la atención primaria de salud",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/hearts-technical-package",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Prevención secundaria según HEARTS: angina residual, metas de PA y LDL, antiagregación y estatina."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de cardiopatía isquémica",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina",
+      "name": "Angina desde el último control",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "angina_irradiado", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "angina", "equals": true }
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "angina_ccs",
+      "name": "Clase de angina (CCS)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "I — sólo con esfuerzo intenso",
+        "II — limitación leve",
+        "III — limitación marcada",
+        "IV — con mínima actividad o en reposo"
+      ]
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "ldl",
+      "name": "Último LDL (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "prevencion_secundaria",
+      "name": "Recibe",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Aspirina u otro antiagregante",
+        "Estatina",
+        "Betabloqueante",
+        "IECA o ARA II"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: cardiopatía isquémica",
+      "code": "rehabilitacion_cardiaca",
+      "name": "Rehabilitación cardíaca",
+      "dataType": "string",
+      "required": false,
+      "options": ["Completa", "En curso", "No la hizo"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin angina",
+        "PA < 130/80 mmHg",
+        "LDL < 55 mg/dL",
+        "No fuma",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dieta con menos sal",
+        "Actividad física",
+        "Dejar de fumar",
+        "Reducir el alcohol",
+        "Adherencia a la medicación",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

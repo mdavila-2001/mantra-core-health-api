@@ -1,6 +1,6 @@
 {
   "code": "TRAUMA_EVALUACION_BASE",
-  "name": "Evaluación musculoesquelética — versión general base",
+  "name": "Traumatología y ortopedia — consulta inicial (ficha base)",
   "specialty": {
     "code": "TRAUMATOLOGIA",
     "display": "Traumatología y ortopedia"
@@ -13,7 +13,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de anamnesis y examen locomotor del formato oficial. Las escalas funcionales de sociedades científicas quedaron fuera por licencia — ver README. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación de Gustilo, reglas de Ottawa, escala de fuerza MRC."
+    "note": "Estructura de anamnesis y examen locomotor del formato oficial. Las escalas funcionales de sociedades científicas quedaron fuera por licencia — ver README. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación de Gustilo, escala de fuerza MRC."
   },
   "fields": [
     {
@@ -215,130 +215,7 @@
         "Tendinopatía"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fractura_hueso",
-      "name": "Hueso y segmento",
-      "dataType": "string",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Fractura" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fractura_tipo",
-      "name": "Tipo",
-      "dataType": "string",
-      "required": false,
-      "options": ["Cerrada", "Expuesta"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Fractura" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fractura_desplazamiento",
-      "name": "Desplazamiento",
-      "dataType": "string",
-      "required": false,
-      "options": ["No desplazada", "Desplazada", "Conminuta"],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Fractura" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "esguince_grado",
-      "name": "Grado",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "I — distensión",
-        "II — rotura parcial",
-        "III — rotura completa"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Esguince" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ottawa",
-      "name": "Reglas de Ottawa positivas (tobillo/rodilla)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Esguince" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "luxacion_articulacion",
-      "name": "Articulación",
-      "dataType": "string",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Luxación" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "luxacion_reducida",
-      "name": "Reducida",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Luxación" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "rodilla_pruebas",
-      "name": "Pruebas positivas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Lachman",
-        "Cajón anterior",
-        "McMurray",
-        "Bostezo varo/valgo",
-        "Ninguna"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión meniscal o ligamentaria de rodilla"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "rodilla_derrame",
-      "name": "Derrame",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión meniscal o ligamentaria de rodilla"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "lumbalgia_banderas_trauma",
-      "name": "Banderas rojas",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Déficit neurológico",
-        "Alteración de esfínteres",
-        "Fiebre",
-        "Antecedente de cáncer",
-        "Ninguna"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lumbalgia mecánica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tendon",
-      "name": "Tendón afectado",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Tendinopatía"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Conducta",
@@ -347,5 +224,6 @@
       "dataType": "text",
       "required": true
     }
-  ]
+  ],
+  "kind": "BASE"
 }

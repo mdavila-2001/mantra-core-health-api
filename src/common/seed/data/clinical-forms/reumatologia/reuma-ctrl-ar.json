@@ -1,0 +1,198 @@
+{
+  "code": "REUMA_CTRL_AR",
+  "name": "Control de artritis reumatoide",
+  "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones EULAR",
+    "organization": "European Alliance of Associations for Rheumatology (EULAR)",
+    "url": "https://www.eular.org/recommendations",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Actividad por DAS28 (índice publicado) con recuento de 28 articulaciones; seguimiento de fármacos modificadores."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de artritis reumatoide",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "articulaciones_dolorosas_28",
+      "name": "Articulaciones dolorosas (de 28)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "articulaciones_tumefactas_28",
+      "name": "Articulaciones tumefactas (de 28)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "vsg",
+      "name": "VSG (mm/h)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "pcr",
+      "name": "PCR (mg/L)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "evaluacion_global_paciente",
+      "name": "Evaluación global del paciente (0 a 100)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "das28",
+      "name": "DAS28",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "actividad_das28",
+      "name": "Actividad",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Remisión (< 2,6)",
+        "Baja (2,6–3,2)",
+        "Moderada (3,2–5,1)",
+        "Alta (> 5,1)"
+      ]
+    },
+    {
+      "section": "Evaluación: artritis reumatoide",
+      "code": "rigidez_matinal_minutos",
+      "name": "Rigidez matinal (minutos)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "ar_controles_farmacos",
+      "name": "Controles de seguridad al día",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Transaminasas",
+        "Creatinina",
+        "Tamizaje de tuberculosis antes de biológico"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Remisión o baja actividad", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Adherencia al metotrexato y ácido fólico",
+        "Ejercicio",
+        "Protección articular"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

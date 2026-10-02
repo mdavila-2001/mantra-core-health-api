@@ -1,6 +1,6 @@
 {
   "code": "CIRGEN_EVALUACION_BASE",
-  "name": "Evaluación de cirugía general",
+  "name": "Cirugía General — consulta inicial (ficha base)",
   "specialty": { "code": "CIRUGIA_GENERAL", "display": "Cirugía General" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los ítems quirúrgicos: características del dolor abdominal, tránsito intestinal, hernias, cirugías previas, riesgo quirúrgico descrito en prosa e indicación quirúrgica propuesta. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA, escala de Alvarado."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los ítems quirúrgicos: características del dolor abdominal, tránsito intestinal, hernias, cirugías previas, riesgo quirúrgico descrito en prosa e indicación quirúrgica propuesta. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA."
   },
   "fields": [
     {
@@ -398,105 +398,7 @@
         "Patología anorrectal"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "alvarado",
-      "name": "Escala de Alvarado",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Migración del dolor a fosa ilíaca derecha",
-        "Anorexia",
-        "Náuseas o vómitos",
-        "Dolor en fosa ilíaca derecha (2)",
-        "Rebote",
-        "Fiebre > 37,3 °C",
-        "Leucocitosis > 10 000 (2)",
-        "Desviación a la izquierda"
-      ],
-      "multiple": true,
-      "description": "7 o más puntos: probable apendicitis.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Apendicitis aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "murphy_cirugia",
-      "name": "Signo de Murphy",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Colecistitis o colelitiasis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "eco_vesicula",
-      "name": "Ecografía — hallazgo",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Colecistitis o colelitiasis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hernia_dolor_cronico",
-      "name": "Dolor crónico en la hernia",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hernia de pared abdominal"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "obstruccion_signos",
-      "name": "Signos",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Distensión",
-        "Vómitos fecaloides",
-        "Ruidos aumentados metálicos",
-        "Silencio abdominal",
-        "Cicatriz previa"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Obstrucción intestinal"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "abdomen_agudo_imagen",
-      "name": "Imagen solicitada",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Abdomen agudo inespecífico"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anorrectal_tipo",
-      "name": "Sospecha",
-      "dataType": "string",
-      "required": true,
-      "options": ["Hemorroides", "Fisura", "Absceso", "Fístula"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Patología anorrectal"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Plan quirúrgico",
@@ -535,5 +437,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

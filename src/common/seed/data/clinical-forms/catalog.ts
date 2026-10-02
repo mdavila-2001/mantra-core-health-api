@@ -45,6 +45,8 @@ import evaluacionKinesiologica from './fisioterapia/evaluacion-kinesiologica.jso
 import valoracionDeEnfermeria from './enfermeria/valoracion-de-enfermeria.json';
 import controlObstetrico from './obstetricia/control-obstetrico.json';
 import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
+// v2 (2026-10-02) — las fichas específicas por condición, generadas.
+import { SPECIFIC_FORMS } from './specific-forms.generated';
 
 /**
  * Los tipos de dato que un formulario del catálogo puede declarar.
@@ -171,10 +173,20 @@ export interface StandardFormField {
   showWhen?: StandardFormShowWhen;
 }
 
+/**
+ * Qué clase de ficha es:
+ * - `BASE`: la consulta inicial de la especialidad (una por especialidad);
+ * - `SPECIFIC`: el control o la evaluación estándar de una condición;
+ * - `GENERAL`: las transversales, de toda consulta.
+ */
+export type StandardFormKind = 'BASE' | 'SPECIFIC' | 'GENERAL';
+
 /** Un formulario estándar del catálogo, con su ficha y su esquema. */
 export interface StandardFormDefinition {
   /** Código único de la plantilla que se va a crear. */
   code: string;
+  /** Clase de ficha. */
+  kind: StandardFormKind;
   /** Nombre legible del formulario. */
   name: string;
   /** Especialidad a la que pertenece. */
@@ -192,7 +204,8 @@ export interface StandardFormDefinition {
  * ensanchan a `string`, así que `dataType` llega sin estrechar. `validar` es lo
  * que cierra esa brecha.
  */
-export type RawForm = Omit<StandardFormDefinition, 'fields'> & {
+export type RawForm = Omit<StandardFormDefinition, 'fields' | 'kind'> & {
+  kind?: string;
   fields: readonly (Omit<StandardFormField, 'dataType' | 'showWhen'> & {
     dataType: string;
     showWhen?: { field: string; equals: unknown };
@@ -223,7 +236,11 @@ export function validar(form: RawForm): StandardFormDefinition {
     anteriores.set(field.code, field);
     return field as StandardFormField;
   });
-  return { ...form, fields };
+  const kind = form.kind ?? 'BASE';
+  if (!['BASE', 'SPECIFIC', 'GENERAL'].includes(kind)) {
+    throw new Error(`Formulario ${form.code}: clase desconocida "${kind}".`);
+  }
+  return { ...form, kind: kind as StandardFormKind, fields };
 }
 
 /** El tipo tiene que ser uno que el motor sepa dibujar. */
@@ -371,4 +388,5 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   valoracionDeEnfermeria,
   controlObstetrico,
   anamnesisOdontologica,
+  ...(SPECIFIC_FORMS as readonly RawForm[]),
 ].map(validar);

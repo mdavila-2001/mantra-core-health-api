@@ -141,5 +141,6 @@
       "dataType": "date",
       "required": false
     }
-  ]
+  ],
+  "kind": "GENERAL"
 }

@@ -1,6 +1,6 @@
 {
   "code": "ORL_EVALUACION_BASE",
-  "name": "Evaluación otorrinolaringológica",
+  "name": "Otorrinolaringología — consulta inicial (ficha base)",
   "specialty": {
     "code": "OTORRINOLARINGOLOGIA",
     "display": "Otorrinolaringología"
@@ -13,7 +13,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis otológica (hipoacusia, lado afectado, otalgia, otorrea, acúfenos, vértigo), la nasal y faringolaríngea (obstrucción nasal, epistaxis, odinofagia, disfonía) y la otoscopia y la rinoscopia anterior descritas en prosa. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ARIA, maniobra de Dix-Hallpike."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis otológica (hipoacusia, lado afectado, otalgia, otorrea, acúfenos, vértigo), la nasal y faringolaríngea (obstrucción nasal, epistaxis, odinofagia, disfonía) y la otoscopia y la rinoscopia anterior descritas en prosa. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
@@ -244,160 +244,7 @@
         "Vértigo periférico"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "oma_abombamiento",
-      "name": "Membrana timpánica abombada",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Otitis media aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "oma_fiebre",
-      "name": "Fiebre",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Otitis media aguda"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "oe_dolor_trago",
-      "name": "Dolor a la presión del trago",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Otitis externa"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "oe_diabetes",
-      "name": "Diabetes (riesgo de otitis maligna)",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Otitis externa"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "centor_fiebre_orl",
-      "name": "Fiebre > 38 °C",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Faringoamigdalitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "centor_exudado_orl",
-      "name": "Exudado amigdalino",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Faringoamigdalitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "centor_adenopatias_orl",
-      "name": "Adenopatías cervicales dolorosas",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Faringoamigdalitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "centor_sin_tos_orl",
-      "name": "Ausencia de tos",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Faringoamigdalitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "rinosinusitis_dias",
-      "name": "Días de evolución",
-      "dataType": "integer",
-      "required": true,
-      "description": "Más de 10 días o empeoramiento tras mejoría: bacteriana probable.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Rinosinusitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "rinosinusitis_sintomas",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": false,
-      "options": ["Rinorrea purulenta", "Dolor facial", "Hiposmia", "Fiebre"],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Rinosinusitis"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "rinitis_aria",
-      "name": "Clasificación ARIA",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Intermitente leve",
-        "Intermitente moderada-grave",
-        "Persistente leve",
-        "Persistente moderada-grave"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Rinitis alérgica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "audiometria",
-      "name": "Audiometría",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Hipoacusia súbita"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dix_hallpike_orl",
-      "name": "Dix-Hallpike",
-      "dataType": "string",
-      "required": true,
-      "options": ["Positiva", "Negativa", "No realizada"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Vértigo periférico"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -414,5 +261,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }
