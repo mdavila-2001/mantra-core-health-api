@@ -1,11 +1,8 @@
 {
   "code": "URO_EVALUACION_BASE",
   "name": "Evaluación urológica",
-  "specialty": {
-    "code": "UROLOGIA",
-    "display": "Urología"
-  },
-  "version": 1,
+  "specialty": { "code": "UROLOGIA", "display": "Urología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato genitourinario",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,116 +10,457 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los síntomas del tracto urinario inferior (disuria, hematuria, nicturia, urgencia, características del chorro), los antecedentes de litiasis e infecciones urinarias, y el examen genital y el tacto rectal descritos en prosa."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad los síntomas del tracto urinario inferior (disuria, hematuria, nicturia, urgencia, características del chorro), los antecedentes de litiasis e infecciones urinarias, y el examen genital y el tacto rectal descritos en prosa. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Con las palabras del paciente."
     },
     {
+      "section": "Motivo de consulta",
       "code": "tiempo_de_evolucion",
       "name": "Tiempo de evolución",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
     },
     {
-      "code": "sintomas_del_tracto_urinario_inferior",
+      "section": "Síntomas",
+      "code": "stui",
       "name": "Síntomas del tracto urinario inferior",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Chorro débil",
+        "Esfuerzo miccional",
+        "Goteo terminal",
+        "Vaciado incompleto",
+        "Polaquiuria",
+        "Urgencia",
+        "Incontinencia",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Síntomas",
+      "code": "sintomas_del_tracto_urinario_inferior",
+      "name": "Síntomas urinarios — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "disuria",
       "name": "Disuria",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "hematuria",
       "name": "Hematuria",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
+      "code": "hematuria_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Macroscópica", "Microscópica"],
+      "showWhen": { "field": "hematuria", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "hematuria_coagulos",
+      "name": "Con coágulos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "hematuria", "equals": true }
+    },
+    {
+      "section": "Síntomas",
       "code": "nicturia",
-      "name": "Episodios de nicturia por noche",
+      "name": "Nicturia (veces por noche)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "urgencia_miccional",
       "name": "Urgencia miccional",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
       "code": "caracteristicas_del_chorro_miccional",
-      "name": "Características del chorro miccional",
+      "name": "Chorro miccional",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Normal", "Débil", "Entrecortado", "Bífido"]
     },
     {
+      "section": "Síntomas",
       "code": "dolor_lumbar",
       "name": "Dolor lumbar",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_lumbar_irradiado", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "dolor_lumbar_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_lumbar", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "antecedentes_de_litiasis",
-      "name": "Antecedentes de litiasis",
+      "name": "Antecedente de litiasis",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
       "code": "infecciones_urinarias_previas",
       "name": "Infecciones urinarias previas",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Antecedentes",
       "code": "cirugias_urologicas_previas",
       "name": "Cirugías urológicas previas",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "medicacion_habitual",
-      "name": "Medicación habitual",
-      "dataType": "text",
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Examen",
       "code": "examen_genital",
       "name": "Examen genital",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "tacto_rectal",
-      "name": "Tacto rectal (hallazgos descritos)",
+      "name": "Tacto rectal",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "examenes_complementarios",
-      "name": "Exámenes complementarios disponibles",
+      "name": "Exámenes complementarios",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Hiperplasia prostática benigna",
+        "Sospecha de cáncer de próstata",
+        "Litiasis urinaria",
+        "Infección urinaria",
+        "Hematuria en estudio",
+        "Disfunción eréctil"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "volumen_prostatico",
+      "name": "Volumen prostático estimado (mL)",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hiperplasia prostática benigna"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "residuo_posmiccional",
+      "name": "Residuo posmiccional (mL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hiperplasia prostática benigna"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "retencion_previa",
+      "name": "Retención urinaria previa",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hiperplasia prostática benigna"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "psa",
+      "name": "PSA total (ng/mL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Sospecha de cáncer de próstata"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tacto_prostata",
+      "name": "Tacto rectal",
+      "dataType": "string",
+      "required": true,
+      "options": ["Normal", "Nódulo", "Indurada", "No realizado"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Sospecha de cáncer de próstata"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lito_tamano",
+      "name": "Tamaño y ubicación del lito",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Litiasis urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lito_obstruccion",
+      "name": "Hidronefrosis",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Litiasis urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "lito_fiebre",
+      "name": "Fiebre (urgencia)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Litiasis urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_uro",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Disuria",
+        "Polaquiuria",
+        "Fiebre",
+        "Dolor perineal (prostatitis)"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "urocultivo",
+      "name": "Urocultivo",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hematuria_tabaco",
+      "name": "Fumador o exfumador",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hematuria en estudio"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hematuria_imagen",
+      "name": "Imagen y cistoscopía",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hematuria en estudio"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "de_inicio",
+      "name": "Inicio",
+      "dataType": "string",
+      "required": true,
+      "options": ["Gradual", "Brusco"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Disfunción eréctil"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "de_erecciones_matinales",
+      "name": "Conserva erecciones matinales",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Disfunción eréctil"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "de_factores",
+      "name": "Factores asociados",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diabetes",
+        "Hipertensión",
+        "Tabaquismo",
+        "Fármacos",
+        "Ansiedad o depresión",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Disfunción eréctil"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
       "code": "diagnostico",
-      "name": "Diagnóstico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Diagnóstico y plan",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta y plan",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }

@@ -302,5 +302,104 @@ describe('ChartTemplatesService', () => {
         d.templatesRepo.findFieldAssignmentsBySection,
       ).toHaveBeenCalledWith(d.em, 'sec1', 'tenant-a');
     });
+
+    /** Una plantilla del catálogo con «¿tiene alergias?» → «¿a qué?». */
+    function conPresentacion(d: ReturnType<typeof build>) {
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        code: 'MEDGEN',
+        name: 'Consulta',
+        version: 2,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: 'sec1',
+      });
+      d.templatesRepo.findFieldAssignmentsBySection.mockResolvedValue([
+        { id: 'a0', fieldId: 'f-cat', required: false, ordinal: -1 },
+        { id: 'a1', fieldId: 'f-si', required: false, ordinal: 0 },
+        { id: 'a2', fieldId: 'f-cual', required: true, ordinal: 1 },
+        {
+          id: 'a3',
+          fieldId: 'f-viejo',
+          required: false,
+          ordinal: 2,
+          visible: false,
+        },
+      ]);
+      d.templatesRepo.findFieldDefinitionsByIds.mockResolvedValue([
+        {
+          id: 'f-cat',
+          code: 'MEDGEN.__catalog__',
+          name: 'Procedencia',
+          dataType: 'json',
+          defaultValueJson: {
+            sourceTitle: 'NT 022',
+            organization: 'MINSA',
+            url: 'https://example.org',
+            license: 'Pública',
+            retrievedAt: '2026-08-14',
+            fieldPresentation: {
+              tiene_alergias: { section: 'Antecedentes' },
+              tipo_de_alergia: {
+                section: 'Antecedentes',
+                options: ['Medicamentos', 'Alimentos'],
+                multiple: true,
+                allowOther: true,
+                showWhen: { field: 'tiene_alergias', equals: true },
+              },
+            },
+          },
+        },
+        {
+          id: 'f-si',
+          code: 'MEDGEN.tiene_alergias',
+          name: '¿Alergias?',
+          dataType: 'boolean',
+        },
+        {
+          id: 'f-cual',
+          code: 'MEDGEN.tipo_de_alergia',
+          name: '¿A qué?',
+          dataType: 'json',
+        },
+        {
+          id: 'f-viejo',
+          code: 'MEDGEN.alergias_v1',
+          name: 'Alergias',
+          dataType: 'text',
+        },
+      ]);
+    }
+
+    it('pega a cada campo del catálogo su lista, su sección y su condición', async () => {
+      const d = build();
+      conPresentacion(d);
+
+      const res = await d.service.getTemplate('tpl1');
+
+      const cual = res.fields.find((f) => f.fieldId === 'f-cual')!;
+      expect(cual).toMatchObject({
+        section: 'Antecedentes',
+        options: ['Medicamentos', 'Alimentos'],
+        multiple: true,
+        allowOther: true,
+        // El código del padre se traduce a su `fieldId`: es lo que el cliente
+        // tiene a mano para leer el valor del que depende.
+        showWhen: { fieldId: 'f-si', equals: true },
+      });
+      expect(
+        res.fields.find((f) => f.fieldId === 'f-si')!.showWhen,
+      ).toBeUndefined();
+      expect(res.provenance?.organization).toBe('MINSA');
+    });
+
+    it('no sirve los campos que una versión nueva del catálogo retiró', async () => {
+      const d = build();
+      conPresentacion(d);
+
+      const res = await d.service.getTemplate('tpl1');
+
+      expect(res.fields.map((f) => f.fieldId)).toEqual(['f-si', 'f-cual']);
+    });
   });
 });

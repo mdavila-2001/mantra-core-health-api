@@ -5,7 +5,7 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, formatos de historia clínica",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,88 +13,293 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de la estructura de anamnesis del formato oficial. No reproduce ningún instrumento con puntaje propietario."
+    "note": "Transcripción de la estructura de anamnesis del formato oficial. No reproduce ningún instrumento con puntaje propietario. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS)."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Con las palabras del paciente."
     },
     {
+      "section": "Motivo de consulta",
       "code": "tiempo_enfermedad",
-      "name": "Tiempo de enfermedad",
+      "name": "Tiempo de evolución",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
     },
     {
+      "section": "Motivo de consulta",
       "code": "enfermedad_actual",
-      "name": "Enfermedad actual (relato cronológico)",
+      "name": "Relato de la enfermedad actual",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Inicio, curso y síntomas acompañantes, en orden cronológico."
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Enfermedades crónicas conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Asma",
+        "EPOC",
+        "Cardiopatía",
+        "Enfermedad renal crónica",
+        "Enfermedad tiroidea",
+        "Cáncer",
+        "Tuberculosis",
+        "Enfermedad de Chagas",
+        "Epilepsia",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
       "code": "antecedentes_patologicos",
-      "name": "Antecedentes personales patológicos",
+      "name": "Antecedentes patológicos — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Año de diagnóstico, tratamiento y si está controlada."
     },
     {
-      "code": "antecedentes_quirurgicos",
-      "name": "Antecedentes quirúrgicos",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "antecedentes_alergicos",
-      "name": "Alergias conocidas",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "medicacion_habitual",
-      "name": "Medicación habitual",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "antecedentes_familiares",
-      "name": "Antecedentes familiares",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "habito_tabaco",
-      "name": "Consume tabaco",
+      "section": "Antecedentes",
+      "code": "tuvo_cirugias",
+      "name": "¿Tuvo cirugías previas?",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_quirurgicos",
+      "name": "¿Cuáles y en qué año?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "tuvo_cirugias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_alergicos",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_familiares_marcados",
+      "name": "Antecedentes familiares (padres, hermanos, hijos)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Cardiopatía isquémica antes de los 55 (H) o 65 (M) años",
+        "Accidente cerebrovascular",
+        "Cáncer",
+        "Enfermedad mental",
+        "Ninguno conocido"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_familiares",
+      "name": "Antecedentes familiares — detalle",
+      "dataType": "text",
+      "required": false,
+      "description": "Parentesco y edad al diagnóstico."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "esquema_vacunas",
+      "name": "Vacunas",
+      "dataType": "string",
+      "required": false,
+      "options": ["Completo", "Incompleto", "Desconocido"]
+    },
+    {
+      "section": "Hábitos",
+      "code": "habito_tabaco",
+      "name": "Fuma o fumó",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Hábitos",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": true,
+      "options": ["Exfumador", "Fumador actual"],
+      "showWhen": { "field": "habito_tabaco", "equals": true }
+    },
+    {
+      "section": "Hábitos",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "habito_tabaco", "equals": true }
+    },
+    {
+      "section": "Hábitos",
       "code": "habito_alcohol",
       "name": "Consume alcohol",
       "dataType": "boolean",
       "required": false
     },
     {
-      "code": "habito_actividad_fisica",
-      "name": "Actividad física habitual",
+      "section": "Hábitos",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia? (AUDIT-C 1)",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "options": [
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ],
+      "showWhen": { "field": "habito_alcohol", "equals": true }
     },
     {
+      "section": "Hábitos",
+      "code": "audit_c_cantidad",
+      "name": "Consumiciones en un día normal (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": { "field": "habito_alcohol", "equals": true }
+    },
+    {
+      "section": "Hábitos",
+      "code": "audit_c_seis_o_mas",
+      "name": "6 o más bebidas en una ocasión (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": { "field": "habito_alcohol", "equals": true }
+    },
+    {
+      "section": "Hábitos",
+      "code": "habito_actividad_fisica",
+      "name": "Actividad física",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sedentario",
+        "Menos de 150 minutos por semana",
+        "150 minutos o más por semana"
+      ]
+    },
+    {
+      "section": "Revisión por sistemas",
+      "code": "sintomas_generales",
+      "name": "Síntomas generales",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Pérdida de peso",
+        "Astenia",
+        "Sudoración nocturna",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Revisión por sistemas",
+      "code": "ros_positivos",
+      "name": "Sistemas con síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Respiratorio",
+        "Cardiovascular",
+        "Digestivo",
+        "Urinario",
+        "Neurológico",
+        "Osteomuscular",
+        "Piel",
+        "Ginecológico",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "revision_por_sistemas",
-      "name": "Revisión por aparatos y sistemas",
+      "name": "Revisión por sistemas — detalle de lo positivo",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Impresión y plan",
       "code": "impresion_diagnostica",
       "name": "Impresión diagnóstica",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Impresión y plan",
       "code": "plan_de_trabajo",
       "name": "Plan de trabajo",
       "dataType": "text",

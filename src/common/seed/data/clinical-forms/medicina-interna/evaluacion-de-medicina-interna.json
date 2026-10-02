@@ -1,11 +1,8 @@
 {
   "code": "MEDINT_EVALUACION_BASE",
   "name": "Evaluación de medicina interna — versión general base",
-  "specialty": {
-    "code": "MEDICINA_INTERNA",
-    "display": "Medicina interna"
-  },
-  "version": 1,
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, historia clínica de consulta externa",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,94 +10,670 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de la evaluación integral del adulto: comorbilidades, polifarmacia y revisión por sistemas."
+    "note": "Estructura de la evaluación integral del adulto: comorbilidades, polifarmacia y revisión por sistemas. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS), CURB-65 (British Thoracic Society), clase funcional NYHA, criterios de Framingham."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Motivo de consulta",
       "code": "enfermedad_actual",
-      "name": "Enfermedad actual",
+      "name": "Relato de la enfermedad actual",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Comorbilidades",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Cardiopatía",
+        "EPOC o asma",
+        "Enfermedad renal crónica",
+        "Hepatopatía",
+        "Cáncer",
+        "Enfermedad de Chagas",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
       "code": "comorbilidades",
-      "name": "Comorbilidades activas",
+      "name": "Comorbilidades — detalle y grado de control",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
       "code": "medicacion_actual",
-      "name": "Medicación actual",
+      "name": "Medicación actual (nombre, dosis, frecuencia)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
       "code": "cantidad_de_farmacos",
-      "name": "Cantidad de fármacos habituales",
+      "name": "Cantidad de fármacos en uso",
       "dataType": "integer",
+      "required": false,
+      "description": "5 o más: polifarmacia."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "alergias",
-      "name": "Alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
     },
     {
-      "code": "habitos_toxicos",
-      "name": "Hábitos tóxicos",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "estado_funcional",
-      "name": "Estado funcional / autonomía",
+      "section": "Antecedentes",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
       "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "habitos_toxicos",
+      "name": "Hábitos tóxicos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "estado_funcional",
+      "name": "Estado funcional",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Independiente",
+        "Requiere ayuda para actividades instrumentales",
+        "Requiere ayuda para actividades básicas",
+        "Postrado"
+      ]
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "perdida_de_peso_reciente",
       "name": "Pérdida de peso reciente",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Revisión por sistemas",
+      "code": "perdida_de_peso_kg",
+      "name": "¿Cuántos kg y en cuánto tiempo?",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "perdida_de_peso_reciente", "equals": true }
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "fiebre",
       "name": "Fiebre",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Revisión por sistemas",
+      "code": "fiebre_dias",
+      "name": "Días de fiebre",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": { "field": "fiebre", "equals": true }
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "revision_por_sistemas",
-      "name": "Revisión por sistemas",
+      "name": "Revisión por sistemas — hallazgos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen físico",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
       "code": "examen_fisico_dirigido",
       "name": "Examen físico dirigido",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen físico",
       "code": "laboratorio_relevante",
       "name": "Laboratorio relevante",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Insuficiencia cardíaca",
+        "Diabetes mellitus descompensada",
+        "Hipertensión arterial",
+        "Neumonía",
+        "Anemia",
+        "Síndrome febril prolongado",
+        "Enfermedad renal crónica"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_clase_nyha",
+      "name": "Clase funcional NYHA",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Clase I — sin limitación de la actividad física",
+        "Clase II — limitación leve: síntomas con la actividad ordinaria",
+        "Clase III — limitación marcada: síntomas con actividad menor a la ordinaria",
+        "Clase IV — síntomas en reposo"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_signos",
+      "name": "Signos y síntomas (Framingham)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ortopnea",
+        "Disnea paroxística nocturna",
+        "Ingurgitación yugular",
+        "Crepitantes pulmonares",
+        "Tercer ruido (galope)",
+        "Edema de miembros inferiores",
+        "Hepatomegalia"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_edema_grado",
+      "name": "Edema (fóvea)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sin edema",
+        "+ (2 mm)",
+        "++ (4 mm)",
+        "+++ (6 mm)",
+        "++++ (8 mm)"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ic_peso_seco",
+      "name": "Peso de referencia (kg)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia cardíaca"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus descompensada"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus descompensada"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliuria",
+        "Polidipsia",
+        "Pérdida de peso",
+        "Visión borrosa",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus descompensada"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_pie",
+      "name": "Examen del pie",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sensibilidad conservada (monofilamento)",
+        "Sensibilidad disminuida",
+        "Úlcera o lesión presente",
+        "No evaluado"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus descompensada"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hipoglucemias",
+      "name": "Episodios de hipoglucemia desde el último control",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus descompensada"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_organo_blanco",
+      "name": "Síntomas de daño de órgano blanco",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Cefalea intensa",
+        "Dolor torácico",
+        "Disnea",
+        "Alteración visual",
+        "Déficit neurológico",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma la medicación todos los días",
+        "Olvida dosis",
+        "Abandonó el tratamiento",
+        "Sin tratamiento todavía"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_registros_domiciliarios",
+      "name": "Registros de presión en domicilio (promedio)",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_crepitantes",
+      "name": "Crepitantes o soplo tubario localizados",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "curb65",
+      "name": "Criterios CURB-65 presentes",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Confusión de reciente aparición",
+        "Urea > 42 mg/dL (BUN > 19 mg/dL)",
+        "Frecuencia respiratoria ≥ 30 rpm",
+        "PAS < 90 o PAD ≤ 60 mmHg",
+        "Edad ≥ 65 años",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "0–1: ambulatorio · 2: valorar internación · 3 o más: neumonía grave.",
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_expectoracion",
+      "name": "Expectoración purulenta",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "anemia_hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "description": "Ajustar por altitud de residencia.",
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Anemia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "anemia_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Astenia",
+        "Disnea de esfuerzo",
+        "Palpitaciones",
+        "Pica",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Anemia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "anemia_perdidas",
+      "name": "Posibles pérdidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Menstruación abundante",
+        "Sangrado digestivo",
+        "Parasitosis",
+        "Ninguna conocida"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Anemia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "anemia_vcm",
+      "name": "VCM y ferritina, si se conocen",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Anemia" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sfp_estudios",
+      "name": "Estudios ya realizados",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemocultivos",
+        "Urocultivo",
+        "Serología VIH",
+        "Baciloscopía",
+        "Imágenes",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome febril prolongado"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "erc_creatinina",
+      "name": "Creatinina (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "erc_tfg",
+      "name": "Filtrado glomerular estimado (mL/min/1,73 m²)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad renal crónica"
+      }
+    },
+    {
+      "section": "Problemas y plan",
       "code": "problemas_activos",
       "name": "Lista de problemas activos",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Problemas y plan",
       "code": "plan_por_problema",
       "name": "Plan por problema",
       "dataType": "text",

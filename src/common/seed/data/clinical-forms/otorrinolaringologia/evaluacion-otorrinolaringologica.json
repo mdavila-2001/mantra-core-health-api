@@ -5,7 +5,7 @@
     "code": "OTORRINOLARINGOLOGIA",
     "display": "Otorrinolaringología"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen de cabeza y cuello",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,116 +13,406 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis otológica (hipoacusia, lado afectado, otalgia, otorrea, acúfenos, vértigo), la nasal y faringolaríngea (obstrucción nasal, epistaxis, odinofagia, disfonía) y la otoscopia y la rinoscopia anterior descritas en prosa."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen dirigido, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis otológica (hipoacusia, lado afectado, otalgia, otorrea, acúfenos, vértigo), la nasal y faringolaríngea (obstrucción nasal, epistaxis, odinofagia, disfonía) y la otoscopia y la rinoscopia anterior descritas en prosa. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ARIA, maniobra de Dix-Hallpike."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
-      "required": true
+      "required": true,
+      "description": "Con las palabras del paciente."
     },
     {
+      "section": "Motivo de consulta",
       "code": "tiempo_de_evolucion",
       "name": "Tiempo de evolución",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
     },
     {
+      "section": "Oído",
       "code": "hipoacusia",
       "name": "Hipoacusia",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Oído",
       "code": "lado_afectado",
       "name": "Lado afectado",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "options": ["Derecho", "Izquierdo", "Bilateral"],
+      "showWhen": { "field": "hipoacusia", "equals": true }
     },
     {
+      "section": "Oído",
+      "code": "hipoacusia_inicio",
+      "name": "Inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "hipoacusia", "equals": true }
+    },
+    {
+      "section": "Oído",
       "code": "otalgia",
       "name": "Otalgia",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Oído",
+      "code": "otalgia_lado",
+      "name": "Lado",
+      "dataType": "string",
+      "required": true,
+      "options": ["Derecho", "Izquierdo", "Bilateral"],
+      "showWhen": { "field": "otalgia", "equals": true }
+    },
+    {
+      "section": "Oído",
       "code": "otorrea",
       "name": "Otorrea",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Oído",
+      "code": "otorrea_aspecto",
+      "name": "Aspecto",
+      "dataType": "string",
+      "required": true,
+      "options": ["Serosa", "Purulenta", "Hemática"],
+      "showWhen": { "field": "otorrea", "equals": true }
+    },
+    {
+      "section": "Oído",
       "code": "acufenos",
       "name": "Acúfenos",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Oído",
+      "code": "acufenos_lado",
+      "name": "Lado",
+      "dataType": "string",
+      "required": true,
+      "options": ["Derecho", "Izquierdo", "Bilateral"],
+      "showWhen": { "field": "acufenos", "equals": true }
+    },
+    {
+      "section": "Oído",
+      "code": "acufenos_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": false,
+      "options": ["Continuo", "Pulsátil"],
+      "showWhen": { "field": "acufenos", "equals": true }
+    },
+    {
+      "section": "Oído",
       "code": "vertigo",
       "name": "Vértigo",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
       "code": "obstruccion_nasal",
       "name": "Obstrucción nasal",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
       "code": "epistaxis",
       "name": "Epistaxis",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
+      "code": "epistaxis_frecuencia",
+      "name": "Frecuencia",
+      "dataType": "string",
+      "required": true,
+      "options": ["Episodio único", "Recurrente"],
+      "showWhen": { "field": "epistaxis", "equals": true }
+    },
+    {
+      "section": "Nariz y garganta",
       "code": "odinofagia",
       "name": "Odinofagia",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
       "code": "disfonia",
       "name": "Disfonía",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
+      "code": "disfonia_semanas",
+      "name": "Semanas de evolución",
+      "dataType": "integer",
+      "required": true,
+      "description": "Más de 3 semanas en fumador: laringoscopía.",
+      "showWhen": { "field": "disfonia", "equals": true }
+    },
+    {
+      "section": "Nariz y garganta",
       "code": "antecedentes_otorrinolaringologicos",
       "name": "Antecedentes otorrinolaringológicos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Nariz y garganta",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Nariz y garganta",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Nariz y garganta",
+      "code": "alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Examen",
       "code": "otoscopia",
-      "name": "Otoscopia (hallazgos descritos)",
+      "name": "Otoscopía",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "rinoscopia_anterior",
-      "name": "Rinoscopia anterior (hallazgos descritos)",
+      "name": "Rinoscopía anterior",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "examen_de_cuello",
       "name": "Examen de cuello",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Otitis media aguda",
+        "Otitis externa",
+        "Faringoamigdalitis",
+        "Rinosinusitis",
+        "Rinitis alérgica",
+        "Hipoacusia súbita",
+        "Vértigo periférico"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "oma_abombamiento",
+      "name": "Membrana timpánica abombada",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Otitis media aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "oma_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Otitis media aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "oe_dolor_trago",
+      "name": "Dolor a la presión del trago",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Otitis externa"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "oe_diabetes",
+      "name": "Diabetes (riesgo de otitis maligna)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Otitis externa"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_fiebre_orl",
+      "name": "Fiebre > 38 °C",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Faringoamigdalitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_exudado_orl",
+      "name": "Exudado amigdalino",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Faringoamigdalitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_adenopatias_orl",
+      "name": "Adenopatías cervicales dolorosas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Faringoamigdalitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_sin_tos_orl",
+      "name": "Ausencia de tos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Faringoamigdalitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "rinosinusitis_dias",
+      "name": "Días de evolución",
+      "dataType": "integer",
+      "required": true,
+      "description": "Más de 10 días o empeoramiento tras mejoría: bacteriana probable.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Rinosinusitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "rinosinusitis_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": ["Rinorrea purulenta", "Dolor facial", "Hiposmia", "Fiebre"],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Rinosinusitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "rinitis_aria",
+      "name": "Clasificación ARIA",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Intermitente leve",
+        "Intermitente moderada-grave",
+        "Persistente leve",
+        "Persistente moderada-grave"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Rinitis alérgica"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "audiometria",
+      "name": "Audiometría",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipoacusia súbita"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dix_hallpike_orl",
+      "name": "Dix-Hallpike",
+      "dataType": "string",
+      "required": true,
+      "options": ["Positiva", "Negativa", "No realizada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Vértigo periférico"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
       "code": "diagnostico",
-      "name": "Diagnóstico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Diagnóstico y plan",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta y plan",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }

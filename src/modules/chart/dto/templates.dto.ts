@@ -219,6 +219,31 @@ export class CreateChartTemplateDto {
   fields!: TemplateFieldInputDto[];
 }
 
+/**
+ * Cuándo se muestra un campo: `enableWhen` de HL7 FHIR con operador `=` y
+ * comportamiento `SHOW`. Se cumple si el campo `fieldId` vale `equals`; si ese
+ * campo es de varias respuestas, si las incluye; si `equals` es una lista,
+ * basta con que coincida uno. Un campo cuyo padre está oculto, también.
+ */
+export class ChartTemplateShowWhenDto {
+  /** El campo del que depende (`fieldId` de la misma plantilla). */
+  @ApiProperty({ format: 'uuid' })
+  fieldId!: string;
+
+  /** El valor, o los valores, que lo muestran. */
+  @ApiProperty({
+    oneOf: [
+      { type: 'string' },
+      { type: 'boolean' },
+      {
+        type: 'array',
+        items: { oneOf: [{ type: 'string' }, { type: 'boolean' }] },
+      },
+    ],
+  })
+  equals!: string | boolean | (string | boolean)[];
+}
+
 /** Un campo ya persistido de una plantilla, tal como lo lee el frontend. */
 export class ChartTemplateFieldDto {
   /**
@@ -280,6 +305,33 @@ export class ChartTemplateFieldDto {
     description: '¿Es un campo propio del tenant, o del formulario estándar?',
   })
   own!: boolean;
+
+  /** La sección de la ficha en la que va (motivo, antecedentes, examen…). */
+  @ApiPropertyOptional()
+  section?: string;
+
+  /**
+   * Las respuestas ofrecidas de una lista cerrada. Con `multiple`, el valor es
+   * la lista elegida (`json`); sin él, la opción elegida (`string`).
+   */
+  @ApiPropertyOptional({ type: [String] })
+  options?: string[];
+
+  /** Si se pueden elegir varias opciones. */
+  @ApiPropertyOptional()
+  multiple?: boolean;
+
+  /** Si además se ofrece «Otro» con texto libre. */
+  @ApiPropertyOptional()
+  allowOther?: boolean;
+
+  /** La ayuda bajo el campo. */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /** Cuándo se muestra el campo; ausente = siempre. */
+  @ApiPropertyOptional({ type: () => ChartTemplateShowWhenDto })
+  showWhen?: ChartTemplateShowWhenDto;
 }
 
 /**

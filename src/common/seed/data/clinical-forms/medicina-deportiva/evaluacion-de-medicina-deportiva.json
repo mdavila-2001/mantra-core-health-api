@@ -5,7 +5,7 @@
     "code": "MEDICINA_DEPORTIVA",
     "display": "Medicina Deportiva"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen por aparatos y sistemas",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,114 +13,193 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad el deporte practicado y su nivel, la carga de entrenamiento semanal, las lesiones deportivas previas, el examen dirigido del aparato locomotor, los antecedentes cardiovasculares con el antecedente familiar de muerte súbita, y la aptitud propuesta redactada en prosa."
+    "note": "De la norma sale la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad el deporte practicado y su nivel, la carga de entrenamiento semanal, las lesiones deportivas previas, el examen dirigido del aparato locomotor, los antecedentes cardiovasculares con el antecedente familiar de muerte súbita, y la aptitud propuesta redactada en prosa. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Motivo y práctica",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Motivo y práctica",
       "code": "deporte_practicado",
       "name": "Deporte practicado",
       "dataType": "string",
       "required": true
     },
     {
+      "section": "Motivo y práctica",
       "code": "nivel_de_practica",
-      "name": "Nivel de práctica",
+      "name": "Nivel",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": [
+        "Recreativo",
+        "Competitivo amateur",
+        "Federado",
+        "Profesional"
+      ]
     },
     {
+      "section": "Motivo y práctica",
       "code": "carga_entrenamiento_semanal_horas",
-      "name": "Carga de entrenamiento semanal (horas)",
+      "name": "Entrenamiento semanal (horas)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Motivo y práctica",
       "code": "lesiones_previas",
-      "name": "Lesiones deportivas previas",
+      "name": "Lesiones previas",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Motivo y práctica",
       "code": "dolor_actual",
-      "name": "Dolor actual: localización y características",
+      "name": "Dolor actual",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Motivo y práctica",
       "code": "tiempo_de_evolucion",
       "name": "Tiempo de evolución",
       "dataType": "string",
       "required": false
     },
     {
+      "section": "Tamizaje cardiovascular",
+      "code": "sintomas_esfuerzo",
+      "name": "Síntomas con el esfuerzo",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor torácico",
+        "Síncope",
+        "Disnea desproporcionada",
+        "Palpitaciones",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Tamizaje cardiovascular",
+      "code": "sintomas_de_esfuerzo",
+      "name": "¿Cuándo y cómo? (requiere estudio antes de autorizar)",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "sintomas_esfuerzo",
+        "equals": [
+          "Dolor torácico",
+          "Síncope",
+          "Disnea desproporcionada",
+          "Palpitaciones"
+        ]
+      }
+    },
+    {
+      "section": "Tamizaje cardiovascular",
+      "code": "antecedente_familiar_muerte_subita",
+      "name": "Familiar con muerte súbita antes de los 50 años",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Tamizaje cardiovascular",
       "code": "antecedentes_cardiovasculares",
-      "name": "Antecedentes cardiovasculares personales",
+      "name": "Antecedentes cardiovasculares",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "antecedente_familiar_muerte_subita",
-      "name": "Antecedente familiar de muerte súbita",
+      "section": "Tamizaje cardiovascular",
+      "code": "soplo_deporte",
+      "name": "Soplo en el examen",
       "dataType": "boolean",
       "required": false
     },
     {
-      "code": "sintomas_de_esfuerzo",
-      "name": "Síntomas referidos durante el esfuerzo",
-      "dataType": "text",
+      "section": "Tamizaje cardiovascular",
+      "code": "ecg_deporte",
+      "name": "ECG de reposo — hallazgo",
+      "dataType": "string",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "suplementos_y_medicacion",
-      "name": "Suplementos y medicación en uso",
+      "name": "Suplementos y medicación",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "examen_general",
-      "name": "Examen físico general y signos vitales",
+      "name": "Examen general",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "examen_cardiorrespiratorio",
       "name": "Examen cardiorrespiratorio",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "examen_aparato_locomotor",
       "name": "Examen del aparato locomotor",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "exploraciones_complementarias",
-      "name": "Exploraciones complementarias disponibles",
+      "name": "Exploraciones complementarias",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Conclusión",
       "code": "diagnostico",
       "name": "Diagnóstico",
       "dataType": "text",
       "required": true
     },
     {
-      "code": "aptitud_propuesta",
-      "name": "Aptitud deportiva propuesta",
-      "dataType": "text",
-      "required": false
+      "section": "Conclusión",
+      "code": "aptitud",
+      "name": "Aptitud deportiva",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Apto",
+        "Apto con restricciones",
+        "No apto temporal",
+        "No apto"
+      ]
     },
     {
+      "section": "Conclusión",
+      "code": "aptitud_propuesta",
+      "name": "¿Qué restricción y hasta cuándo?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "aptitud",
+        "equals": ["Apto con restricciones", "No apto temporal", "No apto"]
+      }
+    },
+    {
+      "section": "Conclusión",
       "code": "plan_de_tratamiento",
-      "name": "Plan de tratamiento y recomendaciones",
+      "name": "Plan",
       "dataType": "text",
       "required": false
     }

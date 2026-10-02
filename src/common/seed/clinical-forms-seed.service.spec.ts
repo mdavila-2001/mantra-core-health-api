@@ -269,6 +269,69 @@ describe('ClinicalFormsSeedService', () => {
   });
 });
 
+describe('ClinicalFormsSeedService — v2 del catálogo', () => {
+  it('guarda en la clave reservada la presentación de cada campo: lista, sección y condición', async () => {
+    const { service, rowsOf } = build();
+
+    await service.run();
+
+    const medgen = rowsOf('DynamicFieldDefinitions').find(
+      (row) =>
+        row.code ===
+        `MEDGEN_CONSULTA_BASE.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`,
+    );
+    const presentacion = medgen.defaultValueJson.fieldPresentation;
+    expect(presentacion.tipo_de_alergia).toMatchObject({
+      multiple: true,
+      showWhen: { field: 'tiene_alergias', equals: true },
+    });
+    expect(presentacion.diagnostico_presuntivo.options).toContain(
+      'Dengue o síndrome febril agudo',
+    );
+    // La procedencia sigue entera al lado.
+    expect(medgen.defaultValueJson.organization).not.toBe('');
+  });
+
+  it('al subir de versión actualiza la ficha de catálogo y retira lo que ya no se pregunta', async () => {
+    const form = STANDARD_FORMS.find((f) => f.code === 'MEDGEN_CONSULTA_BASE')!;
+    const templateId = deterministicId(`clinical-forms:template:${form.code}`);
+    const { service, actualizaciones } = build();
+    // La plantilla ya sembrada, en la v1.
+    const em = (service as any).orm.em.fork();
+    em.findOne.mockImplementation((_entity: any, where: any) =>
+      Promise.resolve(
+        where?.id === templateId
+          ? { id: templateId, version: 1, sectionId: 'sec-medgen' }
+          : null,
+      ),
+    );
+
+    await service.run();
+
+    const catalogo = actualizaciones().find(
+      (u) =>
+        u.where.id ===
+        deterministicId(
+          `clinical-forms:field:${form.code}.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`,
+        ),
+    );
+    expect(catalogo?.data.defaultValueJson.fieldPresentation).toBeDefined();
+
+    const retiro = actualizaciones().find((u) => u.where.fieldId?.$nin);
+    expect(retiro?.where).toMatchObject({
+      sectionId: 'sec-medgen',
+      tenantId: null,
+    });
+    expect(retiro?.data).toMatchObject({ visible: false });
+    // Lo vigente no se retira: la condición excluye a cada campo de la v2.
+    expect(retiro?.where.fieldId.$nin).toContain(
+      deterministicId(
+        `clinical-forms:field:${form.code}.diagnostico_presuntivo`,
+      ),
+    );
+  });
+});
+
 describe('catálogo de formularios estándar', () => {
   it('no repite códigos de plantilla', () => {
     const codigos = STANDARD_FORMS.map((form) => form.code);
