@@ -2,7 +2,7 @@
   "code": "MEDFAM_CONSULTA_BASE",
   "name": "Consulta de medicina familiar",
   "specialty": { "code": "MEDICINA_FAMILIAR", "display": "Medicina Familiar" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico de la atención ambulatoria",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,25 +10,846 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, enfermedad actual, antecedentes personales y familiares, examen físico, diagnóstico y conducta. Son agregados propios de medicina familiar los campos de composición del grupo familiar, condiciones de la vivienda y convivencia, red de apoyo, ocupación y hábitos, y el seguimiento de controles preventivos e inmunizaciones."
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, enfermedad actual, antecedentes personales y familiares, examen físico, diagnóstico y conducta. Son agregados propios de medicina familiar los campos de composición del grupo familiar, condiciones de la vivienda y convivencia, red de apoyo, ocupación y hábitos, y el seguimiento de controles preventivos e inmunizaciones. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS), SRQ-20 (OMS), APGAR familiar de Smilkstein."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_personales", "name": "Antecedentes personales patológicos", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares", "name": "Antecedentes familiares", "dataType": "text", "required": false },
-    { "code": "medicacion_habitual", "name": "Medicación habitual", "dataType": "text", "required": false },
-    { "code": "composicion_grupo_familiar", "name": "Composición del grupo familiar", "dataType": "text", "required": false },
-    { "code": "numero_convivientes", "name": "Número de convivientes en el hogar", "dataType": "integer", "required": false },
-    { "code": "condiciones_de_vivienda", "name": "Condiciones de la vivienda y saneamiento", "dataType": "text", "required": false },
-    { "code": "red_de_apoyo", "name": "Red de apoyo y cuidador principal", "dataType": "text", "required": false },
-    { "code": "ocupacion", "name": "Ocupación actual", "dataType": "string", "required": false },
-    { "code": "habitos", "name": "Hábitos (alimentación, actividad física, tabaco, alcohol)", "dataType": "text", "required": false },
-    { "code": "controles_preventivos", "name": "Controles preventivos e inmunizaciones", "dataType": "text", "required": false },
-    { "code": "examen_fisico_general", "name": "Examen físico general", "dataType": "text", "required": false },
-    { "code": "examen_por_aparatos", "name": "Examen por aparatos y sistemas", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento y seguimiento familiar", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true,
+      "description": "Inicio, curso y síntomas acompañantes, en orden cronológico."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Enfermedades crónicas conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Asma",
+        "EPOC",
+        "Cardiopatía",
+        "Enfermedad renal crónica",
+        "Enfermedad tiroidea",
+        "Cáncer",
+        "Tuberculosis",
+        "Enfermedad de Chagas",
+        "Epilepsia",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_personales",
+      "name": "Antecedentes personales — detalle",
+      "dataType": "text",
+      "required": false,
+      "description": "Año de diagnóstico, tratamiento y si está controlada."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "alergias_detalle",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_familiares_marcados",
+      "name": "Antecedentes familiares (padres, hermanos, hijos)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Cardiopatía isquémica antes de los 55 (H) o 65 (M) años",
+        "Accidente cerebrovascular",
+        "Cáncer",
+        "Enfermedad mental",
+        "Ninguno conocido"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_familiares",
+      "name": "Antecedentes familiares — detalle",
+      "dataType": "text",
+      "required": false,
+      "description": "Parentesco y edad al diagnóstico."
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "etapa_ciclo_vital",
+      "name": "Etapa del ciclo vital familiar",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Formación (pareja sin hijos)",
+        "Expansión (hijos pequeños)",
+        "Consolidación (hijos escolares o adolescentes)",
+        "Contracción (los hijos se van)",
+        "Disolución (adultos mayores solos)"
+      ]
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "composicion_grupo_familiar",
+      "name": "Composición del grupo familiar (familiograma)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "numero_convivientes",
+      "name": "Número de convivientes",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "apgar_familiar",
+      "name": "APGAR familiar (Smilkstein)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Funcional (7 a 10)",
+        "Disfunción leve (4 a 6)",
+        "Disfunción grave (0 a 3)"
+      ]
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "condiciones_vivienda_marcadas",
+      "name": "Vivienda",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Agua potable",
+        "Alcantarillado",
+        "Piso de tierra",
+        "Hacinamiento",
+        "Vinchucas en la vivienda",
+        "Cocina a leña dentro de la casa"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "condiciones_de_vivienda",
+      "name": "Condiciones de vivienda — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "red_de_apoyo",
+      "name": "Red de apoyo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Familia y entorno",
+      "code": "ocupacion",
+      "name": "Ocupación",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "habitos",
+      "name": "Otros hábitos (alimentación, actividad física, sueño)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "controles_preventivos_al_dia",
+      "name": "Controles preventivos al día",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Vacunas",
+        "Papanicolaou o IVAA",
+        "Mamografía",
+        "Glucemia",
+        "Presión arterial",
+        "Salud bucal"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Hábitos y prevención",
+      "code": "controles_preventivos",
+      "name": "Controles preventivos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg, sistólica/diastólica)",
+      "dataType": "string",
+      "required": false,
+      "description": "Por ejemplo: 120/80."
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "examen_fisico_general",
+      "name": "Examen físico general",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "examen_por_aparatos",
+      "name": "Examen por aparatos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Infección respiratoria alta",
+        "Enfermedad diarreica aguda",
+        "Hipertensión arterial",
+        "Diabetes mellitus tipo 2",
+        "Infección urinaria",
+        "Trastorno mental común (ansiedad, depresión)",
+        "Enfermedad de Chagas"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_fiebre",
+      "name": "Fiebre mayor a 38 °C",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección respiratoria alta"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_sin_tos",
+      "name": "Ausencia de tos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección respiratoria alta"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_adenopatias",
+      "name": "Adenopatías cervicales anteriores dolorosas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección respiratoria alta"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "centor_exudado",
+      "name": "Exudado o tumefacción amigdalina",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección respiratoria alta"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ira_rinorrea",
+      "name": "Rinorrea",
+      "dataType": "string",
+      "required": false,
+      "options": ["Ausente", "Acuosa", "Purulenta"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección respiratoria alta"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_deposiciones_24h",
+      "name": "Deposiciones líquidas en las últimas 24 horas",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_sangre_en_heces",
+      "name": "Sangre en las heces (disentería)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_vomitos",
+      "name": "Vómitos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_hidratacion",
+      "name": "Estado de hidratación (OMS)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin deshidratación — Plan A",
+        "Algún grado de deshidratación — Plan B",
+        "Deshidratación grave — Plan C"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "eda_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad diarreica aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_organo_blanco",
+      "name": "Síntomas de daño de órgano blanco",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Cefalea intensa",
+        "Dolor torácico",
+        "Disnea",
+        "Alteración visual",
+        "Déficit neurológico",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma la medicación todos los días",
+        "Olvida dosis",
+        "Abandonó el tratamiento",
+        "Sin tratamiento todavía"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hta_registros_domiciliarios",
+      "name": "Registros de presión en domicilio (promedio)",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertensión arterial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus tipo 2"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus tipo 2"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliuria",
+        "Polidipsia",
+        "Pérdida de peso",
+        "Visión borrosa",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus tipo 2"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_pie",
+      "name": "Examen del pie",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sensibilidad conservada (monofilamento)",
+        "Sensibilidad disminuida",
+        "Úlcera o lesión presente",
+        "No evaluado"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus tipo 2"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hipoglucemias",
+      "name": "Episodios de hipoglucemia desde el último control",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus tipo 2"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_sintomas",
+      "name": "Síntomas urinarios",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Disuria",
+        "Polaquiuria",
+        "Urgencia miccional",
+        "Hematuria",
+        "Dolor suprapúbico"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_fiebre_o_lumbar",
+      "name": "Fiebre o dolor lumbar (sospecha de pielonefritis)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_punopercusion",
+      "name": "Puñopercusión lumbar",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "No evaluada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_embarazo",
+      "name": "¿Embarazo posible?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No", "No aplica"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "srq20_respuestas_si",
+      "name": "SRQ-20 (OMS): marque las preguntas que respondió «sí» en el último mes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "¿Tiene frecuentes dolores de cabeza?",
+        "¿Tiene mal apetito?",
+        "¿Duerme mal?",
+        "¿Se asusta con facilidad?",
+        "¿Sufre de temblor de manos?",
+        "¿Se siente nervioso, tenso o aburrido?",
+        "¿Sufre de mala digestión?",
+        "¿No puede pensar con claridad?",
+        "¿Se siente triste?",
+        "¿Llora usted con mucha frecuencia?",
+        "¿Tiene dificultad en disfrutar sus actividades diarias?",
+        "¿Tiene dificultad para tomar decisiones?",
+        "¿Tiene dificultad en hacer su trabajo?",
+        "¿Es incapaz de desempeñar un papel útil en su vida?",
+        "¿Ha perdido interés en las cosas?",
+        "¿Siente que usted es una persona inútil?",
+        "¿Ha tenido la idea de acabar con su vida?",
+        "¿Se siente cansado todo el tiempo?",
+        "¿Tiene sensaciones desagradables en su estómago?",
+        "¿Se cansa con facilidad?"
+      ],
+      "multiple": true,
+      "description": "8 o más respuestas positivas: probable trastorno mental común. La pregunta 17 positiva exige evaluar riesgo suicida.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno mental común (ansiedad, depresión)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "srq20_puntaje",
+      "name": "SRQ-20 — total de respuestas «sí» (0–20)",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno mental común (ansiedad, depresión)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ideacion_suicida",
+      "name": "Ideación suicida actual",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno mental común (ansiedad, depresión)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_serologia",
+      "name": "Serología para Chagas",
+      "dataType": "string",
+      "required": true,
+      "options": ["Positiva", "Negativa", "Pendiente", "No realizada"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad de Chagas"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_compromiso",
+      "name": "Compromiso orgánico",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cardíaco (arritmia, bloqueo, insuficiencia)",
+        "Digestivo (megaesófago, megacolon)",
+        "Sin compromiso aparente"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad de Chagas"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_tratamiento_previo",
+      "name": "Recibió benznidazol o nifurtimox",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad de Chagas"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "chagas_vivienda_endemica",
+      "name": "Vivió en vivienda con vinchucas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad de Chagas"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento y seguimiento familiar",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

@@ -1,11 +1,8 @@
 {
   "code": "OFTALMO_EXAMEN_BASE",
   "name": "Examen oftalmológico — versión general base",
-  "specialty": {
-    "code": "OFTALMOLOGIA",
-    "display": "Oftalmología"
-  },
-  "version": 1,
+  "specialty": { "code": "OFTALMOLOGIA", "display": "Oftalmología" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, formatos especiales por especialidad",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,104 +10,282 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura del examen oftalmológico básico (agudeza visual, presión intraocular, segmento anterior y posterior)."
+    "note": "Estructura del examen oftalmológico básico (agudeza visual, presión intraocular, segmento anterior y posterior). v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: optotipos de Snellen."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Motivo de consulta",
+      "code": "sintomas_oculares",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Baja de visión",
+        "Ojo rojo",
+        "Dolor ocular",
+        "Fotofobia",
+        "Secreción",
+        "Visión doble",
+        "Moscas volantes o destellos",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Motivo de consulta",
       "code": "usa_correccion_optica",
       "name": "Usa corrección óptica",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Motivo de consulta",
+      "code": "correccion_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Lentes", "Lentes de contacto"],
+      "showWhen": { "field": "usa_correccion_optica", "equals": true }
+    },
+    {
+      "section": "Agudeza visual (Snellen)",
       "code": "agudeza_visual_od",
-      "name": "Agudeza visual sin corrección — ojo derecho",
+      "name": "Agudeza visual sin corrección OD",
       "dataType": "string",
-      "required": true
+      "required": true,
+      "description": "Fracción de Snellen, por ejemplo 20/40."
     },
     {
+      "section": "Agudeza visual (Snellen)",
       "code": "agudeza_visual_oi",
-      "name": "Agudeza visual sin corrección — ojo izquierdo",
+      "name": "Agudeza visual sin corrección OI",
       "dataType": "string",
       "required": true
     },
     {
+      "section": "Agudeza visual (Snellen)",
       "code": "agudeza_visual_corregida_od",
-      "name": "Agudeza visual con corrección — ojo derecho",
+      "name": "Agudeza visual corregida OD",
       "dataType": "string",
       "required": false
     },
     {
+      "section": "Agudeza visual (Snellen)",
       "code": "agudeza_visual_corregida_oi",
-      "name": "Agudeza visual con corrección — ojo izquierdo",
+      "name": "Agudeza visual corregida OI",
       "dataType": "string",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "presion_intraocular_od",
-      "name": "Presión intraocular — ojo derecho (mmHg)",
+      "name": "Presión intraocular OD (mmHg)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "presion_intraocular_oi",
-      "name": "Presión intraocular — ojo izquierdo (mmHg)",
+      "name": "Presión intraocular OI (mmHg)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "reflejos_pupilares",
       "name": "Reflejos pupilares",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "motilidad_ocular",
       "name": "Motilidad ocular",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "segmento_anterior_od",
-      "name": "Segmento anterior — ojo derecho",
+      "name": "Segmento anterior OD",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "segmento_anterior_oi",
-      "name": "Segmento anterior — ojo izquierdo",
+      "name": "Segmento anterior OI",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "fondo_de_ojo_od",
-      "name": "Fondo de ojo — ojo derecho",
+      "name": "Fondo de ojo OD",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "fondo_de_ojo_oi",
-      "name": "Fondo de ojo — ojo izquierdo",
+      "name": "Fondo de ojo OI",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Vicio de refracción",
+        "Catarata",
+        "Glaucoma",
+        "Retinopatía diabética o hipertensiva",
+        "Conjuntivitis",
+        "Pterigión",
+        "Ojo rojo con signos de alarma"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "refraccion_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Miopía", "Hipermetropía", "Astigmatismo", "Presbicia"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Vicio de refracción"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "catarata_ojo",
+      "name": "Ojo",
+      "dataType": "string",
+      "required": true,
+      "options": ["OD", "OI", "Ambos"],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Catarata" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "catarata_limita",
+      "name": "Limita las actividades diarias",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Catarata" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "excavacion",
+      "name": "Relación copa/disco",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Glaucoma" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "campimetria",
+      "name": "Campimetría alterada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Glaucoma" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "retinopatia_grado",
+      "name": "Grado",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin retinopatía",
+        "No proliferativa leve",
+        "No proliferativa moderada",
+        "No proliferativa grave",
+        "Proliferativa",
+        "Edema macular"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Retinopatía diabética o hipertensiva"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "conjuntivitis_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Viral", "Bacteriana", "Alérgica"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Conjuntivitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "conjuntivitis_bav",
+      "name": "Baja de visión o dolor (descartar otra causa)",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Conjuntivitis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "pterigion_grado",
+      "name": "Grado",
+      "dataType": "string",
+      "required": true,
+      "options": ["I", "II", "III", "IV"],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Pterigión" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ojo_rojo_alarma",
+      "name": "Signos de alarma",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor intenso",
+        "Baja de visión",
+        "Pupila arreactiva",
+        "Opacidad corneal",
+        "Trauma"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Ojo rojo con signos de alarma"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
       "code": "diagnostico",
-      "name": "Diagnóstico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Diagnóstico y plan",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta y plan",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
   ]
 }

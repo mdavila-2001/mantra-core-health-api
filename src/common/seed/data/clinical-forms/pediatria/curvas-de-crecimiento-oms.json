@@ -1,11 +1,8 @@
 {
   "code": "PEDIA_CURVAS_CRECIMIENTO_OMS",
   "name": "Curvas de crecimiento (patrones OMS)",
-  "specialty": {
-    "code": "PEDIATRIA",
-    "display": "Pediatría"
-  },
-  "version": 1,
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Patrones de crecimiento infantil de la OMS (WHO Child Growth Standards)",
     "organization": "Organización Mundial de la Salud (OMS)",
@@ -13,74 +10,110 @@
     "license": "Publicación OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
     "sourceVersion": "OMS 2006 (0–5 años) y OMS 2007 (5–19 años)",
     "retrievedAt": "2026-08-14",
-    "note": "Registra las mediciones y sus puntuaciones Z. Las tablas de referencia no se transcriben: se consultan en la fuente."
+    "note": "Registra las mediciones y sus puntuaciones Z. Las tablas de referencia no se transcriben: se consultan en la fuente. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Medición",
       "code": "fecha_de_medicion",
-      "name": "Fecha de la medición",
+      "name": "Fecha de medición",
       "dataType": "date",
       "required": true
     },
     {
+      "section": "Medición",
       "code": "edad_en_meses",
       "name": "Edad (meses)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Medición",
+      "code": "sexo",
+      "name": "Sexo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Niña", "Niño"]
+    },
+    {
+      "section": "Medición",
       "code": "peso_kg",
       "name": "Peso (kg)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Medición",
       "code": "talla_cm",
-      "name": "Talla / longitud (cm)",
+      "name": "Longitud o talla (cm)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Medición",
+      "code": "posicion_medicion",
+      "name": "Medido",
+      "dataType": "string",
+      "required": false,
+      "options": ["Acostado (longitud)", "De pie (talla)"]
+    },
+    {
+      "section": "Medición",
       "code": "perimetro_cefalico_cm",
       "name": "Perímetro cefálico (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Medición",
       "code": "imc",
-      "name": "Índice de masa corporal (kg/m²)",
+      "name": "IMC (kg/m²)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Puntajes Z (patrones OMS)",
       "code": "z_peso_para_la_edad",
-      "name": "Puntuación Z — peso para la edad",
+      "name": "Z peso para la edad",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Puntajes Z (patrones OMS)",
       "code": "z_talla_para_la_edad",
-      "name": "Puntuación Z — talla para la edad",
+      "name": "Z talla para la edad",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Puntajes Z (patrones OMS)",
       "code": "z_peso_para_la_talla",
-      "name": "Puntuación Z — peso para la talla",
+      "name": "Z peso para la talla",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Puntajes Z (patrones OMS)",
       "code": "z_imc_para_la_edad",
-      "name": "Puntuación Z — IMC para la edad",
+      "name": "Z IMC para la edad",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Puntajes Z (patrones OMS)",
       "code": "clasificacion_nutricional",
-      "name": "Clasificación del estado nutricional",
+      "name": "Clasificación nutricional",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "options": [
+        "Normal",
+        "Desnutrición aguda moderada (Z −2 a −3)",
+        "Desnutrición aguda grave (Z < −3)",
+        "Talla baja (Z talla < −2)",
+        "Riesgo de sobrepeso",
+        "Sobrepeso (Z > 2)",
+        "Obesidad (Z > 3)"
+      ]
     }
   ]
 }

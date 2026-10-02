@@ -113,6 +113,18 @@ export const MAX_CAMPOS_PROPIOS_POR_PLANTILLA = 12;
  * `default_value_json` la guarda entera. `ChartTemplatesService` lo saca de
  * `fields` al responder y lo publica como `provenance`, así que ningún
  * consumidor lo ve como un campo a completar.
+ *
+ * ## Y la presentación de cada campo, por la misma razón
+ *
+ * `forms.dynamic_field_definitions` guarda nombre y tipo, pero no las
+ * opciones de una lista cerrada, la sección, la ayuda ni la condición que lo
+ * muestra («¿cuál?» debajo de un «sí»). Sin ellas la ficha v2 llegaría al
+ * encuentro como la v1: todo texto libre. Viajan en el mismo
+ * `default_value_json` de `__catalog__`, bajo `fieldPresentation`, indexadas
+ * por el código del campo, y `ChartTemplatesService` las vuelve a pegar a cada
+ * campo al responder. Es el mismo atajo que la procedencia y se va con ella el
+ * día que el modelo tenga dónde guardarlas (`POST /forms/fields/:id/dependencies`
+ * ya existe para las condiciones de los campos propios).
  */
 @Injectable()
 export class ClinicalFormsSeedService {
@@ -625,7 +637,7 @@ export class ClinicalFormsSeedService {
       },
       -1,
       sectionId,
-      form.provenance,
+      fichaDeCatalogo(form),
       now,
     );
 
@@ -664,6 +676,14 @@ export class ClinicalFormsSeedService {
     const sectionId = existente.sectionId;
     if (sectionId === undefined) return;
 
+    // La ficha de catálogo viaja con la versión: la procedencia gana su nota
+    // y la presentación de cada campo, sus opciones y condiciones.
+    await em.nativeUpdate(
+      DynamicFieldDefinitions,
+      { id: fieldIdDe(form, CHART_TEMPLATE_PROVENANCE_FIELD_CODE) },
+      { defaultValueJson: fichaDeCatalogo(form), updatedAt: now },
+    );
+
     for (const [ordinal, field] of form.fields.entries()) {
       await this.seedField(em, form, field, ordinal, sectionId, undefined, now);
 
@@ -679,7 +699,38 @@ export class ClinicalFormsSeedService {
         { id: assignmentId },
         { required: field.required ?? false, ordinal, updatedAt: now },
       );
+      // El rótulo sí se corrige en el lugar: es lo que se lee, no lo que se
+      // guarda. El tipo no se toca nunca —las capturas ya hechas leen su
+      // columna `value_*`—; lo que cambia de naturaleza entra con código nuevo
+      // (lo garantiza `tools/clinical-forms/build-forms.mjs`).
+      await em.nativeUpdate(
+        DynamicFieldDefinitions,
+        { id: fieldIdDe(form, field.code) },
+        { name: field.name, updatedAt: now },
+      );
     }
+
+    // Lo que la versión nueva ya no pregunta se retira, no se borra: las
+    // instancias capturadas siguen apuntando a su `field_id`.
+    const vigentes = new Set(
+      [
+        CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
+        ...form.fields.map((f) => f.code),
+      ].map((code) => fieldIdDe(form, code)),
+    );
+    await em.nativeUpdate(
+      FieldAssignments,
+      {
+        sectionId,
+        tenantId: null,
+        fieldId: { $nin: [...vigentes] },
+      },
+      {
+        visible: false,
+        stateConceptId: FORMS.ASSIGNMENT_RETIRED,
+        updatedAt: now,
+      },
+    );
 
     const desde = existente.version;
     existente.version = form.version;
@@ -716,7 +767,7 @@ export class ClinicalFormsSeedService {
     // con un `motivo_consulta` cada uno chocarían entre sí. El prefijo no se ve
     // en ningún lado —lo que se dibuja es `name`— pero garantiza unicidad.
     const fieldCode = `${form.code}.${field.code}`;
-    const fieldId = deterministicId(`${ORIGIN}:field:${fieldCode}`);
+    const fieldId = fieldIdDe(form, field.code);
 
     if (!(await em.findOne(DynamicFieldDefinitions, { id: fieldId }))) {
       em.create(
@@ -759,4 +810,37 @@ export class ClinicalFormsSeedService {
     );
     await em.flush();
   }
+}
+
+/** El id determinista de un campo del catálogo. */
+function fieldIdDe(form: StandardFormDefinition, code: string): string {
+  return deterministicId(`${ORIGIN}:field:${form.code}.${code}`);
+}
+
+/**
+ * Lo que se guarda en el `default_value_json` de `__catalog__`: la procedencia
+ * y, por código de campo, lo que la definición del campo no tiene dónde
+ * guardar.
+ */
+export function fichaDeCatalogo(
+  form: StandardFormDefinition,
+): Record<string, unknown> {
+  const fieldPresentation: Record<string, Record<string, unknown>> = {};
+  for (const field of form.fields) {
+    const { section, options, multiple, allowOther, description, showWhen } =
+      field;
+    const presentacion = Object.fromEntries(
+      Object.entries({
+        section,
+        options,
+        multiple,
+        allowOther,
+        description,
+        showWhen,
+      }).filter(([, valor]) => valor !== undefined),
+    );
+    if (Object.keys(presentacion).length > 0)
+      fieldPresentation[field.code] = presentacion;
+  }
+  return { ...form.provenance, fieldPresentation };
 }

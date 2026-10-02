@@ -5,7 +5,7 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen físico y funciones vitales",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,104 +13,190 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de la sección de funciones vitales y examen por aparatos del formato oficial."
+    "note": "Transcripción de la sección de funciones vitales y examen por aparatos del formato oficial. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Signos vitales",
       "code": "presion_arterial_sistolica",
       "name": "Presión arterial sistólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Signos vitales",
       "code": "presion_arterial_diastolica",
       "name": "Presión arterial diastólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Signos vitales",
       "code": "frecuencia_cardiaca",
       "name": "Frecuencia cardíaca (lpm)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Signos vitales",
       "code": "frecuencia_respiratoria",
       "name": "Frecuencia respiratoria (rpm)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Signos vitales",
       "code": "temperatura",
-      "name": "Temperatura (°C)",
+      "name": "Temperatura axilar (°C)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Signos vitales",
       "code": "saturacion_oxigeno",
       "name": "Saturación de oxígeno (%)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Signos vitales",
       "code": "peso_kg",
       "name": "Peso (kg)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Signos vitales",
       "code": "talla_cm",
       "name": "Talla (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Examen general",
       "code": "estado_general",
       "name": "Estado general",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Bueno", "Regular", "Malo"]
     },
     {
+      "section": "Examen general",
+      "code": "hidratacion",
+      "name": "Hidratación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Hidratado",
+        "Deshidratación leve",
+        "Deshidratación moderada a grave"
+      ]
+    },
+    {
+      "section": "Examen general",
+      "code": "coloracion",
+      "name": "Coloración",
+      "dataType": "json",
+      "required": false,
+      "options": ["Normal", "Palidez", "Ictericia", "Cianosis"],
+      "multiple": true
+    },
+    {
+      "section": "Examen general",
       "code": "piel_y_faneras",
       "name": "Piel y faneras",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen general",
       "code": "cabeza_y_cuello",
       "name": "Cabeza y cuello",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "aparato_respiratorio",
+      "section": "Examen por aparatos",
+      "code": "respiratorio_normal",
       "name": "Aparato respiratorio",
-      "dataType": "text",
-      "required": false
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Con hallazgos"]
     },
     {
-      "code": "aparato_cardiovascular",
+      "section": "Examen por aparatos",
+      "code": "aparato_respiratorio",
+      "name": "¿Qué hallazgos?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "respiratorio_normal", "equals": "Con hallazgos" }
+    },
+    {
+      "section": "Examen por aparatos",
+      "code": "cardiovascular_normal",
       "name": "Aparato cardiovascular",
-      "dataType": "text",
-      "required": false
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Con hallazgos"]
     },
     {
-      "code": "abdomen",
+      "section": "Examen por aparatos",
+      "code": "aparato_cardiovascular",
+      "name": "¿Qué hallazgos?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": {
+        "field": "cardiovascular_normal",
+        "equals": "Con hallazgos"
+      }
+    },
+    {
+      "section": "Examen por aparatos",
+      "code": "abdomen_normal",
       "name": "Abdomen",
-      "dataType": "text",
-      "required": false
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Con hallazgos"]
     },
     {
-      "code": "sistema_nervioso",
+      "section": "Examen por aparatos",
+      "code": "abdomen",
+      "name": "¿Qué hallazgos?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "abdomen_normal", "equals": "Con hallazgos" }
+    },
+    {
+      "section": "Examen por aparatos",
+      "code": "neurologico_normal",
       "name": "Sistema nervioso",
-      "dataType": "text",
-      "required": false
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Con hallazgos"]
     },
     {
-      "code": "aparato_locomotor",
-      "name": "Aparato locomotor",
+      "section": "Examen por aparatos",
+      "code": "sistema_nervioso",
+      "name": "¿Qué hallazgos?",
       "dataType": "text",
-      "required": false
+      "required": true,
+      "showWhen": { "field": "neurologico_normal", "equals": "Con hallazgos" }
+    },
+    {
+      "section": "Examen por aparatos",
+      "code": "locomotor_normal",
+      "name": "Aparato locomotor",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Con hallazgos"]
+    },
+    {
+      "section": "Examen por aparatos",
+      "code": "aparato_locomotor",
+      "name": "¿Qué hallazgos?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "locomotor_normal", "equals": "Con hallazgos" }
     }
   ]
 }

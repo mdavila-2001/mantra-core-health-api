@@ -2,7 +2,7 @@
   "code": "REUMA_EVALUACION_BASE",
   "name": "Evaluación reumatológica",
   "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato locomotor",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,25 +10,340 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la caracterización del dolor articular y su ritmo, la rigidez matinal en minutos, el detalle de las articulaciones comprometidas y la tumefacción, y el compromiso cutáneo asociado."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la caracterización del dolor articular y su ritmo, la rigidez matinal en minutos, el detalle de las articulaciones comprometidas y la tumefacción, y el compromiso cutáneo asociado. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "dolor_articular", "name": "Dolor articular (descripción)", "dataType": "text", "required": false },
-    { "code": "ritmo_del_dolor", "name": "Ritmo del dolor (inflamatorio o mecánico)", "dataType": "string", "required": false },
-    { "code": "rigidez_matinal_minutos", "name": "Rigidez matinal (minutos)", "dataType": "integer", "required": false },
-    { "code": "articulaciones_comprometidas", "name": "Articulaciones comprometidas", "dataType": "text", "required": true },
-    { "code": "patron_de_compromiso", "name": "Patrón de compromiso (simétrico, asimétrico, axial)", "dataType": "string", "required": false },
-    { "code": "tumefaccion_articular", "name": "Tumefacción articular", "dataType": "text", "required": false },
-    { "code": "limitacion_funcional", "name": "Limitación funcional referida", "dataType": "text", "required": false },
-    { "code": "compromiso_cutaneo", "name": "Compromiso cutáneo", "dataType": "text", "required": false },
-    { "code": "sintomas_sistemicos", "name": "Síntomas sistémicos asociados", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares_reumatologicos", "name": "Antecedentes familiares reumatológicos", "dataType": "text", "required": false },
-    { "code": "tratamientos_previos", "name": "Tratamientos previos recibidos", "dataType": "text", "required": false },
-    { "code": "examen_osteoarticular", "name": "Examen osteoarticular", "dataType": "text", "required": true },
-    { "code": "examenes_previos", "name": "Exámenes previos revisados", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "dolor_articular",
+      "name": "Dolor articular",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "ritmo_del_dolor",
+      "name": "Ritmo del dolor",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Inflamatorio (empeora en reposo, rigidez matinal)",
+        "Mecánico (empeora con el uso)",
+        "Mixto"
+      ]
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "rigidez_matinal_minutos",
+      "name": "Rigidez matinal (minutos)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "articulaciones_comprometidas",
+      "name": "Articulaciones comprometidas",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "patron_de_compromiso",
+      "name": "Patrón de compromiso",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Monoarticular",
+        "Oligoarticular (2–4)",
+        "Poliarticular (5 o más)",
+        "Axial"
+      ]
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "articulaciones_tumefactas",
+      "name": "Número de articulaciones tumefactas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "articulaciones_dolorosas",
+      "name": "Número de articulaciones dolorosas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "tumefaccion_articular",
+      "name": "Tumefacción articular — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas articulares",
+      "code": "limitacion_funcional",
+      "name": "Limitación funcional",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Compromiso extraarticular",
+      "code": "extraarticular",
+      "name": "Manifestaciones",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fotosensibilidad",
+        "Eritema malar",
+        "Úlceras orales",
+        "Raynaud",
+        "Ojo seco o boca seca",
+        "Psoriasis",
+        "Uveítis",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Compromiso extraarticular",
+      "code": "compromiso_cutaneo",
+      "name": "Compromiso cutáneo — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Compromiso extraarticular",
+      "code": "sintomas_sistemicos",
+      "name": "Síntomas sistémicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Compromiso extraarticular",
+      "code": "antecedentes_familiares_reumatologicos",
+      "name": "Antecedentes familiares reumatológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Compromiso extraarticular",
+      "code": "tratamientos_previos",
+      "name": "Tratamientos previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "examen_osteoarticular",
+      "name": "Examen osteoarticular",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Examen",
+      "code": "examenes_previos",
+      "name": "Exámenes previos (FR, anti-CCP, ANA, VSG, PCR)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Artritis reumatoide",
+        "Artrosis",
+        "Gota",
+        "Lupus eritematoso sistémico",
+        "Espondiloartritis",
+        "Fibromialgia"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ar_fr_ccp",
+      "name": "Factor reumatoide o anti-CCP positivo",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Artritis reumatoide"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ar_erosiones",
+      "name": "Erosiones en radiografía",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Artritis reumatoide"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ar_das28",
+      "name": "DAS28",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Artritis reumatoide"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "artrosis_sitio",
+      "name": "Articulaciones",
+      "dataType": "json",
+      "required": true,
+      "options": ["Rodilla", "Cadera", "Manos", "Columna"],
+      "multiple": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Artrosis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "artrosis_crepitacion",
+      "name": "Crepitación",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Artrosis" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "acido_urico",
+      "name": "Ácido úrico (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "gota_tofos",
+      "name": "Tofos",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "gota_podagra",
+      "name": "Compromiso de la primera metatarsofalángica",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Gota" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "les_ana",
+      "name": "ANA positivo",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lupus eritematoso sistémico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "les_organos",
+      "name": "Órganos comprometidos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Piel",
+        "Articulaciones",
+        "Riñón",
+        "Hematológico",
+        "Serosas",
+        "Neurológico"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Lupus eritematoso sistémico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "espondilo_dolor_inflamatorio",
+      "name": "Lumbalgia inflamatoria de más de 3 meses",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Espondiloartritis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "espondilo_hla_b27",
+      "name": "HLA-B27 positivo",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Espondiloartritis"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "fibro_iid",
+      "name": "Índice de dolor generalizado (0–19)",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Fibromialgia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "fibro_sss",
+      "name": "Escala de gravedad de síntomas (0–12)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Fibromialgia"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

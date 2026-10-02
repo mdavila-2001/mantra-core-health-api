@@ -5,7 +5,7 @@
     "code": "GINECOLOGIA_OBSTETRICIA",
     "display": "Ginecología y obstetricia"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Historia Clínica Perinatal — Sistema Informático Perinatal (SIP)",
     "organization": "Centro Latinoamericano de Perinatología, Salud de la Mujer y Reproductiva (CLAP/SMR) — OPS/OMS",
@@ -13,138 +13,256 @@
     "license": "Publicación OPS/OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
     "sourceVersion": "Historia clínica perinatal simplificada",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de la sección de control prenatal. El formulario completo cubre además parto, puerperio y recién nacido."
+    "note": "Transcripción de la sección de control prenatal. El formulario completo cubre además parto, puerperio y recién nacido. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
     {
+      "section": "Embarazo actual",
       "code": "fecha_ultima_menstruacion",
-      "name": "Fecha de la última menstruación",
+      "name": "Fecha de última menstruación",
       "dataType": "date",
       "required": true
     },
     {
+      "section": "Embarazo actual",
       "code": "fecha_probable_de_parto",
       "name": "Fecha probable de parto",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Embarazo actual",
       "code": "edad_gestacional_semanas",
       "name": "Edad gestacional (semanas)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Embarazo actual",
+      "code": "embarazo_planificado",
+      "name": "Embarazo planificado",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes obstétricos",
       "code": "gestas_previas",
       "name": "Gestas previas",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Antecedentes obstétricos",
       "code": "partos_previos",
-      "name": "Partos previos",
+      "name": "Partos vaginales",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Antecedentes obstétricos",
       "code": "cesareas_previas",
-      "name": "Cesáreas previas",
+      "name": "Cesáreas",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Antecedentes obstétricos",
       "code": "abortos_previos",
-      "name": "Abortos previos",
+      "name": "Abortos",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Antecedentes obstétricos",
+      "code": "antecedentes_obstetricos_riesgo",
+      "name": "Antecedentes de riesgo",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Preeclampsia",
+        "Diabetes gestacional",
+        "Hemorragia posparto",
+        "Parto prematuro",
+        "Muerte fetal",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Examen",
       "code": "peso_kg",
       "name": "Peso (kg)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "talla_cm",
       "name": "Talla (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "presion_arterial_sistolica",
       "name": "Presión arterial sistólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "presion_arterial_diastolica",
       "name": "Presión arterial diastólica (mmHg)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "altura_uterina_cm",
       "name": "Altura uterina (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "presentacion_fetal",
       "name": "Presentación fetal",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Cefálica", "Podálica", "Transversa", "No evaluable"]
     },
     {
+      "section": "Examen",
       "code": "frecuencia_cardiaca_fetal",
       "name": "Frecuencia cardíaca fetal (lpm)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "movimientos_fetales",
-      "name": "Movimientos fetales presentes",
+      "name": "Movimientos fetales",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "edema",
       "name": "Edema",
       "dataType": "boolean",
       "required": false
     },
     {
-      "code": "proteinuria",
-      "name": "Proteinuria",
+      "section": "Examen",
+      "code": "edema_localizacion_hcp",
+      "name": "Localización",
       "dataType": "string",
-      "required": false
+      "required": true,
+      "options": ["Miembros inferiores", "Manos y cara", "Generalizado"],
+      "showWhen": { "field": "edema", "equals": true }
     },
     {
+      "section": "Examen",
+      "code": "proteinuria",
+      "name": "Proteinuria (tira)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Negativa", "Trazas", "+", "++", "+++"]
+    },
+    {
+      "section": "Laboratorio y prevención",
       "code": "hemoglobina",
       "name": "Hemoglobina (g/dL)",
       "dataType": "decimal",
       "required": false
     },
     {
+      "section": "Laboratorio y prevención",
+      "code": "tamizajes",
+      "name": "Tamizajes realizados",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "VIH",
+        "Sífilis",
+        "Hepatitis B",
+        "Chagas",
+        "Glucemia",
+        "Grupo y factor Rh",
+        "Urocultivo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Laboratorio y prevención",
+      "code": "tamizaje_positivo",
+      "name": "Algún tamizaje positivo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Laboratorio y prevención",
+      "code": "tamizaje_positivo_detalle",
+      "name": "¿Cuál y qué conducta?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "tamizaje_positivo", "equals": true }
+    },
+    {
+      "section": "Laboratorio y prevención",
       "code": "vacuna_antitetanica",
-      "name": "Vacuna antitetánica al día",
+      "name": "Vacuna dT",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Laboratorio y prevención",
       "code": "suplemento_hierro_folatos",
-      "name": "Recibe hierro y ácido fólico",
+      "name": "Hierro y ácido fólico",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Signos de alarma",
+      "code": "signos_de_alarma_obstetricos",
+      "name": "Signos de alarma referidos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Sangrado vaginal",
+        "Pérdida de líquido",
+        "Cefalea intensa o visión borrosa",
+        "Dolor en epigastrio",
+        "Disminución de movimientos fetales",
+        "Contracciones antes de las 37 semanas",
+        "Fiebre",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Signos de alarma",
+      "code": "preeclampsia_sospecha",
+      "name": "PA ≥ 140/90 con estos síntomas (sospecha de preeclampsia)",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "signos_de_alarma_obstetricos",
+        "equals": ["Cefalea intensa o visión borrosa", "Dolor en epigastrio"]
+      }
+    },
+    {
+      "section": "Signos de alarma",
       "code": "riesgo_detectado",
       "name": "Riesgo detectado",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Signos de alarma",
       "code": "proximo_control",
-      "name": "Fecha del próximo control",
+      "name": "Próximo control",
       "dataType": "date",
       "required": false
     }

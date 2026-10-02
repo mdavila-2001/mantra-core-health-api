@@ -2,7 +2,7 @@
   "code": "NEUMO_EVALUACION_BASE",
   "name": "Evaluación neumológica",
   "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato respiratorio",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,25 +10,507 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad la descripción dirigida de disnea, tos, expectoración y hemoptisis, el antecedente de tabaquismo, la auscultación pulmonar y la saturación de oxígeno."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen por aparatos, diagnóstico y conducta. Son agregados propios de la especialidad la descripción dirigida de disnea, tos, expectoración y hemoptisis, el antecedente de tabaquismo, la auscultación pulmonar y la saturación de oxígeno. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: CURB-65 (British Thoracic Society), escala de disnea mMRC, control del asma GINA, escala de fuerza MRC."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
-    { "code": "disnea", "name": "Disnea", "dataType": "text", "required": false },
-    { "code": "tos", "name": "Tos", "dataType": "text", "required": false },
-    { "code": "expectoracion", "name": "Expectoración (aspecto y cantidad)", "dataType": "text", "required": false },
-    { "code": "hemoptisis", "name": "Hemoptisis", "dataType": "boolean", "required": false },
-    { "code": "dolor_toracico", "name": "Dolor torácico", "dataType": "text", "required": false },
-    { "code": "sibilancias", "name": "Sibilancias referidas", "dataType": "boolean", "required": false },
-    { "code": "tabaquismo", "name": "Antecedente de tabaquismo", "dataType": "text", "required": false },
-    { "code": "exposicion_ocupacional_o_ambiental", "name": "Exposición ocupacional o ambiental", "dataType": "text", "required": false },
-    { "code": "antecedentes_respiratorios", "name": "Antecedentes respiratorios previos", "dataType": "text", "required": false },
-    { "code": "frecuencia_respiratoria", "name": "Frecuencia respiratoria (por minuto)", "dataType": "integer", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": true },
-    { "code": "auscultacion_pulmonar", "name": "Auscultación pulmonar", "dataType": "text", "required": true },
-    { "code": "examenes_previos", "name": "Exámenes previos revisados", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_enfermedad",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "tiene_disnea",
+      "name": "Disnea",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "disnea_mmrc",
+      "name": "Disnea (escala mMRC)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Grado 0 — disnea sólo con ejercicio intenso",
+        "Grado 1 — al caminar rápido o subir una pendiente",
+        "Grado 2 — camina más despacio que sus pares o se detiene en llano",
+        "Grado 3 — se detiene a los 100 metros o a los pocos minutos",
+        "Grado 4 — no sale de casa o se ahoga al vestirse"
+      ],
+      "showWhen": { "field": "tiene_disnea", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "disnea",
+      "name": "Disnea — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "tiene_disnea", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "tiene_tos",
+      "name": "Tos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "tos_dias",
+      "name": "Días de tos",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": { "field": "tiene_tos", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "tos_tipo",
+      "name": "Tipo de tos",
+      "dataType": "string",
+      "required": false,
+      "options": ["Seca", "Productiva"],
+      "showWhen": { "field": "tiene_tos", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "tos",
+      "name": "Tos — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "tiene_tos", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "expectoracion_aspecto",
+      "name": "Aspecto de la expectoración",
+      "dataType": "string",
+      "required": false,
+      "options": ["Mucosa", "Purulenta", "Hemoptoica"],
+      "showWhen": { "field": "tos_tipo", "equals": "Productiva" }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "expectoracion",
+      "name": "Expectoración — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "tos_tipo", "equals": "Productiva" }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "hemoptisis",
+      "name": "Hemoptisis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "hemoptisis_volumen",
+      "name": "Volumen",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Esputo hemoptoico",
+        "Menos de 100 mL/24 h",
+        "Más de 100 mL/24 h (masiva)"
+      ],
+      "showWhen": { "field": "hemoptisis", "equals": true }
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "dolor_toracico",
+      "name": "Dolor torácico",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Síntomas respiratorios",
+      "code": "sibilancias",
+      "name": "Sibilancias",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "paquetes_anio",
+      "name": "Paquetes-año",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "tabaco",
+        "equals": ["Exfumador", "Fumador actual"]
+      }
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "tabaquismo",
+      "name": "Tabaquismo — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "exposiciones",
+      "name": "Exposiciones",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Humo de leña o biomasa",
+        "Polvo de minería",
+        "Sílice o asbesto",
+        "Aves o palomas",
+        "Contacto con tuberculosis",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "exposicion_ocupacional_o_ambiental",
+      "name": "Exposición ocupacional o ambiental — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "antecedentes_respiratorios",
+      "name": "Antecedentes respiratorios",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Exposiciones y antecedentes",
+      "code": "alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "auscultacion_pulmonar",
+      "name": "Auscultación pulmonar",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "examenes_previos",
+      "name": "Exámenes previos (espirometría, imágenes)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Asma",
+        "EPOC",
+        "Neumonía",
+        "Tuberculosis pulmonar",
+        "Enfermedad pulmonar intersticial",
+        "Apnea obstructiva del sueño"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "asma_control_4_semanas",
+      "name": "En las últimas 4 semanas (GINA)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Síntomas diurnos más de 2 veces por semana",
+        "Despertares nocturnos por asma",
+        "Uso de rescate más de 2 veces por semana",
+        "Limitación de la actividad",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Ninguno: controlada · 1–2: parcialmente controlada · 3–4: no controlada.",
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Asma" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "asma_crisis_anio",
+      "name": "Crisis que requirieron urgencias en el último año",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Asma" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "asma_tratamiento_actual",
+      "name": "Inhaladores que usa",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Asma" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epoc_mmrc",
+      "name": "Disnea (escala mMRC)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Grado 0 — disnea sólo con ejercicio intenso",
+        "Grado 1 — al caminar rápido o subir una pendiente",
+        "Grado 2 — camina más despacio que sus pares o se detiene en llano",
+        "Grado 3 — se detiene a los 100 metros o a los pocos minutos",
+        "Grado 4 — no sale de casa o se ahoga al vestirse"
+      ],
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "EPOC" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epoc_exacerbaciones_anio",
+      "name": "Exacerbaciones en el último año",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "EPOC" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epoc_paquetes_anio",
+      "name": "Tabaquismo acumulado (paquetes-año)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "EPOC" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epoc_exposicion_biomasa",
+      "name": "Exposición a humo de leña o biomasa",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "EPOC" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_crepitantes",
+      "name": "Crepitantes o soplo tubario localizados",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "curb65",
+      "name": "Criterios CURB-65 presentes",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Confusión de reciente aparición",
+        "Urea > 42 mg/dL (BUN > 19 mg/dL)",
+        "Frecuencia respiratoria ≥ 30 rpm",
+        "PAS < 90 o PAD ≤ 60 mmHg",
+        "Edad ≥ 65 años",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "0–1: ambulatorio · 2: valorar internación · 3 o más: neumonía grave.",
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_expectoracion",
+      "name": "Expectoración purulenta",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Neumonía" }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tbc_dias_de_tos",
+      "name": "Días de tos con expectoración",
+      "dataType": "integer",
+      "required": true,
+      "description": "15 días o más: sintomático respiratorio, pedir baciloscopía.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Tuberculosis pulmonar"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tbc_sintomas",
+      "name": "Síntomas acompañantes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre vespertina",
+        "Sudoración nocturna",
+        "Pérdida de peso",
+        "Hemoptisis",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Tuberculosis pulmonar"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tbc_contacto",
+      "name": "Contacto con un caso de tuberculosis",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Tuberculosis pulmonar"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tbc_baciloscopia",
+      "name": "Baciloscopía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "Pedida", "No pedida"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Tuberculosis pulmonar"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epi_velcro",
+      "name": "Crepitantes tipo «velcro»",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad pulmonar intersticial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "epi_hipocratismo",
+      "name": "Hipocratismo digital",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Enfermedad pulmonar intersticial"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "apnea_sintomas",
+      "name": "Síntomas y factores de apnea del sueño",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ronquido fuerte",
+        "Somnolencia diurna",
+        "Apneas observadas por otra persona",
+        "Hipertensión",
+        "Obesidad",
+        "Cuello ancho"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Apnea obstructiva del sueño"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "somnolencia_diurna_veces_semana",
+      "name": "Veces por semana que se duerme sin querer de día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Apnea obstructiva del sueño"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

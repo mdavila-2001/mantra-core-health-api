@@ -2,7 +2,7 @@
   "code": "ENDO_EVALUACION_BASE",
   "name": "Evaluación endocrinológica",
   "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico con registro antropométrico",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,428 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos."
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: categorías TI-RADS."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
-    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
-    { "code": "antecedentes_metabolicos_familiares", "name": "Antecedentes familiares metabólicos (diabetes, tiroides, obesidad)", "dataType": "text", "required": false },
-    { "code": "antecedentes_personales", "name": "Antecedentes personales y medicación habitual", "dataType": "text", "required": false },
-    { "code": "sintomas_tiroideos", "name": "Síntomas tiroideos (intolerancia al frío o calor, temblor, palpitaciones)", "dataType": "text", "required": false },
-    { "code": "poliuria", "name": "Poliuria", "dataType": "boolean", "required": false },
-    { "code": "polidipsia", "name": "Polidipsia", "dataType": "boolean", "required": false },
-    { "code": "polifagia", "name": "Polifagia", "dataType": "boolean", "required": false },
-    { "code": "cambio_de_peso", "name": "Cambio de peso referido (kg y tiempo)", "dataType": "string", "required": false },
-    { "code": "peso", "name": "Peso (kg)", "dataType": "decimal", "required": true },
-    { "code": "talla", "name": "Talla (cm)", "dataType": "decimal", "required": false },
-    { "code": "perimetro_abdominal", "name": "Perímetro abdominal (cm)", "dataType": "decimal", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": false },
-    { "code": "examen_de_tiroides", "name": "Examen de tiroides (tamaño, consistencia, nódulos)", "dataType": "text", "required": false },
-    { "code": "piel_y_anexos", "name": "Piel y anexos (sequedad, acantosis, distribución del vello)", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true,
+      "description": "Con las palabras del paciente."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true,
+      "description": "Por ejemplo: 3 días, 2 semanas, 6 meses."
+    },
+    {
+      "section": "Motivo de consulta",
+      "code": "enfermedad_actual",
+      "name": "Relato de la enfermedad actual",
+      "dataType": "text",
+      "required": true,
+      "description": "Inicio, curso y síntomas acompañantes, en orden cronológico."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_metabolicos_familiares",
+      "name": "Antecedentes metabólicos familiares (diabetes, tiroides, obesidad)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Enfermedades crónicas conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Asma",
+        "EPOC",
+        "Cardiopatía",
+        "Enfermedad renal crónica",
+        "Enfermedad tiroidea",
+        "Cáncer",
+        "Tuberculosis",
+        "Enfermedad de Chagas",
+        "Epilepsia",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
+      "code": "antecedentes_personales",
+      "name": "Antecedentes personales — detalle",
+      "dataType": "text",
+      "required": false,
+      "description": "Año de diagnóstico, tratamiento y si está controlada."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "toma_medicacion",
+      "name": "¿Toma algún medicamento de forma habitual?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "medicacion_habitual",
+      "name": "¿Cuál? Nombre, dosis y frecuencia",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "toma_medicacion", "equals": true }
+    },
+    {
+      "section": "Síntomas",
+      "code": "poliuria",
+      "name": "Poliuria",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "polidipsia",
+      "name": "Polidipsia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "polifagia",
+      "name": "Polifagia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Síntomas",
+      "code": "tendencia_de_peso",
+      "name": "Cambio de peso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Estable", "Aumentó", "Bajó"]
+    },
+    {
+      "section": "Síntomas",
+      "code": "cambio_de_peso",
+      "name": "¿Cuántos kg y en cuánto tiempo?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "tendencia_de_peso",
+        "equals": ["Aumentó", "Bajó"]
+      }
+    },
+    {
+      "section": "Síntomas",
+      "code": "sintomas_tiroideos_marcados",
+      "name": "Síntomas tiroideos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Intolerancia al frío",
+        "Intolerancia al calor",
+        "Palpitaciones",
+        "Temblor",
+        "Constipación",
+        "Caída de cabello",
+        "Bocio referido",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Síntomas",
+      "code": "sintomas_tiroideos",
+      "name": "Síntomas tiroideos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "peso",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "talla",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "perimetro_abdominal",
+      "name": "Perímetro abdominal (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "bocio_oms",
+      "name": "Bocio (clasificación OMS)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Grado 0 — no palpable",
+        "Grado 1 — palpable, no visible",
+        "Grado 2 — visible con el cuello en posición normal"
+      ]
+    },
+    {
+      "section": "Examen físico",
+      "code": "examen_de_tiroides",
+      "name": "Examen de tiroides — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "signos_cutaneos",
+      "name": "Piel",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Acantosis nigricans",
+        "Estrías violáceas",
+        "Hirsutismo",
+        "Mixedema",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Examen físico",
+      "code": "piel_y_anexos",
+      "name": "Piel y anexos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Diabetes mellitus",
+        "Hipotiroidismo",
+        "Hipertiroidismo",
+        "Nódulo tiroideo",
+        "Obesidad y síndrome metabólico",
+        "Dislipidemia"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliuria",
+        "Polidipsia",
+        "Pérdida de peso",
+        "Visión borrosa",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_pie",
+      "name": "Examen del pie",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sensibilidad conservada (monofilamento)",
+        "Sensibilidad disminuida",
+        "Úlcera o lesión presente",
+        "No evaluado"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hipoglucemias",
+      "name": "Episodios de hipoglucemia desde el último control",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes mellitus"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tsh",
+      "name": "TSH (mUI/L)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipotiroidismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "t4l",
+      "name": "T4 libre (ng/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipotiroidismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tsh_hiper",
+      "name": "TSH (mUI/L)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertiroidismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "oftalmopatia",
+      "name": "Oftalmopatía",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hipertiroidismo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "nodulo_tirads",
+      "name": "Ecografía — categoría TI-RADS",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Nódulo tiroideo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "nodulo_puncion",
+      "name": "Punción con aguja fina indicada",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Nódulo tiroideo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sm_criterios",
+      "name": "Criterios de síndrome metabólico",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Perímetro abdominal aumentado",
+        "Triglicéridos ≥ 150 mg/dL",
+        "HDL bajo",
+        "PA ≥ 130/85",
+        "Glucemia en ayunas ≥ 100 mg/dL"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Obesidad y síndrome metabólico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ldl_endo",
+      "name": "LDL (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dislipidemia"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "trigliceridos",
+      "name": "Triglicéridos (mg/dL)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Dislipidemia"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

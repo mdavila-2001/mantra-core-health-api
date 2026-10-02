@@ -2,7 +2,7 @@
   "code": "ONCO_EVALUACION_BASE",
   "name": "Evaluación oncológica",
   "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, examen físico y notas de evolución",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,25 +10,381 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el diagnóstico oncológico y su fecha, el estadio registrado como texto libre, los tratamientos oncológicos recibidos, el estado funcional ECOG como número y la pérdida de peso."
+    "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el diagnóstico oncológico y su fecha, el estadio registrado como texto libre, los tratamientos oncológicos recibidos, el estado funcional ECOG como número y la pérdida de peso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: ECOG, CTCAE (NCI)."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "diagnostico_oncologico_conocido", "name": "Diagnóstico oncológico conocido", "dataType": "string", "required": false },
-    { "code": "fecha_del_diagnostico", "name": "Fecha del diagnóstico", "dataType": "date", "required": false },
-    { "code": "estadio_clinico", "name": "Estadio clínico", "dataType": "string", "required": false },
-    { "code": "tratamientos_oncologicos_recibidos", "name": "Tratamientos oncológicos recibidos", "dataType": "text", "required": false },
-    { "code": "fecha_del_ultimo_tratamiento", "name": "Fecha del último tratamiento", "dataType": "date", "required": false },
-    { "code": "estado_funcional_ecog", "name": "Estado funcional ECOG (0 a 4)", "dataType": "integer", "required": false },
-    { "code": "sintomas_actuales", "name": "Síntomas actuales", "dataType": "text", "required": true },
-    { "code": "dolor", "name": "Dolor", "dataType": "boolean", "required": false },
-    { "code": "perdida_de_peso", "name": "Pérdida de peso", "dataType": "boolean", "required": false },
-    { "code": "peso_actual_kg", "name": "Peso actual (kg)", "dataType": "decimal", "required": false },
-    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
-    { "code": "antecedentes_familiares_oncologicos", "name": "Antecedentes familiares oncológicos", "dataType": "text", "required": false },
-    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
-    { "code": "estudios_complementarios", "name": "Estudios complementarios", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo de consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "diagnostico_oncologico_conocido",
+      "name": "Diagnóstico oncológico conocido",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "estadio_clinico",
+      "name": "Estadio clínico (TNM)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "tratamientos_recibidos",
+      "name": "Tratamientos recibidos",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cirugía",
+        "Quimioterapia",
+        "Radioterapia",
+        "Hormonoterapia",
+        "Inmunoterapia",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "tratamientos_oncologicos_recibidos",
+      "name": "Tratamientos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Enfermedad oncológica",
+      "code": "fecha_del_ultimo_tratamiento",
+      "name": "Fecha del último tratamiento",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Estado actual",
+      "code": "ecog",
+      "name": "Estado funcional ECOG",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "0 — totalmente activo",
+        "1 — síntomas, ambulatorio, trabajo liviano",
+        "2 — ambulatorio, autocuidado, no trabaja; en cama < 50 % del día",
+        "3 — autocuidado limitado; en cama > 50 % del día",
+        "4 — totalmente dependiente, postrado"
+      ]
+    },
+    {
+      "section": "Estado actual",
+      "code": "sintomas_actuales",
+      "name": "Síntomas actuales",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor",
+      "name": "Dolor",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_localizacion",
+      "name": "Dolor — ¿dónde se localiza?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_onco_irradiado", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "dolor_onco_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "perdida_de_peso",
+      "name": "Pérdida de peso",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Estado actual",
+      "code": "perdida_peso_porcentaje",
+      "name": "Porcentaje del peso perdido en 6 meses",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "perdida_de_peso", "equals": true }
+    },
+    {
+      "section": "Estado actual",
+      "code": "peso_actual_kg",
+      "name": "Peso actual (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Estado actual",
+      "code": "medicacion_actual",
+      "name": "Medicación actual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Estado actual",
+      "code": "antecedentes_familiares_oncologicos",
+      "name": "Antecedentes familiares oncológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "examen_fisico",
+      "name": "Examen físico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Examen",
+      "code": "estudios_complementarios",
+      "name": "Estudios complementarios",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sospecha de neoplasia (estudio inicial)",
+        "Toxicidad del tratamiento",
+        "Progresión de enfermedad",
+        "Control de síntomas y cuidados paliativos",
+        "Emergencia oncológica"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neo_alarma",
+      "name": "Signos de alarma",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Masa palpable",
+        "Adenopatía dura o fija",
+        "Sangrado no explicado",
+        "Pérdida de peso",
+        "Síntomas B"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Sospecha de neoplasia (estudio inicial)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neo_biopsia",
+      "name": "Biopsia — estado",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Sospecha de neoplasia (estudio inicial)"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "toxicidad",
+      "name": "Toxicidad",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Neutropenia febril",
+        "Mucositis",
+        "Náuseas y vómitos",
+        "Diarrea",
+        "Neuropatía",
+        "Cardiotoxicidad"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Toxicidad del tratamiento"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "ctcae_grado",
+      "name": "Grado CTCAE",
+      "dataType": "string",
+      "required": false,
+      "options": ["1", "2", "3", "4"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Toxicidad del tratamiento"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "progresion_sitio",
+      "name": "Sitio de progresión",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Progresión de enfermedad"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "paliativos_sintomas",
+      "name": "Síntomas a controlar",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor",
+        "Disnea",
+        "Náuseas",
+        "Constipación",
+        "Delirio",
+        "Ansiedad"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Control de síntomas y cuidados paliativos"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "voluntades",
+      "name": "Conversación sobre voluntades anticipadas",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Control de síntomas y cuidados paliativos"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "emergencia_onco",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Compresión medular",
+        "Síndrome de vena cava superior",
+        "Hipercalcemia",
+        "Síndrome de lisis tumoral",
+        "Neutropenia febril"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Emergencia oncológica"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

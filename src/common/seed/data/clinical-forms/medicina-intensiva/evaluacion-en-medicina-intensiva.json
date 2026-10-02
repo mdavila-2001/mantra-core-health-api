@@ -1,8 +1,11 @@
 {
   "code": "MEDINT_UCI_EVALUACION",
   "name": "Evaluación en medicina intensiva",
-  "specialty": { "code": "MEDICINA_INTENSIVA", "display": "Medicina Intensiva" },
-  "version": 1,
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, notas de evolución y registro de la atención hospitalaria",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +13,461 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común del registro: motivo, fecha de ingreso, signos vitales, evolución, diagnóstico y conducta. Son agregados propios de la especialidad el motivo de ingreso a la unidad, los días de estancia, el soporte ventilatorio, el soporte vasoactivo, la sedación, el balance hídrico y la evolución del turno."
+    "note": "De la norma se transcribe la estructura común del registro: motivo, fecha de ingreso, signos vitales, evolución, diagnóstico y conducta. Son agregados propios de la especialidad el motivo de ingreso a la unidad, los días de estancia, el soporte ventilatorio, el soporte vasoactivo, la sedación, el balance hídrico y la evolución del turno. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: CURB-65 (British Thoracic Society), escala de coma de Glasgow, KDIGO, RASS, definición de Berlín del SDRA."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "motivo_de_ingreso_a_la_unidad", "name": "Motivo de ingreso a la unidad", "dataType": "text", "required": true },
-    { "code": "fecha_de_ingreso_a_la_unidad", "name": "Fecha de ingreso a la unidad", "dataType": "date", "required": false },
-    { "code": "dias_de_estancia_en_la_unidad", "name": "Días de estancia en la unidad", "dataType": "integer", "required": false },
-    { "code": "estado_de_conciencia", "name": "Estado de conciencia", "dataType": "string", "required": false },
-    { "code": "soporte_ventilatorio", "name": "Soporte ventilatorio", "dataType": "boolean", "required": false },
-    { "code": "descripcion_del_soporte_ventilatorio", "name": "Descripción del soporte ventilatorio", "dataType": "text", "required": false },
-    { "code": "soporte_vasoactivo", "name": "Soporte vasoactivo", "dataType": "boolean", "required": false },
-    { "code": "descripcion_del_soporte_vasoactivo", "name": "Descripción del soporte vasoactivo", "dataType": "text", "required": false },
-    { "code": "sedacion", "name": "Sedación", "dataType": "boolean", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial", "dataType": "string", "required": false },
-    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca", "dataType": "integer", "required": false },
-    { "code": "saturacion_de_oxigeno", "name": "Saturación de oxígeno (%)", "dataType": "integer", "required": false },
-    { "code": "temperatura", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
-    { "code": "balance_hidrico_del_turno", "name": "Balance hídrico del turno", "dataType": "string", "required": false },
-    { "code": "evolucion_del_turno", "name": "Evolución del turno", "dataType": "text", "required": true },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Ingreso",
+      "code": "motivo_consulta",
+      "name": "Motivo de la evaluación",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Ingreso",
+      "code": "motivo_de_ingreso_a_la_unidad",
+      "name": "Motivo de ingreso a la unidad",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Ingreso",
+      "code": "fecha_de_ingreso_a_la_unidad",
+      "name": "Fecha de ingreso a la unidad",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Ingreso",
+      "code": "dias_de_estancia_en_la_unidad",
+      "name": "Días de estancia",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Neurológico",
+      "code": "estado_de_conciencia",
+      "name": "Estado de conciencia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Alerta", "Somnoliento", "Estupor", "Coma", "Sedado"]
+    },
+    {
+      "section": "Neurológico",
+      "code": "glasgow_ocular",
+      "name": "Glasgow — apertura ocular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "4 — espontánea",
+        "3 — a la voz",
+        "2 — al dolor",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Neurológico",
+      "code": "glasgow_verbal",
+      "name": "Glasgow — respuesta verbal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "5 — orientada",
+        "4 — confusa",
+        "3 — palabras inapropiadas",
+        "2 — sonidos incomprensibles",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Neurológico",
+      "code": "glasgow_motora",
+      "name": "Glasgow — respuesta motora",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "6 — obedece órdenes",
+        "5 — localiza el dolor",
+        "4 — retira al dolor",
+        "3 — flexión anormal",
+        "2 — extensión",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Neurológico",
+      "code": "sedacion",
+      "name": "Sedación",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Neurológico",
+      "code": "rass",
+      "name": "RASS",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "+2 agitado",
+        "+1 inquieto",
+        "0 alerta y calmo",
+        "−1 somnoliento",
+        "−2 sedación leve",
+        "−3 sedación moderada",
+        "−4 sedación profunda",
+        "−5 no despierta"
+      ],
+      "showWhen": { "field": "sedacion", "equals": true }
+    },
+    {
+      "section": "Neurológico",
+      "code": "delirium",
+      "name": "Delirium (evaluación positiva)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Neurológico",
+      "code": "delirium_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Hiperactivo", "Hipoactivo", "Mixto"],
+      "showWhen": { "field": "delirium", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "soporte_ventilatorio",
+      "name": "Soporte ventilatorio",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "modo_ventilatorio",
+      "name": "Modo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Oxígeno por cánula",
+        "Alto flujo",
+        "Ventilación no invasiva",
+        "Ventilación mecánica invasiva"
+      ],
+      "showWhen": { "field": "soporte_ventilatorio", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "descripcion_del_soporte_ventilatorio",
+      "name": "Parámetros (FiO₂, PEEP, volumen)",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "soporte_ventilatorio", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "pafi",
+      "name": "PaO₂/FiO₂",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": { "field": "soporte_ventilatorio", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "soporte_vasoactivo",
+      "name": "Soporte vasoactivo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "vasoactivos",
+      "name": "Fármacos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Noradrenalina",
+        "Adrenalina",
+        "Vasopresina",
+        "Dobutamina",
+        "Dopamina"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "soporte_vasoactivo", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "descripcion_del_soporte_vasoactivo",
+      "name": "Dosis",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "soporte_vasoactivo", "equals": true }
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg, sistólica/diastólica)",
+      "dataType": "string",
+      "required": false,
+      "description": "Por ejemplo: 120/80."
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "lactato_uci",
+      "name": "Lactato (mmol/L)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "balance_hidrico_del_turno",
+      "name": "Balance hídrico del turno (mL)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Respiratorio y hemodinámico",
+      "code": "diuresis_ml_kg_h",
+      "name": "Diuresis (mL/kg/h)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Shock séptico",
+        "Síndrome de distrés respiratorio agudo",
+        "Neumonía grave",
+        "Insuficiencia renal aguda",
+        "Posoperatorio de alto riesgo",
+        "Coma o daño neurológico agudo"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "foco_sepsis",
+      "name": "Foco",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Shock séptico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hemocultivos",
+      "name": "Hemocultivos tomados",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Shock séptico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "antibiotico_hora",
+      "name": "Antibiótico y hora de inicio",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Shock séptico"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sdra_berlin",
+      "name": "Gravedad (Berlín)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Leve (PaO₂/FiO₂ 200–300)",
+        "Moderado (100–200)",
+        "Grave (< 100)"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome de distrés respiratorio agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "prono",
+      "name": "Ventilación en prono",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Síndrome de distrés respiratorio agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_crepitantes",
+      "name": "Crepitantes o soplo tubario localizados",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Neumonía grave"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "curb65",
+      "name": "Criterios CURB-65 presentes",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Confusión de reciente aparición",
+        "Urea > 42 mg/dL (BUN > 19 mg/dL)",
+        "Frecuencia respiratoria ≥ 30 rpm",
+        "PAS < 90 o PAD ≤ 60 mmHg",
+        "Edad ≥ 65 años",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "0–1: ambulatorio · 2: valorar internación · 3 o más: neumonía grave.",
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Neumonía grave"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "neumonia_expectoracion",
+      "name": "Expectoración purulenta",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Neumonía grave"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "kdigo_lra",
+      "name": "Estadio KDIGO",
+      "dataType": "string",
+      "required": true,
+      "options": ["1", "2", "3"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia renal aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "terapia_reemplazo",
+      "name": "Terapia de reemplazo renal",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Insuficiencia renal aguda"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cirugia_realizada",
+      "name": "Cirugía realizada",
+      "dataType": "string",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Posoperatorio de alto riesgo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "sangrado_postop",
+      "name": "Sangrado activo",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Posoperatorio de alto riesgo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "pupilas_simetricas",
+      "name": "Pupilas simétricas y reactivas",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Coma o daño neurológico agudo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "tac_cerebro",
+      "name": "TAC de cerebro",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Coma o daño neurológico agudo"
+      }
+    },
+    {
+      "section": "Evolución y plan",
+      "code": "evolucion_del_turno",
+      "name": "Evolución del turno",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Evolución y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Evolución y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }

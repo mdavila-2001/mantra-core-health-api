@@ -2,7 +2,7 @@
   "code": "OBST_CONTROL_BASE",
   "name": "Control obstétrico",
   "specialty": { "code": "OBSTETRICIA", "display": "Obstetricia" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, historia clínica materno perinatal y registro de la atención prenatal",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,26 +10,352 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcriben la estructura común (motivo, antecedentes, examen, diagnóstico y conducta) y los campos del registro prenatal: fecha de última menstruación, edad gestacional, fórmula obstétrica, altura uterina, latidos fetales y presión arterial. Son agregados propios de la especialidad los movimientos fetales referidos, la presencia de edemas, las molestias referidas y el registro de controles previos. Los valores se anotan tal como se miden: la ficha no calcula fechas probables ni interpreta resultados."
+    "note": "De la norma se transcriben la estructura común (motivo, antecedentes, examen, diagnóstico y conducta) y los campos del registro prenatal: fecha de última menstruación, edad gestacional, fórmula obstétrica, altura uterina, latidos fetales y presión arterial. Son agregados propios de la especialidad los movimientos fetales referidos, la presencia de edemas, las molestias referidas y el registro de controles previos. Los valores se anotan tal como se miden: la ficha no calcula fechas probables ni interpreta resultados. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
   },
   "fields": [
-    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
-    { "code": "fecha_ultima_menstruacion", "name": "Fecha de última menstruación", "dataType": "date", "required": false },
-    { "code": "edad_gestacional_semanas", "name": "Edad gestacional (semanas)", "dataType": "integer", "required": true },
-    { "code": "gestas", "name": "Gestas", "dataType": "integer", "required": false },
-    { "code": "partos", "name": "Partos", "dataType": "integer", "required": false },
-    { "code": "cesareas", "name": "Cesáreas", "dataType": "integer", "required": false },
-    { "code": "abortos", "name": "Abortos", "dataType": "integer", "required": false },
-    { "code": "antecedentes_relevantes", "name": "Antecedentes relevantes", "dataType": "text", "required": false },
-    { "code": "controles_previos", "name": "Controles prenatales previos", "dataType": "text", "required": false },
-    { "code": "peso_kg", "name": "Peso (kg)", "dataType": "decimal", "required": false },
-    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": true },
-    { "code": "altura_uterina_cm", "name": "Altura uterina (cm)", "dataType": "decimal", "required": false },
-    { "code": "latidos_fetales", "name": "Latidos fetales (lpm)", "dataType": "integer", "required": false },
-    { "code": "movimientos_fetales", "name": "Movimientos fetales referidos", "dataType": "boolean", "required": false },
-    { "code": "edemas", "name": "Edemas", "dataType": "text", "required": false },
-    { "code": "molestias_referidas", "name": "Molestias referidas", "dataType": "text", "required": false },
-    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
-    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+    {
+      "section": "Motivo",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Embarazo",
+      "code": "fecha_ultima_menstruacion",
+      "name": "Fecha de última menstruación",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "edad_gestacional_semanas",
+      "name": "Edad gestacional (semanas)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Embarazo",
+      "code": "gestas",
+      "name": "Gestas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "partos",
+      "name": "Partos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "cesareas",
+      "name": "Cesáreas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "abortos",
+      "name": "Abortos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "antecedentes_relevantes",
+      "name": "Antecedentes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Embarazo",
+      "code": "controles_previos",
+      "name": "Controles previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "presion_arterial",
+      "name": "Presión arterial (mmHg)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Examen",
+      "code": "altura_uterina_cm",
+      "name": "Altura uterina (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "latidos_fetales",
+      "name": "Latidos fetales (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "movimientos_fetales",
+      "name": "Movimientos fetales",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "tiene_edemas",
+      "name": "Edemas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Examen",
+      "code": "edema_localizacion_obst",
+      "name": "Localización",
+      "dataType": "string",
+      "required": true,
+      "options": ["Miembros inferiores", "Manos y cara", "Generalizado"],
+      "showWhen": { "field": "tiene_edemas", "equals": true }
+    },
+    {
+      "section": "Examen",
+      "code": "edemas",
+      "name": "Edemas — detalle",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "tiene_edemas", "equals": true }
+    },
+    {
+      "section": "Examen",
+      "code": "signos_de_alarma_obstetricos",
+      "name": "Signos de alarma",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Sangrado vaginal",
+        "Pérdida de líquido",
+        "Cefalea intensa o visión borrosa",
+        "Dolor en epigastrio",
+        "Disminución de movimientos fetales",
+        "Contracciones antes de las 37 semanas",
+        "Fiebre",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Examen",
+      "code": "molestias_referidas",
+      "name": "Molestias referidas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Embarazo normal",
+        "Trastorno hipertensivo del embarazo",
+        "Amenaza de parto prematuro",
+        "Hemorragia del embarazo",
+        "Diabetes gestacional",
+        "Infección urinaria en el embarazo"
+      ],
+      "allowOther": true,
+      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "proteinuria_obst",
+      "name": "Proteinuria",
+      "dataType": "string",
+      "required": true,
+      "options": ["Negativa", "+", "++", "+++"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno hipertensivo del embarazo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "preeclampsia_grave",
+      "name": "Criterios de gravedad",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "PA ≥ 160/110",
+        "Cefalea o alteración visual",
+        "Dolor en epigastrio",
+        "Plaquetas < 100 000",
+        "Oliguria",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Trastorno hipertensivo del embarazo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "contracciones_hora",
+      "name": "Contracciones por hora",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Amenaza de parto prematuro"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "cervix",
+      "name": "Cuello: dilatación y borramiento",
+      "dataType": "string",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Amenaza de parto prematuro"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hemorragia_trimestre",
+      "name": "Trimestre",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primero", "Segundo", "Tercero"],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hemorragia del embarazo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "hemorragia_dolor",
+      "name": "Con dolor",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Hemorragia del embarazo"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes gestacional"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes gestacional"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliuria",
+        "Polidipsia",
+        "Pérdida de peso",
+        "Visión borrosa",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes gestacional"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_pie",
+      "name": "Examen del pie",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sensibilidad conservada (monofilamento)",
+        "Sensibilidad disminuida",
+        "Úlcera o lesión presente",
+        "No evaluado"
+      ],
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes gestacional"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "dm_hipoglucemias",
+      "name": "Episodios de hipoglucemia desde el último control",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Diabetes gestacional"
+      }
+    },
+    {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "itu_obst",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Disuria",
+        "Polaquiuria",
+        "Fiebre",
+        "Dolor lumbar",
+        "Asintomática con urocultivo positivo"
+      ],
+      "multiple": true,
+      "showWhen": {
+        "field": "diagnostico_presuntivo",
+        "equals": "Infección urinaria en el embarazo"
+      }
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico y plan",
+      "code": "conducta",
+      "name": "Conducta y plan",
+      "dataType": "text",
+      "required": false,
+      "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
+    }
   ]
 }
