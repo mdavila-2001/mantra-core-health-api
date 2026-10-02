@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 109 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 118 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -17,6 +17,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['appointment_bookings', 'ix_appointment_bookings_booked_by_user_id', ['booked_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_booking_policy_id', ['booking_policy_id'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_practitioner_service_offering_id', ['practitioner_service_offering_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
@@ -41,6 +42,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['bookable_slots', 'ix_bookable_slots_resource_id', ['resource_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_schedule_template_id', ['schedule_template_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_service_concept_id', ['service_concept_id'], false, 'btree'],
+  ['bookable_slots', 'ix_bookable_slots_practitioner_service_offering_id', ['practitioner_service_offering_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['bookable_slots', 'ix_bookable_slots_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -81,6 +83,12 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['practitioner_schedules', 'ix_practitioner_schedules_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['practitioner_schedules', 'ix_practitioner_schedules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['practitioner_schedules', 'ix_practitioner_schedules_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practitioner_service_offerings', 'ux_practitioner_service_offerings_practitioner_service', ['practitioner_profile_id', 'service_catalog_id'], true, 'btree'],
+  ['practitioner_service_offerings', 'ix_practitioner_service_offerings_service_catalog_id', ['service_catalog_id'], false, 'btree'],
+  ['practitioner_service_offerings', 'ix_practitioner_service_offerings_channel_concept_id', ['channel_concept_id'], false, 'btree'],
+  ['practitioner_service_offerings', 'ix_practitioner_service_offerings_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['practitioner_service_offerings', 'ix_practitioner_service_offerings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_service_offerings', 'ix_practitioner_service_offerings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_tenant_id', ['tenant_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_practice_id', ['practice_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_resource_type_concept_id', ['resource_type_concept_id'], false, 'btree'],
@@ -89,6 +97,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['schedulable_resources', 'ix_schedulable_resources_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['schedulable_resources', 'ix_schedulable_resources_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
   ['schedule_rules', 'ix_schedule_rules_schedule_template_id', ['schedule_template_id'], false, 'btree'],
+  ['schedule_rules', 'ix_schedule_rules_booking_mode_concept_id', ['booking_mode_concept_id'], false, 'btree'],
   ['schedule_rules', 'ix_schedule_rules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['schedule_rules', 'ix_schedule_rules_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['schedule_templates', 'ix_schedule_templates_resource_id', ['resource_id'], false, 'btree'],

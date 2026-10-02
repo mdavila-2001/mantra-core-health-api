@@ -32,3 +32,10 @@ export type {
   SlotNoticeSnapshot,
   WaitlistEntrySnapshot,
 } from './scheduling-notice.repository';
+
+export { SchedulingOfferingsRepository } from './scheduling-offerings.repository';
+export type {
+  CreateOfferingData,
+  RetencionViva,
+  TramoDeServicioVivo,
+} from './scheduling-offerings.repository';

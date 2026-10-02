@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `scheduling`.
- * 104 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 113 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -14,6 +14,7 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['appointment_bookings', 'booking_policy_id', 'scheduling', 'booking_policies', 'id'],
   ['appointment_bookings', 'created_by_user_id', 'iam', 'users', 'id'],
   ['appointment_bookings', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['appointment_bookings', 'practitioner_service_offering_id', 'scheduling', 'practitioner_service_offerings', 'id'],
   ['appointment_bookings', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
   ['appointment_bookings', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['appointment_bookings', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -37,6 +38,7 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['availability_slots', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['availability_slots', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['bookable_slots', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['bookable_slots', 'practitioner_service_offering_id', 'scheduling', 'practitioner_service_offerings', 'id'],
   ['bookable_slots', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
   ['bookable_slots', 'schedule_template_id', 'scheduling', 'schedule_templates', 'id'],
   ['bookable_slots', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -81,12 +83,19 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['practitioner_schedules', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_schedules', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_service_offerings', 'channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_service_offerings', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_service_offerings', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['practitioner_service_offerings', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
+  ['practitioner_service_offerings', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_service_offerings', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['schedulable_resources', 'created_by_user_id', 'iam', 'users', 'id'],
   ['schedulable_resources', 'practice_id', 'practice', 'practices', 'id'],
   ['schedulable_resources', 'resource_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['schedulable_resources', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['schedulable_resources', 'tenant_id', 'directory', 'tenants', 'id'],
   ['schedulable_resources', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['schedule_rules', 'booking_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['schedule_rules', 'created_by_user_id', 'iam', 'users', 'id'],
   ['schedule_rules', 'schedule_template_id', 'scheduling', 'schedule_templates', 'id'],
   ['schedule_rules', 'updated_by_user_id', 'iam', 'users', 'id'],

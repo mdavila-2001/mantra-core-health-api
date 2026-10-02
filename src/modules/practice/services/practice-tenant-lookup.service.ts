@@ -81,6 +81,26 @@ export class PracticeTenantLookupService {
   }
 
   /**
+   * ¿Esta práctica es el **consultorio propio** de ese usuario?
+   *
+   * Es la práctica personal que se crea al dar de alta un consultorio propio: de
+   * tipo `OFFICE` y con el usuario como administrador. La distinción importa porque
+   * quien atiende en una organización ajena no es dueño de su catálogo, pero en su
+   * propio consultorio no hay nadie más a quien pedirle que dé de alta un servicio.
+   *
+   * Una práctica que no existe responde `false`, igual que una ajena: quien
+   * pregunta no aprende nada de ids que no son suyos.
+   */
+  async isOwnOffice(practiceId: string, userId: string): Promise<boolean> {
+    const practice = await this.practices.findById(this.em.fork(), practiceId);
+    return (
+      practice !== null &&
+      practice.adminUserId === userId &&
+      practice.typeConceptId === PRAC.PRACTICE_TYPE_OFFICE
+    );
+  }
+
+  /**
    * El tenant dueño de una práctica, o `null` si esa práctica no existe.
    *
    * La alternativa era `findActive()`, que trae **todas** las prácticas activas

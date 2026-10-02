@@ -72,7 +72,7 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
       {} as any, {} as any, { findActiveCarriersByPatients: async () => new Map() } as any,
       {} as any, { findLatestIdsByAppointmentIds: async () => new Map() } as any, {} as any,
       { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership } as any,
-      {} as any);
+      {} as any, {} as any);
     const user = { ...actor('PATIENT'), patientProfileId: P1 };
     const result: any = await guarded(SchedulingBookingsController, 'searchBookings',
       { headers: { 'x-tenant-id': T1 }, user, params: {}, query: { resourceId: ID }, body: {} },

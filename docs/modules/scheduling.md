@@ -9,7 +9,7 @@
 # Módulo `scheduling`
 
 **Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/scheduling/README.md)
-· 6 controllers · 11 services · 6 repositories · 17 entidades · 7 DTO
+· 7 controllers · 14 services · 7 repositories · 18 entidades · 8 DTO
 
 ---
 

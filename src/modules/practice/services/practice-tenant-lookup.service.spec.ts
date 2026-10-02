@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { PRAC } from '../practice.concepts';
 import { PracticeTenantLookupService } from './practice-tenant-lookup.service';
 
 describe('PracticeTenantLookupService', () => {
@@ -57,5 +58,56 @@ describe('PracticeTenantLookupService', () => {
       'practitioner-1',
       expect.any(String),
     );
+  });
+
+  describe('isOwnOffice (v4.2.40)', () => {
+    /** Una práctica con el tipo y el administrador que se le indiquen. */
+    function conPractica(practica: Record<string, unknown> | null) {
+      const em = { fork: jest.fn().mockReturnValue({}) };
+      const findById = jest
+        .fn<(...args: unknown[]) => Promise<unknown>>()
+        .mockResolvedValue(practica);
+      const service = new PracticeTenantLookupService(
+        em as never,
+        { findById } as never,
+        {} as never,
+      );
+      return { service, findById };
+    }
+
+    it('es verdadero sólo para la práctica personal (OFFICE) que el usuario administra', async () => {
+      const { service } = conPractica({
+        adminUserId: 'u-1',
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+      });
+
+      await expect(service.isOwnOffice('p-1', 'u-1')).resolves.toBe(true);
+    });
+
+    it('no lo es si la administra otro usuario', async () => {
+      const { service } = conPractica({
+        adminUserId: 'u-2',
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+      });
+
+      await expect(service.isOwnOffice('p-1', 'u-1')).resolves.toBe(false);
+    });
+
+    it('no lo es si es una organización aunque el usuario figure como administrador', async () => {
+      const { service } = conPractica({
+        adminUserId: 'u-1',
+        typeConceptId: 'otro-tipo-de-practica',
+      });
+
+      await expect(service.isOwnOffice('p-1', 'u-1')).resolves.toBe(false);
+    });
+
+    it('una práctica que no existe responde falso, igual que una ajena', async () => {
+      const { service } = conPractica(null);
+
+      await expect(service.isOwnOffice('inventada', 'u-1')).resolves.toBe(
+        false,
+      );
+    });
   });
 });

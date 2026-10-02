@@ -251,6 +251,14 @@ export class BookingPolicyResponseDto {
   stateConceptId!: string;
 }
 
+/** Qué admite una franja del horario. */
+export type RuleBookingMode = 'CONSULTATIONS' | 'SERVICES' | 'MIXED';
+export const RULE_BOOKING_MODES: readonly RuleBookingMode[] = [
+  'CONSULTATIONS',
+  'SERVICES',
+  'MIXED',
+];
+
 /** Franja semanal de la plantilla. */
 export class ScheduleRuleDto {
   /**
@@ -325,6 +333,19 @@ export class ScheduleRuleDto {
   @IsInt()
   @Min(0)
   gapMinutes?: number;
+
+  /**
+   * Qué admite la franja (v4.2.40). Ausente ≡ `CONSULTATIONS`, que es lo que toda
+   * franja era antes: una agenda existente no cambia de significado.
+   */
+  @ApiPropertyOptional({
+    enum: RULE_BOOKING_MODES,
+    description:
+      'Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS',
+  })
+  @IsOptional()
+  @IsIn(RULE_BOOKING_MODES as readonly string[])
+  bookingMode?: RuleBookingMode;
 }
 
 /**
@@ -495,6 +516,10 @@ export class TemplateRuleDto {
    */
   @ApiProperty({ required: false })
   gapMinutes?: number;
+
+  /** Qué admite la franja. No se emite cuando no se declaró (≡ `CONSULTATIONS`). */
+  @ApiProperty({ required: false, enum: RULE_BOOKING_MODES })
+  bookingMode?: RuleBookingMode;
 }
 
 /**

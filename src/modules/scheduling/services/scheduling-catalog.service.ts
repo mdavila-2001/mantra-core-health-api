@@ -44,7 +44,9 @@ import {
   ResourceAgendaResponseDto,
   type ResourceType,
   type ExceptionType,
+  type RuleBookingMode,
 } from '../dto';
+import { SCHED } from '../scheduling.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { avisoDeHorarioMovido } from '../notices/agenda-notices';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
@@ -86,6 +88,26 @@ const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
+
+/** El modo de una franja a su concepto. Ausente ≡ sin concepto (sólo consultas). */
+function modoDeFranja(modo: RuleBookingMode | undefined): string | undefined {
+  if (modo === undefined) return undefined;
+  return {
+    CONSULTATIONS: SCHED.RULE_MODE_CONSULTATIONS,
+    SERVICES: SCHED.RULE_MODE_SERVICES,
+    MIXED: SCHED.RULE_MODE_MIXED,
+  }[modo];
+}
+
+/** Y de vuelta: el concepto guardado, a lo que entiende el cliente. */
+function modoDelConcepto(conceptId: string): RuleBookingMode | undefined {
+  const porConcepto: Record<string, RuleBookingMode> = {
+    [SCHED.RULE_MODE_CONSULTATIONS]: 'CONSULTATIONS',
+    [SCHED.RULE_MODE_SERVICES]: 'SERVICES',
+    [SCHED.RULE_MODE_MIXED]: 'MIXED',
+  };
+  return porConcepto[conceptId];
+}
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -395,6 +417,7 @@ export class SchedulingCatalogService {
           // como cero al generar. Escribir un cero que nadie declaró borraría
           // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
           gapMinutes: rule.gapMinutes,
+          bookingModeConceptId: modoDeFranja(rule.bookingMode),
           actorUserId: actor.id,
         });
       }
@@ -522,6 +545,7 @@ export class SchedulingCatalogService {
             slotMinutes: rule.slotMinutes ?? slotMinutesEfectivo,
             capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
             gapMinutes: rule.gapMinutes,
+            bookingModeConceptId: modoDeFranja(rule.bookingMode),
             actorUserId: actor.id,
           });
         }
@@ -1104,6 +1128,10 @@ export class SchedulingCatalogService {
       let omittedByCommitments = 0;
 
       for (const rule of rules) {
+        // Una franja sólo de servicios no genera cupos de consulta: sus turnos nacen
+        // al retener, con la duración de cada servicio, y una grilla fija encima
+        // ofrecería horarios que la agenda de servicios no respeta.
+        if (rule.bookingModeConceptId === SCHED.RULE_MODE_SERVICES) continue;
         const slotMinutes =
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;
@@ -1913,6 +1941,9 @@ export class SchedulingCatalogService {
           ? {}
           : { capacityPerSlot: franja.capacityPerSlot }),
         ...(franja.gapMinutes == null ? {} : { gapMinutes: franja.gapMinutes }),
+        ...(franja.bookingModeConceptId == null
+          ? {}
+          : { bookingMode: modoDelConcepto(franja.bookingModeConceptId) }),
       });
       porPlantilla.set(franja.scheduleTemplateId, lista);
     }

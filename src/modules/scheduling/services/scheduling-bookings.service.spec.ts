@@ -177,6 +177,14 @@ function build() {
   const formOrigin = {
     assertUsableOrigin: mockFn().mockResolvedValue(undefined),
   };
+  // v4.2.40: los servicios con duración dinámica. Por omisión no hay nada que
+  // devolver ni ninguna oferta detrás del cupo: es el caso de toda consulta.
+  const serviceAgenda = {
+    reabrir: mockFn().mockResolvedValue(0),
+    reabrirTramo: mockFn().mockResolvedValue(0),
+    retraer: mockFn().mockResolvedValue(0),
+    ofertaDelCupo: mockFn().mockResolvedValue(null),
+  };
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
@@ -194,8 +202,10 @@ function build() {
     claimReadRepo as any,
     representation as any,
     formOrigin as any,
+    serviceAgenda as any,
   );
   return {
+    serviceAgenda,
     formOrigin,
     claimReadRepo,
     representation,
@@ -278,6 +288,18 @@ describe('SchedulingBookingsService', () => {
         d.tx,
         SLOT_ID,
       );
+    });
+
+    it('rechaza un cupo retraído: lo pisa un servicio que el profesional ya comprometió', async () => {
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ statusConceptId: SCHED.SLOT_RETRACTED }),
+      );
+
+      await expect(
+        d.service.placeHold(SLOT_ID, { patientProfileId: PATIENT }, actor),
+      ).rejects.toThrow(/ya no está disponible/);
+      expect(d.bookingsRepo.createHold).not.toHaveBeenCalled();
     });
 
     it('marks the slot as held when the last seat is taken', async () => {
@@ -667,6 +689,37 @@ describe('SchedulingBookingsService', () => {
       expect(hold.statusConceptId).toBe(CONCEPTS.HOLD_EXPIRED);
       expect(slot.remainingCapacity).toBe(1);
       expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    it('el cupo de un servicio no se reofrece: muere con la retención y devuelve las consultas', async () => {
+      const d = build();
+      const hold = {
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+      };
+      const fin = new Date(Date.now() + 2 * EN_UNA_HORA);
+      const slot = openSlot({
+        capacity: 1,
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+        endAt: fin,
+        practitionerServiceOfferingId: 'oferta-1',
+      });
+      d.bookingsRepo.findExpiredHolds.mockResolvedValue([hold]);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+
+      await d.service.expireHolds(10);
+
+      // Un cupo que nació para esta retención y nunca estuvo ofrecido: reabrirlo
+      // sería ofertar un horario fantasma.
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      expect(d.serviceAgenda.reabrirTramo).toHaveBeenCalledWith(
+        d.tx,
+        slot,
+        slot.startAt,
+        fin,
+        undefined,
+      );
     });
 
     it('is a no-op when there is nothing expired', async () => {
@@ -1187,6 +1240,113 @@ describe('SchedulingBookingsService', () => {
       expect(creada.confirmedAt).toBeUndefined();
     });
 
+    describe('cuando el cupo es de un servicio (v4.2.40)', () => {
+      /** El cupo de un servicio y la oferta que hay detrás. */
+      function conOferta(
+        d: ReturnType<typeof build>,
+        requiresApproval: boolean,
+      ) {
+        conHoldVivo(d);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+          openSlot({
+            capacity: 1,
+            remainingCapacity: 0,
+            endAt: new Date(Date.now() + 2 * EN_UNA_HORA),
+            practitionerServiceOfferingId: 'oferta-1',
+          }),
+        );
+        d.serviceAgenda.ofertaDelCupo.mockResolvedValue({
+          oferta: {
+            id: 'oferta-1',
+            serviceCatalogId: 'cat-1',
+            minDurationMinutes: 30,
+            maxDurationMinutes: 45,
+            prepMinutes: 5,
+            cleanupMinutes: 10,
+            requiresApproval,
+            channelConceptId: CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+          },
+          catalogo: {
+            code: 'NEBU',
+            name: 'Nebulización',
+            defaultPrice: '80.00',
+            currencyConceptId: CONCEPTS.CURRENCY_BOB,
+          },
+        });
+      }
+
+      it('sin aprobación requerida nace CONFIRMADO, con recordatorios, como procedimiento', async () => {
+        const d = build();
+        conOferta(d, false);
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          solicitud,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+        const creada = d.bookingsRepo.createBooking.mock.calls[0][1];
+        expect(creada.confirmedAt).toBeInstanceOf(Date);
+        expect(creada.practitionerServiceOfferingId).toBe('oferta-1');
+        const cita = d.appointmentsRepo.create.mock.calls[0][1];
+        expect(cita.statusConceptId).toBe(CLIN.APPOINTMENT_BOOKED);
+        expect(cita.typeConceptId).toBe(CLIN.ACTIVITY_PROCEDURE);
+        expect(cita.channelConceptId).toBe(CLIN.APPOINTMENT_CHANNEL_TELEHEALTH);
+        expect(d.bookingsRepo.createReminder).toHaveBeenCalled();
+      });
+
+      it('con aprobación requerida sigue el camino de siempre: pendiente y sin recordatorios', async () => {
+        const d = build();
+        conOferta(d, true);
+
+        const res = await d.service.requestBooking(
+          'hold-token',
+          solicitud,
+          actor,
+        );
+
+        expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+        expect(d.bookingsRepo.createReminder).not.toHaveBeenCalled();
+        // Igual se clasifica como procedimiento: es lo que es, esté aceptado o no.
+        expect(d.appointmentsRepo.create.mock.calls[0][1].typeConceptId).toBe(
+          CLIN.ACTIVITY_PROCEDURE,
+        );
+      });
+
+      it('congela lo que el paciente aceptó: precio, duración y colchones', async () => {
+        const d = build();
+        conOferta(d, false);
+
+        await d.service.requestBooking('hold-token', solicitud, actor);
+
+        const { serviceSnapshot } =
+          d.bookingsRepo.createBooking.mock.calls[0][1];
+        expect(serviceSnapshot).toMatchObject({
+          offeringId: 'oferta-1',
+          serviceName: 'Nebulización',
+          price: '80.00',
+          minDurationMinutes: 30,
+          maxDurationMinutes: 45,
+          prepMinutes: 5,
+          cleanupMinutes: 10,
+        });
+      });
+
+      it('una consulta no cambia: sigue pendiente y sin oferta', async () => {
+        const d = build();
+        conHoldVivo(d);
+
+        await d.service.requestBooking('hold-token', solicitud, actor);
+
+        const creada = d.bookingsRepo.createBooking.mock.calls[0][1];
+        expect(creada.practitionerServiceOfferingId).toBeUndefined();
+        expect(
+          d.appointmentsRepo.create.mock.calls[0][1].typeConceptId,
+        ).toBeUndefined();
+      });
+    });
+
     it('la cita clínica que la respalda también nace pendiente', async () => {
       const d = build();
       conHoldVivo(d);
@@ -1626,8 +1786,10 @@ describe('SchedulingBookingsService', () => {
         );
 
         expect(res.retractedSlots).toBe(2);
-        expect(libre1.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
-        expect(libre2.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        // v4.2.40: RETRAÍDOS y ya no bloqueados. Al bloqueado nadie lo devuelve y al
+        // retraído sí, cuando esta cita se cancela (ver el test de cancelación).
+        expect(libre1.statusConceptId).toBe(SCHED.SLOT_RETRACTED);
+        expect(libre2.statusConceptId).toBe(SCHED.SLOT_RETRACTED);
       });
 
       it('un profesional NO asigna en la agenda de otro', async () => {
@@ -2500,6 +2662,38 @@ describe('SchedulingBookingsService', () => {
       expect(d.waitlist.promoteWaitlist).not.toHaveBeenCalled();
     });
 
+    it('cancelar una cita puntual devuelve las consultas que había retraído', async () => {
+      // Defecto que esto cierra: esos cupos quedaban bloqueados para siempre aunque
+      // el rato que los pisaba ya estuviera libre.
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(vigente());
+      const fin = new Date('2026-08-20T14:30:00.000Z');
+      const slot = {
+        id: SLOT_ID,
+        startAt: new Date('2026-08-20T14:00:00.000Z'),
+        endAt: fin,
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      };
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.noticeRepo.describeBooking.mockResolvedValue(descrita);
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      expect(d.serviceAgenda.reabrirTramo).toHaveBeenCalledWith(
+        d.tx,
+        slot,
+        slot.startAt,
+        fin,
+        expect.any(String),
+      );
+    });
+
     it('si la promoción falla, la cancelación sigue en pie', async () => {
       // La cancelación ya está confirmada cuando esto corre: que la lista de
       // espera falle no puede convertirla en un error para quien canceló. El
@@ -2739,6 +2933,107 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    describe('v4.2.40 · el servicio reservado en la lectura', () => {
+      const snapshot = {
+        offeringId: 'oferta-1',
+        serviceName: 'Ecocardiograma Doppler',
+        price: '480.00',
+        currencyConceptId: 'bob',
+        minDurationMinutes: 30,
+        maxDurationMinutes: 45,
+        requiresApproval: false,
+        // Una clave que mañana alguien agregue al snapshot NO tiene que salir por la API.
+        capturedAt: '2026-10-01T10:00:00.000Z',
+        internalNote: 'no debe viajar',
+      };
+
+      /** Una página con una reserva de servicio colgada del recurso `res-1`. */
+      function paginaDeServicio(d: ReturnType<typeof build>) {
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'perfil-medico',
+        });
+        d.bookingsRepo.findBookings.mockResolvedValue({
+          rows: [
+            {
+              booking: {
+                ...guardada,
+                id: 'bk-servicio',
+                resourceId: 'res-1',
+                serviceSnapshot: snapshot,
+              },
+              slot: null,
+            },
+          ],
+          fetchCapReached: false,
+        });
+        return d;
+      }
+
+      it('el profesional de la agenda ve el servicio, proyectado campo a campo', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(res.items[0].service).toEqual({
+          offeringId: 'oferta-1',
+          name: 'Ecocardiograma Doppler',
+          price: '480.00',
+          currencyConceptId: 'bob',
+          minDurationMinutes: 30,
+          maxDurationMinutes: 45,
+          requiresApproval: false,
+        });
+        expect(res.items[0].service).not.toHaveProperty('internalNote');
+        expect(res.items[0].service).not.toHaveProperty('capturedAt');
+      });
+
+      it('el paciente titular también lo ve', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          { id: 'u-pac', roles: ['PATIENT'], patientProfileId: PATIENT } as any,
+        );
+
+        expect(res.items[0].service?.name).toBe('Ecocardiograma Doppler');
+      });
+
+      it('otro profesional NO lo ve: el nombre de un servicio puede revelar un dato de salud', async () => {
+        const d = paginaDeServicio(build());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('otro-medico') as any,
+        );
+
+        expect(res.items[0]).not.toHaveProperty('service');
+      });
+
+      it('una consulta no trae `service`', async () => {
+        const d = build();
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          resourceRefId: 'perfil-medico',
+        });
+        d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+
+        const res = await d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          medico('perfil-medico') as any,
+        );
+
+        expect(res.items[0]).not.toHaveProperty('service');
+      });
     });
 
     describe('P42 · el vínculo de reconsulta en la lectura', () => {

@@ -159,4 +159,31 @@ export class AppointmentBookings {
     nullable: true,
   })
   cancellationPolicySnapshot?: unknown;
+
+  /**
+   * La oferta de servicio que se reservó (v4.2.40). `undefined` ≡ consulta.
+   *
+   * Apunta a la oferta del profesional, no al catálogo: es la oferta la que dice
+   * cuánto dura el turno. Lo que el paciente aceptó vive en {@link serviceSnapshot}.
+   */
+  @Property({
+    fieldName: 'practitioner_service_offering_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.practitioner_service_offerings
+  practitionerServiceOfferingId?: string;
+
+  /**
+   * Copia congelada de lo que el paciente aceptó al reservar el servicio: nombre,
+   * precio, moneda, duración mínima y máxima y colchones. Mismo criterio que
+   * {@link cancellationPolicySnapshot}: un cambio posterior de la oferta no
+   * reescribe la reserva.
+   */
+  @Property({
+    fieldName: 'service_snapshot',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  serviceSnapshot?: unknown;
 }

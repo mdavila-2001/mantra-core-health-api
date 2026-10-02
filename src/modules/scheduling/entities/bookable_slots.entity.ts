@@ -31,6 +31,20 @@ export class BookableSlots {
   serviceConceptId?: string;
 
   /**
+   * La oferta de servicio de la que es este cupo (v4.2.40). `undefined` ≡ consulta.
+   *
+   * El cupo de un servicio no sale de una plantilla: nace al retener, con la duración
+   * máxima de la oferta. Guardar acá de qué oferta es permite que, al confirmar, el
+   * servidor sepa precio, duración y colchones sin fiarse de lo que mande el navegador.
+   */
+  @Property({
+    fieldName: 'practitioner_service_offering_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.practitioner_service_offerings
+  practitionerServiceOfferingId?: string;
+
+  /**
    * Valor de start at mantenido por la instancia.
    */
   @Property({ fieldName: 'start_at', columnType: 'timestamptz' })

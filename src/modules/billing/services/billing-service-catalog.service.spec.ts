@@ -48,6 +48,9 @@ function build() {
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
     findTenantOfPractice: mockFn().mockResolvedValue(null),
+    // Por omisión la práctica NO es el consultorio propio de nadie: el alta de un
+    // profesional tiene que pedirlo a propósito.
+    isOwnOffice: mockFn().mockResolvedValue(false),
   };
   const templatesRepo = {
     createTemplate: mockFn(),
@@ -182,6 +185,59 @@ describe('BillingServiceCatalogService', () => {
       expect(d.tx.flush).toHaveBeenCalled();
     });
 
+    describe('quién puede dar de alta (v4.2.40)', () => {
+      const dto = {
+        practiceId: 'pr1',
+        code: 'NEBU-01',
+        name: 'Nebulización',
+        defaultPrice: '80.00',
+      };
+
+      it('un profesional da de alta un servicio en su consultorio propio', async () => {
+        const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        // Todo servicio nuevo sale con su encuesta (FT-31): el doble de esa parte.
+        d.templatesRepo.createTemplate.mockReturnValue({
+          id: 'tpl-1',
+          statusConceptId: 'draft',
+        });
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-1',
+          publicationStatusConceptId: 'draft',
+        });
+
+        await runWithTenant('tenant-1', () => d.service.create(dto, medico));
+
+        expect(d.practiceTenantLookup.isOwnOffice).toHaveBeenCalledWith(
+          'pr1',
+          'user-med',
+        );
+        expect(d.serviceCatalogRepo.create).toHaveBeenCalled();
+      });
+
+      it('en una organización ajena responde 404 y no crea nada', async () => {
+        const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(false);
+
+        await expect(d.service.create(dto, medico)).rejects.toThrow(
+          /Práctica no encontrada/,
+        );
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('la administración no pasa por esa comprobación', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+
+        await d.service.create(dto, actor);
+
+        expect(d.practiceTenantLookup.isOwnOffice).not.toHaveBeenCalled();
+      });
+    });
+
     /**
      * FT-31: ningún servicio médico nuevo debería quedar sin forma de medir
      * la atención. Estos tres casos son la regla completa: quien da de alta
@@ -192,6 +248,7 @@ describe('BillingServiceCatalogService', () => {
     describe('encuesta de satisfacción por defecto', () => {
       it('un profesional que da de alta su propio servicio queda como dueño de la encuesta', async () => {
         const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
         d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
         d.serviceCatalogRepo.create.mockReturnValue(item);
         d.templatesRepo.createTemplate.mockReturnValue({

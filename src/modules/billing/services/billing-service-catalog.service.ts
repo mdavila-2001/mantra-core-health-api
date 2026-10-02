@@ -148,6 +148,7 @@ export class BillingServiceCatalogService {
       },
       'Creating service catalog item',
     );
+    await this.assertPuedeDarDeAlta(actor, dto.practiceId);
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -187,6 +188,32 @@ export class BillingServiceCatalogService {
         'Service catalog item created',
       );
       return toItemDto(item);
+    });
+  }
+
+  /**
+   * Quién puede dar de alta un servicio en una práctica.
+   *
+   * La administración de la organización, en cualquiera de las suyas; un profesional,
+   * **sólo en su consultorio propio**. En una organización ajena el catálogo es de la
+   * organización y el profesional sólo corrige precio y duraciones (ver `update`).
+   *
+   * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
+   * práctica ajena responde igual que uno inventado.
+   */
+  private async assertPuedeDarDeAlta(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    const administra =
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('SUPERADMIN');
+    if (administra) return;
+    if (await this.practiceTenantLookup.isOwnOffice(practiceId, actor.id)) {
+      return;
+    }
+    throw new ResourceNotFoundException('Práctica no encontrada', {
+      practiceId,
     });
   }
 
