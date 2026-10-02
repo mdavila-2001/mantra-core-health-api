@@ -22,7 +22,9 @@ import {
  */
 describe('BR-14 · encuentros, sello del cierre, CDS y lecturas del resumen (integración)', () => {
   let ctx: TestContext;
-  let camposDePaciente: Awaited<ReturnType<typeof camposObligatoriosDePaciente>>;
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);
@@ -263,12 +265,10 @@ describe('BR-14 · encuentros, sello del cierre, CDS y lecturas del resumen (int
     it('el motivo queda en audit.conditions_history, recuperable por la lectura del resumen (CL-10/CL-11)', async () => {
       // Concepto real de `condition-clinical-status` (INACTIVE) — el mismo
       // que usa `ConditionsService.CLINICAL_STATUS_TRANSITIONS`.
-      const fila = await ctx.orm.em
-        .getConnection()
-        .execute<{ id: string }[]>(
-          `select id from terminology.catalog_concepts
+      const fila = await ctx.orm.em.getConnection().execute<{ id: string }[]>(
+        `select id from terminology.catalog_concepts
              where code = 'inactive' limit 1`,
-        );
+      );
       const inactiveConceptId = fila[0]?.id;
       if (!inactiveConceptId) {
         // Si el catálogo no trae el código exacto, el resto de la suite ya

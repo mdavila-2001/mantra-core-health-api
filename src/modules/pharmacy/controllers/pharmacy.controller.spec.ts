@@ -22,7 +22,11 @@ function build() {
     verifyLicense: mockFn(),
   };
   const sitesService = { createSite: mockFn() };
-  const productsService = { publishProduct: mockFn(), retireProduct: mockFn() };
+  const productsService = {
+    publishProduct: mockFn(),
+    updateProduct: mockFn(),
+    retireProduct: mockFn(),
+  };
   const pricingService = {
     createPriceList: mockFn(),
     versionPrice: mockFn(),
@@ -93,6 +97,18 @@ describe('PharmacyController', () => {
     await d.controller.publishProduct('ph1', dto, actor);
     expect(d.productsService.publishProduct).toHaveBeenCalledWith(
       'ph1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates updateProduct (P47 §2)', async () => {
+    const d = build();
+    const dto = { brandName: 'Amoxil', genericName: null };
+    await d.controller.updateProduct('ph1', 'pr1', dto, actor);
+    expect(d.productsService.updateProduct).toHaveBeenCalledWith(
+      'ph1',
+      'pr1',
       dto,
       actor,
     );

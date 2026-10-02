@@ -1,0 +1,12 @@
+$ git merge-file -p --ours <versionado> <generado sin la operación> <generado con la operación>  → docs/postman/Salud-API.postman_collection.json
+  (el encabezado con el conteo global ya estaba desactualizado en el versionado y se deja como está)
+ docs/postman/Salud-API.postman_collection.json | 68 +++++++++++++++++++++++++-
+ 1 file changed, 67 insertions(+), 1 deletion(-)
+
+-      "name": "pharmacies (11)",
++      "name": "pharmacies (12)",
++        {
++          "name": "PATCH /pharmacies/{pharmacyId}/products/{productId} · Editar los datos descriptivos de un producto 
++          "request": {
++            "method": "PATCH",
+  …

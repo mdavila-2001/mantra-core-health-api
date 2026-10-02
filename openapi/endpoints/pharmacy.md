@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `pharmacy`
 
-Referencia exhaustiva de 18 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `pharmacy`, `pharmacy-directory`, `pharmacy-public`
 - **Controladores:** `PharmacyController`, `PharmacyPublicController`, `PharmacyReadController`
@@ -20,15 +20,16 @@ Referencia exhaustiva de 18 operación(es) del módulo `pharmacy`, derivada del 
 7. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices](#7-post-pharmacies-pharmacyid-price-lists-pricelistid-prices) — Fijar/versionar precio de producto
 8. [POST /pharmacies/{pharmacyId}/products](#8-post-pharmacies-pharmacyid-products) — Publicar producto en catálogo con identificadores
 9. [DELETE /pharmacies/{pharmacyId}/products/{productId}](#9-delete-pharmacies-pharmacyid-products-productid) — Retirar (soft-delete) producto del catálogo
-10. [POST /pharmacies/{pharmacyId}/projections](#10-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
-11. [POST /pharmacies/{pharmacyId}/sites](#11-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
-12. [GET /pharmacy/pharmacies](#12-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
-13. [GET /pharmacy/pharmacies/{id}](#13-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
-14. [GET /pharmacy/products](#14-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
-15. [GET /pharmacy/sites](#15-get-pharmacy-sites) — Listar sedes publicadas, sueltas
-16. [GET /pharmacy/sites/{siteId}/prices](#16-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
-17. [GET /public/medications](#17-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
-18. [GET /public/medications/{conceptId}/availability](#18-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
+10. [PATCH /pharmacies/{pharmacyId}/products/{productId}](#10-patch-pharmacies-pharmacyid-products-productid) — Editar los datos descriptivos de un producto del catálogo
+11. [POST /pharmacies/{pharmacyId}/projections](#11-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
+12. [POST /pharmacies/{pharmacyId}/sites](#12-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
+13. [GET /pharmacy/pharmacies](#13-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
+14. [GET /pharmacy/pharmacies/{id}](#14-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
+15. [GET /pharmacy/products](#15-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
+16. [GET /pharmacy/sites](#16-get-pharmacy-sites) — Listar sedes publicadas, sueltas
+17. [GET /pharmacy/sites/{siteId}/prices](#17-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
+18. [GET /public/medications](#18-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
+19. [GET /public/medications/{conceptId}/availability](#19-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
 
 ---
 
@@ -1312,7 +1313,171 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /pharmacies/{pharmacyId}/projections
+## 10. PATCH /pharmacies/{pharmacyId}/products/{productId}
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Editar los datos descriptivos de un producto del catálogo
+- **Operation ID:** `PharmacyController_updateProduct`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyController.updateProduct](../../src/modules/pharmacy/controllers/pharmacy.controller.ts)
+
+### Descripción de negocio
+
+Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.
+
+Contexto declarado en el controlador: P47 §2.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /pharmacies/{pharmacyId}/products/{productId}` en `PharmacyController_updateProduct`. El controlador delega en `PharmacyProductsService.updateProduct`. Valida el body como `PharmacyUpdateProductDto` y consume `application/json`. El tipo de retorno estático es `Promise<PharmacyProductReadDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `productId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PharmacyUpdateProductDto`; los campos opcionales se omiten.
+
+```http
+PATCH /pharmacies/00000000-0000-4000-8000-000000000001/products/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `pharmacyId`, `productId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `brandName` | No | `string` | longitud mínima 1; longitud máxima 300; admite null | Marca comercial; `null` la borra | `Nombre de ejemplo` |
+| `genericName` | No | `string` | longitud mínima 1; longitud máxima 300; admite null | Nombre genérico; `null` lo borra | `Nombre de ejemplo` |
+| `strengthText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Concentración (texto libre); `null` la borra | `valor-ejemplo` |
+| `packageSizeText` | No | `string` | longitud mínima 1; longitud máxima 200; admite null | Tamaño de empaque (texto libre); `null` lo borra | `valor-ejemplo` |
+| `requiresPrescription` | No | `boolean` | admite null | Requiere receta; `null` lo borra | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /pharmacies/00000000-0000-4000-8000-000000000001/products/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "brandName": "Nombre de ejemplo",
+  "genericName": "Nombre de ejemplo",
+  "strengthText": "valor-ejemplo",
+  "packageSizeText": "valor-ejemplo",
+  "requiresPrescription": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyProductReadDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyName": "Nombre de ejemplo",
+  "productCode": "CODIGO_EJEMPLO",
+  "brandName": {},
+  "genericName": {},
+  "strengthText": {},
+  "packageSizeText": {},
+  "dosageForm": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "medication": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "requiresPrescription": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `productCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `brandName` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `genericName` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `strengthText` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `packageSizeText` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `dosageForm` | No | `PharmacyConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `dosageForm.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `dosageForm.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `medication` | No | `PharmacyConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `medication.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requiresPrescription` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
+| 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/products/{productId}"
+}
+```
+
+---
+
+## 11. POST /pharmacies/{pharmacyId}/projections
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1447,7 +1612,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /pharmacies/{pharmacyId}/sites
+## 12. POST /pharmacies/{pharmacyId}/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1599,7 +1764,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /pharmacy/pharmacies
+## 13. GET /pharmacy/pharmacies
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -1728,7 +1893,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /pharmacy/pharmacies/{id}
+## 14. GET /pharmacy/pharmacies/{id}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -1884,7 +2049,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /pharmacy/products
+## 15. GET /pharmacy/products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2030,7 +2195,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /pharmacy/sites
+## 16. GET /pharmacy/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2164,7 +2329,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /pharmacy/sites/{siteId}/prices
+## 17. GET /pharmacy/sites/{siteId}/prices
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2329,7 +2494,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /public/medications
+## 18. GET /public/medications
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`
@@ -2471,7 +2636,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /public/medications/{conceptId}/availability
+## 19. GET /public/medications/{conceptId}/availability
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`

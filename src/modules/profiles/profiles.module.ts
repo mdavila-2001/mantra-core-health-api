@@ -19,11 +19,13 @@ import { MedicalSpecialtyCatalogService } from './services/medical-specialty-cat
 import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
 import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
 import {
+  ProfilesDependentRequestsController,
   ProfilesPatientsController,
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
 } from './controllers';
 import {
+  DependentLinkRequestsService,
   ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
@@ -75,6 +77,7 @@ import { MessagingModule } from '../messaging/messaging.module';
   ],
   controllers: [
     ProfilesPatientsController,
+    ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
   ],
@@ -111,6 +114,7 @@ import { MessagingModule } from '../messaging/messaging.module';
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
+    DependentLinkRequestsService,
   ],
   // Los repositorios que necesita el auto-registro de pacientes (IAM crea en la
   // misma transacción la cuenta y su persona/perfil). Se exportan los

@@ -206,7 +206,9 @@ describe('ClaimsReadService', () => {
       });
 
       await conTenant(() =>
-        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).listClaims({}),
+        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).listClaims(
+          {},
+        ),
       );
 
       expect(r.findClaimsPage).toHaveBeenCalledWith(
@@ -227,7 +229,9 @@ describe('ClaimsReadService', () => {
       });
 
       const res = await conTenant(() =>
-        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).getClaim(CLAIM),
+        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).getClaim(
+          CLAIM,
+        ),
       );
 
       expect(r.findClaimInScope).toHaveBeenCalledWith(

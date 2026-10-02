@@ -135,6 +135,7 @@ export type {
   OutboundDispatchResult,
 } from './http/http-dispatcher.service';
 export { assertOutboundUrlAllowed } from './http/ssrf-guard';
+export { buildCorsOptions, loadCorsAllowedOrigins } from './http/cors-origins';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
 export { ParseUuidListPipe } from './http/parse-uuid-list.pipe';
 export { ParseOptionalDatePipe } from './http/parse-optional-date.pipe';

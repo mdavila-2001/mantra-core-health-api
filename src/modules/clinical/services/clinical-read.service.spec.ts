@@ -370,6 +370,56 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     ]);
   });
 
+  it('C3 / P41: expone la decisión de verificación aunque la última revisión sea un cambio de estado', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([
+        { id: 'cond-1', codeConceptId: 'code-1', createdAt: new Date() },
+        { id: 'cond-2', codeConceptId: 'code-2', createdAt: new Date() },
+      ]) // conditions
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    const decision = {
+      outcome: 'CONFIRMED',
+      decidedAt: '2026-09-20T10:00:00.000Z',
+      decidedByProfileId: 'prac-1',
+      reasonText: 'Cuadro compatible',
+      basedOn: { kind: 'NOTE', noteId: 'n-1', ajena: 'no sale' },
+    };
+    const revisiones = [
+      { dataSnapshot: { verification: decision } },
+      { dataSnapshot: { statusChangeReasonText: 'Remite' } },
+    ];
+    // Sin filtro: la última revisión. Con filtro: la última que lo cumple.
+    d.historyRepo.latestBySource.mockImplementation(
+      async (_em: unknown, _e: string, _ids: string[], matches?: any) => {
+        const candidatas = matches ? revisiones.filter(matches) : revisiones;
+        const ultima = candidatas[candidatas.length - 1];
+        return new Map(ultima ? [['cond-1', ultima]] : []);
+      },
+    );
+
+    const resumen = await d.service.getPatientSummary(
+      PERSONA_DEL_TITULAR,
+      50,
+      medica,
+    );
+
+    expect(resumen.conditions[0].lastStatusChangeReasonText).toBe('Remite');
+    expect(resumen.conditions[0].verification).toEqual({
+      outcome: 'CONFIRMED',
+      decidedAt: '2026-09-20T10:00:00.000Z',
+      decidedByProfileId: 'prac-1',
+      reasonText: 'Cuadro compatible',
+      basedOn: { kind: 'NOTE', noteId: 'n-1' },
+    });
+    // Sin decisión, `null`: el front distingue «no decidido» de «sin dato».
+    expect(resumen.conditions[1].verification).toBeNull();
+  });
+
   it('CL-10: expone el motivo del último cambio de estado desde la historia, no del log', async () => {
     const d = build();
     d.vacio.findByPatient

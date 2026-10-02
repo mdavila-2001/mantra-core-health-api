@@ -174,19 +174,19 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       // como `connect` seguido de `disconnect`. Los dos listeners se declaran
       // ANTES de esperar nada, y en la misma promesa, porque cuál de los dos
       // dispara depende de esa carrera y ya no se puede asumir un orden.
-      const resultado = await new Promise<'disconnect' | 'connect_error' | null>(
-        (resolve) => {
-          const timer = setTimeout(() => resolve(null), 4000);
-          socket.once('disconnect', () => {
-            clearTimeout(timer);
-            resolve('disconnect');
-          });
-          socket.once('connect_error', () => {
-            clearTimeout(timer);
-            resolve('connect_error');
-          });
-        },
-      );
+      const resultado = await new Promise<
+        'disconnect' | 'connect_error' | null
+      >((resolve) => {
+        const timer = setTimeout(() => resolve(null), 4000);
+        socket.once('disconnect', () => {
+          clearTimeout(timer);
+          resolve('disconnect');
+        });
+        socket.once('connect_error', () => {
+          clearTimeout(timer);
+          resolve('connect_error');
+        });
+      });
       expect(socket.connected).toBe(false);
       expect(resultado).not.toBeNull();
     } finally {

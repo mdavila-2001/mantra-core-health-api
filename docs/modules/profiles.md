@@ -9,7 +9,7 @@
 # Módulo `profiles`
 
 **Fuente:** [`src/modules/profiles/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/profiles/README.md)
-· 3 controllers · 8 services · 14 repositories · 19 entidades · 26 DTO
+· 4 controllers · 10 services · 14 repositories · 19 entidades · 29 DTO
 
 ---
 
@@ -44,6 +44,12 @@ and Pino logging.
 | 05-12 | `POST /profiles/persons/:personId/decease`                            | Record decease and anonymization                                 | `SECURITY_ADMIN`  | 200  |
 | P5 §3 | `PUT /profiles/practitioners/:profileId/photo`                        | Set the practitioner profile photo from an already uploaded file | owner or platform | 200  |
 | P5 §3 | `DELETE /profiles/practitioners/:profileId/photo`                     | Clear the practitioner profile photo (the file is not deleted)   | owner or platform | 200  |
+| H4 §C | `POST /profiles/patients/search`                                      | UC-05-13 search with the filters in the body (name/CI never in the URL) | clinical or admin | 200  |
+| H4 §C | `POST /profiles/patients/me/dependent-requests`                       | Ask to represent someone who already has an account (by CI or by chosen profile) | own session       | 201  |
+| H4 §C | `GET /profiles/patients/me/dependent-candidates`                      | Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI masked) | own session       | 200  |
+| H4 §C | `GET /profiles/patients/me/dependent-requests/incoming`               | Requests waiting for this account's answer                       | own session       | 200  |
+| H4 §C | `POST /profiles/patients/me/dependent-requests/:id/accept`            | Accept: the requester becomes the representative                 | own session       | 200  |
+| H4 §C | `POST /profiles/patients/me/dependent-requests/:id/reject`            | Reject: no link is created                                       | own session       | 200  |
 
 ## Entities (schema `profiles`)
 
@@ -92,6 +98,18 @@ source_identifier)`; marks the patient `linked`.
 - **Related person (UC-05-10)** — a single active legal guardian per patient (409).
 - **Decease (UC-05-12)** — set `deceased`/`inactive`, revoke active account links
   and portal proxies; optional PII anonymization. Reject a second decease (409).
+- **Dependent requests (Hito 4 §C)** — a request is a `patient_portal_proxies` row
+  born `PROXY_PENDING`; accepting moves it to `PROXY_ACTIVE` (and writes the
+  `related_persons` row, relationship "other", no guardianship), rejecting to
+  `PROXY_REJECTED`. Every permission read filters by `PROXY_ACTIVE` and validity,
+  so a pending or rejected row opens nothing. The person is pointed at by CI
+  **or** by the `patientProfileId` that `dependent-candidates` returned — never
+  both (400). Privacy: "no account" is a single 404 for an unknown CI, a CI with
+  no account and a CI with no patient profile; the own CI/profile is 422; a
+  request that is not yours is 404, same as a missing one; answering twice is
+  409. The name search needs ≥3 letters, returns ≤8 accounts with the CI masked
+  (`••••123`) and leaves out the caller and whoever already represents or was
+  already asked. Both the request and the name search are rate limited.
 
 ## Concepts
 
@@ -101,7 +119,11 @@ exporting `PROFILES_CONCEPT_SEEDS` (for the central seed aggregator) and `PROF`
 
 ## Permissions
 
-All operations require the `SECURITY_ADMIN` global role (`RolesGuard`).
+The governance operations require the `SECURITY_ADMIN` global role
+(`RolesGuard`). The exceptions are the self-service `patients/me/*` routes, which
+only need the session (the subject is resolved server-side and no parameter points
+at another patient), and the patient search (`GET`/`POST patients/search`), open to
+`SECURITY_ADMIN`, `SUPERADMIN`, `CLINICIAN` and `PRACTITIONER`.
 
 ## Logging
 

@@ -105,7 +105,7 @@ const CONVERSACIONES_POR_PRESENCIA = 100;
  *   aunque el hilo no esté abierto.
  */
 @Injectable()
-@WebSocketGateway({ cors: { origin: false } })
+@WebSocketGateway() // CORS: lo impone `CorsIoAdapter` en `main.ts`
 export class CommunityMessagingGateway
   implements OnGatewayInit, OnGatewayDisconnect
 {

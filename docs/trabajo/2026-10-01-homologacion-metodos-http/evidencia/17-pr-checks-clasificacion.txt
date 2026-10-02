@@ -1,0 +1,16 @@
+Clasificación de los checks del PR #527 (regla 80.4)
+
+Corrida 36891957899 · job `docs`: FAIL · clase EXTERNAL (aviso de dependencia, previo a este cambio)
+- Paso que falla: «Auditoría de dependencias runtime — sin vulnerabilidades conocidas» (yarn npm audit).
+- Causa: undici >=8.0.0 <8.10.2 (GHSA-rx4f-c7p8-82vq, severidad moderada, denegación de servicio por cierre
+  sucio de WebSocketStream). Versión 8.9.0 en el árbol, dependiente: node-gyp@npm:13.0.1.
+- Este PR no toca package.json ni yarn.lock.
+- El mismo paso falló en las corridas 36784392323 (justin/article-body-20000), 36872393440
+  (justin/api-pendientes-2026-10-01-dev) y 36872589204 (justin/aseguradora-demo-admin-dev), todas sobre ramas
+  de dev sin este cambio.
+- Pasos en verde del mismo job sobre este PR: Compilar · Verificar tipos · Lint TypeScript — cero errores y
+  cero advertencias.
+- Los pasos posteriores a la auditoría (guardrails, pruebas con cobertura, contrato OpenAPI, artefactos al día,
+  cobertura documental y enlaces) no llegan a ejecutarse mientras ese paso falle.
+
+check `fork-guard`: skipping (no aplica: el PR no viene de un fork).

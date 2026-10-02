@@ -107,8 +107,9 @@ export interface GlossaryBilingualText {
 // --- Relaciones tipadas -----------------------------------------------------
 
 /**
- * Los seis tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
- * (que siguen sirviendo a la jerarquía genérica del catálogo).
+ * Los ocho tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
+ * (que siguen sirviendo a la jerarquía genérica del catálogo). `SYMPTOM` y
+ * `SPECIALTY` se sumaron el 2026-10-01 con las relaciones de Wikidata.
  */
 export type GlossaryRelationType =
   | 'RELATED_TERM'
@@ -116,7 +117,9 @@ export type GlossaryRelationType =
   | 'PROCEDURE'
   | 'TREATMENT'
   | 'ANATOMY'
-  | 'DIAGNOSTIC_TEST';
+  | 'DIAGNOSTIC_TEST'
+  | 'SYMPTOM'
+  | 'SPECIALTY';
 
 /** Todos los tipos de relación del glosario, para `enum` de Swagger y validación. */
 export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
@@ -126,6 +129,8 @@ export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
   'TREATMENT',
   'ANATOMY',
   'DIAGNOSTIC_TEST',
+  'SYMPTOM',
+  'SPECIALTY',
 ];
 
 /** Tipo de relación (API) -> concepto `terminology:relationship:*`. */
@@ -138,6 +143,8 @@ const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
   TREATMENT: CONCEPTS.REL_TREATMENT,
   ANATOMY: CONCEPTS.REL_ANATOMY,
   DIAGNOSTIC_TEST: CONCEPTS.REL_DIAGNOSTIC_TEST,
+  SYMPTOM: CONCEPTS.REL_SYMPTOM,
+  SPECIALTY: CONCEPTS.REL_SPECIALTY,
 };
 
 /** El concepto `relationship_type_concept_id` de un tipo de relación del glosario. */

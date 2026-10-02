@@ -11,6 +11,7 @@ import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   Pharmacies,
   PharmacyPriceLists,
+  PharmacyProducts,
   PharmacySites,
 } from '../entities';
 import type {
@@ -18,6 +19,7 @@ import type {
   PharmacyDetailDto,
   PharmacyDirectoryItemDto,
   PharmacyDirectoryResponseDto,
+  PharmacyProductReadDto,
   PharmacyProductSearchResponseDto,
   PharmacySiteListItemDto,
   PharmacySiteListResponseDto,
@@ -334,19 +336,13 @@ export class PharmacyReadService {
     );
 
     return {
-      items: page.map((row) => ({
-        id: row.id,
-        pharmacyId: row.pharmacyId,
-        pharmacyName: nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
-        productCode: row.productCode,
-        brandName: row.brandName ?? null,
-        genericName: row.genericName ?? null,
-        strengthText: row.strengthText ?? null,
-        packageSizeText: row.packageSizeText ?? null,
-        dosageForm: optionalConcept(conceptById, row.dosageFormConceptId),
-        medication: optionalConcept(conceptById, row.medicationConceptId),
-        requiresPrescription: row.requiresPrescription ?? null,
-      })),
+      items: page.map((row) =>
+        toProductReadDto(
+          row,
+          nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
+          conceptById,
+        ),
+      ),
       limit,
       truncated,
     };
@@ -599,6 +595,30 @@ function nonBlank(value: string | null | undefined): string | null {
 export function displayName(pharmacy: Pharmacies): string {
   const trade = pharmacy.tradeName?.trim();
   return trade && trade !== '' ? trade : pharmacy.legalName;
+}
+
+/**
+ * Un producto como lo lista la búsqueda (`GET /pharmacy/products`), que es
+ * también lo que responde el `PATCH` de edición (P47 §2).
+ */
+export function toProductReadDto(
+  row: PharmacyProducts,
+  pharmacyName: string,
+  concepts: ReadonlyMap<string, CatalogConcepts>,
+): PharmacyProductReadDto {
+  return {
+    id: row.id,
+    pharmacyId: row.pharmacyId,
+    pharmacyName,
+    productCode: row.productCode,
+    brandName: row.brandName ?? null,
+    genericName: row.genericName ?? null,
+    strengthText: row.strengthText ?? null,
+    packageSizeText: row.packageSizeText ?? null,
+    dosageForm: optionalConcept(concepts, row.dosageFormConceptId),
+    medication: optionalConcept(concepts, row.medicationConceptId),
+    requiresPrescription: row.requiresPrescription ?? null,
+  };
 }
 
 /** La dirección en una línea, o null si no tiene ninguna parte con texto. */

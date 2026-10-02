@@ -1,0 +1,5 @@
+$ yarn test --findRelatedTests <pharmacy-read.service, pharmacy-products.service, pharmacy.controller, update-product.dto, dto/index>
+Test Suites: 15 passed, 15 total
+Tests:       209 passed, 209 total
+Time:        32.272 s, estimated 38 s
+exit=0

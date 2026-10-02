@@ -1,0 +1,32 @@
+== numeros de version repetidos en database/SQL/patches (fusion)
+      3 _v4011_
+      2 _v418_
+      3 _v4219_
+      2 _v422_
+      2 _v4220_
+      2 _v426_
+      2 _v427_
+      2 _v429_
+== repetidos con numero >= v4232 (debe estar vacio)
+(fin)
+== v4221 fusion vs origin/test
+exit=0
+== v4221 fusion vs modelo origin/dev
+IDENTICO
+== patches solo en la API (no en el modelo origin/dev)
+2026-09-18_v4219_data_catalog.sql
+2026-09-18_v4220_qa_execution.sql
+2026-09-19_v4219_custodian_tenant_rls.sql
+2026-09-19_v4220_restore_test_runs_objective_status.sql
+2026-09-26_v4232_form_instance_id.sql
+2026-09-26_v4236_service_requests_performer_read_rls.sql
+2026-09-26_v4237_appointment_follow_up_of.sql
+== patches solo en el modelo (no en la API)
+2026-09-26_v4224_data_catalog.sql
+2026-09-26_v4225_qa_execution.sql
+2026-09-26_v4226_custodian_tenant_rls.sql
+2026-09-26_v4227_restore_test_runs_objective_status.sql
+2026-09-26_v4228_pharma_lab.sql
+2026-09-26_v4229_professional_credentials_issuing_city.sql
+2026-09-26_v4230_resource_scope_grants_reason.sql
+2026-09-26_v4231_seed_insurer_accounts.sql

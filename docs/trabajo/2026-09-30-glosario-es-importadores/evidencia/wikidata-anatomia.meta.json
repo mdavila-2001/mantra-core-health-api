@@ -1,0 +1,696 @@
+{
+  "source": "wikidata",
+  "retrievedAt": "2026-09-30T15:20:40.524Z",
+  "sparql": "https://query.wikidata.org/sparql",
+  "itemsConIdTA": 2039,
+  "filas": 1904,
+  "excluidosPorNoSerEstructuraAnatomica": 135,
+  "excluidos": [
+    {
+      "q": "Q1002794",
+      "es": "Foramen Mastoide",
+      "en": "mastoid foramen"
+    },
+    {
+      "q": "Q1002805",
+      "es": "Agujero sacro anterior",
+      "en": "Anterior sacral foramina"
+    },
+    {
+      "q": "Q1032735",
+      "es": "Canales incisivos",
+      "en": "incisive canal"
+    },
+    {
+      "q": "Q1032740",
+      "es": "canal mandibular",
+      "en": "mandibular canal"
+    },
+    {
+      "q": "Q1046019",
+      "es": "Carunculae hymenales",
+      "en": "carunculae hymenales"
+    },
+    {
+      "q": "Q1051911",
+      "es": "cavidad del septo pelúcido",
+      "en": "cavum septum pellucidum"
+    },
+    {
+      "q": "Q11681869",
+      "es": "flexión",
+      "en": "flexion"
+    },
+    {
+      "q": "Q1174313",
+      "es": "Diastema",
+      "en": "diastema"
+    },
+    {
+      "q": "Q1185859",
+      "es": "Fosa romboidal",
+      "en": "Rhomboid fossa"
+    },
+    {
+      "q": "Q1219805",
+      "es": "mucosa",
+      "en": "mucous membrane"
+    },
+    {
+      "q": "Q1384981",
+      "es": "extensión",
+      "en": "extension"
+    },
+    {
+      "q": "Q1425673",
+      "es": "Vértice",
+      "en": "vertex"
+    },
+    {
+      "q": "Q1436580",
+      "es": "Hiato de Winslow",
+      "en": "omental foramen"
+    },
+    {
+      "q": "Q1436590",
+      "es": "Foramen lacerum",
+      "en": "foramen lacerum"
+    },
+    {
+      "q": "Q1436603",
+      "es": "Agujero redondo menor",
+      "en": "foramen spinosum"
+    },
+    {
+      "q": "Q1439390",
+      "es": "Fosa craneal media",
+      "en": "middle cranial fossa"
+    },
+    {
+      "q": "Q1439392",
+      "es": "fosa craneal anterior",
+      "en": "anterior cranial fossa"
+    },
+    {
+      "q": "Q1469743",
+      "es": "Escotadura mandibular",
+      "en": "Mandibular notch"
+    },
+    {
+      "q": "Q1474177",
+      "es": "Articulación pivotante",
+      "en": "Pivot joint"
+    },
+    {
+      "q": "Q14942903",
+      "es": "Fosa (anatomía)",
+      "en": "fossa"
+    },
+    {
+      "q": "Q1501128",
+      "es": "Papila",
+      "en": "Papilla"
+    },
+    {
+      "q": "Q1518719",
+      "es": "conducto auditivo interno",
+      "en": "internal ear canal"
+    },
+    {
+      "q": "Q15223957",
+      "es": "hoyuelos de Venus",
+      "en": "dimples of Venus"
+    },
+    {
+      "q": "Q1547362",
+      "es": "cavidad pélvica",
+      "en": "pelvic cavity"
+    },
+    {
+      "q": "Q1568153",
+      "es": "Pronación",
+      "en": "pronation"
+    },
+    {
+      "q": "Q1568655",
+      "es": "supinación",
+      "en": "supination"
+    },
+    {
+      "q": "Q1591425",
+      "es": "Langer's lines",
+      "en": "Langer's lines"
+    },
+    {
+      "q": "Q1634821",
+      "es": "Foveola gástrica",
+      "en": "gastric pits"
+    },
+    {
+      "q": "Q16935119",
+      "es": "Ganglios lumbares",
+      "en": "Lumbar ganglia"
+    },
+    {
+      "q": "Q174857",
+      "es": "escoliosis",
+      "en": "scoliosis"
+    },
+    {
+      "q": "Q1824021",
+      "es": "Agujeros de Luschka",
+      "en": "lateral aperture"
+    },
+    {
+      "q": "Q1851435",
+      "es": "Foramen redondo mayor",
+      "en": "foramen rotundum"
+    },
+    {
+      "q": "Q1852341",
+      "es": "caudal",
+      "en": "caudal"
+    },
+    {
+      "q": "Q1867507",
+      "es": "anterior",
+      "en": "anterior"
+    },
+    {
+      "q": "Q1880977",
+      "es": "rotador externo",
+      "en": "external rotation"
+    },
+    {
+      "q": "Q192398",
+      "es": "cavidad pleural",
+      "en": "pleural cavity"
+    },
+    {
+      "q": "Q1951981",
+      "es": "craneal",
+      "en": "cranial"
+    },
+    {
+      "q": "Q1983003",
+      "es": "surco",
+      "en": "groove"
+    },
+    {
+      "q": "Q2004163",
+      "es": "Núcleos medianos del tálamo",
+      "en": "midline nuclear group"
+    },
+    {
+      "q": "Q2027917",
+      "es": "Ora serrata",
+      "en": "ora serrata"
+    },
+    {
+      "q": "Q2072063",
+      "es": "ductus arterioso persistente",
+      "en": "patent ductus arteriosus"
+    },
+    {
+      "q": "Q2132510",
+      "es": "posterior",
+      "en": "posterior"
+    },
+    {
+      "q": "Q2141048",
+      "es": "sinostosis",
+      "en": "synostosis"
+    },
+    {
+      "q": "Q21439999",
+      "es": "Región labial",
+      "en": "oral region"
+    },
+    {
+      "q": "Q21441780",
+      "es": "cresta",
+      "en": "crest"
+    },
+    {
+      "q": "Q2301793",
+      "es": "ventana oval",
+      "en": "oval window"
+    },
+    {
+      "q": "Q2333240",
+      "es": "Hilio pulmonar",
+      "en": "hilum of lung"
+    },
+    {
+      "q": "Q248868",
+      "es": "Inion",
+      "en": "inion"
+    },
+    {
+      "q": "Q2490706",
+      "es": "surco Intraparietal",
+      "en": "intraparietal sulcus"
+    },
+    {
+      "q": "Q2560248",
+      "es": "surco",
+      "en": "cerebral sulcus"
+    },
+    {
+      "q": "Q256331",
+      "es": "Fisura esfenopetrosa",
+      "en": "sphenopetrosal fissure"
+    },
+    {
+      "q": "Q263574",
+      "es": "Ventana redonda",
+      "en": "round window"
+    },
+    {
+      "q": "Q265092",
+      "es": "Fisura orbitaria superior",
+      "en": "superior orbital fissure"
+    },
+    {
+      "q": "Q2663245",
+      "es": "proximal",
+      "en": "proximal"
+    },
+    {
+      "q": "Q2685072",
+      "es": "lateral",
+      "en": "lateral"
+    },
+    {
+      "q": "Q2760639",
+      "es": "Helicotrema",
+      "en": "Helicotrema"
+    },
+    {
+      "q": "Q2764039",
+      "es": "distal",
+      "en": "distal"
+    },
+    {
+      "q": "Q277357",
+      "es": "Istmo de las fauces",
+      "en": "isthmus of the fauces"
+    },
+    {
+      "q": "Q28018104",
+      "es": "cavidad sinovial",
+      "en": "synovial cavity"
+    },
+    {
+      "q": "Q2849630",
+      "es": "ángulo iridocorneal",
+      "en": "iridocorneal angle"
+    },
+    {
+      "q": "Q2918521",
+      "es": "Línea arcuata del hueso ilion",
+      "en": "arcuate line of ilium"
+    },
+    {
+      "q": "Q2943378",
+      "es": "Fosa de Gasser",
+      "en": "Trigeminal cave"
+    },
+    {
+      "q": "Q3042992",
+      "es": "decusación",
+      "en": "decussation"
+    },
+    {
+      "q": "Q3063456",
+      "es": "surco cingulado",
+      "en": "cingulate sulcus"
+    },
+    {
+      "q": "Q3063908",
+      "es": "Incisura preoccipital",
+      "en": "preoccipital notch"
+    },
+    {
+      "q": "Q308502",
+      "es": "abducción",
+      "en": "abduction"
+    },
+    {
+      "q": "Q3239259",
+      "es": "Línea arcuata de la vaina de los músculos rectos abdominales",
+      "en": "arcuate line of rectus sheath"
+    },
+    {
+      "q": "Q3319085",
+      "es": "fosa del codo",
+      "en": "cubital fossa"
+    },
+    {
+      "q": "Q3330507",
+      "es": "cavidad abdominopélvica",
+      "en": "abdominopelvic cavity"
+    },
+    {
+      "q": "Q3393764",
+      "es": "Triángulo lumbar",
+      "en": "lumbar triangle"
+    },
+    {
+      "q": "Q3429717",
+      "es": "ventral",
+      "en": "ventral"
+    },
+    {
+      "q": "Q3491648",
+      "es": "Trígono inguinal",
+      "en": "Inguinal triangle"
+    },
+    {
+      "q": "Q353399",
+      "es": "aducción",
+      "en": "adduction"
+    },
+    {
+      "q": "Q4115800",
+      "es": "cavidad pericárdica",
+      "en": "pericardial cavity"
+    },
+    {
+      "q": "Q4116441",
+      "es": "Forámenes olfativos",
+      "en": "Olfactory foramina"
+    },
+    {
+      "q": "Q4119887",
+      "es": "Vestíbulo nasal",
+      "en": "nasal vestibule"
+    },
+    {
+      "q": "Q4180183",
+      "es": "Fosa pterigoidea",
+      "en": "pterygoid fossa"
+    },
+    {
+      "q": "Q445203",
+      "es": "frenillo",
+      "en": "frenulum"
+    },
+    {
+      "q": "Q447782",
+      "es": "vaina tendinosa",
+      "en": "tendon sheath"
+    },
+    {
+      "q": "Q4892383",
+      "es": "espacio de Retzius",
+      "en": "retropubic space"
+    },
+    {
+      "q": "Q492158",
+      "es": "Flexión plantar",
+      "en": "plantarflexion"
+    },
+    {
+      "q": "Q492331",
+      "es": "dorsiflexión",
+      "en": "dorsiflexion"
+    },
+    {
+      "q": "Q4927079",
+      "es": "Lambda",
+      "en": "lambda"
+    },
+    {
+      "q": "Q503944",
+      "es": "fosa craneal posterior",
+      "en": "posterior cranial fossa"
+    },
+    {
+      "q": "Q5122306",
+      "es": "Cisterna magna",
+      "en": "cisterna magna"
+    },
+    {
+      "q": "Q512572",
+      "es": "Pterion",
+      "en": "Pterion peor"
+    },
+    {
+      "q": "Q5129641",
+      "es": "Triángulo clavipectoral",
+      "en": "Clavipectoral triangle"
+    },
+    {
+      "q": "Q5172191",
+      "es": "Ligamento coronario",
+      "en": "coronary ligament of the liver"
+    },
+    {
+      "q": "Q5367024",
+      "es": "antro mastoideo",
+      "en": "mastoid antrum"
+    },
+    {
+      "q": "Q5526791",
+      "es": "Plexo gástrico",
+      "en": "Gastric plexuses"
+    },
+    {
+      "q": "Q5639638",
+      "es": "Rafe palatino",
+      "en": "palatine raphe"
+    },
+    {
+      "q": "Q576202",
+      "es": "Apófisis mamilar",
+      "en": "Mammillary process"
+    },
+    {
+      "q": "Q584922",
+      "es": "acueducto coclear",
+      "en": "cochlear aqueduct"
+    },
+    {
+      "q": "Q6014713",
+      "es": "Foramen incisivo",
+      "en": "incisive foramen"
+    },
+    {
+      "q": "Q6031527",
+      "es": "Ángulo infraesternal",
+      "en": "infrasternal angle"
+    },
+    {
+      "q": "Q606405",
+      "es": "Gonion",
+      "en": "Gonion"
+    },
+    {
+      "q": "Q6077718",
+      "es": "plano horizontal",
+      "en": "horizontal body cut"
+    },
+    {
+      "q": "Q608206",
+      "es": "foramen intervertebral",
+      "en": "intervertebral foramen"
+    },
+    {
+      "q": "Q615895",
+      "es": "Conducto óptico",
+      "en": "optic canal"
+    },
+    {
+      "q": "Q639039",
+      "es": "foramen supraorbitario",
+      "en": "Supraorbital foramen"
+    },
+    {
+      "q": "Q6468858",
+      "es": "punto lagrimal",
+      "en": "lacrimal punctum"
+    },
+    {
+      "q": "Q6491954",
+      "es": "cavidad laríngea",
+      "en": "Laryngeal cavity"
+    },
+    {
+      "q": "Q6491958",
+      "es": "entrada a la laringe",
+      "en": "laryngeal inlet"
+    },
+    {
+      "q": "Q6514826",
+      "es": "receso suprapineal",
+      "en": "suprapineal recess"
+    },
+    {
+      "q": "Q6553361",
+      "es": "Línea terminal",
+      "en": "linea terminalis"
+    },
+    {
+      "q": "Q6642944",
+      "es": "Anexo:Núcleos del tálamo",
+      "en": "list of thalamic nuclei"
+    },
+    {
+      "q": "Q66571821",
+      "es": "occipital",
+      "en": "occipital"
+    },
+    {
+      "q": "Q66571830",
+      "es": "frontal",
+      "en": "frontal"
+    },
+    {
+      "q": "Q66571835",
+      "es": "apical",
+      "en": "apical"
+    },
+    {
+      "q": "Q66571836",
+      "es": "basal",
+      "en": "basal"
+    },
+    {
+      "q": "Q6703136",
+      "es": "Triángulo lumbocostal",
+      "en": "lumbocostal triangle"
+    },
+    {
+      "q": "Q7098801",
+      "es": "receso óptico",
+      "en": "optic recess"
+    },
+    {
+      "q": "Q7128693",
+      "es": "Fisura Palpebral",
+      "en": "palpebral fissure"
+    },
+    {
+      "q": "Q7168384",
+      "es": "seno pericárdico",
+      "en": "pericardial sinus"
+    },
+    {
+      "q": "Q7178844",
+      "es": "Fisura petro-occipital",
+      "en": "petro-occipital fissure"
+    },
+    {
+      "q": "Q718062",
+      "es": "Músculo elevador de la glándula tiroides",
+      "en": "levator muscle of thyroid gland"
+    },
+    {
+      "q": "Q718073",
+      "es": "Agujero estilomastoideo",
+      "en": "stylomastoid foramen"
+    },
+    {
+      "q": "Q7201013",
+      "es": "Articulación plana",
+      "en": "plane joint"
+    },
+    {
+      "q": "Q7249448",
+      "es": "Neurona de proyección",
+      "en": "projection fiber"
+    },
+    {
+      "q": "Q7256998",
+      "es": "Fóvea pterigoidea",
+      "en": "Pterygoid fovea"
+    },
+    {
+      "q": "Q7334367",
+      "es": "Rima vestibular",
+      "en": "Rima vestibuli"
+    },
+    {
+      "q": "Q7631109",
+      "es": "Espacio subdural",
+      "en": "subdural space"
+    },
+    {
+      "q": "Q7631739",
+      "es": "triángulo suboccipital",
+      "en": "suboccipital triangle"
+    },
+    {
+      "q": "Q7644666",
+      "es": "fosa supraclavicular",
+      "en": "Supraclavicular fossa"
+    },
+    {
+      "q": "Q779106",
+      "es": "asterion",
+      "en": "asterion"
+    },
+    {
+      "q": "Q7840109",
+      "es": "triángulo de auscultación",
+      "en": "triangle of auscultation"
+    },
+    {
+      "q": "Q7923449",
+      "es": "acueducto vestibular",
+      "en": "vestibular aqueduct"
+    },
+    {
+      "q": "Q832547",
+      "es": "Foramen parietal",
+      "en": "Parietal foramen"
+    },
+    {
+      "q": "Q837917",
+      "es": "Fosa supraespinosa",
+      "en": "Supraspinatous fossa"
+    },
+    {
+      "q": "Q837926",
+      "es": "fosa infraespinosa",
+      "en": "Infraspinatous fossa"
+    },
+    {
+      "q": "Q848390",
+      "es": "raíz dental",
+      "en": "root canal"
+    },
+    {
+      "q": "Q858590",
+      "es": "narina",
+      "en": "nostril"
+    },
+    {
+      "q": "Q899158",
+      "es": "Foramen infraorbital",
+      "en": "Infraorbital foramen"
+    },
+    {
+      "q": "Q925516",
+      "es": "Fisura orbitaria inferior",
+      "en": "Inferior orbital fissure"
+    },
+    {
+      "q": "Q979384",
+      "es": "Agujero sacro posterior",
+      "en": "posterior sacral foramina"
+    }
+  ],
+  "clasesRecorridas": 2236,
+  "conDescripcion": 708,
+  "conImagen": 1225,
+  "http": {
+    "requests": 76,
+    "retries": 6,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 52337439
+  },
+  "segundos": 397
+}

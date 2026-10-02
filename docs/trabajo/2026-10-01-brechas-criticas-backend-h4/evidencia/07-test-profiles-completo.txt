@@ -1,0 +1,54 @@
+﻿node.exe : Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. 
+Update the import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Jest: importing...mic `import()`.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:7784) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:12884) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13120) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:35876) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 26 passed, 26 total
+Tests:       517 passed, 517 total
+Snapshots:   0 total
+Time:        141.862 s
+Ran all test suites matching src/modules/profiles.

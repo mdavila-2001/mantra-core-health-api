@@ -1,4 +1,5 @@
 import { describe, it, expect, jest } from '@jest/globals';
+import { BadRequestException } from '@nestjs/common';
 import { TerminologyConceptsController } from './terminology-concepts.controller';
 import { type AuthenticatedUser } from '../../../common';
 
@@ -15,6 +16,9 @@ describe('TerminologyConceptsController', () => {
       addRelationship: jest.fn(),
       upsertProperties: jest.fn(),
       deprecateConcept: jest.fn(),
+      searchConcepts: jest.fn(() =>
+        Promise.resolve({ items: [], count: 0, limit: 50 }),
+      ),
     } as any;
     const controller = new TerminologyConceptsController(service);
     return { controller, service };
@@ -81,5 +85,95 @@ describe('TerminologyConceptsController', () => {
 
     expect(service.deprecateConcept).toHaveBeenCalledWith('c-1', dto, user);
     expect(result).toBe(expected);
+  });
+
+  describe('búsqueda paginada del glosario', () => {
+    it('pasa `offset` y `tagValueSetId` al servicio', async () => {
+      const { controller, service } = build();
+
+      await controller.searchConcepts(
+        'cora',
+        undefined,
+        24,
+        undefined,
+        'ES',
+        'true',
+        'vs-cat',
+        'vs-tag',
+        '48',
+      );
+
+      expect(service.searchConcepts).toHaveBeenCalledWith(
+        'cora',
+        undefined,
+        24,
+        undefined,
+        {
+          language: 'ES',
+          valueSetId: 'vs-cat',
+          tagValueSetId: 'vs-tag',
+          offset: 48,
+          includeValueSets: true,
+        },
+      );
+    });
+
+    it('sin `offset` no lo agrega: el resto de las búsquedas sigue igual', async () => {
+      const { controller, service } = build();
+
+      await controller.searchConcepts('x');
+
+      expect(service.searchConcepts).toHaveBeenCalledWith(
+        'x',
+        undefined,
+        50,
+        undefined,
+        { includeValueSets: false },
+      );
+    });
+
+    it.each(['-1', '1.5', 'abc', '1000001'])(
+      'rechaza `offset=%s` con 400',
+      (offset) => {
+        const { controller } = build();
+        expect(() =>
+          controller.searchConcepts(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            offset,
+          ),
+        ).toThrow(BadRequestException);
+      },
+    );
+
+    it('acepta `offset=0`, que es la primera página', async () => {
+      const { controller, service } = build();
+
+      await controller.searchConcepts(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        '0',
+      );
+
+      expect(service.searchConcepts).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        { offset: 0, includeValueSets: false },
+      );
+    });
   });
 });

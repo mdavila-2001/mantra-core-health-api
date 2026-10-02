@@ -6929,7 +6929,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 5000 | Texto del post (sin PHI identificable) | `valor-ejemplo` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 20000 | Texto del post (sin PHI identificable) | `valor-ejemplo` |
 | `postType` | No | `string` | valores: `TEXT`, `POLL` | Tipo de post | `TEXT` |
 | `visibility` | No | `string` | valores: `PUBLIC`, `FOLLOWERS`, `PRIVATE` | Quién puede leer el post. Omitirlo equivale a PUBLIC, que es como se leen las publicaciones anteriores a este campo. | `PUBLIC` |
 | `commentsEnabled` | No | `boolean` | Sin restricción adicional declarada | Comentarios habilitados | `true` |

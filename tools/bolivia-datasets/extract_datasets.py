@@ -53,6 +53,17 @@ FUENTE_COORDS_POR_DEFECTO = RAIZ_API.parent / "mantra-core-health" / "data" / "m
 
 # Marcas de daño de OCR: letras y dígitos mezclados dentro de una palabra, o
 # caracteres que el reconocedor usa para rellenar lo que no pudo leer.
+from ocr_es import LEXICO_VERSIONADO, Lexico, corregir_texto  # noqa: E402
+
+LEXICO_OCR = Lexico.leer(Path(__file__).with_name(LEXICO_VERSIONADO))
+
+
+def corregir_ocr(texto: str) -> tuple[str, list[str]]:
+    """Texto con las letras del OCR corregidas contra el léxico, y la lista de cambios."""
+    corregido, cambios, _ = corregir_texto(texto, LEXICO_OCR)
+    return corregido, cambios
+
+
 PATRON_OCR = re.compile(r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]\d|\d[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{2,}|[|©®~¢£¥§¤]")
 
 
@@ -794,14 +805,28 @@ def extraer_aranceles(fuente: Path) -> dict:
         if clave in repetidos:
             continue
         repetidos.add(clave)
+        # El código sale del texto ORIGINAL, como antes: corregir el OCR no puede
+        # cambiar el id de un procedimiento que ya está en una base viva.
+        codigo_estable = codigo("BO_ARM", f"{especialidad} {grupo} {concepto}", usados)
+        concepto_corregido, cambios = corregir_ocr(concepto)
+        grupo_corregido = corregir_ocr(grupo)[0] if grupo else None
+        # Un «grupo» que trae un importe o una fila pegada no es un encabezado.
+        if grupo_corregido and (re.search(r"\bUMA\b|\d+[.,]\d+", grupo_corregido) or len(grupo_corregido) > 80):
+            grupo_corregido = None
         medicos.append(
             {
-                "code": codigo("BO_ARM", f"{especialidad} {grupo} {concepto}", usados),
+                "code": codigo_estable,
                 "especialidad": especialidad,
-                "grupo": grupo or None,
-                "concepto": concepto,
+                "grupo": grupo_corregido,
+                "concepto": concepto_corregido,
                 "uma": float(uma.replace(",", ".")),
-                "ocrSospechoso": sospechoso_de_ocr(concepto),
+                # Tras corregir las letras, ¿queda algo que el OCR rompió? El importe
+                # nunca se corrige: si la fila es dudosa, se revisa contra el PDF. Un
+                # importe 0 no es un precio («o artrodesis» leído como número, o una
+                # nota del pliego): la fila queda, con su id, pero marcada.
+                "ocrSospechoso": sospechoso_de_ocr(concepto_corregido) or float(uma.replace(",", ".")) == 0,
+                **({"conceptoOriginal": concepto, "correccionesOcr": cambios} if cambios else {}),
+                **({"grupoOriginal": grupo} if grupo and grupo_corregido != grupo else {}),
                 **procedencia(archivo_honorarios, indice),
             }
         )
@@ -840,13 +865,16 @@ def extraer_aranceles(fuente: Path) -> dict:
         if clave_odo in repetidos_odo:
             continue
         repetidos_odo.add(clave_odo)
+        concepto_odo = re.sub(r"^[a-z0-9]\)\s*", "", concepto)
+        concepto_odo_corregido, cambios_odo = corregir_ocr(concepto_odo)
         odontologicos.append(
             {
                 "code": codigo("BO_ARO", f"{seccion} {concepto}", usados_odo),
                 "seccion": seccion,
-                "concepto": re.sub(r"^[a-z0-9]\)\s*", "", concepto),
+                "concepto": concepto_odo_corregido,
                 "precioUsd": float(precio.replace(",", ".")),
-                "ocrSospechoso": sospechoso_de_ocr(concepto),
+                "ocrSospechoso": sospechoso_de_ocr(concepto_odo_corregido),
+                **({"conceptoOriginal": concepto_odo, "correccionesOcr": cambios_odo} if cambios_odo else {}),
                 **procedencia(archivo_odontologico, indice_odo),
             }
         )

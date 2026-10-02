@@ -9,9 +9,14 @@ import { readFileSync } from 'node:fs';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { PreconditionFailedException } from '../../../common';
+import { SearchPatientsQueryDto } from '../dto';
 import { ProfilesPatientsController } from './profiles-patients.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const ID = '11111111-1111-4111-8111-111111111111';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -33,6 +38,7 @@ function build() {
     removeOwnPhoto: mockFn(),
     getOwnDependents: mockFn(),
     registerOwnDependent: mockFn(),
+    searchPatients: mockFn(),
   };
   const controller = new ProfilesPatientsController(patientsService as any);
   return { controller, patientsService };
@@ -195,6 +201,143 @@ describe('ProfilesPatientsController', () => {
       dto,
       titular,
     );
+  });
+
+  describe('POST patients/search: la búsqueda con los filtros en el cuerpo (UC-05-13)', () => {
+    const clinico = { id: 'med-1', roles: ['PRACTITIONER'] } as any;
+
+    /**
+     * Los errores de validación del cuerpo, como los vería el `ValidationPipe`.
+     *
+     * @param cuerpo - Lo que mandaría el cliente.
+     * @returns Las propiedades que no pasaron.
+     */
+    async function erroresDe(cuerpo: unknown): Promise<string[]> {
+      const dto = plainToInstance(SearchPatientsQueryDto, cuerpo);
+      const errores = await validate(dto, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      });
+      return errores.map((e) => e.property);
+    }
+
+    it('delega los filtros del cuerpo con el actor de la sesión, igual que el GET', async () => {
+      const d = build();
+      d.patientsService.searchPatients.mockResolvedValue({
+        items: [],
+        count: 0,
+        limit: 20,
+        nextCursor: null,
+      });
+
+      await expect(
+        d.controller.searchPatientsByBody(
+          {
+            q: 'ana',
+            nationalId: '7654321',
+            issuerAdministrativeAreaConceptId: ID,
+            cursor: 'c-2',
+            limit: 20,
+          },
+          clinico,
+        ),
+      ).resolves.toMatchObject({ count: 0 });
+      expect(d.patientsService.searchPatients).toHaveBeenCalledWith(
+        {
+          query: 'ana',
+          nationalId: '7654321',
+          issuerAdministrativeAreaConceptId: ID,
+          cursor: 'c-2',
+          limit: 20,
+        },
+        clinico,
+      );
+    });
+
+    it('sin tope pide 50, el mismo valor por omisión del GET', async () => {
+      const d = build();
+
+      await d.controller.searchPatientsByBody(
+        { nationalId: '7654321' },
+        clinico,
+      );
+
+      expect(d.patientsService.searchPatients.mock.calls[0][0].limit).toBe(50);
+    });
+
+    it('lo decide el mismo servicio: el 422 por falta de criterio le llega al cliente', async () => {
+      const d = build();
+      d.patientsService.searchPatients.mockRejectedValue(
+        new PreconditionFailedException('Indicá un nombre o un documento'),
+      );
+
+      await expect(
+        d.controller.searchPatientsByBody({}, clinico),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('exige los mismos roles que el GET y responde 200, no 201', () => {
+      // Se lee el descriptor y no el método suelto: es lo que Nest inspecciona,
+      // y evita separar el método de su objeto.
+      const handler = (nombre: string): object =>
+        Object.getOwnPropertyDescriptor(
+          ProfilesPatientsController.prototype,
+          nombre,
+        )?.value as object;
+      const roles = (nombre: string): unknown =>
+        Reflect.getMetadata('requiredRoles', handler(nombre));
+
+      // Igualdad no vacía: dos `undefined` también serían «iguales».
+      expect(roles('searchPatients')).toEqual(
+        expect.arrayContaining(['CLINICIAN', 'PRACTITIONER']),
+      );
+      expect(roles('searchPatientsByBody')).toEqual(roles('searchPatients'));
+      expect(
+        Reflect.getMetadata('__httpCode__', handler('searchPatientsByBody')),
+      ).toBe(200);
+    });
+
+    it('se declara antes que `patients/:profileId`', () => {
+      const fuente = readFileSync(
+        'src/modules/profiles/controllers/profiles-patients.controller.ts',
+        'utf8',
+      );
+      const busqueda = fuente.indexOf("@Post('patients/search')");
+      const porId = fuente.indexOf("@Get('patients/:profileId')");
+
+      expect(busqueda).toBeGreaterThan(-1);
+      expect(busqueda).toBeLessThan(porId);
+    });
+
+    it('acepta los cinco filtros del GET y ninguno más', async () => {
+      expect(
+        await erroresDe({
+          q: 'ana',
+          nationalId: '7654321',
+          issuerAdministrativeAreaConceptId: ID,
+          cursor: 'c-2',
+          limit: 20,
+        }),
+      ).toEqual([]);
+      expect(await erroresDe({})).toEqual([]);
+    });
+
+    it('rechaza un filtro que el contrato no declara, en vez de ignorarlo en silencio', async () => {
+      expect(await erroresDe({ q: 'ana', aboGroupConceptId: ID })).toEqual([
+        'aboGroupConceptId',
+      ]);
+    });
+
+    it('rechaza un tope fuera de 1..500 y un departamento que no es uuid', async () => {
+      expect(await erroresDe({ limit: 0 })).toEqual(['limit']);
+      expect(await erroresDe({ limit: 501 })).toEqual(['limit']);
+      expect(
+        await erroresDe({
+          nationalId: '7654321',
+          issuerAdministrativeAreaConceptId: 'LP',
+        }),
+      ).toEqual(['issuerAdministrativeAreaConceptId']);
+    });
   });
 
   it('las rutas de dependientes se declaran antes que `patients/:profileId`', () => {

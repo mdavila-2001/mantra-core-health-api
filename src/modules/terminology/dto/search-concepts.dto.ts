@@ -109,6 +109,14 @@ export class ConceptSearchItemDto {
   /** Estado publicado del término (`active`, hoy el único que puede llegar al glosario público). */
   @ApiPropertyOptional({ example: 'active' })
   status?: string;
+
+  /**
+   * Miniatura de la imagen del término, si tiene una cargada (propiedad
+   * `glossary-image`). Sólo la URL: la atribución y la licencia viajan en la
+   * ficha, que es donde se muestra la imagen entera con su crédito.
+   */
+  @ApiPropertyOptional({ format: 'uri' })
+  imageThumbnailUrl?: string;
 }
 
 /**
@@ -263,6 +271,14 @@ export class ConceptImageDto {
   /** Estado de revisión de la imagen. */
   @ApiProperty({ enum: ['approved', 'pending', 'rejected'] })
   status!: 'approved' | 'pending' | 'rejected';
+
+  /** Miniatura del mismo activo, para la lista y para no bajar el original de entrada. */
+  @ApiPropertyOptional({ format: 'uri' })
+  thumbnailSource?: string;
+
+  /** Página de la fuente donde se publica la imagen con su licencia (p. ej. Wikimedia Commons). */
+  @ApiPropertyOptional({ format: 'uri' })
+  sourcePage?: string;
 }
 
 /**
@@ -422,4 +438,25 @@ export class SearchConceptsResponseDto {
    */
   @ApiProperty({ description: 'Tope de resultados aplicado' })
   limit!: number;
+
+  /**
+   * Cuántos términos se saltearon antes de esta página.
+   *
+   * Sólo en la lectura del glosario, que es la única que pagina por
+   * desplazamiento: ahí se lee por páginas numeradas y ordenadas por nombre,
+   * y un cursor no deja saltar a la página 40 sin pasar por las 39 de antes.
+   */
+  @ApiPropertyOptional({
+    description: 'Desplazamiento aplicado (sólo glosario)',
+  })
+  offset?: number;
+
+  /**
+   * Cuántos términos coinciden en total, no sólo en esta página.
+   *
+   * Sólo en la lectura del glosario. `count` sigue siendo lo que vino en la
+   * página, como en el resto de las búsquedas.
+   */
+  @ApiPropertyOptional({ description: 'Total que coincide (sólo glosario)' })
+  total?: number;
 }
