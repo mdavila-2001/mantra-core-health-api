@@ -39,6 +39,11 @@ export interface BoliviaFeeScheduleResult {
   properties: number;
   /** Membresías de la expansión creadas. */
   memberships: number;
+  /**
+   * Filas ya existentes que el seed corrigió: nombres con el OCR enmendado,
+   * propiedades con otro valor y marcas de revisión que dejaron de aplicar.
+   */
+  reconciled: number;
 }
 
 /** Cuántos ids se consultan por vuelta contra la base. */
@@ -69,11 +74,17 @@ const TAMANO_DE_BLOQUE = 500;
  * llevan la propiedad `procedure:review-needed`, que es lo que permite
  * revisarlas sin volver al PDF.
  *
- * Ese detector encuentra sólo lo obvio —letras y dígitos mezclados dentro de una
- * palabra—, así que **no llevar la marca no certifica nada**. Se carga igual
- * porque un nomenclador incompleto no sirve para cotizar y porque el texto
- * crudo, marcado, es honesto; inventar la corrección sería peor: un nombre de
- * procedimiento plausible pero falso no se distingue del bueno.
+ * Desde el 2026-10-01 el extractor (`tools/bolivia-datasets/ocr_es.py`) corrige
+ * SÓLO LETRAS y sólo cuando el resultado es una palabra de un léxico oficial en
+ * castellano (CIE-10-ES, MedlinePlus, fichas técnicas de CIMA): «Resecci6n» →
+ * «Resección», «quirdrgico» → «quirúrgico». El importe nunca se toca, el código
+ * sigue saliendo del texto original (los ids no cambian) y lo que no se resuelve
+ * con certeza conserva la marca. Inventar la corrección seguiría siendo peor: un
+ * nombre plausible pero falso no se distingue del bueno.
+ *
+ * Como el seed antes sólo insertaba, una base viva se quedaba con el texto viejo
+ * para siempre. `reconcile` alinea las filas existentes con el dataset: nombre,
+ * propiedades y marca de revisión.
  *
  * Idempotente por ids deterministas, como el resto de la cadena. Corre después
  * de `TerminologySeedService`: los conceptos cuelgan de
@@ -110,6 +121,7 @@ export class BoliviaFeeScheduleSeedService {
       procedures: 0,
       properties: 0,
       memberships: 0,
+      reconciled: 0,
     };
 
     // --- Nivel 1: el conjunto ---
@@ -166,13 +178,15 @@ export class BoliviaFeeScheduleSeedService {
     contadores.procedures += await this.seedConcepts(em, now);
     contadores.properties += await this.seedProperties(em, now);
     contadores.memberships += await this.seedMemberships(em, now);
+    contadores.reconciled += await this.reconcile(em, now);
 
     const total =
       contadores.valueSets +
       contadores.versions +
       contadores.procedures +
       contadores.properties +
-      contadores.memberships;
+      contadores.memberships +
+      contadores.reconciled;
     if (total > 0) {
       this.logger.info(
         { operation: 'seed.bolivia-fee-schedule', ...contadores },
@@ -180,6 +194,66 @@ export class BoliviaFeeScheduleSeedService {
       );
     }
     return contadores;
+  }
+
+  /**
+   * Alinea con el dataset las filas que ya estaban en la base: el nombre del
+   * procedimiento, el valor de cada propiedad declarada, y borra las propiedades
+   * que el dataset ya no declara (la marca de revisión de una fila que quedó
+   * limpia, el grupo que resultó ser una fila pegada).
+   *
+   * @param em - Contexto de persistencia.
+   * @param now - Instante de la corrida.
+   * @returns Cuántas filas cambió o borró.
+   */
+  private async reconcile(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    let cambios = 0;
+    const nombres = new Map(
+      BOLIVIA_PROCEDURES.map((p) => [boFeeConceptId(p.code), p.nombre]),
+    );
+    const declaradas = new Map(
+      BOLIVIA_PROCEDURES.flatMap((p) =>
+        this.propertiesOf(p).map(
+          ([codigo, valor]) =>
+            [boFeePropertyId(p.code, codigo), valor] as const,
+        ),
+      ),
+    );
+    const codigosPropios = Object.values(BO_FEE_PROPERTY_CODES);
+    const ids = [...nombres.keys()];
+    for (let i = 0; i < ids.length; i += TAMANO_DE_BLOQUE) {
+      const bloque = ids.slice(i, i + TAMANO_DE_BLOQUE);
+      for (const concepto of await em.find(CatalogConcepts, {
+        id: { $in: bloque },
+      })) {
+        const nombre = nombres.get(concepto.id);
+        if (nombre !== undefined && concepto.display !== nombre) {
+          concepto.display = nombre;
+          concepto.updatedAt = now;
+          cambios += 1;
+        }
+      }
+      const propiedades = await em.find(ConceptProperties, {
+        conceptId: { $in: bloque },
+        propertyCode: { $in: codigosPropios },
+      });
+      for (const propiedad of propiedades) {
+        const valor = declaradas.get(propiedad.id);
+        if (valor === undefined) {
+          em.remove(propiedad);
+          cambios += 1;
+        } else if (propiedad.valueJson !== valor) {
+          propiedad.valueJson = valor;
+          propiedad.updatedAt = now;
+          cambios += 1;
+        }
+      }
+      await em.flush();
+    }
+    return cambios;
   }
 
   /** Rompe si el nomenclador declara dos veces el mismo código. */

@@ -17,9 +17,9 @@ describe('Catálogo curado del glosario médico', () => {
     expect(GLOSSARY_TERMS).toHaveLength(69);
   });
 
-  it('declara exactamente 12 categorías y 16 etiquetas', () => {
+  it('declara exactamente 12 categorías y 21 etiquetas', () => {
     expect(GLOSSARY_CATEGORIES).toHaveLength(12);
-    expect(GLOSSARY_TAGS).toHaveLength(16);
+    expect(GLOSSARY_TAGS).toHaveLength(21);
   });
 
   it('cada slug es único', () => {

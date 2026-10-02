@@ -136,6 +136,7 @@ async function main() {
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   const result = [];
+  const pendientes = [];
   try {
     await assertPrerequisites(client, valueSetCodes);
     for (const p of plan) {
@@ -167,12 +168,18 @@ async function main() {
       r.designations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], p.designations, ['uuid', 'uuid', 'uuid', 'uuid', null, null]);
       r.properties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], p.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
       r.memberships = await insertMany(client, 'value_set_members', ['id', 'value_set_version_id', 'concept_id', 'included'], p.memberships, ['uuid', 'uuid', 'uuid', null]);
+      pendientes.push({ p, r, startedAt, sourceId: src[0].id, versionId: csv[0].id });
+    }
+    // Segunda pasada: las relaciones cruzan sistemas (una enfermedad de CIE-10-ES
+    // apunta a un síntoma de Wikidata o a un medicamento de CIMA), así que van
+    // cuando ya existen TODOS los conceptos; si no, la FK del destino rechaza el lote.
+    for (const { p, r, startedAt, sourceId, versionId } of pendientes) {
       r.relationships = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], p.relationships, ['uuid', 'uuid', 'uuid', 'uuid', null]);
       const total = r.concepts + r.designations + r.properties + r.memberships + r.relationships;
       await client.query(
         `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
          VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
-        [md5uuid(`mantra:glossary-es:batch:${p.codeSystem.internalCode}:${startedAt.toISOString()}`), src[0].id, csv[0].id, startedAt, p.rows.length, total, md5uuid(p.rows.map((x) => x.slug).join('|'))],
+        [md5uuid(`mantra:glossary-es:batch:${p.codeSystem.internalCode}:${startedAt.toISOString()}`), sourceId, versionId, startedAt, p.rows.length, total, md5uuid(p.rows.map((x) => x.slug).join('|'))],
       );
       result.push(r);
       console.log(`[load] ${JSON.stringify(r)}`);

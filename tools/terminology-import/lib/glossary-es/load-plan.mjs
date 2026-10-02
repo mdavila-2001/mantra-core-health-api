@@ -36,6 +36,8 @@ export const RELATION_TYPE = {
   TREATMENT: deterministicId('terminology:relationship:treatment'),
   ANATOMY: deterministicId('terminology:relationship:anatomy'),
   DIAGNOSTIC_TEST: deterministicId('terminology:relationship:diagnostic-test'),
+  SYMPTOM: deterministicId('terminology:relationship:symptom'),
+  SPECIALTY: deterministicId('terminology:relationship:specialty'),
 };
 
 /** Ids de value set / versión / miembro, idénticos a `dynamic-enum-catalog.ts`. */
@@ -97,6 +99,35 @@ export const CODE_SYSTEMS = {
     name: 'Wikidata — anatomía con identificador TA98/TA2',
     version: null,
   },
+  'inlasa-aranceles-2026': {
+    sourceCode: 'INLASA_BO',
+    sourceName: 'INLASA — Instituto Nacional de Laboratorios de Salud (Bolivia)',
+    owner: 'Instituto Nacional de Laboratorios de Salud «Dr. Néstor Morales Villazón», Ministerio de Salud y Deportes',
+    officialUrl: 'https://inlasa.gob.bo/servicios-y-aranceles-del-inlasa/',
+    name: 'INLASA — Listado de Servicios y Aranceles 2026 (análisis a pacientes)',
+    version: '2026',
+  },
+  // Fichas que crea `wikidata-relations.mjs` para los destinos de una relación
+  // (síntoma, especialidad…) que el corpus no tenía. Una fuente, cinco sistemas.
+  ...Object.fromEntries(
+    [
+      ['wikidata-sintoma', 'síntomas y signos'],
+      ['wikidata-especialidad', 'especialidades sanitarias'],
+      ['wikidata-tratamiento', 'tratamientos y terapias'],
+      ['wikidata-medicamento', 'medicamentos con código ATC'],
+      ['wikidata-prueba', 'exámenes médicos'],
+    ].map(([codeSystem, nombre]) => [
+      codeSystem,
+      {
+        sourceCode: 'WIKIDATA',
+        sourceName: 'Wikidata (Wikimedia Foundation, CC0)',
+        owner: 'Comunidad de Wikidata / Wikimedia Foundation',
+        officialUrl: 'https://www.wikidata.org/',
+        name: `Wikidata — ${nombre} declarados por las enfermedades`,
+        version: null,
+      },
+    ]),
+  ),
   'loinc-es': {
     sourceCode: 'REGENSTRIEF_LOINC_ES',
     sourceName: 'LOINC — variante lingüística en castellano (Regenstrief)',
@@ -154,6 +185,8 @@ export function propertiesFor(row) {
     ...(row.plainSummaryEs ? js('glossary-plain-summary', { es: row.plainSummaryEs }) : []),
     ...js('plain_summary_source', row.plainSummarySource ?? null),
     ...js('sections', row.sections ?? null),
+    ...str('official_name', row.officialName ?? null),
+    ...js('reference_price', row.referencePrice ?? null),
     ...js('glossary-provenance', { reviewStatus: row.reviewStatus, categoryRule: row.categoryRule ?? null, imageMatch: row.imageMatch ?? null }),
   ];
   if (row.imageUrl) {

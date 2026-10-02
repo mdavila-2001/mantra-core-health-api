@@ -44,9 +44,21 @@ import vademecumDataset from './data/vademecum/vademecum.dataset.json';
  * Se flushea por niveles porque las FK son columnas uuid planas y MikroORM no
  * ordena inserts entre entidades que no están relacionadas por referencia.
  *
- * > No es un vademécum clínico: son 17 medicamentos tipeados a mano para poder
- * > ejercitar la receta en desarrollo. La carga real es de datos —una versión
- * > nueva del code system— y no de código.
+ * ## La LINAME 2022-2024 (desde 2026-10-01)
+ *
+ * El catálogo era de 17 medicamentos tipeados a mano, con nombre y formas en
+ * inglés. Ahora suma la Lista Nacional de Medicamentos Esenciales de Bolivia
+ * (fuente `LINAME_BO`): 489 conceptos, uno por ATC nivel 5, con el nombre
+ * oficial en castellano, sus formas y concentraciones (`dose_forms`,
+ * `strengths`) y sus presentaciones con código LINAME y uso restringido
+ * (`liname_presentations`). Lo genera
+ * `tools/bolivia-datasets/build_vademecum_liname.py` desde
+ * `tools/bolivia-datasets/data/liname-2022-2024.json`. La LINAME no trae
+ * indicaciones, dosis ni contraindicaciones, y el dataset tampoco.
+ *
+ * Además de insertar lo que falta, {@link reconcile} corrige en una base ya
+ * cargada el nombre, la definición, la designación preferida y el valor de las
+ * propiedades, para que los 17 de desarrollo dejen de mostrarse en inglés.
  *
  * ## B-13 — sin contenido clínico ni fuentes que no lo respaldan
  *
@@ -63,6 +75,21 @@ import vademecumDataset from './data/vademecum/vademecum.dataset.json';
  * interacciones (`clinical_ext.drug_interactions`) no se tocan: las consume
  * CDS y su fuente es una decisión de producto aparte (P-25-1).
  */
+/**
+ * JSON con las claves de cada objeto ordenadas. Postgres guarda `jsonb` con sus
+ * propias reglas de orden de claves: comparar con `JSON.stringify` a secas daba
+ * distinto en cada arranque y «corregía» las mismas 488 filas una y otra vez.
+ */
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v: unknown) =>
+    v !== null && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(
+          Object.entries(v).sort(([a], [b]) => a.localeCompare(b)),
+        )
+      : v,
+  );
+}
+
 @Injectable()
 export class VademecumSeedService {
   /**
@@ -102,6 +129,8 @@ export class VademecumSeedService {
      * se saltó por `skipped`.
      */
     inserted: number;
+    /** Filas ya presentes que se corrigieron para que digan lo que dice el dataset. */
+    reconciled?: number;
     /** Motivo por el que no se hizo nada, si se saltó. */
     skipped?: 'production-not-allowed';
   }> {
@@ -136,14 +165,16 @@ export class VademecumSeedService {
     inserted += await this.seedProperties(em, now, fuentes.idReal);
     inserted += await this.seedInteractions(em, now, fuentes.idReal);
     await em.flush();
+    const reconciled = await this.reconcile(em, now, fuentes.idReal);
+    await em.flush();
 
-    if (inserted > 0) {
+    if (inserted > 0 || reconciled > 0) {
       this.logger.info(
-        { inserted, medications: vademecumDataset.concepts.length },
-        'Vademécum de desarrollo materializado',
+        { inserted, reconciled, medications: vademecumDataset.concepts.length },
+        'Vademécum materializado',
       );
     }
-    return { inserted };
+    return { inserted, reconciled };
   }
 
   /** Las fuentes de terminología que el catálogo cita (ATC, RxNorm, SNOMED). */
@@ -430,6 +461,71 @@ export class VademecumSeedService {
   }
 
   /** Las interacciones conocidas entre pares de sustancias del catálogo. */
+  /**
+   * Corrige lo que una base ya cargada tiene distinto del dataset: el nombre y
+   * la definición de cada concepto, cuál designación es la preferida y el valor
+   * de cada propiedad. Sin esta pasada, el cambio de los 17 medicamentos de
+   * desarrollo al nombre oficial en castellano de la LINAME —y sus formas y
+   * concentraciones— sólo llegaba a una base nueva: el seed sólo inserta lo que
+   * falta. No borra nada.
+   */
+  private async reconcile(
+    em: EntityManager,
+    now: Date,
+    idReal: Map<string, string>,
+  ): Promise<number> {
+    let reconciled = 0;
+    const real = (id: string) => VademecumSeedService.real(idReal, id);
+
+    const concepts = await em.find(CatalogConcepts, {
+      id: { $in: vademecumDataset.concepts.map((c) => real(c.id)) },
+    });
+    const conceptById = new Map(concepts.map((c) => [c.id, c]));
+    for (const concept of vademecumDataset.concepts) {
+      const row = conceptById.get(real(concept.id));
+      if (row === undefined) continue;
+      const definition = concept.definition ?? undefined;
+      if (
+        row.display === concept.display &&
+        (row.definition ?? undefined) === definition
+      )
+        continue;
+      row.display = concept.display;
+      row.definition = definition;
+      row.updatedAt = now;
+      reconciled++;
+    }
+
+    const designations = await em.find(ConceptDesignations, {
+      id: { $in: vademecumDataset.designations.map((d) => d.id) },
+    });
+    const designationById = new Map(designations.map((d) => [d.id, d]));
+    for (const designation of vademecumDataset.designations) {
+      const row = designationById.get(designation.id);
+      const preferred = designation.preferred ?? undefined;
+      if (row === undefined || (row.preferred ?? undefined) === preferred)
+        continue;
+      row.preferred = preferred;
+      row.updatedAt = now;
+      reconciled++;
+    }
+
+    const properties = await em.find(ConceptProperties, {
+      id: { $in: vademecumDataset.properties.map((p) => p.id) },
+    });
+    const propertyById = new Map(properties.map((p) => [p.id, p]));
+    for (const property of vademecumDataset.properties) {
+      const row = propertyById.get(property.id);
+      if (row === undefined) continue;
+      if (canonicalJson(row.valueJson) === canonicalJson(property.value_json))
+        continue;
+      row.valueJson = property.value_json;
+      row.updatedAt = now;
+      reconciled++;
+    }
+    return reconciled;
+  }
+
   private async seedInteractions(
     em: EntityManager,
     now: Date,
