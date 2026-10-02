@@ -51,6 +51,10 @@ import { DataAccessLogRepository } from '../../audit/repositories';
 import { HistoryRepository } from '../../audit/repositories';
 import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
+import {
+  hasVerification,
+  verificationFromSnapshot,
+} from './condition-verification';
 
 /** Recurso que se asienta en `audit.data_access_log` al leer el resumen. */
 const SUMMARY_RESOURCE_TYPE = 'PATIENT_CLINICAL_SUMMARY';
@@ -680,6 +684,14 @@ export class ClinicalReadService {
       'conditions',
       cutConditions.map((c) => c.id),
     );
+    // C3 / P41: la decisión de verificación, de la última revisión que la
+    // trae — un cambio de estado posterior no la borra.
+    const verificationHistory = await this.historyRepo.latestBySource(
+      em,
+      'conditions',
+      cutConditions.map((c) => c.id),
+      (revision) => hasVerification(revision.dataSnapshot),
+    );
     // BR-14 (CL-11): reacciones de cada alergia, en lote.
     const reactionsByAllergy = new Map<
       string,
@@ -729,6 +741,9 @@ export class ClinicalReadService {
           resolvedAt: row.resolvedAt,
           noteText: row.noteText,
           lastStatusChangeReasonText,
+          verification: verificationFromSnapshot(
+            verificationHistory.get(row.id)?.dataSnapshot,
+          ),
           createdAt: row.createdAt,
         };
       }),

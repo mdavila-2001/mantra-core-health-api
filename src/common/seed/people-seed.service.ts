@@ -146,10 +146,7 @@ export class PeopleSeedService {
     let pacientesTexto: string;
     try {
       medicosTexto = readFileSync(join(origen, ARCHIVO_MEDICOS), 'utf-8');
-      pacientesTexto = readFileSync(
-        join(origen, ARCHIVO_PACIENTES),
-        'utf-8',
-      );
+      pacientesTexto = readFileSync(join(origen, ARCHIVO_PACIENTES), 'utf-8');
     } catch (error) {
       this.logger.warn(
         { operation: 'seed.people', sourceDir: origen, err: error },
@@ -287,9 +284,10 @@ export class PeopleSeedService {
     return existente !== null;
   }
 
+  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
   private async altaPractitioner(
     dto: RegisterPractitionerDto,
-  ): Promise<'created' | 'existing' | string> {
+  ): Promise<string> {
     if (await this.existeCredencial(dto.email)) return 'existing';
     try {
       await this.practitionerRegistration.registerPractitioner(dto);
@@ -305,9 +303,8 @@ export class PeopleSeedService {
     }
   }
 
-  private async altaPatient(
-    dto: RegisterPatientDto,
-  ): Promise<'created' | 'existing' | string> {
+  /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
+  private async altaPatient(dto: RegisterPatientDto): Promise<string> {
     if (await this.existeCredencial(dto.nationalId)) return 'existing';
     try {
       await this.patientRegistration.registerPatient(dto);

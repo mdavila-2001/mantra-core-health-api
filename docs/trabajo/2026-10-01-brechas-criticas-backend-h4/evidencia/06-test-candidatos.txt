@@ -1,0 +1,17 @@
+﻿node.exe : (node:32260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:32260) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36560) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 2 passed, 2 total
+Tests:       50 passed, 50 total
+Snapshots:   0 total
+Time:        12.849 s
+Ran all test suites matching src/modules/profiles/services/dependent-link-requests.service.spec.ts|src/modules/profiles
+/controllers/profiles-dependent-requests.controller.spec.ts.

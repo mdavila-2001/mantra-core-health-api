@@ -16,3 +16,4 @@ export * from './insurance-portability.service';
 export * from './insurance-portability-pdf.service';
 export * from './practitioner-settlement-batches.service';
 export * from './insurance-campaigns.service';
+export * from './insurer-received-claims.service';

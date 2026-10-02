@@ -176,6 +176,10 @@ x-app-env: &app-env
   # que cualquiera falsifique su IP con una cabecera `X-Forwarded-For`.
   TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
 
+  # Orígenes del frontend si vive en otro dominio (Hostinger). Vacío = CORS
+  # denegado, que es lo correcto con el nginx del frontend delante.
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+
   # --- Primer administrador ----------------------------------------------
   # `BOOTSTRAP_ADMIN_ALLOW_PRODUCTION` tiene que ser `true` explícito o el seed
   # se salta en producción y no queda NINGUNA cuenta con SECURITY_ADMIN: sin

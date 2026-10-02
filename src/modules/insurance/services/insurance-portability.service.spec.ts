@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
+import { INS } from '../insurance.concepts';
 import { InsurancePortabilityService } from './insurance-portability.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -388,5 +389,63 @@ describe('InsurancePortabilityService.verify', () => {
     const result = await service.verify('a'.repeat(64));
 
     expect(result.generatedAt).toBe(sealedAt.toISOString());
+  });
+});
+
+describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () => {
+  /** Una solicitud mínima: el resumen sólo lee el id, la fecha y los importes. */
+  const solicitud = (claimId: string) => ({
+    claimId,
+    submittedAt: '2026-09-01T10:00:00.000Z',
+    billedTotal: '100.00',
+    approvedTotal: null,
+    patientTotal: null,
+    deniedTotal: null,
+  });
+
+  it('cuenta una aprobación parcial como aprobada y no como pendiente', () => {
+    const { service } = build();
+    const resultados = new Map<string, string | null>([
+      ['aprobada', INS.ADJ_OUTCOME_APPROVED],
+      ['parcial', INS.ADJ_OUTCOME_PARTIAL],
+      ['denegada', INS.ADJ_OUTCOME_DENIED],
+      ['sin-dictamen', null],
+    ]);
+    const solicitudes = ['aprobada', 'parcial', 'denegada', 'sin-dictamen'].map(
+      solicitud,
+    );
+
+    const stats = (service as any).periodStats(
+      solicitudes,
+      null,
+      [],
+      new Date('2026-10-01T00:00:00.000Z'),
+      resultados,
+    );
+
+    expect(stats).toMatchObject({
+      claimsCount: 4,
+      approvedCount: 2,
+      deniedCount: 1,
+      pendingCount: 1,
+    });
+  });
+
+  it('una solicitud que no aparece en los resultados queda pendiente', () => {
+    const { service } = build();
+
+    const stats = (service as any).periodStats(
+      [solicitud('desconocida')],
+      null,
+      [],
+      new Date('2026-10-01T00:00:00.000Z'),
+      new Map(),
+    );
+
+    expect(stats).toMatchObject({
+      approvedCount: 0,
+      deniedCount: 0,
+      pendingCount: 1,
+    });
   });
 });

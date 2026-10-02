@@ -1,0 +1,19 @@
+merge: reconciliación bidireccional de origin/test en dev (Hito 1)
+
+Trae a dev los 149 commits de la rama test (PRs #470-#487, #504, #505, #509,
+#510, #512, #514, #515, #516) conservando los 14 propios de dev (#511 CORS
+por entorno, #513 claims-read, #517/#518/#519 glosario en castellano).
+
+Fusión limpia (git merge-tree exit 0, árbol fb0bd909). Auto-merges aditivos,
+sin edición manual, en: docker-compose.coolify.yml, package.json,
+src/common/index.ts y community-messaging.gateway.ts (CORS en CorsIoAdapter
+y autenticación en afterInit). Los cuatro insurance/claims-read* son
+byte-idénticos en ambas ramas.
+
+No regenera catálogos ORM, DDL, openapi/ ni docs generados. Los patches
+v4.2.32/36/37 de database/SQL/patches quedan pendientes de promoción al
+modelo (seguimiento aparte).
+
+Plan: docs/trabajo/2026-09-30-sincronizacion-backend-dev-test/
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>

@@ -315,6 +315,45 @@ export class ProfilesPatientsController {
   }
 
   /**
+   * UC-05-13: la misma búsqueda de pacientes, con los filtros en el **cuerpo**.
+   *
+   * `q` es el nombre de una persona y `nationalId` su documento: en la URL de
+   * una petición quedan en los logs de acceso de cualquier proxy, en el
+   * historial del navegador y en el `Referer`. Es el camino que usa el cliente;
+   * el `GET patients` sigue vivo con el mismo DTO, los mismos roles y la misma
+   * respuesta, y se conserva sólo por compatibilidad.
+   *
+   * Responde `200` y no `201`: no crea nada. Va declarada junto al `GET` y
+   * antes de cualquier `patients/:profileId` por lo de siempre con las rutas de
+   * Nest: se resuelven por orden de declaración.
+   *
+   * Los filtros son exactamente los del `GET` (`q`, `nationalId`,
+   * `issuerAdministrativeAreaConceptId`, `cursor`, `limit`). Una clave de más
+   * responde `400`: ignorar en silencio un filtro devolvería filas que el
+   * llamador cree haber descartado.
+   *
+   * @param body - Filtros de la búsqueda.
+   * @param actor - Quien pregunta; decide el alcance y si necesita criterio.
+   * @returns Página de pacientes.
+   */
+  @Post('patients/search')
+  @HttpCode(HttpStatus.OK)
+  @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
+  @ApiOperation({
+    summary:
+      'UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo',
+    description:
+      'Igual que `GET /profiles/patients`, pero el nombre y el documento viajan en el cuerpo y no en la URL. `CLINICIAN` y `PRACTITIONER` deben aportar `q` o `nationalId`: sin ninguno responde 422.',
+  })
+  @ApiOkResponse({ type: SearchPatientsResponseDto })
+  searchPatientsByBody(
+    @Body() body: SearchPatientsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
+    return this.searchPatients(body, actor);
+  }
+
+  /**
    * UC-05-09·L. Va **antes** que `patients/:profileId` en el archivo por lo de
    * siempre con las rutas de Nest: se resuelven por orden de declaración, y
    * `merge-events` encajaría en el parámetro y devolvería un 400 por uuid mal

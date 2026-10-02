@@ -15,7 +15,8 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
 | 3.2 (T-26) | `/clinical/service-requests/duplicate-check` | POST | Pre-validar duplicidad de estudios (antiduplicación) |
 | UC-08-06 | `/clinical/diagnostic-reports` | POST | Emitir reporte diagnóstico desde la orden |
 | UC-08-07 | `/clinical/diagnostic-reports/{id}/release` | POST | Liberar resultados del reporte |
-| UC-08-08 | `/clinical/conditions` | POST | Registrar condición/diagnóstico |
+| UC-08-08 | `/clinical/conditions` | POST | Registrar condición/diagnóstico (presuntivo o confirmado) |
+| C3 / P41 | `/clinical/conditions/{id}/verification` | POST | Confirmar o refutar un diagnóstico presuntivo, con motivo o evidencia |
 | UC-08-09 | `/clinical/allergy-intolerances` | POST | Registrar alergia con reacciones |
 | UC-08-10 | `/clinical/medication-requests` | POST | Prescribir medicación |
 | UC-08-11 | `/clinical/medication-records` | POST | Administrar/registrar medicación |
@@ -52,6 +53,18 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
   episodio activo único por (tenant, paciente); condición activa única por
   (tenant, paciente, código); alergia activa única por (tenant, paciente,
   sustancia); dosis única por (tenant, paciente, vacuna, número).
+- **Verificación de diagnósticos (C3 / P41)**: un diagnóstico nace confirmado, o
+  presuntivo (`COND_PROVISIONAL`) si el alta manda `verificationStatusConceptId`;
+  refutado (`COND_REFUTED`) no es un estado de alta. `POST
+  /clinical/conditions/{id}/verification` lleva un presuntivo a confirmado
+  (activo) o refutado (inactivo, con `resolvedAt`). Ambos son terminales: decidir
+  de nuevo es 409. Exige **motivo o evidencia** (422 si faltan las dos); la
+  evidencia (`NOTE` o `ANALYSIS`) debe ser **del mismo paciente**, y una ajena
+  responde como una inexistente (422). Al confirmar, inicio y fin esperado salvo
+  curso crónico. Escribe con la misma política que `change-status` (turno, consulta
+  o relación asistencial vigentes) y el autor es `practitionerProfileId` de la
+  sesión (403 si no tiene perfil profesional). La decisión no tiene columna: se
+  sella en `audit.conditions_history.data_snapshot.verification` (D-BR14-04).
 - **Concurrencia optimista**: `close`, `amend` y `release` aceptan
   `expectedRowVersion` y lanzan `ConcurrencyConflictException` (409) si no coincide.
 - **Transiciones**: `close` exige encuentro `in-progress`; `amend` exige

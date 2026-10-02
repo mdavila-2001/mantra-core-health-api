@@ -103,6 +103,13 @@ export type NotificationDestinationType =
    */
   | 'CARE_RELATIONSHIP_REQUEST'
   /**
+   * Una solicitud de representar a quien ya tiene cuenta (dependiente adulto):
+   * el pedido le llega a esa persona y la respuesta vuelve a quien lo hizo. El
+   * `id` es el del apoderamiento pendiente. El front ya la enruta a la pantalla
+   * de dependientes.
+   */
+  | 'DEPENDENT_LINK_REQUEST'
+  /**
    * Una orden de estudios que el médico dejó al paciente (MCH-027). Aditivo,
    * mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su ruta
    * (la lista de órdenes del paciente) al conectar.

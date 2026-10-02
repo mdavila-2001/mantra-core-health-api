@@ -26,6 +26,7 @@ import {
 import { ValueSetsService } from '../services';
 import {
   CreateValueSetDto,
+  GlossaryFacetsResponseDto,
   ReadValueSetExpansionResponseDto,
   SearchValueSetsResponseDto,
   ValueSetResponseDto,
@@ -155,6 +156,33 @@ export class TerminologyValueSetsController {
       cursor,
       limit: limit ?? DEFAULT_VALUE_SET_PAGE_SIZE,
     });
+  }
+
+  /**
+   * Las facetas del glosario médico: cuántos términos publicados tiene cada
+   * categoría y cada etiqueta, y qué etiquetas aparecen dentro de cada
+   * categoría.
+   *
+   * Es lo que pinta la rejilla de categorías sin traer términos. Sale de una
+   * consulta agregada: con el glosario en cientos de miles de términos, la
+   * alternativa —derivarlo en el navegador recorriendo el corpus— dejó de
+   * existir.
+   *
+   * Público por lo mismo que el listado de arriba: devuelve códigos, nombres y
+   * conteos del catálogo global, sin `tenant_id` ni datos de nadie. Un solo
+   * segmento, así que no compite con `:id/$expand`.
+   *
+   * @returns Categorías y etiquetas del glosario con sus conteos.
+   */
+  @Get('$glossary-facets')
+  @Public()
+  @Throttle(PUBLIC_CATALOG_READ_THROTTLE)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Facetas del glosario: conteo por categoría y etiqueta',
+  })
+  readGlossaryFacets(): Promise<GlossaryFacetsResponseDto> {
+    return this.valueSetsService.readGlossaryFacets();
   }
 
   /**

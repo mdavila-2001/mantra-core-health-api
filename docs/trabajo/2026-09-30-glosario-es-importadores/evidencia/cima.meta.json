@@ -1,0 +1,24 @@
+{
+  "source": "aemps-cima",
+  "endpoint": "https://cima.aemps.es/cima/rest",
+  "retrievedAt": "2026-09-30T15:37:41.650Z",
+  "reportedTotal": 25471,
+  "medicamentosUnicos": 25471,
+  "medicamentosSinVtm": 1,
+  "vtm": 2380,
+  "productos": 25470,
+  "productosSinDetalle": 0,
+  "conDefinicion": 2277,
+  "conImagen": 1110,
+  "conAtc": 2380,
+  "seccionesFichaTecnica": 13213,
+  "seccionesVaciasO404": 467,
+  "http": {
+    "requests": 6569,
+    "retries": 0,
+    "cacheHits": 32709,
+    "failures": 0,
+    "bytes": 243470293
+  },
+  "segundos": 716
+}

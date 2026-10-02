@@ -51,7 +51,7 @@ Se documentan **1374 de 1374 endpoints** en **70 módulos**. La referencia compl
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 18 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy` | 19 | [Abrir referencia](endpoints/pharmacy.md) |
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |

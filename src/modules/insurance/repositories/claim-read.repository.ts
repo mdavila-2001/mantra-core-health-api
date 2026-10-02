@@ -7,11 +7,17 @@ import {
   InsuranceCarriers,
   InsuranceClaimLines,
   InsuranceClaims,
+  InsurancePlans,
   PatientCoverages,
   PatientExplanationsOfBenefit,
 } from '../entities';
 import { INS } from '../insurance.concepts';
 import { CatalogConcepts } from '../../terminology/entities';
+import { Encounters } from '../../clinical/entities';
+import { DiagnosticUnits } from '../../diagnostic_units/entities';
+import { Users } from '../../iam/entities';
+import { Practices } from '../../practice/entities';
+import { PractitionerSpecialties } from '../../profiles/entities';
 
 /**
  * Lo mínimo de una solicitud para nombrarla desde afuera del módulo: la agenda
@@ -323,6 +329,71 @@ export class ClaimReadRepository {
       { insuranceClaimId: { $in: [...claimIds] } },
       { orderBy: { createdAt: QueryOrder.DESC } },
     );
+  }
+
+  /**
+   * Los encuentros que respaldan las solicitudes, para llegar al profesional y
+   * al día de la atención. Sólo lee: el alcance ya lo puso quien trajo las
+   * solicitudes (la aseguradora dueña), y de la atención no viaja nada clínico.
+   */
+  findEncountersByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Encounters[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Encounters, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * Las especialidades de los profesionales dados, la más antigua primero.
+   *
+   * Se traen todas y no sólo la principal: quien llama elige la marcada como
+   * principal y, si ninguna lo está, la primera —un profesional recién dado de
+   * alta puede tener una sola sin marcar.
+   */
+  findSpecialtiesByPractitionerIds(
+    em: EntityManager,
+    practitionerIds: readonly string[],
+  ): Promise<PractitionerSpecialties[]> {
+    if (practitionerIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      PractitionerSpecialties,
+      { practitionerProfileId: { $in: [...practitionerIds] } },
+      { orderBy: { createdAt: QueryOrder.ASC } },
+    );
+  }
+
+  /** Consultorios que facturan, por id, para nombrar al prestador. */
+  findPracticesByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Practices[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Practices, { id: { $in: [...ids] } });
+  }
+
+  /** Unidades diagnósticas que facturan, por id, para nombrar al prestador. */
+  findDiagnosticUnitsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<DiagnosticUnits[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(DiagnosticUnits, { id: { $in: [...ids] } });
+  }
+
+  /** Planes por id, para nombrar el de la cobertura. */
+  findPlansByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<InsurancePlans[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(InsurancePlans, { id: { $in: [...ids] } });
+  }
+
+  /** Cuentas por id, para decir quién dictaminó. */
+  findUsersByIds(em: EntityManager, ids: readonly string[]): Promise<Users[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Users, { id: { $in: [...ids] } });
   }
 
   /**

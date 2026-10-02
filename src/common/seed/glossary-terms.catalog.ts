@@ -280,7 +280,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['infectious'],
     enDisplay: 'Fever',
     esName: 'Fiebre',
-    esSynonyms: ['Pirexia', 'Hipertermia'],
+    esSynonyms: ['Pirexia'],
     clinicalDefinitionEs:
       'Elevación de la temperatura corporal central por encima de 38.0 °C, generalmente mediada por pirógenos como respuesta inmunológica a una infección u otro proceso inflamatorio.',
     clinicalDefinitionEn:
@@ -601,7 +601,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'hemograma-completo',
     slug: 'hemograma-completo',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: [],
     enDisplay: 'Complete blood count',
     esName: 'Hemograma completo',
@@ -615,7 +615,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'glucemia-en-ayunas',
     slug: 'glucemia-en-ayunas',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: ['endocrine'],
     enDisplay: 'Fasting blood glucose',
     esName: 'Glucemia en ayunas',
@@ -629,7 +629,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'radiografia-de-torax',
     slug: 'radiografia-de-torax',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'imaging',
     tagKeys: ['respiratory'],
     enDisplay: 'Chest X-ray',
     esName: 'Radiografía de tórax',
@@ -653,7 +653,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     clinicalDefinitionEs:
       'Prueba funcional respiratoria que mide los volúmenes y flujos de aire movilizados durante una maniobra inspiratoria y espiratoria forzada, esencial para el diagnóstico y seguimiento del asma y la EPOC.',
     plainSummaryEs:
-      'Es un examen en el que soplas fuerte en un aparato para medir qué tan bien funcionan tus pulmones.',
+      'Es un examen en el que soplás fuerte en un aparato para medir qué tan bien funcionan tus pulmones.',
     relations: [
       { type: 'ANATOMY', targetSlug: 'pulmon' },
       { type: 'DISEASE', targetSlug: 'asma-bronquial' },
@@ -662,7 +662,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'creatinina-serica',
     slug: 'creatinina-serica',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: ['renal'],
     enDisplay: 'Serum creatinine',
     esName: 'Creatinina sérica',
@@ -727,7 +727,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['renal', 'chronic'],
     enDisplay: 'Dialysis',
     esName: 'Diálisis',
-    esSynonyms: ['Hemodiálisis'],
     clinicalDefinitionEs:
       'Procedimiento de depuración extracorpórea o peritoneal que suple la función excretora del riñón en pacientes con enfermedad renal avanzada, removiendo solutos y exceso de líquido.',
     plainSummaryEs:
@@ -963,7 +962,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     clinicalDefinitionEs:
       'Anticoagulante oral antagonista de la vitamina K, utilizado en la prevención de eventos tromboembólicos, que requiere monitoreo periódico del tiempo de protrombina/INR.',
     plainSummaryEs:
-      'Es un medicamento que hace la sangre más líquida para evitar coágulos.',
+      'Es un medicamento que hace que la sangre tarde más en coagular, para evitar coágulos.',
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'tiempo-de-protrombina' },
     ],
@@ -1011,7 +1010,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['infectious'],
     enDisplay: 'C-reactive protein (CRP)',
     esName: 'Proteína C reactiva',
-    esSynonyms: ['PCR'],
+    esSynonyms: ['PCR (proteína C reactiva)'],
     clinicalDefinitionEs:
       'Reactante de fase aguda producido por el hígado en respuesta a la inflamación sistémica, utilizado como marcador inespecífico de infección o inflamación.',
     plainSummaryEs:
@@ -1023,9 +1022,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     slug: 'tiempo-de-protrombina',
     categoryKey: 'lab',
     tagKeys: ['cardiovascular'],
-    enDisplay: 'Prothrombin time (INR)',
+    enDisplay: 'Prothrombin time (PT)',
     esName: 'Tiempo de protrombina',
-    esSynonyms: ['INR', 'TP'],
+    esSynonyms: ['TP'],
     clinicalDefinitionEs:
       'Prueba de coagulación que mide el tiempo que tarda el plasma en coagular por la vía extrínseca, estandarizada como INR, esencial para el monitoreo de la terapia con warfarina.',
     plainSummaryEs:
@@ -1111,7 +1110,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     categoryKey: 'imaging',
     tagKeys: ['oncologic', 'gyn-ob'],
     enDisplay: 'Mammography',
-    esName: 'Mamografía',
+    esName: 'Mamografía de tamizaje',
     clinicalDefinitionEs:
       'Estudio radiológico de la glándula mamaria utilizado como método de tamizaje y diagnóstico para la detección temprana del cáncer de mama.',
     plainSummaryEs:
@@ -1291,7 +1290,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: [],
     enDisplay: 'Referral (specialist consultation)',
     esName: 'Interconsulta',
-    esSynonyms: ['Referencia médica', 'Segunda opinión médica'],
+    esSynonyms: ['Referencia médica'],
     clinicalDefinitionEs:
       'Solicitud que hace un profesional de salud para que otra especialidad evalúe a un paciente y aporte su criterio sobre el diagnóstico o el tratamiento.',
     plainSummaryEs:

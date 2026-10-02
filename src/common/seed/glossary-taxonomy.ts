@@ -9,7 +9,7 @@ import {
 
 /**
  * La taxonomía del glosario médico: 12 categorías (pertenencia exclusiva, una
- * por término — la duodécima, `other`, se sumó en FND-25-01), 15 etiquetas
+ * por término — la duodécima, `other`, se sumó en FND-25-01), 16 etiquetas
  * (N:N) y el value set paraguas que marca «esto es un término del glosario»
  * dentro de la tabla compartida de conceptos.
  *
@@ -125,7 +125,18 @@ export const GLOSSARY_CATEGORIES: readonly GlossaryTaxonomyEntry[] = [
   },
 ];
 
-/** Las 15 etiquetas del glosario. Un término puede llevar 0..N. */
+/**
+ * Las 21 etiquetas del glosario. Un término puede llevar 0..N.
+ *
+ * `urologic` se sumó el 2026-09-30 (auditoría del glosario): la próstata, el
+ * testículo y la función eréctil no son riñón, y colgarlos de `renal` mezclaba
+ * dos especialidades en un mismo filtro.
+ *
+ * `hematologic`, `ophthalmologic`, `ent`, `congenital` y `trauma` se sumaron el
+ * 2026-10-01: son los capítulos 3, 7, 8, 17 y 19 de CIE-10 (sangre e inmunidad,
+ * ojo, oído, malformaciones congénitas, traumatismos), que no tenían etiqueta y
+ * dejaban sin filtro a 3 de cada 4 diagnósticos del glosario.
+ */
 export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
   { key: 'urgency', internalCode: 'glossary-tag-urgency', name: 'Urgencia' },
   { key: 'chronic', internalCode: 'glossary-tag-chronic', name: 'Crónico' },
@@ -171,6 +182,11 @@ export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
   },
   { key: 'renal', internalCode: 'glossary-tag-renal', name: 'Renal' },
   {
+    key: 'urologic',
+    internalCode: 'glossary-tag-urologic',
+    name: 'Urológico',
+  },
+  {
     key: 'dermatologic',
     internalCode: 'glossary-tag-dermatologic',
     name: 'Dermatológico',
@@ -189,6 +205,31 @@ export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
     key: 'neurologic',
     internalCode: 'glossary-tag-neurologic',
     name: 'Neurológico',
+  },
+  {
+    key: 'hematologic',
+    internalCode: 'glossary-tag-hematologic',
+    name: 'Hematológico e inmunitario',
+  },
+  {
+    key: 'ophthalmologic',
+    internalCode: 'glossary-tag-ophthalmologic',
+    name: 'Oftalmológico',
+  },
+  {
+    key: 'ent',
+    internalCode: 'glossary-tag-ent',
+    name: 'Otorrinolaringológico',
+  },
+  {
+    key: 'congenital',
+    internalCode: 'glossary-tag-congenital',
+    name: 'Congénito',
+  },
+  {
+    key: 'trauma',
+    internalCode: 'glossary-tag-trauma',
+    name: 'Traumatismos y envenenamientos',
   },
 ];
 

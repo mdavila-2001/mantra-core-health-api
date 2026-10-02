@@ -845,6 +845,21 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'REL_DIAGNOSTIC_TEST',
     'Associated diagnostic test',
   ),
+  // 2026-10-01: las relaciones que Wikidata declara para cada enfermedad
+  // (P780 síntomas, P1995 especialidad). Sin ellas «la tos se asocia al asma»
+  // sólo podía decirse con RELATED_TERM, que no dice qué es cada extremo.
+  //  - SYMPTOM: el origen (enfermedad) presenta el síntoma o signo destino.
+  //  - SPECIALTY: el origen (enfermedad) lo atiende la especialidad destino.
+  REL_SYMPTOM: def(
+    'terminology:relationship:symptom',
+    'REL_SYMPTOM',
+    'Associated symptom or sign',
+  ),
+  REL_SPECIALTY: def(
+    'terminology:relationship:specialty',
+    'REL_SPECIALTY',
+    'Associated health specialty',
+  ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
     'terminology:vs-operator:is-a',

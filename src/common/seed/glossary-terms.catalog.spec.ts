@@ -4,7 +4,7 @@ import { GLOSSARY_CATEGORIES, GLOSSARY_TAGS } from './glossary-taxonomy';
 
 /**
  * Guarda de consistencia del catálogo curado: fija que los 64 términos, las
- * 11 categorías y las 15 etiquetas están exactamente como el spec de
+ * 11 categorías y las 16 etiquetas están exactamente como el spec de
  * reconstrucción los declara, y que ninguna edición futura pueda colar una
  * categoría o etiqueta fuera de la taxonomía aprobada («vocabulario no
  * médico») sin que esta prueba se rompa primero.
@@ -17,9 +17,9 @@ describe('Catálogo curado del glosario médico', () => {
     expect(GLOSSARY_TERMS).toHaveLength(69);
   });
 
-  it('declara exactamente 12 categorías y 15 etiquetas', () => {
+  it('declara exactamente 12 categorías y 21 etiquetas', () => {
     expect(GLOSSARY_CATEGORIES).toHaveLength(12);
-    expect(GLOSSARY_TAGS).toHaveLength(15);
+    expect(GLOSSARY_TAGS).toHaveLength(21);
   });
 
   it('cada slug es único', () => {
@@ -57,8 +57,25 @@ describe('Catálogo curado del glosario médico', () => {
       );
     }
     for (const category of GLOSSARY_CATEGORIES) {
+      if (category.key === 'diagnostic-test') continue;
       expect(porCategoria.get(category.key) ?? 0).toBeGreaterThanOrEqual(5);
     }
+  });
+
+  it('«Pruebas diagnósticas» es la única excepción al mínimo, y conserva exactamente sus dos pruebas funcionales', () => {
+    // La auditoría del glosario del 2026-09-30 sacó de `diagnostic-test` lo que
+    // no era una prueba funcional: el hemograma, la glucemia y la creatinina son
+    // análisis de laboratorio (`lab`) y la radiografía de tórax es imagen
+    // (`imaging`). En el catálogo curado quedan dos; la categoría no queda vacía
+    // en la grilla porque las capas del front (`analisis-frecuentes.ndjson`)
+    // suman holter, prueba de esfuerzo, electroencefalograma y audiometría
+    // (seis en total en la maqueta). Se fija la lista exacta
+    // para que la excepción no crezca en silencio: cualquier otro término que
+    // salga o entre acá tiene que cambiar esta prueba a la vista.
+    const pruebas = GLOSSARY_TERMS.filter(
+      (term) => term.categoryKey === 'diagnostic-test',
+    ).map((term) => term.slug);
+    expect(pruebas).toEqual(['electrocardiograma', 'espirometria']);
   });
 
   it('toda relación apunta a un slug conocido, salvo la única excepción documentada de la fuente', () => {

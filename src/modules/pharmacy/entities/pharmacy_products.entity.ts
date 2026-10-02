@@ -123,6 +123,20 @@ export class PharmacyProducts {
   /**
    * Identificador asociado a status concept.
    */
+  @Property({
+    fieldName: 'catalog_product_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  catalogProductConceptId?: string;
+
+  @Property({
+    fieldName: 'catalog_presentation_code',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  catalogPresentationCode?: string;
+
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 

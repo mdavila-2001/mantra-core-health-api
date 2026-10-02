@@ -167,6 +167,53 @@ Tablas: `insurance.insurance_campaigns` e `insurance.insurance_campaign_partners
 (parche `v4223` del modelo). Acceso a datos en
 `repositories/insurance-campaigns.repository.ts`.
 
+## Solicitudes recibidas por la aseguradora (Hito 4 §A)
+
+La cara de **quien paga** del mismo `insurance_claims` que el prestador ve en
+`GET /insurance-claims`: aquélla acota por el prestador que envió, ésta por la
+aseguradora que recibe. Contrato del front:
+`mantra-core-health/docs/contracts/insurer-received-claims.md`.
+
+| Método y ruta | Quién puede | Respuesta |
+| --- | --- | --- |
+| `GET /insurance/received-claims` | OWNER/ADMIN de la aseguradora activa, o `INSURANCE_OPERATOR` vigente **en ese tenant**, o plataforma | `200 { items, truncated }`: hasta 500, de la más reciente a la más vieja, importes como cadena decimal. `403` si la organización activa no es una aseguradora o la sesión no tiene permiso (mismo texto en los dos casos) |
+| `POST /insurance/received-claims/:id/decision` | Los mismos | `200` con la solicitud completa. `404` si no existe o es de otra aseguradora; `409 { details.reason: 'ALREADY_DECIDED' }` si ya tiene dictamen; `422` si el monto o el motivo no son los que pide el resultado, o el pedido de origen cambió |
+
+Reglas que no se deducen del código:
+
+- **La aseguradora sale del tenant activo**, nunca de un parámetro. La autoridad
+  es la membresía OWNER/ADMIN o un rol de aseguradora vigente en ese tenant
+  (`roleAuthorizesInTenant`): un rol concedido en otra organización no vale.
+- **El dictamen es definitivo.** Sólo se decide una solicitud `CLAIM_SUBMITTED`
+  sin ninguna versión de adjudicación; la fila se bloquea (`FOR UPDATE`) antes de
+  mirar, así que dos dictámenes concurrentes no crean dos versiones 1. No hay
+  ruta que lo revierta. `POST /insurance-claims/:id/adjudications` sigue siendo
+  otro camino, con su propia política (permite versionar).
+- **Resultados.** `APPROVED` aprueba lo solicitado; `PARTIAL` exige
+  `approvedAmount` mayor que cero y menor que lo solicitado; `REJECTED` aprueba
+  cero. `PARTIAL` y `REJECTED` exigen `reason` de al menos 5 caracteres, y
+  `approvedAmount` fuera de `PARTIAL` es 422. `PARTIAL` es el concepto nuevo
+  `ADJUDICATION_PARTIAL`; el resumen de portabilidad lo cuenta como aprobado.
+- **El monto se reparte entre renglones** en centavos exactos y en proporción a lo
+  facturado (`services/received-claim-settlement.ts`): la suma es el monto
+  aprobado y `aprobado + denegado = facturado` en cada renglón. Exige que los
+  renglones sumen el total solicitado (422 si no).
+- **Estado visible derivado.** El estado de la solicitud sólo distingue enviada,
+  adjudicada, pagada y revertida; el resultado del dictamen decide si la
+  adjudicada se ve `APPROVED`, `PARTIAL` o `REJECTED`. No existe `IN_REVIEW`.
+- **Cláusula opcional.** `policyClauseReference` es una extensión aditiva del
+  contrato: sin ella el dictamen se escribe igual, pero la liquidación del
+  prestador queda «en revisión» (la transparencia de exclusiones exige cláusula
+  en toda línea no aprobada).
+- **Solicitud enlazada a un pedido.** Se vuelve a comprobar que el pedido no
+  cambió desde que se presentó (mismo orden de locks que `ClaimsService`).
+- **Facturación.** Un dictamen favorable publica `InsuranceClaimDecided` por el
+  outbox, en la misma transacción (ids e importes, sin datos del paciente). **No
+  están** `POST …/:id/invoice` ni `POST …/:id/invoice/annulment`, y `invoice`
+  viaja siempre `null`: el modelo no declara dónde vive la factura del prestador
+  a la aseguradora (`billing.invoices` exige práctica y paciente y no tiene
+  anulación). Es una decisión de modelo pendiente (ADR-0021).
+
 ## Contenido
 
 ### Subcarpetas
