@@ -1725,33 +1725,6 @@
       "selectable": true
     },
     {
-      "id": "2ce6efb7-8796-5ff8-9bc6-0b1808a7a165",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "J01CA05",
-      "display": "Amoxicilina",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
-      "id": "b37ad034-d853-51f7-a007-610e802551eb",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "J01CA06",
-      "display": "Amoxicilina",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
-      "id": "4df5f40a-8c89-598c-a96d-09ece6b3b64e",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "J01CA07",
-      "display": "Amoxicilina",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
       "id": "908f5e15-1343-565e-be78-9355e2c2a46a",
       "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
       "code": "J01CE01",
@@ -1779,15 +1752,6 @@
       "selectable": true
     },
     {
-      "id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "J01CE10",
-      "display": "Bencilpenicilina procaínica",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
       "id": "61b8ba30-e0f1-5554-bc11-75f09c59bdbb",
       "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
       "code": "J01CF01",
@@ -1809,15 +1773,6 @@
       "id": "f2260aa4-a257-56bb-8ad7-85a358a42d24",
       "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
       "code": "J01CR02",
-      "display": "Amoxicilina + inhibidor betalactamasa",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
-      "id": "cef2196c-6882-594d-b29c-05d517eaf22b",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "J01CR03",
       "display": "Amoxicilina + inhibidor betalactamasa",
       "definition": null,
       "abstract": false,
@@ -2620,15 +2575,6 @@
       "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
       "code": "L01AX04",
       "display": "Dacarbazina",
-      "definition": null,
-      "abstract": false,
-      "selectable": true
-    },
-    {
-      "id": "79bf9987-9153-5fd6-aa16-318ae0f7e03f",
-      "code_system_version_id": "be720bd7-4383-5011-9f45-457fad6fecb0",
-      "code": "L01AX05",
-      "display": "Temozolomida",
       "definition": null,
       "abstract": false,
       "selectable": true
@@ -5341,14 +5287,6 @@
       "preferred": true
     },
     {
-      "id": "e10d9ad5-094a-5f10-b9b5-f4fb8add745d",
-      "concept_id": "2ce6efb7-8796-5ff8-9bc6-0b1808a7a165",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Amoxicilina",
-      "preferred": true
-    },
-    {
       "id": "55ee2748-7b4d-5e8e-9e8d-d798a13e4d54",
       "concept_id": "2cf75d7b-8e61-5b19-99be-e1f1e7bcc37d",
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
@@ -5387,14 +5325,6 @@
       "designation_type_concept_id": null,
       "value": "Nistatina",
       "preferred": true
-    },
-    {
-      "id": "594314b7-ed38-5ba9-a16c-0679985c5662",
-      "concept_id": "2dccbf29-ac2d-584b-8ff3-3468162722d8",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Bencilpenicilina benzatínica",
-      "preferred": false
     },
     {
       "id": "bd534e29-b4bb-5727-bb16-d9682cec5ea4",
@@ -5861,14 +5791,6 @@
       "preferred": true
     },
     {
-      "id": "5503c991-b68f-5c93-a255-75776aa06b78",
-      "concept_id": "4df5f40a-8c89-598c-a96d-09ece6b3b64e",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Amoxicilina",
-      "preferred": true
-    },
-    {
       "id": "bdc8acd6-37ae-54ad-a50e-92f8b7dc4493",
       "concept_id": "4f31b8c9-b46d-550f-81cc-eb37ace07c96",
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
@@ -5979,14 +5901,6 @@
       "designation_type_concept_id": null,
       "value": "Dacarbazina",
       "preferred": true
-    },
-    {
-      "id": "95c773e8-c768-5e49-9f25-921699941569",
-      "concept_id": "517277b2-ef2b-5845-aabc-2171fb5f3509",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Temozolomida",
-      "preferred": false
     },
     {
       "id": "dd8af2da-f27d-5896-9c46-2b89baf871e2",
@@ -6818,14 +6732,6 @@
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
       "designation_type_concept_id": null,
       "value": "Ergotamina tartrato + Cafeína",
-      "preferred": true
-    },
-    {
-      "id": "71cc2100-42af-571f-85bf-4c78f020f72c",
-      "concept_id": "79bf9987-9153-5fd6-aa16-318ae0f7e03f",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Temozolomida",
       "preferred": true
     },
     {
@@ -7709,14 +7615,6 @@
       "preferred": true
     },
     {
-      "id": "ef1d6b05-6a6a-5c6e-b225-c88e833bd7ae",
-      "concept_id": "b37ad034-d853-51f7-a007-610e802551eb",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Amoxicilina",
-      "preferred": true
-    },
-    {
       "id": "f773457f-b059-5d2e-9625-afd19bd17655",
       "concept_id": "b384e035-3871-5610-bf6f-9d75daddc49a",
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
@@ -7914,22 +7812,6 @@
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
       "designation_type_concept_id": null,
       "value": "Protamina Sulfato",
-      "preferred": true
-    },
-    {
-      "id": "c89b547d-80e7-5e9f-9afd-b247f5abfc47",
-      "concept_id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Bencilpenicilina benzatínica",
-      "preferred": false
-    },
-    {
-      "id": "38b13ed3-d77f-5010-9951-255b254536a5",
-      "concept_id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Bencilpenicilina procaínica",
       "preferred": true
     },
     {
@@ -8146,14 +8028,6 @@
       "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
       "designation_type_concept_id": null,
       "value": "Colecalciferol (Vitamina D3)",
-      "preferred": true
-    },
-    {
-      "id": "0e39db4d-9b43-5cfa-a605-0e719e6cfec2",
-      "concept_id": "cef2196c-6882-594d-b29c-05d517eaf22b",
-      "language_concept_id": "1e0b7669-d4d8-5c0f-9544-182a5fe60651",
-      "designation_type_concept_id": null,
-      "value": "Amoxicilina + inhibidor betalactamasa",
       "preferred": true
     },
     {
@@ -9191,6 +9065,20 @@
           "form": "Cápsula",
           "strength": "20 mg",
           "restrictedUse": true
+        },
+        {
+          "code": "L-01-52",
+          "name": "Temozolomida",
+          "form": "Cápsula",
+          "strength": "100 mg",
+          "restrictedUse": true
+        },
+        {
+          "code": "L-01-53",
+          "name": "Temozolomida",
+          "form": "Cápsula",
+          "strength": "250 mg",
+          "restrictedUse": true
         }
       ]
     },
@@ -9200,7 +9088,9 @@
       "property_code": "strengths",
       "data_type": "json",
       "value_json": [
-        "20 mg"
+        "20 mg",
+        "100 mg",
+        "250 mg"
       ]
     },
     {
@@ -11176,7 +11066,9 @@
       "property_code": "dose_forms",
       "data_type": "json",
       "value_json": [
-        "Comprimido"
+        "Comprimido",
+        "Inyectable",
+        "Suspensión"
       ]
     },
     {
@@ -11190,6 +11082,27 @@
           "name": "Amoxicilina",
           "form": "Comprimido",
           "strength": "1 g",
+          "restrictedUse": false
+        },
+        {
+          "code": "J-01-06",
+          "name": "Amoxicilina",
+          "form": "Comprimido",
+          "strength": "500 mg",
+          "restrictedUse": false
+        },
+        {
+          "code": "J-01-08",
+          "name": "Amoxicilina",
+          "form": "Inyectable",
+          "strength": "1 g",
+          "restrictedUse": false
+        },
+        {
+          "code": "J-01-57",
+          "name": "Amoxicilina",
+          "form": "Suspensión",
+          "strength": "500 mg/5 ml",
           "restrictedUse": false
         }
       ]
@@ -11209,7 +11122,9 @@
       "property_code": "strengths",
       "data_type": "json",
       "value_json": [
-        "1 g"
+        "1 g",
+        "500 mg",
+        "500 mg/5 ml"
       ]
     },
     {
@@ -12528,39 +12443,6 @@
       ]
     },
     {
-      "id": "9b16110c-da80-50f3-a526-c11256a005d6",
-      "concept_id": "2ce6efb7-8796-5ff8-9bc6-0b1808a7a165",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Comprimido"
-      ]
-    },
-    {
-      "id": "92ecb9f7-0d9c-55cc-b103-ea67d6f8c61e",
-      "concept_id": "2ce6efb7-8796-5ff8-9bc6-0b1808a7a165",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "J-01-06",
-          "name": "Amoxicilina",
-          "form": "Comprimido",
-          "strength": "500 mg",
-          "restrictedUse": false
-        }
-      ]
-    },
-    {
-      "id": "8faede04-f7bb-5138-bc51-40493b746967",
-      "concept_id": "2ce6efb7-8796-5ff8-9bc6-0b1808a7a165",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "500 mg"
-      ]
-    },
-    {
       "id": "d6ad2a0f-eba8-5a2c-b8f9-384578d3b6ee",
       "concept_id": "2cf75d7b-8e61-5b19-99be-e1f1e7bcc37d",
       "property_code": "dose_forms",
@@ -12734,17 +12616,17 @@
       "data_type": "json",
       "value_json": [
         {
-          "code": "J-01-15",
-          "name": "Bencilpenicilina benzatínica",
-          "form": "Inyectable",
-          "strength": "1.200.000 UI",
-          "restrictedUse": false
-        },
-        {
           "code": "J-01-17",
           "name": "Bencilpenicilina procaínica",
           "form": "Inyectable",
           "strength": "400.000 UI",
+          "restrictedUse": false
+        },
+        {
+          "code": "J-01-18",
+          "name": "Bencilpenicilina procaínica",
+          "form": "Inyectable",
+          "strength": "800.000 UI",
           "restrictedUse": false
         }
       ]
@@ -12755,8 +12637,8 @@
       "property_code": "strengths",
       "data_type": "json",
       "value_json": [
-        "1.200.000 UI",
-        "400.000 UI"
+        "400.000 UI",
+        "800.000 UI"
       ]
     },
     {
@@ -14825,39 +14707,6 @@
       "value_json": []
     },
     {
-      "id": "bae14e01-acee-5b62-9efd-e1402d585ccf",
-      "concept_id": "4df5f40a-8c89-598c-a96d-09ece6b3b64e",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Suspensión"
-      ]
-    },
-    {
-      "id": "a33ece57-91da-530b-9ae5-9798d9839233",
-      "concept_id": "4df5f40a-8c89-598c-a96d-09ece6b3b64e",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "J-01-57",
-          "name": "Amoxicilina",
-          "form": "Suspensión",
-          "strength": "500 mg/5 ml",
-          "restrictedUse": false
-        }
-      ]
-    },
-    {
-      "id": "1f41221b-accd-5135-92ba-1fd2ecb78295",
-      "concept_id": "4df5f40a-8c89-598c-a96d-09ece6b3b64e",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "500 mg/5 ml"
-      ]
-    },
-    {
       "id": "a18f50c9-92c7-5cf5-b592-41bd2378c6f5",
       "concept_id": "4f31b8c9-b46d-550f-81cc-eb37ace07c96",
       "property_code": "dose_forms",
@@ -15149,8 +14998,7 @@
       "property_code": "dose_forms",
       "data_type": "json",
       "value_json": [
-        "Inyectable",
-        "Cápsula"
+        "Inyectable"
       ]
     },
     {
@@ -15165,13 +15013,6 @@
           "form": "Inyectable",
           "strength": "200 mg",
           "restrictedUse": false
-        },
-        {
-          "code": "L-01-52",
-          "name": "Temozolomida",
-          "form": "Cápsula",
-          "strength": "100 mg",
-          "restrictedUse": true
         }
       ]
     },
@@ -15181,8 +15022,7 @@
       "property_code": "strengths",
       "data_type": "json",
       "value_json": [
-        "200 mg",
-        "100 mg"
+        "200 mg"
       ]
     },
     {
@@ -18379,39 +18219,6 @@
       ]
     },
     {
-      "id": "b349e9f1-be31-5349-bdf4-0c89a679a1c2",
-      "concept_id": "79bf9987-9153-5fd6-aa16-318ae0f7e03f",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Cápsula"
-      ]
-    },
-    {
-      "id": "456a4249-e8f0-56a5-bfe4-89484dc6b238",
-      "concept_id": "79bf9987-9153-5fd6-aa16-318ae0f7e03f",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "L-01-53",
-          "name": "Temozolomida",
-          "form": "Cápsula",
-          "strength": "250 mg",
-          "restrictedUse": true
-        }
-      ]
-    },
-    {
-      "id": "13f8eec7-1cc9-5049-a9c2-8b3ea5c717bc",
-      "concept_id": "79bf9987-9153-5fd6-aa16-318ae0f7e03f",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "250 mg"
-      ]
-    },
-    {
       "id": "9446848c-ffec-58f9-8724-55e2068095b7",
       "concept_id": "7a00323b-efb1-52bb-aa87-934d13ca9bfe",
       "property_code": "dose_forms",
@@ -19659,6 +19466,20 @@
           "form": "Inyectable",
           "strength": "600.000 UI",
           "restrictedUse": false
+        },
+        {
+          "code": "J-01-15",
+          "name": "Bencilpenicilina benzatínica",
+          "form": "Inyectable",
+          "strength": "1.200.000 UI",
+          "restrictedUse": false
+        },
+        {
+          "code": "J-01-16",
+          "name": "Bencilpenicilina benzatínica",
+          "form": "Inyectable",
+          "strength": "2.400.000 UI",
+          "restrictedUse": false
         }
       ]
     },
@@ -19668,7 +19489,9 @@
       "property_code": "strengths",
       "data_type": "json",
       "value_json": [
-        "600.000 UI"
+        "600.000 UI",
+        "1.200.000 UI",
+        "2.400.000 UI"
       ]
     },
     {
@@ -22027,39 +21850,6 @@
       ]
     },
     {
-      "id": "221ef932-4b2d-560b-a968-1214f8f7614e",
-      "concept_id": "b37ad034-d853-51f7-a007-610e802551eb",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Inyectable"
-      ]
-    },
-    {
-      "id": "56fc5b4d-d03a-567c-ad75-f05ec01a5232",
-      "concept_id": "b37ad034-d853-51f7-a007-610e802551eb",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "J-01-08",
-          "name": "Amoxicilina",
-          "form": "Inyectable",
-          "strength": "1 g",
-          "restrictedUse": false
-        }
-      ]
-    },
-    {
-      "id": "01acc36f-6300-515d-ae1c-ee36048b914d",
-      "concept_id": "b37ad034-d853-51f7-a007-610e802551eb",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "1 g"
-      ]
-    },
-    {
       "id": "ea64fab8-36a7-5439-adca-7fee971ac52f",
       "concept_id": "b384e035-3871-5610-bf6f-9d75daddc49a",
       "property_code": "dose_forms",
@@ -22858,47 +22648,6 @@
       "data_type": "json",
       "value_json": [
         "10 mg/ml"
-      ]
-    },
-    {
-      "id": "7a768f3d-0fdb-5e3f-b586-16109d97e49d",
-      "concept_id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Inyectable"
-      ]
-    },
-    {
-      "id": "088376b2-3299-53c7-8c9a-e4a40b16eaf0",
-      "concept_id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "J-01-16",
-          "name": "Bencilpenicilina benzatínica",
-          "form": "Inyectable",
-          "strength": "2.400.000 UI",
-          "restrictedUse": false
-        },
-        {
-          "code": "J-01-18",
-          "name": "Bencilpenicilina procaínica",
-          "form": "Inyectable",
-          "strength": "800.000 UI",
-          "restrictedUse": false
-        }
-      ]
-    },
-    {
-      "id": "107d351e-1820-56ee-ae27-c6f27f0dcde1",
-      "concept_id": "c3cbe53f-d288-5ed9-bfbc-7307bc466e03",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "2.400.000 UI",
-        "800.000 UI"
       ]
     },
     {
@@ -23828,39 +23577,6 @@
       "data_type": "json",
       "value_json": [
         "0,25 mcg"
-      ]
-    },
-    {
-      "id": "c6f34ce0-0087-508b-a133-670464c8be7f",
-      "concept_id": "cef2196c-6882-594d-b29c-05d517eaf22b",
-      "property_code": "dose_forms",
-      "data_type": "json",
-      "value_json": [
-        "Comprimido"
-      ]
-    },
-    {
-      "id": "6a06b6b0-396d-5ac5-a439-1b94254a60c9",
-      "concept_id": "cef2196c-6882-594d-b29c-05d517eaf22b",
-      "property_code": "liname_presentations",
-      "data_type": "json",
-      "value_json": [
-        {
-          "code": "J-01-71",
-          "name": "Amoxicilina + inhibidor betalactamasa",
-          "form": "Comprimido",
-          "strength": "875 mg + Según disponibilidad",
-          "restrictedUse": false
-        }
-      ]
-    },
-    {
-      "id": "8ebc7f53-b4e1-5109-8c41-80c46f5714b9",
-      "concept_id": "cef2196c-6882-594d-b29c-05d517eaf22b",
-      "property_code": "strengths",
-      "data_type": "json",
-      "value_json": [
-        "875 mg + Según disponibilidad"
       ]
     },
     {
@@ -26425,6 +26141,13 @@
           "form": "Inyectable",
           "strength": "1 g + Según disponibilidad",
           "restrictedUse": false
+        },
+        {
+          "code": "J-01-71",
+          "name": "Amoxicilina + inhibidor betalactamasa",
+          "form": "Comprimido",
+          "strength": "875 mg + Según disponibilidad",
+          "restrictedUse": false
         }
       ]
     },
@@ -26436,7 +26159,8 @@
       "value_json": [
         "500 mg + Según disponibilidad",
         "250 mg + Según disponibilidad",
-        "1 g + Según disponibilidad"
+        "1 g + Según disponibilidad",
+        "875 mg + Según disponibilidad"
       ]
     },
     {

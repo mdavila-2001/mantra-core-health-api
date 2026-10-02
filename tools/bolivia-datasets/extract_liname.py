@@ -18,6 +18,15 @@ del listado ALFABÉTICO; la del listado por grupo sólo si el código falta en e
 alfabético. Nada se corrige: un ATC que la fuente trae mal escrito («104BA»,
 «B2BB01») queda tal cual en `atcPublicado` y `atc` sale null.
 
+La columna «A.T.Q.» no siempre es el ATC de la OMS: en cinco principios activos
+la LINAME numera la presentación siguiente dentro del mismo subgrupo
+(amoxicilina J01CA04 → 05 → 06 → 07; en la OMS J01CA05 es epicilina). Cruzando
+cada par (ATC, principio activo) contra los registros sanitarios de CIMA
+(España) e INVIMA (Colombia), que traen el ATC de cada producto, el código
+correcto queda confirmado; la tabla `CORRECCIONES_ATC` lo aplica, guarda el
+publicado en `atcPublicado` y marca `atcCorregido`. Fuera de esos cinco, el ATC
+pasa tal cual.
+
 Uso (requiere `pip install pdfplumber`):
   python3 tools/bolivia-datasets/extract_liname.py <LINAME_2022_2024.pdf>
 """
@@ -27,6 +36,7 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
@@ -45,9 +55,27 @@ COLUMNAS = (
     ("letra", -999, -400), ("grupo", -400, -380), ("orden", -380, -360), ("nombre", -360, -255),
     ("forma", -255, -170), ("concentracion", -170, -100), ("atc", -100, -70), ("restringido", -70, 999),
 )
+# (nombre normalizado, ATC publicado) → ATC de la OMS, confirmado contra CIMA e INVIMA.
+CORRECCIONES_ATC = {
+    ("amoxicilina", "J01CA05"): "J01CA04",
+    ("amoxicilina", "J01CA06"): "J01CA04",
+    ("amoxicilina", "J01CA07"): "J01CA04",
+    ("amoxicilina + inhibidor betalactamasa", "J01CR03"): "J01CR02",  # J01CR03 = ticarcilina + inhibidor
+    ("bencilpenicilina benzatinica", "J01CE09"): "J01CE08",  # J01CE09 = bencilpenicilina procaínica
+    ("bencilpenicilina benzatinica", "J01CE10"): "J01CE08",  # J01CE10 = fenoximetilpenicilina benzatina
+    ("bencilpenicilina procainica", "J01CE10"): "J01CE09",
+    ("temozolomida", "L01AX04"): "L01AX03",  # L01AX04 = dacarbazina
+    ("temozolomida", "L01AX05"): "L01AX03",
+}
 ENCABEZADO = re.compile(r"A\.T\.Q\.|MEDICAMENTO|CÓDIGO|CLASIFIC|CONCENTRACIÓN|FORMA FARMAC|RES\.|USO")
 ATC_VALIDO = re.compile(r"^[A-Z]\d{2}[A-Z]{2}\d{2}$")
 ATC_PUBLICADO = re.compile(r"^[A-Z]\d{2}[A-Z]{0,2}\d{0,2}(\*+)?$")
+
+
+def normalizado(nombre: str) -> str:
+    """Minúsculas, sin tildes y sin el paréntesis aclaratorio: la clave de `CORRECCIONES_ATC`."""
+    plano = "".join(c for c in unicodedata.normalize("NFKD", nombre.lower()) if not unicodedata.combining(c))
+    return plano.split("(")[0].strip()
 
 
 def columna(pos: float) -> str:
@@ -125,13 +153,16 @@ def main() -> None:
         candidatas = alfabetico or por_codigo[codigo]
         f = min(candidatas, key=lambda f: (not valida(f), f["pagina"]))
         publicado = f["atc"].replace(" ", "").rstrip(".")
+        corregido = CORRECCIONES_ATC.get((normalizado(f["nombre"]), publicado))
+        atc = corregido or (publicado if ATC_VALIDO.match(publicado) else None)
         medicamentos.append({
             "codigo": codigo,
             "nombre": f["nombre"],
             "forma": f["forma"],
             "concentracion": f["concentracion"],
             "atcPublicado": publicado,
-            "atc": publicado if ATC_VALIDO.match(publicado) else None,
+            "atc": atc,
+            "atcCorregido": corregido is not None,
             "usoRestringido": f["restringido"] == "R",
         })
     if len(medicamentos) < 700:
@@ -143,6 +174,7 @@ def main() -> None:
         encoding="utf-8",
     )
     con_atc = sum(1 for m in medicamentos if m["atc"])
+    print(f"{sum(m['atcCorregido'] for m in medicamentos)} ATC corregidos por CORRECCIONES_ATC")
     print(f"{len(medicamentos)} medicamentos ({con_atc} con ATC nivel 5, "
           f"{len({m['atc'] for m in medicamentos if m['atc']})} ATC distintos) → {SALIDA}")
 
