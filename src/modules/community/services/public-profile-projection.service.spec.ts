@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { CONCEPTS } from '../../../common';
 import { COMM } from '../community.concepts';
 import { PublicProfileProjectionService } from './public-profile-projection.service';
-const fn = (): any => jest.fn();
+const fn = (impl?: any): any => (jest.fn as any)(impl);
 function setup(profile: any = null) {
   const em: any = {
     flush: fn().mockResolvedValue(undefined),
