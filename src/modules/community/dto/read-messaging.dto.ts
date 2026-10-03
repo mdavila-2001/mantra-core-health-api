@@ -1,4 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type, type TransformFnParams } from 'class-transformer';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 /** Último mensaje de una conversación, para la vista previa de la bandeja. */
 export class ConversationPreviewMessageDto {
@@ -113,6 +124,58 @@ export class ConversationPeerDto {
   /** Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. */
   @ApiPropertyOptional({ nullable: true })
   avatarUrl?: string | null;
+}
+
+/** Query validada de la búsqueda de contactos para chat. */
+export class SearchChatContactsRequestDto {
+  /** Perfil propio desde el que se iniciará la conversación. */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  profileId!: string;
+
+  /** Nombre a buscar; se recortan espacios exteriores. */
+  @ApiProperty({ minLength: 2, maxLength: 80 })
+  @Transform(({ value }: TransformFnParams): unknown =>
+    typeof value === 'string' ? value.trim() : (value as unknown),
+  )
+  @IsString()
+  @MinLength(2)
+  @MaxLength(80)
+  q!: string;
+
+  /** Tope pequeño para evitar enumeración masiva de personas. */
+  @ApiPropertyOptional({ minimum: 1, maximum: 20, default: 10 })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  limit = 10;
+}
+
+/** Persona que se puede elegir para iniciar un chat autenticado. */
+export class ChatContactDto {
+  /** Perfil interno necesario para crear la conversación. */
+  @ApiProperty({ format: 'uuid' })
+  profileId!: string;
+
+  /** Nombre visible en el resultado. */
+  @ApiProperty()
+  displayName!: string;
+
+  /** Descripción breve, si la persona la configuró. */
+  @ApiPropertyOptional({ nullable: true })
+  headline!: string | null;
+
+  /** Avatar servido por la ruta pública de archivos, o `null`. */
+  @ApiPropertyOptional({ nullable: true })
+  avatarUrl!: string | null;
+}
+
+/** Resultados de la búsqueda autenticada de contactos del chat. */
+export class ChatContactPageDto {
+  @ApiProperty({ type: [ChatContactDto] })
+  items!: ChatContactDto[];
 }
 
 /** Una conversación de la bandeja del actor. */
