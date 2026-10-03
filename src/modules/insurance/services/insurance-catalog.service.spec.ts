@@ -92,6 +92,38 @@ describe('InsuranceCatalogService', () => {
     expect(carriers[0].isPublic).toBe(true);
   });
 
+  it('rotula los seguros públicos «Nombre completo - SIGLA» y los privados con su marca', async () => {
+    const publico = (code: string, legalName: string, sigla: string) => ({
+      ...carrierRow(code, sigla),
+      legalName,
+    });
+    const d = build({
+      carriers: [
+        publico(
+          'BO_PUB_BANCA_PRIVADA',
+          'Caja de Salud de la Banca Privada',
+          'CSBP',
+        ),
+        publico(
+          'BO_PUB_CAMINOS',
+          'Caja de Salud de Caminos y Ramas Anexas',
+          'Caja de Caminos',
+        ),
+        carrierRow(BISA, 'BISA'),
+      ],
+      products: [],
+      plans: [],
+    });
+
+    const { carriers } = await d.service.listHealthCatalog();
+
+    expect(carriers.map((c) => c.name).sort()).toEqual([
+      'BISA',
+      'Caja de Salud de Caminos y Ramas Anexas',
+      'Caja de Salud de la Banca Privada - CSBP',
+    ]);
+  });
+
   it('pide sólo los identificadores del catálogo curado, no todas las aseguradoras', async () => {
     const d = build({ carriers: [], products: [], plans: [] });
 

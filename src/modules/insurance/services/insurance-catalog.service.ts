@@ -16,6 +16,22 @@ import { INS } from '../insurance.concepts';
 import type { CarrierCatalogEntryDto, CarrierCatalogResponseDto } from '../dto';
 
 /**
+ * Rótulo de un seguro público: «Caja de Salud de la Banca Privada - CSBP».
+ *
+ * La sigla sólo se agrega si es una sigla de verdad (mayúsculas): «Caja de
+ * Caminos» es el nombre corto de su caja, no una sigla, y repetirlo junto al
+ * nombre completo sería ruido.
+ *
+ * @param legalName - Nombre oficial de la caja o del sistema.
+ * @param sigla - Sigla con la que se lo conoce, si la hay.
+ * @returns El nombre completo, seguido de la sigla cuando corresponde.
+ */
+function publicCarrierLabel(legalName: string, sigla?: string | null): string {
+  const esSigla = sigla != null && /^[A-Z]{2,}$/.test(sigla);
+  return esSigla && sigla !== legalName ? `${legalName} - ${sigla}` : legalName;
+}
+
+/**
  * El catálogo de aseguradoras que se ofrece a quien se está registrando.
  *
  * ## Por qué no lo sirve `InsuranceReadService`
@@ -83,23 +99,31 @@ export class InsuranceCatalogService {
       else plansByCarrier.set(owner, [plan]);
     }
 
-    const entries: CarrierCatalogEntryDto[] = carriers.map((carrier) => ({
-      id: carrier.id,
-      code: carrier.carrierCode,
-      name: carrier.sigla ?? carrier.legalName,
-      legalName: carrier.legalName,
-      isPublic: isPublicCarrierId(carrier.id),
-      plans: (plansByCarrier.get(carrier.id) ?? []).map((plan) => ({
-        id: plan.id,
-        // `plan_code` viaja prefijado con el código de la aseguradora; a la
-        // pantalla le sirve el sufijo, que es lo que distingue un plan de otro
-        // dentro de la misma compañía.
-        code: plan.planCode.startsWith(`${carrier.carrierCode}_`)
-          ? plan.planCode.slice(carrier.carrierCode.length + 1)
-          : plan.planCode,
-        name: plan.name,
-      })),
-    }));
+    const entries: CarrierCatalogEntryDto[] = carriers.map((carrier) => {
+      const isPublic = isPublicCarrierId(carrier.id);
+      return {
+        id: carrier.id,
+        code: carrier.carrierCode,
+        // Las cajas y el SUS se rotulan «Nombre completo - SIGLA»: «CORDES» o
+        // «CSBP» a secas no le dicen nada a quien tiene que elegir la suya. Las
+        // privadas siguen con su marca comercial.
+        name: isPublic
+          ? publicCarrierLabel(carrier.legalName, carrier.sigla)
+          : (carrier.sigla ?? carrier.legalName),
+        legalName: carrier.legalName,
+        isPublic,
+        plans: (plansByCarrier.get(carrier.id) ?? []).map((plan) => ({
+          id: plan.id,
+          // `plan_code` viaja prefijado con el código de la aseguradora; a la
+          // pantalla le sirve el sufijo, que es lo que distingue un plan de otro
+          // dentro de la misma compañía.
+          code: plan.planCode.startsWith(`${carrier.carrierCode}_`)
+            ? plan.planCode.slice(carrier.carrierCode.length + 1)
+            : plan.planCode,
+          name: plan.name,
+        })),
+      };
+    });
 
     entries.sort((a, b) => a.name.localeCompare(b.name, 'es'));
     return { carriers: entries };
