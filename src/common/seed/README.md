@@ -17,6 +17,8 @@ Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta res
 | `bo-geography-seed.service.ts`   | Siembra `VS_BO_DEPARTMENT`: el conjunto, su versión vigente y los nueve miembros. Lo lee el registro público para «departamento que emitió tu documento». |
 | `bo-employers.catalog.ts`        | Las empresas y empleadores de Bolivia, su sector y los derivadores deterministas de sus ids. Documenta qué publica el SEPREC y por qué la lista no puede ser exhaustiva. |
 | `bo-employers-seed.service.ts`   | Siembra `VS_BO_EMPLOYER`: el conjunto, su versión vigente y sus miembros. Lo lee el alta de paciente para «¿en qué empresa trabajás?», que reemplazó a la ubicación del trabajo. |
+| `affiliation-catalogs.catalog.ts` | Los cuatro conjuntos del onboarding legal de una organización (tipo de documento de afiliación, autoridad emisora, estado de verificación, rol del representante legal), con la procedencia de cada código. |
+| `affiliation-catalogs-seed.service.ts` | Siembra esos cuatro conjuntos de forma idempotente. Sin ellos `register-organization` responde 422 «El catálogo de documentos de afiliación no está disponible». Si el paquete de seeds del modelo ya los cargó, no los toca. |
 | `data/clinical-forms/`           | El contenido de ese catálogo: un `.json` por formulario, con su ficha de procedencia. Tiene su propio `README.md`.                                        |
 
 ## Criterios de mantenimiento
