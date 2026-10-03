@@ -6,6 +6,8 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { CommonModule } from '../common/common.module';
 import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
 import { DirectoryAuthorizationModule } from './directory-authorization.module';
+import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { OrganizationLogoService } from './services/organization-logo.service';
 import {
   TenantTypeProfileService,
   AffiliationDocumentConceptsService,
@@ -56,8 +58,13 @@ import {
     CommonModule,
     DirectoryAuthorizationModule,
   ],
-  controllers: [AdminTenantsController, TenantsController],
+  controllers: [
+    AdminTenantsController,
+    TenantsController,
+    OrganizationLogoController,
+  ],
   providers: [
+    OrganizationLogoService,
     TenantTypeProfileService,
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,

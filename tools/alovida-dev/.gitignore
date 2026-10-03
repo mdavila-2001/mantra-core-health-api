@@ -1,0 +1,6 @@
+/demo-access/
+/imagenes-demo/
+/model-seed.env
+/__pycache__/
+*.dump
+*.csv
