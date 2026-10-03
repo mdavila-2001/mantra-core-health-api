@@ -1,3 +1,5 @@
+import { PractitionerSignatureAssetsController } from './controllers/practitioner-signature-assets.controller';
+import { PractitionerSignatureAssetsService } from './services/practitioner-signature-assets.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
@@ -76,12 +78,14 @@ import { MessagingModule } from '../messaging/messaging.module';
     InsuranceModule,
   ],
   controllers: [
+    PractitionerSignatureAssetsController,
     ProfilesPatientsController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
   ],
   providers: [
+    PractitionerSignatureAssetsService,
     ProfileOwnershipService,
     PatientRepresentationService,
     MedicalSpecialtyCatalogService,

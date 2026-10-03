@@ -62,6 +62,12 @@ export class HealthPractitionerProfiles {
   @Property({ fieldName: 'photo_file_id', type: 'uuid', nullable: true }) // FK → common.files
   photoFileId?: string;
 
+  @Property({ fieldName: 'signature_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
+  signatureFileId?: string;
+
+  @Property({ fieldName: 'seal_file_id', type: 'uuid', nullable: true }) // FK → common.files (inferida)
+  sealFileId?: string;
+
   /**
    * Valor de accepts new patients mantenido por la instancia.
    */
