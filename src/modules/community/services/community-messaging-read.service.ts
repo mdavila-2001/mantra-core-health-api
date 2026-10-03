@@ -19,6 +19,7 @@ import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
 import type { FileContentDto } from '../../common/dto';
 import type {
+  ChatContactPageDto,
   ConversationListItemDto,
   ConversationPageDto,
   ConversationPresenceDto,
@@ -73,6 +74,41 @@ export class CommunityMessagingReadService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
+  }
+
+  /**
+   * Busca personas por nombre para iniciar una conversación.
+   *
+   * A diferencia del directorio anónimo, esta lectura autenticada incluye
+   * pacientes y profesionales. Exige que `profileId` pertenezca a la sesión,
+   * excluye ese mismo perfil y no publica datos de cuenta, contacto ni tenant.
+   */
+  async searchContacts(
+    profileId: string,
+    actor: AuthenticatedUser,
+    query: string,
+    limit: number,
+  ): Promise<ChatContactPageDto> {
+    const em = this.em.fork();
+    await this.visibility.assertOwnProfile(em, profileId, actor);
+
+    const q = query.trim().slice(0, 120);
+    if (q === '') return { items: [] };
+
+    const profiles = await this.profilesRepo.searchChatContacts(em, {
+      ownProfileId: profileId,
+      q,
+      limit,
+    });
+
+    return {
+      items: profiles.map((profile) => ({
+        profileId: profile.id,
+        displayName: profile.displayName,
+        headline: profile.headline ?? null,
+        avatarUrl: this.fileUrl(profile.avatarFileId),
+      })),
+    };
   }
 
   /**

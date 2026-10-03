@@ -29,23 +29,12 @@ export class CreateConversationDto {
    * Valor de conversation type mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Tipo de conversación',
-    enum: ['DIRECT', 'GROUP'],
+    description: 'Tipo de conversación (los grupos usan su flujo de membresía)',
+    enum: ['DIRECT'],
   })
   @IsOptional()
-  @IsIn(['DIRECT', 'GROUP'])
-  conversationType?: 'DIRECT' | 'GROUP';
-
-  /**
-   * Identificador asociado a group.
-   */
-  @ApiPropertyOptional({
-    description: 'Grupo asociado (conversaciones de grupo)',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  groupId?: string;
+  @IsIn(['DIRECT'])
+  conversationType?: 'DIRECT';
 }
 
 /** Cuerpo de `POST /community/conversations/{conversationId}/messages` (UC-19-06). */

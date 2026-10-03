@@ -27,6 +27,7 @@ function build() {
     unpinMessage: mockFn(),
   };
   const readService = {
+    searchContacts: mockFn(),
     listConversations: mockFn(),
     listMessages: mockFn(),
     conversationPresence: mockFn(),
@@ -43,6 +44,22 @@ function build() {
 }
 
 describe('CommunityMessagingController', () => {
+  it('busca contactos del chat con el perfil propio, texto y tope', async () => {
+    const d = build();
+
+    await d.controller.searchContacts(
+      { profileId: 'p1', q: 'María', limit: 12 },
+      actor,
+    );
+
+    expect(d.readService.searchContacts).toHaveBeenCalledWith(
+      'p1',
+      actor,
+      'María',
+      12,
+    );
+  });
+
   it('delegates createConversation', async () => {
     const d = build();
     const dto = { participantProfileIds: ['a', 'b'] };
