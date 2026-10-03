@@ -40,10 +40,10 @@
 
 **CA:** el frontend descarta respuestas obsoletas, abre por `profileId`, las pruebas dirigidas pasan y existen PR hacia `test`.
 
-**Estado:** EN CURSO hasta registrar los PR.
+**Estado:** HECHO
 
 | ID | Microtarea | Estado |
 |---|---|
 | H3.1 | Integración frontend y carrera HTTP | HECHO |
 | H3.2 | Verificación dirigida y gates estáticos | HECHO |
-| H3.3 | Commit, push y PR API/frontend | EN CURSO |
+| H3.3 | Commit, push y PR API/frontend | HECHO |

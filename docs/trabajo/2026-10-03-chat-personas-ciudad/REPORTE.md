@@ -30,5 +30,5 @@
 
 ## Entrega
 
-- PR API: pendiente de registrar.
-- PR frontend: pendiente de registrar.
+- PR API: [#541](https://github.com/mdavila-2001/mantra-core-health-api/pull/541), base `test`.
+- PR frontend: [#892](https://github.com/mdavila-2001/mantra-core-health/pull/892), base `test`.
