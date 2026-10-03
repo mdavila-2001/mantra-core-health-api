@@ -3,6 +3,47 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { PublicProfiles, VerifiedBadges } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
 import { COMM } from '../community.concepts';
+import {
+  containsPattern,
+  normalizeSearchText,
+  sqlSearchKey,
+} from '../../terminology/repositories/glossary-search.sql';
+
+const SEARCH_ACCENTS: Readonly<Record<string, readonly string[]>> = {
+  a: ['á'],
+  e: ['é'],
+  i: ['í'],
+  o: ['ó'],
+  u: ['ú', 'ü'],
+  n: ['ñ'],
+};
+
+/**
+ * Consulta por prefijo para el GIN existente de perfiles públicos.
+ *
+ * Incluye variantes castellanas de una tilde por palabra: así `maria`
+ * selecciona `María` desde el índice antes de aplicar la comparación exacta
+ * normalizada. Sólo interpola letras y números extraídos localmente; el valor
+ * final sigue viajando como parámetro SQL.
+ */
+function prefixTsQuery(text: string): string {
+  const tokens = normalizeSearchText(text).match(/[\p{L}\p{N}]+/gu) ?? [];
+  if (tokens.length === 0) return "'__sin_terminos__':*";
+
+  return tokens
+    .map((token) => {
+      const variants = new Set([token]);
+      [...token].forEach((letter, index) => {
+        for (const accented of SEARCH_ACCENTS[letter] ?? []) {
+          variants.add(
+            `${token.slice(0, index)}${accented}${token.slice(index + 1)}`,
+          );
+        }
+      });
+      return `(${[...variants].map((variant) => `'${variant}':*`).join(' | ')})`;
+    })
+    .join(' & ');
+}
 
 /** Datos para dar de alta un perfil público (anchor social del módulo). */
 export interface CreatePublicProfileData {
@@ -92,6 +133,78 @@ export class PublicProfilesRepository {
   listByIds(em: EntityManager, ids: string[]): Promise<PublicProfiles[]> {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(PublicProfiles, { id: { $in: ids } });
+  }
+
+  /**
+   * Personas activas que se pueden elegir para iniciar un chat.
+   *
+   * Es una lectura autenticada y deliberadamente distinta del directorio
+   * público: también incluye perfiles de pacientes (`PROFILE_TARGET_USER`),
+   * pero sólo devuelve el ancla social mínima que necesita la mensajería.
+   */
+  searchChatContacts(
+    em: EntityManager,
+    options: { ownProfileId: string; q: string; limit: number },
+  ): Promise<PublicProfiles[]> {
+    return this.searchChatContactIds(em, options).then((ids) => {
+      if (ids.length === 0) return [];
+      return em.find(
+        PublicProfiles,
+        { id: { $in: ids } },
+        { orderBy: { displayName: 'ASC', id: 'ASC' } },
+      );
+    });
+  }
+
+  /**
+   * Filtra consentimiento y bloqueos antes de hidratar perfiles. Primero usa
+   * el GIN `gin_public_profiles_search` para acotar por prefijos de palabras;
+   * después confirma la coincidencia sin tildes con funciones nativas. Este
+   * esquema no instala la extensión `unaccent`.
+   */
+  private async searchChatContactIds(
+    em: EntityManager,
+    options: { ownProfileId: string; q: string; limit: number },
+  ): Promise<string[]> {
+    const sql = `
+      SELECT p.id
+        FROM community.public_profiles p
+       WHERE p.id <> ?
+         AND p.status_concept_id = ?
+         AND p.visibility_concept_id = ?
+         AND p.target_type_concept_id IN (?, ?)
+         AND to_tsvector(
+               'simple',
+               (coalesce(p.display_name, '') || ' ' || coalesce(p.headline, ''))
+             ) @@ to_tsquery('simple', ?)
+         AND ${sqlSearchKey('p.display_name')} LIKE ?
+         AND NOT EXISTS (
+           SELECT 1
+             FROM community.user_blocks b
+            WHERE b.status_concept_id = ?
+              AND ((b.blocker_profile_id = ? AND b.blocked_profile_id = p.id)
+                OR (b.blocker_profile_id = p.id AND b.blocked_profile_id = ?))
+         )
+       ORDER BY p.display_name ASC, p.id ASC
+       LIMIT ?`;
+    const params = [
+      options.ownProfileId,
+      CONCEPTS.STATE_ACTIVE,
+      COMM.PROFILE_VISIBILITY_PUBLIC,
+      COMM.PROFILE_TARGET_USER,
+      COMM.PROFILE_TARGET_PRACTITIONER,
+      prefixTsQuery(options.q),
+      containsPattern(normalizeSearchText(options.q)),
+      CONCEPTS.STATE_ACTIVE,
+      options.ownProfileId,
+      options.ownProfileId,
+      options.limit,
+    ];
+
+    const rows = await em
+      .getConnection()
+      .execute<{ id: string }[]>(sql, params, 'all');
+    return rows.map((row) => row.id);
   }
 
   /**
