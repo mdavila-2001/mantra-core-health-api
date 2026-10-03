@@ -88,10 +88,9 @@ export class SupportAdminNoticeAdapter {
         actor,
       );
 
-      const conversation = await this.messaging.createConversation(
+      const conversation = await this.messaging.createSystemDirectConversation(
         {
           participantProfileIds: [supportAdminProfileId, recipientProfileId],
-          conversationType: 'DIRECT',
         },
         actor,
       );

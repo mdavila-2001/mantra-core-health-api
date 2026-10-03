@@ -1,0 +1,51 @@
+# CI del PR #538 (API → dev): el fallo es PREEXISTENTE y ajeno al cambio
+# Fuente: `gh run view --log-failed` y `gh run list`, consultados el 2026-10-03. Líneas literales (prefijos de GitHub quitados).
+
+## 1. Corrida del PR #538 (run 37100064062, rama justin/catalogo-afiliacion-seed-dev)
+job docs: failure
+  paso fallido: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
+job fork-guard: skipped
+FAIL src/modules/insurance/controllers/insurance-controllers.spec.ts
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+    - Expected  - 0
+    + Received  + 4
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:262:19)
+Jest: Coverage for branches (68.65%) does not meet "global" threshold (69%)
+FAIL modules/insurance/controllers/insurance-controllers.spec.ts
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+    - Expected  - 0
+    + Received  + 4
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:262:19)
+Test Suites: 1 failed, 1 skipped, 791 passed, 792 of 793 total
+Tests:       1 failed, 1 skipped, 9794 passed, 9796 total
+
+## 2. Corrida AJENA anterior: PR fichas-clinicas-v2 (run 37062543405, 2026-10-02) — mismo test, misma cobertura
+FAIL src/modules/insurance/controllers/insurance-controllers.spec.ts (5.063 s)
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+    - Expected  - 0
+    + Received  + 4
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:262:19)
+Jest: Coverage for branches (68.63%) does not meet "global" threshold (69%)
+FAIL modules/insurance/controllers/insurance-controllers.spec.ts (5.063 s)
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+    - Expected  - 0
+    + Received  + 4
+
+## 3. Corridas del workflow `docs` sobre PR a dev: todas terminan en `failure` (sólo se comparó el MOTIVO en la corrida del punto 2; en las demás se verificó únicamente el resultado)
+2026-10-03T05:30:54Z pull_request rama=justin/catalogo-afiliacion-seed-dev conclusion=failure run=37100064062
+2026-10-02T20:44:48Z pull_request rama=justin/fichas-clinicas-v2 conclusion=failure run=37062543405
+2026-10-02T01:42:27Z pull_request rama=justin/catalogos-oficiales-api conclusion=failure run=36952214174
+2026-10-02T01:36:20Z pull_request rama=justin/catalogos-oficiales-api conclusion=failure run=36951732914
+2026-10-01T23:34:23Z pull_request rama=justin/catalogos-oficiales-api conclusion=failure run=36941517714
+2026-10-01T23:12:18Z pull_request rama=justin/catalogos-oficiales-api conclusion=failure run=36939512758
+2026-10-01T21:13:33Z pull_request rama=justin/deps-audit-2026-10-01 conclusion=failure run=36927214927
+2026-10-01T21:03:32Z pull_request rama=marcelo/feat-brechas-criticas-backend-h4 conclusion=failure run=36926054135
+2026-10-01T21:02:42Z pull_request rama=marcelo/feat-brechas-criticas-backend-h4 conclusion=failure run=36925955116
+2026-10-01T18:33:38Z pull_request rama=justin/servicios-dinamicos-api conclusion=failure run=36907733433
+2026-10-01T17:53:56Z pull_request rama=justin/catalogo-universal-api conclusion=failure run=36902798931
+2026-10-01T17:16:21Z pull_request rama=marcelo/fix-homologacion-metodos-http conclusion=failure run=36898148024
+
+## Lectura
+- Antes de este trabajo ya había corridas en `failure` (la más antigua listada: 2026-10-01). Mismo test (`insurance-controllers.spec.ts`, roles de la lectura de solicitudes de seguro) y cobertura de ramas 68,65 % (mi PR) vs 68,63 % (PR ajeno) contra el umbral 69 %.
+- El cambio de #538 sólo agrega un seeder y su registro; sus propios tests pasan (ver `h1-specs.txt` y `h2-unit-vecinas.txt`).
+- Los pasos de build, typecheck, lint, auditoría y guardrails de ese workflow pasaron; sólo falló «Pruebas unitarias con cobertura».

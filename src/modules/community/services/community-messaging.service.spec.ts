@@ -9,10 +9,12 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityMessagingService } from './community-messaging.service';
 import {
+  CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
 import { ForbiddenException } from '@nestjs/common';
+import { COMM } from '../community.concepts';
 
 const actor = { id: 'admin-1', roles: [] } as any;
 
@@ -40,6 +42,14 @@ function build() {
     findLiveMessagesByAttachmentFileId: mockFn().mockResolvedValue([]),
   };
   const blocksRepo = { existsBetween: mockFn().mockResolvedValue(null) };
+  const profilesRepo = {
+    findById: mockFn().mockResolvedValue({
+      id: 'p2',
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+    }),
+  };
   // El aviso in-app del carril P1, doblado: enviar un mensaje se prueba acá,
   // avisarlo se prueba en su propio servicio.
   const messageNotifications = {
@@ -73,6 +83,7 @@ function build() {
     em as any,
     conversationsRepo as any,
     blocksRepo as any,
+    profilesRepo as any,
     messageNotifications as any,
     gateway as any,
     autoReply as any,
@@ -86,6 +97,7 @@ function build() {
     tx,
     conversationsRepo,
     blocksRepo,
+    profilesRepo,
     messageNotifications,
     gateway,
     visibility,
@@ -107,6 +119,98 @@ describe('CommunityMessagingService', () => {
       'p1',
       'p2',
     ]);
+    expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+      expect.anything(),
+      'p1',
+      actor,
+    );
+  });
+
+  it('rechaza antes de sondear una conversación si el iniciador es un perfil ajeno', async () => {
+    const d = build();
+    d.visibility.assertActsAsProfile.mockRejectedValue(
+      new ForbiddenException('perfil ajeno'),
+    );
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p-ajeno', 'p2'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+    expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
+  });
+
+  it('rechaza una conversación directa con más de dos participantes', async () => {
+    const d = build();
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p2', 'p3'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+  });
+
+  it('rechaza una conversación directa consigo mismo', async () => {
+    const d = build();
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p1'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it.each([
+    [
+      'privado',
+      {
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE,
+        targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+      },
+    ],
+    [
+      'inactivo',
+      {
+        statusConceptId: 'inactive',
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+      },
+    ],
+  ])('rechaza un destinatario %s', async (_caso, perfil) => {
+    const d = build();
+    d.profilesRepo.findById.mockResolvedValue(perfil);
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p2'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+  });
+
+  it('rechaza un destinatario bloqueado antes de buscar o crear la conversación', async () => {
+    const d = build();
+    d.blocksRepo.existsBetween.mockResolvedValue({ id: 'block-1' });
+
+    await expect(
+      d.service.createConversation(
+        { participantProfileIds: ['p1', 'p2'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+    expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
   });
 
   /* --- Carril P2 · la conversación directa deja de duplicarse ------------- */
@@ -131,33 +235,54 @@ describe('CommunityMessagingService', () => {
     expect(d.gateway.emitNewConversation).not.toHaveBeenCalled();
   });
 
-  it('no reutiliza nada cuando es un grupo: dos foros del mismo equipo son dos foros', async () => {
+  it('rechaza grupos: su membresía se administra por el flujo específico de grupos', async () => {
     const d = build();
-    d.conversationsRepo.createConversation.mockReturnValue({
-      id: 'conv-nueva',
-    });
 
-    await d.service.createConversation(
-      { participantProfileIds: ['p1', 'p2'], conversationType: 'GROUP' },
-      actor,
-    );
+    await expect(
+      d.service.createConversation(
+        {
+          participantProfileIds: ['p1', 'p2'],
+          conversationType: 'GROUP',
+        } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
 
     expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
-    expect(d.conversationsRepo.createConversation).toHaveBeenCalled();
+    expect(d.conversationsRepo.createConversation).not.toHaveBeenCalled();
   });
 
-  it('tampoco reutiliza con más de dos participantes', async () => {
+  it('permite al canal SYSTEM abrir un hilo con un destinatario privado activo', async () => {
     const d = build();
+    d.profilesRepo.findById.mockResolvedValue({
+      id: 'p2',
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PRIVATE,
+      targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+    });
     d.conversationsRepo.createConversation.mockReturnValue({
-      id: 'conv-nueva',
+      id: 'conv-system',
     });
 
-    await d.service.createConversation(
-      { participantProfileIds: ['p1', 'p2', 'p3'] },
-      actor,
-    );
+    await expect(
+      d.service.createSystemDirectConversation(
+        { participantProfileIds: ['p-support', 'p2'] },
+        { id: 'system-1', roles: ['SYSTEM'] } as any,
+      ),
+    ).resolves.toEqual({ id: 'conv-system' });
+  });
 
-    expect(d.conversationsRepo.findDirectBetween).not.toHaveBeenCalled();
+  it('no deja usar el canal interno sin rol SYSTEM', async () => {
+    const d = build();
+
+    await expect(
+      d.service.createSystemDirectConversation(
+        { participantProfileIds: ['p-support', 'p2'] },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
   });
 
   describe('sendMessage (UC-19-06)', () => {

@@ -40,7 +40,10 @@ function build() {
   };
   // Carril P2: la bandeja nombra al otro lado. Por defecto no hay perfiles
   // que resolver, que es lo que ven las pruebas que no miran los nombres.
-  const profilesRepo = { listByIds: mockFn().mockResolvedValue([]) };
+  const profilesRepo = {
+    listByIds: mockFn().mockResolvedValue([]),
+    searchChatContacts: mockFn().mockResolvedValue([]),
+  };
   const visibility = {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
@@ -148,6 +151,68 @@ function conTresConversaciones(d: ReturnType<typeof build>) {
 }
 
 describe('CommunityMessagingReadService', () => {
+  describe('searchContacts', () => {
+    it('encuentra pacientes y profesionales activos sin devolverse a uno mismo', async () => {
+      const d = build();
+      d.profilesRepo.searchChatContacts.mockResolvedValue([
+        {
+          id: 'p-paciente',
+          displayName: 'María Pérez',
+          headline: 'Paciente',
+          avatarFileId: 'avatar-1',
+        },
+        {
+          id: 'p-medica',
+          displayName: 'Dra. María Quispe',
+          headline: 'Cardióloga',
+        },
+      ]);
+
+      const resultado = await d.service.searchContacts(
+        'p-propio',
+        actor,
+        '  María  ',
+        10,
+      );
+
+      expect(d.visibility.assertOwnProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'p-propio',
+        actor,
+      );
+      expect(d.profilesRepo.searchChatContacts).toHaveBeenCalledWith(
+        expect.anything(),
+        { ownProfileId: 'p-propio', q: 'María', limit: 10 },
+      );
+      expect(resultado).toEqual({
+        items: [
+          {
+            profileId: 'p-paciente',
+            displayName: 'María Pérez',
+            headline: 'Paciente',
+            avatarUrl: '/public/media/avatar-1',
+          },
+          {
+            profileId: 'p-medica',
+            displayName: 'Dra. María Quispe',
+            headline: 'Cardióloga',
+            avatarUrl: null,
+          },
+        ],
+      });
+    });
+
+    it('una consulta vacía no enumera perfiles', async () => {
+      const d = build();
+
+      await expect(
+        d.service.searchContacts('p-propio', actor, '   ', 10),
+      ).resolves.toEqual({ items: [] });
+
+      expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getAttachmentContent (5.1 · FT-32)', () => {
     it('permite al receptor participante aunque no sea quien subió', async () => {
       const d = build();
