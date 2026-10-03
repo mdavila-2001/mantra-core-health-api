@@ -41,6 +41,8 @@ import {
   DeletedMessageResponseDto,
   PinnedMessageResponseDto,
   ConversationPresenceDto,
+  ChatContactPageDto,
+  SearchChatContactsRequestDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -167,6 +169,23 @@ export class CommunityMessagingController {
   }
 
   // --- Lecturas (UC-19-14, cara de lectura) ---
+
+  /** Personas activas —pacientes y profesionales— con quienes iniciar un chat. */
+  @Post('contacts/search')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Buscar personas para iniciar una conversación' })
+  searchContacts(
+    @Body() request: SearchChatContactsRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatContactPageDto> {
+    return this.readService.searchContacts(
+      request.profileId,
+      actor,
+      request.q,
+      request.limit,
+    );
+  }
 
   /**
    * 5.1 · FT-32-R02: el contenido de un adjunto de la conversación, para quien
