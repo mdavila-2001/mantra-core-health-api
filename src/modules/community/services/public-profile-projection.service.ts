@@ -66,6 +66,47 @@ export class PublicProfileProjectionService {
    */
   constructor(private readonly profilesRepo: PublicProfilesRepository) {}
 
+  /** Referencia del logo; no publica ni crea una vitrina al leer. */
+  async getOrganizationLogo(
+    em: EntityManager,
+    targetId: string,
+  ): Promise<string | null> {
+    const profile = await this.profilesRepo.findByTarget(em, targetId);
+    return profile?.avatarFileId ?? null;
+  }
+
+  /** Guarda el logo antes de la verificación sin publicar la organización. */
+  async setOrganizationLogo(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      displayName: string;
+      fileId: string | null;
+      actorUserId: string;
+    },
+  ): Promise<void> {
+    let profile = await this.profilesRepo.findByTarget(em, data.tenantId);
+    if (!profile) {
+      if (data.fileId === null) return;
+      profile = this.profilesRepo.create(em, {
+        tenantId: data.tenantId,
+        targetId: data.tenantId,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+        slug: `organization-${data.tenantId}`,
+        displayName: data.displayName,
+        statusConceptId: CONCEPTS.STATE_PENDING,
+        // Sin visibilidad pública: esta fila sólo permite guardar el logo interno.
+        actorUserId: data.actorUserId,
+        avatarFileId: data.fileId,
+      });
+    } else {
+      // null explícito persiste la eliminación, sin tocar presentación ni portada.
+      em.assign(profile, { avatarFileId: data.fileId });
+      touch(profile, data.actorUserId);
+    }
+    await em.flush();
+  }
+
   /**
    * Proyecta una organización dentro de la transacción del caso de uso llamador.
    *
@@ -82,7 +123,22 @@ export class PublicProfileProjectionService {
     // mismo sujeto —dos enlaces públicos a lo mismo— y el slug, que es único,
     // hacía caer la segunda con un error de base que no nombraba el problema.
     const existente = await this.profilesRepo.findByTarget(em, data.targetId);
-    if (existente) return existente.id;
+    if (existente) {
+      // Completa exclusivamente el ancla pendiente creada para un logo interno.
+      // Una vitrina con visibilidad privada explícita conserva su decisión.
+      if (
+        existente.visibilityConceptId == null &&
+        existente.statusConceptId === CONCEPTS.STATE_PENDING
+      ) {
+        existente.visibilityConceptId = COMM.PROFILE_VISIBILITY_PUBLIC;
+        existente.statusConceptId = CONCEPTS.STATE_ACTIVE;
+        existente.targetTypeConceptId =
+          data.targetTypeConceptId ?? COMM.PROFILE_TARGET_ORGANIZATION;
+        touch(existente, data.actorUserId);
+        await em.flush();
+      }
+      return existente.id;
+    }
 
     const profile = this.profilesRepo.create(em, {
       tenantId: data.tenantId,
