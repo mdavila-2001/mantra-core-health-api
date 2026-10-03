@@ -6,6 +6,7 @@ import {
   type UploadedFileBytes,
 } from '../../common/services';
 import { RegistrationDocumentUploadResponseDto } from '../dto';
+import { PreconditionFailedException } from '../../../common';
 
 /** Único formato admitido por esta vía: el registro de procesos pide PDF. */
 const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
@@ -59,6 +60,31 @@ export class IamRegistrationDocumentUploadService {
       fileId: uploaded.id,
       // `FileResponseDto.originalName` es opcional; acá siempre viene, porque
       // el interceptor de multer no deja pasar un `file` sin nombre.
+      originalName: file?.originalname ?? uploaded.originalName ?? '',
+      sizeBytes: uploaded.sizeBytes,
+      mimeType: uploaded.mimeType,
+    };
+  }
+
+  /** Precarga privada de firma/sello; la cuenta aún no existe. */
+  async uploadSignatureImage(
+    file: UploadedFileBytes | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    if (file && file.buffer.byteLength > 2 * 1024 * 1024) {
+      throw new PreconditionFailedException(
+        'La imagen supera el límite de 2 MB',
+      );
+    }
+    const uploaded = await this.fileUploadService.uploadAnonymous(
+      file,
+      { category: FileCategory.IMAGE, sensitivity: FileSensitivity.PHI },
+      {
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        operation: 'iam.auth.upload-registration-signature-image',
+      },
+    );
+    return {
+      fileId: uploaded.id,
       originalName: file?.originalname ?? uploaded.originalName ?? '',
       sizeBytes: uploaded.sizeBytes,
       mimeType: uploaded.mimeType,

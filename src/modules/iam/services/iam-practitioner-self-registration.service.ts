@@ -562,6 +562,30 @@ export class IamPractitionerSelfRegistrationService {
       });
       await tx.flush();
 
+      // Reclamar dentro del alta: un fallo revierte cuenta, propiedad y perfil.
+      for (const fileId of [dto.signatureFileId, dto.sealFileId]) {
+        if (fileId == null) continue;
+        const { file, version } =
+          await this.attachableFiles.claimAnonymousUpload(
+            tx,
+            fileId,
+            { ownerUserId: user.id, tenantId: SEED.tenantId },
+            {
+              allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+              operation: 'iam.auth.register-practitioner.signature-assets',
+            },
+          );
+        if (
+          file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
+          BigInt(version.sizeBytes) > BigInt(2 * 1024 * 1024)
+        ) {
+          throw new PreconditionFailedException(
+            'La firma y el sello requieren una imagen privada de hasta 2 MB',
+          );
+        }
+      }
+
       // 3) Perfil profesional. `health_practitioner_profiles.profile_id` ES
       // `persons.id` (ver ProfilesPractitionersService), no un id propio.
       const practitioner = this.practitionersRepo.create(tx, {
@@ -571,6 +595,8 @@ export class IamPractitionerSelfRegistrationService {
           dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
         professionalTitle: dto.professionalTitle,
         photoFileId,
+        signatureFileId: dto.signatureFileId,
+        sealFileId: dto.sealFileId,
         // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
         verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,

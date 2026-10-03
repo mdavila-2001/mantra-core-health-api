@@ -619,6 +619,18 @@ export class RegisterPractitionerDto {
   @IsString()
   profilePhotoBase64?: string;
 
+  /** Firma precargada por la ruta de imágenes del registro. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  signatureFileId?: string;
+
+  /** Sello precargado por la ruta de imágenes del registro. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  sealFileId?: string;
+
   /**
    * Consultorio propio declarado en el alta (ALV-005/006 · P20).
    *
