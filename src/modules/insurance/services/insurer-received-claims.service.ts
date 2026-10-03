@@ -39,6 +39,7 @@ import type {
 } from '../dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { matchesLinkedClaimSnapshot } from './linked-claim-validation';
+import type { MyClaimDto, MyClaimsView } from '../dto/my-claims.dto';
 import {
   fromCents,
   splitApproval,
@@ -589,6 +590,56 @@ export class InsurerReceivedClaimsService {
     if (claims.length === 0) return [];
     const context = await this.loadContext(em, claims);
     return claims.map((claim) => this.toItem(claim, context));
+  }
+
+  /** Proyección de filas que el llamador ya acotó por titular o prestador (P56). */
+  async buildMyItems(
+    em: EntityManager,
+    claims: readonly InsuranceClaims[],
+    view: MyClaimsView,
+  ): Promise<MyClaimDto[]> {
+    if (claims.length === 0) return [];
+    const [items, carriers] = await Promise.all([
+      this.buildItems(em, claims),
+      this.claimReadRepo.findCarriersByIds(
+        em,
+        unique(claims.map((claim) => claim.insuranceCarrierId)),
+      ),
+    ]);
+    const carrierNames = new Map(
+      carriers.map((carrier) => [carrier.id, carrier.legalName]),
+    );
+    const carrierByClaim = new Map(
+      claims.map((claim) => [claim.id, claim.insuranceCarrierId]),
+    );
+    return items.map((item) => ({
+      id: item.id,
+      claimIdentifier: item.claimIdentifier,
+      patientName: view === 'PATIENT' ? null : item.patient.displayName,
+      practitioner: item.practitioner
+        ? {
+            displayName: item.practitioner.displayName,
+            specialty: item.practitioner.specialty,
+          }
+        : null,
+      providerName: item.providerName,
+      service: item.service,
+      additionalServiceCount: item.additionalServiceCount,
+      billedTotal: item.billedTotal,
+      approvedTotal: item.approvedTotal,
+      submittedAt: item.submittedAt,
+      serviceDate: item.serviceDate,
+      insurerName: carrierNames.get(carrierByClaim.get(item.id) ?? '') ?? '',
+      planName: item.planName,
+      status: item.status,
+      decision: item.decision
+        ? {
+            outcome: item.decision.outcome,
+            decidedAt: item.decision.decidedAt,
+            reason: item.decision.reason,
+          }
+        : null,
+    }));
   }
 
   /**

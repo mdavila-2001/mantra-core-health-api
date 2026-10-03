@@ -1,3 +1,5 @@
+import { MyClaimsController } from './controllers/my-claims.controller';
+import { MyClaimsService } from './services/my-claims.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PracticeModule } from '../practice/practice.module';
@@ -113,6 +115,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     MessagingModule,
   ],
   controllers: [
+    MyClaimsController,
     InsuranceBackboneController,
     CoverageController,
     PriorAuthController,
@@ -131,6 +134,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurerReceivedClaimsController,
   ],
   providers: [
+    MyClaimsService,
     // Repositorios
     CatalogRepository,
     InsuranceReadRepository,
