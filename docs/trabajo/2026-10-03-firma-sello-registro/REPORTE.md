@@ -3,7 +3,7 @@
 - Fecha: 2026-10-03. [Plan](./PLAN.md).
 - Rama: marcelo/feat-firma-sello-registro; base API dev 55b92f0a.
 - Evidencia: VERIFIED para el camino HTTP de firma/sello y persistencia; no E2E de navegador ni verde global.
-- Avance conjunto de los dos repos: 7 / 9 microtareas (77.78%); compilación del frontend y publicación pendientes.
+- Avance conjunto de los dos repos: 9 / 9 microtareas (100%); entrega de código y verificaciones dirigidas.
 
 ## Completado
 
@@ -17,12 +17,13 @@
 | H1.S2.M2 | Reintento sin duplicar carga confirmada | mismo runner frontend | `Tests 157 passed (157)` |
 | H1.S3.M1 | HTTP real y bytes persistidos; rollback | `yarn test:integration --runInBand test/integration/practitioner-signature-registration.int-spec.ts` | `Tests: 2 passed, 2 total`; salida 0 |
 
+| H1.S2.M3 | Frontend productivo compila | `yarn build --configuration production` | salida 0; `Application bundle generation complete. [169.088 seconds]` |
+| H1.S3.M2 | PRs publicados hacia dev | `gh pr view --json url,baseRefName` | API #549; frontend #907; base dev |
+
 ESLint dirigido de API y revisión del diff: salida 0. [Evidencia](./evidencia/VALIDACION.txt).
 
 ## A medias
 
-- H1.S2.M3: compilación productiva del frontend en curso.
-- H1.S3.M2: publicación de PRs vinculados en curso.
 - Regresión heredada de integración general: tres fallos reproducidos en el código original de dev (dos casos de domicilio y uno de alta asistida). El nuevo flujo no elimina ni modifica esas pruebas. No se afirma que toda la suite pase.
 
 ## No hecho
@@ -38,3 +39,10 @@ ESLint dirigido de API y revisión del diff: salida 0. [Evidencia](./evidencia/V
 La API real no recibe los campos base64 del simulador. El frontend los mantiene en memoria para previsualizar y reintentar. Un fallo de subida no continúa al registro. Después del login se consultan los activos del perfil y se descargan mediante la ruta autenticada existente; la lectura pública devuelve 404.
 
 El modelo ya incorporó el patch en PR #44. Se copia sin cambios a database/SQL/patches de la API. Antes de activar el frontend se aplica el patch y se despliega la API. La reversión del código conserva las columnas nullable; no borrar archivos ni columnas con datos.
+
+## PRs y estado remoto
+
+- API: https://github.com/mdavila-2001/mantra-core-health-api/pull/549
+- Frontend: https://github.com/mdavila-2001/mantra-core-health/pull/907
+- Ambos listos para revisión, sin conflictos al publicar; CI remoto pendiente. Orden: patch → API → frontend.
+- Las bases temporales PostgreSQL y MongoDB se eliminaron; no queda un contenedor temporal de verificación.
