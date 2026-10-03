@@ -1,0 +1,5 @@
+FROM python:3.12-slim-bookworm
+WORKDIR /workspace
+COPY modelo/salud-db/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt Pillow argon2-cffi
+ENV PYTHONPATH=/workspace/modelo/salud-db SALUD_WORKSPACE=/workspace
