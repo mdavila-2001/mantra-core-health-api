@@ -15,3 +15,5 @@ Pruebas dirigidas, no toda la suite del API. Sin nuevos cambios de esquema, sin 
 
 ## Integración y reversión
 API antes que frontend en dev y test. Test recibe sólo los commits propios sobre origin/test; conserva sus dependencias. Revertir el API revierte los endpoints y proyección; los scripts son manuales y no se ejecutan al arrancar. No hay reseed ni reinicio de servicios como parte del PR.
+
+Test: imagen compilada con el package.json/yarn.lock propios de origin/test; build, lint dirigido y 11 tests aprobados con código de salida 0. El Dockerfile.seed se incluye expresamente pese al patrón global *.seed.
