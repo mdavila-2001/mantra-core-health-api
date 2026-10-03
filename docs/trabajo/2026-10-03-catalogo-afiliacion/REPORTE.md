@@ -1,6 +1,6 @@
 # Reporte — Catálogos de afiliación del alta de organización
 
-> **AVANCE: 16 / 16 microtareas HECHO.** Peldaño alcanzado: **`VERIFIED`** (comportamiento observado en runtime: reproducido en rojo, corregido y verde por API y por navegador). **NO se declara `REGRESSION_VERIFIED`** (corrección del 2026-10-03, ver «Actualización posterior al merge»): el CI del front nunca corrió, el CI de la API sobre `dev` está en rojo por un fallo previo ajeno, no se verificó el servidor desplegado y la revisión visual independiente rechazó 4 pantallas por causas ajenas.
+> **AVANCE: 16 / 16 microtareas HECHO.** Peldaño alcanzado: **`VERIFIED`** (comportamiento observado en runtime: reproducido en rojo, corregido y verde por API y por navegador). **NO se declara `REGRESSION_VERIFIED`** (corrección del 2026-10-03, ver «Actualización posterior al merge»): el CI del front nunca corrió, el CI de la API sobre `dev` está en rojo por un fallo previo ajeno, la verificación en el servidor se hizo después de este informe y la revisión visual independiente rechazó 4 pantallas por causas ajenas.
 
 - Fecha: 2026-10-03 · Plan: [PLAN.md](./PLAN.md)
 - Base de las PR: `test` (la rama que despliega el servidor).
@@ -64,7 +64,7 @@ Un segundo defecto, descubierto al hacer clic de verdad: en la pantalla de asegu
 | Merge de los PR | **Hecho** el 2026-10-03: API #537 (test) y #538 (dev), front #869/#870 (test), #874/#875 (dev), #876/#877 (mockup) |
 | Que `test` y `dev` vuelvan a compilar (`pdfMinimo`) | **Abierto**: front #884 (test) y #885 (dev); mientras no se mezclen, el servidor no recibe estos arreglos |
 | Textos que insinuaban elegir cómo se recibe el pedido | **Abierto**: front #886/#887/#888 |
-| Comprobar en el servidor que el alta ya no devuelve 422 | **Pendiente** del redespliegue y del arreglo de build; requiere crear una organización de prueba (visto bueno del propietario) |
+| Comprobar en el servidor que el alta ya no devuelve 422 | **Hecho el 2026-10-03:** 10 pruebas de navegador contra `https://test.173.249.39.237.sslip.io`, 10 passed, sobre la API `b8315d9c` (seeder desde `5e245aec`). Evidencia en `mantra-core-health`, `docs/frontend/evidence/2026-10-03-servidor-test/` (PR `#893`/`#894`/`#895`) |
 | Cargador del paquete del modelo vs. seeder de la API (`uq_value_sets_internal_code`) | **Pendiente** en el repo del modelo |
 
 ## Actualización posterior al merge (2026-10-03)
@@ -75,4 +75,5 @@ Hechos comprobados con salida literal en `evidencia/`:
 2. **CI de la API sobre `dev` (#538): `docs` terminó en fallo** en «Pruebas unitarias con cobertura». **Es previo y ajeno**: mismo test (`insurance-controllers.spec.ts`, roles de solicitudes de seguro) y cobertura de ramas 68,65 % vs 68,63 % de una corrida de otro PR del 2/10, con umbral de 69 %. Detalle y comparación: `evidencia/ci-538-fallo-preexistente.txt`. Sobre `test` no hay CI configurado (el workflow dispara sólo sobre `master` y `dev`).
 3. **CI del front: los 6 PR quedaron `queued` y se mezclaron sin que corriera.** La verificación que los respalda es la local; está guardada en el repo del front (`docs/frontend/evidence/2026-10-03-alta-org-y-sin-delivery/`).
 4. **Hallazgo grave ajeno:** `test` y `dev` del front **no compilan** (`TS2304 pdfMinimo` en `clinical.handlers.ts`, dejado por los merges «integra los aportes locales de mockup»). Sin ese arreglo el despliegue falla en silencio. Ver el README de la evidencia del front.
-5. **Corrección de este reporte:** donde decía `REGRESSION_VERIFIED` ahora dice `VERIFIED`. La segunda pasada visual la hice yo mismo (la regla lo prohíbe); se repitió con un revisor independiente, que dio veredicto global RECHAZADO (por causas ajenas al cambio). El veredicto visual es `VERIFIED_FUNCTIONAL_ONLY`.
+5. **Verificado en el servidor de test:** el alta de aseguradora completa con 201 desde un navegador real y los casos límite y error responden lo esperado (10/10), sobre el despliegue de la API que ya incluye el seeder. Esto cierra la brecha «no se verificó el servidor desplegado»; los demás motivos de la corrección de abajo siguen en pie.
+6. **Corrección de este reporte:** donde decía `REGRESSION_VERIFIED` ahora dice `VERIFIED`. La segunda pasada visual la hice yo mismo (la regla lo prohíbe); se repitió con un revisor independiente, que dio veredicto global RECHAZADO (por causas ajenas al cambio). El veredicto visual es `VERIFIED_FUNCTIONAL_ONLY`.
