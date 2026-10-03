@@ -9,6 +9,7 @@ import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.servi
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
+import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
@@ -130,6 +131,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
    * @param legalEntityTypes - País y categoría canónica de cada forma societaria
    *   del diccionario internacional (subtarea 1.1).
+   * @param affiliationCatalogs - Documentos de afiliación, autoridad emisora,
+   *   estado de verificación y rol del representante legal del alta de organización.
    * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
    * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
@@ -162,6 +165,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
+    private readonly affiliationCatalogs: AffiliationCatalogsSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
     private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
@@ -315,6 +319,18 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'país y categoría canónica de formas societarias',
         kind: 'core',
         run: () => this.legalEntityTypes.run(),
+      },
+      // Los cuatro conjuntos que el alta de organización resuelve por código
+      // (documentos de afiliación, autoridad emisora, estado de verificación y
+      // rol del representante). Es núcleo y no contenido: sin ellos
+      // `register-organization` responde 422 «El catálogo de documentos de
+      // afiliación no está disponible» — el defecto D6 del 26/09/2026. Va
+      // después de terminología porque sus conceptos cuelgan del sistema de
+      // códigos interno.
+      {
+        name: 'catálogos de afiliación y representación legal',
+        kind: 'core',
+        run: () => this.affiliationCatalogs.run(),
       },
       // Y con ellos, por lo mismo: el alta de paciente resuelve
       // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.
