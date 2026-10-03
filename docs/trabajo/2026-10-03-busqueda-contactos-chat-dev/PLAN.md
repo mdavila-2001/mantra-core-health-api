@@ -17,7 +17,7 @@
 
 **CA:** Dado un actor autenticado, cuando busca desde su perfil, entonces recibe solo contactos públicos activos elegibles sin bloqueos.
 **DoD:** pruebas dirigidas en serie, compilación, revisión del diff y PR contra dev.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 ### H1.S1 — Contrato y acceso
 
@@ -34,13 +34,13 @@
 
 **CA:** Dado dev actual, cuando se compila y publica la rama, entonces el cambio es revisable sin modificar dev directamente.
 **DoD:** compilación y controles dirigidos; publicar PR.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H1.S2.M1 | Compilar el backend | Dado el código nuevo, cuando se construye, entonces no hay errores TypeScript | `docker build --target build -t alovida-chat-api-build:dev .` → salida 0 | HECHO |
 | H1.S2.M2 | Revisar el diff | Dado el parche, cuando se revisa, entonces no contiene secretos ni cambios fuera del alcance | `git diff --check` → salida 0; revisión de archivos | HECHO |
-| H1.S2.M3 | Publicar PR | Dada la rama nueva, cuando se publica, entonces su base es dev | `gh pr view --json url,baseRefName,headRefName` → base dev | EN CURSO |
+| H1.S2.M3 | Publicar PR | Dada la rama nueva, cuando se publica, entonces su base es dev | `gh pr view --json url,baseRefName,headRefName` → base dev | HECHO |
 
 ## Riesgos y bloqueos previstos
 
@@ -49,3 +49,7 @@
 | Test tiene otros cambios de escritura | Alterar contratos ajenos | Portar solo archivos y hunks de lectura |
 | Pruebas unitarias usan dobles | No prueban el flujo desplegado | Declarar ese límite; no afirmar verificación E2E |
 | CI remoto demora | PR aún no habilitado para revisión | Observar los checks y declarar su estado |
+
+## Entrega
+
+PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/548, base dev. Se aplica la preferencia previa del usuario de entregar PRs listos para revisión; CI remoto pendiente, sin merge automático.

@@ -3,7 +3,7 @@
 - Fecha: 2026-10-03. Plan: [PLAN.md](./PLAN.md).
 - Rama: marcelo/feat-busqueda-contactos-chat.
 - Evidencia alcanzada: TESTED; sin verificación E2E desplegada.
-- Avance: 4 / 5 microtareas (80%).
+- Avance: 5 / 5 microtareas (100%).
 
 ## Completado
 
@@ -14,17 +14,20 @@
 | H1.S2.M1 | Backend compilado | `docker build --target build -t alovida-chat-api-build:dev .` | salida 0, `#15 DONE 12.6s` |
 | H1.S2.M2 | Diff revisado y lint dirigido limpio | `git diff --check HEAD`; ESLint en ocho archivos | ambos salida 0 |
 
+| H1.S2.M3 | PR publicado contra dev | `gh pr view 548 --json url,baseRefName,headRefName` | `baseRefName: dev`; `headRefName: marcelo/feat-busqueda-contactos-chat` |
+
 [Resumen de evidencia](./evidencia/VALIDACION.txt).
 
 ## A medias
 
-- H1.S2.M3: publicación del PR en curso.
 - SQL real y sesión del frontend no ejercitados. Se portó el contrato existente de test sin cambiar la creación de conversaciones.
 
 ## No hecho
 
 - Merge y despliegue; cambios de frontend, escrituras de mensajería y migraciones: fuera del alcance.
-- CI remoto completo: pendiente de la apertura del PR.
+- CI remoto completo: pendiente; no se afirma que pasó. Se aplica la preferencia previa del usuario de entregar PRs listos para revisión.
+
+PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/548.
 
 ## Contrato y riesgos
 
