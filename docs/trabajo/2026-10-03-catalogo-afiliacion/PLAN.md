@@ -18,9 +18,9 @@
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H1.M1 | `affiliation-catalogs.catalog.ts`: 4 conjuntos, miembros del modelo, ids deterministas | cada código que exigen `affiliation-documents.ts` y `legal-representatives.ts` está en el catálogo | spec de cobertura de códigos → `evidencia/h1-specs.log` 31/31 | HECHO |
+| H1.M1 | `affiliation-catalogs.catalog.ts`: 4 conjuntos, miembros del modelo, ids deterministas | cada código que exigen `affiliation-documents.ts` y `legal-representatives.ts` está en el catálogo | spec de cobertura de códigos → `evidencia/h1-specs.txt` 31/31 | HECHO |
 | H1.M2 | `affiliation-catalogs-seed.service.ts` (una versión de sistema de códigos por conjunto) | 1.ª corrida crea; 2.ª = 0; conjunto ajeno existente se respeta | spec del servicio (mismo log) | HECHO |
-| H1.M3 | Registrar en `seed-bootstrap.service.ts` y `seed.module.ts` + spec de pasos | el paso corre después de terminología y antes de cualquier uso | `seed-bootstrap.service.spec.ts` (mismo log) · `evidencia/h1-typecheck.log` exit 0 · `evidencia/h1-lint.log` exit 0 | HECHO |
+| H1.M3 | Registrar en `seed-bootstrap.service.ts` y `seed.module.ts` + spec de pasos | el paso corre después de terminología y antes de cualquier uso | `seed-bootstrap.service.spec.ts` (mismo log) · `evidencia/h1-typecheck.txt` exit 0 · `evidencia/h1-lint.txt` exit 0 | HECHO |
 | H1.M4 | README de `src/common/seed/` | la fila existe | `git diff src/common/seed/README.md` | HECHO |
 
 ## H2 — Reproducción en frío y matriz por API
@@ -31,11 +31,11 @@
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H2.M1 | Stack local mínimo con topes de RAM, base en frío | Postgres sano, esquema aplicado | init exit 0 · 1 243 tablas · 0 value sets | HECHO |
-| H2.M2 | Kill-test: alta sin los catálogos | 422 con `VS_AFFILIATION_DOCUMENT_TYPE` | `evidencia/h2-kill-test.log` | HECHO |
-| H2.M3 | Con el arreglo: `seed-cli` ×3 y alta | alta 201; 3.ª pasada 0 filas | `evidencia/h2-seed-*.log`, `h2-alta-tras-arreglo.log` | HECHO |
+| H2.M2 | Kill-test: alta sin los catálogos | 422 con `VS_AFFILIATION_DOCUMENT_TYPE` | `evidencia/h2-kill-test.txt` | HECHO |
+| H2.M3 | Con el arreglo: `seed-cli` ×3 y alta | alta 201; 3.ª pasada 0 filas | `evidencia/h2-seed-*.log`, `h2-alta-tras-arreglo.txt` | HECHO |
 | H2.M4 | Matriz por API (válido / límite / error) | una fila por `throw` del flujo | 32 PASS / 0 FAIL en `h2-matriz-api.resultado.md` | HECHO |
-| H2.M5 | Int-specs del alta contra la base local | verdes | 2 suites · 16 tests · `h2-int-specs.log` | HECHO |
-| H2.M6 | Regresión de áreas vecinas (seeds, directorio, IAM) | verdes | 62 suites · 773 tests · `h2-unit-vecinas.log` | HECHO |
+| H2.M5 | Int-specs del alta contra la base local | verdes | 2 suites · 16 tests · `h2-int-specs.txt` | HECHO |
+| H2.M6 | Regresión de áreas vecinas (seeds, directorio, IAM) | verdes | 62 suites · 773 tests · `h2-unit-vecinas.txt` | HECHO |
 
 ## H3 — Recorrido de navegador contra la API real (repo front)
 **CA:** Dado API y front en modo real-api, el alta de aseguradora termina en 201 y los casos límite y error responden lo documentado.

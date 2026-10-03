@@ -16,7 +16,7 @@ Un segundo defecto, descubierto al hacer clic de verdad: en la pantalla de asegu
 |---|---|---|---|
 | H1.M1–M4 | Seeder idempotente de los 4 catálogos (28 conceptos), registrado en `seed-cli`; README | `yarn typecheck` · `yarn eslint --max-warnings=0` · specs dirigidos | exit 0 · exit 0 · 31/31 (`evidencia/h1-*.log`) |
 | H2.M1 | Stack local mínimo con tope de memoria (Postgres 2 GB, Mongo 768 MB, Redis 128 MB), base en frío | `docker compose --profile local-db up` + `postgres-init` | init exit 0; 1 243 tablas; 0 value sets |
-| H2.M2 | **Kill-test en rojo, reproducido** | `MODE=kill node h2-matriz-api.mjs` | `422 … {"valueSet":"VS_AFFILIATION_DOCUMENT_TYPE"}` (`evidencia/h2-kill-test.log`) |
+| H2.M2 | **Kill-test en rojo, reproducido** | `MODE=kill node h2-matriz-api.mjs` | `422 … {"valueSet":"VS_AFFILIATION_DOCUMENT_TYPE"}` (`evidencia/h2-kill-test.txt`) |
 | H2.M3 | Con el arreglo: misma API sin reiniciar → 201; 3.ª pasada del seed inserta 0 | `node dist/src/seed-cli.js` ×3 | #1: 25 pasos, 0 fallos, mi paso +68 filas · #2 repara +36 · **#3 `inserted: 0`** |
 | H2.M4 | Matriz del alta por API (válido / límite / error) | `node h2-matriz-api.mjs` | **32 PASS / 0 FAIL** (`evidencia/h2-matriz-api.resultado.md`) |
 | H2.M5 | Int-specs reales del alta contra Postgres | `yarn test:integration --runInBand organization-legal-documents organization-legal-representative` | 2 suites · 16 tests · exit 0 |
