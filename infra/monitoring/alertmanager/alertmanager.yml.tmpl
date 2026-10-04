@@ -39,7 +39,11 @@ receivers:
         send_resolved: true
         message: '{{ template "alovida.telegram.message" . }}'
 
+  # Sin HEALTHCHECKS_PING_URL, entrypoint.sh borra el bloque marcado y este
+  # receptor queda sin integraciones: el latido se descarta en silencio.
   - name: healthchecks
+    # __HEALTHCHECKS_BEGIN__
     webhook_configs:
       - url_file: __RUNTIME_DIR__/healthchecks_url
         send_resolved: false
+    # __HEALTHCHECKS_END__
