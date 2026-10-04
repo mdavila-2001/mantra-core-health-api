@@ -1,0 +1,151 @@
+{
+  "code": "EMERG_INTOXICACION",
+  "name": "Intoxicación aguda",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Sustancia, tiempo, vía, toxíndrome e intención."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "sustancia",
+      "name": "Sustancia y cantidad",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "hora_exposicion",
+      "name": "Hora de la exposición",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "via",
+      "name": "Vía",
+      "dataType": "string",
+      "required": false,
+      "options": ["Oral", "Inhalatoria", "Cutánea", "Parenteral"]
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "toxindrome",
+      "name": "Toxíndrome",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Colinérgico (organofosforados)",
+        "Anticolinérgico",
+        "Simpaticomimético",
+        "Opioide",
+        "Sedante-hipnótico",
+        "No definido"
+      ]
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "intencion",
+      "name": "Intención",
+      "dataType": "string",
+      "required": true,
+      "options": ["Accidental", "Autolesión", "Laboral", "No se sabe"]
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "evaluacion_salud_mental",
+      "name": "Interconsulta a salud mental pedida",
+      "dataType": "boolean",
+      "required": true,
+      "showWhen": { "field": "intencion", "equals": "Autolesión" }
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "glasgow_ocular",
+      "name": "Glasgow — apertura ocular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "4 — espontánea",
+        "3 — a la voz",
+        "2 — al dolor",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "glasgow_verbal",
+      "name": "Glasgow — respuesta verbal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "5 — orientada",
+        "4 — confusa",
+        "3 — palabras inapropiadas",
+        "2 — sonidos incomprensibles",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación: intoxicación",
+      "code": "glasgow_motora",
+      "name": "Glasgow — respuesta motora",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "6 — obedece órdenes",
+        "5 — localiza el dolor",
+        "4 — retira al dolor",
+        "3 — flexión anormal",
+        "2 — extensión",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,185 @@
+{
+  "code": "NEURO_CTRL_CEFALEA",
+  "name": "Control de cefalea primaria (migraña o tensional)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Fenotipo, frecuencia, uso de analgésicos y banderas rojas SNOOP."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de cefalea",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "cefalea_snoop",
+      "name": "Banderas rojas (SNOOP)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Síntomas sistémicos (fiebre, pérdida de peso)",
+        "Déficit neurológico focal o confusión",
+        "Inicio súbito, en trueno",
+        "Inicio después de los 50 años",
+        "Cambio de patrón o empeora con Valsalva o posición",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "cefalea_tipo",
+      "name": "Fenotipo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Migraña sin aura",
+        "Migraña con aura",
+        "Tensional",
+        "En racimos",
+        "Por abuso de analgésicos",
+        "No definido"
+      ]
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "cefalea_dias_mes",
+      "name": "Días de cefalea por mes",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "dias_analgesicos_mes",
+      "name": "Días por mes que toma analgésicos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "cefalea_intensidad",
+      "name": "Intensidad habitual (0 a 10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: cefalea",
+      "code": "profilaxis",
+      "name": "Recibe tratamiento preventivo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Menos de 4 días de cefalea por mes",
+        "Analgésicos menos de 10 días por mes",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diario de cefalea",
+        "Evitar abuso de analgésicos",
+        "Sueño y desencadenantes"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

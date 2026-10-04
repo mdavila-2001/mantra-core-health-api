@@ -1,6 +1,6 @@
 {
   "code": "ODONTO_ANAMNESIS",
-  "name": "Anamnesis y antecedentes odontológicos",
+  "name": "Odontología — anamnesis y consulta inicial (ficha base)",
   "specialty": { "code": "ODONTOLOGIA", "display": "Odontología" },
   "version": 2,
   "provenance": {
@@ -262,5 +262,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

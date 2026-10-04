@@ -1,0 +1,219 @@
+{
+  "code": "CARDIO_CTRL_HTA",
+  "name": "Control de hipertensión arterial",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "HEARTS: paquete técnico para el manejo de las enfermedades cardiovasculares en la atención primaria de salud",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/hearts-technical-package",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estructura de la visita de control del módulo de hipertensión de HEARTS: cifras, adherencia, daño de órgano blanco y meta < 140/90 (< 130/80 en alto riesgo)."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de hipertensión arterial",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "perimetro_abdominal_cm",
+      "name": "Perímetro abdominal (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "hta_organo_blanco",
+      "name": "Síntomas de daño de órgano blanco",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Cefalea intensa",
+        "Dolor torácico",
+        "Disnea",
+        "Alteración visual",
+        "Déficit neurológico",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: hipertensión arterial",
+      "code": "hta_registros_domiciliarios",
+      "name": "Registros de presión en domicilio (promedio)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "hta_dano_organo",
+      "name": "Daño de órgano blanco conocido",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertrofia ventricular izquierda",
+        "Enfermedad renal crónica",
+        "Retinopatía",
+        "ACV previo",
+        "Cardiopatía isquémica",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "creatinina",
+      "name": "Última creatinina (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "ecg_hecho",
+      "name": "ECG en el último año",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "PA < 140/90 mmHg",
+        "PA < 130/80 mmHg (alto riesgo)",
+        "No fuma",
+        "IMC < 25",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dieta con menos sal",
+        "Actividad física",
+        "Dejar de fumar",
+        "Reducir el alcohol",
+        "Adherencia a la medicación",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,6 +1,6 @@
 {
   "code": "BIOQ_INFORME_BASE",
-  "name": "Informe de laboratorio bioquímico",
+  "name": "Bioquímica Clínica — informe general de laboratorio (ficha base)",
   "specialty": {
     "code": "BIOQUIMICA_CLINICA",
     "display": "Bioquímica Clínica"
@@ -202,5 +202,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

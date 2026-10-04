@@ -1,0 +1,120 @@
+{
+  "code": "RADIO_INFORME_MAMOGRAFIA",
+  "name": "Informe de mamografía",
+  "specialty": { "code": "RADIOLOGIA", "display": "Radiología e Imagenología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Breast Imaging Reporting and Data System (BI-RADS)",
+    "organization": "American College of Radiology (ACR)",
+    "url": "https://www.acr.org/Clinical-Resources/Clinical-Tools-and-Reference/Reporting-and-Data-Systems/BI-RADS",
+    "license": "Sólo las categorías 0 a 6, que son de uso clínico universal; no se reproduce el atlas",
+    "retrievedAt": "2026-10-02",
+    "note": "Composición mamaria, hallazgos y categoría BI-RADS (0 a 6) con su conducta."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: mamografía",
+      "code": "tipo_de_mamografia",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Tamizaje", "Diagnóstica", "Control"]
+    },
+    {
+      "section": "Resultado: mamografía",
+      "code": "composicion",
+      "name": "Composición mamaria",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "a — grasa",
+        "b — densidades fibroglandulares dispersas",
+        "c — heterogéneamente densa",
+        "d — extremadamente densa"
+      ]
+    },
+    {
+      "section": "Resultado: mamografía",
+      "code": "hallazgos_mama",
+      "name": "Hallazgos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Nódulo",
+        "Calcificaciones",
+        "Distorsión de la arquitectura",
+        "Asimetría",
+        "Adenopatía axilar",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Resultado: mamografía",
+      "code": "birads",
+      "name": "Categoría BI-RADS",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "0 — incompleto",
+        "1 — negativo",
+        "2 — benigno",
+        "3 — probablemente benigno",
+        "4 — sospechoso",
+        "5 — altamente sugestivo de malignidad",
+        "6 — malignidad confirmada"
+      ]
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,6 +1,6 @@
 {
   "code": "DERMA_EXAMEN_BASE",
-  "name": "Examen dermatológico — versión general base",
+  "name": "Dermatología — consulta inicial (ficha base)",
   "specialty": { "code": "DERMATOLOGIA", "display": "Dermatología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de la descripción semiológica de la lesión elemental, su distribución y su evolución. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: fototipos de Fitzpatrick, regla ABCDE del melanoma."
+    "note": "Estructura de la descripción semiológica de la lesión elemental, su distribución y su evolución. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: fototipos de Fitzpatrick."
   },
   "fields": [
     {
@@ -195,182 +195,7 @@
         "Carcinoma de piel no melanoma"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "abcde",
-      "name": "Criterios ABCDE",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Asimetría",
-        "Bordes irregulares",
-        "Color heterogéneo",
-        "Diámetro > 6 mm",
-        "Evolución (cambió)"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión pigmentada (descartar melanoma)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dermatoscopia",
-      "name": "Dermatoscopía realizada",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Lesión pigmentada (descartar melanoma)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "atopia",
-      "name": "Antecedente de atopia",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Dermatitis (atópica o de contacto)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "dermatitis_contactante",
-      "name": "Posible contactante",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Dermatitis (atópica o de contacto)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "pasi",
-      "name": "PASI",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "superficie_corporal",
-      "name": "Superficie corporal afectada (%)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "psoriasis_artritis",
-      "name": "Dolor articular",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Psoriasis" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "acne_grado",
-      "name": "Grado",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Comedoniano",
-        "Papulopustuloso leve",
-        "Papulopustuloso moderado",
-        "Noduloquístico"
-      ],
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Acné" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "micosis_tipo",
-      "name": "Tipo",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Tiña corporal",
-        "Tiña pedis",
-        "Onicomicosis",
-        "Pitiriasis versicolor",
-        "Candidiasis"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Micosis superficial"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "koh",
-      "name": "KOH o cultivo realizado",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Micosis superficial"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "leish_cutanea_lesiones",
-      "name": "Número de úlceras",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Leishmaniasis cutánea"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "leish_mucosa",
-      "name": "Compromiso nasal o bucal",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Leishmaniasis cutánea"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "leish_procedencia",
-      "name": "Zona donde se expuso",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Leishmaniasis cutánea"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cpnm_tipo",
-      "name": "Sospecha",
-      "dataType": "string",
-      "required": true,
-      "options": ["Basocelular", "Espinocelular", "Queratosis actínica"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Carcinoma de piel no melanoma"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "cpnm_biopsia",
-      "name": "Biopsia indicada",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Carcinoma de piel no melanoma"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -394,5 +219,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

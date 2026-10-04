@@ -1,6 +1,6 @@
 {
   "code": "HEMATO_EVALUACION_BASE",
-  "name": "Evaluación hematológica",
+  "name": "Hematología — consulta inicial (ficha base)",
   "specialty": { "code": "HEMATOLOGIA", "display": "Hematología" },
   "version": 2,
   "provenance": {
@@ -186,200 +186,7 @@
         "Policitemia"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anemia_hemoglobina",
-      "name": "Hemoglobina (g/dL)",
-      "dataType": "decimal",
-      "required": true,
-      "description": "Ajustar por altitud de residencia.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia ferropénica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anemia_sintomas",
-      "name": "Síntomas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Astenia",
-        "Disnea de esfuerzo",
-        "Palpitaciones",
-        "Pica",
-        "Ninguno"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia ferropénica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anemia_perdidas",
-      "name": "Posibles pérdidas",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Menstruación abundante",
-        "Sangrado digestivo",
-        "Parasitosis",
-        "Ninguna conocida"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia ferropénica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anemia_vcm",
-      "name": "VCM y ferritina, si se conocen",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia ferropénica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "vcm_mega",
-      "name": "VCM (fL)",
-      "dataType": "decimal",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia megaloblástica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "b12",
-      "name": "Vitamina B12 (pg/mL)",
-      "dataType": "decimal",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia megaloblástica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "mega_neuro",
-      "name": "Síntomas neurológicos",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Anemia megaloblástica"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "plaquetas",
-      "name": "Plaquetas (/µL)",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trombocitopenia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "trombo_sangrado_activo",
-      "name": "Sangrado activo",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trombocitopenia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "tp_inr",
-      "name": "TP / INR",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno de la coagulación"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ttpa",
-      "name": "TTPa",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno de la coagulación"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "anticoagulado",
-      "name": "Recibe anticoagulantes",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Trastorno de la coagulación"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "sintomas_b",
-      "name": "Síntomas B",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Fiebre",
-        "Sudoración nocturna",
-        "Pérdida de más del 10 % del peso"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de leucemia o linfoma"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "blastos",
-      "name": "Blastos en el frotis",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de leucemia o linfoma"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "hematocrito",
-      "name": "Hematocrito (%)",
-      "dataType": "decimal",
-      "required": true,
-      "description": "Interpretar según la altitud de residencia.",
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Policitemia" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "residencia_altitud",
-      "name": "Altitud de residencia (m s. n. m.)",
-      "dataType": "string",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Policitemia" }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -396,5 +203,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

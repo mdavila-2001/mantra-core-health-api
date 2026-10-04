@@ -1,0 +1,176 @@
+{
+  "code": "INFECTO_CTRL_DENGUE",
+  "name": "Dengue: evaluación y seguimiento diario",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Dengue: guías para la atención de enfermos en la Región de las Américas, 2.ª ed.",
+    "organization": "Organización Panamericana de la Salud (OPS/OMS)",
+    "url": "https://www.paho.org/es/temas/dengue",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Clasificación en grupos A/B/C y signos de alarma de la guía de OPS; control diario en la fase crítica (días 3 a 7)."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "dengue_dias_de_fiebre",
+      "name": "Días de fiebre",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "dengue_signos_de_alarma",
+      "name": "Signos de alarma (OPS/OMS)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Dolor abdominal intenso y continuo",
+        "Vómitos persistentes",
+        "Acumulación de líquidos (ascitis, derrame)",
+        "Sangrado de mucosas",
+        "Letargia o irritabilidad",
+        "Hepatomegalia mayor a 2 cm",
+        "Aumento del hematocrito con caída de plaquetas",
+        "Hipotensión postural",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "dengue_torniquete",
+      "name": "Prueba del torniquete",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "No realizada"]
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "dengue_grupo",
+      "name": "Clasificación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Grupo A — sin signos de alarma",
+        "Grupo B — con signos de alarma o condición asociada",
+        "Grupo C — dengue grave"
+      ]
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "hematocrito",
+      "name": "Hematocrito (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "plaquetas",
+      "name": "Plaquetas (/µL)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "hidratacion_oral",
+      "name": "Tolera la hidratación oral",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "Parcialmente", "No"]
+    },
+    {
+      "section": "Evaluación: dengue",
+      "code": "diuresis",
+      "name": "Diuresis (mL/kg/h)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin signos de alarma",
+        "Hematocrito estable",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hidratación oral",
+        "No tomar AINE ni aspirina",
+        "Volver ya ante un signo de alarma",
+        "Mosquitero y eliminar criaderos"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

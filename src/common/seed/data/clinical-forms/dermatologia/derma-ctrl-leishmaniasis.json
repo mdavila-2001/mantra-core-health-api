@@ -1,0 +1,166 @@
+{
+  "code": "DERMA_CTRL_LEISHMANIASIS",
+  "name": "Control de leishmaniasis cutánea y mucosa",
+  "specialty": { "code": "DERMATOLOGIA", "display": "Dermatología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Leishmaniasis",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/health-topics/leishmaniasis",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Forma, número de lesiones, compromiso mucoso y respuesta al tratamiento."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de leishmaniasis",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_forma",
+      "name": "Forma",
+      "dataType": "string",
+      "required": true,
+      "options": ["Cutánea", "Mucosa", "Mucocutánea"]
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_lesiones",
+      "name": "Número de úlceras",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_tamano",
+      "name": "Tamaño de la mayor (mm)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_mucosa",
+      "name": "Compromiso nasal u oral",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_procedencia",
+      "name": "Zona de exposición",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_confirmacion",
+      "name": "Confirmación",
+      "dataType": "string",
+      "required": false,
+      "options": ["Frotis", "Biopsia", "PCR", "Sin confirmar"]
+    },
+    {
+      "section": "Evaluación: leishmaniasis",
+      "code": "leish_respuesta",
+      "name": "Respuesta al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Reepitelización completa",
+        "Parcial",
+        "Sin respuesta",
+        "Todavía en tratamiento"
+      ]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Completar el tratamiento", "Control a los 3, 6 y 12 meses"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

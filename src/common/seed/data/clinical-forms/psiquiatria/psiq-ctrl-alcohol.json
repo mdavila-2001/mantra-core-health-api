@@ -1,0 +1,213 @@
+{
+  "code": "PSIQ_CTRL_ALCOHOL",
+  "name": "Consumo de alcohol: AUDIT completo (OMS)",
+  "specialty": {
+    "code": "PSIQUIATRIA",
+    "display": "Psiquiatría y salud mental"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Guía de intervención mhGAP para los trastornos mentales, neurológicos y por consumo de sustancias, versión 2.0",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549790",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Las 10 preguntas del AUDIT de la OMS con su puntaje, y abstinencia."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_1",
+      "name": "1. ¿Con qué frecuencia consume alguna bebida alcohólica?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Una o menos veces al mes (1)",
+        "De 2 a 4 veces al mes (2)",
+        "De 2 a 3 veces a la semana (3)",
+        "4 o más veces a la semana (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_2",
+      "name": "2. ¿Cuántas consumiciones toma en un día de consumo normal?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "1 o 2 (0)",
+        "3 o 4 (1)",
+        "5 o 6 (2)",
+        "7 a 9 (3)",
+        "10 o más (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_3",
+      "name": "3. ¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_4",
+      "name": "4. En el último año, ¿con qué frecuencia no pudo parar de beber una vez que empezó?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_5",
+      "name": "5. ¿Con qué frecuencia no pudo hacer lo que se esperaba de usted porque había bebido?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_6",
+      "name": "6. ¿Con qué frecuencia necesitó beber en ayunas para recuperarse después de beber mucho?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_7",
+      "name": "7. ¿Con qué frecuencia tuvo remordimientos o sentimientos de culpa después de beber?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_8",
+      "name": "8. ¿Con qué frecuencia no pudo recordar lo que sucedió la noche anterior porque había bebido?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Nunca (0)",
+        "Menos de una vez al mes (1)",
+        "Mensualmente (2)",
+        "Semanalmente (3)",
+        "A diario o casi (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_9",
+      "name": "9. ¿Usted u otra persona resultó herida porque usted había bebido?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "No (0)",
+        "Sí, pero no en el último año (2)",
+        "Sí, en el último año (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_10",
+      "name": "10. ¿Algún familiar, amigo o profesional se preocupó por su consumo o le sugirió dejar de beber?",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "No (0)",
+        "Sí, pero no en el último año (2)",
+        "Sí, en el último año (4)"
+      ]
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "audit_total",
+      "name": "AUDIT — total (0–40)",
+      "dataType": "integer",
+      "required": true,
+      "description": "8–15: consumo de riesgo · 16–19: perjudicial · ≥ 20: probable dependencia."
+    },
+    {
+      "section": "Evaluación: consumo de alcohol",
+      "code": "abstinencia",
+      "name": "Signos de abstinencia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Intervención breve",
+        "Límites de consumo",
+        "Grupos de apoyo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

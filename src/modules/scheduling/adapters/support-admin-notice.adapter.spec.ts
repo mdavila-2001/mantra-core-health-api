@@ -23,7 +23,9 @@ function build() {
   em.findOne = mockFn().mockResolvedValue({ displayName: 'Ana Pérez' });
 
   const messaging = {
-    createConversation: mockFn().mockResolvedValue({ id: 'conv-1' }),
+    createSystemDirectConversation: mockFn().mockResolvedValue({
+      id: 'conv-1',
+    }),
     sendMessage: mockFn().mockResolvedValue({ id: 'msg-1' }),
   };
   const profiles = {
@@ -64,8 +66,8 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
     expect(dataDestinatario.targetId).toBe('user-medico');
     expect(dataDestinatario.displayName).toBe('Ana Pérez');
 
-    const [dtoConversacion] = d.messaging.createConversation.mock.calls[0];
-    expect(dtoConversacion.conversationType).toBe('DIRECT');
+    const [dtoConversacion] =
+      d.messaging.createSystemDirectConversation.mock.calls[0];
     expect(dtoConversacion.participantProfileIds).toEqual([
       'perfil-support-admin',
       'perfil-medico',
@@ -82,7 +84,8 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
 
     await d.adapter.notify(aviso, 'user-medico');
 
-    const [, actorConversacion] = d.messaging.createConversation.mock.calls[0];
+    const [, actorConversacion] =
+      d.messaging.createSystemDirectConversation.mock.calls[0];
     const [, , actorMensaje] = d.messaging.sendMessage.mock.calls[0];
     expect(actorConversacion.id).toBe(SEED.supportAdminUserId);
     expect(actorMensaje.id).toBe(SEED.supportAdminUserId);
@@ -100,7 +103,9 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
 
   it('nunca lanza: un chat que no sale no puede tumbar la agenda', async () => {
     const d = build();
-    d.messaging.createConversation.mockRejectedValue(new Error('caído'));
+    d.messaging.createSystemDirectConversation.mockRejectedValue(
+      new Error('caído'),
+    );
 
     const resultado = await d.adapter.notify(aviso, 'user-medico');
 

@@ -198,5 +198,6 @@
       "required": true,
       "showWhen": { "field": "locomotor_normal", "equals": "Con hallazgos" }
     }
-  ]
+  ],
+  "kind": "GENERAL"
 }
