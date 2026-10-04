@@ -74,6 +74,38 @@ día). **Los `.json` se editan desde ahí, no a mano.**
   abajo, se dejaron afuera STOP-BANG, IIEF-5, Braden, Morse, MUST, criterios de Roma y CAM; donde
   hacían falta, la ficha pregunta lo clínico sin el instrumento (lo prueba `catalog.spec.ts`).
 
+## Una ficha base y fichas específicas por especialidad (2026-10-02)
+
+Así trabaja un médico: la **primera consulta** se hace con la ficha base de la especialidad, y los
+**controles** de una enfermedad ya diagnosticada, con la ficha estándar de esa enfermedad. Cada
+ficha declara su clase en `kind`:
+
+| `kind`     | Qué es                                                                                                                                        | Cuántas                  |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `BASE`     | La consulta inicial de la especialidad («Cardiología — consulta inicial (ficha base)»)                                                        | 36, una por especialidad |
+| `SPECIFIC` | El control o la evaluación estándar de una condición (control de HTA, de asma, de diabetes, dengue, trabajo de parto, informe de mamografía…) | 97                       |
+| `GENERAL`  | Las transversales: anamnesis, examen físico, consentimiento, epicrisis                                                                        | 4                        |
+
+- La base pregunta el **diagnóstico presuntivo de una lista**; lo que hay que observar de cada
+  cuadro está en su ficha específica.
+- Las específicas comparten un armazón (`control()` en `tools/clinical-forms/lib.mjs`), según el
+  tipo de ficha:
+  - **controles crónicos:** tipo de control, fecha del diagnóstico, tratamiento, adherencia y
+    efectos adversos;
+  - **cuadros agudos:** inicio y tratamiento previo;
+  - **evaluaciones puntuales:** primera vez o control;
+  - **informes** (`informeDe()`): indicación, resultado y conclusión.
+
+  Después de esa apertura viene la evaluación propia del cuadro y, al final, metas, educación,
+  diagnóstico y plan.
+
+- Las específicas viven en la carpeta de su especialidad como `<codigo-en-kebab>.json`. Se crean
+  con el generador, que también escribe `specific-forms.generated.ts`, el barrel que importa
+  `catalog.ts`.
+- Fuentes de las específicas en `tools/clinical-forms/fuentes.mjs`. Sólo organismos citables
+  (OMS/OPS, NIH, NCI, MINSA); de GINA, GOLD, KDIGO, EULAR, AAO y ACR se toman **categorías**, no
+  texto.
+
 ## Agregar un formulario
 
 1. Crear `<especialidad>/<formulario>.json` con la ficha de procedencia y escribir sus campos en

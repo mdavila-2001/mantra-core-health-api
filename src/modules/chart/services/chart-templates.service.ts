@@ -28,6 +28,8 @@ interface ResolvedSchema {
   fields: ChartTemplateFieldDto[];
   /** De dónde salió la plantilla, si vino del catálogo sembrado. */
   provenance?: ChartTemplateProvenanceDto;
+  /** La clase de ficha del catálogo, si vino del catálogo sembrado. */
+  kind?: ChartTemplateResponseDto['kind'];
 }
 
 /**
@@ -268,6 +270,7 @@ export class ChartTemplatesService {
 
     let provenance: ChartTemplateProvenanceDto | undefined;
     let presentacion: Presentaciones = new Map();
+    let kind: ChartTemplateResponseDto['kind'];
     const fields: ChartTemplateFieldDto[] = [];
 
     for (const assignment of assignments) {
@@ -279,6 +282,7 @@ export class ChartTemplatesService {
       if (esClaveDeCatalogo(field.code)) {
         provenance = leerProcedencia(field.defaultValueJson);
         presentacion = leerPresentacion(field.defaultValueJson);
+        kind = leerClase(field.defaultValueJson);
         continue;
       }
 
@@ -302,7 +306,11 @@ export class ChartTemplatesService {
       });
     }
 
-    return { fields: aplicarPresentacion(fields, presentacion), provenance };
+    return {
+      fields: aplicarPresentacion(fields, presentacion),
+      provenance,
+      kind,
+    };
   }
 
   /**
@@ -336,6 +344,7 @@ export class ChartTemplatesService {
       fieldTargetConceptId: CHART.TEMPLATE_FIELD_TARGET,
       fields: schema.fields,
       provenance: schema.provenance,
+      kind: schema.kind,
     };
   }
 }
@@ -460,4 +469,13 @@ function aplicarPresentacion(
     }
     return { ...field, ...extra };
   });
+}
+
+/** La clase de ficha del catálogo (`BASE`, `SPECIFIC`, `GENERAL`), si la trae. */
+function leerClase(value: unknown): ChartTemplateResponseDto['kind'] {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const kind = (value as Record<string, unknown>).kind;
+  return kind === 'BASE' || kind === 'SPECIFIC' || kind === 'GENERAL'
+    ? kind
+    : undefined;
 }

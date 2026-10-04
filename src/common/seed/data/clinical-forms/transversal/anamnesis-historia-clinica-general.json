@@ -305,5 +305,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "GENERAL"
 }

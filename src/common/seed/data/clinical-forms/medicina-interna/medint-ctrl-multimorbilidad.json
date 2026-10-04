@@ -1,0 +1,183 @@
+{
+  "code": "MEDINT_CTRL_MULTIMORBILIDAD",
+  "name": "Control de multimorbilidad y polifarmacia",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Revisión de problemas activos, fármacos (polifarmacia ≥ 5) y prioridades del paciente."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de multimorbilidad",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "condiciones_cronicas",
+      "name": "Condiciones crónicas activas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hipertensión",
+        "Diabetes",
+        "Insuficiencia cardíaca",
+        "EPOC",
+        "Enfermedad renal crónica",
+        "Fibrilación auricular",
+        "Depresión",
+        "Artrosis"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "numero_de_farmacos",
+      "name": "Fármacos en uso",
+      "dataType": "integer",
+      "required": true,
+      "description": "5 o más: polifarmacia; revisar cada uno."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "problemas_con_farmacos",
+      "name": "Problemas detectados",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Duplicación",
+        "Interacción relevante",
+        "Dosis no ajustada a la función renal",
+        "Fármaco sin indicación vigente",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "farmacos_a_suspender",
+      "name": "Fármacos a suspender o ajustar",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "prioridades_paciente",
+      "name": "Qué es lo más importante para el paciente",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Lista actualizada de medicamentos",
+        "Pastillero",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -10,7 +10,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { AttachableFileService } from '../../common/services';
-import { ConversationsRepository, BlocksRepository } from '../repositories';
+import {
+  ConversationsRepository,
+  BlocksRepository,
+  PublicProfilesRepository,
+} from '../repositories';
 import { CommunityMessageNotificationsService } from './community-message-notifications.service';
 // Import directo del archivo (no del barrel `../gateways`): rompe el ciclo
 // barrel↔barrel con `CommunityMessagingGateway`, que a su vez necesita
@@ -71,6 +75,7 @@ export class CommunityMessagingService {
     private readonly em: EntityManager,
     private readonly conversationsRepo: ConversationsRepository,
     private readonly blocksRepo: BlocksRepository,
+    private readonly profilesRepo: PublicProfilesRepository,
     private readonly messageNotifications: CommunityMessageNotificationsService,
     private readonly gateway: CommunityMessagingGateway,
     private readonly autoReply: CommunityChatAutoReplyService,
@@ -92,9 +97,9 @@ export class CommunityMessagingService {
    * sus mensajes repartidos entre los tres. No es un caso borde: pasa la
    * segunda vez.
    *
-   * La reutilización aplica **sólo a las directas de dos participantes**. Un
-   * grupo con los mismos integrantes puede existir varias veces a propósito —
-   * dos foros del mismo equipo son dos foros—, así que ahí se sigue creando.
+   * Este bootstrap sólo abre conversaciones directas de dos participantes.
+   * Los grupos pasan por su flujo específico, que valida grupo y membresía;
+   * aceptar UUID arbitrarios acá permitiría saltarse esas reglas.
    *
    * Es aditivo para quien ya la usaba: devuelve un id de conversación en la
    * que los participantes pedidos participan, que es lo que el contrato
@@ -104,29 +109,97 @@ export class CommunityMessagingService {
     dto: CreateConversationDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    const resultado = await this.em.transactional(async (tx) => {
-      const esDirectaDeDos =
-        dto.conversationType !== 'GROUP' &&
-        dto.participantProfileIds.length === 2;
+    if ((dto.conversationType as string | undefined) === 'GROUP') {
+      throw new PreconditionFailedException(
+        'Las conversaciones grupales se crean desde el flujo de grupos',
+        {},
+      );
+    }
+    return this.createDirectConversation(dto, actor, true);
+  }
 
-      if (esDirectaDeDos) {
-        const [perfilA, perfilB] = dto.participantProfileIds;
-        const existente = await this.conversationsRepo.findDirectBetween(
-          tx,
-          perfilA,
-          perfilB,
-          COMM.CONVERSATION_DIRECT,
-          CONCEPTS.STATE_ACTIVE,
+  /**
+   * Canal interno para avisos transaccionales de la plataforma.
+   *
+   * A diferencia del buscador público, puede dirigirse a un perfil privado:
+   * una preferencia de directorio no impide recibir un aviso de agenda. No se
+   * expone en ningún controlador y exige el rol interno firmado `SYSTEM`.
+   */
+  async createSystemDirectConversation(
+    dto: CreateConversationDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    if (!actor.roles.includes('SYSTEM')) {
+      throw new ForbiddenException('Canal reservado al sistema');
+    }
+    return this.createDirectConversation(dto, actor, false);
+  }
+
+  private async createDirectConversation(
+    dto: CreateConversationDto,
+    actor: AuthenticatedUser,
+    requirePublicRecipient: boolean,
+  ): Promise<IdResponseDto> {
+    const resultado = await this.em.transactional(async (tx) => {
+      const [initiatorProfileId] = dto.participantProfileIds;
+      await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
+
+      const participantIds = new Set(dto.participantProfileIds);
+      if (participantIds.size !== dto.participantProfileIds.length) {
+        throw new PreconditionFailedException(
+          'Los participantes de una conversación deben ser distintos',
+          {},
         );
-        if (existente) return { id: existente.id, creada: false };
       }
 
+      if (dto.participantProfileIds.length !== 2) {
+        throw new PreconditionFailedException(
+          'Una conversación directa requiere exactamente dos participantes',
+          {},
+        );
+      }
+
+      const [perfilA, perfilB] = dto.participantProfileIds;
+      const destinatario = await this.profilesRepo.findById(tx, perfilB);
+      const destinatarioElegible =
+        destinatario?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
+        (!requirePublicRecipient ||
+          destinatario.visibilityConceptId ===
+            COMM.PROFILE_VISIBILITY_PUBLIC) &&
+        [COMM.PROFILE_TARGET_USER, COMM.PROFILE_TARGET_PRACTITIONER].includes(
+          destinatario.targetTypeConceptId,
+        );
+      if (!destinatarioElegible) {
+        throw new PreconditionFailedException(
+          'La persona no está disponible para iniciar una conversación',
+          {},
+        );
+      }
+
+      const blocked = await this.blocksRepo.existsBetween(
+        tx,
+        perfilA,
+        perfilB,
+        CONCEPTS.STATE_ACTIVE,
+      );
+      if (blocked) {
+        throw new PreconditionFailedException(
+          'No se puede iniciar una conversación entre perfiles bloqueados',
+          {},
+        );
+      }
+
+      const existente = await this.conversationsRepo.findDirectBetween(
+        tx,
+        perfilA,
+        perfilB,
+        COMM.CONVERSATION_DIRECT,
+        CONCEPTS.STATE_ACTIVE,
+      );
+      if (existente) return { id: existente.id, creada: false };
+
       const conversation = this.conversationsRepo.createConversation(tx, {
-        conversationTypeConceptId:
-          dto.conversationType === 'GROUP'
-            ? COMM.CONVERSATION_GROUP
-            : COMM.CONVERSATION_DIRECT,
-        groupId: dto.groupId,
+        conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
       });

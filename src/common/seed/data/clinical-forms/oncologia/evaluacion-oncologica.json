@@ -1,6 +1,6 @@
 {
   "code": "ONCO_EVALUACION_BASE",
-  "name": "Evaluación oncológica",
+  "name": "Oncología — consulta inicial (ficha base)",
   "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el diagnóstico oncológico y su fecha, el estadio registrado como texto libre, los tratamientos oncológicos recibidos, el estado funcional ECOG como número y la pérdida de peso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: ECOG, CTCAE (NCI)."
+    "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el diagnóstico oncológico y su fecha, el estadio registrado como texto libre, los tratamientos oncológicos recibidos, el estado funcional ECOG como número y la pérdida de peso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: ECOG."
   },
   "fields": [
     {
@@ -247,129 +247,7 @@
         "Emergencia oncológica"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "neo_alarma",
-      "name": "Signos de alarma",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Masa palpable",
-        "Adenopatía dura o fija",
-        "Sangrado no explicado",
-        "Pérdida de peso",
-        "Síntomas B"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de neoplasia (estudio inicial)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "neo_biopsia",
-      "name": "Biopsia — estado",
-      "dataType": "string",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Sospecha de neoplasia (estudio inicial)"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "toxicidad",
-      "name": "Toxicidad",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Neutropenia febril",
-        "Mucositis",
-        "Náuseas y vómitos",
-        "Diarrea",
-        "Neuropatía",
-        "Cardiotoxicidad"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Toxicidad del tratamiento"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ctcae_grado",
-      "name": "Grado CTCAE",
-      "dataType": "string",
-      "required": false,
-      "options": ["1", "2", "3", "4"],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Toxicidad del tratamiento"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "progresion_sitio",
-      "name": "Sitio de progresión",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Progresión de enfermedad"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "paliativos_sintomas",
-      "name": "Síntomas a controlar",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Dolor",
-        "Disnea",
-        "Náuseas",
-        "Constipación",
-        "Delirio",
-        "Ansiedad"
-      ],
-      "multiple": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Control de síntomas y cuidados paliativos"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "voluntades",
-      "name": "Conversación sobre voluntades anticipadas",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Control de síntomas y cuidados paliativos"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "emergencia_onco",
-      "name": "Tipo",
-      "dataType": "string",
-      "required": true,
-      "options": [
-        "Compresión medular",
-        "Síndrome de vena cava superior",
-        "Hipercalcemia",
-        "Síndrome de lisis tumoral",
-        "Neutropenia febril"
-      ],
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Emergencia oncológica"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -386,5 +264,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

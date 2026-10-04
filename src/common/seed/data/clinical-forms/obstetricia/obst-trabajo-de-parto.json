@@ -1,0 +1,111 @@
+{
+  "code": "OBST_TRABAJO_DE_PARTO",
+  "name": "Trabajo de parto (guía de cuidados de la OMS)",
+  "specialty": { "code": "OBSTETRICIA", "display": "Obstetricia" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Guía de cuidados durante el trabajo de parto (WHO Labour Care Guide, 2020)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240017566",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Variables de la Labour Care Guide de la OMS: bienestar materno y fetal y progreso del trabajo de parto."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "hora_evaluacion",
+      "name": "Hora de la evaluación",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "dilatacion_cm",
+      "name": "Dilatación (cm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "descenso",
+      "name": "Descenso",
+      "dataType": "string",
+      "required": false,
+      "options": ["5/5", "4/5", "3/5", "2/5", "1/5", "0/5"]
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "contracciones_10min",
+      "name": "Contracciones en 10 minutos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "frecuencia_cardiaca_fetal",
+      "name": "Frecuencia cardíaca fetal (lpm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "liquido_amniotico",
+      "name": "Líquido amniótico",
+      "dataType": "string",
+      "required": false,
+      "options": ["Íntegras", "Claro", "Meconial", "Sanguinolento"]
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: trabajo de parto",
+      "code": "acompanante",
+      "name": "Tiene acompañante de su elección",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

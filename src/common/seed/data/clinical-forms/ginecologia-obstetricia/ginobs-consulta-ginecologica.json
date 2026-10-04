@@ -1,0 +1,152 @@
+{
+  "code": "GINOBS_CONSULTA_GINECOLOGICA",
+  "name": "Ginecología y obstetricia — consulta ginecológica (ficha base)",
+  "specialty": {
+    "code": "GINECOLOGIA_OBSTETRICIA",
+    "display": "Ginecología y obstetricia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Ficha base de ginecología: antecedentes gineco-obstétricos, ciclo, anticoncepción, tamizajes y examen."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "menarca",
+      "name": "Menarca (edad)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "fum",
+      "name": "Fecha de última menstruación",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "ciclo",
+      "name": "Ciclo",
+      "dataType": "string",
+      "required": false,
+      "options": ["Regular", "Irregular", "Amenorrea", "Menopausia"]
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "gestas",
+      "name": "Gestas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "partos",
+      "name": "Partos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "cesareas",
+      "name": "Cesáreas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "abortos",
+      "name": "Abortos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "anticoncepcion",
+      "name": "Anticoncepción",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Ninguna",
+        "Preservativo",
+        "Hormonal",
+        "DIU",
+        "Implante",
+        "Quirúrgica"
+      ]
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "ultimo_tamizaje_cervix",
+      "name": "Último tamizaje de cuello uterino",
+      "dataType": "string",
+      "required": false,
+      "options": ["Menos de 3 años", "3 a 5 años", "Más de 5 años", "Nunca"]
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "sintomas_gineco",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Flujo anormal",
+        "Dolor pélvico",
+        "Sangrado anormal",
+        "Dispareunia",
+        "Bulto en la mama",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: consulta ginecológica",
+      "code": "examen_ginecologico",
+      "name": "Examen ginecológico y mamario",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "BASE"
+}

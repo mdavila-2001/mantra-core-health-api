@@ -1,6 +1,6 @@
 {
   "code": "GERIA_VALORACION_BASE",
-  "name": "Valoración geriátrica",
+  "name": "Geriatría — consulta inicial (ficha base)",
   "specialty": { "code": "GERIATRIA", "display": "Geriatría" },
   "version": 2,
   "provenance": {
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la autonomía en actividades de la vida diaria, el antecedente de caídas, el recuento de fármacos en uso, la descripción en prosa del estado cognitivo y del ánimo, la continencia y el soporte social. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: SRQ-20 (OMS), índice de Katz, escala de Lawton, fenotipo de fragilidad de Fried, criterios de Beers/STOPP."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la autonomía en actividades de la vida diaria, el antecedente de caídas, el recuento de fármacos en uso, la descripción en prosa del estado cognitivo y del ánimo, la continencia y el soporte social. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: índice de Katz, escala de Lawton, criterios de Beers/STOPP."
   },
   "fields": [
     {
@@ -381,156 +381,7 @@
         "Depresión del adulto mayor"
       ],
       "allowOther": true,
-      "description": "Al elegirlo se abren las observaciones que ese cuadro exige registrar."
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "fried",
-      "name": "Criterios de Fried",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Pérdida de peso no intencionada",
-        "Agotamiento",
-        "Debilidad (prensión)",
-        "Marcha lenta",
-        "Baja actividad física"
-      ],
-      "multiple": true,
-      "description": "3 o más: frágil · 1–2: prefrágil.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Síndrome de fragilidad"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "caidas_riesgo",
-      "name": "Factores de riesgo",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Alteración de la marcha",
-        "Hipotensión ortostática",
-        "Psicofármacos",
-        "Déficit visual",
-        "Riesgos en el hogar"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Caídas" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "caidas_fractura",
-      "name": "Fractura en alguna caída",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Caídas" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "demencia_prueba",
-      "name": "Prueba y puntaje",
-      "dataType": "string",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Deterioro cognitivo o demencia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "demencia_conducta",
-      "name": "Síntomas conductuales",
-      "dataType": "boolean",
-      "required": false,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Deterioro cognitivo o demencia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "delirium_rasgos",
-      "name": "Rasgos de delirium",
-      "dataType": "json",
-      "required": true,
-      "options": [
-        "Inicio agudo y curso fluctuante",
-        "Inatención",
-        "Pensamiento desorganizado",
-        "Alteración del nivel de conciencia"
-      ],
-      "multiple": true,
-      "showWhen": { "field": "diagnostico_presuntivo", "equals": "Delirium" }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "polifarmacia_revision",
-      "name": "Fármacos a suspender o ajustar",
-      "dataType": "text",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Polifarmacia"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "srq20_respuestas_si",
-      "name": "SRQ-20 (OMS): marque las preguntas que respondió «sí» en el último mes",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "¿Tiene frecuentes dolores de cabeza?",
-        "¿Tiene mal apetito?",
-        "¿Duerme mal?",
-        "¿Se asusta con facilidad?",
-        "¿Sufre de temblor de manos?",
-        "¿Se siente nervioso, tenso o aburrido?",
-        "¿Sufre de mala digestión?",
-        "¿No puede pensar con claridad?",
-        "¿Se siente triste?",
-        "¿Llora usted con mucha frecuencia?",
-        "¿Tiene dificultad en disfrutar sus actividades diarias?",
-        "¿Tiene dificultad para tomar decisiones?",
-        "¿Tiene dificultad en hacer su trabajo?",
-        "¿Es incapaz de desempeñar un papel útil en su vida?",
-        "¿Ha perdido interés en las cosas?",
-        "¿Siente que usted es una persona inútil?",
-        "¿Ha tenido la idea de acabar con su vida?",
-        "¿Se siente cansado todo el tiempo?",
-        "¿Tiene sensaciones desagradables en su estómago?",
-        "¿Se cansa con facilidad?"
-      ],
-      "multiple": true,
-      "description": "8 o más respuestas positivas: probable trastorno mental común. La pregunta 17 positiva exige evaluar riesgo suicida.",
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Depresión del adulto mayor"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "srq20_puntaje",
-      "name": "SRQ-20 — total de respuestas «sí» (0–20)",
-      "dataType": "integer",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Depresión del adulto mayor"
-      }
-    },
-    {
-      "section": "Diagnóstico presuntivo y observaciones",
-      "code": "ideacion_suicida",
-      "name": "Ideación suicida actual",
-      "dataType": "boolean",
-      "required": true,
-      "showWhen": {
-        "field": "diagnostico_presuntivo",
-        "equals": "Depresión del adulto mayor"
-      }
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
     },
     {
       "section": "Diagnóstico y plan",
@@ -547,5 +398,6 @@
       "required": false,
       "description": "Tratamiento, estudios pedidos, educación, interconsultas y control."
     }
-  ]
+  ],
+  "kind": "BASE"
 }

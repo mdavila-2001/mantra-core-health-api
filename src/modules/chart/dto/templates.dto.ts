@@ -449,4 +449,12 @@ export class ChartTemplateResponseDto {
    */
   @ApiPropertyOptional({ type: ChartTemplateProvenanceDto })
   provenance?: ChartTemplateProvenanceDto;
+
+  /**
+   * Qué clase de ficha es, en el catálogo estándar: la consulta inicial de la
+   * especialidad (`BASE`), el control estándar de una condición (`SPECIFIC`) o
+   * una de toda consulta (`GENERAL`). Ausente en las plantillas armadas a mano.
+   */
+  @ApiPropertyOptional({ enum: ['BASE', 'SPECIFIC', 'GENERAL'] })
+  kind?: 'BASE' | 'SPECIFIC' | 'GENERAL';
 }

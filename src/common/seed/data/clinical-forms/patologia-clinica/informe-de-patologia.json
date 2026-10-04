@@ -1,6 +1,6 @@
 {
   "code": "PATOL_INFORME_BASE",
-  "name": "Informe de anatomía patológica",
+  "name": "Patología Clínica — informe general de anatomía patológica (ficha base)",
   "specialty": { "code": "PATOLOGIA_CLINICA", "display": "Patología Clínica" },
   "version": 2,
   "provenance": {
@@ -197,5 +197,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

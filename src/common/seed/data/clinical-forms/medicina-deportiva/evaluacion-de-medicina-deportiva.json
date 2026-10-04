@@ -1,6 +1,6 @@
 {
   "code": "MEDEP_EVALUACION_BASE",
-  "name": "Evaluación de medicina deportiva",
+  "name": "Medicina Deportiva — consulta inicial (ficha base)",
   "specialty": {
     "code": "MEDICINA_DEPORTIVA",
     "display": "Medicina Deportiva"
@@ -203,5 +203,6 @@
       "dataType": "text",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }
