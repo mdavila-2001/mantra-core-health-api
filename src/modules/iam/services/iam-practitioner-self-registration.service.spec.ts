@@ -1540,4 +1540,73 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
   });
+
+  describe('Firma y sello privados durante el registro', () => {
+    const signatureFileId = '33333333-3333-4333-8333-333333333333';
+    const sealFileId = '44444444-4444-4444-8444-444444444444';
+
+    it('reclama ambas imágenes y entrega sus referencias al perfil', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+        file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI },
+        version: { sizeBytes: '1024' },
+      });
+      await d.service.registerPractitioner({
+        ...dto,
+        signatureFileId,
+        sealFileId,
+      });
+      for (const fileId of [signatureFileId, sealFileId]) {
+        expect(
+          d.attachableFileService.claimAnonymousUpload,
+        ).toHaveBeenCalledWith(
+          d.tx,
+          fileId,
+          { ownerUserId: 'user-1', tenantId: SEED.tenantId },
+          expect.objectContaining({
+            allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+          }),
+        );
+      }
+      expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ signatureFileId, sealFileId }),
+      );
+    });
+
+    it('propaga la denegación de propiedad antes de crear el perfil', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new Error('archivo ajeno'),
+      );
+      await expect(
+        d.service.registerPractitioner({ ...dto, signatureFileId }),
+      ).rejects.toThrow('archivo ajeno');
+      expect(d.practitionersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'archivo público',
+        {
+          file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+          version: { sizeBytes: '1024' },
+        },
+      ],
+      [
+        'archivo grande',
+        {
+          file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI },
+          version: { sizeBytes: String(2 * 1024 * 1024 + 1) },
+        },
+      ],
+    ])('rechaza %s', async (_caso, archivo) => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue(archivo);
+      await expect(
+        d.service.registerPractitioner({ ...dto, signatureFileId }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.practitionersRepo.create).not.toHaveBeenCalled();
+    });
+  });
 });

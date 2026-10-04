@@ -37,6 +37,9 @@ export interface CreatePractitionerProfileData {
    * Identificador de foto de perfil (FK → common.files).
    */
   photoFileId?: string;
+  /** Archivos privados de firma y sello vinculados al perfil. */
+  signatureFileId?: string;
+  sealFileId?: string;
   /**
    * Valor de accepts new patients mantenido por la instancia.
    */
@@ -164,6 +167,8 @@ export class HealthPractitionerProfilesRepository {
         professionalTitle: data.professionalTitle,
         professionalBio: data.professionalBio,
         photoFileId: data.photoFileId,
+        signatureFileId: data.signatureFileId,
+        sealFileId: data.sealFileId,
         verificationStatusConceptId: data.verificationStatusConceptId,
         practiceStatusConceptId: data.practiceStatusConceptId,
         acceptsNewPatients: data.acceptsNewPatients ?? false,

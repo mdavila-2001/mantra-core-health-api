@@ -142,6 +142,33 @@ export class IamAuthController {
     return this.organizationRegistrationService.registerOrganization(dto, ip);
   }
 
+  /** Precarga de firma o sello: máximo 2 MB y sin lectura pública. */
+  @Post('upload-registration-signature-image')
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOperation({
+    summary: 'Pre-cargar una imagen de firma o sello para el registro',
+  })
+  uploadRegistrationSignatureImage(
+    @UploadedFile() file: UploadedFileBytes | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    return this.registrationDocumentUploadService.uploadSignatureImage(file);
+  }
+
   /**
    * Pre-carga pública de un PDF para un registro que todavía no tiene sesión:
    * documento legal de organización o respaldo de credencial profesional.

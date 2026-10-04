@@ -1,0 +1,37 @@
+API source base: 55b92f0a7162014a987010715b4a5b6756608f0a
+Model patch source: mantra-core-technologies/mantra-core-health-model dev b6587c7f22fccd9504e89e7a9feb2a936358d5f4
+Patch SHA256: f9dfdd6c9cd5c77768b433a26ea6316bfb2573696e1b78c561d559d4aa238470
+
+Jest unitario, cinco specs afectados y de propiedad de archivos:
+Test Suites: 5 passed, 5 total
+Tests:       159 passed, 159 total
+Exit code: 0
+
+HTTP real + PostgreSQL aislado, con el mismo arnés de la API:
+PASS test/integration/practitioner-signature-registration.int-spec.ts (50.462 s)
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Time:        50.64 s
+Exit code: 0
+Precarga multipart, alta, login, lectura de perfil, descarga de ambas imágenes y comparación de bytes; propiedad y sensibilidad persistidas; ruta pública devuelve 404; rollback de alta y primera reclamación ante referencia inválida.
+
+Build Docker --target build alovida-signature-api-build:dev:
+#15 DONE 12.2s
+Exit code: 0
+ESLint dirigido: exit code 0, sin diagnósticos.
+git diff --check: exit code 0.
+
+Patch canónico aplicado dos veces, ambas con ON_ERROR_STOP y exit code 0.
+Columnas observadas:
+seal_file_id|uuid|YES
+signature_file_id|uuid|YES
+
+Regresión heredada observada también en el árbol original de dev (sin estos cambios):
+FAIL test/integration/practitioner-registration.int-spec.ts (52.57 s)
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 5 passed, 8 total
+Time:        52.692 s
+Los tres casos son domicilio particular (2) y rollback de alta asistida (1). No se debilitan sus aserciones ni se cambian sus fixtures en este PR. No se afirma verde global.
+
+El primer arranque de la base vacía superó 180 s durante los seeds; 25 etapas finalizaron sin fallo y sembraron 38501 registros. Repetición en base inicializada, sin aumentar timeout.
+Base aislada creada solo con DDL, sin copiar datos de AloVida Dev. El índice HNSW ajeno al flujo se omitió en la restauración por dimensiones ausentes en el dump; el resto del esquema se restauró con ON_ERROR_STOP.
