@@ -12,16 +12,38 @@ log = logging.getLogger(__name__)
 
 Report = Callable[[Sources], str]
 
+_HELP: Report = lambda _: reports.HELP_TEXT
+_CONTAINERS: Report = lambda sources: reports.containers_report(*sources.containers())
+_ALERTS: Report = lambda sources: reports.alerts_report(sources.active_alerts())
+
+# Cada comando en castellano y en inglés: /status y /estado dan lo mismo.
 COMMANDS: dict[str, Report] = {
-    "/start": lambda _: reports.HELP_TEXT,
-    "/ayuda": lambda _: reports.HELP_TEXT,
-    "/help": lambda _: reports.HELP_TEXT,
+    "/start": _HELP,
+    "/ayuda": _HELP,
+    "/help": _HELP,
+    "/status": reports.status_report,
     "/estado": reports.status_report,
     "/ram": reports.memory_report,
+    "/memory": reports.memory_report,
+    "/cpu": reports.cpu_report,
     "/red": reports.network_report,
-    "/contenedores": lambda sources: reports.containers_report(*sources.containers()),
-    "/alertas": lambda sources: reports.alerts_report(sources.active_alerts()),
+    "/network": reports.network_report,
+    "/contenedores": _CONTAINERS,
+    "/containers": _CONTAINERS,
+    "/alertas": _ALERTS,
+    "/alerts": _ALERTS,
 }
+
+# Lo que Telegram muestra en el menú al tocar «/» (setMyCommands).
+MENU: list[tuple[str, str]] = [
+    ("status", "Resumen: RAM, CPU, disco, red y contenedores"),
+    ("ram", "RAM del servidor y contenedores que más usan"),
+    ("cpu", "Uso por núcleo y carga"),
+    ("red", "Tráfico de red por interfaz y contenedor"),
+    ("contenedores", "Estado y salud de cada contenedor"),
+    ("alertas", "Alertas activas"),
+    ("ayuda", "Lista de comandos"),
+]
 
 
 def parse_command(text: str) -> str | None:
