@@ -34,6 +34,7 @@ describe('MyClaimsController', () => {
   });
 
   it('GET autenticado de autoservicio no exige tenant ni rol de aseguradora', () => {
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- se lee la metadata del método, no se invoca
     const handler = MyClaimsController.prototype.listMyClaims;
     expect(Reflect.getMetadata('path', MyClaimsController)).toBe(
       'insurance/my-claims',
