@@ -339,21 +339,15 @@ export class SchedulingCatalogService {
         );
       }
 
-      // REQ-10-026: sin esto, un slot más largo que la franja no rompía nada
-      // — `generateSlots` simplemente no producía ningún turno para ese día,
-      // en silencio. Quien publicó el horario veía «Vigente» y descubría
-      // recién en «cuántos turnos por semana» que ese día no ofrece ninguno.
-      const slotMinutes =
-        rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES;
-      const duracionFranja =
-        minutosDelDia(rule.endTime) - minutosDelDia(rule.startTime);
-      if (slotMinutes > duracionFranja) {
-        throw new PreconditionFailedException(
-          `El turno de ${slotMinutes} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min)`,
-          { dayOfWeek: rule.dayOfWeek, slotMinutes, duracionFranja },
-          SchedulingErrorReason.TEMPLATE_RULE_SLOT_TOO_LONG,
-        );
-      }
+      // REQ-10-026: un día sin ningún turno no puede publicarse en silencio.
+      // Con el redondeo hacia adelante una franja siempre da al menos uno —el
+      // último se completa aunque pase la hora de fin—, salvo que ese turno
+      // pise la franja siguiente del mismo día.
+      assertPrimerTurnoEntra(
+        rule,
+        dto.rules,
+        rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -506,19 +500,11 @@ export class SchedulingCatalogService {
               { dayOfWeek: rule.dayOfWeek },
             );
           }
-          const slotMinutesDeLaFranja = rule.slotMinutes ?? slotMinutesEfectivo;
-          const duracionFranja =
-            minutosDelDia(rule.endTime) - minutosDelDia(rule.startTime);
-          if (slotMinutesDeLaFranja > duracionFranja) {
-            throw new PreconditionFailedException(
-              `El turno de ${slotMinutesDeLaFranja} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min)`,
-              {
-                dayOfWeek: rule.dayOfWeek,
-                slotMinutesDeLaFranja,
-                duracionFranja,
-              },
-            );
-          }
+          assertPrimerTurnoEntra(
+            rule,
+            dto.rules,
+            rule.slotMinutes ?? slotMinutesEfectivo,
+          );
         }
 
         await this.catalogRepo.deleteRulesByTemplate(tx, templateId);
@@ -1144,6 +1130,12 @@ export class SchedulingCatalogService {
         const gapMinutes = rule.gapMinutes ?? 0;
         const pasoMinutes = slotMinutes + gapMinutes;
 
+        // Redondeo hacia adelante (propietario, 2026-10-04): el último turno
+        // se COMPLETA aunque pase la hora de fin —cada hora le cuesta dinero al
+        // médico, y cortarlo le regalaba el tramo final—. El único tope es la
+        // franja siguiente del mismo día: el turno extendido no la pisa.
+        const siguiente = inicioDeLaFranjaSiguiente(rule, rules);
+
         for (const day of diasLocalesQueCoinciden(
           from,
           to,
@@ -1152,6 +1144,8 @@ export class SchedulingCatalogService {
         )) {
           const dayStart = horaLocalAUtc(day, rule.startTime, zona);
           const dayEnd = horaLocalAUtc(day, rule.endTime, zona);
+          const tope =
+            siguiente === null ? null : horaLocalAUtc(day, siguiente, zona);
 
           for (
             let cursor = dayStart;
@@ -1159,7 +1153,7 @@ export class SchedulingCatalogService {
             cursor = new Date(cursor.getTime() + pasoMinutes * 60_000)
           ) {
             const end = new Date(cursor.getTime() + slotMinutes * 60_000);
-            if (end > dayEnd) break;
+            if (tope !== null && end > tope) break;
             // El barrido de días locales se ensancha un día por lado, porque un
             // día de la sede puede empezar antes de `from` o terminar después de
             // `to`. Acá se recorta a lo que se pidió: sin esto, una ventana de
@@ -2266,6 +2260,55 @@ function seSolapan(
 }
 
 /** Los minutos desde medianoche de un `HH:MM` o `HH:MM:SS`. */
+/** Lo mínimo de una franja que el redondeo necesita mirar. */
+interface FranjaDelDia {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+/**
+ * Dónde empieza la franja que sigue a ésta el mismo día, o `null` si es la
+ * última. Es el tope del redondeo hacia adelante: el último turno se completa
+ * pasando la hora de fin, pero no puede pisar la franja de la tarde.
+ */
+export function inicioDeLaFranjaSiguiente(
+  franja: FranjaDelDia,
+  franjas: readonly FranjaDelDia[],
+): string | null {
+  const posteriores = franjas
+    .filter(
+      (otra) =>
+        otra.dayOfWeek === franja.dayOfWeek && otra.startTime >= franja.endTime,
+    )
+    .map((otra) => otra.startTime)
+    .sort();
+  return posteriores[0] ?? null;
+}
+
+/**
+ * Corta si ni el primer turno de la franja puede darse (REQ-10-026).
+ *
+ * Con el redondeo hacia adelante eso sólo pasa cuando el turno, completo,
+ * pisaría la franja siguiente del mismo día.
+ */
+function assertPrimerTurnoEntra(
+  franja: FranjaDelDia,
+  franjas: readonly FranjaDelDia[],
+  slotMinutes: number,
+): void {
+  const siguiente = inicioDeLaFranjaSiguiente(franja, franjas);
+  if (siguiente === null) return;
+  const finDelPrimero = minutosDelDia(franja.startTime) + slotMinutes;
+  if (finDelPrimero > minutosDelDia(siguiente)) {
+    throw new PreconditionFailedException(
+      `El turno de ${slotMinutes} min que empieza a las ${franja.startTime} pisaría la franja de las ${siguiente}`,
+      { dayOfWeek: franja.dayOfWeek, slotMinutes, siguiente },
+      SchedulingErrorReason.TEMPLATE_RULE_SLOT_TOO_LONG,
+    );
+  }
+}
+
 function minutosDelDia(hhmm: string): number {
   const [h, m] = hhmm.split(':');
   return Number(h) * 60 + Number(m ?? 0);

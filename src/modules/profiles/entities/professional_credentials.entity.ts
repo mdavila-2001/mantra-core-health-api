@@ -61,6 +61,36 @@ export class ProfessionalCredentials {
   issuingCountryConceptId?: string;
 
   /**
+   * Valor de issuing city text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'issuing_city_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  issuingCityText?: string;
+
+  /**
+   * Valor de issuing country text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'issuing_country_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  issuingCountryText?: string;
+
+  /**
+   * Identificador asociado a profession concept.
+   */
+  @Property({
+    fieldName: 'profession_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  professionConceptId?: string;
+
+  /**
    * Valor de issue date mantenido por la instancia.
    */
   @Property({ fieldName: 'issue_date', columnType: 'date', nullable: true })

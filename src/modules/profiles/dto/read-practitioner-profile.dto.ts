@@ -98,6 +98,18 @@ export class PractitionerCredentialDto {
   @ApiPropertyOptional()
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se cursó. */
+  @ApiPropertyOptional()
+  issuingCityText?: string;
+
+  /** País donde se cursó, como texto. */
+  @ApiPropertyOptional()
+  issuingCountryText?: string;
+
+  /** Profesión que acredita (COB-2023). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  professionConceptId?: string;
+
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   issueDate?: Date;
 
