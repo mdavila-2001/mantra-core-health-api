@@ -1,0 +1,135 @@
+# promtool test rules prometheus/tests/rules_test.yml
+# Series sintéticas → se comprueba que cada alerta salte (o NO salte) a tiempo.
+rule_files:
+  - ../rules/host.yml
+  - ../rules/containers.yml
+  - ../rules/endpoints.yml
+  - ../rules/watchdog.yml
+
+evaluation_interval: 30s
+
+tests:
+  - name: RAM baja avisa a los 5 min, no antes; crítica a los 2 min
+    interval: 30s
+    input_series:
+      - series: 'node_memory_MemTotal_bytes{instance="n"}'
+        values: '100x30'
+      - series: 'node_memory_MemAvailable_bytes{instance="n"}'
+        values: '10x14 5x15'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: HostMemoryLow
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: HostMemoryLow
+        exp_alerts:
+          - exp_labels: { severity: warning, instance: n }
+            exp_annotations:
+              summary: "RAM del VPS baja: queda 10% disponible"
+              description: "Menos del 15 % de la RAM libre durante 5 min. Mirá /ram para ver qué contenedor la está usando."
+      - eval_time: 10m
+        alertname: HostMemoryCritical
+        exp_alerts:
+          - exp_labels: { severity: critical, instance: n }
+            exp_annotations:
+              summary: "RAM del VPS CRÍTICA: queda 5% disponible"
+              description: "Con menos del 8 % libre, el kernel empieza a matar procesos (OOM)."
+
+  - name: Contenedor unhealthy salta a los 3 min; uno sano no
+    interval: 30s
+    input_series:
+      - series: 'alovida_container_unhealthy{name="api-1",display="alovida-backend-central/api"}'
+        values: '1x10'
+      - series: 'alovida_container_unhealthy{name="redis-1",display="alovida-backend-central/redis"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: ContainerUnhealthy
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: ContainerUnhealthy
+        exp_alerts:
+          - exp_labels: { severity: critical, name: api-1, display: alovida-backend-central/api }
+            exp_annotations:
+              summary: "alovida-backend-central/api está UNHEALTHY"
+              description: "Su healthcheck falla hace más de 3 min. Si tiene la etiqueta autoheal=true, autoheal lo reinicia solo."
+
+  - name: Un one-shot terminado NO es un contenedor caído; uno con restart always sí
+    interval: 30s
+    input_series:
+      - series: 'alovida_container_running{name="api-migrate",display="x/api-migrate"}'
+        values: '0x10'
+      - series: 'alovida_container_expected_running{name="api-migrate",display="x/api-migrate"}'
+        values: '0x10'
+      - series: 'alovida_container_running{name="minio",display="x/minio"}'
+        values: '0x10'
+      - series: 'alovida_container_expected_running{name="minio",display="x/minio"}'
+        values: '1x10'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: ContainerDown
+        exp_alerts:
+          - exp_labels: { severity: critical, name: minio, display: x/minio }
+            exp_annotations:
+              summary: "x/minio está DETENIDO"
+              description: "Tiene política de reinicio y no está corriendo hace más de 3 min."
+
+  - name: Más de 3 reinicios en 15 min es un bucle
+    interval: 1m
+    input_series:
+      - series: 'alovida_container_started_at_seconds{name="w",display="x/worker"}'
+        values: '100 160 220 280 340 400'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: ContainerRestartLoop
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: ContainerRestartLoop
+        exp_alerts:
+          - exp_labels: { severity: critical, name: w, display: x/worker }
+            exp_annotations:
+              summary: "x/worker se reinició 5 veces en 15 min"
+              description: "Bucle de reinicios: arranca, muere y vuelve a arrancar."
+
+  - name: Contenedor sin límite de memoria no dispara la alerta de límite
+    interval: 30s
+    input_series:
+      - series: 'container_memory_working_set_bytes{name="pg"}'
+        values: '1000x12'
+      - series: 'container_spec_memory_limit_bytes{name="pg"}'
+        values: '0x12'
+      - series: 'container_memory_working_set_bytes{name="api"}'
+        values: '95x12'
+      - series: 'container_spec_memory_limit_bytes{name="api"}'
+        values: '100x12'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: ContainerMemoryNearLimit
+        exp_alerts:
+          - exp_labels: { severity: warning, name: api }
+            exp_annotations:
+              summary: "api usa el 95% de su límite de memoria"
+              description: "Al llegar al 100 % el kernel lo mata (OOM)."
+
+  - name: Sitio caído 2 min
+    interval: 30s
+    input_series:
+      - series: 'probe_success{job="blackbox-http",instance="https://test.example/"}'
+        values: '0x8'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: EndpointDown
+        exp_alerts:
+          - exp_labels: { severity: critical, job: blackbox-http, instance: "https://test.example/" }
+            exp_annotations:
+              summary: "https://test.example/ NO responde"
+              description: "Falla hace más de 2 min. Si coincide con un despliegue de Coolify, es la ventana del despliegue."
+
+  - name: El latido está siempre activo
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: Watchdog
+        exp_alerts:
+          - exp_labels: { severity: none }
+            exp_annotations:
+              summary: "Latido del monitoreo (siempre activo, no es un problema)"

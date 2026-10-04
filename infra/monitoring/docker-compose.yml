@@ -1,0 +1,291 @@
+# -------------------------------------------------------------------------
+# Monitoreo del VPS — recurso APARTE en Coolify (`alovida-monitoring`).
+#
+# Vive separado del compose de la app a propósito: cuando Coolify despliega la
+# API reemplaza sus contenedores, y si el monitoreo estuviera adentro moriría
+# justo en el momento que más interesa ver. Así, el corte se observa y se avisa.
+#
+# Qué mide y quién avisa:
+#   node-exporter  → RAM, swap, disco, carga y tráfico de red del HOST
+#   cadvisor       → CPU, RAM y red rx/tx POR CONTENEDOR
+#   telegram-bot   → health, reinicios y OOM de cada contenedor (cAdvisor no
+#                    los da) + comandos /estado /ram /red /contenedores /alertas
+#   blackbox       → los sitios públicos responden y su certificado no vence
+#   prometheus     → guarda 15 días y evalúa las reglas de `prometheus/rules/`
+#   alertmanager   → manda las alertas al grupo de Telegram y el latido
+#                    (Watchdog) a Healthchecks.io, que avisa si el VPS entero muere
+#   autoheal       → reinicia lo que quede `unhealthy` con la etiqueta
+#                    `autoheal=true`: Docker por sí solo NO lo hace,
+#                    `restart: always` sólo actúa cuando el proceso termina.
+#
+# Las configuraciones van horneadas en imágenes propias (`build:`) en vez de
+# montadas: así el contenedor que corre en Coolify es byte a byte el que se
+# validó, sin depender de cómo Coolify resuelva rutas relativas del repo.
+#
+# Variables que se cargan en el panel de Coolify (nunca en el repo):
+#   TELEGRAM_BOT_TOKEN · TELEGRAM_CHAT_ID · HEALTHCHECKS_PING_URL ·
+#   GRAFANA_ADMIN_PASSWORD · GRAFANA_ROOT_URL
+# Guía completa en README.md.
+# -------------------------------------------------------------------------
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-base: &base
+  restart: always
+  logging: *logging
+  networks:
+    - monitoring
+
+services:
+  prometheus:
+    <<: *base
+    build:
+      context: ./prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --storage.tsdb.retention.size=5GB
+      - --web.enable-lifecycle
+    volumes:
+      - prometheus_data:/prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9090/-/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  alertmanager:
+    <<: *base
+    build:
+      context: ./alertmanager
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?falta TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:?falta TELEGRAM_CHAT_ID}
+      HEALTHCHECKS_PING_URL: ${HEALTHCHECKS_PING_URL:?falta HEALTHCHECKS_PING_URL}
+    volumes:
+      - alertmanager_data:/alertmanager
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9093/-/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  grafana:
+    <<: *base
+    build:
+      context: ./grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?falta GRAFANA_ADMIN_PASSWORD}
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3000}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: America/La_Paz
+    volumes:
+      - grafana_data:/var/lib/grafana
+    # Único servicio con dominio: se le asigna en Coolify (HTTPS por Traefik).
+    # Prometheus y Alertmanager NO se exponen.
+    expose:
+      - "3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  node-exporter:
+    <<: *base
+    image: prom/node-exporter:v1.9.1
+    pid: host
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/host/root
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|var/lib/docker/.+)($|/)
+      - --collector.netdev.device-exclude=^(veth.*|br-.*|docker0|lo)$
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro,rslave
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+  cadvisor:
+    <<: *base
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    privileged: true
+    devices:
+      - /dev/kmsg
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=30s
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project,coolify.resourceName,coolify.name
+      # Sólo lo que se usa: CPU, memoria, red y OOM. El resto multiplica las
+      # series de Prometheus por los ~60 contenedores sin que nadie lo mire.
+      - --enable_metrics=cpu,memory,network,oom_event
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  blackbox:
+    <<: *base
+    build:
+      context: ./blackbox
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 64M
+
+  # Proxy del socket de Docker de SOLO LECTURA para el bot. Montar el socket con
+  # `:ro` no protege nada (el `ro` es del archivo, no de la API): quien lo lee
+  # puede crear contenedores privilegiados. Este proxy sólo deja pasar GET, y
+  # vive en una red `internal` que comparte únicamente con el bot.
+  docker-read-proxy:
+    <<: *base
+    image: tecnativa/docker-socket-proxy:0.3.0
+    environment:
+      CONTAINERS: "1"
+      POST: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-read
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 32M
+
+  # Proxy aparte para autoheal. OJO, medido en la prueba local: en la 0.3.0 la
+  # regla `deny unless GET || POST` va ANTES que `ALLOW_RESTARTS`, así que sin
+  # `POST=1` el reinicio da 403. Y con `POST=1` + `CONTAINERS=1` el proxy deja
+  # pasar TODO POST bajo /containers —crear un contenedor privilegiado incluido,
+  # que es root en el host—. Por eso este proxy vive en una red `internal` que
+  # SÓLO comparte con autoheal (sin puertos, sin entrada desde afuera). Ni el
+  # bot ni Grafana, que sí hablan con el exterior, pueden alcanzarlo.
+  docker-restart-proxy:
+    <<: *base
+    image: tecnativa/docker-socket-proxy:0.3.0
+    environment:
+      CONTAINERS: "1"
+      POST: "1"
+      ALLOW_RESTARTS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-restart
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 32M
+
+  autoheal:
+    <<: *base
+    # Fijada por digest y NO al tag 1.2.0: ese tag es de 2021 y su entrypoint
+    # sólo arranca si DOCKER_SOCK es un archivo; con `tcp://` (el proxy) cae a
+    # `exec autoheal` → «autoheal: not found» y queda en bucle de reinicio
+    # (comprobado en la prueba local del 2026-10-04). El soporte de `tcp://`
+    # sólo existe en las imágenes nuevas, que el proyecto publica como `latest`.
+    image: willfarrell/autoheal:latest@sha256:d3901060e112cde0600aa3e4a0baff1da2fd8a37d3bb963836730b3f05e70f51
+    environment:
+      DOCKER_SOCK: tcp://docker-restart-proxy:2375
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: "10"
+      # Margen tras arrancar antes de juzgar: la API tarda ~60 s en estar sana
+      # (su `start_period`) y la primera migración puede tardar más.
+      AUTOHEAL_START_PERIOD: "300"
+      AUTOHEAL_DEFAULT_STOP_TIMEOUT: "45"
+    depends_on:
+      - docker-restart-proxy
+    networks:
+      - docker-restart
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 32M
+
+  telegram-bot:
+    <<: *base
+    build:
+      context: ./telegram-bot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?falta TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:?falta TELEGRAM_CHAT_ID}
+      PROMETHEUS_URL: http://prometheus:9090
+      ALERTMANAGER_URL: http://alertmanager:9093
+      DOCKER_URL: http://docker-read-proxy:2375
+      DAILY_SUMMARY_HOUR: "8"
+      SUMMARY_TIMEZONE: America/La_Paz
+    depends_on:
+      - docker-read-proxy
+    networks:
+      - monitoring
+      - docker-read
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 96M
+    healthcheck:
+      # 127.0.0.1 y no `localhost`: el wget de busybox resuelve `localhost` a ::1
+      # y el exportador escucha sólo en IPv4 → el healthcheck fallaba siempre
+      # (medido en la prueba local del 2026-10-04).
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:9200/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:
+
+networks:
+  monitoring:
+  # Redes sin salida ni entrada externa: cada proxy del socket sólo es
+  # alcanzable por su único cliente.
+  docker-read:
+    internal: true
+  docker-restart:
+    internal: true

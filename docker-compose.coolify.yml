@@ -333,6 +333,24 @@ x-worker-healthcheck: &worker-healthcheck
   retries: 3
   start_period: 60s
 
+# Rotación de logs. Sin esto el driver json-file de Docker crece sin techo y,
+# con ~30 contenedores escribiendo, es el disco el que tumba el servidor. 30 MB
+# por contenedor como máximo (3 archivos de 10 MB).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Etiqueta que lee `autoheal` (stack de monitoreo, `infra/monitoring/`).
+# Docker NO reinicia un contenedor `unhealthy`: `restart: always` sólo actúa
+# cuando el proceso termina. Un Node colgado con el proceso vivo quedaba
+# colgado para siempre. Sólo la llevan la API y los workers, que no guardan
+# estado: reiniciar Postgres u OpenSearch a mitad de una recuperación larga
+# puede convertir un arranque lento en un bucle, y ésos se vigilan con alertas.
+x-autoheal-labels: &autoheal-labels
+  autoheal: "true"
+
 # Plantilla de los 22 workers: misma imagen que la API, mismo entorno, y lo
 # único que cambia es el `command`. Se fusiona con `<<:` para no repetir
 # veintidós veces catorce líneas idénticas — repetidas, un cambio se aplica a
@@ -346,6 +364,8 @@ x-worker: &worker
       GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
       APP_VERSION: ${APP_VERSION:-desconocido}
   restart: always
+  logging: *logging
+  labels: *autoheal-labels
   environment:
     <<: *app-env
   deploy:
@@ -368,6 +388,7 @@ services:
   postgres:
     image: timescale/timescaledb-ha:pg18
     restart: always
+    logging: *logging
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -408,6 +429,7 @@ services:
       dockerfile: docker/db-init/Dockerfile
       target: postgres-init
     restart: "no"
+    logging: *logging
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -422,6 +444,7 @@ services:
   mongodb:
     image: mongo:8.2.12
     restart: always
+    logging: *logging
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -441,6 +464,7 @@ services:
       dockerfile: docker/db-init/Dockerfile
       target: mongo-init
     restart: "no"
+    logging: *logging
     entrypoint: ["bash", "/init/bin/init-mongo.sh"]
     environment:
       MONGO_DB: ${MONGO_DB:-alovida_document_store}
@@ -453,6 +477,7 @@ services:
   redis:
     image: redis:8.10-alpine
     restart: always
+    logging: *logging
     # `--save 60 1` conserva el snapshot: Redis guarda el estado del limitador
     # de tasa y de las colas, y perderlo en cada reinicio del contenedor no es
     # gratis.
@@ -470,6 +495,7 @@ services:
   opensearch:
     image: opensearchproject/opensearch:3.8.0
     restart: always
+    logging: *logging
     environment:
       - cluster.name=alovida-cluster
       - node.name=alovida-node1
@@ -503,6 +529,7 @@ services:
       dockerfile: docker/db-init/Dockerfile
       target: opensearch-init
     restart: "no"
+    logging: *logging
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     depends_on:
       opensearch:
@@ -524,6 +551,7 @@ services:
     # imagen exacta deja de ser obtenible por cualquier medio público conocido.
     pull_policy: missing
     restart: always
+    logging: *logging
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -558,6 +586,7 @@ services:
   minio-init:
     image: amazon/aws-cli:2.19.5
     restart: "no"
+    logging: *logging
     entrypoint:
       - /bin/sh
       - -c
@@ -599,6 +628,7 @@ services:
         GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
         APP_VERSION: ${APP_VERSION:-desconocido}
     restart: "no"
+    logging: *logging
     command: ["node", "dist/src/seed-cli.js"]
     environment:
       <<: *app-env
@@ -641,6 +671,8 @@ services:
         BUILD_TIME: ${BUILD_TIME:-desconocido}
         APP_VERSION: ${APP_VERSION:-desconocido}
     restart: always
+    logging: *logging
+    labels: *autoheal-labels
     command: ["node", "dist/src/main.js"]
     environment:
       <<: *app-env

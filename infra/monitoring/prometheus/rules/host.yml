@@ -1,0 +1,94 @@
+# Salud del HOST (el VPS). Fuente: node-exporter.
+groups:
+  - name: host
+    rules:
+      - alert: HostMemoryLow
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.15
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "RAM del VPS baja: queda {{ $value | humanizePercentage }} disponible"
+          description: "Menos del 15 % de la RAM libre durante 5 min. Mirá /ram para ver qué contenedor la está usando."
+
+      - alert: HostMemoryCritical
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.08
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "RAM del VPS CRÍTICA: queda {{ $value | humanizePercentage }} disponible"
+          description: "Con menos del 8 % libre, el kernel empieza a matar procesos (OOM)."
+
+      - alert: HostSwapHigh
+        expr: (1 - node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes) > 0.5 and node_memory_SwapTotal_bytes > 0
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Swap del VPS al {{ $value | humanizePercentage }}"
+          description: "Más de la mitad del swap en uso durante 10 min: el host se queda sin RAM real."
+
+      - alert: HostOomKill
+        expr: increase(node_vmstat_oom_kill[10m]) > 0
+        labels: { severity: critical }
+        annotations:
+          summary: "El kernel del VPS mató procesos por falta de memoria"
+          description: "{{ $value | humanize }} OOM kill(s) en los últimos 10 min."
+
+      - alert: HostDiskHigh
+        expr: (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"}) > 0.80
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Disco {{ $labels.mountpoint }} al {{ $value | humanizePercentage }}"
+          description: "Más del 80 % ocupado. Revisar imágenes viejas y logs de Docker."
+
+      - alert: HostDiskCritical
+        expr: (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"}) > 0.90
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "Disco {{ $labels.mountpoint }} CRÍTICO al {{ $value | humanizePercentage }}"
+          description: "Con el disco lleno, Postgres deja de escribir y los despliegues fallan."
+
+      - alert: HostDiskWillFillIn24h
+        expr: |
+          predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"}[6h], 24 * 3600) < 0
+          and (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|nsfs|ramfs"}) > 0.70
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: "Al ritmo actual, el disco {{ $labels.mountpoint }} se llena en menos de 24 h"
+          description: "Proyección lineal de las últimas 6 h."
+
+      - alert: HostHighLoad
+        expr: node_load5 / on(instance) count by (instance) (node_cpu_seconds_total{mode="idle"}) > 1.5
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Carga del VPS en {{ $value | humanize }}× los núcleos"
+          description: "La carga a 5 min supera 1,5 por núcleo durante 10 min."
+
+      # TODO(fase 4): el umbral de 150 Mbit/s es PROVISIONAL. Se fija con la
+      # línea base de 7 días de este mismo Prometheus (pico × 1,5).
+      - alert: HostNetworkReceiveHigh
+        expr: rate(node_network_receive_bytes_total[5m]) * 8 > 150e6
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Tráfico de ENTRADA alto en {{ $labels.device }}: {{ $value | humanize }}bit/s"
+          description: "Sostenido 10 min. Puede ser carga legítima o un abuso; mirá /red."
+
+      - alert: HostNetworkTransmitHigh
+        expr: rate(node_network_transmit_bytes_total[5m]) * 8 > 150e6
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Tráfico de SALIDA alto en {{ $labels.device }}: {{ $value | humanize }}bit/s"
+          description: "Sostenido 10 min. Mirá /red para ver qué contenedor lo genera."
+
+      - alert: HostNetworkErrors
+        expr: rate(node_network_receive_errs_total[5m]) + rate(node_network_transmit_errs_total[5m]) > 1
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Errores de red en {{ $labels.device }}: {{ $value | humanize }}/s"
+          description: "La interfaz está descartando o corrompiendo paquetes."
