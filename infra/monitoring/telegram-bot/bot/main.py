@@ -9,7 +9,7 @@ from datetime import datetime, date
 from zoneinfo import ZoneInfo
 
 from . import reports
-from .commands import reply_for
+from .commands import MENU, reply_for
 from .config import Config, load_config
 from .docker_state import fetch_container_states
 from .exporter import DockerStateCache, serve_exporter
@@ -33,7 +33,11 @@ def main() -> None:
     threading.Thread(
         target=_daily_summary_loop, args=(config, telegram, sources), name="daily-summary", daemon=True
     ).start()
-    _safe_send(telegram, config.telegram_chat_id, "🟢 Monitoreo del VPS iniciado. /ayuda para ver los comandos.")
+    try:
+        telegram.set_commands(MENU)
+    except Exception as exc:  # noqa: BLE001 — sin menú los comandos igual funcionan
+        log.warning("no se pudo registrar el menú de comandos: %s", exc)
+    _safe_send(telegram, config.telegram_chat_id, "🟢 Monitoreo del VPS iniciado. Probá /status o /ayuda.")
     log.info("exportador en :%s y bot escuchando", config.exporter_port)
     _poll_forever(config, telegram, sources)
 

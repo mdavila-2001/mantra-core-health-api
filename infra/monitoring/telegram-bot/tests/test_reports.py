@@ -66,3 +66,30 @@ def test_alerts_report_handles_empty_and_severity():
         {"labels": {"alertname": "HostDiskHigh", "severity": "warning"}, "annotations": {"summary": "Disco / al 85 %"}},
     ])
     assert "🟠 Disco / al 85 %" in text
+
+
+def test_status_report_includes_cpu_usage_and_cores():
+    samples = host_samples()
+    samples[reports.Q_CPU_USED] = [({}, 0.234)]
+    samples[reports.Q_CPU_CORES] = [({}, 8.0)]
+    assert "CPU: 23 % en uso de 8 núcleos" in reports.status_report(FakeSources(samples=samples))
+
+
+def test_cpu_report_shows_each_core_in_order_load_and_top_containers():
+    samples = host_samples()
+    samples[reports.Q_CPU_USED] = [({}, 0.5)]
+    samples[reports.Q_CPU_CORES] = [({}, 2.0)]
+    samples[reports.Q_CPU_PER_CORE] = [({"cpu": "10"}, 0.2), ({"cpu": "1"}, 0.9)]
+    samples[reports.Q_LOAD_1] = [({}, 1.0)]
+    samples[reports.Q_LOAD_5] = [({}, 0.8)]
+    samples[reports.Q_LOAD_15] = [({}, 0.5)]
+    samples[reports.Q_CONTAINER_CPU] = [({"name": "api"}, 0.35), ({"name": "postgres"}, 1.2)]
+    text = reports.cpu_report(FakeSources(samples=samples))
+    assert "Carga 1 / 5 / 15 min: 1.00 / 0.80 / 0.50 (sobre 2 núcleos)" in text
+    assert "<code>cpu 1 ▰▰▰▰▰▰▰▰▰▱  90 %</code>" in text
+    assert text.index("cpu 1") < text.index("cpu10")
+    assert text.index("postgres: 120 %") < text.index("api: 35 %")
+
+
+def test_cpu_report_without_data_does_not_crash():
+    assert "CPU: sin datos" in reports.cpu_report(FakeSources())

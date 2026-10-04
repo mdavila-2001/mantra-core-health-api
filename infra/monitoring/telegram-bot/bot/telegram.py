@@ -34,6 +34,14 @@ class TelegramClient:
             )
 
 
+    def set_commands(self, commands: list[tuple[str, str]]) -> None:
+        self._post(
+            f"{self._base}/setMyCommands",
+            {"commands": [{"command": name, "description": text} for name, text in commands]},
+            15,
+        )
+
+
 def split_message(text: str, limit: int = MAX_MESSAGE_CHARS) -> list[str]:
     """Parte por líneas para no cortar una etiqueta HTML a la mitad."""
     chunks: list[str] = []
