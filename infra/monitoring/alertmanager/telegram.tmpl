@@ -1,0 +1,15 @@
+{{/* Mensaje de Telegram en castellano, HTML. Una línea por alerta del grupo. */}}
+{{ define "alovida.telegram.icon" -}}
+{{- if eq .Status "resolved" }}✅{{ else if eq .CommonLabels.severity "critical" }}🔴{{ else }}🟠{{ end -}}
+{{- end }}
+
+{{ define "alovida.telegram.message" -}}
+{{ template "alovida.telegram.icon" . }} <b>{{ if eq .Status "resolved" }}RESUELTO{{ else if eq .CommonLabels.severity "critical" }}CRÍTICO{{ else }}AVISO{{ end }}</b> · {{ .CommonLabels.alertname }}
+{{ range .Alerts -}}
+• {{ .Annotations.summary }}
+{{- if and (eq .Status "firing") .Annotations.description }}
+  <i>{{ .Annotations.description }}</i>
+{{- end }}
+{{ end -}}
+<code>{{ .CommonLabels.server }}</code>
+{{- end }}

@@ -1,0 +1,62 @@
+# Salud de los CONTENEDORES. Fuentes: cAdvisor (recursos) y el exportador del
+# bot (`alovida_container_*`: health, reinicios, estado esperado).
+groups:
+  - name: containers
+    rules:
+      - alert: ContainerUnhealthy
+        expr: alovida_container_unhealthy == 1
+        for: 3m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.display }} está UNHEALTHY"
+          description: "Su healthcheck falla hace más de 3 min. Si tiene la etiqueta autoheal=true, autoheal lo reinicia solo."
+
+      - alert: ContainerDown
+        expr: alovida_container_expected_running == 1 and alovida_container_running == 0
+        for: 3m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.display }} está DETENIDO"
+          description: "Tiene política de reinicio y no está corriendo hace más de 3 min."
+
+      # Cuenta arranques por el cambio de StartedAt y no por RestartCount: los
+      # reinicios que hace autoheal por la API no incrementan RestartCount.
+      - alert: ContainerRestartLoop
+        expr: changes(alovida_container_started_at_seconds[15m]) > 3
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.display }} se reinició {{ $value }} veces en 15 min"
+          description: "Bucle de reinicios: arranca, muere y vuelve a arrancar."
+
+      - alert: ContainerOomKilled
+        expr: increase(container_oom_events_total{name!=""}[10m]) > 0
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.name }} murió por falta de memoria (OOM)"
+          description: "Superó su límite de memoria. Revisar el límite o una fuga."
+
+      - alert: ContainerMemoryNearLimit
+        expr: container_memory_working_set_bytes{name!=""} / (container_spec_memory_limit_bytes{name!=""} > 0) > 0.90
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.name }} usa el {{ $value | humanizePercentage }} de su límite de memoria"
+          description: "Al llegar al 100 % el kernel lo mata (OOM)."
+
+  - name: monitoring-self
+    rules:
+      - alert: MonitoringTargetDown
+        expr: up == 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "El monitoreo no puede leer {{ $labels.job }} ({{ $labels.instance }})"
+          description: "Mientras siga así, hay métricas que no se están mirando."
+
+      - alert: DockerStateUnavailable
+        expr: alovida_docker_up == 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "El bot no puede consultar el estado de Docker"
+          description: "Sin esto no hay alertas de unhealthy, detenidos ni reinicios."
