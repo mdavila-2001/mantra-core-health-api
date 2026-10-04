@@ -74,6 +74,7 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 // caso de uso que `POST /practitioners/me/sites`. Import por archivo, mismo
 // criterio que `MedicalSpecialtyCatalogService` arriba.
 import { OwnSiteProvisioningService } from '../../practice/services/own-site-provisioning.service';
+import { BO_PROFESSION_CONCEPT_IDS } from '../../../common/seed/bo-professions.catalog';
 
 /**
  * Los cinco tipos que el modelo admite para una credencial académica.
@@ -91,6 +92,12 @@ const TIPOS_DE_CREDENCIAL: readonly string[] = [
   PROF.CREDENTIAL_TYPE_DOCTORATE,
   PROF.CREDENTIAL_TYPE_SPECIALTY,
 ];
+
+/** Texto recortado, o `undefined` si viene vacío: una cadena en blanco no es un dato. */
+function textoOpcional(valor: string | undefined): string | undefined {
+  const limpio = valor?.trim();
+  return limpio ? limpio : undefined;
+}
 
 const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
 
@@ -681,6 +688,17 @@ export class IamPractitionerSelfRegistrationService {
             { credentialTypeConceptId: declarada.credentialTypeConceptId },
           );
         }
+        // Mismo criterio que el tipo: la FK acepta cualquier concepto, y quién
+        // decide qué es una profesión es VS_BO_PROFESSION (COB-2023).
+        if (
+          declarada.professionConceptId !== undefined &&
+          !BO_PROFESSION_CONCEPT_IDS.has(declarada.professionConceptId)
+        ) {
+          throw new PreconditionFailedException(
+            'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
+            { professionConceptId: declarada.professionConceptId },
+          );
+        }
         if (declarada.fileId) {
           await this.attachableFiles.claimAnonymousUpload(
             tx,
@@ -702,6 +720,9 @@ export class IamPractitionerSelfRegistrationService {
           credentialTypeConceptId: declarada.credentialTypeConceptId,
           number: numero,
           issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
+          issuingCityText: textoOpcional(declarada.issuingCityText),
+          issuingCountryText: textoOpcional(declarada.issuingCountryText),
+          professionConceptId: declarada.professionConceptId,
           fileId: declarada.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,

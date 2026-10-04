@@ -44,6 +44,12 @@ export interface CreateCredentialData {
    * Valor de issuing institution text mantenido por la instancia.
    */
   issuingInstitutionText?: string;
+  /** Ciudad donde se cursó (`issuing_city_text`). */
+  issuingCityText?: string;
+  /** País donde se cursó, como texto (`issuing_country_text`). */
+  issuingCountryText?: string;
+  /** Profesión que acredita, miembro de `VS_BO_PROFESSION` (`profession_concept_id`). */
+  professionConceptId?: string;
   /**
    * Cuándo se emitió. Sin ella, una línea de tiempo de formación no se puede
    * ordenar y se lee como una lista de títulos sueltos.
@@ -118,6 +124,9 @@ export class ProfessionalCredentialsRepository {
         credentialTypeConceptId: data.credentialTypeConceptId,
         number: data.number,
         issuingInstitutionText: data.issuingInstitutionText,
+        issuingCityText: data.issuingCityText,
+        issuingCountryText: data.issuingCountryText,
+        professionConceptId: data.professionConceptId,
         issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,
