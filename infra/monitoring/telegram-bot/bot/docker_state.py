@@ -1,0 +1,100 @@
+"""Estado de cada contenedor según la API de Docker (vía el proxy de solo lectura).
+
+cAdvisor da CPU, memoria y red, pero no el resultado del healthcheck, ni el
+contador de reinicios, ni la política de reinicio. Eso sale de acá.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Callable
+
+from .http_json import get_json
+
+# Políticas con las que Docker promete mantener el contenedor vivo. Un
+# contenedor con `restart: "no"` (los *-init, api-migrate) termina a propósito.
+RESTARTING_POLICIES = frozenset({"always", "unless-stopped", "on-failure"})
+
+# Etiquetas que Coolify y compose ponen, de la más legible a la menos.
+RESOURCE_LABELS = ("coolify.resourceName", "coolify.name", "com.docker.compose.project")
+SERVICE_LABEL = "com.docker.compose.service"
+
+
+@dataclass(frozen=True)
+class ContainerState:
+    name: str
+    service: str
+    resource: str
+    status: str  # running · exited · restarting · paused · created · dead
+    health: str  # healthy · unhealthy · starting · none
+    restart_count: int
+    oom_killed: bool
+    restart_policy: str
+    started_at: datetime | None
+
+    @property
+    def running(self) -> bool:
+        return self.status == "running"
+
+    @property
+    def unhealthy(self) -> bool:
+        return self.health == "unhealthy"
+
+    @property
+    def expected_running(self) -> bool:
+        return self.restart_policy in RESTARTING_POLICIES
+
+    @property
+    def display(self) -> str:
+        if self.resource and self.service:
+            return f"{self.resource}/{self.service}"
+        return self.service or self.name
+
+
+JsonGetter = Callable[[str], Any]
+
+
+def fetch_container_states(docker_url: str, getter: JsonGetter | None = None) -> list[ContainerState]:
+    get = getter or (lambda path: get_json(f"{docker_url}{path}"))
+    summaries = get("/containers/json?all=1")
+    return [parse_inspect(get(f"/containers/{summary['Id']}/json")) for summary in summaries]
+
+
+def parse_inspect(inspect: dict[str, Any]) -> ContainerState:
+    state = inspect.get("State") or {}
+    labels = (inspect.get("Config") or {}).get("Labels") or {}
+    health = (state.get("Health") or {}).get("Status") or "none"
+    policy = ((inspect.get("HostConfig") or {}).get("RestartPolicy") or {}).get("Name") or "no"
+    return ContainerState(
+        name=str(inspect.get("Name", "")).lstrip("/"),
+        service=labels.get(SERVICE_LABEL, ""),
+        resource=_first_label(labels, RESOURCE_LABELS),
+        status=state.get("Status", "unknown"),
+        health=health,
+        restart_count=int(inspect.get("RestartCount", 0) or 0),
+        oom_killed=bool(state.get("OOMKilled", False)),
+        restart_policy=policy,
+        started_at=_parse_docker_time(state.get("StartedAt")),
+    )
+
+
+def _first_label(labels: dict[str, str], keys: tuple[str, ...]) -> str:
+    for key in keys:
+        value = labels.get(key)
+        if value:
+            return value
+    return ""
+
+
+def _parse_docker_time(raw: str | None) -> datetime | None:
+    # Docker devuelve nanosegundos ("2026-10-04T03:45:41.123456789Z") y
+    # "0001-01-01T00:00:00Z" si nunca arrancó. fromisoformat acepta hasta µs.
+    if not raw or raw.startswith("0001-"):
+        return None
+    head, _, frac = raw.rstrip("Z").partition(".")
+    try:
+        parsed = datetime.fromisoformat(f"{head}.{frac[:6]}" if frac else head)
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=timezone.utc)

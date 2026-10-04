@@ -1,0 +1,45 @@
+# Plantilla: entrypoint.sh reemplaza __TELEGRAM_CHAT_ID__ y __RUNTIME_DIR__.
+global:
+  resolve_timeout: 5m
+
+templates:
+  - /etc/alertmanager/telegram.tmpl
+
+route:
+  receiver: telegram
+  group_by: [alertname, display, name, instance, mountpoint, device]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # El latido NO va a Telegram: va a Healthchecks.io cada 5 min.
+    - matchers: [alertname = "Watchdog"]
+      receiver: healthchecks
+      group_wait: 0s
+      group_interval: 1m
+      repeat_interval: 5m
+
+inhibit_rules:
+  # Si ya avisó lo crítico, no repetir el aviso suave de lo mismo.
+  - source_matchers: [severity = "critical"]
+    target_matchers: [severity = "warning"]
+    equal: [display, name, instance, mountpoint, device]
+  - source_matchers: [alertname = "HostMemoryCritical"]
+    target_matchers: [alertname = "HostMemoryLow"]
+  - source_matchers: [alertname = "HostDiskCritical"]
+    target_matchers: [alertname = "HostDiskHigh"]
+    equal: [mountpoint]
+
+receivers:
+  - name: telegram
+    telegram_configs:
+      - bot_token_file: __RUNTIME_DIR__/telegram_token
+        chat_id: __TELEGRAM_CHAT_ID__
+        parse_mode: HTML
+        send_resolved: true
+        message: '{{ template "alovida.telegram.message" . }}'
+
+  - name: healthchecks
+    webhook_configs:
+      - url_file: __RUNTIME_DIR__/healthchecks_url
+        send_resolved: false
