@@ -26,19 +26,29 @@ Q_DISK_ROOT_USED = f'1 - node_filesystem_avail_bytes{{mountpoint="/",{FS}}} / no
 Q_LOAD_PER_CORE = 'node_load5 / on(instance) count by (instance) (node_cpu_seconds_total{mode="idle"})'
 Q_NET_RX = "rate(node_network_receive_bytes_total[5m]) * 8"
 Q_NET_TX = "rate(node_network_transmit_bytes_total[5m]) * 8"
+Q_CPU_USED = '1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))'
+Q_CPU_PER_CORE = '1 - avg by (cpu) (rate(node_cpu_seconds_total{mode="idle"}[5m]))'
+Q_CPU_CORES = 'count(node_cpu_seconds_total{mode="idle"})'
+Q_LOAD_1 = "node_load1"
+Q_LOAD_5 = "node_load5"
+Q_LOAD_15 = "node_load15"
+Q_CONTAINER_CPU = 'sum by (name) (rate(container_cpu_usage_seconds_total{name!=""}[5m]))'
 Q_CONTAINER_MEM = 'container_memory_working_set_bytes{name!=""}'
 Q_CONTAINER_MEM_LIMIT = 'container_spec_memory_limit_bytes{name!=""}'
 Q_CONTAINER_NET = 'sum by (name) (rate(container_network_receive_bytes_total{name!=""}[5m]) + rate(container_network_transmit_bytes_total{name!=""}[5m])) * 8'
 
+BAR_WIDTH = 10
+
 HELP_TEXT = (
     "<b>Monitoreo del VPS</b>\n"
-    "/estado — resumen: RAM, disco, carga, red, contenedores y alertas\n"
+    "/status — resumen: RAM, CPU, disco, red, contenedores y alertas\n"
     "/ram — RAM del host y los 10 contenedores que más usan\n"
+    "/cpu — uso por núcleo, carga y los contenedores que más CPU usan\n"
     "/red — tráfico por interfaz y los contenedores que más mueven\n"
     "/contenedores — estado, health, uptime y reinicios de cada uno\n"
     "/alertas — alertas activas ahora\n"
     "/ayuda — esta lista\n\n"
-    "Sólo lectura: el bot no reinicia ni cambia nada."
+    "También en castellano: /estado. Sólo lectura: el bot no reinicia ni cambia nada."
 )
 
 
@@ -59,6 +69,26 @@ def memory_report(sources: Sources) -> str:
     lines.extend(f"• {_e(name)}: {_mib(used)}{_limit_suffix(used, limits.get(name))}" for name, used in top)
     if not top:
         lines.append("Sin datos de cAdvisor todavía.")
+    return "\n".join(lines)
+
+
+def cpu_report(sources: Sources) -> str:
+    cores = _scalar(sources.query(Q_CPU_CORES))
+    per_core = sorted(
+        ((labels.get("cpu", "?"), value) for labels, value in sources.query(Q_CPU_PER_CORE)),
+        key=lambda item: int(item[0]) if item[0].isdigit() else 0,
+    )
+    loads = [_scalar(sources.query(q)) for q in (Q_LOAD_1, Q_LOAD_5, Q_LOAD_15)]
+    lines = [
+        f"<b>🧮 CPU</b> (promedio 5 min)\n{_cpu_line(sources)}",
+        f"Carga 1 / 5 / 15 min: {' / '.join(_num(load) for load in loads)}"
+        + (f" (sobre {int(cores)} núcleos)" if cores else ""),
+        "\n<b>Por núcleo</b>",
+    ]
+    lines.extend(f"<code>cpu{_e(core):>2} {_bar(value)} {_pct(value):>5}</code>" for core, value in per_core)
+    top = sorted(_by_name(sources.query(Q_CONTAINER_CPU)).items(), key=lambda item: item[1], reverse=True)
+    lines.append(f"\n<b>Top {TOP_N} contenedores</b> (100 % = un núcleo entero)")
+    lines.extend(f"• {_e(name)}: {_pct(value)}" for name, value in top[:TOP_N])
     return "\n".join(lines)
 
 
@@ -107,6 +137,7 @@ def _host_block(sources: Sources) -> str:
     tx = sum(value for _, value in sources.query(Q_NET_TX))
     return "\n".join([
         f"🧠 {_memory_line(sources)}",
+        f"🧮 {_cpu_line(sources)}",
         f"💾 Disco /: {_pct(disk)}",
         f"⚙️ Carga 5 min por núcleo: {_num(load)}",
         f"🌐 Red: ↓ {_mbps(rx)} · ↑ {_mbps(tx)}",
@@ -125,6 +156,14 @@ def _memory_line(sources: Sources) -> str:
     if swap_total:
         line += f" · swap {_pct((swap_total - (swap_free or 0)) / swap_total)}"
     return line
+
+
+def _cpu_line(sources: Sources) -> str:
+    used = _scalar(sources.query(Q_CPU_USED))
+    cores = _scalar(sources.query(Q_CPU_CORES))
+    if used is None:
+        return "CPU: sin datos"
+    return f"CPU: {_pct(used)} en uso" + (f" de {int(cores)} núcleos" if cores else "")
 
 
 def _containers_summary(states: list[ContainerState], docker_up: bool) -> str:
@@ -185,6 +224,11 @@ def _limit_suffix(used: float, limit: float | None) -> str:
     if not limit or limit >= UNLIMITED_MEMORY_BYTES:
         return " (sin límite)"
     return f" de {_mib(limit)} ({_pct(used / limit)})"
+
+
+def _bar(ratio: float) -> str:
+    filled = round(max(0.0, min(ratio, 1.0)) * BAR_WIDTH)
+    return "▰" * filled + "▱" * (BAR_WIDTH - filled)
 
 
 def _e(text: str) -> str:
