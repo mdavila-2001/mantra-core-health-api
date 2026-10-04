@@ -72,7 +72,7 @@ services:
     environment:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?falta TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:?falta TELEGRAM_CHAT_ID}
-      HEALTHCHECKS_PING_URL: ${HEALTHCHECKS_PING_URL:?falta HEALTHCHECKS_PING_URL}
+      HEALTHCHECKS_PING_URL: ${HEALTHCHECKS_PING_URL:-}
     volumes:
       - alertmanager_data:/alertmanager
     deploy:

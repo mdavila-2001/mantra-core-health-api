@@ -7,12 +7,13 @@ set -eu
 
 : "${TELEGRAM_BOT_TOKEN:?falta TELEGRAM_BOT_TOKEN}"
 : "${TELEGRAM_CHAT_ID:?falta TELEGRAM_CHAT_ID}"
-: "${HEALTHCHECKS_PING_URL:?falta HEALTHCHECKS_PING_URL}"
+: "${HEALTHCHECKS_PING_URL:=}"
 
 case "$TELEGRAM_CHAT_ID" in
   ''|*[!0-9-]*) echo "TELEGRAM_CHAT_ID debe ser un número (los grupos empiezan con -)" >&2; exit 1 ;;
 esac
 case "$HEALTHCHECKS_PING_URL" in
+  '') echo "AVISO: sin HEALTHCHECKS_PING_URL no hay latido externo; si el VPS entero se cae, nadie avisa." >&2 ;;
   https://*) ;;
   *) echo "HEALTHCHECKS_PING_URL debe empezar con https://" >&2; exit 1 ;;
 esac
@@ -26,8 +27,12 @@ umask 077
 printf '%s' "$TELEGRAM_BOT_TOKEN" > "$RUNTIME_DIR/telegram_token"
 printf '%s' "$HEALTHCHECKS_PING_URL" > "$RUNTIME_DIR/healthchecks_url"
 
+DROP_HEALTHCHECKS=""
+[ -z "$HEALTHCHECKS_PING_URL" ] && DROP_HEALTHCHECKS="/__HEALTHCHECKS_BEGIN__/,/__HEALTHCHECKS_END__/d"
+
 sed -e "s|__TELEGRAM_CHAT_ID__|$TELEGRAM_CHAT_ID|g" \
     -e "s|__RUNTIME_DIR__|$RUNTIME_DIR|g" \
+    ${DROP_HEALTHCHECKS:+-e "$DROP_HEALTHCHECKS"} \
     /etc/alertmanager/alertmanager.yml.tmpl > "$RUNTIME_DIR/alertmanager.yml"
 
 exec /bin/alertmanager \
