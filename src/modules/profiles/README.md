@@ -125,8 +125,4 @@ each operation. PHI (names, identifiers) is not logged.
 
 ## Tests
 
-Unit tests (`*.spec.ts`) mock `EntityManager` and repositories:
-`NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/profiles`. Each
-service covers happy path, not-found, conflict and business-rule rejections;
-controllers verify delegation. Cross-module integration is exercised by
-`test/smoke/modules/profiles.smoke.ts` (`PROFILES_SMOKE`).
+`corepack yarn test src/modules/profiles --runInBand --silent` aprobó 29 suites y 535 pruebas durante la revisión (tres advertencias JSON preexistentes). La representación propia resuelve el sujeto desde la sesión; las rutas que aún emiten excepciones genéricas necesitan `reason` estable, según la [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/profiles.md). El smoke intermodular está en `test/smoke/modules/profiles.smoke.ts` (`PROFILES_SMOKE`).

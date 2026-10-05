@@ -1,70 +1,101 @@
-# src/modules — Módulos de dominio
+# Módulos del backend
 
-**59 módulos NestJS, uno por schema PostgreSQL del modelo canónico SALUD v4.0.x.**
-1159 entidades en total.
+Esta rama contiene **70 directorios de módulo** en `src/modules/`. Algunos usan tablas PostgreSQL y entidades MikroORM; otros integran almacenes o adaptadores distintos. La forma exacta de cada módulo se comprueba en su código y README; no hay una plantilla de archivos válida para todos.
 
-## Convención estricta
+La API los compone en `src/app.module.ts`. El catálogo de entidades, índices y claves foráneas está en [`src/orm/`](../orm/README.md); el DDL versionado en [`database/`](../../database/SQL). Los jobs programados viven en [`src/worker/`](../worker/README.md).
 
-```
-src/modules/<dominio>/
-  <dominio>.module.ts        MikroOrmModule.forFeature(Object.values(entities)) + controller + service
-  <dominio>.controller.ts
-  <dominio>.service.ts
-  entities/
-    <tabla>.entity.ts        una entidad por tabla, nombre de archivo igual al de la tabla
-    index.ts                 barrel; forFeature depende de él
-```
+## Índice por dominio
 
-El barrel no es opcional: `Object.values(entities)` es lo que registra los repositorios, así
-que una entidad que no se reexporte queda descubierta por MikroORM pero sin repositorio
-inyectable en su módulo.
+### Atención y datos clínicos
 
-## Las entidades se generan, no se escriben
+- [`clinical`](./clinical/README.md)
+- [`clinical_ext`](./clinical_ext/README.md)
+- [`chart`](./chart/README.md)
+- [`forms`](./forms/README.md)
+- [`health_data`](./health_data/README.md)
+- [`health_context`](./health_context/README.md)
+- [`diagnostics`](./diagnostics/README.md)
+- [`diagnostic_units`](./diagnostic_units/README.md)
+- [`pharmacy`](./pharmacy/README.md)
+- [`pharma_lab`](./pharma_lab/README.md)
+- [`pharmacy_inventory`](./pharmacy_inventory/README.md)
+- [`qa_lab`](./qa_lab/README.md)
+- [`qa_execution`](./qa_execution/README.md)
+- [`procedures_perioperative`](./procedures_perioperative/README.md)
+- [`consent`](./consent/README.md)
 
-El cuerpo lo produce `python salud-db/gen_entities.py` desde los `.puml` del modelo
-canónico (la misma fuente que el DDL), y la documentación la rellena `yarn docs:tsdoc`
-en una pasada aparte que respeta la prosa escrita a mano — ver
-[ADR-0022](../../docs/adr/ADR-0022-generacion-de-entidades.md). La regla del proyecto
-es **no editar el cuerpo a mano**: si algo no cuadra, se corrige el `.puml` y se
-regenera. El JSDoc a medida sí es bienvenido: la regeneración lo preserva.
+### Identidad, acceso y profesionales
 
-Dos consecuencias que explican cómo están escritas:
+- [`iam`](./iam/README.md)
+- [`authz`](./authz/README.md)
+- [`auth_providers`](./auth_providers/README.md)
+- [`identity_assurance`](./identity_assurance/README.md)
+- [`profiles`](./profiles/README.md)
+- [`delegated_access`](./delegated_access/README.md)
+- [`directory`](./directory/README.md)
+- [`practice`](./practice/README.md)
+- [`medical_groups`](./medical_groups/README.md)
+- [`organization_extensions`](./organization_extensions/README.md)
 
-- **Las claves foráneas son `uuid` escalares, no relaciones `@ManyToOne`.** Con 5993
-  referencias entre 57 módulos, modelarlas como relaciones obligaría a que casi todos los
-  módulos se importasen entre sí y produciría ciclos. La integridad referencial la declara
-  `src/orm/catalog/foreign-keys` y la aplica la capa 06 del arranque. El comentario
-  `// FK → schema.tabla` de cada columna es la trazabilidad que queda en el código.
-- **Los índices no están en las entidades.** Están en `src/orm/catalog/indexes`.
+### Finanzas y cobertura
 
-`row_version` lleva `version: true`: es la columna de bloqueo optimista del modelo. Sin ella,
-dos escrituras concurrentes sobre la misma fila se pisan sin que nadie se entere.
+- [`accounting`](./accounting/README.md)
+- [`billing`](./billing/README.md)
+- [`payments`](./payments/README.md)
+- [`insurance`](./insurance/README.md)
+- [`erp`](./erp/README.md)
+- [`quotations`](./quotations/README.md)
+- [`promotions`](./promotions/README.md)
 
-## Terminología en vez de enums
+### Comunicación y experiencia
 
-El modelo resuelve prácticamente todos sus valores cerrados contra
-`terminology.catalog_concepts` mediante columnas `*_concept_id`, no contra enums nativos de
-PostgreSQL ni enums de TypeScript. Es una decisión de gobernanza: añadir un valor a un
-catálogo es un INSERT; añadirlo a un enum es una migración.
+- [`community`](./community/README.md)
+- [`messaging`](./messaging/README.md)
+- [`ads`](./ads/README.md)
+- [`marketing`](./marketing/README.md)
+- [`crm`](./crm/README.md)
+- [`education`](./education/README.md)
+- [`surveys`](./surveys/README.md)
+- [`content_packs`](./content_packs/README.md)
+- `public` — todavía sin README propio en esta base
+- [`audio_assets`](./audio_assets/README.md)
+- [`tracking`](./tracking/README.md)
+- [`automation`](./automation/README.md)
+- [`scheduling`](./scheduling/README.md)
+- [`workflow`](./workflow/README.md)
+- [`geo`](./geo/README.md)
 
-**No inventar enums de TypeScript para estos campos.** El único enum nativo del modelo es
-`terminology.technical_data_type`.
+### Plataforma, datos y operación
 
-## Módulos sin entidades propias
+- [`common`](./common/README.md)
+- [`system_context`](./system_context/README.md)
+- [`system_ops`](./system_ops/README.md)
+- [`platform_ops`](./platform_ops/README.md)
+- `ops_console` — todavía sin README propio en esta base
+- [`audit`](./audit/README.md)
+- [`telemetry`](./telemetry/README.md)
+- [`terminology`](./terminology/README.md)
+- [`integration_contracts`](./integration_contracts/README.md)
+- [`integrations`](./integrations/README.md)
+- [`cross_store_consistency`](./cross_store_consistency/README.md)
+- [`polyglot_storage`](./polyglot_storage/README.md)
+- [`data_catalog`](./data_catalog/README.md)
+- [`lakehouse`](./lakehouse/README.md)
+- [`time_series`](./time_series/README.md)
+- [`vector_rag`](./vector_rag/README.md)
+- [`read_models`](./read_models/README.md)
+- [`graph_intelligence`](./graph_intelligence/README.md)
+- [`reporting`](./reporting/README.md)
+- [`document_store`](./document_store/README.md)
+- [`redis_runtime`](./redis_runtime/README.md)
+- [`search_platform`](./search_platform/README.md)
+- [`object_storage`](./object_storage/README.md)
 
-Ninguno: los 59 tienen su carpeta `entities/`. Los stores no relacionales del modelo
-(`document_store` en MongoDB, `redis_runtime`, `search_platform` en OpenSearch) no tienen
-módulo aquí porque MikroORM cubre solo PostgreSQL.
+## Convenciones verificables
 
-## Añadir un módulo
+- Un controller declara rutas y DTOs HTTP; el servicio contiene el caso de uso. La autorización por recurso puede estar en ambos niveles y debe revisarse por endpoint.
+- Las entidades PostgreSQL y el catálogo ORM deben contrastarse con el DDL y patches aplicados. No deduzcas el esquema desde un README antiguo.
+- Los valores cerrados suelen referenciar `terminology.catalog_concepts`; consultá el catálogo antes de agregar un enum o una columna.
+- Para pruebas, usá el spec dirigido de la unidad con `corepack yarn test --runInBand <carpeta>`. La integración puede requerir servicios reales; véase [test/integration](../../test/integration/README.md).
 
-1. Crear la carpeta con los cuatro archivos de la convención.
-2. Añadir el schema al catálogo: `yarn orm:catalog`.
-3. Registrar el módulo en `src/app.module.ts`.
-4. Comprobar con `yarn orm:audit` que no queda ninguna entidad del modelo sin mapear.
-
-## Volumen por dominio
-
-Los cinco mayores: `audit` (123 entidades), `ads` (73), `erp` (51), `payments` (47),
-`accounting` (42). El detalle completo, con su número de módulo del modelo, está en
-`src/orm/catalog/schemas.catalog.ts`.
+El [informe maestro de revisión](../../docs/revision-backend-2026-10-04/README.md) indica qué módulos fueron realmente leídos y cuáles siguen pendientes. Este índice no es una certificación de seguridad, contrato o esquema.

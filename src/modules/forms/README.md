@@ -10,12 +10,12 @@ gobernadas por política, instancias de formulario, captura/curación de valores
 | UC | Método y ruta | Permiso | Descripción |
 |----|---------------|---------|-------------|
 | UC-09-01 | `POST /forms/definition-sets` | `SECURITY_ADMIN` | Crea set + versión inicial (draft, inmutable) |
-| UC-09-02 | `POST /forms/field-definitions` | autenticado | Declara campo con reglas de validación |
+| UC-09-02 | `POST /forms/field-definitions` | clínico, practitioner o `SECURITY_ADMIN` | Declara campo con reglas de validación |
 | UC-09-03 | `POST /forms/definition-sets/:id/versions/:ver/publish` | `SECURITY_ADMIN` | Compone miembros y publica la versión |
 | UC-09-04 | `POST /forms/fields/:id/dependencies` | autenticado | Define dependencia condicional entre campos |
 | UC-09-05 | `PUT /forms/fields/:id/localizations/:lang` | autenticado | Upsert de localización i18n (`es`/`en`) |
 | UC-09-06 | `POST /forms/assignments` | `SECURITY_ADMIN` | Asigna campo a target con enforcement de política |
-| UC-09-07 | `POST /forms/instances` | autenticado | Abre instancia de formulario para un recurso |
+| UC-09-07 | `POST /forms/instances` | `CLINICIAN`/`PRACTITIONER` | Abre instancia de formulario para un recurso |
 | UC-09-08 | `POST /forms/instances/:id/values` | autenticado | Captura valores (value[x] exclusivo) |
 | UC-09-09 | `PATCH /forms/values/:id` | autenticado | Corrige valor con supersede y snapshot inmutable |
 | UC-09-10 | `POST /forms/values/import` | autenticado | Importa valores externos (batch ETL) con procedencia |
@@ -72,14 +72,16 @@ Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exig
 `FormsReadService` sigue el patrón de `ChartReadService`: sólo lectura sobre un
 `fork` del `EntityManager`, lotes `$in` sin N+1, `limit+1` con recorte declarado.
 Aislamiento de instancias: la propiedad se ancla en el `clinical.encounter` que
-la instancia referencia (`resourceId`), exigiendo el tenant del contexto; lo
-ajeno o lo no anclable responde 404. Enmascarado deny-by-default: un campo con
+la instancia referencia (`resourceId`) y exige tenant del contexto. Falta aplicar
+la política clínica del paciente a las lecturas profesionales; ver la
+[revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/forms.md).
+Enmascarado deny-by-default: un campo con
 `field_value_access_rules` activa responde `masked: true` sin valor, porque la
 semántica de roles de la regla no es evaluable todavía (no existe puente
 rol→value-set en el sistema).
 
 ## Tests
 
-- Unit: `services/*.service.spec.ts` (mockean repos/em) y
-  `controllers/forms-controllers.spec.ts` (mockean servicios). 45 casos.
+- `corepack yarn test src/modules/forms --runInBand --silent`: 9 suites y 129
+  pruebas aprobadas durante la revisión.
 - Smoke: `test/smoke/modules/forms.smoke.ts` (`FORMS_SMOKE`), 29 casos encadenados.

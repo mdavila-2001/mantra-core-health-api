@@ -161,3 +161,11 @@ delegación de los tres controladores).
   `EncryptionProfileDefined`, `StoragePoliciesDefined`, `StoreHealthDegraded`,
   `PlacementFailedOver`, `StorageCostSnapshotConsolidated`, `IntegrityMismatchDetected`,
   `ProjectionQuarantined`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas y dejó registrada la brecha entre aprobar una colocación y aplicar la política sobre el motor físico. El informe está en [`docs/revision-backend-2026-10-04/modulos/polyglot_storage.md`](../../../docs/revision-backend-2026-10-04/modulos/polyglot_storage.md).
+
+```bash
+corepack yarn test src/modules/polyglot_storage --runInBand --silent
+```

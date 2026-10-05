@@ -72,3 +72,14 @@ anticipo entre 0 y el precio, cuota mayor que cero.
   responde `422`.
 - Un plan que no cierra con el precio responde `422`, con el total de las
   cuotas en `details` para que la pantalla diga cuánto falta o sobra.
+
+## Auditoría vigente
+
+La práctica se valida al crear, pero la revisión de octubre de 2026 halló que se
+debe comprobar además el acceso clínico al paciente y validar las referencias
+clínicas que entran en la solicitud. El detalle y la matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/quotations.md`](../../../docs/revision-backend-2026-10-04/modulos/quotations.md).
+
+```bash
+corepack yarn test src/modules/quotations --runInBand --silent
+```

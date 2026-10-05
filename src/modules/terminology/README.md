@@ -145,3 +145,15 @@ mockeados, sin acceso a base de datos:
 ```bash
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/terminology
 ```
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 detectó que la escritura de políticas de catálogo
+por tenant requiere una comprobación de ámbito organizacional adicional. También
+registró límites que faltan en colecciones de entrada. El plan de corrección y la
+matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/terminology.md`](../../../docs/revision-backend-2026-10-04/modulos/terminology.md).
+
+```bash
+corepack yarn test src/modules/terminology --runInBand --silent
+```

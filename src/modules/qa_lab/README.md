@@ -95,7 +95,8 @@ loguean payloads ni valores capturados.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=qa_lab` — 58 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/qa_lab --runInBand --silent` — 5 suites y 99 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -126,3 +127,8 @@ loguean payloads ni valores capturados.
   registra con `DECLARATIVE_ONLY` (comportamiento anterior, que no era un oráculo).
 - Una corrida sin ningún caso aprobado ya no cierra como PASSED.
 - Lectura para el portal: `GET /admin/qa/environments|suites|suites/:id|runs|runs/:id|defects`.
+
+## Revisión ALOVIDA
+
+Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
+[el informe](../../../docs/revision-backend-2026-10-04/modulos/qa_lab.md).
