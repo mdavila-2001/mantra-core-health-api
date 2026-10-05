@@ -1,0 +1,223 @@
+{
+  "code": "NNAC_U06_01_DIABETES_MELLITUS_TIPO",
+  "name": "Diabetes mellitus TIPO 1 – diabetes mellitus TIPO 2 – otros tipos de diabetes (NNAC)",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 1 de la unidad 6 de las NNAC, pág. 427; CIE-10 E10 – E11 – E14; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes delgados",
+        "Poliuria",
+        "Polifagia",
+        "Polidipsia",
+        "Pérdida inexplicable de peso",
+        "Infecciones mucocutáneas y/o genitourinarias",
+        "Disminución de la agudeza visual, visión borrosa",
+        "Puede ser asintomática",
+        "Se presenta con mayor frecuencia en mayores de 50 años y obesos",
+        "Poliuria, polidipsia, pérdida de peso",
+        "Vaginitis por cándida albicans en mujeres como primera manifestación clínica",
+        "Alteración de la agudeza visual, visión borrosa",
+        "Astenia"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 427. La diabetes mellitus (DM) es un grupo heterogéneo de enfermedades, cuya característica principal es la hiperglucemia, causada por el déficit absoluto o relativo de insulina, que tiene como consecuencia alteraciones en el metabolismo de los hidratos de carbono, proteínas y lípidos, con complicaciones crónicas que afectan la calidad de vida."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diabetes mellitus tipo 1",
+        "Diabetes mellitus tipo 2",
+        "Diabetes gestacional",
+        "Otros tipos de diabetes"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Antecedentes de diabetes gestacional",
+        "Mujeres con antecedentes de recién nacidos macrosómicos (> 4,5 Kg.)",
+        "Sobrepeso y obesidad",
+        "Hipertensión arterial",
+        "Antecedentes de diabetes en familiares de primer grado (padre, madre o hermanos)",
+        "Ser miembro de grupo étnico con alta prevalencia de diabetes",
+        "Dislipidemia",
+        "Sedentarismo",
+        "Uso de medicamentos: esteroides, tiazidas, betabloqueadores y otros",
+        "Factores ambientales: virus, exposición a químicos y drogas, exposición temprana a leche de vaca",
+        "Predisposición racial con alta prevalencia de diabetes tipo 1",
+        "Edad menor de 20 años: se presenta en general en la primera infancia y en la adolescencia, pero puede aparecer a cualquier edad"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Glucemia basal",
+        "Hemograma",
+        "Examen de orina",
+        "Creatinina",
+        "Prueba de tolerancia oral a la glucosa",
+        "Perfil lipídico",
+        "Ácido úrico",
+        "Hemoglobina glicosilada a1c",
+        "Microalbuminuria",
+        "Proteinuria de 24 horas",
+        "Electrocardiograma"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: E10 – E11 – E14."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cetoacidosis diabética (CIE 10: E-101)",
+        "Coma hipoglucémico (CIE 10: E-140)",
+        "Microangiopatía (retinopatía, neuropatía y nefropatía)",
+        "Macroangiopatía: cardiopatía coronaria, enfermedad vascular periférica, accidentes vásculo-cerebrales"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 1, pág. 427); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diabetes mellitus tipo 1, en caso de no tener acceso a centro de nivel III o especialista en endocrinología, deberá controlarse en nivel I ó II",
+        "Diabetes mellitus tipo 2 con complicaciones",
+        "Diabetes gestacional",
+        "Diabetes Mellitus tipo 2 compensada con tratamiento ambulatorio establecido",
+        "Para control y seguimiento"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

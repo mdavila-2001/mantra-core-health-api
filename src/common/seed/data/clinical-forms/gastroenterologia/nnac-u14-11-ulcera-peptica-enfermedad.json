@@ -1,0 +1,216 @@
+{
+  "code": "NNAC_U14_11_ULCERA_PEPTICA_ENFERMEDAD",
+  "name": "Úlcera péptica – enfermedad ácido péptica (gastritis-duodenitis-esofagitis) (NNAC)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 11 de la unidad 14 de las NNAC, pág. 801; CIE-10 K27 – K29; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dolor urente, localizado en epigastrio y en ayunas",
+        "Náuseas y/o vómitos postprandiales inmediatos",
+        "Acidez y/o pirosis más o menos permanentes",
+        "Sensación dolorosa de hambre y/o vacío en epigastrio",
+        "Meteorismo",
+        "Halitosis",
+        "Sialorrea",
+        "Constipación",
+        "Lactantes: datos inespecíficos (irritabilidad, llanto pertinaz, vómitos, dificultad para alimentarse)",
+        "Pre-escolares y escolares: dolor abdominal de cualquier localización, inapetencia, vómitos, distensión abdominal postprandial",
+        "Adolescentes: dolor urente referido en hipogastrio, pirosis, distensión abdominal, dispepsias, meteorismo, vómitos"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 801. Es una lesión en la mucosa gastrointestinal que se extiende más allá de la muscularis mucosae y que permanece por un desbalance entre los factores defensivos y agresivos de la mucosa afectada, que se caracteriza por procesos inflamatorios erosivos o ulcerativos."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Estrés (estado de choque, traumatismos, sepsis, grandes quemados)",
+        "Fármacos: antiinflamatorios esteroideos y no esteroideos, aspirina, etanol"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Infección por Helicobacter pylori",
+        "Ingesta de antiinflamatorios no esteroides, ácido acetil salicílico",
+        "Hipoxia tisular (estrés, eritrocitosis, senectud)",
+        "Grupo sanguíneo 0 (duodenal) y grupo sanguíneo A (gástrica)",
+        "Hipersecreción ácida: gastrinoma, Zollinger Ellison, neoplasia endócrina múltiple",
+        "Asociadas a uso de cocaína – crack",
+        "Alcohol, tabaco",
+        "Reflujo duodeno gástrico",
+        "Ingesta de antiinflamatorios esteroideos y no esteroideos"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma y grupo sanguíneo en caso de sospecha de complicación (hemorragia, perforación)",
+        "Test de ureasa (para detección de Helicobacter pylori)",
+        "Detección de antígeno de Helicobacter pylori en heces",
+        "Forma y características del nicho ulceroso",
+        "Características de los pliegues",
+        "Localización de la úlcera",
+        "Presencia de complicaciones",
+        "Para obtención de biopsias",
+        "Úlcera gástrica: biopsia a toda lesión para descartar neoplasia",
+        "Hemograma",
+        "Serología para Helicobacter pylori",
+        "Antígeno fecal para Helicobacter pylori",
+        "Diagnóstica",
+        "Toma de biopsias (en todos los casos)",
+        "Test de ureasa (para detección de Helicobacter Pylori)",
+        "Prueba del aliento con urea marcada (C13)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: K27 – K29."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": ["Hemorragia", "Perforación", "Estenosis píloro-duodenal"],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 801); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resolución de la sintomatología clínica y de las complicaciones",
+        "Control clínico y endoscópico + biopsia periódica en casos de úlcera esofágica o gástrica",
+        "Seguimiento del tratamiento ambulatorio en el nivel I y II siguiendo los esquemas establecidos y utilizando la hoja de contrarreferencia",
+        "Buscar Helicobacter pylori en la familia",
+        "Tratamiento al contacto (adolescentes)",
+        "Seguimiento hasta el segundo mes en el nivel III"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

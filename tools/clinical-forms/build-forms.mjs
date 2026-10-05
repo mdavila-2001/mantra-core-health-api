@@ -27,6 +27,7 @@ import prettier from 'prettier';
 import { ESPECIFICAS_1 } from './especificas-1.mjs';
 import { ESPECIFICAS_2 } from './especificas-2.mjs';
 import { ESPECIFICAS_3 } from './especificas-3.mjs';
+import { ESPECIFICAS_NNAC } from './especificas-nnac.mjs';
 import { CLINICAS } from './fichas-clinicas.mjs';
 import { FUENTES } from './fuentes.mjs';
 import {
@@ -42,7 +43,12 @@ const DATOS = join(RAIZ, 'src', 'common', 'seed', 'data', 'clinical-forms');
 const FECHA_V2 = '2026-10-02';
 const MARCA_V2 = `v2 (${FECHA_V2})`;
 const CONSTRUCTORES = { ...CLINICAS, ...PROCEDIMIENTO, ...OTRAS };
-const ESPECIFICAS = [...ESPECIFICAS_1, ...ESPECIFICAS_2, ...ESPECIFICAS_3];
+const ESPECIFICAS = [
+  ...ESPECIFICAS_1,
+  ...ESPECIFICAS_2,
+  ...ESPECIFICAS_3,
+  ...ESPECIFICAS_NNAC,
+];
 const FECHA_ESPECIFICAS = '2026-10-02';
 
 /**
@@ -127,7 +133,11 @@ async function crearEspecificas(soloComprobar) {
       name: e.nombre,
       specialty: base.specialty,
       version: 1,
-      provenance: { ...fuente, retrievedAt: FECHA_ESPECIFICAS, note: e.nota },
+      provenance: {
+        ...fuente,
+        retrievedAt: e.fecha ?? FECHA_ESPECIFICAS,
+        note: e.nota,
+      },
       fields: [],
     };
     writeFileSync(archivo, `${JSON.stringify(nueva, null, 2)}\n`);

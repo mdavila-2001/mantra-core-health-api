@@ -1,0 +1,176 @@
+{
+  "code": "NNAC_U12_01_FIEBRE_REUMATICA_MENCION",
+  "name": "Fiebre reumática sin mención de complicación cardiaca y fiebre reumática con complicación cardiaca (NNAC)",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 1 de la unidad 12 de las NNAC, pág. 695; CIE-10 I00 – I01; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliartritis: toma grandes articulaciones, es asimétrica, es migratoria, dura en la misma articulación una a dos semanas y calma con la aspirina",
+        "Carditis: taquicardia persistente, presencia de soplos, tercer ruido cardiaco, cardiomegalia y/o insuficiencia cardiaca",
+        "Artralgias*",
+        "Fiebre",
+        "Reactantes de fase aguda presentes (VES, PCR positiva, leucocitosis)",
+        "Incremento de anticuerpos anti estreptocócicos (ASTO desde 333 unidades Tood)",
+        "Compromiso cardíaco manifestado en el electrocardiograma por prolongación del intervalo PR mayor de 0,20 segundos. * No confundir con artritis"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 695. Es una enfermedad inflamatoria, no supurativa, tardía, secundaria a una infección faríngea causada por el estreptococo grupo A de Lancefield, que afecta a las articulaciones, piel, tejido celular subcutáneo, sistema nervioso central y corazón, en personas susceptibles a contraer la enfermedad."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "VES, PCR",
+        "Cultivo faríngeo para estreptococos del grupo A",
+        "Rx de tórax (cardiomegalia, aumento de la trama vascular pulmonar, convexidad de la arteria pulmonar)",
+        "ECG (prolongación del intervalo PR)",
+        "Ecocardiografía Doppler (en hospital de nivel II y III)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: I00 – I01."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 1, pág. 695); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Todos los pacientes con criterios clínicos de carditis leve a moderada deben ser evaluados por cardiología pediátrica",
+        "Los pacientes con corea deben ser evaluados por neurología pediátrica"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resuelto el episodio agudo",
+        "El seguimiento del paciente con fiebre reumática es permanente y de por vida",
+        "En pacientes con carditis leve el tratamiento es durante 10 años o hasta los 25 años",
+        "Medidas de profilaxis primaria (evitar la enfermedad o primer brote reumático)",
+        "Diagnóstico y tratamiento correcto de la faringitis",
+        "Profilaxis secundaria estricta (evitar nuevos brotes de fiebre reumática)",
+        "La mejor forma de prevenir la fiebre reumática es diagnosticando y tratando apropiada y oportunamente las infecciones orofaríngeas causadas por el estreptococo",
+        "Las amigdalitis crónicas deben ser observadas por un año, en caso de no responder a terapia antibiótica, establecer la necesidad de amigdalectomía",
+        "Medidas higiénico dietéticas y de alimentación"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -11,6 +11,14 @@ const CATEGORIAS =
   'Guía de acceso público; se usan sus categorías clínicas, no su texto';
 
 export const FUENTES = {
+  NNAC_BOLIVIA: {
+    sourceTitle:
+      'Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
   MINSA_NT022: {
     sourceTitle:
       'Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02',

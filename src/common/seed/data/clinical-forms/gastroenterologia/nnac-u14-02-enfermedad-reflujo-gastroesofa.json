@@ -1,0 +1,250 @@
+{
+  "code": "NNAC_U14_02_ENFERMEDAD_REFLUJO_GASTROESOFA",
+  "name": "Enfermedad por reflujo gastroesofágico (NNAC)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 2 de la unidad 14 de las NNAC, pág. 770; CIE-10 K21; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pirosis retroesternal",
+        "Regurgitación",
+        "Odinofagia",
+        "Disfagia",
+        "Eructo",
+        "Hipo",
+        "Tos crónica nocturna",
+        "Cuadro asmáticos o asmatiforme",
+        "Neumonitis recurrente",
+        "Faringitis: odinofagia y/o disfagia",
+        "Laringitis: ronquera, estridor",
+        "Disfonía",
+        "Llanto pertinaz",
+        "Vómitos postprandiales",
+        "Inapetencia",
+        "Sudoración profusa",
+        "Singulto",
+        "Sialorrea",
+        "Broncoespasmo",
+        "Otitis recurrente",
+        "Infecciones respiratorias altas y bajas recurrentes",
+        "Misceláneos: síndrome de Sandifer"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 770. En adultos: la enfermedad por reflujo gastroesofágico (ERGE) es el paso anormal, frecuente y prolongado de contenido gástrico y/o duodenal hacia el esófago en ausencia de náuseas y vómitos, capaz de provocar síntomas clínicos y/o lesiones de la mucosa esofágica."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Síndrome de reflujo típico",
+        "Esofagitis por reflujo",
+        "Estenosis por reflujo",
+        "Esófago de Barrett",
+        "Síndrome de la tos por reflujo",
+        "Síndrome de laringitis por reflujo",
+        "Síndrome de asma por reflujo",
+        "Faringitis",
+        "Sinusitis",
+        "Fibrosis pulmonar recurrente",
+        "ERGE primaria por inmadurez",
+        "Alteraciones anatómicas (ej. hernia hiatal)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hernia hiatal",
+        "Aumento de la presión intra-abdominal",
+        "Vaciamiento gástrico retardado",
+        "Malformaciones anatómicas",
+        "Alergia alimentaria",
+        "Neuropatías crónicas (ej. parálisis cerebral infantil)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Radiología contrastada serie esófago-gastroduodenal",
+        "PHmetría de 24 horas",
+        "Manometría esofágica (demuestra competencia o incompetencia del EEI y evalúa la actividad contráctil de la musculatura del cuerpo del esófago)",
+        "Endoscopia",
+        "Histopatología",
+        "Serie esófagogastroduodenal",
+        "Impedanciometría",
+        "Histología",
+        "Evalúa la anatomía esófago-gástrica",
+        "Informa la presencia de hernia hiatal",
+        "Muestra cambios morfológicos en relación a úlceras y estenosis",
+        "Identifica anillos, estenosis, divertículos, acalasia, cáncer, etc",
+        "Evalúa esofagitis y epitelio de Barrett",
+        "Clasifica grado de severidad de la esofagitis",
+        "Informa la presencia de mal rotación intestinal",
+        "Informa el grado de apertura del ángulo de His",
+        "Informa la presencia de estenosis hipertrófica de píloro",
+        "Efectúa biopsias",
+        "Evalúa grado de dismotilidad del cuerpo esofágico secundado a reflujo patológico",
+        "Define altura de ubicación del EEI, su presión basal y su grado de relajación"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: K21."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Estenosis esofágica",
+        "Úlcera esofágica",
+        "Hemorragia",
+        "Metaplasia columnar (epitelio de Barrett)",
+        "Adenocarcinoma de esófago",
+        "Desnutrición",
+        "Broncoaspiración",
+        "Muerte súbita",
+        "Esofagitis"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 770); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes con sospecha de ERGE que no responden a ocho semanas de tratamiento medicamentoso (omeprazol)",
+        "Pacientes con sospecha de ERGE y síntomas respiratorios, descartar presencia de esofagitis",
+        "Pacientes con sospecha de ERGE y síntomas gástricos que no responden al tratamiento con omeprazol y/o proquinético",
+        "Pacientes con sospecha de ERGE y síntomas respiratorios, porque se requiere descartar presencia de esofagitis",
+        "Complicaciones de la ERGE, traducida en empeoramiento de síntomas gástricos y/o respiratorios",
+        "Presencia de ERGE ya tratado con medicamentos sin respuesta y con datos de desnutrición secundaria",
+        "Pacientes con antecedentes propios o familiares de alergias"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
