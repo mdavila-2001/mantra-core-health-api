@@ -220,4 +220,4 @@ aprobadas durante la revisión (21 gobierno + 20 pipeline + 25 retrieval + 13 ma
 ## Revisión ALOVIDA
 
 Los recursos resueltos por UUID no se acotan al tenant activo y el borrado no filtra los documentos
-por tenant. Ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/vector_rag.md).
+por tenant. Ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/vector_rag.md).

@@ -68,4 +68,4 @@ datos autenticada todavía no ejecuta la materialized view ni pagina filas.
 La revisión de 2026-10-05 confirmó tres hallazgos altos: autorización omitida
 al servir contratos de vista, datos autenticados no materializados y errores de
 la MV pública convertidos en listas vacías. El plan y los casos de regresión
-están en [el informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/read_models.md).
+están en [el informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/read_models.md).

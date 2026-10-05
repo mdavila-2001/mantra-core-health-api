@@ -8,7 +8,7 @@
 
 # Módulo `workflow`
 
-**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/workflow/README.md)
+**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/workflow/README.md)
 · 3 controllers · 3 services · 3 repositories · 8 entidades · 1 DTO
 
 ---
@@ -165,8 +165,8 @@ guarda ni el contenido de `payloadJson`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/workflow` — 87 pruebas (17 definición + 31 ejecución +
-19 instancias + 9 del repositorio de agregado + 11 de delegación de los tres controladores).
+`corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
+aprobadas durante la revisión.
 
 ## Divergencia con el caso de uso v3.9
 
@@ -199,3 +199,7 @@ guarda ni el contenido de `payloadJson`.
   pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
   (`access_policies`), que es de la parte de Pablo.
 
+## Revisión ALOVIDA
+
+El propósito de uso configurado en una transición todavía no se comprueba contra la política del
+actor; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/workflow.md).

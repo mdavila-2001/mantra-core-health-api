@@ -8,8 +8,8 @@
 
 # Módulo `terminology`
 
-**Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/terminology/README.md)
-· 7 controllers · 9 services · 9 repositories · 15 entidades · 17 DTO
+**Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/terminology/README.md)
+· 7 controllers · 9 services · 9 repositories · 15 entidades · 18 DTO
 
 ---
 
@@ -161,3 +161,14 @@ mockeados, sin acceso a base de datos:
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/terminology
 ```
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 detectó que la escritura de políticas de catálogo
+por tenant requiere una comprobación de ámbito organizacional adicional. También
+registró límites que faltan en colecciones de entrada. El plan de corrección y la
+matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/terminology.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/terminology.md).
+
+```bash
+corepack yarn test src/modules/terminology --runInBand --silent
+```

@@ -8,7 +8,7 @@
 
 # Módulo `integration_contracts`
 
-**Fuente:** [`src/modules/integration_contracts/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integration_contracts/README.md)
+**Fuente:** [`src/modules/integration_contracts/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integration_contracts/README.md)
 · 2 controllers · 4 services · 9 repositories · 9 entidades · 13 DTO
 
 ---
@@ -84,7 +84,13 @@ sincronización monótonos y evidencia firmada de entrega de webhooks.
 
 ## Tests
 
-- Unitarios (`*.spec.ts`): 4 servicios + 2 controllers, mocks de repos/EM. 46 casos.
+- Unitarios (`*.spec.ts`): 4 servicios + 2 controllers, mocks de repos/EM. La
+  revisión ejecutó 6 suites y 48 pruebas con `corepack yarn test
+  src/modules/integration_contracts --runInBand --silent`.
 - Smoke transversal: `test/smoke/modules/integration_contracts.smoke.ts`
   (`INTEGRATION_CONTRACTS_SMOKE`), encadena el ciclo completo del contrato.
 
+## Revisión ALOVIDA
+
+Los recursos resueltos por UUID aún no se comparan contra el tenant activo; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integration_contracts.md).

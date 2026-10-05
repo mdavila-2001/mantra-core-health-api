@@ -8,7 +8,7 @@
 
 # Módulo `qa_lab`
 
-**Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/qa_lab/README.md)
+**Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_lab/README.md)
 · 3 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
@@ -110,7 +110,8 @@ loguean payloads ni valores capturados.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=qa_lab` — 58 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/qa_lab --runInBand --silent` — 5 suites y 99 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -142,3 +143,7 @@ loguean payloads ni valores capturados.
 - Una corrida sin ningún caso aprobado ya no cierra como PASSED.
 - Lectura para el portal: `GET /admin/qa/environments|suites|suites/:id|runs|runs/:id|defects`.
 
+## Revisión ALOVIDA
+
+Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_lab.md).

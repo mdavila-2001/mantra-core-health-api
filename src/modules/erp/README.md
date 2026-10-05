@@ -87,7 +87,7 @@ Nunca se loguean identificadores bancarios, salarios ni datos personales del emp
 
 ## Pruebas
 
-`corepack yarn test --testPathPatterns=erp --runInBand --silent` — 3 suites y 50 pruebas aprobadas en la revisión ALOVIDA. El informe de evidencia y los hallazgos confirmados están en [`docs/revision-backend-2026-10-04/modulos/erp.md`](../../../docs/revision-backend-2026-10-04/modulos/erp.md).
+`corepack yarn test --testPathPatterns=erp --runInBand --silent` — 3 suites y 50 pruebas aprobadas en la revisión ALOVIDA. El informe de evidencia y los hallazgos confirmados están en [`docs/revision-backend-2026-10-04/modulos/erp.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/erp.md).
 
 ## Pendiente
 

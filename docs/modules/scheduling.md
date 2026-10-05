@@ -8,7 +8,7 @@
 
 # Módulo `scheduling`
 
-**Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/scheduling/README.md)
+**Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/scheduling/README.md)
 · 7 controllers · 14 services · 7 repositories · 18 entidades · 8 DTO
 
 ---
@@ -93,7 +93,21 @@ bloqueo optimista automático.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=scheduling` — 35 pruebas de servicio + delegación de controladores.
+```bash
+corepack yarn test src/modules/scheduling --runInBand --silent
+```
+
+La corrida dirigida de la revisión (2026-10-05) pasó 30 suites y 621 tests. Gran parte usa
+repositorios simulados; no demuestra aislamiento entre tenants ni una política de autorización
+en una base real.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/scheduling.md)
+identifica que el listado por `resourceId` permite a un `PATIENT` obtener reservas ajenas sin
+validar actor, titularidad de agenda ni tenant. También quedan por acotar los lotes de reglas,
+slots y recordatorios. No se debe considerar el listado apto para datos clínicos hasta aplicar
+esa política y probarla con dos tenants.
 
 ## Pendiente
 
@@ -130,4 +144,3 @@ pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día
 `horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
 `generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
 hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
-

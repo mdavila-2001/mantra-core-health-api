@@ -117,4 +117,4 @@ aprobadas durante la revisión.
 ## Revisión ALOVIDA
 
 Las rutas por UUID aún no comparan el tenant activo con definición, ejecución o programación;
-ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/reporting.md).
+ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/reporting.md).

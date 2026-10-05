@@ -8,7 +8,7 @@
 
 # Módulo `erp`
 
-**Fuente:** [`src/modules/erp/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/erp/README.md)
+**Fuente:** [`src/modules/erp/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/erp/README.md)
 · 1 controllers · 2 services · 3 repositories · 51 entidades · 1 DTO
 
 ---
@@ -102,11 +102,10 @@ Nunca se loguean identificadores bancarios, salarios ni datos personales del emp
 
 ## Pruebas
 
-`yarn test --testPathPatterns=erp` — 41 pruebas de servicio + delegación del controlador.
+`corepack yarn test --testPathPatterns=erp --runInBand --silent` — 3 suites y 50 pruebas aprobadas en la revisión ALOVIDA. El informe de evidencia y los hallazgos confirmados están en [`docs/revision-backend-2026-10-04/modulos/erp.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/erp.md).
 
 ## Pendiente
 
 Los asientos contables derivados (GR/IR en la recepción, provisión de la valoración IFRS 16) se
 enlazan mediante `journal_transaction_id`, que queda sin poblar: la contabilización pertenece al
 módulo 16 y se conectará cuando exista el outbox.
-

@@ -14,14 +14,14 @@
 
 Todos los endpoints exigen `SECURITY_ADMIN`, pero el controlador entrega IDs y
 `tenantId` del cuerpo al servicio sin derivarlos de una sesión con alcance
-([geo-tracked-subjects.controller.ts](../../../src/modules/geo/controllers/geo-tracked-subjects.controller.ts#L29-L89),
-[geo-geofences.controller.ts](../../../src/modules/geo/controllers/geo-geofences.controller.ts#L28-L50)). `enroll`
+([geo-tracked-subjects.controller.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/controllers/geo-tracked-subjects.controller.ts#L29-L89),
+[geo-geofences.controller.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/controllers/geo-geofences.controller.ts#L28-L50)). `enroll`
 persiste el `subjectId` y el `tenantId` solicitados sin resolver al sujeto ni
-verificar consentimiento ([geo-tracked-subjects.service.ts](../../../src/modules/geo/services/geo-tracked-subjects.service.ts#L65-L112)).
+verificar consentimiento ([geo-tracked-subjects.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/services/geo-tracked-subjects.service.ts#L65-L112)).
 `ingestPings`, `lastPosition` y `revokeConsent` buscan sólo `{ id }`
-([#L119-L263](../../../src/modules/geo/services/geo-tracked-subjects.service.ts#L119-L263)); las consultas de
-geofence y eventos hacen lo mismo ([geo-geofences.service.ts](../../../src/modules/geo/services/geo-geofences.service.ts#L53-L194),
-[geofences.repository.ts](../../../src/modules/geo/repositories/geofences.repository.ts#L49-L63)).
+([#L119-L263](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/services/geo-tracked-subjects.service.ts#L119-L263)); las consultas de
+geofence y eventos hacen lo mismo ([geo-geofences.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/services/geo-geofences.service.ts#L53-L194),
+[geofences.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/repositories/geofences.repository.ts#L49-L63)).
 
 Un administrador con una petición válida puede aportar un UUID de sujeto o
 geofence de otra organización y crear, leer la última posición, añadir pings o
@@ -47,9 +47,9 @@ sólo mediante una identidad de servicio explícita, no por un rol HTTP genéric
 ### GEO-02 — Alta — se pueden enlazar un geofence y un sujeto de tenants distintos
 
 Al registrar un evento, el servicio carga geofence y sujeto por ID de forma
-independiente y sólo comprueba existencia/estado ([geo-geofences.service.ts](../../../src/modules/geo/services/geo-geofences.service.ts#L143-L194)). No compara
+independiente y sólo comprueba existencia/estado ([geo-geofences.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/services/geo-geofences.service.ts#L143-L194)). No compara
 `geofence.tenantId` con `subject.tenantId`; el repositorio tampoco restringe la
-búsqueda ([tracked-subjects.repository.ts](../../../src/modules/geo/repositories/tracked-subjects.repository.ts#L40-L62)).
+búsqueda ([tracked-subjects.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/repositories/tracked-subjects.repository.ts#L40-L62)).
 
 Aunque se añadiera la política de actor de GEO-01, una ruta de servicio o worker
 mal cableada podría grabar eventos que mezclan los tenants. Antes de insertar,
@@ -62,8 +62,8 @@ GEO_GEOFENCE_SUBJECT_TENANT_MISMATCH`.
 ### GEO-03 — Media — el lote de pings permite valores físicos no acotados
 
 El DTO limita el lote a 1.000 elementos, pero `accuracyM`, `altitudeM`,
-`speedMps` y `headingDeg` sólo usan `@IsNumber` ([ingest-pings.dto.ts](../../../src/modules/geo/dto/ingest-pings.dto.ts#L34-L145)). Se convierten directamente a `numeric`
-antes de almacenar ([geo-tracked-subjects.service.ts](../../../src/modules/geo/services/geo-tracked-subjects.service.ts#L164-L181)). Valores infinitos, absurdos o un
+`speedMps` y `headingDeg` sólo usan `@IsNumber` ([ingest-pings.dto.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/dto/ingest-pings.dto.ts#L34-L145)). Se convierten directamente a `numeric`
+antes de almacenar ([geo-tracked-subjects.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/geo/services/geo-tracked-subjects.service.ts#L164-L181)). Valores infinitos, absurdos o un
 rumbo fuera de 0–360 pueden contaminar telemetría, alertas y cálculos posteriores.
 
 Definir rangos físicos y `@IsFinite`/validadores equivalentes para cada campo,

@@ -47,7 +47,7 @@ entidad legal reutilizan conceptos transversales (`CONCEPTS.*`).
   tenant y plataformas; el ownership exige OWNER.
 - Logs Pino estructurados por operación (`directory.*`), sin secretos ni PHI.
 - La falta de `reason` estable en varias denegaciones está documentada en la
-  [revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/directory.md).
+  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/directory.md).
 
 ## Tests
 

@@ -204,4 +204,4 @@ aprobadas durante la revisión.
 ## Revisión ALOVIDA
 
 La referencia de consentimiento de ubicación se exige pero todavía no se verifica contra la
-política canónica; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/time_series.md).
+política canónica; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/time_series.md).

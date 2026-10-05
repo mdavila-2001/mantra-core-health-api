@@ -8,7 +8,7 @@
 
 # Módulo `practice`
 
-**Fuente:** [`src/modules/practice/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/practice/README.md)
+**Fuente:** [`src/modules/practice/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/practice/README.md)
 · 6 controllers · 10 services · 12 repositories · 11 entidades · 17 DTO
 
 ---
@@ -83,3 +83,10 @@ Pino estructurado por operación (`practice.site.create`, `practice.inventory.mo
 - Smoke (contrato transversal): `test/smoke/modules/practice.smoke.ts`
   (`PRACTICE_SMOKE`).
 
+## Revisión ALOVIDA — 2026-10-05
+
+Comando dirigido: `corepack yarn test src/modules/practice --runInBand --silent`.
+En la revisión pasaron **11 suites y 106 pruebas**. Son pruebas unitarias con
+mocks: no demuestran RLS ni aislamiento de escrituras por UUID entre dos
+tenants. El informe de alcance y el hallazgo confirmado están en
+[`docs/revision-backend-2026-10-04/modulos/practice.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/practice.md).

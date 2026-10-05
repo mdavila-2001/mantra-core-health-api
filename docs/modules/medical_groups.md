@@ -8,7 +8,7 @@
 
 # Módulo `medical_groups`
 
-**Fuente:** [`src/modules/medical_groups/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/medical_groups/README.md)
+**Fuente:** [`src/modules/medical_groups/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/medical_groups/README.md)
 · 1 controllers · 1 services · 2 repositories · 2 entidades · 1 DTO
 
 ---
@@ -65,3 +65,12 @@ profesional.
   no distinga «no es tuya» de «no existe».
 - Sólo el creador resuelve un cambio de horario.
 
+## Auditoría vigente
+
+La creación debe aplicar la política clínica al paciente aun si el diagnóstico es
+opcional; la implementación revisada sólo lo hace en la rama con condición. La
+auditoría y la matriz de pruebas propuesta están en
+[`docs/revision-backend-2026-10-04/modulos/medical_groups.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/medical_groups.md).
+
+No existen specs bajo `src/modules/medical_groups` en la base auditada; la
+ejecución dirigida termina con `No tests found`.

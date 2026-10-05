@@ -8,7 +8,7 @@
 
 # Módulo `messaging`
 
-**Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/messaging/README.md)
+**Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/messaging/README.md)
 · 3 controllers · 3 services · 4 repositories · 22 entidades · 2 DTO
 
 ---
@@ -161,7 +161,8 @@ de proveedor, categoría, idioma y moneda son catálogos abiertos y llegan como 
 ## Permisos
 
 `MESSAGING_ADMIN` cubre el módulo. `SYSTEM` —los workers— opera el relay, el despacho, el reclamo de
-jobs y la entrega de notificaciones. `USER` marca sus propias notificaciones como leídas.
+jobs y la entrega de notificaciones. `USER` lee su propia bandeja, marca sus notificaciones como
+leídas y administra sus preferencias.
 
 `POST /webhooks/providers/:providerCode/receipts` es **la única ruta pública**: quien llama es un
 proveedor externo sin sesión.
@@ -181,8 +182,9 @@ intento de entrega fallido y rebote del proveedor. No se loguea el contenido de 
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/messaging` — 83 pruebas (70 de servicio + 13 de delegación de
-los tres controladores).
+`corepack yarn test src/modules/messaging --runInBand --silent` — 9 suites y 123 pruebas
+(ejecutado el 2026-10-05). Las pruebas dirigidas son unitarias; no sustituyen las pruebas de
+integración de restricciones DDL indicadas en la revisión.
 
 ## Pendiente
 
@@ -191,8 +193,9 @@ los tres controladores).
 - **Llamada real al proveedor**: el worker la hace fuera de la transacción y aquí sólo se asienta el
   resultado. Elegir el proveedor por `rate_limit_per_min` y rotar a la siguiente configuración por
   prioridad vive en el worker.
-- **Verificación de firma del webhook**: la ruta es pública y hoy sólo comprueba que el proveedor
-  exista. El HMAC corresponde al conector de integraciones (módulo 12), que guarda el secreto.
+- **Secreto de webhook por proveedor**: la ruta pública verifica HMAC antes de conciliar, pero el
+  secreto actual se deriva de `WEBHOOK_SIGNING_KEY` y del id del proveedor. Falta integrar la
+  credencial rotatoria específica que ya contempla `provider_channel_configs`.
 - **Evaluación del consentimiento**: se guarda la referencia a la directiva (`consent_id`); evaluarla
   vive en `consent` y leerla desde aquí cruzaría la frontera del esquema. Las horas de silencio y el
   opt-in sí se evalúan, porque son tablas nuestras.
@@ -205,3 +208,11 @@ los tres controladores).
   `notification_inbox_v`, `delivery_status_v` y las series de `time_series` las alimentará el propio
   outbox una vez haya consumidores registrados.
 
+## Revisión backend 2026-10-04
+
+Informe de evidencia: [`docs/revision-backend-2026-10-04/modulos/messaging.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/messaging.md).
+
+Hallazgos confirmados: el índice único actual de `event_deliveries` impide el fan-out a más de
+una suscripción (MSG-01) y el contrato permite un destinatario externo que el esquema no puede
+persistir (MSG-02). No se deben considerar resueltos hasta aplicar y probar las migraciones y
+validaciones descritas en ese informe.

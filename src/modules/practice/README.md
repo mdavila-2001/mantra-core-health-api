@@ -74,4 +74,4 @@ Comando dirigido: `corepack yarn test src/modules/practice --runInBand --silent`
 En la revisión pasaron **11 suites y 106 pruebas**. Son pruebas unitarias con
 mocks: no demuestran RLS ni aislamiento de escrituras por UUID entre dos
 tenants. El informe de alcance y el hallazgo confirmado están en
-[`docs/revision-backend-2026-10-04/modulos/practice.md`](../../../docs/revision-backend-2026-10-04/modulos/practice.md).
+[`docs/revision-backend-2026-10-04/modulos/practice.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/practice.md).

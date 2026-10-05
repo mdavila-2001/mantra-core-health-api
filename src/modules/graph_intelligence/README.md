@@ -195,4 +195,4 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
 
 Las mutaciones por UUID todavía no comparan el tenant activo contra el recurso cargado, y el
 recorrido con paciente no contrasta consentimiento. Ver el
-[informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).
+[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).

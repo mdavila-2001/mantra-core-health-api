@@ -8,7 +8,7 @@
 
 # Módulo `document_store`
 
-**Fuente:** [`src/modules/document_store/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/document_store/README.md)
+**Fuente:** [`src/modules/document_store/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/document_store/README.md)
 · 1 controllers · 1 services · 1 repositories · 0 entidades · 5 DTO
 
 ---
@@ -57,8 +57,19 @@ relacional. Persiste en MongoDB real (contenedor `mantra-redesa-mongodb-1`) leye
 - **Roles** (`@Roles`) en los mutantes (`STORAGE_ADMIN`/`PLATFORM_ADMIN`); validación de DTOs con
   class-validator.
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 detectó que `GET` no exige rol y entrega el
+payload flexible completo. Debe incorporarse autorización de lectura por tipo de
+documento y recurso antes de usar documentos con contenido clínico. El detalle y
+las pruebas propuestas están en
+[`docs/revision-backend-2026-10-04/modulos/document_store.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/document_store.md).
+
+```bash
+corepack yarn test src/modules/document_store --runInBand --silent
+```
+
 ## Conexión
 
 `MongoConnection` abre un único `MongoClient` de forma perezosa (pool interno compartido) y lo cierra
 limpiamente en `onModuleDestroy`. El orquestador importa `DocumentStoreModule`.
-

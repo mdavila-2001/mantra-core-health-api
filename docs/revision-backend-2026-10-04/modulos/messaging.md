@@ -14,19 +14,19 @@ webhook verifica HMAC antes de mutar una entrega.
 
 **Evidencia.** `OutboxService.fanOutToSubscribers()` recorre todas las suscripciones que
 coinciden y crea una entrega con `attemptNumber: 1` para cada una
-([`src/modules/messaging/services/outbox.service.ts:477`](../../../src/modules/messaging/services/outbox.service.ts#L477),
-[`src/modules/messaging/services/outbox.service.ts:498`](../../../src/modules/messaging/services/outbox.service.ts#L498)).
+([`src/modules/messaging/services/outbox.service.ts:477`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/outbox.service.ts#L477),
+[`src/modules/messaging/services/outbox.service.ts:498`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/outbox.service.ts#L498)).
 La tabla contiene `subscription_id` precisamente para distinguir esos destinos
-([`database/SQL/35_messaging/02_tables.sql:65`](../../../database/SQL/35_messaging/02_tables.sql#L65)).
+([`database/SQL/35_messaging/02_tables.sql:65`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/database/SQL/35_messaging/02_tables.sql#L65)).
 Sin embargo, el DDL impone unicidad en `(domain_event_id, attempt_number)`
-([`database/SQL/35_messaging/04_indexes.sql:49`](../../../database/SQL/35_messaging/04_indexes.sql#L49)).
+([`database/SQL/35_messaging/04_indexes.sql:49`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/database/SQL/35_messaging/04_indexes.sql#L49)).
 Como el servicio siempre usa intento `1` para la primera entrega, el segundo suscriptor
 provoca violación de unicidad y revierte la transacción completa.
 
 **Impacto.** Un evento publicado con dos suscripciones activas no se distribuye a ninguna;
 los consumidores aguas abajo no reciben el hecho. Los tests actuales sólo ejercen un
 suscriptor y usan repositorios simulados
-([`src/modules/messaging/services/outbox.service.spec.ts:280`](../../../src/modules/messaging/services/outbox.service.spec.ts#L280)),
+([`src/modules/messaging/services/outbox.service.spec.ts:280`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/outbox.service.spec.ts#L280)),
 por lo que no revelan la restricción real.
 
 **Plan de corrección.** Sustituir el índice por unicidad en
@@ -47,16 +47,16 @@ una repetición de despacho.
 
 **Evidencia.** El DTO hace opcionales tanto `recipientUserId` como `recipientAddress` y
 presenta la segunda como destino de canal externo
-([`src/modules/messaging/dto/messaging.dto.ts:614`](../../../src/modules/messaging/dto/messaging.dto.ts#L614),
-[`src/modules/messaging/dto/messaging.dto.ts:622`](../../../src/modules/messaging/dto/messaging.dto.ts#L622)).
+([`src/modules/messaging/dto/messaging.dto.ts:614`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/dto/messaging.dto.ts#L614),
+[`src/modules/messaging/dto/messaging.dto.ts:622`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/dto/messaging.dto.ts#L622)).
 El servicio sólo rechaza cuando faltan ambos
-([`src/modules/messaging/services/notifications.service.ts:120`](../../../src/modules/messaging/services/notifications.service.ts#L120))
+([`src/modules/messaging/services/notifications.service.ts:120`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/notifications.service.ts#L120))
 y pasa `recipientUserId` indefinido al repositorio
-([`src/modules/messaging/services/notifications.service.ts:213`](../../../src/modules/messaging/services/notifications.service.ts#L213)).
+([`src/modules/messaging/services/notifications.service.ts:213`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/notifications.service.ts#L213)).
 El repositorio persiste ese valor directamente
-([`src/modules/messaging/repositories/notifications.repository.ts:266`](../../../src/modules/messaging/repositories/notifications.repository.ts#L266)),
+([`src/modules/messaging/repositories/notifications.repository.ts:266`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/repositories/notifications.repository.ts#L266)),
 pero `notification_requests.recipient_user_id` es `NOT NULL`
-([`database/SQL/35_messaging/02_tables.sql:260`](../../../database/SQL/35_messaging/02_tables.sql#L260)).
+([`database/SQL/35_messaging/02_tables.sql:260`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/database/SQL/35_messaging/02_tables.sql#L260)).
 
 **Impacto.** Una petición válida según el contrato HTTP con sólo `recipientAddress` llega al
 flush y falla por restricción `NOT NULL`; no hay una excepción de dominio que traduzca ese
@@ -81,12 +81,12 @@ sin delegar la validación al driver.
 
 - La ruta pública de acuses sólo llama al servicio después de `@Public`; el servicio busca el
   proveedor y verifica HMAC antes de buscar o cambiar una entrega
-  ([`provider-webhooks.controller.ts:32`](../../../src/modules/messaging/controllers/provider-webhooks.controller.ts#L32),
-  [`notifications.service.ts:523`](../../../src/modules/messaging/services/notifications.service.ts#L523)).
+  ([`provider-webhooks.controller.ts:32`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/controllers/provider-webhooks.controller.ts#L32),
+  [`notifications.service.ts:523`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/notifications.service.ts#L523)).
 - `markInAppRead` bloquea la modificación de una bandeja ajena y `listMine` filtra las filas y
   el contador por el usuario autenticado
-  ([`notifications.service.ts:634`](../../../src/modules/messaging/services/notifications.service.ts#L634),
-  [`notifications.service.ts:767`](../../../src/modules/messaging/services/notifications.service.ts#L767)).
+  ([`notifications.service.ts:634`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/notifications.service.ts#L634),
+  [`notifications.service.ts:767`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/messaging/services/notifications.service.ts#L767)).
 - Relay, reclamo de cola y reclamo de notificaciones usan bloqueo pesimista parcial; completar
   y fallar un job también comprueban `lockedBy`.
 - Falta una prueba de integración contra PostgreSQL para MSG-01 y una prueba HTTP/de

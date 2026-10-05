@@ -8,8 +8,8 @@
 
 # Módulo `consent`
 
-**Fuente:** [`src/modules/consent/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/consent/README.md)
-· 9 controllers · 9 services · 9 repositories · 10 entidades · 15 DTO
+**Fuente:** [`src/modules/consent/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/consent/README.md)
+· 11 controllers · 11 services · 9 repositories · 10 entidades · 16 DTO
 
 ---
 
@@ -86,3 +86,9 @@ npx tsc --noEmit -p tsconfig.json | grep modules/consent   # vacío
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/consent   # verde
 ```
 
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/consent.md)
+registra pendientes de alcance para decisiones, retiro y revocación de
+consentimiento, además del fallback al tenant seed. La corrida dirigida pasó
+13 suites y 54 tests; faltan pruebas de dos tenants y de titularidad del paciente.

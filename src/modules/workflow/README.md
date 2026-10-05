@@ -187,4 +187,4 @@ aprobadas durante la revisión.
 ## Revisión ALOVIDA
 
 El propósito de uso configurado en una transición todavía no se comprueba contra la política del
-actor; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/workflow.md).
+actor; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/workflow.md).

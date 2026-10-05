@@ -8,7 +8,7 @@
 
 # Módulo `graph_intelligence`
 
-**Fuente:** [`src/modules/graph_intelligence/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/graph_intelligence/README.md)
+**Fuente:** [`src/modules/graph_intelligence/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/graph_intelligence/README.md)
 · 2 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
@@ -173,8 +173,8 @@ riesgo.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/graph_intelligence` — 87 pruebas (28 proyección + 19 recorrido
-+ 25 analítica + 15 de delegación de los dos controladores).
+`corepack yarn test src/modules/graph_intelligence --runInBand --silent` — 4 suites y 87 pruebas
+aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 15 de delegación).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -206,3 +206,8 @@ riesgo.
   las del tenant en memoria. Con volumen alto conviene el operador de arrays de Postgres, que exige
   el índice que el modelo declara pero el ORM no materializa.
 
+## Revisión ALOVIDA
+
+Las mutaciones por UUID todavía no comparan el tenant activo contra el recurso cargado, y el
+recorrido con paciente no contrasta consentimiento. Ver el
+[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).

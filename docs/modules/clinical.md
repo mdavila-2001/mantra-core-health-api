@@ -8,7 +8,7 @@
 
 # Módulo `clinical`
 
-**Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/clinical/README.md)
+**Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical/README.md)
 · 9 controllers · 17 services · 15 repositories · 23 entidades · 15 DTO
 
 ---
@@ -106,9 +106,7 @@ rechazos de regla de negocio. No se registran PHI ni secretos.
 
 ## Tests
 
-- Unit: `services/*.service.spec.ts` (mockean repos + `em.transactional`) y
-  `controllers/*.controller.spec.ts` (mockean servicios). 14 suites, verdes.
+- Unit: `corepack yarn test src/modules/clinical --runInBand --silent` — 51 suites y 518 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). Incluye servicios, controladores y guards. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical.md).
 - Smoke de contrato: `test/smoke/modules/clinical.smoke.ts`
   (`CLINICAL_SMOKE: SmokeCase[]`), encadena episodio→encuentro→observación→orden→
   reporte→…→cierre y ejercita casos límite (401/400/404/409/422).
-

@@ -142,4 +142,4 @@ controlador).
 La revisión de octubre de 2026 detectó que las URL de protocolo se validan sólo
 como texto y deben restringirse antes de configurarlas o entregarlas al conector
 de red. El detalle y la matriz de pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/auth_providers.md`](../../../docs/revision-backend-2026-10-04/modulos/auth_providers.md).
+[`docs/revision-backend-2026-10-04/modulos/auth_providers.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/auth_providers.md).

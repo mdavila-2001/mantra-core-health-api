@@ -8,7 +8,7 @@
 
 # Módulo `search_platform`
 
-**Fuente:** [`src/modules/search_platform/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/search_platform/README.md)
+**Fuente:** [`src/modules/search_platform/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/search_platform/README.md)
 · 1 controllers · 1 services · 0 repositories · 0 entidades · 1 DTO
 
 ---
@@ -72,3 +72,10 @@ app no deja el pool de conexiones abierto.
 
 Cobertura en `services/search-index.service.spec.ts` (cliente OpenSearch mockeado).
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó el sellado y filtrado obligatorio por tenant, la allowlist de índices/campos y la ausencia de DSL crudo en las rutas. El informe está en [`docs/revision-backend-2026-10-04/modulos/search_platform.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/search_platform.md).
+
+```bash
+corepack yarn test src/modules/search_platform --runInBand --silent
+```

@@ -198,7 +198,7 @@ controladores).
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/health_data.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_data.md)
 registra pendientes de alcance para `$everything`, ingesta y liberación de
 datos, más límites de arrays. La corrida dirigida ejecutó 7 suites y 98 tests
 verdes; no reemplaza pruebas con dos tenants, autorización por paciente ni

@@ -8,7 +8,7 @@
 
 # Módulo `platform_ops`
 
-**Fuente:** [`src/modules/platform_ops/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/platform_ops/README.md)
+**Fuente:** [`src/modules/platform_ops/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/platform_ops/README.md)
 · 1 controllers · 4 services · 5 repositories · 38 entidades · 1 DTO
 
 ---
@@ -155,8 +155,8 @@ que quién los registró se deja en el log.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=platform_ops` — 146 pruebas (131 de servicio + 15 de delegación del
-controlador).
+`corepack yarn test src/modules/platform_ops --runInBand --silent` — 5 suites y 146 pruebas
+aprobadas durante la revisión.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -190,3 +190,7 @@ controlador).
   `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera; su gestión
   llegará con los casos de uso que los declaren.
 
+## Revisión ALOVIDA
+
+Los recursos operativos resueltos por UUID aún no se acotan al tenant activo; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/platform_ops.md).

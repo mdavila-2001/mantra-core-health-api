@@ -124,7 +124,7 @@ archivo para que el módulo sea auto-contenido.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/pharmacy.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy.md)
 registra que las mutaciones administrativas sólo exigen rol global y no atan el
 actor a farmacia ni tenant. También faltan comprobaciones entre farmacia, sede,
 práctica y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió

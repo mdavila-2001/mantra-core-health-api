@@ -27,7 +27,7 @@ Agrupa los componentes relacionados con **identity assurance** y mantiene cohesi
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/identity_assurance.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/identity_assurance.md)
 identifica que los comandos administrativos de casos y evidencia no atan el UUID
 al tenant ni al sujeto autorizado. La corrida dirigida pasó 17 suites y 139 tests,
 sin cobertura de RLS, archivos o dos tenants reales.

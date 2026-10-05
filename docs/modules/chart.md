@@ -8,8 +8,8 @@
 
 # Módulo `chart`
 
-**Fuente:** [`src/modules/chart/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/README.md)
-· 6 controllers · 7 services · 4 repositories · 11 entidades · 5 DTO
+**Fuente:** [`src/modules/chart/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/README.md)
+· 7 controllers · 8 services · 4 repositories · 11 entidades · 6 DTO
 
 ---
 
@@ -21,11 +21,11 @@ Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta re
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/chart/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 
@@ -44,6 +44,10 @@ Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta re
   Si un archivo no pasa la comprobación, el documento no se crea. El
   `tenantId` ajeno ya lo rechaza el interceptor global de contexto de tenant
   antes de llegar al controlador; el servicio no lo repite.
+- **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
+  validación explícita de que el encuentro pertenece al paciente antes de
+  persistirlos. Esa validación no está completa todavía; ver la
+  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos
@@ -65,4 +69,5 @@ Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta re
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
-
+- Ejecutar la evidencia dirigida con `corepack yarn test src/modules/chart --runInBand --silent`
+  (18 suites y 139 pruebas aprobadas durante la revisión).

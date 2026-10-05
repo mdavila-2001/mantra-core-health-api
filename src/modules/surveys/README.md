@@ -60,7 +60,7 @@ por dominio propio.
 - **Emisión secuencialmente idempotente.** El servicio detecta una invitación ya
   emitida por `(reserva, versión)`, pero el DDL aún no impone la unicidad: dos
   solicitudes concurrentes pueden duplicarla. Ver la revisión
-  [`SURV-02`](../../../docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
+  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
 - **Ventana congelada al emitir.** `expires_at` se deriva de
   `response_window_days` en el momento de la emisión; cambiar el plazo después no
   mueve una ventana ya prometida.
@@ -69,7 +69,7 @@ por dominio propio.
 - **`value[x]` exclusivo en servicio**, igual que `forms.field_values`: el
   servicio normaliza una única columna `value_*` por fila. Falta el `CHECK` de
   respaldo en la base; ver
-  [`SURV-02`](../../../docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
+  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
 - **Desactivar ≠ borrar.** Corta las emisiones nuevas; lo ya emitido sigue siendo
   contestable y lo ya respondido, legible.
 
@@ -88,7 +88,7 @@ Cómo se sostiene acá:
    aceptan `patientProfileId`: sale del claim `pid` de la sesión. Este filtro no
    incorpora todavía el tenant de la sesión, por lo que no aísla a un paciente
    que atiende en más de una organización; ver
-   [`SURV-01`](../../../docs/revision-backend-2026-10-04/modulos/surveys.md#surv-01--crítica--el-autoservicio-de-paciente-no-limita-invitaciones-al-tenant-activo).
+   [`SURV-01`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-01--crítica--el-autoservicio-de-paciente-no-limita-invitaciones-al-tenant-activo).
 3. **La autorización de lectura es por dueño, no por rol.** Dos profesionales de
    la misma organización comparten roles y no comparten instrumentos; las
    respuestas se leen colgando de `GET /surveys/templates/:id/responses`, que
@@ -109,7 +109,7 @@ vistas de paciente de M41 scheduling.
   y 65 pruebas aprobadas el 2026-10-05. Cubre propiedad de plantilla,
   invitación ajena, sesión sin perfil y validación por tipo; no cubre aislamiento
   de tenant en autoservicio ni carreras de persistencia. Ver la
-  [revisión backend](../../../docs/revision-backend-2026-10-04/modulos/surveys.md).
+  [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md).
 
 ## Notas de integración
 

@@ -82,4 +82,4 @@ de consentimiento, referencias de ingesta y aislamiento de tenant.
 
 La revisión ALOVIDA documenta problemas críticos de propiedad de consentimiento,
 referencias de ingesta, validación de propiedades y aislamiento de tenant en la
-[revisión del módulo](../../../docs/revision-backend-2026-10-04/modulos/telemetry.md).
+[revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/telemetry.md).

@@ -27,7 +27,7 @@
 | H1.S1.M2 | Arreglo | el mismo comando, más `node m4-verify-retiro.mjs` | 4/4 · runtime `200 {releasedSlots: 68, keptSlots: 12, liveBookings: 6}` |
 
 Compuertas: `yarn typecheck` exit 0 · `yarn lint` exit 0 · `yarn test --testPathPatterns=scheduling`
-**511/511** (25 suites). La salida está en [`evidencia/`](./evidencia/).
+**511/511** (25 suites). La salida está en [`evidencia/`](./evidencia/index.md).
 
 ## A medias
 

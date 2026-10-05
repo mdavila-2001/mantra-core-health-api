@@ -12,11 +12,11 @@ en vez de propagar filas completas.
 - `GET /public/profiles/f/:slug/products`
 
 El repositorio resuelve sólo perfiles activos y visibles
-([public-catalog.repository.ts](../../../src/modules/public/repositories/public-catalog.repository.ts#L70-L93)),
+([public-catalog.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/public/repositories/public-catalog.repository.ts#L70-L93)),
 oculta el tipo real tras el mismo 404
-([public-catalog.service.ts](../../../src/modules/public/services/public-catalog.service.ts#L138-L150))
+([public-catalog.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/public/services/public-catalog.service.ts#L138-L150))
 y emplea parámetros para slug, tenant y cursor. Las lecturas tienen keyset y un
-tope HTTP de 50 elementos ([public-catalog.dto.ts](../../../src/modules/public/dto/public-catalog.dto.ts#L10-L46)).
+tope HTTP de 50 elementos ([public-catalog.dto.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/public/dto/public-catalog.dto.ts#L10-L46)).
 
 ## Pruebas ejecutadas
 
@@ -34,8 +34,8 @@ PostgreSQL y RLS que compruebe que no puede aparecer una práctica de otro tenan
 
 | Ruta | Correcto | Límite | Error | Falla catalogada |
 | --- | --- | --- | --- | --- |
-| Servicios públicos | Perfil visible con catálogo | `limit=50` y segunda página por cursor | `limit=51` o cursor inválido | `400/VALIDATION_ERROR/PUBLIC_CATALOG_INVALID_CURSOR` |
-| Productos públicos | Farmacia visible, verificada y con lista pública | Producto sin stock y precio `null` | Parámetro no declarado | `404/RESOURCE_NOT_FOUND/PUBLIC_CATALOG_PROFILE_NOT_FOUND` para slug oculto, ajeno o de otro tipo |
+| Servicios públicos | Perfil visible con catálogo | `limit=50` y segunda página por cursor | `limit=51` o cursor inválido | Cursor inválido: `400` con código `VALIDATION_FAILED`; el contrato no expone un `reason` estable. |
+| Productos públicos | Farmacia visible, verificada y con lista pública | Producto sin stock y precio `null` | Parámetro no declarado | Perfil inexistente, oculto, ajeno o de otro tipo: `404` con código `NOT_FOUND`; el contrato no expone un `reason` estable. |
 
 ## Riesgo residual y acción futura
 

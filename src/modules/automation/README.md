@@ -146,7 +146,7 @@ Ninguna ruta es pública.
 
 La revisión ALOVIDA identificó que los servicios todavía no aplican el alcance de
 tenant de la identidad a la cadena de workflows, runs y automatizaciones de
-registro. Ver [informe del módulo](../../../docs/revision-backend-2026-10-04/modulos/automation.md)
+registro. Ver [informe del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/automation.md)
 antes de habilitar operaciones entre tenants.
 
 ## Concurrencia

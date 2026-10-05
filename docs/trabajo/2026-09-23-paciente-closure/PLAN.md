@@ -1,8 +1,8 @@
 # Plan local — cierre funcional de Paciente (API)
 
 - Fecha: 2026-09-23 · Repo: `mantra-core-health-api` · Rama: `justin/patient-closure-api` · base `dev` (`7541797cd93dfe3cde50c8a7fd3bf404cc709f12`).
-- Fuente funcional única: [plan maestro](../../../../MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/PATIENT_PLAN_01_METAPROMPT_2026-09-23.md); [metaprompt literal](../../../../MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/SOURCE.md), SHA-256 `17b41ce468a147a4a4e97cc3b028869bed4088fe314845e3e8bf3f28f7f2b9b5`. El maestro contiene los 71 IDs, criterios CA/DoD, límites y decisiones. No derivar alcance de otros metaprompts.
-- Estado actualizado 2026-09-24: PARCIAL. H0.S2.M2 real aprobado; copagos integración 8/8 en DB desechable. Consolidación: [REPORTE.md](../../../../MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/REPORTE.md). No se cerró ningún criterio fuente completo.
+- Fuente funcional única externa al repositorio: `MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/PATIENT_PLAN_01_METAPROMPT_2026-09-23.md`; metaprompt literal `MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/SOURCE.md`, SHA-256 `17b41ce468a147a4a4e97cc3b028869bed4088fe314845e3e8bf3f28f7f2b9b5`. El maestro contiene los 71 IDs, criterios CA/DoD, límites y decisiones. No derivar alcance de otros metaprompts.
+- Estado actualizado 2026-09-24: PARCIAL. H0.S2.M2 real aprobado; copagos integración 8/8 en DB desechable. Consolidación externa: `MetaPrompts/PLAN_PACIENTE_01_METAPROMPT_17b41ce468a1_2026-09-23/REPORTE.md`. No se cerró ningún criterio fuente completo.
 - Resultado observable: IAM/Profiles/Agenda/Clinical/Diagnostics/Pharmacy/Insurance/Messaging exponen y autorizan las capacidades existentes del paciente con consistencia de IDs, transición, decimales y visibilidad.
 - Kill-test: paciente sintético se registra, persiste ubicación, recibe una orden emitida por médico sintético y, en nueva sesión, API devuelve paciente/ubicación/orden/autor desde DB real.
 

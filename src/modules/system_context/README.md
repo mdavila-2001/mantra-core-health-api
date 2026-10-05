@@ -140,7 +140,7 @@ La resolución de tenant está centralizada en `TenantContextInterceptor`, que r
 contradictorios y puede fijar RLS. La revisión confirmó riesgos pendientes en la clave de
 idempotencia global del refresh, la carrera al crear bindings, el DTO de procedencia que admite
 campos `NOT NULL` ausentes y reasons no versionados. El detalle, evidencia y plan de pruebas están
-en [la revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/system_context.md).
+en [la revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/system_context.md).
 
 ## Pendiente
 

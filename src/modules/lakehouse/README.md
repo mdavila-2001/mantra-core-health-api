@@ -170,10 +170,10 @@ persistencia real de los payloads mínimos frente al DDL.
 
 - Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
   resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
-  esa comprobación; ver [informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
+  esa comprobación; ver [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
 - Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
-  aceptado por validación puede fallar al persistir. Ver [LAKE-02](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
-- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
+  aceptado por validación puede fallar al persistir. Ver [LAKE-02](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
+- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
 
 ## Divergencias con el caso de uso v3.9
 

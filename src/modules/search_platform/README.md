@@ -59,7 +59,7 @@ Cobertura en `services/search-index.service.spec.ts` (cliente OpenSearch mockead
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 confirmó el sellado y filtrado obligatorio por tenant, la allowlist de índices/campos y la ausencia de DSL crudo en las rutas. El informe está en [`docs/revision-backend-2026-10-04/modulos/search_platform.md`](../../../docs/revision-backend-2026-10-04/modulos/search_platform.md).
+La revisión de octubre de 2026 confirmó el sellado y filtrado obligatorio por tenant, la allowlist de índices/campos y la ausencia de DSL crudo en las rutas. El informe está en [`docs/revision-backend-2026-10-04/modulos/search_platform.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/search_platform.md).
 
 ```bash
 corepack yarn test src/modules/search_platform --runInBand --silent

@@ -8,7 +8,7 @@
 
 # Módulo `tracking`
 
-**Fuente:** [`src/modules/tracking/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/tracking/README.md)
+**Fuente:** [`src/modules/tracking/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/tracking/README.md)
 · 1 controllers · 1 services · 1 repositories · 8 entidades · 1 DTO
 
 ---
@@ -108,13 +108,13 @@ loguea qué se transporta ni datos del destinatario.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=tracking` — 45 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
 
 ## Pendiente
 
 - **Firma del webhook**: la ruta es pública y hoy sólo valida que el código de transportista exista.
-  La verificación de firma HMAC del proveedor corresponde al conector de integraciones (módulo 12),
-  que es quien guarda el secreto.
+  La verificación de firma HMAC del proveedor debe impedir mutaciones antes del conector de integraciones;
+  el riesgo y la corrección propuesta están en la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
 - **Geolocalización**: `location_ping_id` se acepta si llega, pero los pings viven en `geo` y los
   produce el módulo de localización. `tracked_subject_id` del envío se poblará con esa integración.
 - **Cálculo del ETA**: el módulo registra y aplica la estimación, pero no la calcula. El motor
@@ -123,4 +123,3 @@ loguea qué se transporta ni datos del destinatario.
   pertenece al planificador.
 - **Outbox**: `SubjectOpened`, `ShipmentDispatched`, `ShipmentDelivered`, `SlaBreached` se emitirán
   cuando exista el módulo 35.
-

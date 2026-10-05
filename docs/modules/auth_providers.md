@@ -8,7 +8,7 @@
 
 # Módulo `auth_providers`
 
-**Fuente:** [`src/modules/auth_providers/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/auth_providers/README.md)
+**Fuente:** [`src/modules/auth_providers/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/auth_providers/README.md)
 · 1 controllers · 2 services · 1 repositories · 9 entidades · 1 DTO
 
 ---
@@ -133,7 +133,7 @@ referencia al vault, nunca el secreto.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=auth_providers` — 96 pruebas (84 de servicio + 12 de delegación del
+`corepack yarn test src/modules/auth_providers --runInBand --silent` — 96 pruebas (84 de servicio + 12 de delegación del
 controlador).
 
 ## Pendiente
@@ -152,3 +152,9 @@ controlador).
 - **Outbox**: `ProviderRegistered`, `SigningKeyRotated`, `FederatedLoginSucceeded`,
   `IdentityUnlinked` se emitirán cuando exista el módulo 35.
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 detectó que las URL de protocolo se validan sólo
+como texto y deben restringirse antes de configurarlas o entregarlas al conector
+de red. El detalle y la matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/auth_providers.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/auth_providers.md).

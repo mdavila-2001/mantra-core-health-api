@@ -8,7 +8,7 @@
 
 # Módulo `system_context`
 
-**Fuente:** [`src/modules/system_context/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/system_context/README.md)
+**Fuente:** [`src/modules/system_context/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/system_context/README.md)
 · 1 controllers · 2 services · 1 repositories · 9 entidades · 1 DTO
 
 ---
@@ -125,16 +125,16 @@ sets cerrados", y esa validación vive en `terminology`, no aquí.
 
 `PLATFORM_ADMIN` cubre el módulo. `TERMINOLOGY_ENGINEER` define enumeraciones, redacta y publica
 versiones. `MODULE_OWNER` crea bindings de enum y de contexto. `WRITE_SERVICE` resuelve valores en
-escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco.
-
-Ninguna ruta es pública.
+escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco. `GET /dynamic-enums` es
+`@Public()` para poblar altas anónimas; `GET /dynamic-enums/bindings` queda autenticado sin rol
+específico.
 
 ## Concurrencia
 
-`FOR UPDATE` sobre la definición al redactar —el número de versión sale de un máximo, y dos
-redacciones simultáneas darían el mismo número—, sobre la versión y la publicada al publicar, sobre
-los bindings al retirar, sobre el contexto en todo lo que mueva `current_version_id`, y sobre la
-versión activa al promover o volver atrás. `row_version` aporta bloqueo optimista.
+`FOR UPDATE` protege la definición al redactar, la versión publicada al publicar, los bindings al
+retirar, y el contexto/versiones que cambian `current_version_id`. `row_version` aporta bloqueo
+optimista. La creación concurrente de bindings y sus ventanas requiere el endurecimiento detallado
+en el informe de revisión.
 
 ## Logs
 
@@ -144,8 +144,18 @@ contexto. No se loguea el contenido del contexto.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=system_context` — 76 pruebas (65 de servicio + 11 de delegación del
-controlador).
+`corepack yarn test src/modules/system_context --runInBand --silent` — **3 suites y 99 pruebas**
+aprobadas en la revisión de 2026-10-04. Son pruebas unitarias con repositorios simulados; no
+comprueban constraints PostgreSQL, dos transacciones en paralelo ni la respuesta HTTP del filtro
+global.
+
+## Revisión de seguridad e integridad
+
+La resolución de tenant está centralizada en `TenantContextInterceptor`, que rechaza propietarios
+contradictorios y puede fijar RLS. La revisión confirmó riesgos pendientes en la clave de
+idempotencia global del refresh, la carrera al crear bindings, el DTO de procedencia que admite
+campos `NOT NULL` ausentes y reasons no versionados. El detalle, evidencia y plan de pruebas están
+en [la revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/system_context.md).
 
 ## Pendiente
 
@@ -164,4 +174,3 @@ controlador).
   `SystemContextVersionActivated`, `SystemContextBound`, `SystemContextRolledBack`.
 - **Proyecciones y series**: `read_models.*` y `time_series.context_refresh_series` los alimenta el
   outbox.
-

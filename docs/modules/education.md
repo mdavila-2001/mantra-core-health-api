@@ -8,7 +8,7 @@
 
 # Módulo `education`
 
-**Fuente:** [`src/modules/education/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/education/README.md)
+**Fuente:** [`src/modules/education/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/README.md)
 · 1 controllers · 2 services · 2 repositories · 15 entidades · 1 DTO
 
 ---
@@ -102,6 +102,12 @@ inscripción (active, 0%) ── lesson-progress (append-only) ──> % recalcu
 `LEARNER` se inscribe, registra progreso, hace intentos y reseña. `SYSTEM` completa inscripciones,
 emite certificados y acredita CME — son pasos que dispara un worker tras la finalización.
 
+El tenant de la petición se valida globalmente y los roles con alcance se evalúan
+contra él. En el código actual, las mutaciones que reciben UUID no acotan el
+recurso al tenant ni anclan las operaciones `LEARNER` al perfil del sujeto;
+los hallazgos y el plan de cierre están en la
+[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/education.md).
+
 ## Concurrencia
 
 `FOR UPDATE` sobre curso (serializa el versionado), cohorte (la capacidad), inscripción, intento y
@@ -115,7 +121,10 @@ respuestas de evaluación ni datos del aprendiz más allá del identificador.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=education` — 72 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/education --runInBand --silent` — 3 suites y 84
+pruebas aprobadas durante la revisión. Son pruebas unitarias con repositorios
+simulados; faltan integración HTTP con dos tenants, RLS y dos aprendices para
+cubrir los hallazgos documentados.
 
 ## Pendiente
 
@@ -130,4 +139,3 @@ respuestas de evaluación ni datos del aprendiz más allá del identificador.
   proyección; no se calcula aquí.
 - **Outbox**: `CoursePublished`, `EnrollmentCompleted`, `CertificateIssued`, `CmeCreditAwarded` se
   emitirán cuando exista el módulo 35.
-

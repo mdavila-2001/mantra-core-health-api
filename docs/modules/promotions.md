@@ -8,8 +8,8 @@
 
 # Módulo `promotions`
 
-**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/promotions/README.md)
-· 2 controllers · 2 services · 2 repositories · 11 entidades · 1 DTO
+**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/promotions/README.md)
+· 2 controllers · 3 services · 2 repositories · 11 entidades · 1 DTO
 
 ---
 
@@ -110,8 +110,8 @@ que procesa por lotes y no debe esperar a otra pasada. `row_version` aporta bloq
 
 ## Pruebas
 
-`yarn test --testPathPatterns=promotions` — 71 pruebas de servicio + delegación de los dos
-controladores.
+`corepack yarn test src/modules/promotions --runInBand --silent` — 4 suites y 118 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -127,3 +127,7 @@ controladores.
 - **Outbox**: `PointsEarned`, `CouponRedeemed`, `DiscountApplied`, `ReferralQualified`… se emitirán
   cuando exista el módulo 35.
 
+## Revisión ALOVIDA
+
+Las operaciones administrativas por UUID todavía no comparan la pertenencia de tenant; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/promotions.md).

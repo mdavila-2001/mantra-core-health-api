@@ -8,7 +8,7 @@
 
 # Módulo `quotations`
 
-**Fuente:** [`src/modules/quotations/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/quotations/README.md)
+**Fuente:** [`src/modules/quotations/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/quotations/README.md)
 · 1 controllers · 1 services · 2 repositories · 0 entidades · 2 DTO
 
 ---
@@ -88,3 +88,13 @@ anticipo entre 0 y el precio, cuota mayor que cero.
 - Un plan que no cierra con el precio responde `422`, con el total de las
   cuotas en `details` para que la pantalla diga cuánto falta o sobra.
 
+## Auditoría vigente
+
+La práctica se valida al crear, pero la revisión de octubre de 2026 halló que se
+debe comprobar además el acceso clínico al paciente y validar las referencias
+clínicas que entran en la solicitud. El detalle y la matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/quotations.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/quotations.md).
+
+```bash
+corepack yarn test src/modules/quotations --runInBand --silent
+```

@@ -8,7 +8,7 @@
 
 # Módulo `reporting`
 
-**Fuente:** [`src/modules/reporting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/reporting/README.md)
+**Fuente:** [`src/modules/reporting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/reporting/README.md)
 · 1 controllers · 2 services · 2 repositories · 12 entidades · 1 DTO
 
 ---
@@ -108,7 +108,8 @@ parámetros de ejecución ni direcciones de destinatarios.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=reporting` — 58 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/reporting --runInBand --silent` — 3 suites y 68 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -128,3 +129,7 @@ parámetros de ejecución ni direcciones de destinatarios.
 - **Outbox**: `ReportPublished`, `ExecutionQueued`, `ReportDistributed` se emitirán cuando exista el
   módulo 35.
 
+## Revisión ALOVIDA
+
+Las rutas por UUID aún no comparan el tenant activo con definición, ejecución o programación;
+ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/reporting.md).

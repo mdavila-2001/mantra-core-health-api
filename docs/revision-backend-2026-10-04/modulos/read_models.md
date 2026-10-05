@@ -34,15 +34,15 @@ conservarán.
 ### RM-01 — Alta — Cualquier usuario autenticado puede resolver contratos de rutas y vistas no autorizadas
 
 La ruta de datos y la de acciones sólo requieren autenticación en el
-controlador ([`frontend-views.controller.ts:55-89`](../../../src/modules/read_models/controllers/frontend-views.controller.ts#L55-L89)). Al resolver la vista, el servicio consulta portal, ruta y vista por código, pero no evalúa
+controlador ([`frontend-views.controller.ts:55-89`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/controllers/frontend-views.controller.ts#L55-L89)). Al resolver la vista, el servicio consulta portal, ruta y vista por código, pero no evalúa
 `portal.audienceRoleValueSetId`, `portal.tenantScoped`,
 `portal.patientScoped`, `route.requiredPermissionId`,
 `route.purposeOfUseConceptId`, `route.featureFlagCode`,
 `route.requiresPatientContext` ni `route.requiresTenantContext`
-([`frontend-views.service.ts:259-319`](../../../src/modules/read_models/services/frontend-views.service.ts#L259-L319),
-[`frontend-views.service.ts:425-459`](../../../src/modules/read_models/services/frontend-views.service.ts#L425-L459)). Esos requisitos existen en las entidades
-([`portal_surfaces.entity.ts:34-53`](../../../src/modules/read_models/entities/portal_surfaces.entity.ts#L34-L53),
-[`frontend_routes.entity.ts:70-128`](../../../src/modules/read_models/entities/frontend_routes.entity.ts#L70-L128)) y quedan sin efecto.
+([`frontend-views.service.ts:259-319`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/frontend-views.service.ts#L259-L319),
+[`frontend-views.service.ts:425-459`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/frontend-views.service.ts#L425-L459)). Esos requisitos existen en las entidades
+([`portal_surfaces.entity.ts:34-53`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/entities/portal_surfaces.entity.ts#L34-L53),
+[`frontend_routes.entity.ts:70-128`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/entities/frontend_routes.entity.ts#L70-L128)) y quedan sin efecto.
 
 Un usuario autenticado que conozca los códigos de una ruta administrativa o
 clínica puede obtener sus campos, acciones y estado de frescura. Hoy `data` es
@@ -69,11 +69,11 @@ del contrato fuera de alcance.
 
 `serveData` resuelve el contrato y calcula metadatos, pero devuelve de forma
 incondicional `data: []` y `nextCursor: null`; el comentario confirma que la
-MV no se consulta ([`frontend-views.service.ts:259-305`](../../../src/modules/read_models/services/frontend-views.service.ts#L259-L305)). Ignora además
+MV no se consulta ([`frontend-views.service.ts:259-305`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/frontend-views.service.ts#L259-L305)). Ignora además
 `defaultPageSize`, `maximumPageSize`, `stableCursorColumnsJson`, filtros y
 orden declarados en la definición/contrato. La prueba actual sólo verifica
 masking y staleness de metadatos, y por ello no puede detectar la respuesta
-vacía ([`frontend-views.service.spec.ts:195-248`](../../../src/modules/read_models/services/frontend-views.service.spec.ts#L195-L248)).
+vacía ([`frontend-views.service.spec.ts:195-248`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/frontend-views.service.spec.ts#L195-L248)).
 
 Toda vista autenticada devuelve éxito sin registros aun cuando la MV tenga
 datos. Esto deja la funcionalidad central del módulo sin implementar y oculta
@@ -97,11 +97,11 @@ de responder una lista vacía.
 ### RM-03 — Alta — La caída de la materialized view pública se transforma en un `200` vacío
 
 Las dos lecturas públicas capturan cualquier excepción de base, registran sólo
-un warning y retornan `records: []` ([`public-projections.service.ts:52-79`](../../../src/modules/read_models/services/public-projections.service.ts#L52-L79),
-[`public-projections.service.ts:118-141`](../../../src/modules/read_models/services/public-projections.service.ts#L118-L141)). No distinguen la ausencia esperable de
+un warning y retornan `records: []` ([`public-projections.service.ts:52-79`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/public-projections.service.ts#L52-L79),
+[`public-projections.service.ts:118-141`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/public-projections.service.ts#L118-L141)). No distinguen la ausencia esperable de
 la MV de conexión caída, permisos revocados, timeout, corruptela u otro error
 del driver. La spec establece explícitamente este `200` vacío ante
-`relation does not exist` ([`public-projections.service.spec.ts:45-54`](../../../src/modules/read_models/services/public-projections.service.spec.ts#L45-L54)).
+`relation does not exist` ([`public-projections.service.spec.ts:45-54`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/read_models/services/public-projections.service.spec.ts#L45-L54)).
 
 El directorio público comunica “sin resultados” durante una caída real y evita
 que clientes, métricas y alertas detecten el incidente. No hay contrato de

@@ -1,10 +1,9 @@
 # ALOVIDA Health API
 
 Backend del ecosistema de salud ALOVIDA (Mantra Core Technologies): una API NestJS modular de
-**61 módulos de negocio documentados** (más el grupo raíz `app`), **915 operaciones HTTP**
+**70 módulos de negocio documentados** (más el grupo raíz `app`), **915 operaciones HTTP**
 documentadas en OpenAPI, sobre PostgreSQL con aislamiento por tenant, complementada por MongoDB,
-Redis, OpenSearch, MinIO y **21 procesos
-worker** independientes.
+Redis, OpenSearch, MinIO y **24 procesos worker** independientes.
 
 Esta documentación se genera y verifica junto al código: cada afirmación técnica aquí es
 rastreable a un archivo, un comando o una prueba real — no hay contenido genérico ni
@@ -25,11 +24,11 @@ flowchart LR
   API --> OS[(OpenSearch<br/>search_platform)]
   API --> MinIO[(MinIO/S3<br/>object_storage)]
   API -->|outbox| PG
-  subgraph W[21 workers independientes]
+  subgraph W[24 workers independientes]
     direction TB
     W1[worker-messaging]
     W2[worker-billing]
-    Wn[... 18 más]
+    Wn[... 22 más]
   end
   W -->|HTTP interno /internal/*| API
 ```
@@ -41,7 +40,7 @@ Detalle completo: [visión general de arquitectura](architecture/overview.md) ·
 
 ## Capacidades principales
 
-61 módulos agrupados en grandes áreas de negocio — catálogo completo, con métricas reales de cada
+70 módulos agrupados en grandes áreas de negocio — catálogo completo, con métricas reales de cada
 uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad y acceso (`iam`,
 `authz`, `auth_providers`, `identity_assurance`), clínica (`clinical`, `clinical_ext`,
 `diagnostics`, `pharmacy`, `procedures_perioperative`), operación de práctica (`practice`,
@@ -59,6 +58,7 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 | Ver un módulo de negocio concreto                | [Catálogo de módulos](modules/index.md)                                                                                                                                                         |
 | Entender cómo se relacionan los módulos          | [Dependencias entre módulos](architecture/module-dependencies.md)                                                                                                                               |
 | Ver qué se auditó y cómo                         | [Línea base](reports/baseline.md) · [Auditoría Graphify](reports/graphify-audit.md)                                                                                                             |
+| Ver la revisión backend de octubre de 2026       | [Informe maestro de revisión](revision-backend-2026-10-04/README.md)                                                                                                                             |
 | Ver el estado real para producción               | [Auditoría de producción 2026-07-31](reports/production-readiness-2026-07-31.md)                                                                                                                |
 | Ver el progreso de la implementación de audio/TTS | [Informe de progreso](progress/progress-report.md)                                                                                                                                              |
 | Ver brechas documentales conocidas y su estado   | [Análisis de brechas](reports/documentation-gap-analysis.md)                                                                                                                                    |

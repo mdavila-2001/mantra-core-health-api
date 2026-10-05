@@ -8,7 +8,7 @@
 
 # Módulo `pharmacy_inventory`
 
-**Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/README.md)
+**Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
 · 6 controllers · 11 services · 16 repositories · 21 entidades · 16 DTO
 
 ---
@@ -21,11 +21,11 @@ Agrupa los componentes relacionados con **pharmacy inventory** y mantiene cohesi
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy_inventory/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 
@@ -59,3 +59,20 @@ misma moneda.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
 
+## Pruebas
+
+```bash
+corepack yarn test src/modules/pharmacy_inventory --runInBand --silent
+```
+
+La corrida dirigida de la revisión (2026-10-05) pasó 7 suites y 117 tests. Usa
+dobles de repositorio y no demuestra claves foráneas, tenant ni pertenencia entre
+farmacia, sede, ubicación, lote y producto.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
+documenta que los comandos administrativos aceptan relaciones de inventario sin
+alcance de tenant y que los asientos de conteo/recall usan IDs de sede o ubicación
+como farmacia. Deben corregirse y validarse sobre PostgreSQL con FK activas antes
+de considerar confiable el movimiento de stock.

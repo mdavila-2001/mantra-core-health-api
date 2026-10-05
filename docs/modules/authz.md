@@ -8,8 +8,8 @@
 
 # Módulo `authz`
 
-**Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/authz/README.md)
-· 7 controllers · 8 services · 14 repositories · 15 entidades · 19 DTO
+**Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/authz/README.md)
+· 8 controllers · 9 services · 14 repositories · 15 entidades · 20 DTO
 
 ---
 
@@ -113,3 +113,16 @@ se registra en nivel `warn` (acceso de emergencia).
   real del PDP) y `controllers/*.controller.spec.ts` (mockean el servicio).
 - Smoke transversal: `test/smoke/modules/authz.smoke.ts` → `AUTHZ_SMOKE`.
 
+## Revisión de backend 2026-10-04
+
+`corepack yarn test src/modules/authz --runInBand --silent` aprobó 17 suites y
+108 pruebas. La cobertura dirigida confirma reglas de vigencia, duplicados,
+delegación HTTP y la evaluación del PDP con repositorios simulados. No cubre la
+custodia cruzada de paciente, encuentro o consentimiento.
+
+El interceptor común fija y compara el tenant declarado de cada request. Los
+servicios de acceso clínico, break-the-glass, relación asistencial y
+representación legal deben además resolver sus referencias clínicas y comprobar
+que pertenecen al mismo tenant y paciente antes de persistirlas; no basta con
+validar el `tenantId` del DTO. El hallazgo, plan y matriz de casos están en el
+[informe del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/authz.md).
