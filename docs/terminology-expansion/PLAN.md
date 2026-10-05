@@ -1,6 +1,6 @@
 # Plan ejecutable: ampliar el glosario clínico y su mapa de relaciones
 
-Fecha de corte: 2026-10-05. Estado: primera extracción local de MedlinePlus hecha; API y vista del mapa en desarrollo.
+Fecha de corte: 2026-10-05. Estado: piloto de extracción local hecho; endpoint API y vista de red implementados en PRs; expansión anatómica inicial y tipado explícito de síntomas en curso.
 
 ## Objetivo
 
@@ -10,11 +10,11 @@ No existe una lista finita de “todos los sitios médicos existentes”. La cob
 
 ## Estado y línea base local
 
-- El catálogo de backend tiene 64 términos, 11 categorías y 104 relaciones tipadas. No hay definiciones clínicas ni resúmenes vacíos ni slugs duplicados. Hay un destino de relación huérfano: `control-de-signos-vitales`.
+- Línea base auditada antes de esta entrega: 69 términos, 12 categorías y 104 relaciones tipadas. Esta entrega añade cinco términos (cuatro estructuras anatómicas y el procedimiento de control de signos vitales) y cinco relaciones; el destino previamente huérfano ahora resuelve. El catálogo resultante queda en 74 términos y 109 relaciones tipadas.
 - Se descargó y procesó la distribución comprimida de temas de salud de MedlinePlus del 2026-10-03. Resultado: 2.033 temas bilingües, 6.104 referencias a temas relacionados y 3.165 referencias cruzadas; cinco temas carecen de resumen.
 - La extracción encontró 17 candidatos de nombre exacto para revisión frente al catálogo curado. Son candidatos, no equivalencias aprobadas.
 - Archivos de ejecución: `2026-10-05/medlineplus-manifest.json`, `medlineplus-topics.jsonl`, `medlineplus-review-queue.csv`, `medlineplus-glossary-coverage.json` y `curated-glossary-profile.json`.
-- La interfaz incluye un enlace a la vista de red. El backend y el cliente ya tienen un contrato inicial para nodos y aristas tipadas.
+- La interfaz incluye un enlace a la vista de red (PR #959, fusionado); el backend expone nodos y aristas tipadas (PR #571, abierto en la fecha de esta actualización).
 
 ## Fuentes por ola
 
@@ -56,7 +56,7 @@ Antes de activar cada fuente se guardan: organismo editor, URL del dataset/API, 
 
 ## Modelo de relaciones para el mapa
 
-La interfaz inicial lee las relaciones existentes del catálogo y muestra vecinos directos, dirección y categoría. En la fuente actual algunas relaciones `DISEASE` están guardadas desde el síntoma hacia la enfermedad; la vista debe etiquetar al vecino según su categoría y conservar la dirección. Para la siguiente iteración, revisar si conviene añadir un tipo explícito `SYMPTOM` o normalizar el par a `HAS_SYMPTOM`/`SYMPTOM_OF`; cualquier cambio exige migración, actualización del catálogo, DTO, cliente, mock, ficha y documentación OpenAPI.
+La interfaz inicial lee las relaciones existentes del catálogo y muestra vecinos directos, dirección y categoría. El vocabulario ya incluye `SYMPTOM`; esta entrega tipa explícitamente las relaciones salientes de asma, neumonía e insuficiencia cardiaca hacia síntomas existentes. Las relaciones inversas `DISEASE` desde el síntoma se conservan donde estaban. Las aristas representan asociaciones del catálogo, no causalidad ni consejo clínico.
 
 La red global se paginará o filtrará por categoría cuando el catálogo crezca. El primer corte limita la respuesta, expone `possiblyTruncated` y deja seleccionar un término central. Las aristas deben tener etiqueta textual accesible además de color, navegación a fichas y un aviso fijo: son asociaciones catalogadas y no recomendaciones médicas.
 
@@ -64,7 +64,7 @@ La red global se paginará o filtrará por categoría cuando el catálogo crezca
 
 Priorizar por sistema y dependencia entre estructuras: cardiovascular; respiratorio; digestivo; renal/urinario; nervioso; musculoesquelético; endocrino; tegumentario; hematológico e inmunitario. Cada término debe indicar localización, componentes principales, función, conexiones anatómicas relevantes y diferencias con términos que suelen confundirse. Añadir primero las estructuras que habiliten relaciones con enfermedades, síntomas y pruebas ya presentes. El atlas visual es un índice de placas y no sustituye una definición clínica estructurada.
 
-Primera pasada del catálogo actual: revisar corazón, pulmón, hígado, riñón, encéfalo y columna vertebral. Luego expandir con cerebro/cerebelo/tronco encefálico sólo si se representan como conceptos separados y sin duplicar `encéfalo`; añadir páncreas, estómago, intestino, piel, vasos sanguíneos, médula espinal y huesos con slugs y fuentes antes de editar el seed.
+Primera pasada del catálogo actual: revisar corazón, pulmón, hígado, riñón, encéfalo y columna vertebral. Esta entrega añade páncreas, estómago, piel y médula espinal con definiciones originales y referencias editoriales NCBI Bookshelf. La siguiente ronda anatómica sigue con intestino, vasos sanguíneos y huesos; cerebro/cerebelo/tronco encefálico sólo se separan si el modelo aclara que no son duplicados de `encéfalo`.
 
 ## Validaciones de cada lote
 
@@ -77,10 +77,10 @@ Primera pasada del catálogo actual: revisar corazón, pulmón, hígado, riñón
 
 ## Entregas y criterio de salida
 
-1. **P0, completándose**: grafo API/UI, lectura desde mock y enlace en glosario; compilar ambos proyectos.
+1. **P0, implementado en PRs**: grafo API/UI, lectura desde mock y enlace en glosario; compilación completada para la UI y rama de origen API.
 2. **P1**: cerrar el piloto MedlinePlus con revisión de los 17 candidatos y hoja de discrepancias; añadir trazabilidad de procedencia al esquema/seed.
 3. **P2**: expandir definiciones anatómicas y vocabulario por sistema, empezando por conceptos conectados al catálogo actual.
-4. **P3**: añadir fuentes una por una después de revisar licencia y formato; importar candidatos por lote con control editorial.
-5. **P4**: estandarizar relación síntoma/enfermedad y escalar mapa a navegación filtrada/paginada.
+4. **P3**: añadir fuentes una por una después de revisar licencia y formato; importar candidatos por lote con control editorial. MedlinePlus XML y las otras capas españolas ya tienen importadores en `tools/terminology-import/`.
+5. **P4, primera parte implementada**: tipar explícitamente algunas aristas enfermedad→síntoma; ampliar cobertura tras revisión clínica y escalar mapa a navegación filtrada/paginada según tamaño.
 
 La primera liberación de contenido se acepta cuando cada término nuevo tiene fuente reutilizable, definición ES revisada, sinónimos depurados, relaciones no huérfanas y estado editorial explícito; el conteo de términos por sí solo no es criterio de calidad.

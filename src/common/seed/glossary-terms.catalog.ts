@@ -1,8 +1,8 @@
 import type { GlossaryRelationType } from '../../modules/terminology/glossary.constants';
 
 /**
- * El catálogo curado del glosario médico (v1) — 69 términos (64 + 5 de
- * FND-25-01, categoría `other`).
+ * El catálogo curado del glosario médico (v1) — 74 términos (69 existentes
+ * más 4 estructuras anatómicas y 1 procedimiento).
  *
  * > Este es un catálogo inicial, curado y revisado médicamente a mano, no una
  * > importación de una nomenclatura externa (no hubo para este carril una carga
@@ -46,15 +46,9 @@ import type { GlossaryRelationType } from '../../modules/terminology/glossary.co
  *
  * ## Nota de transcripción — una relación huérfana en la fuente
  *
- * El término 13 (`hipertension-arterial`) declara en la fuente curada la
- * relación `PROCEDURE->control-de-signos-vitales`, pero ningún término de los
- * 64 tiene ese slug (el más cercano es `signos-vitales`, un concepto distinto:
- * el valor del signo vital, no el procedimiento de tomarlo). Se transcribió la
- * fuente verbatim en vez de inventar el término faltante o redirigir a un slug
- * parecido; `GlossarySeedService` valida cada relación contra el conjunto de
- * slugs conocido y **omite** —con advertencia en el log— cualquiera cuyo
- * destino no resuelva, en vez de fallar el seed completo o fabricar contenido.
- * Ver `CARRIL_REPORT.md` para el seguimiento de esta discrepancia de la fuente.
+ * La referencia `PROCEDURE->control-de-signos-vitales` de hipertensión ahora
+ * resuelve a una ficha propia. Se conserva separada de `signos-vitales`, que
+ * nombra los parámetros medidos y no el procedimiento de medirlos.
  *
  * ## Nota de transcripción — conteo de contenido en inglés
  *
@@ -163,6 +157,10 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // Riñones: https://www.ncbi.nlm.nih.gov/books/NBK482385/
   // Encéfalo: https://www.ncbi.nlm.nih.gov/books/NBK542179/
   // Columna: https://www.ncbi.nlm.nih.gov/books/NBK279468/
+  // Estómago: https://www.ncbi.nlm.nih.gov/books/NBK482334/
+  // Páncreas: https://www.ncbi.nlm.nih.gov/books/NBK532912/
+  // Piel: https://www.ncbi.nlm.nih.gov/books/NBK441980/
+  // Médula espinal: https://www.ncbi.nlm.nih.gov/books/NBK544267/
   {
     key: 'corazon',
     slug: 'corazon',
@@ -256,6 +254,62 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es la estructura de huesos y discos que recorre la espalda. Sostiene el tronco, permite inclinarse y girar, y rodea y protege la médula espinal.',
     relations: [],
+  },
+  {
+    key: 'estomago',
+    slug: 'estomago',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Stomach',
+    esName: 'Estómago',
+    esSynonyms: ['Víscera gástrica'],
+    clinicalDefinitionEs:
+      'Órgano muscular hueco del tubo digestivo, situado entre el esófago y el duodeno. Sus regiones anatómicas incluyen cardias, fondo, cuerpo y porción pilórica; almacena temporalmente los alimentos, los mezcla con secreciones gástricas y regula su paso al intestino delgado.',
+    plainSummaryEs:
+      'Es una bolsa muscular del abdomen que recibe los alimentos, los mezcla con jugos digestivos y los libera poco a poco hacia el intestino.',
+    relations: [{ type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' }],
+  },
+  {
+    key: 'pancreas',
+    slug: 'pancreas',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive', 'endocrine'],
+    enDisplay: 'Pancreas',
+    esName: 'Páncreas',
+    clinicalDefinitionEs:
+      'Glándula alargada situada detrás del estómago, con funciones exocrinas y endocrinas. El tejido acinar libera enzimas digestivas al duodeno; los islotes pancreáticos secretan hormonas, entre ellas insulina y glucagón, que participan en la regulación de la glucosa.',
+    plainSummaryEs:
+      'Es una glándula del abdomen que ayuda a digerir los alimentos y produce hormonas que regulan el azúcar en la sangre.',
+    relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+  },
+  {
+    key: 'piel',
+    slug: 'piel',
+    categoryKey: 'anatomy',
+    tagKeys: ['dermatologic'],
+    enDisplay: 'Skin',
+    esName: 'Piel',
+    clinicalDefinitionEs:
+      'Órgano que cubre la superficie externa del cuerpo y está formado por epidermis y dermis, sobre el tejido subcutáneo. Actúa como barrera, participa en la percepción sensorial y contribuye a la regulación térmica y al equilibrio de agua.',
+    plainSummaryEs:
+      'Es la cubierta del cuerpo: protege frente al entorno, permite sentir y ayuda a regular la temperatura.',
+    relations: [],
+  },
+  {
+    key: 'medula-espinal',
+    slug: 'medula-espinal',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Spinal cord',
+    esName: 'Médula espinal',
+    clinicalDefinitionEs:
+      'Estructura del sistema nervioso central contenida en el conducto vertebral, continua con el tronco encefálico y organizada en segmentos cervicales, torácicos, lumbares y sacros. Conduce señales entre el encéfalo y el cuerpo e integra circuitos reflejos; los nervios espinales emergen de sus segmentos.',
+    plainSummaryEs:
+      'Es un cordón de tejido nervioso dentro de la columna que comunica el encéfalo con el cuerpo y participa en algunos reflejos.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'columna-vertebral' },
+      { type: 'RELATED_TERM', targetSlug: 'encefalo' },
+    ],
   },
 
   // --- Signos y síntomas (glossary-category-signs-symptoms) ----------------
@@ -381,10 +435,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'When your blood pressure stays higher than normal all the time.',
     relations: [
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      // Referencia huérfana de la fuente curada: ningún término tiene el slug
-      // `control-de-signos-vitales` (ver nota de cabecera). Se deja declarada
-      // tal como está en la fuente; el seed la omite y advierte en vez de
-      // fallar o inventar el destino.
       { type: 'PROCEDURE', targetSlug: 'control-de-signos-vitales' },
     ],
   },
@@ -427,7 +477,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'espirometria' },
       { type: 'TREATMENT', targetSlug: 'oxigenoterapia' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
     ],
   },
   {
@@ -444,7 +494,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'radiografia-de-torax' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'fiebre' },
+      { type: 'SYMPTOM', targetSlug: 'fiebre' },
     ],
   },
   {
@@ -467,8 +517,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'ecocardiograma' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'electrocardiograma' },
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
-      { type: 'RELATED_TERM', targetSlug: 'edema' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'edema' },
     ],
   },
   {
@@ -700,6 +750,20 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'ANATOMY', targetSlug: 'corazon' },
       { type: 'DISEASE', targetSlug: 'insuficiencia-cardiaca' },
     ],
+  },
+  {
+    key: 'control-de-signos-vitales',
+    slug: 'control-de-signos-vitales',
+    categoryKey: 'procedure',
+    tagKeys: [],
+    enDisplay: 'Vital signs measurement',
+    esName: 'Control de signos vitales',
+    esSynonyms: ['Toma de signos vitales', 'Medición de signos vitales'],
+    clinicalDefinitionEs:
+      'Procedimiento de valoración que obtiene y registra parámetros fisiológicos —como presión arterial, frecuencia cardiaca, frecuencia respiratoria, temperatura y, cuando corresponde, saturación de oxígeno— mediante técnicas e instrumentos adecuados para cada medida.',
+    plainSummaryEs:
+      'Es medir y anotar parámetros básicos del cuerpo, como el pulso, la respiración, la presión y la temperatura.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'signos-vitales' }],
   },
   {
     key: 'endoscopia-digestiva-alta',
