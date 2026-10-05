@@ -12,7 +12,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 18 de la unidad 1 de las NNAC, pág. 163; CIE-10 T42.4; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 18 de la unidad 1, pág. 163; CIE-10 T42.4; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -157,19 +157,7 @@
       "options": [
         "Signos vitales normales",
         "Buen estado general",
-        "Su condición general de salud y la gravedad del cuadro",
-        "El tiempo aproximado necesario para el tratamiento",
-        "Procedimientos a ser utilizados así como sus riesgos y beneficios",
-        "La necesidad de referencia a otro establecimiento de mayor resolución si el caso lo requiere",
-        "Explique las señales de peligro, náuseas, dolor de cabeza, dolor abdominal, pérdida del conocimiento o pérdida de agudeza visual",
-        "No dejar sustancias tóxicas al alcance de los niños",
-        "Control de la comercialización de sustancias hipnosedantes",
-        "No utilizar envases inadecuados con rótulo diferente al contenido",
-        "Seguir las órdenes del médico y sus dosificaciones",
-        "Personas que han tenido reacciones alérgicas serias, llevar consigo medicamentos de emergencia de acuerdo a instrucciones médicas",
-        "Pregunte al o la paciente, si tiene antecedentes alérgicos, especialmente en relación con la sustancia medicamentosa que será aplicada",
-        "Luego de aplicado un medicamento u otra sustancia por vía parenteral, observe y vigile al paciente",
-        "Sobre medidas preventivas relacionadas con estilos de vida y factores de riesgo ambientales"
+        "Para seguimiento y continuar tratamiento nutricional"
       ],
       "multiple": true,
       "allowOther": true

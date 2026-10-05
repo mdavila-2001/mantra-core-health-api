@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 7 de la unidad 9 de las NNAC, pág. 615; CIE-10 G40.3; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 7 de la unidad 9, pág. 615; CIE-10 G40.3; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -113,19 +113,7 @@
       "required": false,
       "options": [
         "Persistencia de crisis, efectos colaterales o alergias",
-        "Control de crisis estable",
-        "El seguimiento y control debe ser estructurado y regular para toda persona con epilepsia",
-        "Control EEG según evolución clínica",
-        "Los niños/niñas, jóvenes y adultos que necesitan un electroencefalograma deben realizarlo cuanto antes (plazo: cuatro semanas) después de haber sido solicitado",
-        "Hacer electroencefalograma de 12 derivaciones en los adultos con sospecha de epilepsia",
-        "Desarrollan epilepsia antes de los dos años de edad o en la edad adulta",
-        "Tienen algún indicio de un comienzo focal en la historia, el examen o la electroencefalografía (a menos que haya una clara evidencia de epilepsia focal benigna)",
-        "NO interrumpir medicación sin indicación de médico tratante",
-        "NO consumir bebidas alcohólicas",
-        "Mantener un horario de sueño adecuado de siete horas aproximadamente",
-        "Evitar consumo de fármacos sin el conocimiento de su médico",
-        "Ante un cuadro infeccioso comunicar a su médico del mismo",
-        "Evitar reflejos luminosos intensos, si se ha observado que desencadenan crisis convulsivas"
+        "Control de crisis estable"
       ],
       "multiple": true,
       "allowOther": true,

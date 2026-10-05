@@ -1,0 +1,223 @@
+{
+  "code": "NNAC25_MI_23_PANCREATITIS_AGUDA",
+  "name": "Pancreatitis aguda (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 23, pág. 215; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Náuseas o vómitos",
+        "Íleo",
+        "Fiebre en algunos casos",
+        "Resistencia abdominal",
+        "Síndrome de respuesta inflamatoria sistémica",
+        "Signos asociados a obstrucción biliar: Ictericia, coluria, hipocolia o acolia",
+        "Signos asociados a PA necrohemorrágica: Signos de Cullen y Grey Turner",
+        "Los pacientes con pancreatitis grave pueden tener fiebre, taquipnea, hipoxemia e hipotensión",
+        "PUNTUACIÓN DE RANSON",
+        "PUNTUACIÓN DE BALTHAZAR"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 215. Es la inflamación aguda del páncreas con compromiso variable de los tejidos regionales y diferente grado de compromiso sistémico llegando a desencadenar una disfunción de órganos y sistemas distantes."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pancreatitis aguda leve: Ausencia de Falla Orgánica y complicaciones locales o sistémicas",
+        "Pancreatitis aguda moderadamente grave: Presencia de Falla Orgánica transitoria o complicaciones locales, o sistémicas",
+        "Pancreatitis aguda grave: Presencia de Falla Orgánica persistente (única o múltiple) y una o más complicaciones locales o sistémicas"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sexo femenino",
+        "Edad avanzada",
+        "Alcoholismo Crónico",
+        "Hipertrigliceridemia o deficiencia de la enzima lipoproteína lipasa",
+        "Tabaquismo prolongado",
+        "Obesidad",
+        "Colelitiasis",
+        "Condiciones intestinales: síndrome de intestino irritable, enfermedad intestinal inflamatoria",
+        "Enfermedad renal",
+        "Drogas (valproato, esteroides, azatioprina, cannabis)",
+        "Post Colangiopancreatografía endoscópica retrógrada (CPER)",
+        "Páncreas divisum",
+        "Algunas infecciones virales (paperas y el virus Coxsackie B4)",
+        "Ingesta de grasas saturadas, comidas colistoquinéticas",
+        "Traumas abdominales cerrados o cortantes",
+        "Cirugía abdominal",
+        "VIH positivo. (el 14% desarrollan pancreatitis en el periodo de 1 año)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma con velocidad de eritrosedimentación",
+        "Glicemia, creatinina, BUN",
+        "Pruebas de función hepática: bilirrubinas, transaminasas, fosfatasa alcalina, GGT, Tiempo de protrombina, albumina",
+        "Electrolitos",
+        "Gasometría arterial en pacientes graves",
+        "Calcio, colesterol, triglicéridos",
+        "Proteína C reactiva cuantitativa. b",
+        "Radiografía simple de abdomen",
+        "Radiografía de tórax (buscando derrame pleural)",
+        "Ecografía abdominal",
+        "Tomografía contrastada entre las 48 a 96 horas para valorar necrosis",
+        "Resonancia Magnética: La colangioresonancia permite identificar litos de hasta 3 mm en la vía biliar"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "K85: Pancreatitis aguda",
+        "K85.0: Pancreatitis idiopática aguda",
+        "K85.1: Pancreatitis biliar aguda",
+        "K85.2: Pancreatitis aguda inducida por alcohol",
+        "K85.3: Pancreatitis aguda inducida por drogas",
+        "K85.8: Otras pancreatitis agudas",
+        "K85.9: Pancreatitis aguda, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Colección líquida aguda",
+        "Colección necrótica aguda estéril o infectada",
+        "Pseudoquiste",
+        "Absceso",
+        "Fístula pancreática",
+        "Fístula pancreatocutánea",
+        "Pseudoaneurisma de la arteria pancreática",
+        "Trombosis de la vena porta, mesentérica superior (manifestada por ascitis de reciente inicio) y/o aneurisma esplénico",
+        "Hemorragia del lecho pancreático o retroperitoneo"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 23, pág. 215); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

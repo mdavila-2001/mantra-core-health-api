@@ -12,7 +12,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 3 de la unidad 2 de las NNAC, pág. 203; CIE-10 T74.2 – Y08; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 3 de la unidad 2, pág. 203; CIE-10 T74.2 – Y08; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -60,13 +60,13 @@
         "Fracturas dentales sin una explicación convincente",
         "Movilidad dentaria es diagnóstico de trauma",
         "Retracciones gingivales localizadas, descartando otros diagnósticos, causa posible de trauma",
-        "Buscar huellas sugestivas de abuso sexual anterior",
         "Posición de litotomía o ginecológica: es la más usada en mujeres",
         "Posición de rana: recomendable en niñas pequeñas",
         "Integro",
         "Desgarrado",
         "Presente: indagar acerca del “quién, qué, dónde, cuándo y cómo”; se requiere saber quién está implicado, qué pasó, cuándo, etc",
-        "Futuro: enfocarse hacia cuáles son las eventuales dificultades para la persona y su familia para enfrentar los problemas"
+        "Futuro: enfocarse hacia cuáles son las eventuales dificultades para la persona y su familia para enfrentar los problemas",
+        "Ordenamiento del grado de necesidades: jerarquizar los problemas que deben tratarse inmediatamente sobre los problemas que pueden posponerse"
       ],
       "multiple": true,
       "allowOther": true,

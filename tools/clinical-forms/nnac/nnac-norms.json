@@ -157,7 +157,14 @@
     "pagina": 110,
     "unidad": 1,
     "definicion": "Expulsión se sangre por la boca procedente del aparato respiratorio.",
-    "criterios": [],
+    "criterios": [
+      "Esputo purulento con rasgos hemoptoicos sugiere: bronquitis aguda, bronquiectasias, neumonía, TBC pulmonar activa y malignidad subyacente",
+      "Pleurodinia con edema ascendente y dolor en los miembros inferiores indica TEP",
+      "Hemoptisis consecutiva: trauma torácico puede estar relacionado con bula pulmonar rota traumática",
+      "Tos hemoptoica en un gran fumador orienta a cáncer broncogénico",
+      "Sangrado de otros aparatos y sistemas indican discrasias sanguíneas",
+      "Disnea"
+    ],
     "clasificacion": [],
     "factoresRiesgo": [],
     "examenes": [
@@ -943,19 +950,7 @@
     "alta": [
       "Signos vitales normales",
       "Buen estado general",
-      "Su condición general de salud y la gravedad del cuadro",
-      "El tiempo aproximado necesario para el tratamiento",
-      "Procedimientos a ser utilizados así como sus riesgos y beneficios",
-      "La necesidad de referencia a otro establecimiento de mayor resolución si el caso lo requiere",
-      "Explique las señales de peligro, náuseas, dolor de cabeza, dolor abdominal, pérdida del conocimiento o pérdida de agudeza visual",
-      "No dejar sustancias tóxicas al alcance de los niños",
-      "Control de la comercialización de sustancias hipnosedantes",
-      "No utilizar envases inadecuados con rótulo diferente al contenido",
-      "Seguir las órdenes del médico y sus dosificaciones",
-      "Personas que han tenido reacciones alérgicas serias, llevar consigo medicamentos de emergencia de acuerdo a instrucciones médicas",
-      "Pregunte al o la paciente, si tiene antecedentes alérgicos, especialmente en relación con la sustancia medicamentosa que será aplicada",
-      "Luego de aplicado un medicamento u otra sustancia por vía parenteral, observe y vigile al paciente",
-      "Sobre medidas preventivas relacionadas con estilos de vida y factores de riesgo ambientales"
+      "Para seguimiento y continuar tratamiento nutricional"
     ]
   },
   {
@@ -1215,9 +1210,7 @@
     "unidad": 2,
     "definicion": "Las causas externas de morbilidad y de mortalidad son todos los acontecimientos ambientales y circunstancias que causan traumatismos, envenenamientos y otros efectos adversos (CIE-10, Cap.",
     "criterios": [
-      "Establecer relación empática y de respeto con la víctima",
       "Indagar sobre el origen de las lesiones, fortalecer el aspecto de comunicación empática",
-      "Identificar número de consultas repetidas sin diagnóstico claro, recordando el ciclo de la violencia",
       "Ciclo de la violencia: se reproduce continuamente, puede durar varios años y agravarse cada vez más",
       "Fase 1, aumento de la tensión (aparición del problema)",
       "Fase 2, estallido de la violencia (agresión en sus diversos tipos y consecuencias)",
@@ -1367,13 +1360,13 @@
       "Fracturas dentales sin una explicación convincente",
       "Movilidad dentaria es diagnóstico de trauma",
       "Retracciones gingivales localizadas, descartando otros diagnósticos, causa posible de trauma",
-      "Buscar huellas sugestivas de abuso sexual anterior",
       "Posición de litotomía o ginecológica: es la más usada en mujeres",
       "Posición de rana: recomendable en niñas pequeñas",
       "Integro",
       "Desgarrado",
       "Presente: indagar acerca del “quién, qué, dónde, cuándo y cómo”; se requiere saber quién está implicado, qué pasó, cuándo, etc",
-      "Futuro: enfocarse hacia cuáles son las eventuales dificultades para la persona y su familia para enfrentar los problemas"
+      "Futuro: enfocarse hacia cuáles son las eventuales dificultades para la persona y su familia para enfrentar los problemas",
+      "Ordenamiento del grado de necesidades: jerarquizar los problemas que deben tratarse inmediatamente sobre los problemas que pueden posponerse"
     ],
     "clasificacion": [
       "Genital-perineal-anal",
@@ -1508,15 +1501,7 @@
       "Cuando no puede beber o tomar pecho",
       "Fiebre",
       "Cuando vuelve a presentar episodios de diarrea",
-      "Cuando presenta oliguria o anuria",
-      "Personal de salud capacitado en la atención de estos casos",
-      "La muestra se remite en tubos o frascos con tapa a rosca en medio Cary Blair (viable durante una semana)",
-      "El genero Vibrio incluye cerca de 200 serogrupos",
-      "Desinfección de heces, vómitos, artículos y ropa de cama usados por pacientes, mediante calor, ácido carbólico u otro desinfectante",
-      "Promoción especialmente dirigida a la población sobre la importancia del lavado de manos",
-      "Entierro de difuntos lo antes posible sin realizar velatorios",
-      "Protección, purificación y cloración de los abastecimientos públicos de agua",
-      "Promoción del acceso a agua potable y saneamiento adecuado"
+      "Cuando presenta oliguria o anuria"
     ]
   },
   {
@@ -2173,16 +2158,7 @@
       "Buena tolerancia oral",
       "Para continuar tratamiento en forma ambulatoria",
       "Paciente asintomático",
-      "Control en una semana",
-      "Consejería y tratamiento familiar",
-      "Buscar otros focos infecciosos virales",
-      "Recomendación de prácticas de higiene y alimentación saludable",
-      "Hervido del agua antes de su consumo",
-      "Filtrado del agua de los abastecimientos públicos, que estén dispuestos a contaminación por heces humanas o de animales",
-      "Eliminación de las heces de acuerdo a normas",
-      "Desinfección de las heces y artículos contaminados con ellas",
-      "Instrucción sobre higiene a familias, personal de establecimientos de salud sobre todo a adultos que trabajan en guarderías infantiles",
-      "Controlar la proliferación de moscas por medio de la recolección frecuente y eliminación adecuada de la basura"
+      "Control en una semana"
     ]
   },
   {
@@ -2464,15 +2440,7 @@
     "alta": [
       "Cuando un paciente ha cumplido seis meses de tratamiento para lepra PB y 12 meses para lepra MB y cuando la baciloscopia es negativa",
       "Establecida la curación",
-      "Persistencia de la pérdida de sensibilidad, la debilidad u otro daño nervioso",
-      "El paciente debe saber cuidar y evitar daño neural futuro",
-      "Persistencia de algunas manchas coloreadas, que quedan permanentemente",
-      "Enfermedad de denuncia obligatoria",
-      "No existen",
-      "La promoción se realiza de acuerdo a las características de cada región",
-      "La detección de casos",
-      "Las causas del prejuicio",
-      "Las causas del abandono de los tratamientos"
+      "Puede retornar para continuar tratamiento domiciliario"
     ]
   },
   {
@@ -3049,18 +3017,7 @@
       "Ausencia de signología compatible con el cuadro",
       "Esquema de tratamiento terminado",
       "Volver en una semana",
-      "Para continuar tratamiento en forma ambulatoria",
-      "Consumo de carne bien cocida",
-      "La congelación de la carne durante 24 horas es otra buena opción",
-      "Evitar que las embarazadas limpien los recipientes con arena donde defecan los gatos",
-      "No tener contacto con felinos cuya alimentación se desconozca",
-      "Uso de guantes durante labores de jardinería y lavado de manos antes de comer",
-      "Alimentación de gatos con productos secos o bien hervidos",
-      "Impedir que los gatos cacen, mantenerlos exclusivamente como mascotas dentro el hogar",
-      "Desecho diario de las heces de los gatos y de la arena donde defecan; las heces puede desecharse por el inodoro, quemarse o enterrarse a gran profundidad",
-      "Las cajas de arena para gatos se deben desinfectar todos los días con agua hervida",
-      "Uso de guantes para manipular el material que puede estar infectado y lavarse las manos después de hacerlo",
-      "Lavado de manos antes de comer y después de manipular carne cruda o estar en contacto con tierra que puede estar contaminada con heces de gatos"
+      "Para continuar tratamiento en forma ambulatoria"
     ]
   },
   {
@@ -3489,7 +3446,8 @@
       "Cetoacidosis diabética (CIE 10: E-101)",
       "Coma hipoglucémico (CIE 10: E-140)",
       "Microangiopatía (retinopatía, neuropatía y nefropatía)",
-      "Macroangiopatía: cardiopatía coronaria, enfermedad vascular periférica, accidentes vásculo-cerebrales"
+      "Macroangiopatía: cardiopatía coronaria, enfermedad vascular periférica, accidentes vásculo-cerebrales",
+      "Oftalmopatía diabética: catarata, glaucoma"
     ],
     "referencia": [
       "Diabetes mellitus tipo 1, en caso de no tener acceso a centro de nivel III o especialista en endocrinología, deberá controlarse en nivel I ó II",
@@ -3499,23 +3457,7 @@
       "Para control y seguimiento"
     ],
     "referenciaYAltaJuntas": true,
-    "alta": [
-      "Control oftalmológico al menos una vez por año desde el momento del diagnóstico en diabetes tipo 2",
-      "Control oftalmológico al menos una vez al año desde el tercer año del diagnóstico en diabetes tipo 1",
-      "Control de pruebas de función renal al menos una vez por año",
-      "Revisión completa de los pies en cada visita",
-      "Promoción de estilos de vida y hábitos saludables",
-      "Detección oportuna de individuos con factores de riesgo, de acuerdo al plan nacional de ENT",
-      "Coordinación con los PUN- TOS VIDA",
-      "Diagnóstico clínico y laboratorial",
-      "Tratamiento médico",
-      "IEC en DM, FR y autocuidado a pacientes con DM y familiares",
-      "Intrainstitucional",
-      "Interinstitucional",
-      "Comunitaria",
-      "Detección de individuos con FR de DM",
-      "Control de FR de DM"
-    ]
+    "alta": []
   },
   {
     "numero": "2",
@@ -3757,7 +3699,6 @@
       "TSH de talón mayor a 15 uUI/ml",
       "TSH de cordón mayor a 35 uUI/ml",
       "TSH de talón mayor a 18 uUI/ml",
-      "Tomar muestra ideal a los 2 a 6 días de RN",
       "Perfil tiroideo completo para confirmación del diagnóstico",
       "Ecografía tiroidea al diagnóstico"
     ],
@@ -3859,7 +3800,6 @@
       "Determinaciones IGF-1, exámenes funcionales según la patología encontrada",
       "Cariotipo en casos seleccionados",
       "Evaluación antropométrica (peso, talla) y determinar velocidad de crecimiento",
-      "Determinar grado de desarrollo puberal según el método de Tanner",
       "Estigmas genéticos o facies características",
       "Evidencias de disfunción endocrina (hipotiroidismo, hipercortisolismo, déficit de GH)"
     ],
@@ -4445,7 +4385,6 @@
       "Cumple seis de los nueve síntomas de inatención y/o seis de los nueve síntomas de hiperactividad/impulsividad",
       "Niveles de desarrollo inapropiados",
       "Algunos de los síntomas se presentan antes cumplir los siete años de edad",
-      "Debe existir evidencia clara de alteraciones clínicas significativas en la función social, escolar, u ocupacional",
       "Se acompaña de labilidad emocional, llanto fácil",
       "Escasa tolerancia a la frustración y baja autoestima",
       "Con frecuencia fracasa en prestar atención a los detalles o es descuidado en su desempeño escolar, trabajo u otras actividades",
@@ -4544,8 +4483,7 @@
       "Aparece en general cuando la temperatura alcanza los 39°C o más",
       "La mínima sospecha de meningitis, autoriza realizar punción lumbar y analizar el líquido cefalorraquídeo",
       "Es importante reconocer los factores de riesgo mayores que son: convulsiones focales, crisis con duración mayor a 10 minutos y daño neurológico previo",
-      "Electroencefalograma que debe realizarse preferentemente después de una semana de ocurrida la crisis convulsiva",
-      "Solicitar otros exámenes según se encuentre patología agregada y a criterio del médico tratante"
+      "Electroencefalograma que debe realizarse preferentemente después de una semana de ocurrida la crisis convulsiva"
     ],
     "clasificacion": [
       "Edad de presentación de tres meses a cinco años",
@@ -4754,19 +4692,7 @@
     "complicaciones": [],
     "referencia": [
       "Persistencia de crisis, efectos colaterales o alergias",
-      "Control de crisis estable",
-      "El seguimiento y control debe ser estructurado y regular para toda persona con epilepsia",
-      "Control EEG según evolución clínica",
-      "Los niños/niñas, jóvenes y adultos que necesitan un electroencefalograma deben realizarlo cuanto antes (plazo: cuatro semanas) después de haber sido solicitado",
-      "Hacer electroencefalograma de 12 derivaciones en los adultos con sospecha de epilepsia",
-      "Desarrollan epilepsia antes de los dos años de edad o en la edad adulta",
-      "Tienen algún indicio de un comienzo focal en la historia, el examen o la electroencefalografía (a menos que haya una clara evidencia de epilepsia focal benigna)",
-      "NO interrumpir medicación sin indicación de médico tratante",
-      "NO consumir bebidas alcohólicas",
-      "Mantener un horario de sueño adecuado de siete horas aproximadamente",
-      "Evitar consumo de fármacos sin el conocimiento de su médico",
-      "Ante un cuadro infeccioso comunicar a su médico del mismo",
-      "Evitar reflejos luminosos intensos, si se ha observado que desencadenan crisis convulsivas"
+      "Control de crisis estable"
     ],
     "referenciaYAltaJuntas": true,
     "alta": []
@@ -4789,6 +4715,11 @@
       "Paciente con lupus eritematoso y posibilidad de compromiso del sistema nervioso",
       "Infecciones bacteriana, viral o parasitaria del sistema nervioso central",
       "Afecciones vasculares del sistema nervioso central",
+      "Lesión ocupativa intracerebral"
+    ],
+    "clasificacion": [],
+    "factoresRiesgo": [],
+    "examenes": [
       "Cuadro hemático",
       "Uroanálisis",
       "Electrolitos séricos y calcemia",
@@ -4799,9 +4730,6 @@
       "Electroencefalograma (según disponibilidad)",
       "Tomografía (según disponibilidad)"
     ],
-    "clasificacion": [],
-    "factoresRiesgo": [],
-    "examenes": [],
     "complicaciones": [],
     "referencia": [
       "A nivel superior al no responder al tratamiento y ante sospecha de patología asociada"
@@ -4849,10 +4777,7 @@
       "Remisión del episodio migrañoso",
       "Control del estado migrañoso",
       "Seguimiento de tratamiento preventivo",
-      "Seguimiento de tratamiento antimigrañoso",
-      "Identificación y protección de los factores desencadenantes",
-      "Tomar sus medicamentos antimigrañosos al inicio del cuadro",
-      "Se debe evitar recetas de analgésicos por otros profesionales ajenos a la medicina"
+      "Seguimiento de tratamiento antimigrañoso"
     ]
   },
   {
@@ -4909,8 +4834,7 @@
     "referenciaYAltaJuntas": false,
     "alta": [
       "No requiere hospitalización",
-      "Una vez diagnosticado y tratado para su control posterior",
-      "Se sugiere no administrar corticoides en estos pacientes"
+      "Una vez diagnosticado y tratado para su control posterior"
     ]
   },
   {
@@ -6222,11 +6146,7 @@
       "Examen de la piel",
       "Exploración neurológica"
     ],
-    "clasificacion": [
-      "Reducción de peso (IMC 18-25) baja la presión entre 5 a 10 mmHg",
-      "Dieta (rica en frutas, vegetales, pobre en grasas saturadas, baja la presión entre 4 a 14 mmHg)",
-      "Actividad física (30 min. cinco veces por semana), baja la presión entre 4 a 9 mmHg"
-    ],
+    "clasificacion": [],
     "factoresRiesgo": [
       "Sedentarismo",
       "Elevada ingesta de sal",
@@ -7095,18 +7015,7 @@
       "Ausencia de síntomas",
       "Esquema de tratamiento terminado",
       "Volver a control en una semana",
-      "Para seguimiento y control ambulatorio",
-      "Recalcar a la madre que si presenta signos de dificultad respiratoria debe regresar inmediatamente al servicio de salud",
-      "Vacuna contra el neumococo en pacientes con patología pulmonar, cardíaca o inmunosupresión",
-      "Vacuna contra la gripe",
-      "Cubrirse la boca al toser y estornudar",
-      "Desinfección de las secreciones de la nariz y de la orofaringe",
-      "Siempre que sea posible evitar el hacinamiento en salas y dormitorios, especialmente en centros asistenciales, cuarteles",
-      "Prevenir la desnutrición",
-      "Alentar la actividad física",
-      "Los pacientes en cama deben ser alimentados y mantenerse en posición erguida",
-      "Los padres de niños/niñas menores de un año deben cumplir con esquema de vacunación del PAI",
-      "Lactancia materna exclusiva hasta los seis meses de edad"
+      "Para seguimiento y control ambulatorio"
     ]
   },
   {
@@ -7767,11 +7676,9 @@
       "Presencia de hematemesis y/o melena",
       "Presencia de anemia en pacientes con antecedentes de hepatopatía crónica y/o síndrome de hipertensión portal",
       "Evaluación del grado de severidad de la pérdida sanguínea (leve, moderado, severo, masivo)",
-      "Evaluar estado de conciencia para descartar o confirmar encefalopatía hepática",
       "Hemograma, grupo sanguíneo, recuento de plaquetas, pruebas de coagulación",
       "Pruebas de función renal",
       "Pruebas de función hepática",
-      "Debe ser practicada en forma precoz y siempre con carácter diagnóstico e intención terapéutica, previa estabilización del paciente",
       "Es importante valorar si se trata de sangrado por ruptura de varices esofágicas o gástricas"
     ],
     "clasificacion": [],
@@ -7849,11 +7756,7 @@
       "Sospecha de hemorragia digestiva baja activa",
       "Paciente con enfermedades asociadas (ej. cardiopatía)",
       "Necesidad de tratamiento quirúrgico",
-      "Cuando no se cuente con métodos de diagnóstico y tratamiento",
-      "Firma del consentimiento informado por parte del paciente o familiares para procedimientos de endoscopia y quirúrgicos",
-      "Evitar el estreñimiento",
-      "Evitar manipulación anal",
-      "Mantener dieta adecuada en fibras y agua"
+      "Cuando no se cuente con métodos de diagnóstico y tratamiento"
     ],
     "referenciaYAltaJuntas": true,
     "alta": []
@@ -7880,8 +7783,7 @@
       "Ausencia de deposiciones",
       "Dolor abdominal",
       "Masa palpable (signo de Godet ocasional)",
-      "Tacto rectal: ampolla llena y heces duras",
-      "Se debe sospechar la enfermedad de Hirschsprung"
+      "Tacto rectal: ampolla llena y heces duras"
     ],
     "clasificacion": [],
     "factoresRiesgo": [],
