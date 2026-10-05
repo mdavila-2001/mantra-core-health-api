@@ -1,0 +1,166 @@
+{
+  "code": "NNAC25_NEU_11_MIGRANA",
+  "name": "Migraña (NNAC 2025)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Neurología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 11, pág. 100; niveles de atención II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pródromo de migraña: consiste en síntomas afectivos o vegetativos que aparecen de 24 a 48 horas antes del inicio del dolor de cabeza",
+        "Aura de la migraña suele preceder al dolor de cabeza",
+        "El dolor de cabeza de la migraña"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 100. La migraña es una enfermedad neurológica crónica caracterizada por ataques de cefalea de carácter pulsátil, generalmente unilateral, que se ve agravada por la actividad física y suele estar asociada a fotofobia, fonofobia, náuseas y vómitos."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Migraña sin aura",
+        "Migraña con aura, migraña crónica",
+        "Al menos cinco crisis que cumplen los criterios B-D",
+        "Episodios de cefalea de 4 a 72 horas de duración (no tratados o tratados sin éxito)",
+        "Localización unilateral",
+        "Carácter pulsátil",
+        "Dolor de intensidad moderada o grave",
+        "Empeora con o impide llevar a cabo la actividad física habitual (p. ej., andar o subir escaleras)",
+        "Náuseas y/o vómitos",
+        "Fotofobia y fonofobia",
+        "Al menos cinco crisis que cumplen los criterios B y C",
+        "Visuales"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes con un hallazgo anormal inexplicable en el examen neurológico, es decir síntomas o signos neurológicos nuevos o inexplicables",
+        "Pacientes con cefaleas atípicas o cefaleas que no cumplen la definición estricta de migraña u otro trastorno de dolor de cabeza primario",
+        "Cambio significativo reciente en el patrón, la frecuencia o la gravedad de dolores de cabeza",
+        "Dolor de cabeza siempre en el mismo lado",
+        "Dolores de cabeza que no responden al tratamiento",
+        "Dolores de cabeza de inicio reciente después de los 50 años",
+        "Dolores de cabeza de inicio reciente en pacientes con cáncer o infección por VIH",
+        "Síntomas y signos asociados tales como fiebre, tortícolis, papiledema, deterioro cognitivo o cambios de personalidad",
+        "Cefalea que despierta al paciente"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["G43: Migraña"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 100); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

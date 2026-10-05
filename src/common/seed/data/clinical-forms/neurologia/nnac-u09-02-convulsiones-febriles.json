@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 2 de la unidad 9 de las NNAC, pág. 605; CIE-10 G40.0; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 2 de la unidad 9, pág. 605; CIE-10 G40.0; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -38,8 +38,7 @@
         "Aparece en general cuando la temperatura alcanza los 39°C o más",
         "La mínima sospecha de meningitis, autoriza realizar punción lumbar y analizar el líquido cefalorraquídeo",
         "Es importante reconocer los factores de riesgo mayores que son: convulsiones focales, crisis con duración mayor a 10 minutos y daño neurológico previo",
-        "Electroencefalograma que debe realizarse preferentemente después de una semana de ocurrida la crisis convulsiva",
-        "Solicitar otros exámenes según se encuentre patología agregada y a criterio del médico tratante"
+        "Electroencefalograma que debe realizarse preferentemente después de una semana de ocurrida la crisis convulsiva"
       ],
       "multiple": true,
       "allowOther": true,

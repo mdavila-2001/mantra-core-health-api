@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 2 de la unidad 12 de las NNAC, pág. 698; CIE-10 I10; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 2 de la unidad 12, pág. 698; CIE-10 I10; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -58,20 +58,6 @@
       "multiple": true,
       "allowOther": true,
       "description": "Según la NNAC, pág. 698. La hipertensión arterial sistémica (HAS) es la elevación sostenida de la presión arterial sistólica igual o mayor a 140 mmHg y/o presión arterial diastólica igual o mayor a 90 mmHg (tomando en cuenta la desaparición de ruidos), medidas en tres lecturas por visita, obtenidas en dos consultas."
-    },
-    {
-      "section": "Criterios de la norma",
-      "code": "clasificacion_nnac",
-      "name": "Clasificación o causas que describe la NNAC",
-      "dataType": "json",
-      "required": false,
-      "options": [
-        "Reducción de peso (IMC 18-25) baja la presión entre 5 a 10 mmHg",
-        "Dieta (rica en frutas, vegetales, pobre en grasas saturadas, baja la presión entre 4 a 14 mmHg)",
-        "Actividad física (30 min. cinco veces por semana), baja la presión entre 4 a 9 mmHg"
-      ],
-      "multiple": true,
-      "allowOther": true
     },
     {
       "section": "Criterios de la norma",
