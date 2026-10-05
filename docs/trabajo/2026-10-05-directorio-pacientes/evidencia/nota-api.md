@@ -1,4 +1,4 @@
-﻿# Avance API — 2026-10-05
+# Avance API — 2026-10-05
 
 Estado: código escrito; unitarios dirigidos en verde antes del último cambio de logging.
 
@@ -102,3 +102,23 @@ Inspección del SDK instalado: @mikro-orm/sql/AbstractSqlConnection.js prepara S
 - api-build-current-bases.txt y api-typecheck-current-bases.txt: EXIT_CODE=0, sin diagnosticos, sobre dev actualizado. No se cambia codigo de produccion despues de estos gates.
 - Listener compilado real PID17880/sesion34264 en3105, livenessHTTP200. Log ignorado api-listener-raw.txt confirma Nest started, ORM_SCHEMA_SYNC=off y SEED_ON_BOOT=false. Disponible para agente principal; recorrido navegador real aun pendiente en esta nota.
 - Pendientes de API: lint de archivos QA nuevos y OpenAPI lint, gates de variante test tras cambio coordinado de rama/dependencias. Lint global previo PASS corresponde instantanea anterior y no se reetiqueta como actual.
+
+## Variante test: validacion con su base y dependencias
+
+- yarn install --immutable PASS2.18s (api-test-install-immutable.txt), sin alterar yarn.lock/resolutions.
+- Typecheck inicial FAIL2 por helper fn() de public-profile-projection.service.spec.ts heredado de origin/test; diff de spec/service a base vacio. PLAN H3.S1.M8 previo al fix, helper acepta implementation opcional y la pasa a jest.fn, assertions intactas. Reejecucion api-test-typecheck-final.txt EXIT0. Dev ya trae arreglo propio: no trasladar este fix a dev.
+- api-test-build-final.txt EXIT0 y api-test-build-metadata-final.txt EXIT0 tras completar Swagger. api-test-unit-final.txt: 7 suites/74 tests PASS,15.249s (70 directorio/auth +4 projection). Incluye regresion del helper real.
+- api-test-lint-final.txt global FAIL53 prettier en5 archivos ajenos; todos identicos origin/test, demostrado api-test-baseline-gate-failures.txt. NO se aplico --fix global. api-test-lint-scoped.txt17archivospropios PASS; api-test-lint-metadata-final.txt controller Swagger final PASS. No declarar lint global actual PASS.
+- OpenAPI inicial FAIL2 errores heredados +2 warnings propios (descripciones options/conversation). ApiOperation propio completado y generacion aislada real PASS3paths8schemas. api-test-openapi-lint-rechecked.txt FAIL solo2 errores heredados, sin warnings propios: operaciones publicas services/products sin security, objetos identicos origin/test demostrados. No tocar contratos publicos ajenos ni declarar OpenAPI global PASS.
+- api-test-integration-real-final.txt: AppModule/SQL/chat reales,1 suite/9tests PASS49.019s EXIT0 con10/25/50, scopedoperatorSTAFF,tenantlessadmin,minimizacion,kill-test y reuso persistido/revocaciones. api-test-directory-log-privacy.txt contiene27 logs literales minimos sin queryfiltros/body/auth. Fixtureauth ignorada renovada.
+- Incidencia de orquestacion: lint controller devolvio sessionID y se inicio integración antes de comprobar su cierre; lint se confirmo terminado PASS inmediatamente al revisar. No hubo otros runners despues. Se registra desviacion en vez de afirmar serializacion perfecta.
+- Listener TEST real3105 PID19064/sesion98411, livenessHTTP200 y Neststarted. Root realiza segundo navegador real y capturas positivas; aun pendiente en esta nota. No editar/resetear fixtures existentes; cleanup se limita al stack propio al finalizar ambos flujos.
+
+## Cierre API dev final y recursos
+
+- Dev HEAD639c9722 incorpora metadatos finales propios. api-dev-install-final.txt: install--immutable PASS47.133s (rebuild nativo cpu-features/ssh2 por tree distinto). api-dev-typecheck-final.txt, api-dev-build-final.txt y api-dev-lint-final.txt: todos EXIT_CODE=0 sin diagnosticos. Lint global actual DEV PASS; no confundir con TEST global53errores heredados.
+- No se repitieron unit/SQL dev por cambio exclusivo en textos ApiOperation: unit70 directorio/auth y SQL9 dev ya PASS; test74unit/SQL9 y metadata final build/lint tambien ejecutados. La documentacion no cambia autorizacion o consulta.
+- Root informo E2E frontend real contraAPIdevPASS1/4.9s y contraAPItestPASS1/5.6s, apertura/recarga/reapertura mismo conversationId, consola/red limpias. Evidencia navegador la mantiene root en frontend; no se presenta como ejecutada por este agente.
+- P2 independiente final abrio26 capturas interceptadas y2 positivas reales conservadas, con10preguntas y nota por pantalla en frontend revision-visual-p2.md. ReservaMENORplaceholder1024, sin MAYOR/BLOQUEANTE abierto. Captura historica de fallo TEST_BUG no conservada por limpiezaPlaywright, anotado limite y no usada para validar estado actual.
+- Ambos listeners propios se cerraron por root verificando PID. api-local-cleanup.txt: compose down EXIT0 limitado a proyectoalovida-directory-20261005, sin-v, contenedores y network propios retirados;3volumenes sinteticos conservados, DockerDesktop intacto. No reset ni cambios a recursos preexistentes.
+- Cierre honesto: directorio/API funcional verificado en ambasbases; lint global TEST y OpenAPIglobal siguen FAIL por baseline demostrado. No afirmar DoDglobal completo/mergeable; checksPR/reportes finales los coordina root. Credenciales locales y caches auth permanecen fuera de git.
