@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConcurrencyConflictException,
   PreconditionFailedException,
@@ -150,9 +151,11 @@ export class ObservationsService {
         encounter.patientProfileId !== dto.patientProfileId ||
         encounter.tenantId !== dto.custodianTenantId
       ) {
-        throw new ResourceNotFoundException('Encuentro no encontrado', {
-          encounterId: dto.encounterId,
-        });
+        throw new ResourceNotFoundException(
+          'Encuentro no encontrado',
+          { encounterId: dto.encounterId },
+          ClinicalErrorReason.ENCOUNTER_NOT_FOUND,
+        );
       }
       // BR-14 (CL-07): el encuentro tiene que seguir abierto para admitir una
       // observación nueva contra él.
@@ -174,9 +177,11 @@ export class ObservationsService {
         order.patientProfileId !== dto.patientProfileId ||
         !custodiesOrder
       ) {
-        throw new ResourceNotFoundException('Orden de servicio no encontrada', {
-          serviceRequestId: dto.basedOnServiceRequestId,
-        });
+        throw new ResourceNotFoundException(
+          'Orden de servicio no encontrada',
+          { serviceRequestId: dto.basedOnServiceRequestId },
+          ClinicalErrorReason.SERVICE_REQUEST_NOT_FOUND,
+        );
       }
     }
   }
@@ -200,6 +205,8 @@ export class ObservationsService {
       if (!value.valueTypeConceptId) {
         throw new PreconditionFailedException(
           'La observación requiere un valor (cantidad, decimal, texto, booleano o concepto)',
+          undefined,
+          ClinicalErrorReason.OBSERVATION_VALUE_MISSING,
         );
       }
 
@@ -307,9 +314,13 @@ export class ObservationsService {
         observationId,
       );
       if (!observation) {
-        throw new ResourceNotFoundException('Observación no encontrada', {
-          observationId,
-        });
+        throw new ResourceNotFoundException(
+          'Observación no encontrada',
+          {
+            observationId,
+          },
+          ClinicalErrorReason.OBSERVATION_NOT_FOUND,
+        );
       }
       // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
       await this.clinicalRead.assertPuedeEscribirHistoria(
@@ -324,6 +335,7 @@ export class ObservationsService {
             observationId,
             status: observation.statusConceptId,
           },
+          ClinicalErrorReason.OBSERVATION_NOT_AMENDABLE,
         );
       }
       if (
@@ -336,6 +348,7 @@ export class ObservationsService {
             expected: dto.expectedRowVersion,
             actual: observation.rowVersion,
           },
+          ClinicalErrorReason.OBSERVATION_VERSION_MISMATCH,
         );
       }
 

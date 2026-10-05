@@ -17,6 +17,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   ADMIN_GENDER_CONCEPT_BY_CODE,
   BIRTH_SEX_CONCEPT_BY_CODE,
@@ -202,6 +203,8 @@ export class IamPatientSelfRegistrationService {
         );
         throw new ConflictException(
           'Ya existe una cuenta con ese documento de identidad',
+          undefined,
+          IamErrorReason.NATIONAL_ID_ALREADY_REGISTERED,
         );
       }
 

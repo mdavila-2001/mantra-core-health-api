@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import { BillsRepository, PaymentsMadeRepository } from '../repositories';
 import {
   ExecutePaymentMadeDto,
@@ -67,6 +68,7 @@ export class PaymentsMadeService {
         throw new PreconditionFailedException(
           'El monto del pago debe ser positivo',
           { amount: dto.amount },
+          BillingErrorReason.PAYMENT_MADE_AMOUNT_NOT_POSITIVE,
         );
       }
 
@@ -81,6 +83,7 @@ export class PaymentsMadeService {
         throw new PreconditionFailedException(
           'La suma asignada más retención excede el monto del pago',
           { amount: dto.amount, allocated: fromCents(allocatedCents) },
+          BillingErrorReason.PAYMENT_MADE_ALLOCATION_EXCEEDS_AMOUNT,
         );
       }
 
@@ -103,6 +106,7 @@ export class PaymentsMadeService {
           throw new ResourceNotFoundException(
             'Factura de proveedor no encontrada',
             { billId: alloc.billId },
+            BillingErrorReason.PAYMENT_MADE_BILL_NOT_FOUND,
           );
 
         const balanceCents = toCents(bill.balance ?? '0');
@@ -111,6 +115,7 @@ export class PaymentsMadeService {
           throw new PreconditionFailedException(
             'La factura de proveedor no tiene saldo',
             { billId: bill.id },
+            BillingErrorReason.PAYMENT_MADE_BILL_NO_BALANCE,
           );
         }
         if (allocCents > balanceCents) {
@@ -120,6 +125,7 @@ export class PaymentsMadeService {
               billId: bill.id,
               balance: bill.balance,
             },
+            BillingErrorReason.PAYMENT_MADE_ALLOCATION_EXCEEDS_BILL_BALANCE,
           );
         }
 

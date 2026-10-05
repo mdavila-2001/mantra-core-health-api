@@ -12,6 +12,7 @@ import {
   ReviewsRepository,
 } from '../repositories';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type { PublicProfileReviewsDto, ServiceReviewPageDto } from '../dto';
 
 /**
@@ -64,9 +65,13 @@ export class CommunityReviewsReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.REVIEW_TARGET_PROFILE_NOT_FOUND,
+      );
 
     return this.projectPage(em, profileId, options);
   }

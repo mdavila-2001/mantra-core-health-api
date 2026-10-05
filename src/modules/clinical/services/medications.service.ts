@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -219,6 +220,7 @@ export class MedicationsService {
       throw new PreconditionFailedException(
         'La condición indicada no existe o no pertenece a este paciente',
         { conditionId, patientProfileId },
+        ClinicalErrorReason.MEDICATION_INDICATION_INVALID,
       );
     }
   }
@@ -313,9 +315,13 @@ export class MedicationsService {
   ): Promise<MedicationRequests> {
     const request = await this.requestsRepo.findById(tx, requestId);
     if (!request) {
-      throw new ResourceNotFoundException('Receta no encontrada', {
-        requestId,
-      });
+      throw new ResourceNotFoundException(
+        'Receta no encontrada',
+        {
+          requestId,
+        },
+        ClinicalErrorReason.MEDICATION_REQUEST_NOT_FOUND,
+      );
     }
     return request;
   }
@@ -410,6 +416,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_EDITABLE,
         );
       }
 
@@ -483,6 +490,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede firmarse antes de emitirse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_SIGNABLE,
         );
       }
       // Antes del atajo idempotente: quien no es el prescriptor recibe 403
@@ -537,6 +545,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede emitirse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_ISSUABLE,
         );
       }
 
@@ -553,6 +562,7 @@ export class MedicationsService {
           throw new ConflictException(
             'La clave de idempotencia ya fue usada para emitir otra receta',
             { requestId, idempotencyKey },
+            ClinicalErrorReason.MEDICATION_ISSUE_IDEMPOTENCY_KEY_CONFLICT,
           );
         }
       }
@@ -567,6 +577,7 @@ export class MedicationsService {
           throw new PreconditionFailedException(
             'La política vigente exige firmar la receta antes de emitirla',
             { requestId },
+            ClinicalErrorReason.MEDICATION_SIGNATURE_REQUIRED,
           );
         }
       }
@@ -634,6 +645,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede invalidarse',
           { requestId, status: request.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_INVALIDATABLE,
         );
       }
       request.statusConceptId = CLIN.MEDICATION_REQUEST_INVALIDATED;
@@ -685,6 +697,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida (ISSUED) puede reemplazarse',
           { requestId, status: original.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_REPLACEABLE,
         );
       }
 
@@ -774,6 +787,7 @@ export class MedicationsService {
         throw new PreconditionFailedException(
           'Solo una receta emitida o completada puede renovarse',
           { requestId, status: source.statusConceptId },
+          ClinicalErrorReason.MEDICATION_REQUEST_NOT_RENEWABLE,
         );
       }
 
@@ -840,9 +854,13 @@ export class MedicationsService {
       if (dto.requestId) {
         const request = await this.requestsRepo.findById(tx, dto.requestId);
         if (!request) {
-          throw new ResourceNotFoundException('Prescripción no encontrada', {
-            requestId: dto.requestId,
-          });
+          throw new ResourceNotFoundException(
+            'Prescripción no encontrada',
+            {
+              requestId: dto.requestId,
+            },
+            ClinicalErrorReason.MEDICATION_REQUEST_FOR_ADMINISTRATION_NOT_FOUND,
+          );
         }
         // Solo se dispensa contra una receta emitida (sellada). Un borrador aún
         // no surte efecto; una invalidada/reemplazada/completada no es dispensable.
@@ -853,6 +871,7 @@ export class MedicationsService {
               requestId: dto.requestId,
               status: request.statusConceptId,
             },
+            ClinicalErrorReason.MEDICATION_REQUEST_NOT_ISSUED,
           );
         }
         if (dto.isFinalDose) {

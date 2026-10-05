@@ -1,4 +1,5 @@
 ﻿import { PreconditionFailedException } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 
 /**
  * Lo que se guarda de cada cambio en la vida de una cita
@@ -147,6 +148,7 @@ export function requireReason(raw: string | undefined, accion: string): string {
     throw new PreconditionFailedException(
       `Indique el motivo para ${accion}: es obligatorio y debe explicar el cambio.`,
       { failureCode: 'REASON_REQUIRED', minLength: MIN_REASON_LENGTH },
+      SchedulingErrorReason.REASON_REQUIRED,
     );
   }
 
@@ -154,6 +156,7 @@ export function requireReason(raw: string | undefined, accion: string): string {
     throw new PreconditionFailedException(
       `El motivo para ${accion} no puede ser un texto de relleno: escriba la razón real.`,
       { failureCode: 'REASON_PLACEHOLDER' },
+      SchedulingErrorReason.REASON_PLACEHOLDER,
     );
   }
 

@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import { DunningRepository, InvoicesRepository } from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import {
@@ -86,6 +87,7 @@ export class DunningService {
           {
             runNumber: dto.runNumber,
           },
+          BillingErrorReason.DUNNING_RUN_NUMBER_ALREADY_EXISTS,
         );
       }
 

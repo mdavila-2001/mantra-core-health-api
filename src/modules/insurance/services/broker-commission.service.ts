@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -54,9 +55,13 @@ export class BrokerCommissionService {
     return this.em.transactional(async (tx) => {
       const broker = await this.catalog.findBroker(tx, dto.insuranceBrokerId);
       if (!broker)
-        throw new ResourceNotFoundException('Broker no encontrado', {
-          brokerId: dto.insuranceBrokerId,
-        });
+        throw new ResourceNotFoundException(
+          'Broker no encontrado',
+          {
+            brokerId: dto.insuranceBrokerId,
+          },
+          InsuranceErrorReason.BROKER_NOT_FOUND,
+        );
       const agreement = await this.catalog.findAgreement(
         tx,
         dto.brokerCarrierAgreementId,
@@ -67,12 +72,17 @@ export class BrokerCommissionService {
           {
             agreementId: dto.brokerCarrierAgreementId,
           },
+          InsuranceErrorReason.AGREEMENT_NOT_FOUND,
         );
       }
       if (agreement.statusConceptId !== INS.AGREEMENT_ACTIVE) {
-        throw new PreconditionFailedException('El acuerdo no está activo', {
-          agreementId: dto.brokerCarrierAgreementId,
-        });
+        throw new PreconditionFailedException(
+          'El acuerdo no está activo',
+          {
+            agreementId: dto.brokerCarrierAgreementId,
+          },
+          InsuranceErrorReason.AGREEMENT_NOT_ACTIVE,
+        );
       }
 
       const periodStart = new Date(dto.periodStart);
@@ -88,6 +98,7 @@ export class BrokerCommissionService {
         throw new ConflictException(
           'Ya existe liquidación para el periodo',
           {},
+          InsuranceErrorReason.COMMISSION_STATEMENT_ALREADY_EXISTS,
         );
 
       const statement = this.repo.createStatement(tx, {

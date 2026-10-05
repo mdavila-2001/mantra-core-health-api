@@ -25,6 +25,7 @@ import {
 import { AUTHZ } from '../authz.concepts';
 import { EFFECT_CONCEPT } from './authz-policies.service';
 import { SCOPE_CONCEPT } from './authz-catalog.service';
+import { AuthzErrorReason } from '../authz.error-reasons';
 
 const SUBJECT_TYPE_CONCEPT: Record<SubjectType, string> = {
   USER: AUTHZ.SUBJECT_TYPE_USER,
@@ -88,6 +89,7 @@ export class AuthzGrantsService {
       throw new PreconditionFailedException(
         'Indique el rol a asignar por `roleId` o por `roleCode`',
         {},
+        AuthzErrorReason.ROLE_ASSIGNMENT_MISSING_ROLE_REFERENCE,
       );
     }
     return this.em.transactional(async (tx) => {
@@ -95,20 +97,29 @@ export class AuthzGrantsService {
         ? await this.rolesRepo.findById(tx, dto.roleId)
         : await this.rolesRepo.findByCode(tx, dto.roleCode!);
       if (!role)
-        throw new ResourceNotFoundException('Rol no encontrado', {
-          roleId: dto.roleId,
-          roleCode: dto.roleCode,
-        });
+        throw new ResourceNotFoundException(
+          'Rol no encontrado',
+          {
+            roleId: dto.roleId,
+            roleCode: dto.roleCode,
+          },
+          AuthzErrorReason.ROLE_ASSIGNMENT_ROLE_NOT_FOUND,
+        );
       if (!role.isAssignable) {
-        throw new PreconditionFailedException('El rol no es asignable', {
-          roleId: role.id,
-          roleCode: role.code,
-        });
+        throw new PreconditionFailedException(
+          'El rol no es asignable',
+          {
+            roleId: role.id,
+            roleCode: role.code,
+          },
+          AuthzErrorReason.ROLE_ASSIGNMENT_ROLE_NOT_ASSIGNABLE,
+        );
       }
       if (dto.validFrom && dto.validTo && dto.validFrom >= dto.validTo) {
         throw new PreconditionFailedException(
           'validFrom debe ser anterior a validTo',
           {},
+          AuthzErrorReason.ROLE_ASSIGNMENT_INVALID_VALIDITY_WINDOW,
         );
       }
 
@@ -136,6 +147,7 @@ export class AuthzGrantsService {
             branchId: dto.branchId,
             practiceId: dto.practiceId,
           },
+          AuthzErrorReason.ROLE_ASSIGNMENT_ALREADY_ACTIVE,
         );
       }
 
@@ -180,9 +192,13 @@ export class AuthzGrantsService {
         dto.permissionId,
       );
       if (!permission) {
-        throw new ResourceNotFoundException('Permiso no encontrado', {
-          permissionId: dto.permissionId,
-        });
+        throw new ResourceNotFoundException(
+          'Permiso no encontrado',
+          {
+            permissionId: dto.permissionId,
+          },
+          AuthzErrorReason.PERMISSION_GRANT_PERMISSION_NOT_FOUND,
+        );
       }
       const existing = await this.permGrantsRepo.findActive(
         tx,
@@ -196,6 +212,7 @@ export class AuthzGrantsService {
             userId,
             permissionId: dto.permissionId,
           },
+          AuthzErrorReason.PERMISSION_GRANT_ALREADY_ACTIVE,
         );
       }
 
@@ -235,9 +252,13 @@ export class AuthzGrantsService {
         dto.permissionId,
       );
       if (!permission) {
-        throw new ResourceNotFoundException('Permiso no encontrado', {
-          permissionId: dto.permissionId,
-        });
+        throw new ResourceNotFoundException(
+          'Permiso no encontrado',
+          {
+            permissionId: dto.permissionId,
+          },
+          AuthzErrorReason.RESOURCE_SCOPE_GRANT_PERMISSION_NOT_FOUND,
+        );
       }
       const existing = await this.resourceGrantsRepo.findExisting(
         tx,
@@ -253,6 +274,7 @@ export class AuthzGrantsService {
             permissionId: dto.permissionId,
             resourceId: dto.resourceId,
           },
+          AuthzErrorReason.RESOURCE_SCOPE_GRANT_ALREADY_EXISTS,
         );
       }
 

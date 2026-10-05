@@ -8,6 +8,7 @@ import {
 import type { MedicalVisitors, PharmaLabs } from '../entities';
 import { OrganizationRepository, VisitorsRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * Puerta única por la que pasan todas las operaciones del carril que dependen de
@@ -130,14 +131,18 @@ export class PharmaLabAccessService {
   ): Promise<PharmaLabs> {
     const lab = await this.orgRepo.findLab(tx, pharmaLabId);
     if (!lab) {
-      throw new ResourceNotFoundException('Laboratorio no encontrado', {
-        pharmaLabId,
-      });
+      throw new ResourceNotFoundException(
+        'Laboratorio no encontrado',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_FOUND,
+      );
     }
     if (lab.statusConceptId !== PHL.LAB_ACTIVE) {
-      throw new PreconditionFailedException('El laboratorio no está activo', {
-        pharmaLabId,
-      });
+      throw new PreconditionFailedException(
+        'El laboratorio no está activo',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_ACTIVE,
+      );
     }
     return lab;
   }
@@ -160,9 +165,11 @@ export class PharmaLabAccessService {
   ): Promise<PharmaLabs> {
     const lab = await this.orgRepo.findLab(tx, pharmaLabId);
     if (!lab) {
-      throw new ResourceNotFoundException('Laboratorio no encontrado', {
-        pharmaLabId,
-      });
+      throw new ResourceNotFoundException(
+        'Laboratorio no encontrado',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_FOUND,
+      );
     }
     return lab;
   }
@@ -192,6 +199,7 @@ export class PharmaLabAccessService {
       throw new ResourceNotFoundException(
         'La cuenta no corresponde a un visitador médico',
         { userId: actor.id },
+        PharmaLabErrorReason.VISITOR_PROFILE_NOT_FOUND,
       );
     }
     return {
@@ -217,6 +225,7 @@ export class PharmaLabAccessService {
       throw new PreconditionFailedException(
         'El visitador no tiene una vinculación activa con un laboratorio',
         { medicalVisitorId: visitor.id },
+        PharmaLabErrorReason.VISITOR_LINK_NOT_ACTIVE,
       );
     }
     const lab = await this.orgRepo.findLab(tx, visitor.pharmaLabId);
@@ -224,6 +233,7 @@ export class PharmaLabAccessService {
       throw new PreconditionFailedException(
         'El laboratorio del visitador no está activo',
         { medicalVisitorId: visitor.id, pharmaLabId: visitor.pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_ACTIVE,
       );
     }
     return lab;
@@ -248,6 +258,7 @@ export class PharmaLabAccessService {
       throw new ResourceNotFoundException(
         'Visitador no encontrado en el laboratorio',
         { pharmaLabId, medicalVisitorId },
+        PharmaLabErrorReason.VISITOR_NOT_FOUND_IN_LAB,
       );
     }
     return visitor;

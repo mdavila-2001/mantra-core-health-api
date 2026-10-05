@@ -8,6 +8,7 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   PatientStatementsRepository,
   InvoicesRepository,
@@ -93,6 +94,7 @@ export class PatientStatementsService {
             periodStart: dto.periodStart,
             periodEnd: dto.periodEnd,
           },
+          BillingErrorReason.PATIENT_STATEMENT_PERIOD_ALREADY_EXISTS,
         );
       }
 

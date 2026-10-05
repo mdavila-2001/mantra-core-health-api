@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import { SchedulingBookingsRepository } from '../repositories';
 import { SCHED } from '../scheduling.concepts';
 
@@ -260,6 +261,7 @@ export class SchedulingProfessionalTimeService {
         endAt: primero.endAt,
         resourceName: primero.resourceName,
       },
+      SchedulingErrorReason.PRACTITIONER_NOT_AVAILABLE,
     );
   }
 }

@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { NotificationsService } from '../../messaging/services';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -202,11 +203,17 @@ export class IamPasswordResetService {
     const outcome = await this.em.transactional(async (tx) => {
       const reset = await this.resetsRepo.findByTokenHash(tx, tokenHash);
       if (!reset) {
-        throw new UnauthorizedException('Token de restablecimiento inválido');
+        throw new UnauthorizedException(
+          'Token de restablecimiento inválido',
+          undefined,
+          IamErrorReason.PASSWORD_RESET_TOKEN_INVALID,
+        );
       }
       if (reset.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new UnauthorizedException(
           'El token de restablecimiento ya fue utilizado',
+          undefined,
+          IamErrorReason.PASSWORD_RESET_TOKEN_ALREADY_USED,
         );
       }
       if (reset.expiresAt.getTime() < Date.now()) {
@@ -223,7 +230,11 @@ export class IamPasswordResetService {
       // no hay dónde escribir la contraseña, y crear una nueva sería dar acceso
       // a una cuenta que alguien deshabilitó a propósito.
       if (!credential || credential.userId !== reset.userId) {
-        throw new UnauthorizedException('Token de restablecimiento inválido');
+        throw new UnauthorizedException(
+          'Token de restablecimiento inválido',
+          undefined,
+          IamErrorReason.PASSWORD_RESET_CREDENTIAL_MISSING,
+        );
       }
 
       credential.secretHash = secretHash;
@@ -271,7 +282,11 @@ export class IamPasswordResetService {
     });
 
     if (outcome.expired) {
-      throw new UnauthorizedException('El token de restablecimiento expiró');
+      throw new UnauthorizedException(
+        'El token de restablecimiento expiró',
+        undefined,
+        IamErrorReason.PASSWORD_RESET_TOKEN_EXPIRED,
+      );
     }
     return {
       userId: outcome.userId,

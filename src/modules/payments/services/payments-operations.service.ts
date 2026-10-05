@@ -21,6 +21,7 @@ import {
   CreateReconciliationRunDto,
   ReconciliationRunResponseDto,
 } from '../dto';
+import { PaymentsErrorReason } from '../payments.error-reasons';
 
 const CURRENCY_CONCEPT: Readonly<Record<'BOB' | 'USD', string>> = {
   BOB: CONCEPTS.CURRENCY_BOB,
@@ -76,6 +77,7 @@ export class PaymentsOperationsService {
         {
           code: dto.code,
         },
+        PaymentsErrorReason.FEE_SCHEDULE_MISSING_PERCENTAGE,
       );
     }
     if (dto.method === 'FIXED' && !dto.fixedAmount) {
@@ -84,6 +86,7 @@ export class PaymentsOperationsService {
         {
           code: dto.code,
         },
+        PaymentsErrorReason.FEE_SCHEDULE_MISSING_FIXED_AMOUNT,
       );
     }
 
@@ -239,6 +242,7 @@ export class PaymentsOperationsService {
         {
           payeeRefId: dto.payeeRefId,
         },
+        PaymentsErrorReason.PAYOUT_NET_AMOUNT_NOT_POSITIVE,
       );
     }
 

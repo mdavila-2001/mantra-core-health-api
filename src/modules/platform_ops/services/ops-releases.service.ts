@@ -14,6 +14,7 @@ import {
   OpsReliabilityRepository,
   OpsPracticesRepository,
 } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
 import {
   CreateChangeRequestDto,
   ChangeRequestResponseDto,
@@ -124,6 +125,7 @@ export class OpsReleasesService {
           plannedStartAt: dto.plannedStartAt,
           plannedEndAt: dto.plannedEndAt,
         },
+        PlatformOpsErrorReason.CHANGE_WINDOW_INVERTED,
       );
     }
 
@@ -133,14 +135,22 @@ export class OpsReleasesService {
         dto.serviceComponentId,
       );
       if (!component) {
-        throw new ResourceNotFoundException('Componente no encontrado', {
-          serviceComponentId: dto.serviceComponentId,
-        });
+        throw new ResourceNotFoundException(
+          'Componente no encontrado',
+          {
+            serviceComponentId: dto.serviceComponentId,
+          },
+          PlatformOpsErrorReason.SERVICE_COMPONENT_NOT_FOUND,
+        );
       }
       if (component.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El componente no está activo', {
-          serviceComponentId: dto.serviceComponentId,
-        });
+        throw new PreconditionFailedException(
+          'El componente no está activo',
+          {
+            serviceComponentId: dto.serviceComponentId,
+          },
+          PlatformOpsErrorReason.SERVICE_COMPONENT_NOT_ACTIVE,
+        );
       }
 
       if (dto.maintenanceWindowId) {
@@ -154,6 +164,7 @@ export class OpsReleasesService {
             {
               maintenanceWindowId: dto.maintenanceWindowId,
             },
+            PlatformOpsErrorReason.MAINTENANCE_WINDOW_NOT_FOUND,
           );
         }
         if (window.statusConceptId === CONCEPTS.MAINTENANCE_WINDOW_CLOSED) {
@@ -162,6 +173,7 @@ export class OpsReleasesService {
             {
               maintenanceWindowId: dto.maintenanceWindowId,
             },
+            PlatformOpsErrorReason.MAINTENANCE_WINDOW_CLOSED,
           );
         }
         // Atarse a una ventana y planificarse fuera de ella es contradictorio:
@@ -172,6 +184,7 @@ export class OpsReleasesService {
             {
               maintenanceWindowId: dto.maintenanceWindowId,
             },
+            PlatformOpsErrorReason.CHANGE_STARTS_BEFORE_WINDOW,
           );
         }
         if (plannedEndAt && plannedEndAt > window.endsAt) {
@@ -180,6 +193,7 @@ export class OpsReleasesService {
             {
               maintenanceWindowId: dto.maintenanceWindowId,
             },
+            PlatformOpsErrorReason.CHANGE_ENDS_AFTER_WINDOW,
           );
         }
       }
@@ -240,6 +254,7 @@ export class OpsReleasesService {
           {
             changeRequestId,
           },
+          PlatformOpsErrorReason.CHANGE_REQUEST_NOT_FOUND,
         );
       }
       if (!DECIDABLE_CHANGE_STATES.includes(change.statusConceptId)) {
@@ -248,6 +263,7 @@ export class OpsReleasesService {
           {
             changeRequestId,
           },
+          PlatformOpsErrorReason.CHANGE_NOT_DECIDABLE,
         );
       }
       // Aprobar el propio cambio anularía el control: el CAB existe para que
@@ -256,6 +272,7 @@ export class OpsReleasesService {
         throw new PreconditionFailedException(
           'Quien solicita el cambio no puede aprobarlo',
           { changeRequestId },
+          PlatformOpsErrorReason.APPROVER_IS_REQUESTER,
         );
       }
 
@@ -277,10 +294,14 @@ export class OpsReleasesService {
             approval.approverUserId === actor.id,
         )
       ) {
-        throw new ConflictException('Ese aprobador ya votó en este paso', {
-          changeRequestId,
-          approvalStep: dto.approvalStep,
-        });
+        throw new ConflictException(
+          'Ese aprobador ya votó en este paso',
+          {
+            changeRequestId,
+            approvalStep: dto.approvalStep,
+          },
+          PlatformOpsErrorReason.APPROVAL_STEP_ALREADY_VOTED,
+        );
       }
       // Saltarse un paso dejaría aprobado un cambio que nadie miró en ese nivel.
       if (
@@ -293,6 +314,7 @@ export class OpsReleasesService {
             changeRequestId,
             approvalStep: dto.approvalStep,
           },
+          PlatformOpsErrorReason.APPROVAL_STEP_OUT_OF_ORDER,
         );
       }
 
@@ -361,9 +383,13 @@ export class OpsReleasesService {
         dto.serviceComponentId,
       );
       if (!component) {
-        throw new ResourceNotFoundException('Componente no encontrado', {
-          serviceComponentId: dto.serviceComponentId,
-        });
+        throw new ResourceNotFoundException(
+          'Componente no encontrado',
+          {
+            serviceComponentId: dto.serviceComponentId,
+          },
+          PlatformOpsErrorReason.SERVICE_COMPONENT_NOT_FOUND,
+        );
       }
 
       if (dto.producedByToolId) {
@@ -372,9 +398,13 @@ export class OpsReleasesService {
           dto.producedByToolId,
         );
         if (!tool) {
-          throw new ResourceNotFoundException('Herramienta no encontrada', {
-            producedByToolId: dto.producedByToolId,
-          });
+          throw new ResourceNotFoundException(
+            'Herramienta no encontrada',
+            {
+              producedByToolId: dto.producedByToolId,
+            },
+            PlatformOpsErrorReason.BUILD_TOOL_NOT_FOUND,
+          );
         }
         // Un artefacto construido con una herramienta no homologada no puede ir
         // a producción, y no marcarlo aquí lo dejaría pasar sin que nadie lo vea.
@@ -384,6 +414,7 @@ export class OpsReleasesService {
             {
               producedByToolId: dto.producedByToolId,
             },
+            PlatformOpsErrorReason.BUILD_TOOL_NOT_APPROVED,
           );
         }
       }
@@ -398,6 +429,7 @@ export class OpsReleasesService {
           {
             artifactRef: dto.artifactRef,
           },
+          PlatformOpsErrorReason.ARTIFACT_REF_DUPLICATE,
         );
       }
       const duplicateVersion = await this.releasesRepo.findArtifactByVersion(
@@ -406,10 +438,14 @@ export class OpsReleasesService {
         dto.version,
       );
       if (duplicateVersion) {
-        throw new ConflictException('El componente ya publicó esa versión', {
-          serviceComponentId: dto.serviceComponentId,
-          version: dto.version,
-        });
+        throw new ConflictException(
+          'El componente ya publicó esa versión',
+          {
+            serviceComponentId: dto.serviceComponentId,
+            version: dto.version,
+          },
+          PlatformOpsErrorReason.ARTIFACT_VERSION_DUPLICATE,
+        );
       }
 
       const artifact = this.releasesRepo.createArtifact(tx, {
@@ -470,12 +506,17 @@ export class OpsReleasesService {
           {
             changeRequestId: dto.changeRequestId,
           },
+          PlatformOpsErrorReason.CHANGE_REQUEST_NOT_FOUND,
         );
       }
       if (change.statusConceptId !== CONCEPTS.CHANGE_APPROVED) {
-        throw new PreconditionFailedException('El cambio no está aprobado', {
-          changeRequestId: dto.changeRequestId,
-        });
+        throw new PreconditionFailedException(
+          'El cambio no está aprobado',
+          {
+            changeRequestId: dto.changeRequestId,
+          },
+          PlatformOpsErrorReason.CHANGE_NOT_APPROVED,
+        );
       }
 
       const artifact = await this.releasesRepo.findArtifactById(
@@ -483,14 +524,22 @@ export class OpsReleasesService {
         dto.artifactId,
       );
       if (!artifact) {
-        throw new ResourceNotFoundException('Artefacto no encontrado', {
-          artifactId: dto.artifactId,
-        });
+        throw new ResourceNotFoundException(
+          'Artefacto no encontrado',
+          {
+            artifactId: dto.artifactId,
+          },
+          PlatformOpsErrorReason.ARTIFACT_NOT_FOUND,
+        );
       }
       if (artifact.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El artefacto no está activo', {
-          artifactId: dto.artifactId,
-        });
+        throw new PreconditionFailedException(
+          'El artefacto no está activo',
+          {
+            artifactId: dto.artifactId,
+          },
+          PlatformOpsErrorReason.ARTIFACT_NOT_ACTIVE,
+        );
       }
       // Desplegar el artefacto de otro componente pondría en marcha algo que
       // nadie revisó para este servicio.
@@ -501,6 +550,7 @@ export class OpsReleasesService {
             artifactId: dto.artifactId,
             serviceComponentId: change.serviceComponentId,
           },
+          PlatformOpsErrorReason.ARTIFACT_COMPONENT_MISMATCH,
         );
       }
 
@@ -516,6 +566,7 @@ export class OpsReleasesService {
           throw new PreconditionFailedException(
             'Producción exige una revisión de preparación con decisión "go"',
             { serviceComponentId: change.serviceComponentId },
+            PlatformOpsErrorReason.PRODUCTION_READINESS_REVIEW_MISSING,
           );
         }
       }
@@ -524,6 +575,7 @@ export class OpsReleasesService {
         throw new PreconditionFailedException(
           'Los despliegues están congelados por agotamiento del error budget',
           { changeRequestId: dto.changeRequestId },
+          PlatformOpsErrorReason.DEPLOYMENTS_FROZEN,
         );
       }
 
@@ -615,9 +667,13 @@ export class OpsReleasesService {
         deploymentId,
       );
       if (!source) {
-        throw new ResourceNotFoundException('Despliegue no encontrado', {
-          deploymentId,
-        });
+        throw new ResourceNotFoundException(
+          'Despliegue no encontrado',
+          {
+            deploymentId,
+          },
+          PlatformOpsErrorReason.DEPLOYMENT_NOT_FOUND,
+        );
       }
       if (
         source.statusConceptId !== CONCEPTS.DEPLOY_SUCCEEDED &&
@@ -628,6 +684,7 @@ export class OpsReleasesService {
           {
             deploymentId,
           },
+          PlatformOpsErrorReason.DEPLOYMENT_NOT_REVERSIBLE,
         );
       }
       if (!source.isCurrent) {
@@ -636,6 +693,7 @@ export class OpsReleasesService {
           {
             deploymentId,
           },
+          PlatformOpsErrorReason.DEPLOYMENT_NOT_CURRENT,
         );
       }
 
@@ -652,6 +710,7 @@ export class OpsReleasesService {
         throw new PreconditionFailedException(
           'No hay un despliegue estable anterior al que volver',
           { deploymentId },
+          PlatformOpsErrorReason.ROLLBACK_TARGET_NOT_FOUND,
         );
       }
       if (
@@ -661,6 +720,7 @@ export class OpsReleasesService {
         throw new PreconditionFailedException(
           'El destino de la reversión es de otro componente o entorno',
           { deploymentId, targetDeploymentId: target.id },
+          PlatformOpsErrorReason.ROLLBACK_TARGET_MISMATCH,
         );
       }
 
@@ -757,6 +817,7 @@ export class OpsReleasesService {
     throw new ConflictException(
       'No se pudo asignar un número de cambio libre',
       { tenantId },
+      PlatformOpsErrorReason.CHANGE_NUMBER_EXHAUSTED,
     );
   }
 
@@ -780,6 +841,7 @@ export class OpsReleasesService {
     throw new ConflictException(
       'No se pudo asignar un número de despliegue libre',
       {},
+      PlatformOpsErrorReason.DEPLOYMENT_NUMBER_EXHAUSTED,
     );
   }
 }

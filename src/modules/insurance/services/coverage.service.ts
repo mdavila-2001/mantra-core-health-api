@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -94,13 +95,21 @@ export class CoverageService {
     return this.em.transactional(async (tx) => {
       const plan = await this.catalog.findPlan(tx, dto.insurancePlanId);
       if (!plan)
-        throw new ResourceNotFoundException('Plan no encontrado', {
-          planId: dto.insurancePlanId,
-        });
+        throw new ResourceNotFoundException(
+          'Plan no encontrado',
+          {
+            planId: dto.insurancePlanId,
+          },
+          InsuranceErrorReason.PLAN_NOT_FOUND,
+        );
       if (plan.statusConceptId !== INS.PLAN_ACTIVE) {
-        throw new PreconditionFailedException('El plan no está activo', {
-          planId: dto.insurancePlanId,
-        });
+        throw new PreconditionFailedException(
+          'El plan no está activo',
+          {
+            planId: dto.insurancePlanId,
+          },
+          InsuranceErrorReason.PLAN_NOT_ACTIVE,
+        );
       }
 
       const clash = await this.repo.findByMemberAndPlan(
@@ -114,6 +123,7 @@ export class CoverageService {
           {
             memberIdentifier: dto.memberIdentifier,
           },
+          InsuranceErrorReason.COVERAGE_ALREADY_EXISTS,
         );
       }
 
@@ -178,9 +188,13 @@ export class CoverageService {
     return this.em.transactional(async (tx) => {
       const coverage = await this.repo.findCoverage(tx, dto.patientCoverageId);
       if (!coverage) {
-        throw new ResourceNotFoundException('Cobertura no encontrada', {
-          coverageId: dto.patientCoverageId,
-        });
+        throw new ResourceNotFoundException(
+          'Cobertura no encontrada',
+          {
+            coverageId: dto.patientCoverageId,
+          },
+          InsuranceErrorReason.COVERAGE_NOT_FOUND,
+        );
       }
 
       if (dto.idempotencyKey) {
@@ -189,9 +203,13 @@ export class CoverageService {
           dto.idempotencyKey,
         );
         if (existing)
-          throw new ConflictException('Solicitud de elegibilidad duplicada', {
-            idempotencyKey: dto.idempotencyKey,
-          });
+          throw new ConflictException(
+            'Solicitud de elegibilidad duplicada',
+            {
+              idempotencyKey: dto.idempotencyKey,
+            },
+            InsuranceErrorReason.ELIGIBILITY_REQUEST_DUPLICATE,
+          );
       }
 
       const request = this.repo.createEligibilityRequest(tx, {
@@ -241,12 +259,14 @@ export class CoverageService {
           {
             coverageId: dto.primaryPatientCoverageId,
           },
+          InsuranceErrorReason.PRIMARY_COVERAGE_NOT_FOUND,
         );
       }
       if (!dto.secondaryPatientCoverageId) {
         throw new PreconditionFailedException(
           'COB requiere al menos una cobertura secundaria',
           {},
+          InsuranceErrorReason.COB_SECONDARY_COVERAGE_REQUIRED,
         );
       }
 

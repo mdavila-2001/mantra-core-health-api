@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -134,7 +135,11 @@ export class ClaimsService {
           statusConceptId: { $ne: INS.CLAIM_REVERSED },
         });
         if (existing)
-          throw new ConflictException('El pedido ya tiene un reclamo activo');
+          throw new ConflictException(
+            'El pedido ya tiene un reclamo activo',
+            { inventoryReservationId: dto.inventoryReservationId, serviceRequestId: dto.serviceRequestId },
+            InsuranceErrorReason.CLAIM_ALREADY_EXISTS_FOR_ORDER,
+          );
         await this.validatePriorAuthorization(tx, dto);
       } else {
         const coverage = await this.coverage.findCoverage(
@@ -142,7 +147,11 @@ export class ClaimsService {
           dto.patientCoverageId,
         );
         if (!coverage)
-          throw new ResourceNotFoundException('Cobertura no encontrada');
+          throw new ResourceNotFoundException(
+            'Cobertura no encontrada',
+            { coverageId: dto.patientCoverageId },
+            InsuranceErrorReason.COVERAGE_NOT_FOUND,
+          );
         const plan = await this.catalog.findPlanForCarrier(
           tx,
           coverage.insurancePlanId,
@@ -151,13 +160,19 @@ export class ClaimsService {
         if (!plan)
           throw new PreconditionFailedException(
             'La cobertura no corresponde a la aseguradora indicada',
+            { coverageId: dto.patientCoverageId, carrierId: dto.insuranceCarrierId },
+            InsuranceErrorReason.CARRIER_NOT_FOUND,
           );
         currencyConceptId = plan.currencyConceptId;
         if (
           dto.idempotencyKey &&
           (await this.repo.findByIdempotency(tx, dto.idempotencyKey))
         )
-          throw new ConflictException('Reclamo duplicado');
+          throw new ConflictException(
+            'Reclamo duplicado',
+            { idempotencyKey: dto.idempotencyKey },
+            InsuranceErrorReason.CLAIM_DUPLICATE,
+          );
       }
       const claim = this.repo.createClaim(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
@@ -411,6 +426,8 @@ export class ClaimsService {
       if (!allowed.includes(claim.statusConceptId))
         throw new PreconditionFailedException(
           'El reclamo no está en estado adjudicable',
+          { claimId },
+          InsuranceErrorReason.CLAIM_NOT_ADJUDICABLE,
         );
       const decisions = dto.lineAdjudications.map((row) => ({
         ...row,
@@ -436,6 +453,8 @@ export class ClaimsService {
           if (!line || line.insuranceClaimId !== claimId)
             throw new ResourceNotFoundException(
               'Línea de reclamo no encontrada',
+              { lineId: row.insuranceClaimLineId },
+              InsuranceErrorReason.CLAIM_LINE_NOT_FOUND,
             );
         }
       }
@@ -492,7 +511,9 @@ export class ClaimsService {
         ![INS.CLAIM_ADJUDICATED, INS.CLAIM_PAID].includes(claim.statusConceptId)
       ) {
         throw new PreconditionFailedException(
-          'No existe adjudicación vigente para publicar',
+          'No existe adjudicación in_force para publicar EOB',
+          { claimId },
+          InsuranceErrorReason.ADJUDICATION_NOT_FOUND_FOR_EOB,
         );
       }
       if (lines) {
@@ -507,6 +528,8 @@ export class ClaimsService {
       if (await this.repo.findEob(tx, claimId, version.id))
         throw new ConflictException(
           'La EOB ya fue publicada para esta versión',
+          { claimId },
+          InsuranceErrorReason.EOB_ALREADY_PUBLISHED,
         );
       const coverage = await this.coverage.findCoverage(
         tx,
@@ -542,6 +565,8 @@ export class ClaimsService {
       ) {
         throw new PreconditionFailedException(
           'El reclamo no está en estado reversible',
+          { claimId },
+          InsuranceErrorReason.CLAIM_NOT_REVERSIBLE,
         );
       }
       const version = await this.repo.findVersion(
@@ -551,6 +576,10 @@ export class ClaimsService {
       if (!version || version.insuranceClaimId !== claimId)
         throw new ResourceNotFoundException(
           'Versión de adjudicación no encontrada',
+          {
+            versionId: dto.reversedAdjudicationVersionId,
+          },
+          InsuranceErrorReason.ADJUDICATION_VERSION_NOT_FOUND,
         );
       if (lines) {
         const latest = await this.repo.latestVersion(tx, claimId);

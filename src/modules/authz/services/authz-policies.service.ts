@@ -5,6 +5,7 @@ import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { AccessPoliciesRepository } from '../repositories';
 import { CreateAccessPolicyDto, AuthzIdResponseDto, type Effect } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+import { AuthzErrorReason } from '../authz.error-reasons';
 
 /** Traducción efecto → concept id. */
 export const EFFECT_CONCEPT: Record<Effect, string> = {
@@ -60,6 +61,7 @@ export class AuthzPoliciesService {
               targetResource: dto.targetResource,
               priority: dto.priority,
             },
+            AuthzErrorReason.POLICY_PRIORITY_CLASH,
           );
         }
       }

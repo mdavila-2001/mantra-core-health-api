@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CONCEPTS, ResourceNotFoundException, touch } from '../../../common';
 import { COMM } from '../community.concepts';
 import { PublicProfilesRepository } from '../repositories';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /** Datos mínimos para proyectar una organización en el directorio público. */
 export interface OrganizationPublicProfileProjection {
@@ -195,6 +196,7 @@ export class PublicProfileProjectionService {
       throw new ResourceNotFoundException(
         'Esta organización todavía no tiene vitrina pública: se proyecta al verificarla',
         { targetId: data.targetId },
+        CommunityErrorReason.ORGANIZATION_VITRINA_NOT_PROJECTED,
       );
 
     if (data.displayName !== undefined) profile.displayName = data.displayName;

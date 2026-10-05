@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
   JournalRepository,
   AccountsRepository,
@@ -147,6 +148,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'La cuenta no tiene un perfil profesional asociado',
         { actorId: actor.id },
+        AccountingErrorReason.PRACTITIONER_PROFILE_MISSING,
       );
     }
     const practiceIds =
@@ -157,6 +159,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId },
+        AccountingErrorReason.PRACTITIONER_PRACTICE_NOT_LINKED,
       );
     }
   }
@@ -199,9 +202,13 @@ export class LedgerService {
           dto.fiscalPeriodId,
         );
         if (!period) {
-          throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-            fiscalPeriodId: dto.fiscalPeriodId,
-          });
+          throw new ResourceNotFoundException(
+            'Periodo fiscal no encontrado',
+            {
+              fiscalPeriodId: dto.fiscalPeriodId,
+            },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+          );
         }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
           throw new PreconditionFailedException(
@@ -210,6 +217,7 @@ export class LedgerService {
               fiscalPeriodId: dto.fiscalPeriodId,
               status: period.statusConceptId,
             },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
           );
         }
       }
@@ -226,6 +234,7 @@ export class LedgerService {
           {
             transactionNumber: number,
           },
+          AccountingErrorReason.JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -305,6 +314,7 @@ export class LedgerService {
         throw new ConflictException(
           'El número de asiento ya existe en la práctica',
           { transactionNumber: number },
+          AccountingErrorReason.JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -479,9 +489,13 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       const txn = await this.journalRepo.findTransactionById(tx, id);
       if (!txn) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId: id,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId: id,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       this.assertTransition(txn.statusConceptId, ACCT.TXN_POSTED);
 
@@ -497,9 +511,13 @@ export class LedgerService {
           txn.fiscalPeriodId,
         );
         if (!period) {
-          throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-            fiscalPeriodId: txn.fiscalPeriodId,
-          });
+          throw new ResourceNotFoundException(
+            'Periodo fiscal no encontrado',
+            {
+              fiscalPeriodId: txn.fiscalPeriodId,
+            },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+          );
         }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
           throw new PreconditionFailedException(
@@ -508,6 +526,7 @@ export class LedgerService {
               fiscalPeriodId: txn.fiscalPeriodId,
               status: period.statusConceptId,
             },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
           );
         }
       }
@@ -564,9 +583,13 @@ export class LedgerService {
         transactionId,
       );
       if (!original) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       // ALOVIDA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
       // `assertTransition` rechaza (422) reversar un asiento en cualquier otro estado.
@@ -577,9 +600,13 @@ export class LedgerService {
         ACCT.RELATION_REVERSES,
       );
       if (existingLink) {
-        throw new ConflictException('El asiento ya fue reversado', {
-          transactionId,
-        });
+        throw new ConflictException(
+          'El asiento ya fue reversado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_ALREADY_REVERSED,
+        );
       }
 
       const originalLines = await this.journalRepo.ledgerEntriesForTransaction(
@@ -689,9 +716,13 @@ export class LedgerService {
         transactionId,
       );
       if (!transaction) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       const file = this.journalRepo.createFile(tx, {
         transactionId,
@@ -731,6 +762,7 @@ export class LedgerService {
           tenantId: dto.tenantId,
           postingScenarioConceptId: dto.postingScenarioConceptId,
         },
+        AccountingErrorReason.POSTING_RULE_NOT_FOUND,
       );
     }
     return {
@@ -757,6 +789,7 @@ export class LedgerService {
           {
             code: dto.code,
           },
+          AccountingErrorReason.ACCOUNT_CODE_ALREADY_EXISTS,
         );
       }
       const account = this.accountsRepo.create(tx, {
@@ -832,10 +865,14 @@ export class LedgerService {
   assertTransition(from: string, to: string): void {
     const allowed = ALLOWED_TRANSITIONS[from] ?? [];
     if (!allowed.includes(to)) {
-      throw new PreconditionFailedException('Transición de estado inválida', {
-        from,
-        to,
-      });
+      throw new PreconditionFailedException(
+        'Transición de estado inválida',
+        {
+          from,
+          to,
+        },
+        AccountingErrorReason.JOURNAL_INVALID_STATE_TRANSITION,
+      );
     }
   }
 
@@ -887,9 +924,13 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       const txn = await this.journalRepo.findTransactionById(tx, id);
       if (!txn) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId: id,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId: id,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       guard?.(txn);
       this.assertTransition(txn.statusConceptId, to);
@@ -911,6 +952,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'Se requiere un rol con autoridad de aprobación para aprobar el asiento',
         { requiredAnyOf: APPROVAL_ROLES },
+        AccountingErrorReason.APPROVAL_ROLE_REQUIRED,
       );
     }
   }
@@ -977,6 +1019,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'El asiento no balancea (debe != haber)',
         { debit: fromCents(debitCents), credit: fromCents(creditCents) },
+        AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
     return debitCents;
@@ -1000,7 +1043,11 @@ export class LedgerService {
       lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount),
     );
     if (debitCents <= 0) {
-      throw new PreconditionFailedException('El asiento no tiene importe', {});
+      throw new PreconditionFailedException(
+        'El asiento no tiene importe',
+        {},
+        AccountingErrorReason.JOURNAL_ENTRY_EMPTY_AMOUNT,
+      );
     }
     if (debitCents !== creditCents) {
       throw new PreconditionFailedException(
@@ -1009,6 +1056,7 @@ export class LedgerService {
           debit: fromCents(debitCents),
           credit: fromCents(creditCents),
         },
+        AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
     return { debitCents, creditCents };

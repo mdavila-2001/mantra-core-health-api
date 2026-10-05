@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   PaymentsReceivedRepository,
@@ -71,6 +72,7 @@ export class PaymentsReceivedService {
           {
             amount: dto.amount,
           },
+          BillingErrorReason.PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE,
         );
       }
 
@@ -82,6 +84,7 @@ export class PaymentsReceivedService {
         throw new PreconditionFailedException(
           'La suma asignada excede el monto del pago',
           { amount: dto.amount, allocated: fromCents(allocatedCents) },
+          BillingErrorReason.PAYMENT_RECEIVED_ALLOCATION_EXCEEDS_AMOUNT,
         );
       }
 
@@ -103,9 +106,13 @@ export class PaymentsReceivedService {
       for (const alloc of dto.allocations) {
         const invoice = await this.invoicesRepo.findById(tx, alloc.invoiceId);
         if (!invoice) {
-          throw new ResourceNotFoundException('Factura no encontrada', {
-            invoiceId: alloc.invoiceId,
-          });
+          throw new ResourceNotFoundException(
+            'Factura no encontrada',
+            {
+              invoiceId: alloc.invoiceId,
+            },
+            BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NOT_FOUND,
+          );
         }
         const balanceCents = toCents(invoice.balance ?? '0');
         const allocCents = toCents(alloc.allocatedAmount);
@@ -115,6 +122,7 @@ export class PaymentsReceivedService {
             {
               invoiceId: invoice.id,
             },
+            BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NO_BALANCE,
           );
         }
         if (allocCents > balanceCents) {
@@ -125,6 +133,7 @@ export class PaymentsReceivedService {
               balance: invoice.balance,
               allocated: alloc.allocatedAmount,
             },
+            BillingErrorReason.PAYMENT_RECEIVED_ALLOCATION_EXCEEDS_INVOICE_BALANCE,
           );
         }
 

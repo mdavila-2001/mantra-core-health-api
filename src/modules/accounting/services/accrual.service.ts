@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { AccrualRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
 import { sumCents, toCents, fromCents } from './money';
@@ -64,6 +65,7 @@ export class AccrualService {
           total: dto.totalAmount,
           planned: fromCents(plannedTotal),
         },
+        AccountingErrorReason.ACCRUAL_SCHEDULE_TOTAL_MISMATCH,
       );
     }
 
@@ -79,6 +81,7 @@ export class AccrualService {
           {
             objectNumber: dto.objectNumber,
           },
+          AccountingErrorReason.ACCRUAL_OBJECT_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -143,9 +146,13 @@ export class AccrualService {
         dto.accrualObjectId,
       );
       if (!object) {
-        throw new ResourceNotFoundException('Objeto de devengo no encontrado', {
-          accrualObjectId: dto.accrualObjectId,
-        });
+        throw new ResourceNotFoundException(
+          'Objeto de devengo no encontrado',
+          {
+            accrualObjectId: dto.accrualObjectId,
+          },
+          AccountingErrorReason.ACCRUAL_OBJECT_NOT_FOUND,
+        );
       }
       if (!object.expenseAccountId || !object.accrualAccountId) {
         throw new PreconditionFailedException(
@@ -153,6 +160,7 @@ export class AccrualService {
           {
             accrualObjectId: dto.accrualObjectId,
           },
+          AccountingErrorReason.ACCRUAL_OBJECT_ACCOUNTS_MISSING,
         );
       }
 
@@ -169,6 +177,7 @@ export class AccrualService {
             accrualObjectId: dto.accrualObjectId,
             fiscalPeriodId: dto.fiscalPeriodId,
           },
+          AccountingErrorReason.ACCRUAL_NO_PENDING_LINES_IN_PERIOD,
         );
       }
 

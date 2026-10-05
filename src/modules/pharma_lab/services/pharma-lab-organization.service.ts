@@ -21,6 +21,7 @@ import {
 import { OrganizationRepository, VisitorsRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 import type {
   PharmaLabLinkEvents,
   PharmaLabStaff,
@@ -76,15 +77,18 @@ export class PharmaLabOrganizationService {
       this.access.assertAdministers(actor, dto.tenantId);
       const tenant = await tx.findOne(Tenants, { id: dto.tenantId });
       if (!tenant) {
-        throw new ResourceNotFoundException('Organización no encontrada', {
-          tenantId: dto.tenantId,
-        });
+        throw new ResourceNotFoundException(
+          'Organización no encontrada',
+          { tenantId: dto.tenantId },
+          PharmaLabErrorReason.TENANT_NOT_FOUND,
+        );
       }
       const clash = await this.repo.findLabByTenant(tx, dto.tenantId);
       if (clash) {
         throw new ConflictException(
           'La organización ya está registrada como laboratorio',
           { tenantId: dto.tenantId },
+          PharmaLabErrorReason.TENANT_ALREADY_LAB,
         );
       }
 
@@ -229,6 +233,7 @@ export class PharmaLabOrganizationService {
         throw new ConflictException(
           'La cuenta ya está vinculada al laboratorio',
           { pharmaLabId, userId: dto.userId },
+          PharmaLabErrorReason.STAFF_ALREADY_LINKED,
         );
       }
 
@@ -430,6 +435,7 @@ export class PharmaLabOrganizationService {
       throw new ResourceNotFoundException(
         'Ficha de personal no encontrada en el laboratorio',
         { pharmaLabId, staffId },
+        PharmaLabErrorReason.STAFF_NOT_FOUND,
       );
     }
     return staff;

@@ -30,6 +30,7 @@ import {
   type LegalRepresentationType,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+import { AuthzErrorReason } from '../authz.error-reasons';
 
 const CARE_REL_TYPE_CONCEPT: Record<CareRelationshipType, string> = {
   TREATING: AUTHZ.CARE_REL_TREATING,
@@ -309,6 +310,7 @@ export class AuthzCareRelationshipsService {
         throw new PreconditionFailedException(
           'validTo debe ser posterior a validFrom',
           {},
+          AuthzErrorReason.CARE_RELATIONSHIP_INVALID_VALIDITY_WINDOW,
         );
       }
 
@@ -324,6 +326,7 @@ export class AuthzCareRelationshipsService {
             patientProfileId: dto.patientProfileId,
             practitionerProfileId: dto.practitionerProfileId,
           },
+          AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
         );
       }
 
@@ -363,11 +366,13 @@ export class AuthzCareRelationshipsService {
         throw new ResourceNotFoundException(
           'Relación asistencial no encontrada',
           { id },
+          AuthzErrorReason.CARE_RELATIONSHIP_NOT_FOUND,
         );
       if (rel.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La relación asistencial no está activa',
           { id, status: rel.statusConceptId },
+          AuthzErrorReason.CARE_RELATIONSHIP_NOT_ACTIVE,
         );
       }
 
@@ -461,6 +466,7 @@ export class AuthzCareRelationshipsService {
         throw new PreconditionFailedException(
           'validTo debe ser posterior a validFrom',
           {},
+          AuthzErrorReason.LEGAL_REPRESENTATION_INVALID_VALIDITY_WINDOW,
         );
       }
 
@@ -476,6 +482,7 @@ export class AuthzCareRelationshipsService {
             patientProfileId: dto.patientProfileId,
             representativeUserId: dto.representativeUserId,
           },
+          AuthzErrorReason.LEGAL_REPRESENTATION_ALREADY_ACTIVE,
         );
       }
 
@@ -514,11 +521,13 @@ export class AuthzCareRelationshipsService {
         throw new ResourceNotFoundException(
           'Representación legal no encontrada',
           { id },
+          AuthzErrorReason.LEGAL_REPRESENTATION_NOT_FOUND,
         );
       if (rep.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La representación legal no está activa',
           { id, status: rep.statusConceptId },
+          AuthzErrorReason.LEGAL_REPRESENTATION_NOT_ACTIVE,
         );
       }
 
