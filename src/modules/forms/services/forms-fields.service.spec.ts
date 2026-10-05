@@ -284,7 +284,6 @@ describe('FormsFieldsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
-  });
 
   describe('updateFieldDefinition — opciones de elección', () => {
     it('replaces the options entirely when none in use', async () => {

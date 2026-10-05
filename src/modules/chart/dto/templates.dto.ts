@@ -341,22 +341,6 @@ export class ChartTemplateFieldDto {
   @ApiPropertyOptional({ format: 'uuid' })
   valueSetId?: string;
 
-  /** Opciones propias de un campo de elección sin `valueSetId`. */
-  @ApiPropertyOptional({ type: [String] })
-  options?: string[];
-
-  /** Si el campo admite marcar varias opciones. */
-  @ApiPropertyOptional()
-  multiple?: boolean;
-
-  /** Si el campo ofrece además «Otro», con texto libre. */
-  @ApiPropertyOptional()
-  allowOther?: boolean;
-
-  /** La ayuda que se lee bajo la pregunta. Se sirve como `hint` del campo. */
-  @ApiPropertyOptional()
-  description?: string;
-
   /** Casillas: marcar al menos N. Sólo con `multiple`. */
   @ApiPropertyOptional()
   cardinalityMin?: number;
