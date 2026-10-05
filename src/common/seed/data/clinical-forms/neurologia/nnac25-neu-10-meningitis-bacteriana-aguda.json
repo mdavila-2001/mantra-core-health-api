@@ -1,0 +1,178 @@
+{
+  "code": "NNAC25_NEU_10_MENINGITIS_BACTERIANA_AGUDA",
+  "name": "Meningitis bacteriana aguda (NNAC 2025)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Neurología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 10, pág. 92; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Cefalea",
+        "Rigidez de nuca",
+        "Alteraciones del estado de conciencia, conducta y sensorio"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 92. La meningitis bacteriana es una enfermedad infecciosa grave, de alta mortalidad, de las membranas que recubren al cerebro, de etiología infecciosa. Los microorganismos causantes más comunes en adultos son: Streptococcus pneumoniae y Neisseria meningitidis (1)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Medicación inmunosupresora o esplenectomía",
+        "Cáncer, diabetes mellitus y alcoholismo",
+        "Infección por VIH",
+        "Hipogammaglobulinemia",
+        "Deficiencia tardía del componente del complemento (variable común)",
+        "En recién nacidos y niños pequeños, las bacterias más comunes son Streptococcus agalactiae, Escherichia (E.) coli y Listeria monocytogenes",
+        "En adultos de edad media, las bacterias más comunes son S. pneumoniae y S. aureus",
+        "En adultos mayores, las bacterias más comunes son S. pneumoniae, S. aureus y L. monocytogenes",
+        "Por tiempo de evolución: La meningitis puede ser aguda, subaguda o crónica"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Recuento de células en sangre",
+        "Proteína C reactiva",
+        "Panel de coagulación",
+        "Hemocultivo",
+        "Glucosa en sangre",
+        "Gases en sangre",
+        "Sangre completa (con EDTA) para PCR (si la prueba se encuentra disponible en el medio)",
+        "Déficits neurológicos focales (excluyendo parálisis de nervios craneales)",
+        "Convulsiones de reciente aparición",
+        "Estado mental gravemente alterado (puntuación en la Escala de Coma de Glasgow <10)",
+        "Pleocitosis de leucocitos principalmente polimórficos",
+        "Baja concentración de glucosa",
+        "Baja relación glucosa en líquido cefalorraquídeo/sangre",
+        "Niveles elevados de proteínas",
+        "Aspectos físicos: turbio, aumento de la presión de apertura"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "G00: Meningitis bacteriana, no clasificada en otra parte",
+        "G00.0: Meningitis por hemófilos",
+        "G00.1: Meningitis neumocócica",
+        "G00.2: Meningitis estreptocócica",
+        "G00.3: Meningitis estafilocócica",
+        "G00.8: Otras meningitis bacterianas:",
+        "G00.9: Meningitis bacteriana, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 10, pág. 92); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

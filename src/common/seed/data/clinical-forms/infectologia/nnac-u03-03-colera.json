@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 3 de la unidad 3 de las NNAC, pág. 235; CIE-10 A00; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 3 de la unidad 3, pág. 235; CIE-10 A00; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -121,15 +121,7 @@
         "Cuando no puede beber o tomar pecho",
         "Fiebre",
         "Cuando vuelve a presentar episodios de diarrea",
-        "Cuando presenta oliguria o anuria",
-        "Personal de salud capacitado en la atención de estos casos",
-        "La muestra se remite en tubos o frascos con tapa a rosca en medio Cary Blair (viable durante una semana)",
-        "El genero Vibrio incluye cerca de 200 serogrupos",
-        "Desinfección de heces, vómitos, artículos y ropa de cama usados por pacientes, mediante calor, ácido carbólico u otro desinfectante",
-        "Promoción especialmente dirigida a la población sobre la importancia del lavado de manos",
-        "Entierro de difuntos lo antes posible sin realizar velatorios",
-        "Protección, purificación y cloración de los abastecimientos públicos de agua",
-        "Promoción del acceso a agua potable y saneamiento adecuado"
+        "Cuando presenta oliguria o anuria"
       ],
       "multiple": true,
       "allowOther": true

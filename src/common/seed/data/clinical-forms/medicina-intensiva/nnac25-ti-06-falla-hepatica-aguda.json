@@ -1,0 +1,200 @@
+{
+  "code": "NNAC25_TI_06_FALLA_HEPATICA_AGUDA",
+  "name": "Falla hepática aguda (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Terapia Intensiva (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 6, pág. 69; niveles de atención III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "En las presentaciones agudas del síndrome de Budd-Chiari, también se debe considerar un proceso maligno subyacente y una posible infiltración",
+        "Común en pacientes de edad avanzada",
+        "La isquemia hepática también se observa después de un traumatismo y un percance quirúrgico cuando hay pérdida de flujo vascular hacia el hígado",
+        "No son una indicación de LTx",
+        "Del mismo modo, los procesos de enfermedades infecciosas como la malaria, el dengue y la rickettsiosis pueden provocar insuficiencia hepática secundaria",
+        "La lesión isquémica aguda se resolverá después de la mejora del estado hemodinámico y no es una indicación para LTx de emergencia",
+        "Puede tratarse de suicidio intencional o motivación parasuicida",
+        "El uso d e N-acetilcisteína se asocia con mejores resultados en pacientes que presentan intoxicación por paracetamol",
+        "La IHA inducida por fármacos surge con mayor frecuencia en pacientes mayores, especialmente por encima de los 60 años",
+        "Un DHIF hepatocelular normalmente se presenta con un curso clínico agudo de IHA, por éxtasis",
+        "Siempre se deben buscar infecciones virales concurrentes en aquellos con DHIF, ya que son frecuentes y se han asociado como factores desencadenantes",
+        "Las clases de fármacos más frecuentemente asociados con la IHA son los antituberculosos (especialmente la isoniazida)",
+        "Como ocur re con todas las etiologías de la hepatitis hipóxica, la mayoría de los casos sobreviven solo con tratamiento médico",
+        "Los siguientes virus hepáticos pueden causar IHA: virus de la hepatitis B (VHB), virus de la hepatitis A (VHA) y virus de hepatitis E (VHE)",
+        "La vacunación ha llevado a una caída significativa en la incidencia de casos de VHB, con una caída concomitante en IHA",
+        "Menos del 4% de los casos con hepatitis B aguda desarrollarán IHA, pero la mortalidad es mayor que en las infecciones por VHA o VHE",
+        "La IHA relacionada con el VHB se presenta con un fenotipo agudo",
+        "Menos del 1% de los pacientes con VHA agudo desarrollarán IHA y varios cofactores afectarán su evolución",
+        "Por lo general, la hepatitis A tiene un curso clínico hiperagudo o agudo",
+        "La hepatitis aguda por VHE se observa con mayor frecuencia en pacientes que viajaron recientemente a áreas endémicas",
+        "La presentación de la enfermedad en Asia y África es más grave que la observada en Europa",
+        "El desarrollo de DHIF también puede verse potenciado por la activación de los virus herpes y CMV, junto con las interacciones farmacológicas del huésped",
+        "La presencia de otros trastornos autoinmunes en un paciente que presenta IHA debe hacer sospechar que la etiología es una hepatitis autoinmune",
+        "Por lo tanto, la falta de mejoría dentro de los siete días debería conducir a la lista para LTx de emergencia sin demora",
+        "En algunos pacientes, que generalmente se presentan con un fenotipo de IHA aguda o subaguda, no se puede identificar la etiología",
+        "Una proporción de estos pacientes puede haber tomado medicamentos o xenobióticos, que no recuerdan (o no pueden)",
+        "Algunos presentan posteriormente características inmunomediadas, lo que sugiere que la enfermedad original puede haber tenido una etiología autoinmune",
+        "La lesión hepática inducida por fármacos, especialmente la toxicidad por paracetamol, es la causa más frecuente de DHA e IHA graves",
+        "El pronóstico es peor en pacientes con ingesta escalonada de paracetamol",
+        "Siempre se debe realizar un cribado de etiologías virales y efectos de cofactores (nivel de evidencia II-2, grado de recomendación 1)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 69. Disfunción hepatocelular con 2 a 3 veces elevación de las transaminasas con anormalidades en la coagulación (INR mayor a 1. 5 o actividad protrombínica menor a 40%), algún grado de encefalopatía hepática en pacientes sin historia previa de enfermedad hepática y con una evolución menor a 26 semanas."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fulminante: Menor a 2 semanas",
+        "Subfulminante: Desarrollo entre 2 a 8 semanas",
+        "Hiperaguda: 24 horas a 7 días",
+        "Aguda: 8 a 28 días",
+        "Subaguda: 29 a 72 días"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "TP, INR o factor V y pantalla completa de coagulación que incluye fibrinógeno",
+        "Exámenes de sangre hepática que incluyen LDH y bilirrubina conjugada y no conjugada y CPK",
+        "Evaluación de la función renal: Diuresis cada hora",
+        "Gasometría arterial y lactato",
+        "Cribado toxicológico en orina y nivel sérico de paracetamol",
+        "Cultivos (respiratorio, sangre, orina)",
+        "Rayos X de tórax/ECG/ecografía hepática: también se pueden requerir imágenes axiales del abdomen y el tórax",
+        "Saturación de oxígeno, presión arterial, frecuencia cardíaca, frecuencia respiratoria, producción de orina por hora",
+        "Profilaxis de úlceras por estrés",
+        "Restringir los factores de coagulación a menos que haya sangrado activo",
+        "Trasladar a un nivel de atención adecuado, si corresponde a Cuidados Críticos ante los primeros síntomas de alteraciones mentales",
+        "Ambiente tranquilo, cabecera de la cama >30°, cabeza en posición neutra e intubar, ventilar y sedar si progresa a >3 coma",
+        "Umbral bajo para inicio empírico de antibióticos si hay deterioro hemodinámico y/o aumento de encefalopatía con fenotipo inflamatorio",
+        "En caso de evolución de HE: intubación y sedación previa al traslado",
+        "Asegure el reabastecimiento de volumen y normalice las variables bioquímicas (Sodio, Magnesio, Fosfato, Potasio)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "K72: Insuficiencia hepática, no clasificada en otra parte",
+        "K72.0: Insuficiencia hepática aguda o subaguda",
+        "K72.1: Insuficiencia hepática crónica",
+        "K72.9: Insuficiencia hepática, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 6, pág. 69); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

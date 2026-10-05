@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 8 de la unidad 6 de las NNAC, pág. 447; CIE-10 E02; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 8 de la unidad 6, pág. 447; CIE-10 E02; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -38,7 +38,6 @@
         "TSH de talón mayor a 15 uUI/ml",
         "TSH de cordón mayor a 35 uUI/ml",
         "TSH de talón mayor a 18 uUI/ml",
-        "Tomar muestra ideal a los 2 a 6 días de RN",
         "Perfil tiroideo completo para confirmación del diagnóstico",
         "Ecografía tiroidea al diagnóstico"
       ],

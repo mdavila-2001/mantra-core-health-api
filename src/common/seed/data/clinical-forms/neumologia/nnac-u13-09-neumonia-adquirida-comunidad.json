@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 9 de la unidad 13 de las NNAC, pág. 748; CIE-10 J15; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 9 de la unidad 13, pág. 748; CIE-10 J15; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -145,18 +145,7 @@
         "Ausencia de síntomas",
         "Esquema de tratamiento terminado",
         "Volver a control en una semana",
-        "Para seguimiento y control ambulatorio",
-        "Recalcar a la madre que si presenta signos de dificultad respiratoria debe regresar inmediatamente al servicio de salud",
-        "Vacuna contra el neumococo en pacientes con patología pulmonar, cardíaca o inmunosupresión",
-        "Vacuna contra la gripe",
-        "Cubrirse la boca al toser y estornudar",
-        "Desinfección de las secreciones de la nariz y de la orofaringe",
-        "Siempre que sea posible evitar el hacinamiento en salas y dormitorios, especialmente en centros asistenciales, cuarteles",
-        "Prevenir la desnutrición",
-        "Alentar la actividad física",
-        "Los pacientes en cama deben ser alimentados y mantenerse en posición erguida",
-        "Los padres de niños/niñas menores de un año deben cumplir con esquema de vacunación del PAI",
-        "Lactancia materna exclusiva hasta los seis meses de edad"
+        "Para seguimiento y control ambulatorio"
       ],
       "multiple": true,
       "allowOther": true

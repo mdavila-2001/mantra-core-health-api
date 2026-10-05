@@ -1,0 +1,170 @@
+{
+  "code": "NNAC25_TI_07_FALLA_RENAL_AGUDA",
+  "name": "Falla renal aguda (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Terapia Intensiva (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 7, pág. 90; niveles de atención II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Síndrome urémico: Náuseas, vómitos, sangrado digestivo, aliento urémico, alteración del sensorio",
+        "Acidosis metabólica descompensada",
+        "Hiperaazoemia de rápida progresión asociada o no a oliguria o anuria",
+        "Signos de hipervolemia: edema, hepatomegalia, disnea, hipertensión, encefalopatía",
+        "Oliguria",
+        "Anuria"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 90. Aumento de la creatinina en 0. 3mg/dl en 48 horas; o aumento de la creatinina en 1. 5 veces el valor inicial, que se sabe o se supone que ocurrió en los 7 días anteriores; o volumen de orina de 0."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "FRA prerrenal: Caracterizado por hipoperfusión renal con integridad del parénquima",
+        "FRA parenquimatoso o azoemia renal: Producido por enfermedades que afectan al parénquima renal",
+        "FRA postrenal: Ocasionado por obstrucción del sistema colector urinario"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma completo",
+        "Plaquetas y grupo sanguíneo",
+        "Creatinina, urea, ácido úrico",
+        "Glicemia",
+        "Examen general de orina",
+        "Electrolitos séricos (sodio, potasio, cloro)",
+        "Gasometría",
+        "Calcio y fósforo séricos",
+        "Gabinete: - Ecografía renal y de vías urinarias. - Radiogr afía de Tórax, - Otros estudios de imagen de acuerdo al caso"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "N17: Insuficiencia renal aguda",
+        "N17.0: Insuficiencia renal aguda con necrosis tubular",
+        "N17.1: Insuficiencia renal aguda con necrosis cortical aguda",
+        "N17.2: Insuficiencia renal aguda con necrosis medular",
+        "N17.8: Otras insuficiencias renales agudas",
+        "N17.9: Insuficiencia renal aguda, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 7, pág. 90); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

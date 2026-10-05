@@ -32,8 +32,35 @@ const SECCIONES = [
   ['COMPLICACIONES', 'complicaciones'],
   ['CRITERIOS DE REFERENCIA', 'referencia'],
   ['CRITERIOS DE ALTA', 'alta'],
+  // Los que aparecen en las normas de 2025 y, a veces, también en las de 2012.
+  ['MANIFESTACIONES CLÍNICAS', 'manifestaciones'],
+  ['CRITERIOS CLÍNICOS', 'diagnostico'],
+  ['CRITERIOS DIAGNÓSTICOS', 'diagnostico'],
+  ['SIGNOS Y SÍNTOMAS', 'manifestaciones'],
+  ['DIAGNÓSTICOS DIFERENCIALES', 'diferencial'],
+  ['PRINCIPALES CAUSAS / ETIOLOGÍA', 'etiologia'],
+  ['CRITERIOS DE HOSPITALIZACIÓN', 'hospitalizacion'],
+  ['LABORATORIO', 'examenes'],
+  ['GABINETE', 'examenes'],
+  ['IMAGENOLOGÍA', 'examenes'],
+  ['EPIDEMIOLOGÍA', 'otros'],
+  ['PATOGENIA', 'otros'],
+  ['INTRODUCCIÓN', 'otros'],
+  ['RECOMENDACIONES Y PREVENCIÓN', 'otros'],
+  ['MEDIDAS GENERALES', 'tratamiento'],
+  ['MEDIDAS ESPECÍFICAS', 'tratamiento'],
+  ['MEDIDAS ESPECÍFICAS POR NIVELES DE ATENCIÓN', 'tratamiento'],
+  ['TRATAMIENTO FARMACOLÓGICO', 'tratamiento'],
+  ['TRATAMIENTO NO FARMACOLÓGICO', 'tratamiento'],
+  ['MEDICACIÓN', 'tratamiento'],
+  ['PRIMER NIVEL', 'tratamiento'],
+  ['SEGUNDO Y TERCER NIVEL', 'tratamiento'],
+  ['TERCER NIVEL', 'tratamiento'],
+  ['CONSIDERACIONES ESPECIALES', 'otros'],
+  ['SERVICIO, FAMILIA Y COMUNIDAD', 'otros'],
+  ['OBSERVACIONES', 'otros'],
 ];
-const ENCABEZADOS = new Map(
+export const ENCABEZADOS = new Map(
   SECCIONES.map(([texto, clave]) => [normalizar(texto), clave]),
 );
 /** Los dos encabezados lado a lado que el PDF imprime en una sola línea. */
@@ -97,9 +124,9 @@ export function unidadDe(pagina) {
   return u;
 }
 
-const BULLET = /^\s*(?:■■|■●|●|■|•|▪)\s*/;
+export const BULLET = /^\s*(?:■■|■●|●|■|•|▪|[\uF000-\uF0FF])\s*/u;
 
-function normalizar(texto) {
+export function normalizar(texto) {
   return texto
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
@@ -132,7 +159,7 @@ function esRuido(linea, titulosNorm) {
 }
 
 /** Une los renglones partidos por el ancho de la columna. */
-function unir(partes) {
+export function unir(partes) {
   return partes
     .join(' ')
     .replace(/(\p{L})- (\p{Ll})/gu, '$1$2')
@@ -194,6 +221,17 @@ export function limpiarItem(crudo) {
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
+/**
+ * Un criterio diagnóstico es algo que se observa en el paciente. «Identificar
+ * los antecedentes…» o «Considerar BK…» son instrucciones al médico: sirven
+ * como texto de la norma, no como casilla que se marca.
+ */
+const INSTRUCCION =
+  /^(?:Identificar|Realizar|Considerar|Valorar|Evaluar|Determinar|Descartar|Solicitar|Interrogar|Buscar|Investigar|Verificar|Confirmar|Controlar|Administrar|Iniciar|Medir|Registrar|Tomar|Obtener|Establecer|Excluir|Tener en cuenta|Se debe|Debe|Hay que)\b/u;
+export function soloHallazgos(items) {
+  return items.filter((i) => !INSTRUCCION.test(i));
+}
+
 /** Los ítems aptos de una sección, cortando donde empieza otra. */
 export function limpiarLista(items) {
   const salida = [];
@@ -205,7 +243,7 @@ export function limpiarLista(items) {
   return [...new Set(salida)];
 }
 
-function viñetas(lineas) {
+export function viñetas(lineas) {
   const items = [];
   let actual = null;
   // Un marcador en medio de la línea también separa ítems («Hemograma. ■■ Glucemia»).
@@ -222,7 +260,7 @@ function viñetas(lineas) {
   return items;
 }
 
-function prosa(lineas) {
+export function prosa(lineas) {
   const sinViñetas = lineas.filter((l) => !BULLET.test(l));
   return unir(sinViñetas);
 }
@@ -363,7 +401,7 @@ export function compactar(norma) {
     pagina: norma.pagina,
     unidad: norma.unidad,
     definicion: resumirDefinicion(norma.secciones.definicion?.texto ?? ''),
-    criterios: lista('diagnostico', 30),
+    criterios: soloHallazgos(lista('diagnostico', 60)).slice(0, 30),
     clasificacion: lista('clasificacion', 12),
     factoresRiesgo: lista('factores_riesgo', 20),
     examenes: lista('examenes', 20),
