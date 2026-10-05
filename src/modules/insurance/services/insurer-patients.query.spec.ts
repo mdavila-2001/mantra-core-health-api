@@ -3,6 +3,7 @@ import { CONCEPTS, encodeKeysetCursor } from '../../../common';
 import { INS } from '../insurance.concepts';
 import {
   buildInsurerPatientPageQuery,
+  buildInsurerPatientCountQuery,
   nextCursorAfter,
   type InsurerPatientCriteria,
 } from './insurer-patients.query';
@@ -25,17 +26,17 @@ function criteria(
 }
 
 describe('buildInsurerPatientPageQuery', () => {
-  it('acota a la aseguradora por cobertura o reclamo, con su id como parámetro', () => {
+  it('acota a la aseguradora por cobertura vigente, nunca reclamos, con su id como parámetro', () => {
     const { sql, params } = buildInsurerPatientPageQuery(criteria());
 
-    expect(sql).toContain('where pr.insurance_carrier_id = ?');
-    expect(sql).toContain('where cl.insurance_carrier_id = ?');
-    expect(params.slice(0, 2)).toEqual([CARRIER, CARRIER]);
+    expect(sql).toContain('and apr.insurance_carrier_id = ?');
+    expect(sql).not.toContain('insurance_claims');
+    expect(params.slice(0, 2)).toEqual([CARRIER, INS.CARRIER_ACTIVE]);
     expect(sql).not.toContain(CARRIER);
     expect(params.at(-1)).toBe(11);
   });
 
-  it('busca nombre, teléfono y correo por «contiene» sin tildes y el documento entero', () => {
+  it('busca nombre, teléfono y correo por «contiene» sin tildes sin consultar documentos', () => {
     const { sql, params } = buildInsurerPatientPageQuery(
       criteria({ search: '  Pérez 50%  ' }),
     );
@@ -43,28 +44,28 @@ describe('buildInsurerPatientPageQuery', () => {
     expect(params).toContain('%perez 50\\%%');
     expect(params).toContain(CONCEPTS.CONTACT_MOBILE);
     expect(params).toContain(CONCEPTS.CONTACT_EMAIL);
-    expect(params).toContain(CONCEPTS.ID_TYPE_NATIONAL);
-    expect(params).toContain('Pérez 50%');
-    expect(sql).toContain('i.value = ?');
+    expect(params).not.toContain(CONCEPTS.ID_TYPE_NATIONAL);
+    expect(params).not.toContain('Pérez 50%');
+    expect(sql).not.toContain('common.identifiers');
     expect(sql).not.toContain('Pérez');
   });
 
-  it('suma sexo, ocupación y rango de nacimiento como igualdades parametrizadas', () => {
+  it('suma sexo, ocupación y rango de nacimiento con parametros', () => {
     const { sql, params } = buildInsurerPatientPageQuery(
       criteria({
         genderConceptId: 'g-1',
-        occupationConceptId: 'o-1',
+        occupation: 'o-1',
         birthDateFrom: '1980-01-01',
         birthDateTo: '1999-12-31',
       }),
     );
 
     expect(sql).toContain('p.administrative_gender_concept_id = ?');
-    expect(sql).toContain('p.occupation_concept_id = ?');
+    expect(sql).toContain('p.occupation_free_text');
     expect(sql).toContain('p.birth_date >= ?::date');
     expect(sql).toContain('p.birth_date <= ?::date');
     expect(params).toEqual(
-      expect.arrayContaining(['g-1', 'o-1', '1980-01-01', '1999-12-31']),
+      expect.arrayContaining(['g-1', '%o-1%', '1980-01-01', '1999-12-31']),
     );
   });
 
@@ -76,8 +77,9 @@ describe('buildInsurerPatientPageQuery', () => {
     expect(sql).toMatch(
       /where exists \(\s*select 1\s+from insurance\.patient_coverages ac/,
     );
-    expect(params.slice(2, 9)).toEqual([
+    expect(params.slice(0, 8)).toEqual([
       CARRIER,
+      INS.CARRIER_ACTIVE,
       INS.COVERAGE_ACTIVE,
       INS.PLAN_ACTIVE,
       HOY,
@@ -93,14 +95,15 @@ describe('buildInsurerPatientPageQuery', () => {
     );
 
     expect(sql).toMatch(
-      /where not exists \(\s*select 1\s+from insurance\.patient_coverages ac/,
+      /and not exists \(\s*select 1\s+from insurance\.patient_coverages ac/,
     );
   });
 
-  it('«Todos» no agrega predicado de cobertura', () => {
+  it('«Todos» conserva el predicado de cobertura vigente', () => {
     const { sql } = buildInsurerPatientPageQuery(criteria());
 
-    expect(sql).not.toContain('patient_coverages ac');
+    expect(sql).toContain('patient_coverages ac');
+    expect(sql).toContain('ac.status_concept_id = ?');
   });
 
   it('continúa después del cursor que emitió, hacia adelante o hacia atrás según el orden', () => {
@@ -159,5 +162,60 @@ describe('buildInsurerPatientPageQuery', () => {
         criteria({ sortBy: 'birthDate', sortDirection: 'desc' }),
       ).sql,
     ).toContain("'0001-01-01'");
+  });
+});
+
+describe('directory scope and counts', () => {
+  it('does not expand insurer scope for no insurance or another carrier', () => {
+    expect(
+      buildInsurerPatientPageQuery(criteria({ insuranceCarrierId: 'other' }))
+        .sql,
+    ).toContain('and false');
+    const none = buildInsurerPatientPageQuery(
+      criteria({ insuranceStatus: 'NO_INSURANCE' }),
+    );
+    expect(none.sql).toContain('where exists');
+    expect(none.sql).toContain('and not exists');
+  });
+  it('allows the platform roster including uninsured patients', () => {
+    const roster = buildInsurerPatientPageQuery(
+      criteria({ carrierId: undefined }),
+    );
+    expect(roster.sql).not.toContain('patient_coverages');
+    expect(roster.params).toEqual([11]);
+  });
+  it('uses the same filters for total without cursor or limit', () => {
+    const base = criteria({
+      search: 'Ana',
+      occupation: 'Arquitecta',
+      birthDateFrom: '1980-01-01',
+    });
+    const cursor = nextCursorAfter(
+      { patient_profile_id: 'p1', sort_value: 'a' },
+      base,
+    );
+    const count = buildInsurerPatientCountQuery({ ...base, cursor });
+    expect(count.sql).toContain('count(*)::int as total');
+    expect(count.params).toEqual(
+      buildInsurerPatientPageQuery(base).params.slice(0, -1),
+    );
+    expect(count.sql).not.toContain('limit');
+  });
+  it('rejects an inverted birth date range', () => {
+    expect(() =>
+      buildInsurerPatientPageQuery(
+        criteria({ birthDateFrom: '2000-01-01', birthDateTo: '1990-01-01' }),
+      ),
+    ).toThrow(BadRequestException);
+  });
+  it('normalizes phone formatting without turning arbitrary text into a phone search', () => {
+    const phone = buildInsurerPatientPageQuery(
+      criteria({ search: '+591 700-00-001' }),
+    );
+    expect(phone.params).toContain('%59170000001%');
+    expect(phone.sql).toContain('regexp_replace');
+    expect(
+      buildInsurerPatientPageQuery(criteria({ search: 'Persona 1' })).sql,
+    ).not.toContain('regexp_replace');
   });
 });

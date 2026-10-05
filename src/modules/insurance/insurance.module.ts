@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { CommunityModule } from '../community/community.module';
 import { PracticeModule } from '../practice/practice.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 // Antiduplicación de estudios (subtarea 3.2, T-26): `DuplicateStudyDetector`
@@ -114,6 +115,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     CommonModule,
     AuditModule,
     MessagingModule,
+    CommunityModule,
   ],
   controllers: [
     InsuranceBackboneController,

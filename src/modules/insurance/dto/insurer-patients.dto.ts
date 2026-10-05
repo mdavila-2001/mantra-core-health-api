@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  Matches,
 } from 'class-validator';
 
 /** Tamaños de página que ofrece la tabla: los mismos tres del pedido. */
@@ -38,15 +39,16 @@ export const INSURER_PATIENT_SORT_DIRECTIONS = ['asc', 'desc'] as const;
 export type InsurerPatientSortDirection =
   (typeof INSURER_PATIENT_SORT_DIRECTIONS)[number];
 
-/** `GET /insurance/patients` — filtros del directorio. Ninguno elige la aseguradora. */
+/** Filtros en POST /insurance/patients/search; nunca determinan el alcance. */
 export class InsurerPatientSearchQueryDto {
   /** Cursor opaco devuelto por la página anterior. */
   @ApiPropertyOptional({ description: 'Cursor opaco de la página anterior' })
   @IsOptional()
   @IsString()
+  @MaxLength(2048)
   cursor?: string;
 
-  @ApiPropertyOptional({ enum: INSURER_PATIENT_PAGE_SIZES, default: 10 })
+  @ApiPropertyOptional({ enum: INSURER_PATIENT_PAGE_SIZES, default: 25 })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -54,8 +56,7 @@ export class InsurerPatientSearchQueryDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description:
-      'Nombre, teléfono o correo (contiene, sin tildes) o documento de identidad (exacto).',
+    description: 'Nombre, teléfono o correo (contiene, sin tildes).',
     maxLength: 120,
   })
   @IsOptional()
@@ -69,21 +70,29 @@ export class InsurerPatientSearchQueryDto {
   genderConceptId?: string;
 
   @ApiPropertyOptional({
-    format: 'uuid',
-    description: 'Ocupación del catálogo',
+    description: 'Profesión de catálogo o texto libre',
+    maxLength: 120,
   })
   @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  occupation?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  occupationConceptId?: string;
+  insuranceCarrierId?: string;
 
   @ApiPropertyOptional({ example: '1980-01-01' })
   @IsOptional()
   @IsISO8601({ strict: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
   birthDateFrom?: string;
 
   @ApiPropertyOptional({ example: '1999-12-31' })
   @IsOptional()
   @IsISO8601({ strict: true })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
   birthDateTo?: string;
 
   @ApiPropertyOptional({
@@ -111,82 +120,71 @@ export class InsurerPatientSearchQueryDto {
   sortDirection?: InsurerPatientSortDirection;
 }
 
-/** La cobertura del paciente **con esta aseguradora**; nunca la de otra. */
-export class InsurerPatientCoverageDto {
-  @ApiProperty({
-    description:
-      'Si tiene una cobertura vigente con esta aseguradora. `false` ⇒ la pantalla dice «Ninguno».',
-  })
-  hasActiveCoverage!: boolean;
-
-  @ApiPropertyOptional()
-  planName?: string;
-
-  @ApiPropertyOptional()
-  policyIdentifier?: string;
-
-  @ApiPropertyOptional()
-  memberIdentifier?: string;
-
-  @ApiPropertyOptional({
-    enum: ['CURRENT', 'UPCOMING', 'EXPIRED', 'INACTIVE', 'UNKNOWN'],
-  })
-  validityStatus?: string;
+/** Projection of an authorized insurer; no policy identifiers. */
+export class InsurerPatientCarrierDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+  @ApiProperty()
+  name!: string;
 }
 
-/** Una fila del directorio. Datos de contacto y filiación; nada clínico. */
+export class InsurerPatientOptionsDto {
+  @ApiProperty({ type: [InsurerPatientCarrierDto] })
+  insurers!: InsurerPatientCarrierDto[];
+}
+
+export class InsurerPatientMessagingDto {
+  @ApiProperty({ enum: ['internal'] })
+  channel!: 'internal';
+  @ApiProperty()
+  available!: boolean;
+}
+
+/** Minimum fields required by the patient directory. */
 export class InsurerPatientListItemDto {
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
-
   @ApiProperty()
   fullName!: string;
-
-  @ApiPropertyOptional({ description: 'Documento de identidad' })
-  documentNumber?: string;
-
   @ApiPropertyOptional({ example: '1990-04-12' })
   birthDate?: string;
-
-  @ApiPropertyOptional({ description: 'Años cumplidos a la fecha de La Paz' })
+  @ApiPropertyOptional()
   age?: number;
-
-  @ApiPropertyOptional({ description: 'Celular, o el fijo si no hay celular' })
+  @ApiPropertyOptional()
   phone?: string;
-
   @ApiPropertyOptional()
   email?: string;
-
-  @ApiPropertyOptional({ format: 'uuid' })
-  genderConceptId?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Código del sexo administrativo (`GENDER_FEMALE`…). Se manda el código y no el display: el catálogo lo rotula en inglés técnico y la palabra la pone la pantalla.',
-  })
+  @ApiPropertyOptional()
   genderCode?: string;
-
-  @ApiPropertyOptional({ description: 'Del catálogo; si no, el texto libre' })
+  @ApiPropertyOptional()
   occupationDisplay?: string;
-
-  @ApiProperty({ type: InsurerPatientCoverageDto })
-  coverage!: InsurerPatientCoverageDto;
-
-  @ApiPropertyOptional({
-    description:
-      'Slug del perfil público con el que se le puede escribir. Ausente ⇒ todavía no activó la mensajería.',
-  })
-  communityProfileSlug?: string;
+  @ApiProperty({ type: [InsurerPatientCarrierDto] })
+  insurers!: InsurerPatientCarrierDto[];
+  @ApiProperty({ type: InsurerPatientMessagingDto })
+  messaging!: InsurerPatientMessagingDto;
 }
 
-/** Página del directorio, por cursor (M34): sin total ni número de página. */
 export class InsurerPatientListDto {
   @ApiProperty({ type: [InsurerPatientListItemDto] })
   items!: InsurerPatientListItemDto[];
-
+  @ApiProperty()
+  total!: number;
   @ApiProperty()
   limit!: number;
-
   @ApiProperty({ type: String, nullable: true })
   nextCursor!: string | null;
+}
+
+export class InsurerPatientConversationDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  patientProfileId!: string;
+  @ApiProperty({ enum: ['internal'] })
+  @IsIn(['internal'])
+  channel!: 'internal';
+}
+
+export class InsurerPatientConversationResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
 }
