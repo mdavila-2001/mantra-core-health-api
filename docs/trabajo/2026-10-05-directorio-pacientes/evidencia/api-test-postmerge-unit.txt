@@ -1,0 +1,10 @@
+COMMAND: yarn test --runInBand insurer-patients tenant-scope.guard tenant-context public-profile-projection
+(node:18412) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+System.Management.Automation.RemoteException
+Test Suites: 7 passed, 7 total
+Tests:       74 passed, 74 total
+Snapshots:   0 total
+Time:        15.247 s, estimated 61 s
+Ran all test suites matching insurer-patients|tenant-scope.guard|tenant-context|public-profile-projection.
+EXIT_CODE=0

@@ -1,0 +1,5 @@
+COMMAND: regenerate directory-only metadata on incoming OpenAPI document
+Generated 3 directory paths and 8 schemas from real Nest metadata; other paths preserved.
+EXIT_CODE=0
+PASS: all incoming non-directory OpenAPI paths, schemas and metadata preserved
+ASSERT_EXIT_CODE=0

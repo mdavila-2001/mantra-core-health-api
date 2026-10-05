@@ -1,0 +1,9 @@
+COMMAND: yarn test --runInBand tenant-scope.guard
+(node:9000) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.919 s, estimated 1 s
+Ran all test suites matching tenant-scope.guard.
+EXIT_CODE=0
