@@ -1,0 +1,224 @@
+{
+  "code": "NNAC25_MI_11_FIEBRE_REUMATICA_MENCION",
+  "name": "Fiebre reumática sin mención de complicación cardíaca (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 11, pág. 104; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Dolor articular migratorio",
+        "Eritema cutáneo",
+        "Nódulos indoloros subcutáneos",
+        "Precordalgia",
+        "Soplos cardiacos",
+        "Disnea",
+        "Eritema marginado",
+        "Movimientos corporales espasmódicos: Corea de Sydenham",
+        "Periodos de irritabilidad, que acompañan la Corea de Sydenham",
+        "Población de bajo riesgo: enfermedad clínica y/o subclínica",
+        "Población de riesgo medio y alto: también carditis clínica y/o subclínica y artritis: monoartritis o poliartritis, posiblemente también con poliartralgia",
+        "Población de bajo riesgo: los parámetros de inflamación y el nivel de fiebre se definieron con precisión",
+        "Población de riesgo medio y alto: monoartralgia, también con parámetros definidos de inflamación y el nivel de fiebre",
+        "Criterios principales para poblaciones de: Poblaciones de bajo riesgo Poblaciones de riesgo moderado y alto",
+        "Carditis - Clínica y/o subclínica",
+        "Artritis - Solo poliartritis",
+        "Corea",
+        "Nódulos subcutáneos",
+        "Artritis - Poliartralgia (debe considerarse solo cuando es reactivo, se descartan causas infecciosas y autoinmunes)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 104. La fiebre reumática (FR) es una enfermedad inflamatoria sistémica caracterizada por la presencia de lesiones que afectan al corazón, las articulaciones, el sistema nervioso central, la piel y el tejido celular subcutáneo como secuela a una infección faríngea por estreptococo betahemolítico del grupo A."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Leve sin cardiomegalia",
+        "Moderada con cardiomegalia",
+        "Severa con insuficiencia cardiaca",
+        "Sin presencia de carditis"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "La pobreza y la desventaja social",
+        "Base genética que predispone a infecciones faríngeas",
+        "Las infecciones faríngeas por estreptococo beta hemolítico del grupo A",
+        "Fiebre escarlatina",
+        "Las infecciones en la piel o en otras partes del cuerpo con el estreptococo del grupo A",
+        "Cardiopatías congénitas"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma completo",
+        "Química sanguínea",
+        "Reactantes de fase aguda",
+        "Pruebas de función hepática",
+        "Pruebas de función renal",
+        "ASTO",
+        "Perfil inmunológico",
+        "Examen general de orina",
+        "Cultivo y antibiograma, hisopado faríngeo, esputo, lavado bronquial",
+        "Radiografía postero anterior de tórax",
+        "Electrocardiograma de reposo",
+        "Ecocardiograma Doppler color"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["I00: Fiebre reumática sin mención de complicación cardíaca"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Estenosis de las válvulas",
+        "Insuficiencia valvular",
+        "Lesión miocárdica",
+        "Insuficiencia cardiaca",
+        "Fibrilación auricular"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 104); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_hospitalizacion",
+      "name": "Criterios de hospitalización que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "En fase aguda, con carditis",
+        "En fase aguda con compromiso hemodinámico"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

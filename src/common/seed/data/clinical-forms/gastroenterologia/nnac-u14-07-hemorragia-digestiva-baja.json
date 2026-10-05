@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 7 de la unidad 14 de las NNAC, pág. 791; CIE-10 K62.5; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 7 de la unidad 14, pág. 791; CIE-10 K62.5; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -165,11 +165,7 @@
         "Sospecha de hemorragia digestiva baja activa",
         "Paciente con enfermedades asociadas (ej. cardiopatía)",
         "Necesidad de tratamiento quirúrgico",
-        "Cuando no se cuente con métodos de diagnóstico y tratamiento",
-        "Firma del consentimiento informado por parte del paciente o familiares para procedimientos de endoscopia y quirúrgicos",
-        "Evitar el estreñimiento",
-        "Evitar manipulación anal",
-        "Mantener dieta adecuada en fibras y agua"
+        "Cuando no se cuente con métodos de diagnóstico y tratamiento"
       ],
       "multiple": true,
       "allowOther": true,

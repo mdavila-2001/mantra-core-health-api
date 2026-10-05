@@ -1,0 +1,174 @@
+{
+  "code": "NNAC25_URG_23_POLITRAUMATISMO",
+  "name": "Politraumatismo (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Urgencias y Emergencias (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/966-norma-nacional-de-atencion-clinica-de-urgencias-y-emergencias?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 23, pág. 227; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dolor.  Taquipnea.  Hematuria o anuria",
+        "Equimosis.  Silencio o disminución del murmullo vesicular",
+        "En recto presencia de sangre o alteración del tono del esfínter rectal",
+        "Hematomas",
+        "Erosiones o heridas.  Enfisema subcutáneo",
+        "Sangrados externos.  Defensa en pared abdominal",
+        "Fracturas, alteración de ejes de miembros, deformidades",
+        "Alteración del llenado capilar. Ausencia de peristalsis",
+        "Matidez o timpanismo, difusa o localizada",
+        "Náuseas",
+        "Neumotórax.  Vómitos, palidez, hipotermia, hipotensión (choque)",
+        "Cianosis.  Hipovolemia inexplicable",
+        "Disnea",
+        "X Control de hemorragias exanguinantes",
+        "A Vía Aérea con restricción de movimiento de la columna cervical",
+        "B (Breathing) respiración y ventilación",
+        "C Circulación con control de la hemorragia",
+        "D Déficit (evaluación del estado neurológico)",
+        "Monitoreo electrocardiográfico (Monitorización)",
+        "Oximetría de pulso",
+        "Frecuencia respiratoria, gases en sangre arterial y capnografía (si se cuenta)",
+        "Sonda vesical y sonda gástrica",
+        "AP de tórax (radiografía)",
+        "RX AP y LAT de columna cervical",
+        "RX de miembros afectados",
+        "Pelvis AP",
+        "FAST, Efast",
+        "TAC de cráneo, columna, tórax, abdomen y pelvis (si se cuenta disponible)",
+        "Historia: - Alergias, Medicamentos, Patología pasada, Libación (ultima comida) y Ambiente relacionado con la lesión",
+        "Coexistencia de TCE, lesiones viscerales o periféricas"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 227. Trauma: La OMS la define como lesión corporal a nivel orgánico, intencional o no intencional, resultante de una exposición aguda infringida a cantidades de energía que sobrepasan el umbral de tolerancia fisiológica (1)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Trauma leve",
+        "Trauma craneoencefálico",
+        "Trauma de tórax",
+        "Trauma de abdomen",
+        "Trauma de extremidades",
+        "Caídas",
+        "Heridas por arma de fuego",
+        "Heridas por arma punzocortante",
+        "Heridas por explosión",
+        "Accidente de tránsito"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["T07: Traumatismos múltiples, no especificados"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 23, pág. 227); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
