@@ -44,14 +44,7 @@ import {
  */
 @ApiTags('insurance-claims-read')
 @ApiBearerAuth()
-@Roles(
-  'BILLING_OPERATOR',
-  'SECURITY_ADMIN',
-  'BILLING',
-  'FINANCE',
-  'INSURANCE_OPERATOR',
-  'USER',
-)
+@Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')
 @Controller()
 export class ClaimsReadController {
   /**

@@ -946,10 +946,16 @@ export class ConceptsService {
     language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
     limit = 500,
   ): Promise<GlossaryGraphDto> {
-    const page = await this.searchConcepts(undefined, undefined, limit, undefined, {
-      language,
-      includeValueSets: true,
-    });
+    const page = await this.searchConcepts(
+      undefined,
+      undefined,
+      limit,
+      undefined,
+      {
+        language,
+        includeValueSets: true,
+      },
+    );
     const nodes: GlossaryGraphNodeDto[] = page.items
       .filter(
         (item): item is typeof item & { slug: string } =>

@@ -50,6 +50,7 @@ function build(
     sinPaciente?: string[];
     sinCuenta?: string[];
     candidatas?: unknown[];
+    personas?: Record<string, unknown>;
   } = {},
 ) {
   const tx = { flush: fn(async () => undefined), marca: 'tx' };
@@ -79,8 +80,9 @@ function build(
       personas[id] && !sinPaciente.has(id) ? { profileId: id } : null,
     ),
   };
+  const personRows = { ...personas, ...opciones.personas };
   const personsRepo = {
-    findById: fn(async (_em: unknown, id: string) => personas[id] ?? null),
+    findById: fn(async (_em: unknown, id: string) => personRows[id] ?? null),
   };
   const relatedPersonsRepo = {
     create: fn((_em: unknown, datos: Record<string, unknown>) => ({
@@ -124,6 +126,7 @@ function build(
     service,
     tx,
     identifiersRepo,
+    accountLinksRepo,
     relatedPersonsRepo,
     portalProxiesRepo,
     notifications,
@@ -222,6 +225,24 @@ describe('DependentLinkRequestsService', () => {
       expect(c.displayName).toBe('Luis Pérez');
     });
 
+    it('mantiene la candidata aunque no tenga ninguna parte del nombre', async () => {
+      const { service } = build({
+        candidatas: [
+          candidata({
+            display_name: null,
+            name: null,
+            middle_name: null,
+            last_name: null,
+            mother_last_name: null,
+          }),
+        ],
+      });
+
+      const [candidataSinNombre] = await service.findCandidates('luis', madre);
+
+      expect(candidataSinNombre.displayName).toBe('');
+    });
+
     it('con menos de tres letras no consulta nada: no es un listado del padrón', async () => {
       const { service, portalProxiesRepo } = build({
         candidatas: [candidata()],
@@ -312,6 +333,19 @@ describe('DependentLinkRequestsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(portalProxiesRepo.create).not.toHaveBeenCalled();
       expect(notifications.emitInApp).not.toHaveBeenCalled();
+    });
+
+    it('rechaza como propio un CI que resuelve a otra persona vinculada a la misma cuenta', async () => {
+      const { service, accountLinksRepo, portalProxiesRepo } = build();
+      accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: madre.id,
+        personId: 'person-abuelo',
+      });
+
+      await expect(
+        service.request({ nationalId: '7654321' }, madre),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(portalProxiesRepo.create).not.toHaveBeenCalled();
     });
 
     it('un CI sin dueño es 404', async () => {
@@ -430,6 +464,19 @@ describe('DependentLinkRequestsService', () => {
         expect(notifications.emitInApp).not.toHaveBeenCalled();
       });
 
+      it('rechaza un perfil ajeno que resuelve a la misma cuenta autenticada', async () => {
+        const { service, accountLinksRepo, portalProxiesRepo } = build();
+        accountLinksRepo.findActiveByPerson.mockResolvedValue({
+          userId: madre.id,
+          personId: 'person-abuelo',
+        });
+
+        await expect(
+          service.request({ patientProfileId: 'person-abuelo' }, madre),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(portalProxiesRepo.create).not.toHaveBeenCalled();
+      });
+
       it('si ya la representa, 409; si ya hay una pendiente, 409 y no se duplica el aviso', async () => {
         const vigente = build({ vigente: { id: 'proxy-viejo' } });
         await expect(
@@ -455,6 +502,44 @@ describe('DependentLinkRequestsService', () => {
       await expect(
         service.request({ nationalId: '7654321' }, madre),
       ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('una cuenta sin vínculo activo tampoco puede pedir: 403', async () => {
+      const { service } = build({ sinCuenta: ['user-madre'] });
+
+      await expect(
+        service.request({ nationalId: '7654321' }, madre),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it.each([
+      {
+        nombre: 'compone el nombre de quien pide cuando no hay displayName',
+        person: {
+          id: 'person-madre',
+          displayName: null,
+          name: 'Ana',
+          lastName: 'Pérez',
+        },
+        esperado: 'Ana Pérez',
+      },
+      {
+        nombre: 'usa un rótulo neutro cuando la cuenta no tiene ningún nombre',
+        person: { id: 'person-madre', displayName: null },
+        esperado: 'Alguien',
+      },
+    ])('$nombre', async ({ person, esperado }) => {
+      const { service, notifications } = build({
+        personas: { 'person-madre': person },
+      });
+
+      await service.request({ nationalId: '7654321' }, madre);
+
+      expect(notifications.emitInApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bodyText: expect.stringContaining(`${esperado} pide registrarte`),
+        }),
+      );
     });
   });
 
