@@ -310,7 +310,6 @@ describe('InsurerReceivedClaimsService.buildMyItems', () => {
       {} as never,
       {} as never,
       {} as never,
-      {} as never,
       { setContext: mockFn() } as never,
     );
     jest.spyOn(service as any, 'buildItems').mockResolvedValue([
@@ -356,7 +355,6 @@ describe('InsurerReceivedClaimsService.buildMyItems', () => {
         {} as never,
         {} as never,
         repository as never,
-        {} as never,
         {} as never,
         {} as never,
         {} as never,
@@ -429,7 +427,6 @@ describe('InsurerReceivedClaimsService.buildMyItems', () => {
       {} as never,
       {} as never,
       repository as never,
-      {} as never,
       {} as never,
       {} as never,
       {} as never,

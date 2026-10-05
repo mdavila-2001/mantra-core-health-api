@@ -14,3 +14,4 @@ export * from './insurance-analytics.dto';
 export * from './insurance-portability.dto';
 export * from './practitioner-settlement-batch.dto';
 export * from './insurance-campaigns.dto';
+export * from './insurer-patients.dto';

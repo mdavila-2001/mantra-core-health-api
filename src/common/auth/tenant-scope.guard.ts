@@ -2,6 +2,10 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { IS_TENANT_AGNOSTIC_KEY } from '../tenant/tenant-agnostic.decorator';
+import {
+  PLATFORM_TENANT_OPTIONAL_KEY,
+  hasOptionalPlatformTenant,
+} from '../tenant/platform-tenant-optional.decorator';
 import { resolveRequestTenantId } from '../tenant/tenant-resolution';
 import type { AuthenticatedRequest } from './authenticated-user.interface';
 
@@ -48,6 +52,12 @@ export class TenantScopeGuard implements CanActivate {
       // inventa un tenant para una identidad que no existe.
       return true;
     }
+
+    const platformRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      PLATFORM_TENANT_OPTIONAL_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (hasOptionalPlatformTenant(user, platformRoles)) return true;
 
     request.resolvedTenantId = resolveRequestTenantId(request, user);
     return true;
