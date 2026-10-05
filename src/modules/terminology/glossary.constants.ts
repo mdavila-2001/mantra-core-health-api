@@ -59,6 +59,9 @@ export const GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE =
 /** Resumen en lenguaje llano: jsonb `{ es: string, en?: string }`. */
 export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
 
+/** Fuentes editoriales con procedencia, licencia, idioma y fecha de consulta. */
+export const GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE = 'glossary-sources';
+
 /**
  * Imagen del término: jsonb `{ source, license, attribution, alt, status }`.
  *

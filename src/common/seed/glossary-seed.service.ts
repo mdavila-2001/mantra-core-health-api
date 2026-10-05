@@ -21,6 +21,7 @@ import {
   GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE,
   GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
   GLOSSARY_SLUG_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
   glossaryRelationTypeFromConceptId,
@@ -52,6 +53,7 @@ import {
   GLOSSARY_TERMS,
   type GlossaryTermSeed,
 } from './glossary-terms.catalog';
+import { GLOSSARY_SOURCE_REFERENCES } from './glossary-source-provenance';
 
 /** Única versión que recibe cada value set de la taxonomía del glosario. */
 const GLOSSARY_VALUE_SET_VERSION = '1.0.0';
@@ -68,11 +70,12 @@ const STRING_DATA_TYPE = 'string';
  */
 const MAX_OWNED_SYNONYM_INDEX = 32;
 
-/** Los siete códigos de propiedad que este servicio escribe. */
+/** Los códigos de propiedad que este servicio escribe. */
 const OWNED_PROPERTY_CODES = [
   GLOSSARY_SLUG_PROPERTY_CODE,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
   GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
   GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
   GLOSSARY_DRUG_ROUTE_PROPERTY_CODE,
@@ -108,8 +111,8 @@ function glossaryConceptCode(slug: string): string {
 }
 
 /**
- * Materializa el glosario médico curado (Carril 03): la taxonomía (29 value
- * sets — 12 categorías, 16 etiquetas, 1 paraguas) y los 69 términos de
+ * Materializa el glosario médico curado (Carril 03): la taxonomía (34 value
+ * sets — 12 categorías, 21 etiquetas, 1 paraguas) y los 80 términos de
  * `GLOSSARY_TERMS`, con sus designaciones, propiedades, membresías y
  * relaciones tipadas.
  *
@@ -157,7 +160,7 @@ export class GlossarySeedService {
     terms: number;
     /** Designaciones (preferida ES + sinónimos) creadas. */
     designations: number;
-    /** Propiedades (slug, definición clínica, resumen llano) creadas. */
+    /** Propiedades de contenido, procedencia y ficha de medicamento creadas. */
     properties: number;
     /** Membresías de value set (categoría + etiquetas + paraguas) creadas. */
     memberships: number;
@@ -290,7 +293,7 @@ export class GlossarySeedService {
     // --- Nivel 4: designaciones (preferida ES + sinónimos) ---
     counters.designations += await this.seedDesignations(em, now);
 
-    // --- Nivel 5: propiedades (slug, definición clínica, resumen llano) ---
+    // --- Nivel 5: propiedades (contenido, procedencia y ficha de medicamento) ---
     counters.properties += await this.seedProperties(em, now);
 
     // --- Nivel 6: membresías (categoría + etiquetas + paraguas) ---
@@ -405,7 +408,7 @@ export class GlossarySeedService {
     return created;
   }
 
-  /** Propiedades `glossary-slug` / `glossary-clinical-definition` / `glossary-plain-summary`. */
+  /** Propiedades de contenido, procedencia editorial y ficha de medicamento. */
   private async seedProperties(
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
@@ -423,6 +426,14 @@ export class GlossarySeedService {
     ];
     const ids = GLOSSARY_TERMS.flatMap((term) => [
       ...propertyCodes.map((code) => glossaryPropertyId(term.slug, code)),
+      ...(GLOSSARY_SOURCE_REFERENCES[term.slug] !== undefined
+        ? [
+            glossaryPropertyId(
+              term.slug,
+              GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
+            ),
+          ]
+        : []),
       ...(term.drugFacts !== undefined
         ? drugFactPropertyCodes.map((code) =>
             glossaryPropertyId(term.slug, code),
@@ -502,6 +513,30 @@ export class GlossarySeedService {
           { partial: true },
         );
         created += 1;
+      }
+
+      const sourceReferences = GLOSSARY_SOURCE_REFERENCES[term.slug];
+      if (sourceReferences !== undefined) {
+        const sourceReferencesId = glossaryPropertyId(
+          term.slug,
+          GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
+        );
+        if (!existing.has(sourceReferencesId)) {
+          em.create(
+            ConceptProperties,
+            {
+              id: sourceReferencesId,
+              conceptId,
+              propertyCode: GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
+              dataType: JSON_DATA_TYPE,
+              valueJson: sourceReferences,
+              createdAt: now,
+              updatedAt: now,
+            },
+            { partial: true },
+          );
+          created += 1;
+        }
       }
 
       // Ficha de medicamento (FND-25-02): mismos 4 códigos que escribe el
@@ -912,6 +947,10 @@ export class GlossarySeedService {
       [GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE, clinicalDefinition],
       [GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE, plainSummary],
     ];
+    const sourceReferences = GLOSSARY_SOURCE_REFERENCES[term.slug];
+    if (sourceReferences !== undefined) {
+      rows.push([GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE, sourceReferences]);
+    }
     if (term.drugFacts !== undefined) {
       rows.push(
         [

@@ -1,8 +1,8 @@
 import type { GlossaryRelationType } from '../../modules/terminology/glossary.constants';
 
 /**
- * El catálogo curado del glosario médico (v1) — 69 términos (64 + 5 de
- * FND-25-01, categoría `other`).
+ * El catálogo curado del glosario médico (v1) — 80 términos (77 existentes
+ * más tres subdivisiones anatómicas del encéfalo).
  *
  * > Este es un catálogo inicial, curado y revisado médicamente a mano, no una
  * > importación de una nomenclatura externa (no hubo para este carril una carga
@@ -46,15 +46,9 @@ import type { GlossaryRelationType } from '../../modules/terminology/glossary.co
  *
  * ## Nota de transcripción — una relación huérfana en la fuente
  *
- * El término 13 (`hipertension-arterial`) declara en la fuente curada la
- * relación `PROCEDURE->control-de-signos-vitales`, pero ningún término de los
- * 64 tiene ese slug (el más cercano es `signos-vitales`, un concepto distinto:
- * el valor del signo vital, no el procedimiento de tomarlo). Se transcribió la
- * fuente verbatim en vez de inventar el término faltante o redirigir a un slug
- * parecido; `GlossarySeedService` valida cada relación contra el conjunto de
- * slugs conocido y **omite** —con advertencia en el log— cualquiera cuyo
- * destino no resuelva, en vez de fallar el seed completo o fabricar contenido.
- * Ver `CARRIL_REPORT.md` para el seguimiento de esta discrepancia de la fuente.
+ * La referencia `PROCEDURE->control-de-signos-vitales` de hipertensión ahora
+ * resuelve a una ficha propia. Se conserva separada de `signos-vitales`, que
+ * nombra los parámetros medidos y no el procedimiento de medirlos.
  *
  * ## Nota de transcripción — conteo de contenido en inglés
  *
@@ -152,7 +146,7 @@ export interface GlossaryTermSeed {
   };
 }
 
-/** Los 64 términos curados, en el orden del catálogo fuente. */
+/** Los términos curados, en el orden del catálogo fuente. */
 export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // --- Anatomía (glossary-category-anatomy) ---------------------------------
   // Referencias editoriales para la revisión de estas definiciones (redacción
@@ -163,6 +157,16 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // Riñones: https://www.ncbi.nlm.nih.gov/books/NBK482385/
   // Encéfalo: https://www.ncbi.nlm.nih.gov/books/NBK542179/
   // Columna: https://www.ncbi.nlm.nih.gov/books/NBK279468/
+  // Estómago: https://www.ncbi.nlm.nih.gov/books/NBK482334/
+  // Páncreas: https://www.ncbi.nlm.nih.gov/books/NBK532912/
+  // Piel: https://www.ncbi.nlm.nih.gov/books/NBK441980/
+  // Médula espinal: https://www.ncbi.nlm.nih.gov/books/NBK544267/
+  // Intestino: https://www.ncbi.nlm.nih.gov/books/NBK279303/
+  // Vasos sanguíneos: https://www.ncbi.nlm.nih.gov/books/NBK470401/
+  // Hueso: https://www.ncbi.nlm.nih.gov/books/NBK279149/
+  // Cerebro: https://www.ncbi.nlm.nih.gov/books/NBK549789/
+  // Cerebelo: https://www.ncbi.nlm.nih.gov/books/NBK538167/
+  // Tronco encefálico: https://www.ncbi.nlm.nih.gov/books/NBK544297/
   {
     key: 'corazon',
     slug: 'corazon',
@@ -234,9 +238,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     slug: 'encefalo',
     categoryKey: 'anatomy',
     tagKeys: ['neurologic'],
-    enDisplay: 'Brain',
-    esName: 'Encéfalo (cerebro)',
-    esSynonyms: ['Cerebro'],
+    enDisplay: 'Encephalon',
+    esName: 'Encéfalo',
     clinicalDefinitionEs:
       'Conjunto de estructuras del sistema nervioso central alojadas dentro del cráneo: cerebro, diencéfalo, cerebelo y tronco encefálico. Integra información sensorial, planifica y coordina movimientos, sustenta funciones cognitivas y participa en la regulación de funciones autónomas esenciales. Se continúa con la médula espinal a través del foramen magno; cerebro es una parte del encéfalo y no un sinónimo anatómico de todo el conjunto.',
     plainSummaryEs:
@@ -256,6 +259,155 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es la estructura de huesos y discos que recorre la espalda. Sostiene el tronco, permite inclinarse y girar, y rodea y protege la médula espinal.',
     relations: [],
+  },
+  {
+    key: 'estomago',
+    slug: 'estomago',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Stomach',
+    esName: 'Estómago',
+    esSynonyms: ['Víscera gástrica'],
+    clinicalDefinitionEs:
+      'Órgano muscular hueco del tubo digestivo, situado entre el esófago y el duodeno. Sus regiones anatómicas incluyen cardias, fondo, cuerpo y porción pilórica; almacena temporalmente los alimentos, los mezcla con secreciones gástricas y regula su paso al intestino delgado.',
+    plainSummaryEs:
+      'Es una bolsa muscular del abdomen que recibe los alimentos, los mezcla con jugos digestivos y los libera poco a poco hacia el intestino.',
+    relations: [{ type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' }],
+  },
+  {
+    key: 'pancreas',
+    slug: 'pancreas',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive', 'endocrine'],
+    enDisplay: 'Pancreas',
+    esName: 'Páncreas',
+    clinicalDefinitionEs:
+      'Glándula alargada situada detrás del estómago, con funciones exocrinas y endocrinas. El tejido acinar libera enzimas digestivas al duodeno; los islotes pancreáticos secretan hormonas, entre ellas insulina y glucagón, que participan en la regulación de la glucosa.',
+    plainSummaryEs:
+      'Es una glándula del abdomen que ayuda a digerir los alimentos y produce hormonas que regulan el azúcar en la sangre.',
+    relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+  },
+  {
+    key: 'piel',
+    slug: 'piel',
+    categoryKey: 'anatomy',
+    tagKeys: ['dermatologic'],
+    enDisplay: 'Skin',
+    esName: 'Piel',
+    clinicalDefinitionEs:
+      'Órgano que cubre la superficie externa del cuerpo y está formado por epidermis y dermis, sobre el tejido subcutáneo. Actúa como barrera, participa en la percepción sensorial y contribuye a la regulación térmica y al equilibrio de agua.',
+    plainSummaryEs:
+      'Es la cubierta del cuerpo: protege frente al entorno, permite sentir y ayuda a regular la temperatura.',
+    relations: [],
+  },
+  {
+    key: 'medula-espinal',
+    slug: 'medula-espinal',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Spinal cord',
+    esName: 'Médula espinal',
+    clinicalDefinitionEs:
+      'Estructura del sistema nervioso central contenida en el conducto vertebral, continua con el tronco encefálico y organizada en segmentos cervicales, torácicos, lumbares y sacros. Conduce señales entre el encéfalo y el cuerpo e integra circuitos reflejos; los nervios espinales emergen de sus segmentos.',
+    plainSummaryEs:
+      'Es un cordón de tejido nervioso dentro de la columna que comunica el encéfalo con el cuerpo y participa en algunos reflejos.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'columna-vertebral' },
+      { type: 'RELATED_TERM', targetSlug: 'encefalo' },
+    ],
+  },
+  {
+    key: 'intestino',
+    slug: 'intestino',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Intestine',
+    esName: 'Intestino',
+    clinicalDefinitionEs:
+      'Porción del tubo digestivo que comprende el intestino delgado —duodeno, yeyuno e íleon— y el intestino grueso —ciego, colon y recto—. El intestino delgado completa gran parte de la digestión y absorbe nutrientes; el grueso absorbe agua y electrolitos y conduce las heces hacia su eliminación.',
+    plainSummaryEs:
+      'Es la parte del aparato digestivo que continúa después del estómago. Absorbe nutrientes y agua, y conduce los residuos para su eliminación.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'estomago' },
+      { type: 'ANATOMY', targetSlug: 'pancreas' },
+      { type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' },
+    ],
+  },
+  {
+    key: 'vasos-sanguineos',
+    slug: 'vasos-sanguineos',
+    categoryKey: 'anatomy',
+    tagKeys: ['cardiovascular'],
+    enDisplay: 'Blood vessels',
+    esName: 'Vasos sanguíneos',
+    esSynonyms: ['Sistema vascular sanguíneo'],
+    clinicalDefinitionEs:
+      'Conductos del sistema circulatorio que incluyen arterias, arteriolas, capilares, vénulas y venas. Las arterias distribuyen la sangre desde el corazón; en los capilares ocurre el intercambio de gases, nutrientes y productos de desecho con los tejidos, y las venas la devuelven al corazón.',
+    plainSummaryEs:
+      'Son los conductos por los que circula la sangre: las arterias la llevan desde el corazón, los capilares permiten intercambios con los tejidos y las venas la devuelven.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'corazon' },
+      { type: 'DISEASE', targetSlug: 'hipertension-arterial' },
+    ],
+  },
+  {
+    key: 'huesos',
+    slug: 'huesos',
+    categoryKey: 'anatomy',
+    tagKeys: ['musculoskeletal'],
+    enDisplay: 'Bones',
+    esName: 'Huesos',
+    esSynonyms: ['Tejido óseo'],
+    clinicalDefinitionEs:
+      'Estructuras de tejido conjuntivo mineralizado que, junto con el cartílago, forman el esqueleto. Proporcionan soporte y puntos de inserción muscular, protegen órganos, alojan médula ósea y participan en el almacenamiento y regulación de minerales como calcio y fosfato.',
+    plainSummaryEs:
+      'Son las estructuras rígidas del esqueleto: sostienen el cuerpo, protegen órganos, ayudan al movimiento y contienen médula ósea.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'columna-vertebral' }],
+  },
+  {
+    key: 'cerebro',
+    slug: 'cerebro',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebrum',
+    esName: 'Cerebro (hemisferios cerebrales)',
+    esSynonyms: ['Hemisferios cerebrales'],
+    clinicalDefinitionEs:
+      'Parte principal y de mayor volumen del encéfalo, formada por dos hemisferios unidos por comisuras. La corteza cerebral y las estructuras subcorticales participan en la percepción consciente, el pensamiento, la memoria, el lenguaje y el control del movimiento voluntario; el cerebro es una parte del encéfalo, que también comprende diencéfalo, cerebelo y tronco encefálico.',
+    plainSummaryEs:
+      'Es la parte más grande del encéfalo, formada por dos hemisferios. Participa en el pensamiento, la memoria, el lenguaje, la percepción y los movimientos voluntarios.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'cerebelo',
+    slug: 'cerebelo',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebellum',
+    esName: 'Cerebelo',
+    clinicalDefinitionEs:
+      'Estructura del encéfalo situada en la fosa craneal posterior, detrás del tronco encefálico. Sus circuitos integran información sensorial y señales de otras regiones para ajustar la coordinación, precisión y aprendizaje de movimientos; también participa en algunas funciones cognitivas.',
+    plainSummaryEs:
+      'Es una parte del encéfalo que ayuda a coordinar y ajustar los movimientos y participa en el aprendizaje motor.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'tronco-encefalico',
+    slug: 'tronco-encefalico',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Brainstem',
+    esName: 'Tronco encefálico',
+    esSynonyms: ['Tallo cerebral'],
+    clinicalDefinitionEs:
+      'Parte del encéfalo que conecta los hemisferios cerebrales y el cerebelo con la médula espinal. Está formado por mesencéfalo, puente y bulbo raquídeo; contiene vías nerviosas y núcleos que participan, entre otras funciones, en la respiración, el estado de alerta y el control cardiovascular.',
+    plainSummaryEs:
+      'Es la estructura que conecta el encéfalo con la médula espinal y contiene centros nerviosos importantes para funciones automáticas, como respirar.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'encefalo' },
+      { type: 'ANATOMY', targetSlug: 'cerebelo' },
+      { type: 'ANATOMY', targetSlug: 'medula-espinal' },
+    ],
   },
 
   // --- Signos y síntomas (glossary-category-signs-symptoms) ----------------
@@ -381,10 +533,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'When your blood pressure stays higher than normal all the time.',
     relations: [
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      // Referencia huérfana de la fuente curada: ningún término tiene el slug
-      // `control-de-signos-vitales` (ver nota de cabecera). Se deja declarada
-      // tal como está en la fuente; el seed la omite y advierte en vez de
-      // fallar o inventar el destino.
       { type: 'PROCEDURE', targetSlug: 'control-de-signos-vitales' },
     ],
   },
@@ -427,7 +575,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'espirometria' },
       { type: 'TREATMENT', targetSlug: 'oxigenoterapia' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
     ],
   },
   {
@@ -444,7 +592,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'radiografia-de-torax' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'fiebre' },
+      { type: 'SYMPTOM', targetSlug: 'fiebre' },
     ],
   },
   {
@@ -467,8 +615,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'ecocardiograma' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'electrocardiograma' },
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
-      { type: 'RELATED_TERM', targetSlug: 'edema' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'edema' },
     ],
   },
   {
@@ -700,6 +848,20 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'ANATOMY', targetSlug: 'corazon' },
       { type: 'DISEASE', targetSlug: 'insuficiencia-cardiaca' },
     ],
+  },
+  {
+    key: 'control-de-signos-vitales',
+    slug: 'control-de-signos-vitales',
+    categoryKey: 'procedure',
+    tagKeys: [],
+    enDisplay: 'Vital signs measurement',
+    esName: 'Control de signos vitales',
+    esSynonyms: ['Toma de signos vitales', 'Medición de signos vitales'],
+    clinicalDefinitionEs:
+      'Procedimiento de valoración que obtiene y registra parámetros fisiológicos —como presión arterial, frecuencia cardiaca, frecuencia respiratoria, temperatura y, cuando corresponde, saturación de oxígeno— mediante técnicas e instrumentos adecuados para cada medida.',
+    plainSummaryEs:
+      'Es medir y anotar parámetros básicos del cuerpo, como el pulso, la respiración, la presión y la temperatura.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'signos-vitales' }],
   },
   {
     key: 'endoscopia-digestiva-alta',
