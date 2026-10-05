@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -45,9 +46,10 @@ class ObservationValueInput {
   /**
    * Valor de value text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Valor de texto' })
+  @ApiPropertyOptional({ description: 'Valor de texto', maxLength: 1000 })
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   valueText?: string;
 
   /**
@@ -168,9 +170,10 @@ export class ObservationReferenceRangeInput {
   /**
    * Valor de text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Texto libre del rango' })
+  @ApiPropertyOptional({ description: 'Texto libre del rango', maxLength: 300 })
   @IsOptional()
   @IsString()
+  @MaxLength(300)
   text?: string;
 }
 
@@ -336,6 +339,7 @@ export class CreateObservationDto extends ObservationValueInput {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @MaxLength(1000, { each: true })
   notes?: string[];
 }
 
@@ -344,8 +348,12 @@ export class AmendObservationDto extends ObservationValueInput {
   /**
    * Valor de note mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Nota que justifica la enmienda' })
+  @ApiProperty({
+    description: 'Nota que justifica la enmienda',
+    maxLength: 1000,
+  })
   @IsString()
+  @MaxLength(1000)
   note!: string;
 
   /**

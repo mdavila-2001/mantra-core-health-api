@@ -7,6 +7,7 @@ import {
   Matches,
   Min,
 } from 'class-validator';
+import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
 
@@ -49,6 +50,7 @@ export class UpdateDocumentDto {
   })
   @IsOptional()
   @IsObject()
+  @MaxJsonSize(900 * 1024)
   payload?: Record<string, unknown>;
 
   /**
