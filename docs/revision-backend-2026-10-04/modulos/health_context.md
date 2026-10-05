@@ -37,18 +37,18 @@ version_number)`.
 ### HC-01 — Alta — Una fuente activa de otro país o de cualquier nivel de confianza puede producir evidencia aceptada
 
 `createSource` persiste `countryConceptId` y `trustTierConceptId`
-([`context-collection.service.ts:143-154`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L143-L154)). Al recibir una observación, el servicio sólo comprueba que la
-fuente exista y esté activa ([`context-collection.service.ts:477-487`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L477-L487)); después etiqueta la observación con el país de la corrida, sin comparar el país de
-la fuente ([`context-collection.service.ts:502-516`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L502-L516)). Tampoco hay una decisión sobre `trustTierConceptId` fuera del alta. Al redactar,
+([`context-collection.service.ts:143-154`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L143-L154)). Al recibir una observación, el servicio sólo comprueba que la
+fuente exista y esté activa ([`context-collection.service.ts:477-487`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L477-L487)); después etiqueta la observación con el país de la corrida, sin comparar el país de
+la fuente ([`context-collection.service.ts:502-516`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L502-L516)). Tampoco hay una decisión sobre `trustTierConceptId` fuera del alta. Al redactar,
 una observación sólo necesita estar marcada `ACCEPTED` para convertirse en
-evidencia ([`country-context.service.ts:164-210`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/country-context.service.ts#L164-L210)).
+evidencia ([`country-context.service.ts:164-210`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/country-context.service.ts#L164-L210)).
 
 Un recolector con rol `SYSTEM`, erróneo o comprometido, puede declarar aceptada
 una fuente nacional de otro país o una fuente de confianza insuficiente. La
 versión resultante conserva enlaces de evidencia formalmente válidos, pero con
 procedencia incorrecta; la regla documentada de que la confianza gobierna la
 aceptación no se ejecuta. La spec sólo cubre fuente activa/inactiva, no país ni
-confianza ([`context-collection.service.spec.ts:428-515`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.spec.ts#L428-L515)).
+confianza ([`context-collection.service.spec.ts:428-515`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.spec.ts#L428-L515)).
 
 **Plan de corrección.** Definir en el modelo de fuente si `countryConceptId`
 ausente significa global y cuál es el conjunto de `trustTier` apto para una
@@ -69,16 +69,16 @@ razón de negocio estable y no revelar el país o la fuente fuera de alcance.
 
 Cuando llega `scheduleId`, `startCollectionRun` carga y bloquea la
 programación, pero usa `agentId ??= schedule.agentId` y `countryConceptId ??=
-schedule.countryConceptId` ([`context-collection.service.ts:377-405`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L377-L405)). Por tanto, valores presentes en el DTO ganan a los
+schedule.countryConceptId` ([`context-collection.service.ts:377-405`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L377-L405)). Por tanto, valores presentes en el DTO ganan a los
 de la programación. La corrida se persiste con esos valores
-([`context-collection.service.ts:416-436`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L416-L436)) y puede además avanzar `next_run_at` de la programación original. El DTO presenta ambos campos como valores “por defecto” de la programación
-([`health-context.dto.ts:524-544`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/dto/health-context.dto.ts#L524-L544)), pero no impone igualdad.
+([`context-collection.service.ts:416-436`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L416-L436)) y puede además avanzar `next_run_at` de la programación original. El DTO presenta ambos campos como valores “por defecto” de la programación
+([`health-context.dto.ts:524-544`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/dto/health-context.dto.ts#L524-L544)), pero no impone igualdad.
 
 Un curador puede iniciar una corrida que parece pertenecer a la programación A,
 pero la atribuye al agente o país B. Esto rompe la cadena programación → corrida
 → evidencia y puede dejar sin ejecutar la marca legítima de A. La prueba sólo
 cubre la omisión de ambos campos y no su contradicción
-([`context-collection.service.spec.ts:306-340`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.spec.ts#L306-L340)).
+([`context-collection.service.spec.ts:306-340`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.spec.ts#L306-L340)).
 
 **Plan de corrección.** Para una corrida con `scheduleId`, derivar siempre
 agente y país del registro bloqueado y rechazar `agentId`/`countryConceptId`
@@ -96,11 +96,11 @@ programación. Probar además que el rechazo no cambia `next_run_at`.
 ### HC-03 — Alta — La idempotencia de una corrida no resuelve la carrera entre dos peticiones simultáneas
 
 El servicio primero busca por clave y, si no encuentra una fila, crea la
-corrida ([`context-collection.service.ts:361-371`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L361-L371), [`…:428-443`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L428-L443)). El DDL impone el único
+corrida ([`context-collection.service.ts:361-371`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L361-L371), [`…:428-443`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L428-L443)). El DDL impone el único
 `uq_context_collection_runs_idempotency_key`
-([`04_indexes.sql:45`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/44_health_context/04_indexes.sql#L45)). Dos transacciones que lean antes de que cualquiera haga flush llegan ambas al
+([`04_indexes.sql:45`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/database/SQL/44_health_context/04_indexes.sql#L45)). Dos transacciones que lean antes de que cualquiera haga flush llegan ambas al
 insert; una pierde por unicidad. El filtro global la convierte en `409/CONFLICT`
-([`all-exceptions.filter.ts:294-300`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/filters/all-exceptions.filter.ts#L294-L300)), pero el método no captura esa condición ni recupera la corrida
+([`all-exceptions.filter.ts:294-300`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/common/filters/all-exceptions.filter.ts#L294-L300)), pero el método no captura esa condición ni recupera la corrida
 ganadora, por lo que incumple la respuesta documentada de repetición
 `duplicate: true`.
 
@@ -108,7 +108,7 @@ Un reintento de red o dos réplicas puede recibir un conflicto en lugar de la
 misma corrida, y el cliente puede crear otra clave o dar por fallido un trabajo
 que sí empezó. La prueba de idempotencia preconfigura una lectura ya existente;
 no sincroniza dos transacciones ni verifica la restricción real
-([`context-collection.service.spec.ts:342-357`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.spec.ts#L342-L357)).
+([`context-collection.service.spec.ts:342-357`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.spec.ts#L342-L357)).
 
 **Plan de corrección.** Conservar el índice único como árbitro y, ante
 `UniqueConstraintViolationException` de esa restricción, volver a leer por la
@@ -127,9 +127,9 @@ alta de agentes, fuentes y contextos que hoy hacen check-then-insert.
 ### HC-04 — Media — La ruta de revisión permite que un revisor humano suplante la firma de un agente automático
 
 El endpoint de revisión admite a `QUALITY_REVIEWER` además de `SYSTEM`
-([`health-context.controller.ts:185-199`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/controllers/health-context.controller.ts#L185-L199)). El DTO acepta un `reviewerAgentId` controlado por el cliente
-([`health-context.dto.ts:958-1002`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/dto/health-context.dto.ts#L958-L1002)) y el servicio lo persiste directamente; si está presente,
-elimina la firma del actor humano ([`country-context.service.ts:290-299`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/country-context.service.ts#L290-L299)). No carga ni verifica el agente, su estado, ni que la llamada sea del
+([`health-context.controller.ts:185-199`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/controllers/health-context.controller.ts#L185-L199)). El DTO acepta un `reviewerAgentId` controlado por el cliente
+([`health-context.dto.ts:958-1002`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/dto/health-context.dto.ts#L958-L1002)) y el servicio lo persiste directamente; si está presente,
+elimina la firma del actor humano ([`country-context.service.ts:290-299`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/country-context.service.ts#L290-L299)). No carga ni verifica el agente, su estado, ni que la llamada sea del
 sistema. El FK puede impedir un UUID inexistente, pero no que una persona
 atribuya su aprobación a un agente real.
 
@@ -155,10 +155,10 @@ estable para agente inexistente, inactivo o incompatible.
 No existe un archivo `health_context.error-reasons.ts`. Los servicios lanzan
 `ResourceNotFoundException`, `ConflictException` y
 `PreconditionFailedException` con textos y detalles variables, por ejemplo al
-cerrar una corrida ([`context-collection.service.ts:554-571`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/context-collection.service.ts#L554-L571)) o publicar una versión
-([`country-context.service.ts:340-359`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/health_context/services/country-context.service.ts#L340-L359)). `DomainException` sólo serializa `code`, `message` y
-`details` ([`domain.exception.ts:13-29`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/errors/domain.exception.ts#L13-L29)); el filtro no agrega un reason de módulo
-([`all-exceptions.filter.ts:161-170`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/filters/all-exceptions.filter.ts#L161-L170)).
+cerrar una corrida ([`context-collection.service.ts:554-571`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/context-collection.service.ts#L554-L571)) o publicar una versión
+([`country-context.service.ts:340-359`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/health_context/services/country-context.service.ts#L340-L359)). `DomainException` sólo serializa `code`, `message` y
+`details` ([`domain.exception.ts:13-29`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/common/errors/domain.exception.ts#L13-L29)); el filtro no agrega un reason de módulo
+([`all-exceptions.filter.ts:161-170`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/common/filters/all-exceptions.filter.ts#L161-L170)).
 
 Clientes y jobs distinguen estados como “corrida cerrada”, “fuente inactiva” o
 “versión no aprobada” parseando español o eligiendo un tratamiento genérico de

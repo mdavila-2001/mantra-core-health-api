@@ -8,7 +8,7 @@
 
 # Módulo `medical_groups`
 
-**Fuente:** [`src/modules/medical_groups/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/medical_groups/README.md)
+**Fuente:** [`src/modules/medical_groups/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/medical_groups/README.md)
 · 1 controllers · 1 services · 2 repositories · 2 entidades · 1 DTO
 
 ---

@@ -16,7 +16,7 @@ Hallazgos confirmados: **0 críticos, 1 alto, 1 medio, 1 bajo**. La sonda de dia
 | Todos los dominios | 24 | 20 scripts de producción |
 | Sin script `start:worker:*` | `files`, `lakehouse`, `time_series`, `vector_rag` | Docker Compose usa `node dist/src/worker-*.js` para los cuatro. |
 
-Los 24 entrypoints usan `bootstrapWorker`. La diferencia entre exclusión en memoria por proceso y lock entre réplicas debe revisarse en cada job; el marco común no ofrece lock distribuido universal. El README de [`src/worker/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/worker/README.md) contiene el inventario de 24 procesos.
+Los 24 entrypoints usan `bootstrapWorker`. La diferencia entre exclusión en memoria por proceso y lock entre réplicas debe revisarse en cada job; el marco común no ofrece lock distribuido universal. El README de [`src/worker/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/worker/README.md) contiene el inventario de 24 procesos.
 
 ## 3. Hallazgos y verificación adversarial
 

@@ -8,7 +8,7 @@ Se revisaron el registro WORM, la cadena hash por tenant, historial versionado, 
 
 ### AUD-01 — Alta — La atestación de integridad puede declarar válida una cadena parcialmente revisada
 
-`POST /audit/integrity/verify` acepta un límite que por omisión es `1000` y usa ese resultado como si fuera toda la partición ([`audit-events.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audit/services/audit-events.service.ts#L181-L237)). `findChain()` ordena ascendentemente y aplica ese `limit` sin cursor, conteo total ni indicador de truncamiento ([`audit-log.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audit/repositories/audit-log.repository.ts#L198-L207)). Al terminar el prefijo, el servicio devuelve `verified: true` y agrega una atestación WORM aun cuando no examinó los eslabones posteriores.
+`POST /audit/integrity/verify` acepta un límite que por omisión es `1000` y usa ese resultado como si fuera toda la partición ([`audit-events.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/audit/services/audit-events.service.ts#L181-L237)). `findChain()` ordena ascendentemente y aplica ese `limit` sin cursor, conteo total ni indicador de truncamiento ([`audit-log.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/audit/repositories/audit-log.repository.ts#L198-L207)). Al terminar el prefijo, el servicio devuelve `verified: true` y agrega una atestación WORM aun cuando no examinó los eslabones posteriores.
 
 Con más de 1.000 eventos de un tenant, una alteración a partir del evento 1.001 queda fuera de la recomputación predeterminada y la API emite una atestación positiva. La cadena y el cerrojo de append son correctos para las filas que sí se leen; el problema es que el contrato no distingue verificación completa de parcial.
 
@@ -23,7 +23,7 @@ Con más de 1.000 eventos de un tenant, una alteración a partir del evento 1.00
 
 ## Controles verificados
 
-El endpoint de historial valida la entidad contra un registro cerrado antes de consultar, y registra la propia lectura dentro de una transacción ([`audit-history.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audit/services/audit-history.service.ts#L45-L87), [`history.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audit/repositories/history.repository.ts#L91-L129)). Las rutas HTTP de auditoría, cumplimiento y privacidad requieren `SECURITY_ADMIN`; DSAR conserva transición terminal y control optimista de fila. Estos controles no corrigen la afirmación positiva sobre una verificación incompleta.
+El endpoint de historial valida la entidad contra un registro cerrado antes de consultar, y registra la propia lectura dentro de una transacción ([`audit-history.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/audit/services/audit-history.service.ts#L45-L87), [`history.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/audit/repositories/history.repository.ts#L91-L129)). Las rutas HTTP de auditoría, cumplimiento y privacidad requieren `SECURITY_ADMIN`; DSAR conserva transición terminal y control optimista de fila. Estos controles no corrigen la afirmación positiva sobre una verificación incompleta.
 
 ## Cobertura pendiente
 

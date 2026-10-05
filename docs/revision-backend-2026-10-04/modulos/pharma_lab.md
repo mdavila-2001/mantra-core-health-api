@@ -6,7 +6,7 @@ Se revisaron organización de laboratorios, personal, visitadores, solicitudes y
 
 ## Controles confirmados
 
-`PharmaLabScopeGuard` exige que la identidad administre el laboratorio, sea personal activo o sea un visitador operativo del laboratorio; las rutas ajenas devuelven `404` ([`pharma-lab-scope.guard.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/guards/pharma-lab-scope.guard.ts#L20-L91)). Los controladores de catálogo, documentos, farmacovigilancia, social y visitadores montan esta guardia. Documentos regulatorios conservan versiones, registran lecturas y no ofrecen borrado físico ([`regulatory-documents.controller.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/controllers/regulatory-documents.controller.ts#L27-L190)).
+`PharmaLabScopeGuard` exige que la identidad administre el laboratorio, sea personal activo o sea un visitador operativo del laboratorio; las rutas ajenas devuelven `404` ([`pharma-lab-scope.guard.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/pharma_lab/guards/pharma-lab-scope.guard.ts#L20-L91)). Los controladores de catálogo, documentos, farmacovigilancia, social y visitadores montan esta guardia. Documentos regulatorios conservan versiones, registran lecturas y no ofrecen borrado físico ([`regulatory-documents.controller.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/pharma_lab/controllers/regulatory-documents.controller.ts#L27-L190)).
 
 | Caso | Prueba dirigida a conservar | Resultado esperado |
 | --- | --- | --- |

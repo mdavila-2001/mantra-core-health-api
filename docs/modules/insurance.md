@@ -8,8 +8,8 @@
 
 # Módulo `insurance`
 
-**Fuente:** [`src/modules/insurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/README.md)
-· 18 controllers · 22 services · 12 repositories · 31 entidades · 19 DTO
+**Fuente:** [`src/modules/insurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/README.md)
+· 19 controllers · 24 services · 12 repositories · 31 entidades · 20 DTO
 
 ---
 
@@ -233,11 +233,11 @@ Reglas que no se deducen del código:
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/insurance/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/insurance/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 

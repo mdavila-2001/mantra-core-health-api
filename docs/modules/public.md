@@ -8,7 +8,7 @@
 
 # Módulo `public`
 
-**Fuente:** [`src/modules/public/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/public/README.md)
+**Fuente:** [`src/modules/public/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/public/README.md)
 · 1 controllers · 1 services · 1 repositories · 0 entidades · 1 DTO
 
 ---

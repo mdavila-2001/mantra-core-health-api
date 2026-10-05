@@ -14,7 +14,7 @@ import test from 'node:test';
 
 const script = join(dirname(fileURLToPath(import.meta.url)), 'sync-module-docs.mjs');
 
-test('el espejo generado termina con un solo salto de línea', () => {
+test('el espejo generado enlaza dev y termina con un solo salto de línea', () => {
   const fixture = mkdtempSync(join(tmpdir(), 'alovida-docs-sync-'));
 
   try {
@@ -36,6 +36,10 @@ test('el espejo generado termina con un solo salto de línea', () => {
     );
     assert.equal(mirror.endsWith('\n'), true);
     assert.equal(mirror.endsWith('\n\n'), false);
+    assert.match(
+      mirror,
+      /\*\*Fuente:\*\* \[`src\/modules\/example\/README\.md`\]\(https:\/\/github\.com\/example\/alovida\/blob\/dev\/src\/modules\/example\/README\.md\)/,
+    );
   } finally {
     rmSync(fixture, { recursive: true, force: true });
   }

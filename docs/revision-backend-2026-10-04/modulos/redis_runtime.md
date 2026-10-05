@@ -9,7 +9,7 @@
 
 ### REDIS-01 — Alta — el challenge OTP no es single-use bajo concurrencia
 
-`verifyChallenge` ejecuta `GET`, compara el hash y después ejecuta `DEL` como operaciones separadas ([redis-runtime.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/redis_runtime/services/redis-runtime.service.ts#L225-L242)). Dos solicitudes con el mismo OTP pueden leer el hash antes de que cualquiera lo borre; ambas comparan verdadero y ambas devuelven `true`. El comentario promete consumo single-use, pero no hay Lua/CAS ni otro primitivo atómico como el que sí se utiliza al liberar locks ([#L24-L34](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/redis_runtime/services/redis-runtime.service.ts#L24-L34)).
+`verifyChallenge` ejecuta `GET`, compara el hash y después ejecuta `DEL` como operaciones separadas ([redis-runtime.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/redis_runtime/services/redis-runtime.service.ts#L225-L242)). Dos solicitudes con el mismo OTP pueden leer el hash antes de que cualquiera lo borre; ambas comparan verdadero y ambas devuelven `true`. El comentario promete consumo single-use, pero no hay Lua/CAS ni otro primitivo atómico como el que sí se utiliza al liberar locks ([#L24-L34](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/redis_runtime/services/redis-runtime.service.ts#L24-L34)).
 
 Cuando se conecte al flujo de verificación de contacto indicado por el propio módulo, un OTP podría validar dos operaciones concurrentes. Eso permite reutilizar un desafío de autenticación/confirmación y contradice una garantía de seguridad documentada.
 

@@ -8,7 +8,7 @@
 
 # Módulo `directory`
 
-**Fuente:** [`src/modules/directory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/directory/README.md)
+**Fuente:** [`src/modules/directory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/directory/README.md)
 · 3 controllers · 10 services · 5 repositories · 7 entidades · 19 DTO
 
 ---
@@ -51,7 +51,7 @@ membresías de usuarios a tenant y a branch.
 
 ## Conceptos
 
-Definidos en [`directory.concepts.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/directory/directory.concepts.ts) vía
+Definidos en [`directory.concepts.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/directory/directory.concepts.ts) vía
 `defineModuleConcepts('directory', {...})`, exportando `DIRECTORY_CONCEPT_SEEDS` y
 el mapa `DIR`. Los estados `active`/`verified` de tenant y los tipos de tenant /
 entidad legal reutilizan conceptos transversales (`CONCEPTS.*`).

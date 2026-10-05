@@ -15,13 +15,13 @@
 `ConfigureProtocolDto` declara `authorizeUrl`, `tokenUrl`, `userinfoUrl`,
 `jwksUri`, `metadataUrl` y `samlAcsUrl` solamente como `@IsString`, sin
 `@IsUrl`, esquema permitido, longitud ni bloqueo de fragmento/credenciales
-([auth-providers.dto.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/auth_providers/dto/auth-providers.dto.ts#L214-L275)).
+([auth-providers.dto.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/auth_providers/dto/auth-providers.dto.ts#L214-L275)).
 `assertProtocolShape` sólo exige que algunos campos existan
-([auth-providers-config.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/auth_providers/services/auth-providers-config.service.ts#L658-L704))
-y la configuración se persiste tal cual ([#L188-L210](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/auth_providers/services/auth-providers-config.service.ts#L188-L210)).
+([auth-providers-config.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/auth_providers/services/auth-providers-config.service.ts#L658-L704))
+y la configuración se persiste tal cual ([#L188-L210](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/auth_providers/services/auth-providers-config.service.ts#L188-L210)).
 
 El inicio de login concatena la URL configurada con parámetros sin validarla
-([federated-login.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/auth_providers/services/federated-login.service.ts#L640-L671)). Un administrador puede dejar una configuración inválida o con un
+([federated-login.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/02af1e09/src/modules/auth_providers/services/federated-login.service.ts#L640-L671)). Un administrador puede dejar una configuración inválida o con un
 esquema no HTTPS y el cliente que usa `authorizeUrl` recibirá un destino no
 conforme; cuando el conector de descubrimiento/JWKS se integre, el mismo dato
 será una entrada SSRF si no se valida en ambos bordes.

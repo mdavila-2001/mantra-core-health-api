@@ -8,7 +8,7 @@
 
 # Módulo `content_packs`
 
-**Fuente:** [`src/modules/content_packs/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/content_packs/README.md)
+**Fuente:** [`src/modules/content_packs/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/content_packs/README.md)
 · 1 controllers · 1 services · 0 repositories · 0 entidades · 1 DTO
 
 ---

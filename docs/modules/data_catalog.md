@@ -8,7 +8,7 @@
 
 # Módulo `data_catalog`
 
-**Fuente:** [`src/modules/data_catalog/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/data_catalog/README.md)
+**Fuente:** [`src/modules/data_catalog/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/data_catalog/README.md)
 · 2 controllers · 3 services · 2 repositories · 8 entidades · 1 DTO
 
 ---

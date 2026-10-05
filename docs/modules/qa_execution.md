@@ -8,7 +8,7 @@
 
 # Módulo `qa_execution`
 
-**Fuente:** [`src/modules/qa_execution/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/qa_execution/README.md)
+**Fuente:** [`src/modules/qa_execution/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/README.md)
 · 1 controllers · 1 services · 0 repositories · 4 entidades · 1 DTO
 
 ---

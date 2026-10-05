@@ -8,7 +8,7 @@
 
 # Módulo `pharma_lab`
 
-**Fuente:** [`src/modules/pharma_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/README.md)
+**Fuente:** [`src/modules/pharma_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/README.md)
 · 12 controllers · 13 services · 10 repositories · 31 entidades · 11 DTO
 
 ---
@@ -21,11 +21,11 @@ Gestiona laboratorios farmacéuticos, personal y visitadores, agenda y registros
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharma_lab/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 

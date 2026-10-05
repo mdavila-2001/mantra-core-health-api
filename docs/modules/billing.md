@@ -8,7 +8,7 @@
 
 # Módulo `billing`
 
-**Fuente:** [`src/modules/billing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/billing/README.md)
+**Fuente:** [`src/modules/billing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/billing/README.md)
 · 4 controllers · 12 services · 10 repositories · 22 entidades · 13 DTO
 
 ---

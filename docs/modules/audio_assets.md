@@ -8,7 +8,7 @@
 
 # Módulo `audio_assets`
 
-**Fuente:** [`src/modules/audio_assets/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/audio_assets/README.md)
+**Fuente:** [`src/modules/audio_assets/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audio_assets/README.md)
 · 2 controllers · 4 services · 2 repositories · 4 entidades · 1 DTO
 
 ---

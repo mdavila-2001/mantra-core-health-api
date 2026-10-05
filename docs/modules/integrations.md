@@ -8,7 +8,7 @@
 
 # Módulo `integrations`
 
-**Fuente:** [`src/modules/integrations/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/README.md)
+**Fuente:** [`src/modules/integrations/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/README.md)
 · 4 controllers · 4 services · 9 repositories · 10 entidades · 9 DTO
 
 ---
@@ -36,11 +36,11 @@ despacho, reintento y correlación.
 
 ## Estructura y datos
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/controllers/README.md): adaptadores HTTP.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/dto/README.md): contratos de entrada/salida.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/services/README.md): transiciones, transacciones y despacho HTTP.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/repositories/README.md): acceso a datos.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/entities/README.md): tablas `external_providers`, `provider_connections`,
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/controllers/README.md): adaptadores HTTP.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/dto/README.md): contratos de entrada/salida.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/README.md): transiciones, transacciones y despacho HTTP.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/repositories/README.md): acceso a datos.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/entities/README.md): tablas `external_providers`, `provider_connections`,
   `provider_credentials`, `integration_endpoints`, `integration_field_mappings`, mensajes,
   reintentos y suscripciones.
 - `integrations.concepts.ts`: IDs deterministas de estados, tipos y protocolos.

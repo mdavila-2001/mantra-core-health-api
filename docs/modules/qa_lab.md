@@ -8,7 +8,7 @@
 
 # Módulo `qa_lab`
 
-**Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/qa_lab/README.md)
+**Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_lab/README.md)
 · 3 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
