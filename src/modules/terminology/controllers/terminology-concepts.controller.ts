@@ -34,6 +34,7 @@ import {
   DeprecateConceptDto,
   DeprecateConceptResponseDto,
   SearchConceptsResponseDto,
+  GlossaryGraphDto,
   ConceptDetailDto,
   type DesignationLanguage,
 } from '../dto';
@@ -194,6 +195,32 @@ export class TerminologyConceptsController {
         ...(valueSetId === undefined ? {} : { valueSetId }),
         includeValueSets: parseFlag(includeValueSets),
       },
+    );
+  }
+
+  /** Lee los nodos activos del glosario y las relaciones entre ellos. */
+  @Get('glossary-graph')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lee el grafo de términos publicados del glosario médico',
+  })
+  @ApiQuery({
+    name: 'lang',
+    required: false,
+    enum: SUPPORTED_DESIGNATION_LANGUAGES,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Máximo de nodos devueltos; por defecto 500',
+  })
+  readGlossaryGraph(
+    @Query('lang') lang?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<GlossaryGraphDto> {
+    return this.conceptsService.readGlossaryGraph(
+      parseLanguage(lang),
+      limit ?? 500,
     );
   }
 

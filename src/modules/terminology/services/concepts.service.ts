@@ -34,6 +34,9 @@ import {
   type ConceptTaxonomyRefDto,
   type ConceptTextDto,
   type ConceptRelationDto,
+  type GlossaryGraphDto,
+  type GlossaryGraphNodeDto,
+  type GlossaryGraphEdgeDto,
   SearchConceptsResponseDto,
 } from '../dto';
 import {
@@ -784,6 +787,55 @@ export class ConceptsService {
     }
 
     return { items, count: items.length, limit };
+  }
+
+  /** Lee todos los nodos publicados y sus aristas tipadas en una sola llamada. */
+  async readGlossaryGraph(
+    language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
+    limit = 500,
+  ): Promise<GlossaryGraphDto> {
+    const page = await this.searchConcepts(undefined, undefined, limit, undefined, {
+      language,
+      includeValueSets: true,
+    });
+    const nodes: GlossaryGraphNodeDto[] = page.items
+      .filter(
+        (item): item is typeof item & { slug: string } =>
+          typeof item.slug === 'string' && item.slug !== '',
+      )
+      .map((item) => ({
+        conceptId: item.conceptId,
+        slug: item.slug,
+        display: item.display,
+        category: item.category ?? null,
+        shortDefinition: item.shortDefinition ?? '',
+      }));
+    const nodeIds = new Set(nodes.map((node) => node.conceptId));
+    const relationsBySource = await this.resolveGlossaryRelations([...nodeIds]);
+    const edges: GlossaryGraphEdgeDto[] = [];
+    const seenEdges = new Set<string>();
+
+    for (const [sourceConceptId, relations] of relationsBySource) {
+      for (const relation of relations) {
+        if (!nodeIds.has(relation.conceptId)) continue;
+        const key = `${sourceConceptId}:${relation.type}:${relation.conceptId}`;
+        if (seenEdges.has(key)) continue;
+        seenEdges.add(key);
+        edges.push({
+          sourceConceptId,
+          targetConceptId: relation.conceptId,
+          type: relation.type,
+        });
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      count: nodes.length,
+      limit,
+      possiblyTruncated: nodes.length === limit,
+    };
   }
 
   /**
