@@ -14,3 +14,4 @@ export * from './insurance-portability-public.controller';
 export * from './practitioner-settlement-batches.controller';
 export * from './insurance-campaigns.controller';
 export * from './insurer-received-claims.controller';
+export * from './insurer-patients.controller';

@@ -37,6 +37,7 @@ import {
   PractitionerSettlementBatchesController,
   InsuranceCampaignsController,
   InsurerReceivedClaimsController,
+  InsurerPatientsController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -58,6 +59,7 @@ import {
   InsuranceCampaignsService,
   InsurerContextService,
   InsurerReceivedClaimsService,
+  InsurerPatientsService,
 } from './services';
 import {
   CatalogRepository,
@@ -133,6 +135,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     PractitionerSettlementBatchesController,
     InsuranceCampaignsController,
     InsurerReceivedClaimsController,
+    InsurerPatientsController,
   ],
   providers: [
     MyClaimsService,
@@ -182,6 +185,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsuranceCampaignsService,
     InsurerContextService,
     InsurerReceivedClaimsService,
+    InsurerPatientsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

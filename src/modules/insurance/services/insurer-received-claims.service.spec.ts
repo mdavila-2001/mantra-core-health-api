@@ -209,7 +209,10 @@ function build(opciones: Opciones = {}) {
 
   const service = new InsurerReceivedClaimsService(
     em as never,
-    new InsurerContextService(catalogRepo as never, tenantAdministration as never),
+    new InsurerContextService(
+      catalogRepo as never,
+      tenantAdministration as never,
+    ),
     claimReadRepo as never,
     claimRepo as never,
     linkedOrders as never,
