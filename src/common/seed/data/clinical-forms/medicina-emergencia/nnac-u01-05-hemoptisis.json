@@ -1,6 +1,6 @@
 {
   "code": "NNAC_U01_05_HEMOPTISIS",
-  "name": "Hemoptisis (emergencias y urgencias respiratorias) (NNAC)",
+  "name": "Hemoptisis (emergencias y urgencias respiratorias) (NNAC 2012)",
   "specialty": {
     "code": "MEDICINA_EMERGENCIA",
     "display": "Medicina de Emergencia"
@@ -12,7 +12,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 5 de la unidad 1 de las NNAC, pág. 110; CIE-10 R04.2; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 5 de la unidad 1, pág. 110; CIE-10 R04.2; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -29,6 +29,24 @@
       "name": "Motivo de consulta y tiempo de evolución",
       "dataType": "text",
       "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Esputo purulento con rasgos hemoptoicos sugiere: bronquitis aguda, bronquiectasias, neumonía, TBC pulmonar activa y malignidad subyacente",
+        "Pleurodinia con edema ascendente y dolor en los miembros inferiores indica TEP",
+        "Hemoptisis consecutiva: trauma torácico puede estar relacionado con bula pulmonar rota traumática",
+        "Tos hemoptoica en un gran fumador orienta a cáncer broncogénico",
+        "Sangrado de otros aparatos y sistemas indican discrasias sanguíneas",
+        "Disnea"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 110. Expulsión se sangre por la boca procedente del aparato respiratorio."
     },
     {
       "section": "Criterios de la norma",

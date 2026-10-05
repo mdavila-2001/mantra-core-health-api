@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 46 de la unidad 3 de las NNAC, pág. 364; CIE-10 B58; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 46 de la unidad 3, pág. 364; CIE-10 B58; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -160,18 +160,7 @@
         "Ausencia de signología compatible con el cuadro",
         "Esquema de tratamiento terminado",
         "Volver en una semana",
-        "Para continuar tratamiento en forma ambulatoria",
-        "Consumo de carne bien cocida",
-        "La congelación de la carne durante 24 horas es otra buena opción",
-        "Evitar que las embarazadas limpien los recipientes con arena donde defecan los gatos",
-        "No tener contacto con felinos cuya alimentación se desconozca",
-        "Uso de guantes durante labores de jardinería y lavado de manos antes de comer",
-        "Alimentación de gatos con productos secos o bien hervidos",
-        "Impedir que los gatos cacen, mantenerlos exclusivamente como mascotas dentro el hogar",
-        "Desecho diario de las heces de los gatos y de la arena donde defecan; las heces puede desecharse por el inodoro, quemarse o enterrarse a gran profundidad",
-        "Las cajas de arena para gatos se deben desinfectar todos los días con agua hervida",
-        "Uso de guantes para manipular el material que puede estar infectado y lavarse las manos después de hacerlo",
-        "Lavado de manos antes de comer y después de manipular carne cruda o estar en contacto con tierra que puede estar contaminada con heces de gatos"
+        "Para continuar tratamiento en forma ambulatoria"
       ],
       "multiple": true,
       "allowOther": true

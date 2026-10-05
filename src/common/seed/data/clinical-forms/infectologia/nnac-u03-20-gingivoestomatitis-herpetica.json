@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 20 de la unidad 3 de las NNAC, pág. 301; CIE-10 B00.2; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 20 de la unidad 3, pág. 301; CIE-10 B00.2; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -137,16 +137,7 @@
         "Buena tolerancia oral",
         "Para continuar tratamiento en forma ambulatoria",
         "Paciente asintomático",
-        "Control en una semana",
-        "Consejería y tratamiento familiar",
-        "Buscar otros focos infecciosos virales",
-        "Recomendación de prácticas de higiene y alimentación saludable",
-        "Hervido del agua antes de su consumo",
-        "Filtrado del agua de los abastecimientos públicos, que estén dispuestos a contaminación por heces humanas o de animales",
-        "Eliminación de las heces de acuerdo a normas",
-        "Desinfección de las heces y artículos contaminados con ellas",
-        "Instrucción sobre higiene a familias, personal de establecimientos de salud sobre todo a adultos que trabajan en guarderías infantiles",
-        "Controlar la proliferación de moscas por medio de la recolección frecuente y eliminación adecuada de la basura"
+        "Control en una semana"
       ],
       "multiple": true,
       "allowOther": true
