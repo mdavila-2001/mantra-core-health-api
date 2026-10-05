@@ -74,3 +74,18 @@ proyecciones/worker fuera del alcance de estos endpoints.
 - Unit: `services/*.service.spec.ts` (repos/em mockeados) y
   `controllers/*.controller.spec.ts` (servicios mockeados).
 - Smoke transversal: `test/smoke/modules/geo.smoke.ts` (`GEO_SMOKE`).
+# Geo module
+
+Gestiona sujetos rastreados, sesiones, pings de ubicación, viajes, geocercas y
+eventos de entrada/salida. Las rutas se reservan al rol `SECURITY_ADMIN`.
+
+## Verificación
+
+```bash
+corepack yarn test src/modules/geo --runInBand --silent
+```
+
+La revisión de octubre de 2026 encontró que el rol global no sustituye una
+comprobación por tenant, sujeto y consentimiento. El detalle y la matriz de
+pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/geo.md`](../../../docs/revision-backend-2026-10-04/modulos/geo.md).

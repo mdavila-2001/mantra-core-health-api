@@ -9,7 +9,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 28 de la unidad 3 de las NNAC, pág. 323; CIE-10 A30; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 28 de la unidad 3, pág. 323; CIE-10 A30; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -131,15 +131,7 @@
       "options": [
         "Cuando un paciente ha cumplido seis meses de tratamiento para lepra PB y 12 meses para lepra MB y cuando la baciloscopia es negativa",
         "Establecida la curación",
-        "Persistencia de la pérdida de sensibilidad, la debilidad u otro daño nervioso",
-        "El paciente debe saber cuidar y evitar daño neural futuro",
-        "Persistencia de algunas manchas coloreadas, que quedan permanentemente",
-        "Enfermedad de denuncia obligatoria",
-        "No existen",
-        "La promoción se realiza de acuerdo a las características de cada región",
-        "La detección de casos",
-        "Las causas del prejuicio",
-        "Las causas del abandono de los tratamientos"
+        "Puede retornar para continuar tratamiento domiciliario"
       ],
       "multiple": true,
       "allowOther": true

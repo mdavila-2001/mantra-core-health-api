@@ -183,8 +183,8 @@ ni citas.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/vector_rag` — 94 pruebas (21 gobierno + 20 pipeline +
-25 retrieval + 13 mantenimiento + 15 de delegación de los dos controladores).
+`corepack yarn test src/modules/vector_rag --runInBand --silent` — 5 suites y 97 pruebas
+aprobadas durante la revisión (21 gobierno + 20 pipeline + 25 retrieval + 13 mantenimiento + 15 de delegación).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -216,3 +216,8 @@ ni citas.
 - **Detección fina de descuadre** (UC-59-12): hoy se detecta por documento con más de una versión
   activa. Comparar `content_hash` contra el manifiesto canónico exige que el manifiesto traiga los
   hashes, que el caso de uso menciona pero no define en la petición.
+
+## Revisión ALOVIDA
+
+Los recursos resueltos por UUID no se acotan al tenant activo y el borrado no filtra los documentos
+por tenant. Ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/vector_rag.md).

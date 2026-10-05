@@ -67,3 +67,11 @@ Pino estructurado por operación (`practice.site.create`, `practice.inventory.mo
   `controllers/practice.controllers.spec.ts` (mockean servicios).
 - Smoke (contrato transversal): `test/smoke/modules/practice.smoke.ts`
   (`PRACTICE_SMOKE`).
+
+## Revisión ALOVIDA — 2026-10-05
+
+Comando dirigido: `corepack yarn test src/modules/practice --runInBand --silent`.
+En la revisión pasaron **11 suites y 106 pruebas**. Son pruebas unitarias con
+mocks: no demuestran RLS ni aislamiento de escrituras por UUID entre dos
+tenants. El informe de alcance y el hallazgo confirmado están en
+[`docs/revision-backend-2026-10-04/modulos/practice.md`](../../../docs/revision-backend-2026-10-04/modulos/practice.md).

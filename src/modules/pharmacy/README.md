@@ -121,3 +121,12 @@ archivo para que el módulo sea auto-contenido.
   `controllers/pharmacy.controller.spec.ts` (mockea servicios).
 - Smoke de integración: `test/smoke/modules/pharmacy.smoke.ts`
   (`PHARMACY_SMOKE`), encadena el ciclo completo sobre `ctx.vars`.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/pharmacy.md)
+registra que las mutaciones administrativas sólo exigen rol global y no atan el
+actor a farmacia ni tenant. También faltan comprobaciones entre farmacia, sede,
+práctica y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió
+dos advertencias de import JSON sin atributo y no prueba aislamiento de tenant
+ni claves foráneas reales.

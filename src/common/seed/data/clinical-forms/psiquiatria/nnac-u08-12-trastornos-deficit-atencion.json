@@ -12,7 +12,7 @@
     "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
     "license": "Documento técnico-normativo estatal de acceso público",
     "retrievedAt": "2026-10-05",
-    "note": "Norma N.º 12 de la unidad 8 de las NNAC, pág. 577; CIE-10 F90 – F98.8; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+    "note": "NNAC 2012, norma N.º 12 de la unidad 8, pág. 577; CIE-10 F90 – F98.8; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
   },
   "fields": [
     {
@@ -42,7 +42,6 @@
         "Cumple seis de los nueve síntomas de inatención y/o seis de los nueve síntomas de hiperactividad/impulsividad",
         "Niveles de desarrollo inapropiados",
         "Algunos de los síntomas se presentan antes cumplir los siete años de edad",
-        "Debe existir evidencia clara de alteraciones clínicas significativas en la función social, escolar, u ocupacional",
         "Se acompaña de labilidad emocional, llanto fácil",
         "Escasa tolerancia a la frustración y baja autoestima",
         "Con frecuencia fracasa en prestar atención a los detalles o es descuidado en su desempeño escolar, trabajo u otras actividades",

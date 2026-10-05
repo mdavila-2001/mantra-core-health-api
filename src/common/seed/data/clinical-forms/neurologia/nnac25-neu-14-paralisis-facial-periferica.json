@@ -1,0 +1,160 @@
+{
+  "code": "NNAC25_NEU_14_PARALISIS_FACIAL_PERIFERICA",
+  "name": "Parálisis facial periférica (NNAC 2025)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Neurología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 14, pág. 129; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Debilidad de hemicara de instauración aguda con o sin afectación del gusto o lagrimeo",
+        "Instauración máxima de 3 días",
+        "Ojo lloroso (lagoftalmos) debido a ectropión del párpado",
+        "Hiperacusia debido a la pérdida de la función del músculo estapedio",
+        "Pérdida del sentido del gusto y disminución en la secreción de saliva",
+        "Borramiento del pliegue nasogeniano y frontal ipsilateral a la parálisis",
+        "Desvió de la comisura labial hacia el lado sano"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 129. La parálisis facial periférica se refiere a una lesión de la neurona motora inferior del nervio facial y puede ocurrir como resultado de varias condiciones médicas, como infección, colesteatoma, trauma, malignidad, problemas autoinmunitarios y embarazo (1)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "HB I: Función no alterada de los músculos faciales",
+        "HB II: Parálisis leve (debilidad muscular mínima)",
+        "HB III: Parálisis moderada (debilidad muscular evidente pero todavía es posible cerrar el ojo)",
+        "HB V: Parálisis grave (movilidad mínima)",
+        "HB VI: Parálisis total (ausencia completa de funciones motoras)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Reflejo del parpadeo, EMG y VCN del nervio facial",
+        "Lesiones de la neurona motora superior",
+        "Lesiones de la neurona motora inferior (idiopáticas, traumáticas, neoplásicas o inflamatorias)",
+        "Síndrome de Ramsay Hunt: Parálisis del nervio facial (reactivación del virus varicelazóster (VVZ) dentro del ganglio geniculado)",
+        "Sarcoidosis (2)",
+        "Esclerosis múltiple (2)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["G51.0: Parálisis de Bell"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 14, pág. 129); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -158,8 +158,22 @@ pacientes. No se loguean valores de partición, contratos ni expresiones de coho
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/lakehouse` — 70 pruebas (18 catálogo + 18 transformación +
-23 investigación + 11 de delegación de los dos controladores).
+```bash
+corepack yarn test src/modules/lakehouse --runInBand --silent
+```
+
+Revisión 2026-10-05: 4 suites y 73 pruebas aprobadas. La cobertura actual verifica reglas de
+estado, idempotencia y delegación de controladores; no cubre aislamiento entre tenants ni la
+persistencia real de los payloads mínimos frente al DDL.
+
+## Límites conocidos de la implementación revisada
+
+- Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
+  resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
+  esa comprobación; ver [informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
+- Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
+  aceptado por validación puede fallar al persistir. Ver [LAKE-02](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
+- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](../../../docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
 
 ## Divergencias con el caso de uso v3.9
 

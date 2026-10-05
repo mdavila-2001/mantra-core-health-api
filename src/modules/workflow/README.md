@@ -150,8 +150,8 @@ guarda ni el contenido de `payloadJson`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/workflow` — 87 pruebas (17 definición + 31 ejecución +
-19 instancias + 9 del repositorio de agregado + 11 de delegación de los tres controladores).
+`corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
+aprobadas durante la revisión.
 
 ## Divergencia con el caso de uso v3.9
 
@@ -183,3 +183,8 @@ guarda ni el contenido de `payloadJson`.
 - **`purpose_of_use_concept_id`**: se guarda en la definición de la transición y se exige que exista,
   pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
   (`access_policies`), que es de la parte de Pablo.
+
+## Revisión ALOVIDA
+
+El propósito de uso configurado en una transición todavía no se comprueba contra la política del
+actor; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/workflow.md).

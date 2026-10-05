@@ -90,3 +90,10 @@ Las tres cosas que rompieron al probarlo contra PostgreSQL real, por si vuelven 
    ("out of shared memory"). Se trocea en lotes de 200.
 3. **PostgreSQL trunca identificadores de más de 63 bytes sin avisar.** Ver
    `identifier.ts`.
+
+## Verificación y límite operativo
+
+`corepack yarn test --runInBand --silent src/orm` cubre contratos unitarios,
+no la materialización real. Un índice o FK tolerado que falle queda en logs; el
+gate propuesto figura en el
+[informe de revisión](../../../docs/revision-backend-2026-10-04/nucleo/orm-nucleo.md).

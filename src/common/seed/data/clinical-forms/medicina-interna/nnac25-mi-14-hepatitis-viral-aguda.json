@@ -1,0 +1,212 @@
+{
+  "code": "NNAC25_MI_14_HEPATITIS_VIRAL_AGUDA",
+  "name": "Hepatitis viral aguda (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 14, pág. 125; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hepatitis aguda: Es una forma de hepatitis B de corta duración que generalmente se resuelve espontáneamente en un período de 1 a 3 meses",
+        "Hepatitis crónica: Es una forma de hepatitis B a largo plazo que persiste durante más de 6 meses",
+        "Hepatitis C aguda: Es la fase inicial de la infección por el virus de la hepatitis C (VHC)",
+        "Hepatitis C crónica: Si la infección por el VHC persiste más allá de 6 meses, se considera crónica"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Saneamiento deficiente",
+        "Falta de agua salubre",
+        "Convivencia con una persona infectada",
+        "Relaciones sexuales con una persona con infección aguda por VHA (bucoanal)",
+        "Uso de drogas inyectables",
+        "Viajes a zonas de alta endemicidad sin inmunización previa",
+        "Relaciones sexuales sin protección con personas infectadas con VHB",
+        "Múltiples parejas sexuales",
+        "Transfusiones sanguíneas",
+        "Uso de drogas endovenosas",
+        "Jeringas y elementos cortopunzantes contaminados",
+        "Personas que conviven con personas infectadas con VHB de por vida",
+        "Trabajadores del campo de la salud que están en contacto con sangre humana",
+        "Pacientes de hemodiálisis",
+        "Bebés de madres infectadas con VHB (transmisión vertical)",
+        "Relaciones sexuales sin protección con personas infectadas con VHC",
+        "Personas que conviven con personas infectadas con VHC de por vida",
+        "Pacientes de Hemodiálisis",
+        "Bebés de madres infectadas con VHC (transmisión vertical)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma completo",
+        "Coagulograma (TP- APTT)",
+        "Proteinograma",
+        "Perfil hepático (Transaminasas y bilirrubinas, FA, Gammaglutamil-transpeptidasa)",
+        "Ecografía hepática (Elastografía según disponibilidad)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "B15: Hepatitis aguda tipo A",
+        "B15.0: Hepatitis aguda tipo A, con coma hepático",
+        "B15.9: Hepatitis aguda tipo A, sin coma hepático",
+        "B16: Hepatitis aguda tipo B",
+        "B17: Otras hepatitis virales agudas",
+        "B18: Hepatitis viral crónica",
+        "B19: Hepatitis viral, sin otra especificación",
+        "B19.0: Hepatitis viral no especificada con coma",
+        "B19.9: Hepatitis viral no especificada sin coma"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Insuficiencia hepática",
+        "Falla hepática fulminante",
+        "Falla orgánica múltiple",
+        "Cirrosis hepática",
+        "Hepatocarcinoma",
+        "Hepatocarcinoma de mayor frecuencia"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 14, pág. 125); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Analizar todas las donaciones de sangre para detectar este virus",
+        "Garantizar la inocuidad de la sangre y evitar la transmisión accidental",
+        "Someterse a pruebas de detección del HBsAg y servicios de prevención, atención y tratamiento",
+        "Tratamiento profiláctico con antivíricos para prevenir la transmisión del virus de la hepatitis B de la madre al niño"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

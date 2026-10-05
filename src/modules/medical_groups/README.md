@@ -49,3 +49,13 @@ profesional.
 - **Quien no es el invitado** recibe `404` al responder una invitación, para que
   no distinga «no es tuya» de «no existe».
 - Sólo el creador resuelve un cambio de horario.
+
+## Auditoría vigente
+
+La creación debe aplicar la política clínica al paciente aun si el diagnóstico es
+opcional; la implementación revisada sólo lo hace en la rama con condición. La
+auditoría y la matriz de pruebas propuesta están en
+[`docs/revision-backend-2026-10-04/modulos/medical_groups.md`](../../../docs/revision-backend-2026-10-04/modulos/medical_groups.md).
+
+No existen specs bajo `src/modules/medical_groups` en la base auditada; la
+ejecución dirigida termina con `No tests found`.

@@ -258,12 +258,28 @@ describe('catálogo v2 — validación de carga', () => {
  * ese filtro no puede dejar pasar.
  */
 describe('fichas de las NNAC de Bolivia', () => {
-  const nnac = STANDARD_FORMS.filter((ficha) => ficha.code.startsWith('NNAC_'));
+  const nnac = STANDARD_FORMS.filter((ficha) => ficha.code.startsWith('NNAC'));
   const DOSIS =
     /\b\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|ml|mL|UI|mEq|gotas?|comprimidos?|tabletas?|ampollas?)\b|\b(?:IV|VO|IM|SC)\b|\bdosis\b/u;
 
-  it('hay una ficha por cada norma de las unidades 1 a 14 (excepto nutrición)', () => {
-    expect(nnac.length).toBeGreaterThanOrEqual(190);
+  it('hay fichas de las dos ediciones de la norma, una por enfermedad', () => {
+    const de2025 = nnac.filter((ficha) => ficha.code.startsWith('NNAC25_'));
+    expect(de2025.length).toBeGreaterThanOrEqual(70);
+    expect(nnac.length - de2025.length).toBeGreaterThanOrEqual(140);
+    const nombres = nnac.map((ficha) =>
+      ficha.name.replace(/ \(NNAC (?:2012|2025)\)$/, ''),
+    );
+    expect(new Set(nombres).size).toBe(nombres.length);
+  });
+
+  it('el código CIE-10 de 2025 es una lista de «código: nombre» de la norma', () => {
+    const con = STANDARD_FORMS.filter((f) => f.code.startsWith('NNAC25_'))
+      .map((f) => f.fields.find((c) => c.code === 'codigo_cie10'))
+      .filter((c) => c?.options !== undefined);
+    expect(con.length).toBeGreaterThan(60);
+    for (const campo of con)
+      for (const opcion of campo?.options ?? [])
+        expect(opcion).toMatch(/^[A-Z]\d{2}(\.\d+)?: .{4,}/);
   });
 
   it('todas citan al Ministerio de Salud y Deportes como fuente', () => {

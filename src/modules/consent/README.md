@@ -70,3 +70,10 @@ un spec de delegación de controladores. Verificado con:
 npx tsc --noEmit -p tsconfig.json | grep modules/consent   # vacío
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/consent   # verde
 ```
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/consent.md)
+registra pendientes de alcance para decisiones, retiro y revocación de
+consentimiento, además del fallback al tenant seed. La corrida dirigida pasó
+13 suites y 54 tests; faltan pruebas de dos tenants y de titularidad del paciente.

@@ -158,8 +158,8 @@ riesgo.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/graph_intelligence` — 87 pruebas (28 proyección + 19 recorrido
-+ 25 analítica + 15 de delegación de los dos controladores).
+`corepack yarn test src/modules/graph_intelligence --runInBand --silent` — 4 suites y 87 pruebas
+aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 15 de delegación).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -190,3 +190,9 @@ riesgo.
 - **Índice `MULTIVALUE` sobre `member_node_ids[]`**: la depuración de comunidades al borrar recorre
   las del tenant en memoria. Con volumen alto conviene el operador de arrays de Postgres, que exige
   el índice que el modelo declara pero el ORM no materializa.
+
+## Revisión ALOVIDA
+
+Las mutaciones por UUID todavía no comparan el tenant activo contra el recurso cargado, y el
+recorrido con paciente no contrasta consentimiento. Ver el
+[informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).

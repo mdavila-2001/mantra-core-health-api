@@ -1,0 +1,140 @@
+# Revisión transversal de autorización — ALOVIDA
+
+## 1. Fecha, alcance y cobertura real
+
+- Fecha: 2026-10-05. Base: rama `pablo/revision-backend-2026-10-04`; revisión documental, sin modificar código ni ejecutar la suite completa.
+- Alcance de esta pasada: rutas HTTP de `src/`, guards globales, comprobaciones de pertenencia al recurso en los servicios seleccionados y diseño/prueba de RLS. Se usó un recorrido sintáctico local con TypeScript sobre los archivos de controladores: **274 clases `@Controller`, 1.458 handlers HTTP, 54 handlers `@Public()` y 249 handlers sin `@Roles` efectivo ni `@Public()`**. El último grupo incluye `@Roles()` vacío y muchas rutas intencionalmente autorizadas en el servicio; **no es un conteo de vulnerabilidades**. Se contrastó el total de clases con `rg -l '@Controller\(' src --glob '*.ts' -g '!*.spec.ts'` (274).
+- Revisión profunda, con cuerpo de método, guard, servicio y pruebas leídos: `POST /tracking/webhooks/carriers/:carrierCode`; `POST /order-sets/:id/apply`; `POST /common/files/:id/versions`, `POST /common/files/:id/versions/:vid/derivatives`, `POST /common/files/:id/links`, `DELETE /common/files/:id`, `GET /common/files/:id/content`, `POST /common/files/:id/download-url`; como controles adversariales, webhooks de integrations/messaging/payments y rutas clínicas con `ClinicalRecordAccessGuard`. Se leyeron además el interceptor de tenant, el filtro de errores, la configuración de RLS y `test/integration/rls.int-spec.ts`.
+- **No cubierto en profundidad:** los otros 1.450 handlers, sus ramas de servicio/repositorio, los contratos de todos los 54 `@Public`, sockets/GraphQL/transportes de workers, permisos de cada almacén no PostgreSQL y el estado real de RLS/roles en una base desplegada. El recorrido sintáctico detecta decoradores explícitos, pero no demuestra que cada módulo se monte ni que cada servicio haga autorización; se requiere una segunda pasada por dominio. No se ejecutó la prueba RLS porque su preparación muta el esquema. No se ejecutaron tests ni peticiones reales: el estado de evidencia es **revisión de código**, no explotación observada.
+
+## 2. Resumen ejecutivo
+
+| Severidad | Conteo | Lente | Resultado |
+|---|---:|---|---|
+| Crítica | 2 | autorización de webhook; escritura clínica/IDOR | AUTHZ-T01 y AUTHZ-T02 permiten, según el flujo leído, alterar estado de envíos sin credencial de transportista y crear órdenes para un paciente/encuentro elegidos por cualquier sesión. |
+| Alta | 1 | propiedad de archivos | AUTHZ-T03 permite que una sesión con el ID de un archivo ajeno escriba una versión, vínculo, derivado o borrado; la lectura de bytes sí comprueba propiedad. |
+| Media | 1 | RLS/defensa de base | AUTHZ-T04: RLS está apagado por defecto y la prueba de integración es opt-in; el control de aplicación sí existe. |
+
+La cadena global **sí** autentica por defecto: [AuthModule](../../../src/common/auth/auth.module.ts#L33-L44) registra `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard` y `VerifiedIdentityGuard`. [JwtAuthGuard](../../../src/common/auth/jwt-auth.guard.ts#L28-L37) sólo omite JWT para `@Public`; [RolesGuard](../../../src/common/auth/roles.guard.ts#L61-L87) deja pasar si no hay roles exigidos. [TenantContextInterceptor](../../../src/common/tenant/tenant-context.interceptor.ts#L124-L145) impide declarar otro `tenantId`/`custodianTenantId` en el primer nivel y, con `RLS_ENFORCE=true`, fija el contexto PostgreSQL. Ninguno de estos controles demuestra por sí mismo que el actor pueda actuar sobre **un archivo, paciente, encuentro o envío concreto**. La ausencia de `@UseGuards` local no constituye hallazgo.
+
+## 3. Mapa de la unidad
+
+| Método y ruta (profundidad ver §1) | Guard/rol efectivo | Recurso y comprobación leída |
+|---|---|---|
+| `POST /tracking/webhooks/carriers/:carrierCode` | `@Public`; sin JWT/tenant | Busca transportista por código y sujeto por `trackingNumber`; no valida firma, secreto ni relación transportista–sujeto antes de cambiar el estado. |
+| `POST /order-sets/:id/apply` | JWT/tenant; sin `@Roles` ni guard clínico local | `ApplyOrderSetDto` recibe `patientProfileId` y `encounterId`; el servicio crea `service_requests` con ambos valores sin comprobar su relación ni el permiso de escritura. |
+| `POST /common/files/:id/versions` | JWT/tenant; sin rol | `FilesService.createVersion` busca por ID y promociona nueva versión; no comprueba `createdByUserId`. |
+| `POST /common/files/:id/versions/:vid/derivatives` | JWT/tenant; sin rol | Comprueba versión limpia, no propiedad del archivo. |
+| `POST /common/files/:id/links` | JWT/tenant; sin rol | Comprueba que exista el archivo, no permiso del actor sobre él ni sobre `ownerId`. |
+| `DELETE /common/files/:id` | JWT/tenant; sin rol | Comprueba retención legal, no propiedad; `actor.id` queda sólo como auditoría. |
+| `GET /common/files/:id/content`; `POST /common/files/:id/download-url` | JWT/tenant; sin rol | Contraprueba: ambas usan `canActorReadOwnFile`, que permite creador o rol revisor. |
+
+Dependencias relevantes: `common.files` tiene `tenant_id` y `created_by_user_id` ([entidad](../../../src/modules/common/entities/files.entity.ts#L15-L19), [entidad](../../../src/modules/common/entities/files.entity.ts#L97-L106)); `FilesService.createFile` escribe el tenant semilla común `SEED.tenantId` ([servicio](../../../src/modules/common/services/files.service.ts#L183-L191)), por lo que RLS por tenant no distingue dos propietarios de archivo. `ClinicalRecordAccessGuard` sí ofrece `assertPuedeEscribirHistoria` cuando se monta ([guard](../../../src/modules/clinical/guards/clinical-record-access.guard.ts#L118-L145)); el controlador de order sets no lo monta. Para webhooks, integrations y messaging verifican HMAC antes de persistir ([integrations](../../../src/modules/integrations/services/integrations-webhooks.service.ts#L67-L75), [messaging](../../../src/modules/messaging/services/notifications.service.ts#L538-L548)); tracking no tiene ese paso. Catálogo base: `ErrorCode.UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND`, `VALIDATION_FAILED` ([enum](../../../src/common/errors/error-codes.ts#L6-L20)); `DomainException` admite `details.reason` ([clase](../../../src/common/errors/domain.exception.ts#L13-L29)).
+
+## 4. Hallazgos verificados, impacto y plan
+
+### AUTHZ-T01 — Crítica — webhook de transportista sin autenticación
+
+**Evidencia.** [Controlador:119](../../../src/modules/tracking/controllers/tracking.controller.ts#L119-L131): `@Public()` y `return this.trackingService.ingestCarrierWebhook(carrierCode, dto)`. [DTO:488](../../../src/modules/tracking/dto/tracking.dto.ts#L488-L520): sólo `trackingNumber`, `externalStatusCode` y `externalEventId` obligatorios, sin firma. [Servicio:490](../../../src/modules/tracking/services/tracking.service.ts#L490-L512) busca un transportista existente y el número de seguimiento; [servicio:543](../../../src/modules/tracking/services/tracking.service.ts#L543-L576) convierte el código recibido en estado y actualiza sujeto y envío. El hecho de que el número sea difícil de adivinar no es una comprobación de autenticidad.
+
+**Escenario e impacto.** Quien conoce un número de seguimiento y cualquier `carrierCode` existente puede enviar un `externalEventId` nuevo y `externalStatusCode=DELIVERED`; la transacción registra evento y cambia el estado del envío vivo. La deduplicación por ID externo sólo evita repetir el mismo evento. No se observó tráfico real ni se comprobó cómo se entregan los números: la conclusión es sobre el camino de código.
+
+**Intento de refutación.** `JwtAuthGuard` no aplica por `@Public`; `TenantContextInterceptor` también omite rutas públicas ([interceptor:83](../../../src/common/tenant/tenant-context.interceptor.ts#L83-L89)); `AuthThrottlerGuard` limita volumen, no autentica. [Pruebas actuales:443](../../../src/modules/tracking/services/tracking.service.spec.ts#L443-L558) cubren mapeo, repetición y códigos desconocidos, sin firma. Otros webhooks sí comprueban HMAC. **Veredicto: sostenido.**
+
+**Plan.** 1) Definir credencial por transportista y formato firmado (cuerpo canónico o bytes crudos, timestamp y ventana de replay) en `tracking` sin exponer secreto en logs. 2) Añadir firma al contrato de `CarrierWebhookDto` o cabecera validada en el controlador; rechazarla antes de `findSubjectByTrackingNumber` y de cualquier mutación. 3) Comprobar que el sujeto/envío corresponde al transportista autenticado; hoy el código sólo comprueba que el código exista. 4) Mantener deduplicación e incluir la identidad del transportista en la clave; migrar proveedores y contrato antes de exigir firma. 5) Añadir specs unitarias y E2E HTTP con PostgreSQL de prueba. Fragmento orientativo: `if (!verifyCarrierSignature(carrier, canonicalPayload, signature)) throw new DomainException(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHENTICATED, 'Webhook de transportista no autenticado', { reason: 'CARRIER_WEBHOOK_AUTH_FAILED' });`. Confirmar con producto el esquema de firma de cada carrier antes de implementarlo.
+
+### AUTHZ-T02 — Crítica — aplicación de plantilla crea órdenes para paciente/encuentro arbitrarios
+
+**Evidencia.** [Controlador:49](../../../src/modules/clinical_ext/controllers/order-sets.controller.ts#L49-L59): `POST(':id/apply')` sólo recibe JWT y reenvía DTO/actor. [DTO:127](../../../src/modules/clinical_ext/dto/order-set.dto.ts#L127-L152): ambos IDs vienen del cliente. [Servicio:114](../../../src/modules/clinical_ext/services/order-sets.service.ts#L114-L155): carga la plantilla y elige `custodianTenantId` de DTO o plantilla, pero no carga al paciente ni al encuentro y no llama `assertPuedeEscribirHistoria`; [servicio:153](../../../src/modules/clinical_ext/services/order-sets.service.ts#L153-L171) crea una `service_request` por ítem. [Prueba:101](../../../src/modules/clinical_ext/services/order-sets.service.spec.ts#L101-L156) confirma el fan-out con IDs tomados del DTO, sin fixture de permisos.
+
+**Escenario e impacto.** Cualquier cuenta autenticada con tenant activo puede seleccionar un UUID válido de paciente/encuentro y causar nuevas órdenes clínicas si las FK aceptan esos IDs. El servicio tampoco verifica que el encuentro pertenezca al paciente. El éxito final depende de restricciones de DB no ejecutadas aquí; **la falta de control de autorización previa sí está demostrada**. Con `RLS_ENFORCE=false` por defecto, la DB no agrega barrera de tenant; con RLS encendido, dos pacientes del mismo tenant siguen indistinguibles para esa política.
+
+**Intento de refutación.** [AuthModule](../../../src/common/auth/auth.module.ts#L39-L44) exige JWT, pero [RolesGuard](../../../src/common/auth/roles.guard.ts#L62-L68) pasa cuando el handler no declara roles. [ClinicalRecordAccessGuard](../../../src/modules/clinical/guards/clinical-record-access.guard.ts#L100-L145) haría la verificación, pero no aparece en el controlador. [ClinicalExtModule](../../../src/modules/clinical_ext/clinical_ext.module.ts#L64-L81) importa `ClinicalModule`, sin montar ese guard en order sets. El interceptor sólo compara `custodianTenantId`, no `patientProfileId` ni relación de encuentro. **Veredicto: sostenido.**
+
+**Plan.** 1) En `OrderSetsService.apply`, antes de leer ítems o crear órdenes, exigir identidad clínica autorizada y `ClinicalReadService.assertPuedeEscribirHistoria(dto.patientProfileId, actor)`; conservar la verificación dentro del servicio para usos fuera de HTTP. 2) Cargar `encounterId` y comprobar que su `patientProfileId` y custodia coincidan con los valores aprobados; rechazar cruces. 3) Resolver el tenant custodio desde el encuentro autorizado, no desde una plantilla ajena; si se mantiene un override, contrastarlo con la relación clínica. 4) Ejecutar esas consultas y el fan-out dentro de la transacción existente, con bloqueo apropiado si el estado del encuentro puede cambiar. 5) Añadir pruebas de paciente ajeno, encuentro de otro paciente y cross-tenant con RLS apagado/encendido. Fragmento orientativo: `await clinicalRead.assertPuedeEscribirHistoria(dto.patientProfileId, actor); const encounter = await encounters.findById(tx, dto.encounterId); if (encounter?.patientProfileId !== dto.patientProfileId) throw new DomainException(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, 'Encuentro no autorizado para el paciente', { reason: 'ORDER_SET_PATIENT_ENCOUNTER_MISMATCH' });`. Usar el nombre real de la propiedad tras revisar la entidad.
+
+### AUTHZ-T03 — Alta — mutaciones de archivo sin comprobar propietario ni recurso de destino
+
+**Evidencia.** [Controlador:156](../../../src/modules/common/controllers/common-files.controller.ts#L156-L201) expone versión, derivado, vínculo y borrado sin `@Roles`; recibe `actor` pero el servicio usa `actor.id` para auditoría. [Versión:250](../../../src/modules/common/services/files.service.ts#L250-L290) carga `fileId` y promociona la versión sin `createdByUserId`; [derivado:323](../../../src/modules/common/services/files.service.ts#L323-L378) exige versión limpia, no propiedad; [vínculo:414](../../../src/modules/common/services/files.service.ts#L414-L432) acepta `ownerId` del DTO sin validar permiso sobre ese dueño; [borrado:533](../../../src/modules/common/services/files.service.ts#L533-L556) sólo comprueba retención legal. En cambio [descarga:502](../../../src/modules/common/services/file-upload.service.ts#L502-L516) y [URL:613](../../../src/modules/common/services/files.service.ts#L613-L619) usan `canActorReadOwnFile` ([regla:47](../../../src/modules/common/services/file-access.ts#L47-L55)).
+
+**Escenario e impacto.** Dos usuarios autenticados que comparten el tenant de archivos semilla: el segundo, con el UUID de un archivo ajeno, puede añadir/promocionar versión, crear derivado, vincularlo a otro recurso o borrarlo lógicamente. Los bytes maliciosos necesitan un `storageUri` aceptado por la capa de almacenamiento, pero `softDelete` no necesita uno; el vínculo puede alterar la asociación de un archivo clínico. La barrera RLS por tenant no distingue autores dentro de `SEED.tenantId`.
+
+**Intento de refutación.** [StoragePublicationService.guardFile](../../../src/common/storage/storage-publication.service.ts#L179-L202) comprueba vida del archivo y conflictos de almacenamiento, **no recibe actor**. Las [pruebas de versión:141](../../../src/modules/common/services/files.service.spec.ts#L141-L181) y [borrado:274](../../../src/modules/common/services/files.service.spec.ts#L274-L299) no prueban actor ajeno, mientras la URL sí tiene prueba de revisor. **Veredicto: sostenido.**
+
+**Plan.** 1) Crear política única de escritura de archivo por propietario o administrador autorizado para ese tenant; no reutilizar automáticamente la política de lectura del revisor. 2) Llamarla en `createVersion`, `createDerivative`, `createLink` y `softDelete` después de cargar el archivo y antes de mutar, dentro de la transacción. 3) Para `createLink`, autorizar además el `ownerType`/`ownerId` mediante el módulo dueño; bloquear tipos clínicos en la ruta genérica salvo que se pase un contexto clínico ya autorizado. 4) Mantener la guarda de ciclo de vida, que resuelve otro riesgo. 5) Añadir pruebas de dos usuarios del **mismo** tenant y de un revisor con permiso sólo de lectura. Fragmento orientativo: `assertCanMutateFile(file, actor, scope); assertCanLinkToOwner(dto.ownerType, dto.ownerId, actor);` antes de `fileLinksRepo.create`.
+
+### AUTHZ-T04 — Media — RLS no ofrece aislamiento en la configuración por defecto
+
+**Evidencia.** [Interceptor:53](../../../src/common/tenant/tenant-context.interceptor.ts#L49-L53) activa transacción y GUC sólo si `RLS_ENFORCE === 'true'`; [interceptor:128](../../../src/common/tenant/tenant-context.interceptor.ts#L128-L145) omite el `set_config` de otro modo. `docker-compose.yml` [línea 167](../../../docker-compose.yml#L167), `docker-compose.coolify.yml` [línea 207](../../../docker-compose.coolify.yml#L207) y [.env.example:138](../../../.env.example#L133-L139) declaran `false` por defecto. [RLS test:44](../../../test/integration/rls.int-spec.ts#L44-L57) usa `describe.skip` salvo `RLS_TEST=1` y aplica migraciones al esquema. [Readiness:76](../../../src/app-readiness.service.ts#L76-L92) comprueba BYPASSRLS sólo al activar la bandera. El patch SQL existe ([tenant RLS](../../../database/SQL/patches/2026-08-05_tenant_rls.sql#L115-L139)); su existencia no demuestra aplicación en ningún ambiente.
+
+**Impacto y veredicto.** La defensa de base no puede invocarse para refutar IDOR en el despliegue por defecto. El interceptor sí verifica declaraciones de tenant, y este hallazgo **no afirma una fuga cross-tenant observada**. Sostenido como brecha de configuración y de evidencia.
+
+**Plan.** 1) Levantar inventario de ambientes con `RLS_ENFORCE`, `DB_APP_USER`, privilegios reales y policies aplicadas; no cambiar el default a ciegas. 2) Preparar rol runtime sin BYPASSRLS, aplicar patches RLS y probar lecturas/escrituras de dos tenants. 3) Activar RLS por ambiente tras comprobar consultas que requieren políticas adicionales. 4) Agregar gate de despliegue que falle si se declara RLS habilitado sin rol/policies correctas; correr la integración opt-in sólo en DB desechable. 5) Conservar los controles de aplicación por recurso: RLS por tenant nunca distingue dos pacientes/archivos del mismo tenant.
+
+## 5. Tabla de pruebas por hallazgo (propuesta; no ejecutadas)
+
+Los IDs de este apartado son **fixtures sintéticos**. `details.reason` y su tupla son contratos **nuevos propuestos**, no comportamiento actual. Para errores de validación, añadir `reason` estable en el adaptador de validación si el contrato global lo exige.
+
+| Hallazgo | Punto; tipo y spec propuesto | Preparación y entrada exacta | Resultado esperado después de corregir |
+|---|---|---|---|
+| T01 | Correcto; integración `src/modules/tracking/services/tracking-webhook-auth.spec.ts` | Carrier `DHL` con secreto sintético `s1`, envío vivo `ABC123`; `POST /tracking/webhooks/carriers/DHL` con cuerpo `{trackingNumber:'ABC123',externalStatusCode:'IN_TRANSIT',externalEventId:'evt-1'}` y firma válida de `s1`. | `200`, `duplicate:false`, un evento y estado `IN_TRANSIT`. |
+| T01 | Límite; integración mismo spec | Reenviar exactamente `evt-1` con firma válida; luego un evento `evt-2` firmado por otro carrier. | Replay `200`, `duplicate:true`, sin segunda escritura; carrier ajeno `403`, `ErrorCode.FORBIDDEN`, `details.reason='CARRIER_SUBJECT_MISMATCH'` **propuesto**. |
+| T01 | Error; E2E `test/integration/tracking-webhook-auth.int-spec.ts` | Omitir firma con `evt-3`; repetir con firma alterada. | Ambos `401`; cero eventos/updates y consulta de sujeto no ejecutada. |
+| T01 | Falla catalogada; E2E mismo spec | Misma petición sin firma. | `HttpStatus.UNAUTHORIZED (401)` + `ErrorCode.UNAUTHENTICATED` + `details.reason='CARRIER_WEBHOOK_AUTH_FAILED'` **propuesto**. |
+| T02 | Correcto; integración `src/modules/clinical_ext/services/order-sets.authz.spec.ts` | Actor clínico con `WRITE` sobre paciente `P1`; encuentro abierto `E1` de `P1`; plantilla activa `OS1` de tenant `T1`; aplicar `{patientProfileId:P1,encounterId:E1}`. | `201`, exactamente una orden para `P1/E1/T1` y autorización consultada antes de persistir. |
+| T02 | Límite; integración mismo spec | Actor con grant `READ` pero no `WRITE` sobre `P1`; misma entrada. | `403`, cero órdenes; revocar `WRITE` entre dos operaciones vuelve a denegar. |
+| T02 | Error; integración mismo spec | Actor autorizado para `P1`; `encounterId=E2` que pertenece a `P2`. | `403`, cero órdenes aun con RLS desactivado. |
+| T02 | Falla catalogada; E2E `test/integration/order-sets-authz.int-spec.ts` | Sesión de actor sin acceso de escritura a `P1`; `POST /order-sets/OS1/apply` con `P1/E1`. | `HttpStatus.FORBIDDEN (403)` + `ErrorCode.FORBIDDEN` + `details.reason='ORDER_SET_PATIENT_WRITE_DENIED'` **propuesto**; para `E2/P2`, `ORDER_SET_PATIENT_ENCOUNTER_MISMATCH` **propuesto**. |
+| T03 | Correcto; integración `src/modules/common/services/files-ownership.spec.ts` | Archivo vivo `F1` de usuario `U1`, sin retención; `U1` crea versión con `storageUri` probado, luego vincula a recurso propio. | `201` por cada alta; versión promovida y vínculo del dueño. |
+| T03 | Límite; integración mismo spec | `U2` del mismo tenant semilla intenta derivado de versión limpia `V1` y borrado de `F1`; `SECURITY_ADMIN` sólo revisor intenta mutar sin rol de escritura explícito. | Todos denegados; ninguna mutación; el revisor conserva lectura si corresponde. |
+| T03 | Error; integración mismo spec | `U1` intenta vincular `F1` a `ownerId` clínico ajeno `O2`. | `403`, ningún `file_link`; autorización sobre origen y destino evaluada. |
+| T03 | Falla catalogada; E2E `test/integration/common-files-ownership.int-spec.ts` | `U2` envía `DELETE /common/files/F1` de `U1`. | `HttpStatus.FORBIDDEN (403)` + `ErrorCode.FORBIDDEN` + `details.reason='FILE_WRITE_DENIED'` **propuesto**; `createLink` a dueño ajeno: `FILE_LINK_OWNER_DENIED` **propuesto**. |
+| T04 | Correcto; integración `test/integration/rls.int-spec.ts` en DB desechable | Aplicar patches, `RLS_ENFORCE=true`, usuario runtime sin BYPASSRLS, tenant A. | Consulta A sólo ve A; escritura a B rechazada. |
+| T04 | Límite; integración mismo spec | Dos recursos del mismo tenant A pero distinto paciente/autor. | La política RLS permite ver ambas filas; la capa HTTP de recurso deniega la ajena. |
+| T04 | Error; smoke `test/smoke/rls-readiness.spec.ts` | `RLS_ENFORCE=true`, runtime superusuario o BYPASSRLS. | Readiness `503`; despliegue no se certifica como aislado. |
+| T04 | Falla catalogada; smoke mismo spec | Misma configuración insegura. | `HttpStatus.SERVICE_UNAVAILABLE (503)` + `ErrorCode.DEPENDENCY_UNAVAILABLE` + `details.reason='RLS_RUNTIME_ROLE_UNSAFE'` **propuesto**. |
+
+## 6. Matriz de los endpoints revisados
+
+Esta matriz resume cuatro puntos **por ruta revisada en profundidad**. Las expectativas de rechazo son propuestas, no resultados actuales. `401/UNAUTHENTICATED/CARRIER_WEBHOOK_AUTH_FAILED`, `403/FORBIDDEN/ORDER_SET_PATIENT_WRITE_DENIED` y `403/FORBIDDEN/FILE_WRITE_DENIED` significan `HttpStatus/ErrorCode/details.reason` exactos propuestos.
+
+| Endpoint | Correcto | Límite | Error | Falla catalogada |
+|---|---|---|---|---|
+| `POST /tracking/webhooks/carriers/:carrierCode` | Carrier y firma válidos cambian un envío. | Replay firmado no duplica. | Firma ausente/alterada, cero cambios. | `401/UNAUTHENTICATED/CARRIER_WEBHOOK_AUTH_FAILED`. |
+| `POST /order-sets/:id/apply` | Profesional con `WRITE`, encuentro de ese paciente, orden creada. | Grant `READ` no alcanza. | Encuentro de otro paciente, cero órdenes. | `403/FORBIDDEN/ORDER_SET_PATIENT_WRITE_DENIED` o `ORDER_SET_PATIENT_ENCOUNTER_MISMATCH`. |
+| `POST /common/files/:id/versions` | Dueño crea/promociona versión. | Otro usuario del mismo tenant no puede. | `storageUri` no probado no crea versión. | `403/FORBIDDEN/FILE_WRITE_DENIED`. |
+| `POST /common/files/:id/versions/:vid/derivatives` | Dueño deriva versión limpia. | Versión pendiente no se deriva. | Actor ajeno con versión limpia no puede. | `403/FORBIDDEN/FILE_WRITE_DENIED`. |
+| `POST /common/files/:id/links` | Dueño vincula a recurso autorizado. | Recurso clínico ajeno no admite vínculo. | Actor ajeno no puede vincular `F1`. | `403/FORBIDDEN/FILE_LINK_OWNER_DENIED` o `FILE_WRITE_DENIED`. |
+| `DELETE /common/files/:id` | Dueño borra archivo sin hold. | Hold vigente bloquea. | Actor ajeno del mismo tenant no borra. | `403/FORBIDDEN/FILE_WRITE_DENIED`. |
+| `GET /common/files/:id/content` | Creador descarga versión limpia. | Revisor autorizado puede leer. | Actor ajeno no lee bytes. | Actual: `403/FORBIDDEN` sin reason; proponer `FILE_READ_DENIED`. |
+| `POST /common/files/:id/download-url` | Creador obtiene URL para versión limpia. | `SCAN_PENDING` bloquea. | Actor ajeno no obtiene URL. | Actual: `403/FORBIDDEN` sin reason; proponer `FILE_READ_DENIED`. |
+
+Los otros 1.450 handlers quedan **sin matriz de cuatro puntos** en esta unidad; no se extrapola a ellos el resultado de los ocho anteriores. Entre las 249 rutas sin rol del inventario hay casos cuyo servicio sí comprueba pertenencia (por ejemplo la bandeja de solicitudes de profesional); necesitan una revisión por método antes de calificarlas. Las 54 `@Public` incluyen salud, autenticación, catálogos, búsqueda, verificaciones públicas y webhooks; esta pasada contrastó en profundidad los tres webhooks firmados de integrations/messaging/payments y el de tracking, no las 54 superficies.
+
+## 7. Catálogo de errores de autorización
+
+| Reason | HttpStatus | ErrorCode | Momento | Estado |
+|---|---|---|---|---|
+| `CARRIER_WEBHOOK_AUTH_FAILED` | `UNAUTHORIZED` 401 | `UNAUTHENTICATED` | Firma/carrier no autenticado, antes de leer sujeto. | Nuevo propuesto. |
+| `CARRIER_SUBJECT_MISMATCH` | `FORBIDDEN` 403 | `FORBIDDEN` | Carrier autenticado no asignado al envío. | Nuevo propuesto. |
+| `ORDER_SET_PATIENT_WRITE_DENIED` | `FORBIDDEN` 403 | `FORBIDDEN` | Actor sin escritura clínica sobre paciente. | Nuevo propuesto. |
+| `ORDER_SET_PATIENT_ENCOUNTER_MISMATCH` | `FORBIDDEN` 403 | `FORBIDDEN` | Encuentro no corresponde al paciente/custodia autorizados. | Nuevo propuesto. |
+| `FILE_WRITE_DENIED` | `FORBIDDEN` 403 | `FORBIDDEN` | Mutación de archivo ajeno. | Nuevo propuesto. |
+| `FILE_LINK_OWNER_DENIED` | `FORBIDDEN` 403 | `FORBIDDEN` | Vínculo a recurso de destino no autorizado. | Nuevo propuesto. |
+| `FILE_READ_DENIED` | `FORBIDDEN` 403 | `FORBIDDEN` | Lectura/URL ajena; hoy es `ForbiddenException` de Nest sin `details.reason`. | Nuevo propuesto; fuera del arreglo mínimo de mutaciones. |
+| `RLS_RUNTIME_ROLE_UNSAFE` | `SERVICE_UNAVAILABLE` 503 | `DEPENDENCY_UNAVAILABLE` | Se activa RLS con rol que ignora políticas. | Nuevo propuesto; la readiness actual devuelve 503 sin este reason. |
+
+No se hizo inventario exhaustivo de reasons huérfanos o duplicados de todos los módulos; eso corresponde a `catalogo-errores`. Los `ForbiddenException` actuales del guard de roles y de lectura de archivos dan status y code por normalización del [filtro](../../../src/common/filters/all-exceptions.filter.ts#L270-L282), pero carecen de `details.reason` de negocio. No inventar que los reasons propuestos ya existen.
+
+## 8. Olas de corrección, dependencias y esfuerzo
+
+| Ola | ID | Esfuerzo | Orden y dependencia | Riesgo de cambio |
+|---|---|---|---|---|
+| 0 | T01 | M | Acordar y provisionar credenciales por carrier; desplegar contrato de firma y luego exigir verificación antes de mutación. | Los carriers existentes pueden quedar bloqueados; requiere migración coordinada. |
+| 0 | T02 | M | Reutilizar política clínica de escritura, comprobar encuentro/paciente/custodia, agregar casos negativos y luego habilitar. | Un flujo legítimo sin relación clínica previa puede necesitar regla explícita de arranque. |
+| 0 | T03 | M | Definir permiso de escritura y recurso destino; añadir chequeo transaccional en cuatro métodos; comprobar con usuarios del mismo tenant. | Los módulos que llaman `FilesService.createLink` internamente deben pasar contexto autorizado; evitar romper adjuntos clínicos legítimos. |
+| 1 | T04 | L | Inventariar entornos/privilegios/policies, correr RLS en DB desechable, activar por ambiente con rollback. | Consultas cross-tenant legítimas pueden necesitar política o rol explícito. |
+
+## 9. Trabajo pendiente de integrar y límites de cierre
+
+El plan de revisión menciona trabajo fuera de `origin/dev`: `fa74b78c` agrega reasons en `authz` y otros 15 módulos; `2372d42a` endurece DTOs; `55339f05` toca auth/files/main. **Contrastar este informe con esos commits sólo cuando lleguen a `dev`**; no se atribuye aquí un arreglo que aún no está en esta rama. No se hicieron commits ni PR. La conclusión se limita al código leído y al inventario sintáctico declarado; la verificación de explotación, RLS efectivo y regresión requiere pruebas dirigidas y entorno de integración seguro.

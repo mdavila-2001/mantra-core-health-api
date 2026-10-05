@@ -1,0 +1,187 @@
+{
+  "code": "NNAC25_MI_02_ARTRITIS_REUMATOIDE",
+  "name": "Artritis reumatoide (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 2, pág. 32; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Síntomas articulares de reciente comienzo (<1 año)",
+        "Síntomas en articulaciones metacarpofalángicas",
+        "Duración de la rigidez matutina ≥60 min",
+        "Predominio matinal de los síntomas",
+        "AR en un familiar de 1er grado",
+        "Dificultad para cerrar el puño",
+        "Resultado positivo en la prueba de compresión de las articulaciones metacarpofalángicas (2)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 32. La artritis reumatoide es una enfermedad inflamatoria crónica, autoinmune de causa desconocida y de afección predominantemente articular simétrica, pero que puede acompañarse de diversas manifestaciones extraarticulares, que deben tratarse en consecuencia."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Agente infeccioso",
+        "Predisposición genética",
+        "Hormonal",
+        "Tabaquismo",
+        "Obesidad",
+        "Enfermedad periodontal",
+        "Polvo de sílice",
+        "Luz ultravioleta",
+        "Contaminación ambiental",
+        "Alto peso al nacer"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Aumento de los niveles de fibrinógeno y proteína C-reactiva",
+        "Hemograma: Anemia normocítica e hipocrómica",
+        "Leucocitosis leve con fórmula normal",
+        "Trombocitosis (en formas muy activas de la enfermedad) o trombocitopenia (como complicación del tratamiento farmacológico)",
+        "Aumento de los niveles de globulinas α1 y α2 en el plasma",
+        "En la radiografía de las articulaciones los cambios observados dependen de la etapa de la enfermedad",
+        "La TC permite detectar erosiones y otros cambios destructivos en las articulaciones mucho más temprano que la radiografía"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["M05: Artritis reumatoide seropositiva"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Osteoporosis",
+        "Nódulos reumatoides",
+        "Necrosis aséptica de cuello femoral",
+        "Fracturas patológicas de columna lumbar",
+        "Sequedad en los ojos y la boca",
+        "Infecciones",
+        "Composición anormal del cuerpo",
+        "Síndrome del túnel carpiano",
+        "Problemas cardíacos",
+        "Enfermedad pulmonar"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 32); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
