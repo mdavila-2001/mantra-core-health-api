@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { RelatedPersons } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 import { PROF } from '../profiles.concepts';
 
 /** Datos de una persona relacionada / contacto de emergencia. */
@@ -34,6 +34,13 @@ export interface CreateRelatedPersonData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+}
+
+/** Contacto de emergencia listo para la ficha propia. */
+export interface EmergencyContactRow {
+  readonly display_name: string | null;
+  readonly relationship_concept_id: string | null;
+  readonly phone: string | null;
 }
 
 /** Acceso a datos de `profiles.related_persons`. */
@@ -92,6 +99,29 @@ export class RelatedPersonsRepository {
       RelatedPersons,
       { patientProfileId, statusConceptId: PROF.RELATED_ACTIVE },
       { orderBy: { isEmergencyContact: 'DESC', createdAt: 'ASC' } },
+    );
+  }
+
+  /** Contactos de emergencia activos del paciente, sin mezclar representantes. */
+  listActiveEmergencyContactsOfPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<EmergencyContactRow[]> {
+    return em.getConnection().execute<EmergencyContactRow[]>(
+      `select p.display_name,
+              r.relationship_concept_id,
+              (select cp.value from common.contact_points cp
+                where cp.owner_id = r.person_id
+                  and cp.system_concept_id = ?
+                  and cp.valid_to is null
+                order by cp.rank nulls last limit 1) as phone
+         from profiles.related_persons r
+         join profiles.persons p on p.id = r.person_id
+        where r.patient_profile_id = ?
+          and r.status_concept_id = ?
+          and r.is_emergency_contact = true
+        order by r.created_at asc`,
+      [CONCEPTS.CONTACT_PHONE, patientProfileId, PROF.RELATED_ACTIVE],
     );
   }
 

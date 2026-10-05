@@ -108,6 +108,7 @@ function build() {
     findActiveGuardian: mockFn(),
     findActiveDeclaredGuardian: mockFn().mockResolvedValue(null),
     findActiveByPatient: mockFn().mockResolvedValue([]),
+    listActiveEmergencyContactsOfPatient: mockFn().mockResolvedValue([]),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
   };
   const portalProxiesRepo = {
@@ -120,6 +121,7 @@ function build() {
     findActiveByProxyUser: mockFn().mockResolvedValue([]),
     findActiveByProxyUserAndPatient: mockFn().mockResolvedValue(null),
     listActiveDependentsOfUser: mockFn().mockResolvedValue([]),
+    listActiveGuardiansOfPatient: mockFn().mockResolvedValue([]),
     // Las solicitudes de dependiente las usa otro servicio; están para que el
     // doble cumpla el tipo del repositorio.
     findById: mockFn().mockResolvedValue(null),
@@ -936,6 +938,63 @@ describe('ProfilesPatientsService', () => {
       const res = await d.service.getOwnProfile(titular);
 
       expect(res.coverages).toEqual([]);
+      expect(res.emergencyContacts).toEqual([]);
+      expect(res.guardians).toEqual([]);
+    });
+
+    it('separa los contactos de emergencia de los representantes aceptados', async () => {
+      const d = conPaciente();
+      d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
+        [
+          {
+            display_name: 'Rosa Pérez',
+            relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
+            phone: '+591 70011223',
+          },
+        ],
+      );
+      d.portalProxiesRepo.listActiveGuardiansOfPatient.mockResolvedValue([
+        {
+          display_name: 'Pedro Quiroga',
+          relationship_concept_id: PROF.RELATIONSHIP_FATHER,
+          is_legal_guardian: false,
+          phone: '+591 70099887',
+        },
+      ]);
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.emergencyContacts).toEqual([
+        expect.objectContaining({
+          displayName: 'Rosa Pérez',
+          relationshipDisplay: 'Madre',
+          phone: '+591 70011223',
+        }),
+      ]);
+      expect(res.guardians).toEqual([
+        expect.objectContaining({
+          displayName: 'Pedro Quiroga',
+          relationshipDisplay: 'Padre',
+          phone: '+591 70099887',
+        }),
+      ]);
+    });
+
+    it('un contacto de emergencia sin representación activa no aparece como tutor', async () => {
+      const d = conPaciente();
+      d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
+        [
+          {
+            display_name: 'Rosa Pérez',
+            relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
+            phone: '+591 70011223',
+          },
+        ],
+      );
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.emergencyContacts).toHaveLength(1);
       expect(res.guardians).toEqual([]);
     });
 

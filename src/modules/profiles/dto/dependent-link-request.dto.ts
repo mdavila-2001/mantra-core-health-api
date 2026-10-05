@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsOptional,
+  IsIn,
   IsString,
   IsUUID,
   Matches,
@@ -10,6 +11,7 @@ import {
   type ValidationArguments,
   type ValidationOptions,
 } from 'class-validator';
+import { DEPENDENT_RELATIONSHIP_CONCEPT_IDS } from '../dependent-relationship';
 
 /**
  * La propiedad no puede venir junto con otra: el cliente señala a la persona
@@ -163,6 +165,24 @@ export class IncomingDependentLinkRequestDto {
   /** Cuándo lo pidió. */
   @ApiProperty({ format: 'date-time' })
   createdAt!: string;
+}
+
+/** Cuerpo al aceptar que otra cuenta represente a esta persona. */
+export class AcceptDependentLinkRequestDto {
+  /**
+   * Qué relación tiene quien hizo la solicitud con quien la acepta.
+   *
+   * Es opcional sólo por compatibilidad con clientes anteriores; si falta, el
+   * servicio conserva el vínculo como «Otra relación».
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Parentesco de quien representará al paciente',
+  })
+  @IsOptional()
+  @IsUUID()
+  @IsIn(DEPENDENT_RELATIONSHIP_CONCEPT_IDS)
+  relationshipConceptId?: string;
 }
 
 /** Respuesta a aceptar o rechazar una solicitud. */
