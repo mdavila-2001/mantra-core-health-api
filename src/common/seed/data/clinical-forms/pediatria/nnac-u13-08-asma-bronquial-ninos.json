@@ -1,0 +1,220 @@
+{
+  "code": "NNAC_U13_08_ASMA_BRONQUIAL_NINOS",
+  "name": "Asma bronquial en niños/niñas (NNAC)",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 8 de la unidad 13 de las NNAC, pág. 744; CIE-10 J45; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sibilancias, episodios frecuentes (más de una vez al mes)",
+        "Tos nocturna, al amanecer e inducida por factores ambientales y/o ejercicio",
+        "Ausencia de variación estacional en las sibilancias",
+        "Síntomas empeoran con presencia de pelo de mascotas, aerosoles, cambios de temperatura, polvo, medicamentos, ejercicio, polen, IRA (virales), humo, emociones",
+        "Antecedentes familiares de atopía: asma, rinitis, eczema, conjuntivitis alérgica, alergia alimentaria o medicamentosa",
+        "Criterios funcionales, flujometría, espirometría basal y post aerosol broncodilatador, radiografía de tórax, según disponibilidad en el medio",
+        "Síntomas < 2 veces/semana",
+        "Asintomático entre las crisis",
+        "Exacerbaciones cortas y de intensidad variable. < 2 veces al mes",
+        "Síntomas > 2 veces/semana pero < 1 vez al día",
+        "Las exacerbaciones pueden afectar las actividades diarias. > 2 veces al mes",
+        "VEF1/PEF ≤ 80%",
+        "Variación del PEF 20-30%",
+        "Síntomas diarios",
+        "Uso diario de beta 2",
+        "Las exacerbaciones afectan la actividad diaria",
+        "Exacerbaciones > 2 veces/semana. > 1 vez a la semana",
+        "Variación del PEF > 30% Grave persistente",
+        "Síntomas continuos",
+        "Actividad física limitada",
+        "Exacerbaciones frecuentes",
+        "VEF1/PEF ≤60%"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 744. Enfermedad inflamatoria crónica de las vías aéreas, que se acompaña de hiperactividad bronquial y que se caracteriza por episodios recurrentes de tos, sibilancias, opresión torácica y dificultad respiratoria de diferentes grados según la severidad del cuadro, principalmente en la noche."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin síntomas respiratorios (tos, sibilancias audibles, etc.) entre crisis y crisis independiente del tiempo",
+        "Síntomas más de una vez por semana pero no diario durante el día y dos veces al mes por la noche",
+        "Exacerbaciones que afectan el sueño y la actividad",
+        "Sibilancias audibles",
+        "Habla normalmente",
+        "Variabilidad del PEF o VEF1 menor al 20%",
+        "Síntomas diarios",
+        "Exacerbaciones afectan el sueño y actividad",
+        "Síntomas nocturnos más de una vez por semana",
+        "Tos, sibilancias audibles",
+        "Utiliza músculos accesorios",
+        "Dificultad respiratoria leve a moderada"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Pruebas de función pulmonar; espirometría y reto con broncodilatador (cuando se cuente con ese equipo) en mayores de seis años",
+        "Gasometría según disponibilidad en casos graves",
+        "Radiografía PA de tórax",
+        "Estudios de factores etiológicos, pruebas cutáneas para alérgenos alimentarios e inhalantes",
+        "Dosificación de IgE"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: J45."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 8, pág. 744); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Insuficiencia respiratoria grave (asma moderado, grave y estado asmático)",
+        "Falta de respuesta al tratamiento de emergencia",
+        "Presencia de complicaciones",
+        "Reacciones adversas al medicamento",
+        "Condiciones en el hogar que no garanticen cumplir tratamiento",
+        "Paciente con tratamiento previo"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resolución de la exacerbación",
+        "PEF normal o aumento del PEF en 15% o frecuencia respiratoria normal",
+        "Volver a control según criterio médico",
+        "Para continuar tratamiento en forma ambulatoria",
+        "Control ambiental (evitar contacto con alérgenos)",
+        "Vacunación anual contra influenza",
+        "Evitar el tabaquismo pasivo y la exposición del niño/niña a humo de cualquier origen, evitar el habito de fumar durante la gestación",
+        "Mantener la lactancia materna hasta los seis meses de vida",
+        "Evitar convivencia con animales domésticos en los primeros años de vida, especialmente en los niños/niñas con antecedentes de atopia",
+        "Disminuir el polvo que se acumule en la casa",
+        "La habitación del niño/niña debe estar bien ventilada e iluminada"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
