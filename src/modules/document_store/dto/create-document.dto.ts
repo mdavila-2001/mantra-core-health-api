@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsUUID, Matches } from 'class-validator';
+import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 /** Patrón de `documentType`: minúsculas, dígitos y separadores acotados. */
 const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
@@ -46,5 +47,6 @@ export class CreateFlexibleDocumentDto {
     additionalProperties: true,
   })
   @IsObject()
+  @MaxJsonSize(900 * 1024)
   payload!: Record<string, unknown>;
 }

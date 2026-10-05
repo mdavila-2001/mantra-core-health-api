@@ -41,7 +41,10 @@ function build() {
   const assignmentsRepo = {
     findAssignmentsByField: mockFn().mockResolvedValue([]),
   };
-  const valuesRepo = { countByField: mockFn().mockResolvedValue(0) };
+  const valuesRepo = {
+    countByField: mockFn().mockResolvedValue(0),
+    findCodesInUseByField: mockFn().mockResolvedValue([]),
+  };
   const service = new FormsFieldsService(
     em as any,
     fieldsRepo as any,
@@ -195,6 +198,159 @@ describe('FormsFieldsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+    it('creates a choice field with its own options', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldByCode.mockResolvedValue(null);
+      d.fieldsRepo.createField.mockReturnValue({ id: 'f1' });
+      const res = await d.service.createFieldDefinition(
+        {
+          code: 'C',
+          name: 'N',
+          dataType: 'code',
+          options: ['Nunca', 'Ex fumador', 'Fumador'],
+          multiple: false,
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ id: 'f1' });
+      expect(d.fieldsRepo.createField).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          options: ['Nunca', 'Ex fumador', 'Fumador'],
+        }),
+      );
+    });
+
+    it('rejects a choice field with fewer than two options', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            options: ['Sólo una'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.fieldsRepo.findFieldByCode).not.toHaveBeenCalled();
+    });
+
+    it('rejects repeated options', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            options: ['Sí', 'Sí'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects declaring valueSetId and options together', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            valueSetId: 'vs-1',
+            options: ['A', 'B'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects options on a field that is not a choice field', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'string',
+            options: ['A', 'B'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('updateFieldDefinition — opciones de elección', () => {
+    it('replaces the options entirely when none in use', async () => {
+      const d = build();
+      const field: any = {
+        id: 'f1',
+        dataType: 'code',
+        options: ['Nunca', 'Ex fumador'],
+      };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.valuesRepo.findCodesInUseByField.mockResolvedValue([]);
+
+      const res = await enTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { options: ['Nunca', 'Ex fumador', 'Fumador'] } as any,
+          doctora,
+        ),
+      );
+
+      expect(res).toEqual({ ok: true });
+      expect(field.options).toEqual(['Nunca', 'Ex fumador', 'Fumador']);
+    });
+
+    it('rejects removing an option that already has a captured response', async () => {
+      const d = build();
+      const field: any = {
+        id: 'f1',
+        dataType: 'code',
+        options: ['Nunca', 'Ex fumador', 'Fumador'],
+      };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      // «Ex fumador» se retira y ya tiene respuestas.
+      d.valuesRepo.findCodesInUseByField.mockResolvedValue(['Ex fumador']);
+
+      await expect(
+        enTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { options: ['Nunca', 'Fumador'] } as any,
+            doctora,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      // No se pisa el campo si la validación rechaza el reemplazo.
+      expect(field.options).toEqual(['Nunca', 'Ex fumador', 'Fumador']);
+    });
+
+    it('clears the description when it comes as null, and leaves it when absent', async () => {
+      const d = build();
+      const field: any = { id: 'f1', dataType: 'string', description: 'vieja' };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+
+      await enTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { description: null } as any,
+          doctora,
+        ),
+      );
+      expect(field.description).toBeUndefined();
+
+      field.description = 'vieja';
+      await enTenantA(() =>
+        d.service.updateFieldDefinition('f1', {} as any, doctora),
+      );
+      expect(field.description).toBe('vieja');
     });
   });
 

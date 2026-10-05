@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsObject,
@@ -184,4 +186,58 @@ export class CreateFieldDefinitionDto {
   @ValidateNested({ each: true })
   @Type(() => ValidationRuleInputDto)
   validationRules?: ValidationRuleInputDto[];
+
+  /**
+   * Las opciones de un campo de elección sin `valueSetId`: texto libre, en el
+   * orden en que se ofrecen. Sólo tiene sentido con `dataType: 'code'` y sin
+   * `valueSetId` — el servicio rechaza cualquier otra combinación.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Opciones propias de un campo de elección (dataType "code" sin valueSetId)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(2, {
+    message: 'Un campo de elección necesita al menos dos opciones',
+  })
+  @IsString({ each: true })
+  options?: string[];
+
+  /**
+   * Si el campo admite marcar varias opciones («casillas de verificación»)
+   * en vez de una sola («opción múltiple»). Sólo con `dataType: 'code'`.
+   */
+  @ApiPropertyOptional({
+    description: 'Admite varias respuestas en vez de una sola',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  multiple?: boolean;
+
+  /**
+   * Si el campo ofrece además «Otro», con un texto libre que no está entre
+   * {@link options}. Sólo con `dataType: 'code'` y opciones propias.
+   */
+  @ApiPropertyOptional({
+    description: 'Ofrece «Otro», con texto libre',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  allowOther?: boolean;
+
+  /**
+   * La ayuda que se lee bajo la pregunta cuando el nombre no alcanza.
+   */
+  @ApiPropertyOptional({
+    description: 'Ayuda que se lee bajo la pregunta (se sirve como "hint")',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
 }
