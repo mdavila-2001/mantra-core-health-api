@@ -1,0 +1,48 @@
+name: alovida-directory-20261005
+services:
+  postgres:
+    image: timescale/timescaledb-ha:pg18
+    environment:
+      POSTGRES_DB: directory_synthetic
+      POSTGRES_USER: directory
+      POSTGRES_PASSWORD: directory-local-only
+    ports: ["127.0.0.1:55435:5432"]
+    volumes: ["directory_pg:/home/postgres/pgdata"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U directory -d directory_synthetic"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  postgres-init:
+    image: timescale/timescaledb-ha:pg18
+    entrypoint: ["bash", "/init/bin/init-postgres.sh"]
+    environment:
+      POSTGRES_DB: directory_synthetic
+      POSTGRES_USER: directory
+      POSTGRES_PASSWORD: directory-local-only
+    volumes:
+      - C:/Alovida/mantra-core-health-api/database/SQL:/init/SQL:ro
+      - C:/Alovida/mantra-core-health-api/database/NoSQL:/init/NoSQL:ro
+      - C:/Alovida/mantra-core-health-api/docker/db-init:/init/bin:ro
+    depends_on:
+      postgres: {condition: service_healthy}
+  redis:
+    image: redis:8.10-alpine
+    ports: ["127.0.0.1:56385:6379"]
+  mongo:
+    image: mongo:8.2.12
+    ports: ["127.0.0.1:57025:27017"]
+    volumes: ["directory_mongo:/data/db"]
+  opensearch:
+    image: opensearchproject/opensearch:3.8.0
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: 'true'
+      DISABLE_INSTALL_DEMO_CONFIG: 'true'
+      OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx512m'
+    ports: ["127.0.0.1:59205:9200"]
+    volumes: ["directory_search:/usr/share/opensearch/data"]
+volumes:
+  directory_pg:
+  directory_mongo:
+  directory_search:
