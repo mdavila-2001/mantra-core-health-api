@@ -12,6 +12,7 @@ import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -134,6 +135,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param affiliationCatalogs - Documentos de afiliación, autoridad emisora,
    *   estado de verificación y rol del representante legal del alta de organización.
    * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
+   * @param boProfessions - Profesiones COB-2023 (`VS_BO_PROFESSION`).
    * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
@@ -167,6 +169,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
     private readonly affiliationCatalogs: AffiliationCatalogsSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
+    private readonly boProfessions: BoProfessionsSeedService,
     private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
@@ -340,6 +343,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'ocupaciones de Bolivia',
         kind: 'core',
         run: () => this.boOccupations.run(),
+      },
+      // La profesión que acredita un título (COB-2023, grandes grupos 2 y 3):
+      // «Otra profesión» del alta del médico. Núcleo por lo mismo que las
+      // ocupaciones: sin el conjunto el alta vuelve al texto libre.
+      {
+        name: 'profesiones de Bolivia (COB-2023)',
+        kind: 'core',
+        run: () => this.boProfessions.run(),
       },
       // Y con ellas, por lo mismo: el alta pregunta la empresa donde se
       // trabaja —antes preguntaba dónde queda, que eran tres campos— y

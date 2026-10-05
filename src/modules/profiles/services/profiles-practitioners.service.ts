@@ -105,6 +105,7 @@ import {
 import { aplicarOcupacion, aplicarEmpresa } from '../person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
+import { BO_PROFESSION_CONCEPT_IDS } from '../../../common/seed/bo-professions.catalog';
 
 /**
  * Casos de uso de la fuerza laboral de salud (regla GENERALIST): onboarding
@@ -178,6 +179,26 @@ const ESTADOS_PUBLICABLES = [
   PROF.AFFILIATION_DECLARED,
   PROF.AFFILIATION_APPROVED,
 ] as const;
+
+/**
+ * Corta si el concepto no es una profesión de la COB-2023 (`VS_BO_PROFESSION`).
+ *
+ * La FK acepta cualquier concepto del catálogo; quién decide qué es una
+ * profesión es la clasificación, igual que `TIPOS_DE_CREDENCIAL` para el tipo.
+ */
+function assertProfesionDeLaClasificacion(
+  professionConceptId: string | undefined,
+): void {
+  if (
+    professionConceptId !== undefined &&
+    !BO_PROFESSION_CONCEPT_IDS.has(professionConceptId)
+  ) {
+    throw new PreconditionFailedException(
+      'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
+      { professionConceptId },
+    );
+  }
+}
 
 @Injectable()
 export class ProfilesPractitionersService {
@@ -1090,6 +1111,10 @@ export class ProfilesPractitionersService {
           ? { fileId: credential.fileId }
           : {}),
         issuingInstitutionText: credential.issuingInstitutionText,
+        issuingCityText: credential.issuingCityText,
+        issuingCountryText: credential.issuingCountryText,
+        professionConceptId: credential.professionConceptId,
+        titleText: credential.titleText,
         issueDate: credential.issueDate,
         expiryDate: credential.expiryDate,
         stateConceptId: credential.stateConceptId,
@@ -2997,6 +3022,7 @@ export class ProfilesPractitionersService {
         { credentialTypeConceptId: dto.credentialTypeConceptId },
       );
     }
+    assertProfesionDeLaClasificacion(dto.professionConceptId);
 
     this.logger.info(
       { operation: 'profiles.credential.addOwn', actorId: actor.id },
@@ -3033,6 +3059,10 @@ export class ProfilesPractitionersService {
         credentialTypeConceptId: dto.credentialTypeConceptId,
         number: dto.number.trim(),
         issuingInstitutionText: dto.issuingInstitutionText?.trim(),
+        issuingCityText: dto.issuingCityText?.trim() || undefined,
+        issuingCountryText: dto.issuingCountryText?.trim() || undefined,
+        professionConceptId: dto.professionConceptId,
+        titleText: dto.titleText?.trim() || undefined,
         issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
         fileId: dto.fileId,
         stateConceptId: PROF.CRED_PENDING,
@@ -3047,6 +3077,10 @@ export class ProfilesPractitionersService {
       credentialTypeConceptId: creada.credentialTypeConceptId,
       number: creada.number,
       issuingInstitutionText: creada.issuingInstitutionText,
+      issuingCityText: creada.issuingCityText,
+      issuingCountryText: creada.issuingCountryText,
+      professionConceptId: creada.professionConceptId,
+      titleText: creada.titleText,
       issueDate: creada.issueDate,
       stateConceptId: creada.stateConceptId,
       fileId: creada.fileId,
@@ -3075,6 +3109,7 @@ export class ProfilesPractitionersService {
         { credentialTypeConceptId: dto.credentialTypeConceptId },
       );
     }
+    assertProfesionDeLaClasificacion(dto.professionConceptId);
 
     await this.em.transactional(async (tx) => {
       const profileId = await this.ownership.requireOwnPractitionerProfileId(
@@ -3119,6 +3154,19 @@ export class ProfilesPractitionersService {
       if (dto.number !== undefined) credential.number = dto.number.trim();
       if (dto.issuingInstitutionText !== undefined) {
         credential.issuingInstitutionText = dto.issuingInstitutionText.trim();
+      }
+      if (dto.issuingCityText !== undefined) {
+        credential.issuingCityText = dto.issuingCityText.trim() || undefined;
+      }
+      if (dto.issuingCountryText !== undefined) {
+        credential.issuingCountryText =
+          dto.issuingCountryText.trim() || undefined;
+      }
+      if (dto.professionConceptId !== undefined) {
+        credential.professionConceptId = dto.professionConceptId;
+      }
+      if (dto.titleText !== undefined) {
+        credential.titleText = dto.titleText.trim() || undefined;
       }
       if (dto.issueDate !== undefined) {
         credential.issueDate = new Date(dto.issueDate);

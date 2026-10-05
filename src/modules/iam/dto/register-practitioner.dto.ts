@@ -734,6 +734,49 @@ export class RegisterPractitionerCredentialDto {
   issuingInstitutionText?: string;
 
   /**
+   * Ciudad donde se cursó (`issuing_city_text`, modelo v4.2.29). El formulario
+   * la deriva de la universidad elegida; viaja como texto porque fuera de
+   * Bolivia no hay padrón de municipios.
+   */
+  @ApiPropertyOptional({ maxLength: 120 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  issuingCityText?: string;
+
+  /**
+   * País donde se cursó, como texto (`issuing_country_text`, v4.2.41):
+   * `VS_COUNTRY` tiene un solo miembro y no puede representar el exterior.
+   */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  issuingCountryText?: string;
+
+  /**
+   * Qué profesión acredita el título, miembro de `VS_BO_PROFESSION` (COB-2023
+   * del INE, grandes grupos 2 y 3). Otro concepto se rechaza con 422.
+   */
+  @ApiPropertyOptional({
+    description: 'Concept id de VS_BO_PROFESSION (COB-2023)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  professionConceptId?: string;
+
+  /**
+   * Cómo se llama el título cuando no hay catálogo que lo diga
+   * («Diplomado en Salud Pública»). `title_text`, modelo v4.2.41.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
+  /**
    * PDF precargado anónimamente por `POST /iam/auth/upload-registration-document`.
    * El alta lo reclama para el usuario recién creado dentro de la misma
    * transacción y lo vincula a esta fila de credencial.
