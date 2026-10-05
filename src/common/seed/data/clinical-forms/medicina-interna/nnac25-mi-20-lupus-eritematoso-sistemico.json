@@ -1,0 +1,185 @@
+{
+  "code": "NNAC25_MI_20_LUPUS_ERITEMATOSO_SISTEMICO",
+  "name": "Lupus eritematoso sistémico (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 20, pág. 190; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Artritis y artralgias: Se han observado en hasta el 95%, tienden a ser migratorias, de afectación simétrica y poliarticular",
+        "La alopecia difusa relacionada al lupus es típicamente autolimitada y el cabello vuelve a su normalidad después de la reducción de la actividad lúpica",
+        "Compromiso cardíaco y manifestaciones vasculares: La aterosclerosis acelerada con enfermedad coronaria es una causa importante de morbilidad y muerte prematura",
+        "Compromiso gastrointestinal: Ocurren en 40 %",
+        "Compromiso oftálmico : El 8% desarrollan inflamación de la arteria de la retina durante el curso de la enfermedad"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 190. El lupus eritematoso sistémico (LES) es una enfermedad autoinmune de comportamiento heterogéneo, caracterizada por remisiones y exacerbaciones. Es compleja y puede afectar a cualquier órgano con espectro de manifestaciones clínicas e inmunológicas muy variadas."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sexo femenino",
+        "Edad con mayor frecuencia entre los 15 a 44 años",
+        "Raza es más común en afroamericanos, hispanos/latinos",
+        "Antecedentes familiares con Lupus",
+        "Luz solar",
+        "Exposición a luz ultravioleta y exposición al silicio encontrado en detergentes, cigarrillos y cemento",
+        "Infecciones",
+        "Medicamentos",
+        "Factores ambientales tales como infecciones por Virus Epstein Barr, Micobacterias y tripanosomas"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma completo. (Leucopenia, trombocitopenia, anemia hemolítica)",
+        "VSG. Generalmente se encuentra elevada en pacientes con lupus, indicando inflamación",
+        "PCR (Proteína C Reactiva): Puede ser normal o ligeramente elevada",
+        "Urea. Creatinina. Los niveles pueden estar elevados en casos de afectación renal, indicando un deterioro en la función renal",
+        "Proteinuria en orina de 24 horas",
+        "Anticuerpos antinucleares",
+        "Anticuerpos anti-DNA. Son específicos del LES y aumentan cuando hay un brote de la enfermedad",
+        "Anticuerpos anti-Sm (Smith)",
+        "Anticuerpos anti-Ro, anti-La y anti-RNP. Aparecen en algunos pacientes con LES, pero también en otras enfermedades autoinmunes relacionadas",
+        "Anticuerpos antifosfolipídicos (anticuerpos anticardiolipina, anti-beta-2-glicoproteína I, anticoagulante lúpico)",
+        "Factor reumatoide",
+        "Niveles del complemento (C3, C4, CH50)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["M32: Lupus eritematoso sistémico"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Infecciones",
+        "Renales",
+        "Hematológicas",
+        "Neurológicas",
+        "Cardíacas",
+        "Pulmonares"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 20, pág. 190); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

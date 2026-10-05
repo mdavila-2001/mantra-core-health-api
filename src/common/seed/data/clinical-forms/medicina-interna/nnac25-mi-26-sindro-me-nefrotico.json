@@ -1,0 +1,205 @@
+{
+  "code": "NNAC25_MI_26_SINDRO_ME_NEFROTICO",
+  "name": "Síndro ME nefrótico (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 26, pág. 242; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Oliguria",
+        "Edema generalizado",
+        "Abotagamiento facial (facies del muñeco chino)",
+        "Ascitis",
+        "Anasarca",
+        "Derrame pleural",
+        "Disnea",
+        "Astenia",
+        "Adinamia",
+        "Náuseas",
+        "Deposiciones líquidas",
+        "Blandas horizontales de color blanco en las uñas (Signo de Muehrcke)",
+        "Dolor abdominal",
+        "Cefalea",
+        "Fiebre moderada",
+        "Hipertensión arterial",
+        "Hematuria Fuente: Adaptado de: Brenner y Rector",
+        "Radiografía de tórax si edemas importantes",
+        "Eco Doppler renal y de miembros inferiores",
+        "Ecografía abdominal",
+        "Ecocardiograma",
+        "Biopsia renal permitirá proporcionar la causa subyacente definitiva. *De acuerdo a disponibilidad de laboratorio y estudios de imagen"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 242. Es un síndrome causado por el daño en los glomérulos y podocitos que lesionan la membrana basal, se caracterizada por proteinuria intensa, hipoalbuminemia, hipercolesterolemia, edema importante, hipertensión y hematuria mínima."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Enfermedades inmunológicas",
+        "Enfermedades infecciosas",
+        "Enfermedades virales",
+        "Enfermedades por depósito de metales",
+        "Enfermedades secundarias a ingesta de fármacos",
+        "Enfermedades metabólicas",
+        "Enfermedades colagenopáticas",
+        "Hereditarias"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Química sanguínea (glucosa, urea, creatinina, ácido úrico, colesterol, HDL, LDL, triglicéridos, electrolitos, proteinograma)",
+        "Serología: CMV, EBV, parvovirus B19, Herpes 6, virus varicela-zoster, HVB, HVC",
+        "Proteinuria 24 horas",
+        "Índice proteinuria/creatininuria",
+        "Examen general de orina que puede reportar lipiduria: cilindros grasos en sedimento urinario",
+        "Inmunológicos: Anti DNA, Anti ANA, C3, C4, anticitoplasma, anti membrana basal (diagnóstico diferencial)",
+        "Antitrombina III, fibrinógeno, Dímeros D, Factor VIII, proteína C, proteína S",
+        "Urocultivo",
+        "Biomarcadores"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["N04: Síndrome nefrótico"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ascitis, derrame pleural",
+        "Celulitis",
+        "Peritonitis Bacteriana espontanea",
+        "Insuficiencia Renal Aguda",
+        "Trombosis de la vena renal y embolia pulmonar",
+        "Enfermedad coronaria, Insuficiencia Cardiaca",
+        "Enfermedad Renal Crónica",
+        "Acidosis Tubular renal",
+        "Edemas",
+        "Hipertensión Arterial (emergencia hipertensiva)",
+        "Insuficiencia Renal Aguda y/o crónica",
+        "Síntomas refractarios a tratamiento inicial"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 26, pág. 242); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
