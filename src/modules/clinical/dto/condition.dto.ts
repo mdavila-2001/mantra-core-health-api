@@ -141,9 +141,11 @@ export class CreateConditionDto {
   @ApiPropertyOptional({
     description:
       'Hallazgos y justificación clínica (narrativa libre de quien registra; Patch v4.1.3)',
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   noteText?: string;
 }
 

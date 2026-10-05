@@ -614,9 +614,11 @@ export class RegisterPractitionerDto {
    */
   @ApiPropertyOptional({
     description: 'Foto de perfil en formato Base64 (Data URI o base64 plano)',
+    maxLength: 2_800_000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2_800_000)
   profilePhotoBase64?: string;
 
   /**
