@@ -10,7 +10,8 @@ from .sources import Sources
 
 log = logging.getLogger(__name__)
 
-Report = Callable[[Sources], str]
+Reply = str | list[reports.Photo]
+Report = Callable[[Sources], Reply]
 
 _HELP: Report = lambda _: reports.HELP_TEXT
 _CONTAINERS: Report = lambda sources: reports.containers_report(*sources.containers())
@@ -26,6 +27,9 @@ COMMANDS: dict[str, Report] = {
     "/ram": reports.memory_report,
     "/memory": reports.memory_report,
     "/cpu": reports.cpu_report,
+    "/graficas": reports.history_charts,
+    "/gráficas": reports.history_charts,
+    "/charts": reports.history_charts,
     "/red": reports.network_report,
     "/network": reports.network_report,
     "/contenedores": _CONTAINERS,
@@ -39,6 +43,7 @@ MENU: list[tuple[str, str]] = [
     ("status", "Resumen: RAM, CPU, disco, red y contenedores"),
     ("ram", "RAM del servidor y contenedores que más usan"),
     ("cpu", "Uso por núcleo y carga"),
+    ("graficas", "Gráficas de RAM y núcleos de las últimas 24 h"),
     ("red", "Tráfico de red por interfaz y contenedor"),
     ("contenedores", "Estado y salud de cada contenedor"),
     ("alertas", "Alertas activas"),
@@ -53,7 +58,7 @@ def parse_command(text: str) -> str | None:
     return text.split()[0].split("@", 1)[0].lower()
 
 
-def reply_for(message: dict[str, Any], authorized_chat_id: int, sources: Sources) -> str | None:
+def reply_for(message: dict[str, Any], authorized_chat_id: int, sources: Sources) -> Reply | None:
     chat_id = (message.get("chat") or {}).get("id")
     command = parse_command(message.get("text") or "")
     if command is None:
