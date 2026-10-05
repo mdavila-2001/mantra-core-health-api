@@ -10,6 +10,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ClinicalReadService } from './clinical-read.service';
+import { CLINICAL_PROXY_SCOPE } from './clinical-read.service';
 
 /**
  * El aislamiento entre historias clínicas (carril 09).
@@ -52,6 +53,7 @@ const titular = { id: 'user-1', roles: ['PATIENT'] };
 function build() {
   const em: any = {};
   em.fork = mockFn(() => em);
+  em.findOne = mockFn().mockResolvedValue(null);
   const accountLinksRepo = { findActiveByUser: mockFn() };
 
   /** `profile_id` → fila, tal como la indexa `PatientProfilesRepository`. */
@@ -143,6 +145,7 @@ function build() {
   );
 
   return {
+    em,
     service,
     accountLinksRepo,
     patientProfilesRepo,
@@ -157,6 +160,58 @@ function build() {
 }
 
 describe('ClinicalReadService · assertOwnRecord', () => {
+  it('permite un representante solo mientras exista un proxy vigente', async () => {
+    const d = build();
+    d.darDeAltaPaciente(PERSONA_AJENA);
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+      personId: PERSONA_DEL_TITULAR,
+    });
+    d.em.findOne
+      .mockResolvedValueOnce({
+        patientProfileId: PERSONA_AJENA,
+        scopeValueSetId: 'scope-1',
+      })
+      .mockResolvedValueOnce({
+        id: 'scope-1',
+        internalCode: CLINICAL_PROXY_SCOPE.SUMMARY_READ,
+      });
+
+    await expect(
+      d.service.assertOwnRecord(PERSONA_AJENA, titular),
+    ).resolves.toBeUndefined();
+    expect(d.em.findOne).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        patientProfileId: PERSONA_AJENA,
+        proxyUserId: titular.id,
+      }),
+    );
+    await expect(
+      d.service.assertOwnRecord(PERSONA_AJENA, titular),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('rechaza un poder cuyo value set no habilita lectura clínica', async () => {
+    const d = build();
+    d.darDeAltaPaciente(PERSONA_AJENA);
+    d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+      personId: PERSONA_DEL_TITULAR,
+    });
+    d.em.findOne
+      .mockResolvedValueOnce({
+        patientProfileId: PERSONA_AJENA,
+        scopeValueSetId: 'scope-1',
+      })
+      .mockResolvedValueOnce(null);
+
+    await expect(
+      d.service.assertOwnRecord(PERSONA_AJENA, titular),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.em.findOne).toHaveBeenLastCalledWith(expect.anything(), {
+      id: 'scope-1',
+      internalCode: CLINICAL_PROXY_SCOPE.SUMMARY_READ,
+    });
+  });
   /**
    * **La prueba que faltaba (D-3).** El titular pide su propia historia con el
    * identificador que la aplicación le devuelve al registrarse, que es el de su
