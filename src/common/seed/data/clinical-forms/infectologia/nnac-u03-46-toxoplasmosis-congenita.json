@@ -1,0 +1,195 @@
+{
+  "code": "NNAC_U03_46_TOXOPLASMOSIS_CONGENITA",
+  "name": "Toxoplasmosis congénita (NNAC)",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 46 de la unidad 3 de las NNAC, pág. 364; CIE-10 B58; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Linfoadenopatías múltiples y linfocitosis que persiste durante días a semanas",
+        "Abortos a repetición",
+        "Dolor",
+        "Astenia",
+        "Febrícula",
+        "Cefalea",
+        "Mioartralgias",
+        "Náuseas",
+        "Odinofagia",
+        "Asintomáticos o sin malformación aparente al nacer",
+        "Fiebre",
+        "Rash maculopapular",
+        "Hepatoesplenomegalia",
+        "Microcefalia",
+        "Convulsiones",
+        "Ictericia",
+        "Coriorretinitis",
+        "Hidrocefalia",
+        "Aislamiento del parásito en sangre y otros líquidos comprometidos",
+        "Inmunofluorescencia indirecta",
+        "ELISA",
+        "Dye test (Sabin Feldman)",
+        "Fijación de complemento",
+        "Hemaglutinación indirecta",
+        "Radiografía simple de cráneo",
+        "Tomografía computarizada de cráneo (según disponibilidad)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 364. Enfermedad sistémica producida por el protozoario Toxoplasma gondii."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: B58."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 46, pág. 364); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Visión borrosa",
+        "Escotomas",
+        "Fotofobia",
+        "Dolor ocular",
+        "Estrabismo",
+        "Nistagmus",
+        "Coriorretinitis",
+        "Hemorragia vítrea",
+        "Desprendimiento de retina",
+        "Glaucoma",
+        "Ceguera",
+        "En pacientes inmunocomprometidos, miocarditis, neumonía, encefalitis",
+        "Polimiositis"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ausencia de signología compatible con el cuadro",
+        "Esquema de tratamiento terminado",
+        "Volver en una semana",
+        "Para continuar tratamiento en forma ambulatoria",
+        "Consumo de carne bien cocida",
+        "La congelación de la carne durante 24 horas es otra buena opción",
+        "Evitar que las embarazadas limpien los recipientes con arena donde defecan los gatos",
+        "No tener contacto con felinos cuya alimentación se desconozca",
+        "Uso de guantes durante labores de jardinería y lavado de manos antes de comer",
+        "Alimentación de gatos con productos secos o bien hervidos",
+        "Impedir que los gatos cacen, mantenerlos exclusivamente como mascotas dentro el hogar",
+        "Desecho diario de las heces de los gatos y de la arena donde defecan; las heces puede desecharse por el inodoro, quemarse o enterrarse a gran profundidad",
+        "Las cajas de arena para gatos se deben desinfectar todos los días con agua hervida",
+        "Uso de guantes para manipular el material que puede estar infectado y lavarse las manos después de hacerlo",
+        "Lavado de manos antes de comer y después de manipular carne cruda o estar en contacto con tierra que puede estar contaminada con heces de gatos"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

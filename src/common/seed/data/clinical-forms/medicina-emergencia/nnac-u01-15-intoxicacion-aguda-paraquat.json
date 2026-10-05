@@ -1,0 +1,187 @@
+{
+  "code": "NNAC_U01_15_INTOXICACION_AGUDA_PARAQUAT",
+  "name": "Intoxicación aguda por paraquat (NNAC)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 15 de la unidad 1 de las NNAC, pág. 152; CIE-10 T60.3; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Anamnesis dirigida",
+        "Lesiones mucocutáneas por el contacto con el tóxico, que es corrosivo y provoca dolor a nivel de orofaringe y esófago, incluso después de 24 horas",
+        "Vía de entrada",
+        "Momento de ingestión",
+        "Examen neurológico:",
+        "Conciencia: orientación, atención, concentración; memoria (anterograda y retrograda), lenguaje",
+        "Afecto; alteración en la sensopercepción (alucinaciones), alteración en el pensamiento (delirios)",
+        "Cognición y juicio",
+        "Examen físico: signo-sintomatología clínica",
+        "Manifestaciones en las dos a cuatro primeras horas",
+        "Edema, ulceración de la piel y mucosas orales, esófago, faringe, estómago e intestino",
+        "Perforación esofágica",
+        "Vómitos reiterados",
+        "Dolor orofaríngeo, retroesternal, epigástrico, abdominal",
+        "Disfagia",
+        "Sialorrea",
+        "Diarrea",
+        "Hemorragia digestiva",
+        "Puede haber enfisema subcutáneo secundario a perforación esofágica",
+        "Daño hepático con aumento de bilirrubina y transaminasas",
+        "Insuficiencia hepática",
+        "Daño de miocardio y del músculo esquelético",
+        "Después de dos a 14 días, corresponde a la fibrosis pulmonar",
+        "Insuficiencia respiratoria con disnea, polipnea, hipoxemia progresiva, edema pulmonar",
+        "Anoxia tisular",
+        "Insuficiencia renal",
+        "Muerte por hipoxemia refractaria"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 152. Síndrome clínico producido por ingesta y/o contacto brusco, de forma accidental o intencional, con tóxico del tipo de plaguicidas/herbicidas cuyo mecanismo de acción es la fosforilación de la membrana celular e interferencia con la transmisión de electrones, dando como resultado una fibrosis pulmonar."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Glucemia",
+        "Urea y creatininemia",
+        "Hepatograma: bilirrubinas, transaminasas",
+        "Hormona gonadotrofina coriónica humana (en mujeres)",
+        "Elisa para VIH previo consentimiento informado",
+        "Placa de PA de tórax",
+        "Otros según órgano afectado y disponibilidad (ionograma, gasometría arterial, ECG, EEC)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: T60.3."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Broncoaspiración y neumonitis química",
+        "Depresión y falla respiratoria",
+        "Trastornos del ritmo cardíaco",
+        "Falla renal",
+        "Falla multiorgánica",
+        "Falla hepática fulminante",
+        "Coma",
+        "Muerte",
+        "Fibrosis pulmonar"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 15, pág. 152); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

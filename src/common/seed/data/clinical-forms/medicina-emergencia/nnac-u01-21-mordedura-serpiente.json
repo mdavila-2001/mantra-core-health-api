@@ -1,0 +1,194 @@
+{
+  "code": "NNAC_U01_21_MORDEDURA_SERPIENTE",
+  "name": "Mordedura de serpiente (NNAC)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 21 de la unidad 1 de las NNAC, pág. 173; CIE-10 T63.0 – T63.9; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Procedencia: región geográfica específica de cada género",
+        "Antecedentes laborales u ocupacionales",
+        "Edad",
+        "Tiempo transcurrido desde el accidente hasta el inicio del tratamiento",
+        "Localización y verificación de la mordedura, la ausencia de marcas de colmillos no excluye la posibilidad de envenenamiento",
+        "Orina: puede estar oscura, sin anuria ni oliguria",
+        "Tiempo de coagulación: normal o prolongado",
+        "Estado general: conservado",
+        "Orina oscura, mioglobinuria, insuficiencia renal aguda",
+        "Tiempo de coagulación: prolongado",
+        "Edema leve o pronunciado",
+        "Equimosis"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 173. Es uno de los accidentes más comunes y peligrosos, que se producen con mayor frecuencia en área rural y tropical, pueden causar emponzoñamiento (envenenamiento) en la persona afectada."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "▲ Prueba POSITIVA (formación de coagulo), no administrar suero antiofídico",
+        "▲ Prueba NEGATIVA (no se forma coagulo) o el paciente presenta cuadro hemorrágico diverso, inicie tratamiento",
+        "Hemograma",
+        "Recuento de plaquetas",
+        "Creatinina, urea y examen general de orina",
+        "▲ Prueba POSITIVA (formación de coagulo)",
+        "▲ Se confirma accidente por colúbrido y NO requiere de suero antiofídico"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: T63.0 – T63.9."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 21, pág. 173); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemorragias que no cesan con el antídoto",
+        "Síndrome compartimental o fascitis necrosante",
+        "Estado de choque del que no se recupera o sospeche de sepsis",
+        "Sospecha de insuficiencia renal (accidente bothrópico, laquésico y crotálico)",
+        "Insuficiencia respiratoria (accidente elapídico - Micrurus)",
+        "Rabdomiolisis moderada o severa (mioglobinuria)",
+        "Sospecha de hemorragia en el sistema nervioso central",
+        "Necesidad de amputaciones, injertos y rehabilitación"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resueltos los signos y síntomas y completado el esquema de tratamiento (signos vitales estables, diuresis normal, exámenes de laboratorio con valores normales)",
+        "Pruebas de función renal: verificar los niveles séricos de urea y creatinina",
+        "Finalizado el manejo de injertos y rehabilitación",
+        "Volver a control en una semana",
+        "Evitar caminar solo en el campo, no retirar piedras, las serpientes habitan debajo de ellas",
+        "Utilizar siempre calzado de caña alta o botas, usar pantalones gruesos, guantes y sombrero",
+        "No introduzca las manos ni los pies directamente en huecos de árboles, cuevas, o debajo de piedras o ramas",
+        "Tenga cuidado en la recolección de frutos, porque algunas serpientes arborícolas viven o se desplazan en las ramas de los árboles y arbustos",
+        "Tome en cuenta que todas las serpientes, ya sean ponzoñosas o no, son animales silvestres que pueden morder",
+        "Instruya a niños y jóvenes acerca de las serpientes, cómo evitar una mordedura y cuáles pueden ser las consecuencias de un envenenamiento por ofidios",
+        "Cuando ocurra una mordedura por ofidio, sea ponzoñoso o no, debemos acudir a buscar ayuda sanitaria",
+        "La mordedura de una serpiente no venenosa, implica tomar medidas para evitar una infección de la herida, ya que toda mordedura es contaminante por naturaleza"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

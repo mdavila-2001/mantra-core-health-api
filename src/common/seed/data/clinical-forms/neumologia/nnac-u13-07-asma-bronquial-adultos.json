@@ -1,0 +1,171 @@
+{
+  "code": "NNAC_U13_07_ASMA_BRONQUIAL_ADULTOS",
+  "name": "Asma bronquial en adultos (NNAC)",
+  "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 7 de la unidad 13 de las NNAC, pág. 741; CIE-10 J45; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ausencia de variación estacional de las sibilancias",
+        "Antecedentes familiares de atopía: asma, rinitis, eczema, conjuntivitis alérgica, alergia alimentaria o medicamentosa",
+        "Hemograma",
+        "Pruebas de función pulmonar; espirometría (prueba diagnóstica de primera elección)",
+        "Gasometría según disponibilidad en casos graves",
+        "Radiografía PA de tórax",
+        "Estudios de factores etiológicos, pruebas cutáneas para alérgenos alimentarios e inhalantes (según disponibilidad)",
+        "Prueba de histamina o metacolina (según disponibilidad)",
+        "Dosificación de IgE (según disponibilidad)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 741. Enfermedad inflamatoria crónica de las vías aéreas, que se acompaña de hiperreactividad bronquial y que se caracteriza por episodios recurrentes de tos, sibilancias, opresión torácica y dificultad respiratoria de diferentes grados según la severidad del cuadro, principalmente en la noche o temprano en la mañana."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin síntomas diurnos o síntomas de dos días o menos a la semana o síntomas nocturnos no más de dos veces al mes",
+        "Sibilancias mínimas",
+        "PEF normal o levemente disminuida",
+        "Con síntomas diurnos más de dos días a la semana o síntomas nocturnos más de dos veces al mes",
+        "Exacerbaciones que afectan el sueño y la actividad",
+        "Sibilancias audibles",
+        "Habla normalmente",
+        "Variabilidad del PEF o VEF1 menor al 20%",
+        "Con síntomas diurnos a diario o síntomas nocturnos más de una vez a la semana",
+        "Síntomas diarios",
+        "Exacerbaciones afectan el sueño y actividad",
+        "Tos, sibilancias audibles"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: J45."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 7, pág. 741); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Insuficiencia respiratoria grave",
+        "Comorbilidad asociada (cardiopatía asociada, diabetes, etc.)",
+        "Presencia de complicaciones",
+        "Reacciones adversas al medicamento",
+        "Resolución o mejoría significativa de los síntomas de la exacerbación",
+        "PEF normal o aumento del PEF en 15% o frecuencia respiratoria normal",
+        "Volver a control según criterio médico",
+        "Utilizar menos de tres veces al día agonistas dos adrenérgicos de acción corta",
+        "Ausencia de disnea significativa al caminar"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

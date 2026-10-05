@@ -1,0 +1,165 @@
+{
+  "code": "NNAC_U03_06_DENGUE",
+  "name": "Dengue (NNAC)",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 6 de la unidad 3 de las NNAC, pág. 247; CIE-10 A90; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Procedencia de lugares endémicos",
+        "Fiebre, cefalea frontal o retro-orbitaria, mialgia, artralgia, rash maculoso correspondiente al dengue clásico"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 247. Enfermedad infecciosa aguda de etiología viral, de carácter endemo epidémico, transmitida por mosquitos del género Aedes, principalmente el Aedes aegypti, que se manifiesta clínicamente como: asintomático, de fiebre indiferenciada, fiebre clásica de dengue (DC A90), dengue hemorrágico (DH A91) o síndrome de choque por dengue (SCHD A91)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Coagulograma completo",
+        "Eritrosedimentación",
+        "Proteínas totales",
+        "Iono grama",
+        "Gasometría",
+        "Urea y creatinina",
+        "Pruebas de función hepática: transaminasas y otras",
+        "Hemocultivo",
+        "Gota gruesa",
+        "Estudio del líquido cefalorraquídeo (citoquímico y bacteriológico)",
+        "Otras pruebas más específicas",
+        "ELISA",
+        "Inhibición hemaglutinación",
+        "Pruebas neutralización por reducción de placas",
+        "Pruebas inmunocromatográficas o test rápidos",
+        "Aislamiento viral (en cultivo celular, inoculación en mosquitos, inoculación en ratones lactantes)",
+        "Inmunohistoquímica",
+        "Pruebas serológicas (ELISA, inhibición de la hemaglutinación)",
+        "Aislamiento viral",
+        "Reacción en cadena de la polimerasa (PCR convencional y en tiempo real)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: A90."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 6, pág. 247); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Todo caso de dengue con inicio de signos de alarma debe ser transferido de preferencia al nivel III",
+        "Alta institucional para la fiebre del dengue o dengue clásico (resueltos los síntomas clínicos)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

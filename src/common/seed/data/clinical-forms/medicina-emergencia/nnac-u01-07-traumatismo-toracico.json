@@ -1,0 +1,215 @@
+{
+  "code": "NNAC_U01_07_TRAUMATISMO_TORACICO",
+  "name": "Traumatismo torácico (NNAC)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 7 de la unidad 1 de las NNAC, pág. 120; CIE-10 S20 – S29; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "En algunos casos desplazamiento traqueal",
+        "La agitación o intranquilidad sugieren hipoxia",
+        "La obnubilación sugiere hipercapnia",
+        "Cianosis",
+        "Retracción intercostal y uso de musculatura respiratoria accesoria",
+        "Respiración ruidosa como dato de obstrucción",
+        "Dificultad respiratoria",
+        "Taquicardia",
+        "Hipotensión",
+        "Desviación de la tráquea",
+        "Ausencia unilateral de ruidos respiratorios",
+        "Ingurgitación de las venas del cuello",
+        "Cianosis tardía",
+        "Ingurgitación o colapso de las venas del cuello",
+        "Ausencia de ruidos respiratorios",
+        "Matidez del lado afectado",
+        "Movimientos paradójicos del tórax en inspiración y espiración",
+        "Dolor",
+        "Ingurgitación yugular, choque",
+        "Elevación de la Presión Venosa Central (PVC)",
+        "Hipotensión arterial",
+        "Ruidos cardíacos apagados",
+        "Insuficiencia respiratoria de desarrollo lento y progresivo",
+        "Ingurgitación yugular",
+        "Aumento de la PVC",
+        "Ronquera",
+        "Enfisema subcutáneo",
+        "Crepitación laríngea",
+        "Respiración ruidosa",
+        "Signos de obstrucción de vía aérea superior"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 120."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Obstrucción de la vía aérea",
+        "Neumotórax a tensión (S27.0)",
+        "Neumotórax abierto (S27.0)",
+        "Hemotórax masivo (S27.2)",
+        "Tórax inestable (S22.4)",
+        "Contusión pulmonar (S27.3)",
+        "Contusión cardíaca (S26)",
+        "Ruptura aórtica (S25.0)",
+        "Ruptura traumática del diafragma (S27.8)",
+        "Ruptura traqueobronquial (S27.5)",
+        "Enfisema subcutáneo (J43.9)",
+        "Lesión por aplastamiento (asfixia traumática) (S28.0)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Clasificación del tipo de sangre y pruebas cruzadas",
+        "Bioquímica sanguínea: ionograma, glucemia, gasometría arterial",
+        "Radiografía de tórax obtenida dentro la evaluación primaria, dependiendo de la condición y evolución clínica se solicitan exámenes radiológicos adicionales",
+        "Radiografía de columna cervical AP y lateral",
+        "Tomografía axial computarizada para definir diagnósticos específicos",
+        "Electrocardiograma de 12 derivaciones",
+        "Ultrasonido de corazón y tórax"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: S20 – S29."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Choque hipovolémico",
+        "Choque obstructivo",
+        "Paro cardiorrespiratorio",
+        "Arritmias",
+        "Cuadriparesia",
+        "Cuadriplejia",
+        "Atelectasias",
+        "Mediastinitis",
+        "Sepsis",
+        "Empiema",
+        "Distrés respiratorio",
+        "Otras"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 7, pág. 120); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
