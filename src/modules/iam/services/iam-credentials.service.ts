@@ -8,6 +8,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -62,9 +63,11 @@ export class IamCredentialsService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       const dup = await this.credentialsRepo.findFederated(
         tx,
@@ -73,10 +76,14 @@ export class IamCredentialsService {
         dto.externalSubject,
       );
       if (dup) {
-        throw new ConflictException('La credencial federada ya existe', {
-          identityProvider: dto.identityProvider,
-          externalSubject: dto.externalSubject,
-        });
+        throw new ConflictException(
+          'La credencial federada ya existe',
+          {
+            identityProvider: dto.identityProvider,
+            externalSubject: dto.externalSubject,
+          },
+          IamErrorReason.FEDERATED_CREDENTIAL_ALREADY_EXISTS,
+        );
       }
 
       const cred = this.credentialsRepo.createFederated(tx, {
@@ -121,6 +128,7 @@ export class IamCredentialsService {
             userId,
             credentialId,
           },
+          IamErrorReason.CREDENTIAL_NOT_FOUND,
         );
       }
 

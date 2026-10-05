@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OpsReliabilityRepository } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
 import {
   RecordSloMeasurementDto,
   SloMeasurementResponseDto,
@@ -94,6 +95,7 @@ export class OpsReliabilityService {
           windowStart: dto.windowStart,
           windowEnd: dto.windowEnd,
         },
+        PlatformOpsErrorReason.SLO_MEASUREMENT_WINDOW_INVERTED,
       );
     }
 
@@ -103,12 +105,14 @@ export class OpsReliabilityService {
       throw new PreconditionFailedException(
         'Una ventana sin eventos no mide nada',
         { sloId },
+        PlatformOpsErrorReason.SLO_MEASUREMENT_WINDOW_EMPTY,
       );
     }
     if (goodEvents > totalEvents) {
       throw new PreconditionFailedException(
         'Los eventos buenos no pueden superar a los totales',
         { sloId, goodEvents: dto.goodEvents, totalEvents: dto.totalEvents },
+        PlatformOpsErrorReason.SLO_GOOD_EVENTS_EXCEED_TOTAL,
       );
     }
 
@@ -120,12 +124,17 @@ export class OpsReliabilityService {
           {
             sloId,
           },
+          PlatformOpsErrorReason.SLO_NOT_FOUND,
         );
       }
       if (slo.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El objetivo no está activo', {
-          sloId,
-        });
+        throw new PreconditionFailedException(
+          'El objetivo no está activo',
+          {
+            sloId,
+          },
+          PlatformOpsErrorReason.SLO_NOT_ACTIVE,
+        );
       }
       // Medir fuera de la vigencia del objetivo produciría un dato que no
       // corresponde a lo que se comprometió en esa fecha.
@@ -135,6 +144,7 @@ export class OpsReliabilityService {
           {
             sloId,
           },
+          PlatformOpsErrorReason.SLO_MEASUREMENT_BEFORE_EFFECTIVE,
         );
       }
       if (slo.effectiveTo && windowEnd > slo.effectiveTo) {
@@ -143,6 +153,7 @@ export class OpsReliabilityService {
           {
             sloId,
           },
+          PlatformOpsErrorReason.SLO_MEASUREMENT_AFTER_EFFECTIVE,
         );
       }
 
@@ -229,12 +240,17 @@ export class OpsReliabilityService {
         throw new ResourceNotFoundException(
           'Política de error budget no encontrada',
           { policyId },
+          PlatformOpsErrorReason.ERROR_BUDGET_POLICY_NOT_FOUND,
         );
       }
       if (policy.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La política no está activa', {
-          policyId,
-        });
+        throw new PreconditionFailedException(
+          'La política no está activa',
+          {
+            policyId,
+          },
+          PlatformOpsErrorReason.ERROR_BUDGET_POLICY_NOT_ACTIVE,
+        );
       }
 
       // La quema se evalúa contra una medición real: sin ella el ritmo no sale
@@ -247,6 +263,7 @@ export class OpsReliabilityService {
         throw new PreconditionFailedException(
           'La política no tiene ninguna medición del objetivo sobre la que evaluar',
           { policyId },
+          PlatformOpsErrorReason.ERROR_BUDGET_NO_MEASUREMENT,
         );
       }
 
@@ -260,6 +277,7 @@ export class OpsReliabilityService {
         throw new PreconditionFailedException(
           'El ritmo de quema no alcanza el umbral de aviso de la política',
           { policyId, burnRate: dto.burnRate },
+          PlatformOpsErrorReason.ERROR_BUDGET_BURN_RATE_BELOW_WARNING,
         );
       }
 
@@ -320,6 +338,7 @@ export class OpsReliabilityService {
           planId,
           capacityValue: dto.capacityValue,
         },
+        PlatformOpsErrorReason.CAPACITY_VALUE_NOT_POSITIVE,
       );
     }
 
@@ -331,14 +350,19 @@ export class OpsReliabilityService {
         planId,
       );
       if (!plan) {
-        throw new ResourceNotFoundException('Plan de capacidad no encontrado', {
-          planId,
-        });
+        throw new ResourceNotFoundException(
+          'Plan de capacidad no encontrado',
+          {
+            planId,
+          },
+          PlatformOpsErrorReason.CAPACITY_PLAN_NOT_FOUND,
+        );
       }
       if (plan.statusConceptId !== CONCEPTS.CAPACITY_PLAN_ACTIVE) {
         throw new PreconditionFailedException(
           'El plan de capacidad no está activo',
           { planId },
+          PlatformOpsErrorReason.CAPACITY_PLAN_NOT_ACTIVE,
         );
       }
       if (
@@ -351,6 +375,7 @@ export class OpsReliabilityService {
             planId,
             measuredAt: measuredAt.toISOString(),
           },
+          PlatformOpsErrorReason.CAPACITY_MEASUREMENT_OUTSIDE_HORIZON,
         );
       }
 

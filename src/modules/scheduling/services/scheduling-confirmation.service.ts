@@ -6,6 +6,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingConfirmationRepository } from '../repositories';
 import type { BookingConfirmationRules } from '../entities';
@@ -146,7 +147,11 @@ export class SchedulingConfirmationService {
     return this.em.transactional(async (tx) => {
       const rule = await this.repo.findRuleByIdForUpdate(tx, id);
       if (!rule) {
-        throw new ResourceNotFoundException('Regla no encontrada', { id });
+        throw new ResourceNotFoundException(
+          'Regla no encontrada',
+          { id },
+          SchedulingErrorReason.CONFIRMATION_RULE_NOT_FOUND,
+        );
       }
       rule.enabled = enabled;
       rule.version += 1;

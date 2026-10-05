@@ -11,6 +11,7 @@ import {
 } from '../../../common';
 import { PaymentFlowRepository } from '../repositories';
 import { OpenCheckoutSessionDto, CheckoutSessionResponseDto } from '../dto';
+import { PaymentsErrorReason } from '../payments.error-reasons';
 
 /**
  * Apertura de sesiones de checkout con contexto de cajero (UC-42-02).
@@ -63,9 +64,13 @@ export class PaymentsCheckoutService {
     return this.em.transactional(async (tx) => {
       const debt = await this.flowRepo.findDebtForUpdate(tx, dto.paymentDebtId);
       if (!debt) {
-        throw new ResourceNotFoundException('Deuda no encontrada', {
-          paymentDebtId: dto.paymentDebtId,
-        });
+        throw new ResourceNotFoundException(
+          'Deuda no encontrada',
+          {
+            paymentDebtId: dto.paymentDebtId,
+          },
+          PaymentsErrorReason.PAYMENT_DEBT_NOT_FOUND,
+        );
       }
       if (debt.statusConceptId === CONCEPTS.DEBT_IN_CHECKOUT) {
         throw new PreconditionFailedException(
@@ -73,12 +78,17 @@ export class PaymentsCheckoutService {
           {
             paymentDebtId: dto.paymentDebtId,
           },
+          PaymentsErrorReason.PAYMENT_DEBT_CHECKOUT_ALREADY_OPEN,
         );
       }
       if (debt.statusConceptId === CONCEPTS.DEBT_SETTLED) {
-        throw new PreconditionFailedException('La deuda ya está saldada', {
-          paymentDebtId: dto.paymentDebtId,
-        });
+        throw new PreconditionFailedException(
+          'La deuda ya está saldada',
+          {
+            paymentDebtId: dto.paymentDebtId,
+          },
+          PaymentsErrorReason.PAYMENT_DEBT_ALREADY_SETTLED,
+        );
       }
 
       const sessionToken = randomUUID();

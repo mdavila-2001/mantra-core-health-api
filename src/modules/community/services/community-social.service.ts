@@ -28,6 +28,7 @@ import {
   POST_VISIBILITY_CONCEPT_BY_CODE,
   PROFILE_VISIBILITY_CONCEPT_BY_CODE,
 } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreatePublicProfileDto,
   CreatePostDto,
@@ -305,9 +306,13 @@ export class CommunitySocialService {
       // Contra todos los sujetos del actor, no sólo el preferido: si su vitrina
       // está a nombre de la cuenta, conservar su propio slug no es un conflicto.
       if (ocupado && !this.sujetosDe(actor).includes(ocupado.targetId)) {
-        throw new ConflictException('Ese enlace ya está en uso', {
-          slug: dto.slug,
-        });
+        throw new ConflictException(
+          'Ese enlace ya está en uso',
+          {
+            slug: dto.slug,
+          },
+          CommunityErrorReason.PROFILE_SLUG_ALREADY_IN_USE,
+        );
       }
 
       // `null` explícito lo quita; `undefined` (omitido) conserva el que haya.
@@ -403,6 +408,8 @@ export class CommunitySocialService {
     if (!guardado) {
       throw new PreconditionFailedException(
         'No se pudo recuperar el perfil público recién guardado',
+        undefined,
+        CommunityErrorReason.OWN_PROFILE_SAVE_FAILED,
       );
     }
     return guardado;
@@ -492,9 +499,13 @@ export class CommunitySocialService {
     return this.em.transactional(async (tx) => {
       const author = await this.profilesRepo.findById(tx, profileId);
       if (!author)
-        throw new ResourceNotFoundException('Perfil autor no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil autor no encontrado',
+          {
+            profileId,
+          },
+          CommunityErrorReason.POST_AUTHOR_PROFILE_NOT_FOUND,
+        );
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
 
       const now = new Date();
@@ -583,9 +594,13 @@ export class CommunitySocialService {
     return this.em.transactional(async (tx) => {
       const author = await this.profilesRepo.findById(tx, dto.authorProfileId);
       if (!author)
-        throw new ResourceNotFoundException('Perfil autor no encontrado', {
-          profileId: dto.authorProfileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil autor no encontrado',
+          {
+            profileId: dto.authorProfileId,
+          },
+          CommunityErrorReason.COMMENT_AUTHOR_PROFILE_NOT_FOUND,
+        );
       await this.visibility.assertActsAsProfile(tx, dto.authorProfileId, actor);
 
       let parentCommentId: string | undefined;
@@ -600,6 +615,7 @@ export class CommunitySocialService {
           throw new ResourceNotFoundException(
             'Comentario padre no encontrado',
             { parentCommentId: dto.parentCommentId },
+            CommunityErrorReason.PARENT_COMMENT_NOT_FOUND,
           );
         parentCommentId = parent.id;
         rootCommentId = parent.rootCommentId ?? parent.id;
@@ -719,9 +735,13 @@ export class CommunitySocialService {
         dto.bookmarkableRefId,
       );
       if (dup)
-        throw new ConflictException('El contenido ya está guardado', {
-          bookmarkableRefId: dto.bookmarkableRefId,
-        });
+        throw new ConflictException(
+          'El contenido ya está guardado',
+          {
+            bookmarkableRefId: dto.bookmarkableRefId,
+          },
+          CommunityErrorReason.BOOKMARK_ALREADY_EXISTS,
+        );
       const bookmark = this.bookmarksRepo.create(tx, {
         profileId: dto.profileId,
         bookmarkableTypeConceptId: type,
@@ -754,6 +774,7 @@ export class CommunitySocialService {
           {
             followerProfileId: dto.followerProfileId,
           },
+          CommunityErrorReason.CANNOT_FOLLOW_SELF,
         );
       }
       const type = FOLLOWABLE_CONCEPT_BY_CODE[dto.followableType];
@@ -764,9 +785,13 @@ export class CommunitySocialService {
         dto.followableRefId,
       );
       if (dup && dup.statusConceptId === CONCEPTS.STATE_ACTIVE) {
-        throw new ConflictException('Ya sigue este objeto', {
-          followableRefId: dto.followableRefId,
-        });
+        throw new ConflictException(
+          'Ya sigue este objeto',
+          {
+            followableRefId: dto.followableRefId,
+          },
+          CommunityErrorReason.ALREADY_FOLLOWING,
+        );
       }
       if (dup) {
         dup.statusConceptId = CONCEPTS.STATE_ACTIVE;
@@ -804,6 +829,7 @@ export class CommunitySocialService {
           {
             blockerProfileId: dto.blockerProfileId,
           },
+          CommunityErrorReason.CANNOT_BLOCK_SELF,
         );
       }
       // Un bloqueo levantado deja la fila en `STATE_REVOKED`, no la borra: es el
@@ -816,9 +842,13 @@ export class CommunitySocialService {
         dto.blockedProfileId,
       );
       if (previo?.statusConceptId === CONCEPTS.STATE_ACTIVE)
-        throw new ConflictException('El usuario ya está bloqueado', {
-          blockedProfileId: dto.blockedProfileId,
-        });
+        throw new ConflictException(
+          'El usuario ya está bloqueado',
+          {
+            blockedProfileId: dto.blockedProfileId,
+          },
+          CommunityErrorReason.USER_ALREADY_BLOCKED,
+        );
 
       if (previo) {
         previo.statusConceptId = CONCEPTS.STATE_ACTIVE;

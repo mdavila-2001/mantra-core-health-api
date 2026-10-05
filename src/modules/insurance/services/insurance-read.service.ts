@@ -6,6 +6,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TenantAdministrationService } from '../../directory/services';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   BrokerCarrierAgreements,
@@ -138,9 +139,13 @@ export class InsuranceReadService {
     const em = this.em.fork();
     const carrier = await this.readRepo.findCarrierByTenant(em, tenantId, id);
     if (!carrier) {
-      throw new ResourceNotFoundException('Aseguradora no encontrada', {
-        carrierId: id,
-      });
+      throw new ResourceNotFoundException(
+        'Aseguradora no encontrada',
+        {
+          carrierId: id,
+        },
+        InsuranceErrorReason.CARRIER_NOT_FOUND,
+      );
     }
     const canAdminister = await this.tenantAdministration.canAdminister(
       em,
@@ -277,9 +282,13 @@ export class InsuranceReadService {
     const em = this.em.fork();
     const broker = await this.readRepo.findBrokerByTenant(em, tenantId, id);
     if (!broker) {
-      throw new ResourceNotFoundException('Broker no encontrado', {
-        brokerId: id,
-      });
+      throw new ResourceNotFoundException(
+        'Broker no encontrado',
+        {
+          brokerId: id,
+        },
+        InsuranceErrorReason.BROKER_NOT_FOUND,
+      );
     }
 
     const agreements = await this.readRepo.findAgreements(em, [broker.id]);
@@ -324,9 +333,13 @@ export class InsuranceReadService {
     const em = this.em.fork();
     const broker = await this.readRepo.findBrokerByTenant(em, tenantId, id);
     if (!broker) {
-      throw new ResourceNotFoundException('Broker no encontrado', {
-        brokerId: id,
-      });
+      throw new ResourceNotFoundException(
+        'Broker no encontrado',
+        {
+          brokerId: id,
+        },
+        InsuranceErrorReason.BROKER_NOT_FOUND,
+      );
     }
 
     const clients = await this.readRepo.findBrokerClients(em, broker.id);

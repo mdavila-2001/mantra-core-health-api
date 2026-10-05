@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -92,6 +93,7 @@ export class IamUsersService {
           {
             email: dto.email,
           },
+          IamErrorReason.EMAIL_HAS_ACTIVE_PASSWORD_CREDENTIAL,
         );
       }
 
@@ -167,9 +169,11 @@ export class IamUsersService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       user.statusConceptId = CONCEPTS.USER_LOCKED;
       touch(user, actor.id);
@@ -218,18 +222,22 @@ export class IamUsersService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       const roleConceptId = ROLE_CONCEPT_BY_CODE[dto.role];
       const active = await this.rolesRepo.findActive(tx, userId, roleConceptId);
 
       if (dto.action === 'GRANT') {
         if (active)
-          throw new ConflictException('El rol ya está concedido', {
-            role: dto.role,
-          });
+          throw new ConflictException(
+            'El rol ya está concedido',
+            { role: dto.role },
+            IamErrorReason.ROLE_ALREADY_GRANTED,
+          );
         this.rolesRepo.create(tx, {
           userId,
           roleConceptId,
@@ -249,6 +257,7 @@ export class IamUsersService {
             {
               role: dto.role,
             },
+            IamErrorReason.ROLE_NOT_GRANTED,
           );
         }
         active.stateConceptId = CONCEPTS.STATE_REVOKED;
@@ -288,9 +297,11 @@ export class IamUsersService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       user.statusConceptId = CONCEPTS.USER_ANONYMIZED;
       user.anonymizedAt = new Date();

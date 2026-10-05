@@ -12,6 +12,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
@@ -461,17 +462,23 @@ export class SchedulingBookingsService {
     return this.em.transactional(async (tx) => {
       const slot = await this.bookingsRepo.findSlotForUpdate(tx, slotId);
       if (!slot) {
-        throw new ResourceNotFoundException('Slot no encontrado', { slotId });
+        throw new ResourceNotFoundException('Slot no encontrado', { slotId },
+          SchedulingErrorReason.SLOT_NOT_FOUND,
+        );
       }
       if (slot.statusConceptId === CONCEPTS.SLOT_BLOCKED) {
         throw new PreconditionFailedException('El slot está bloqueado', {
           slotId,
-        });
+        },
+          SchedulingErrorReason.SLOT_BLOCKED,
+        );
       }
       if (slot.remainingCapacity <= 0) {
         throw new ConflictException('El slot no tiene cupos disponibles', {
           slotId,
-        });
+        },
+          SchedulingErrorReason.SLOT_NO_CAPACITY,
+        );
       }
 
       const policy = slot.scheduleTemplateId
@@ -499,6 +506,9 @@ export class SchedulingBookingsService {
             ? 'Ese horario ya pasó.'
             : `Ese turno empieza demasiado pronto: hay que pedirlo con al menos ${minutosDeAviso} minutos de anticipación.`,
           { slotId, startAt: slot.startAt.toISOString(), minutosDeAviso },
+          yaPaso
+            ? SchedulingErrorReason.APPOINTMENT_SLOT_PAST
+            : SchedulingErrorReason.APPOINTMENT_MIN_NOTICE_NOT_MET,
         );
       }
 
@@ -515,6 +525,7 @@ export class SchedulingBookingsService {
               patientProfileId: dto.patientProfileId,
               maxActivePerPatient: policy.maxActivePerPatient,
             },
+            SchedulingErrorReason.PATIENT_MAX_ACTIVE_BOOKINGS,
           );
         }
       }
@@ -741,6 +752,7 @@ export class SchedulingBookingsService {
         throw new ResourceNotFoundException(
           'Reserva temporal no encontrada',
           {},
+          SchedulingErrorReason.HOLD_NOT_FOUND,
         );
       }
       if (hold.statusConceptId !== CONCEPTS.HOLD_ACTIVE) {
@@ -749,12 +761,15 @@ export class SchedulingBookingsService {
           {
             holdId: hold.id,
           },
+          SchedulingErrorReason.HOLD_ALREADY_CONSUMED,
         );
       }
       if (hold.expiresAt.getTime() <= Date.now()) {
         throw new ConflictException('La reserva temporal expiró', {
           holdId: hold.id,
-        });
+        },
+          SchedulingErrorReason.HOLD_EXPIRED,
+        );
       }
 
       const slot = await this.bookingsRepo.findSlotForUpdate(
@@ -764,7 +779,9 @@ export class SchedulingBookingsService {
       if (!slot) {
         throw new ResourceNotFoundException('Slot no encontrado', {
           slotId: hold.bookableSlotId,
-        });
+        },
+          SchedulingErrorReason.SLOT_NOT_FOUND,
+        );
       }
       // Segundo cinturón de A-02: el hold ya no se puede tomar sobre un turno
       // vencido, pero uno tomado hace rato puede llegar acá con el horario
@@ -774,7 +791,9 @@ export class SchedulingBookingsService {
         throw new PreconditionFailedException('Ese horario ya pasó.', {
           slotId: slot.id,
           startAt: slot.startAt.toISOString(),
-        });
+        },
+          SchedulingErrorReason.APPOINTMENT_SLOT_PAST,
+        );
       }
 
       // REGLA 1: no se puede pedir un turno encima de uno YA ACEPTADO.
@@ -802,6 +821,7 @@ export class SchedulingBookingsService {
             bookingId: choque.id,
             startAt: choque.startAt,
           },
+          SchedulingErrorReason.PATIENT_ALREADY_BOOKED_OVERLAPPING,
         );
       }
 
@@ -1130,9 +1150,11 @@ export class SchedulingBookingsService {
       dto.resourceId,
     );
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId: dto.resourceId,
-      });
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        { resourceId: dto.resourceId },
+        SchedulingErrorReason.RESOURCE_NOT_FOUND,
+      );
     }
 
     this.assertRecursoEnTenantActivo(resource.tenantId, actor);
@@ -1166,9 +1188,11 @@ export class SchedulingBookingsService {
       dto.patientProfileId,
     ]);
     if (!nombres.has(dto.patientProfileId)) {
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        patientProfileId: dto.patientProfileId,
-      });
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        { patientProfileId: dto.patientProfileId },
+        SchedulingErrorReason.PATIENT_NOT_FOUND,
+      );
     }
 
     // REGLA MADRE: nada se asigna sobre tiempo ya comprometido del
@@ -1199,6 +1223,7 @@ export class SchedulingBookingsService {
           choque.resourceName ? ` en «${choque.resourceName}»` : ''
         }.`,
         { bookingId: choque.id, startAt: choque.startAt },
+        SchedulingErrorReason.PATIENT_ALREADY_BOOKED_OVERLAPPING,
       );
     }
 
@@ -1389,7 +1414,9 @@ export class SchedulingBookingsService {
       if (!booking) {
         throw new ResourceNotFoundException('Cita no encontrada', {
           bookingId,
-        });
+        },
+          SchedulingErrorReason.BOOKING_NOT_FOUND,
+        );
       }
 
       // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelarYAvisar` —
@@ -1406,6 +1433,7 @@ export class SchedulingBookingsService {
           {
             bookingId,
           },
+          SchedulingErrorReason.BOOKING_NOT_ACTIVE_FOR_RESCHEDULE,
         );
       }
 
@@ -1416,6 +1444,7 @@ export class SchedulingBookingsService {
           {
             bookingId,
           },
+          SchedulingErrorReason.RESCHEDULE_SAME_SLOT,
         );
       }
 
@@ -1426,12 +1455,16 @@ export class SchedulingBookingsService {
       if (!target) {
         throw new ResourceNotFoundException('Slot destino no encontrado', {
           slotId: dto.toSlotId,
-        });
+        },
+          SchedulingErrorReason.TARGET_SLOT_NOT_FOUND,
+        );
       }
       if (target.remainingCapacity <= 0) {
         throw new ConflictException('El slot destino no tiene cupos', {
           slotId: dto.toSlotId,
-        });
+        },
+          SchedulingErrorReason.TARGET_SLOT_NO_CAPACITY,
+        );
       }
 
       // M4 · H1.S1: reprogramar es ocupar un rango nuevo, y era el único
@@ -1594,7 +1627,9 @@ export class SchedulingBookingsService {
       if (!booking) {
         throw new ResourceNotFoundException('Cita no encontrada', {
           bookingId,
-        });
+        },
+          SchedulingErrorReason.BOOKING_NOT_FOUND,
+        );
       }
 
       // H3.S1.M2 (BOLA/IDOR de escritura): cancelar/rechazar no comprobaba de
@@ -1609,7 +1644,9 @@ export class SchedulingBookingsService {
       );
 
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
-        throw new ConflictException('La cita ya está cancelada', { bookingId });
+        throw new ConflictException('La cita ya está cancelada', { bookingId },
+          SchedulingErrorReason.BOOKING_ALREADY_CANCELLED,
+        );
       }
 
       // C-10: sólo se cancela desde un estado que la máquina permite cancelar
@@ -1689,6 +1726,7 @@ export class SchedulingBookingsService {
             cancellationWindowMinutes: windowMinutes,
             startAt: slot?.startAt.toISOString(),
           },
+          SchedulingErrorReason.CANCELLATION_WINDOW_NOT_MET,
         );
       }
 
@@ -1870,6 +1908,7 @@ export class SchedulingBookingsService {
         throw new PreconditionFailedException(
           'Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar.',
           { bookingId, statusConceptId: booking.statusConceptId },
+          SchedulingErrorReason.PAYMENT_STATE_NOT_APPLICABLE,
         );
       }
 
@@ -2298,6 +2337,7 @@ export class SchedulingBookingsService {
         throw new PreconditionFailedException(
           'El horario propuesto es el que ya tiene la solicitud',
           { bookingId },
+          SchedulingErrorReason.PROPOSED_SLOT_SAME_AS_CURRENT,
         );
       }
 
@@ -2308,12 +2348,16 @@ export class SchedulingBookingsService {
       if (!destino) {
         throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
           slotId: dto.proposedSlotId,
-        });
+        },
+          SchedulingErrorReason.PROPOSED_SLOT_NOT_FOUND,
+        );
       }
       if (destino.remainingCapacity <= 0) {
         throw new ConflictException('El cupo propuesto no tiene lugar', {
           slotId: dto.proposedSlotId,
-        });
+        },
+          SchedulingErrorReason.PROPOSED_SLOT_NO_CAPACITY,
+        );
       }
 
       const origen = await this.bookingsRepo.findSlotForUpdate(tx, origenId);
@@ -2378,6 +2422,7 @@ export class SchedulingBookingsService {
       throw new PreconditionFailedException(
         'Sólo se opera así sobre una solicitud pendiente',
         { bookingId, statusConceptId: fromState },
+        SchedulingErrorReason.BOOKING_NOT_PENDING,
       );
     }
   }
@@ -2530,7 +2575,9 @@ export class SchedulingBookingsService {
       if (!booking) {
         throw new ResourceNotFoundException('Cita no encontrada', {
           bookingId,
-        });
+        },
+          SchedulingErrorReason.BOOKING_NOT_FOUND,
+        );
       }
       // C-10: la máquina de estados sólo admite check-in desde CONFIRMED.
       const fromState = booking.statusConceptId;
@@ -2565,6 +2612,7 @@ export class SchedulingBookingsService {
           fromStateConceptId: from,
           toStateConceptId: to,
         },
+        SchedulingErrorReason.INVALID_STATE_TRANSITION,
       );
     }
   }
@@ -2620,7 +2668,9 @@ export class SchedulingBookingsService {
       bookingId,
     );
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId },
+        SchedulingErrorReason.BOOKING_NOT_FOUND,
+      );
     }
 
     if (this.operaCualquierAgenda(actor)) {
@@ -2745,6 +2795,7 @@ export class SchedulingBookingsService {
             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +
             'en pie: hablá con la organización para reactivarlo.',
       { tenantId, vinculo: veredicto },
+      SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
   }
 
@@ -2864,6 +2915,8 @@ export class SchedulingBookingsService {
     if (!filters.patientProfileId && !filters.resourceId) {
       throw new PreconditionFailedException(
         'Indique al menos patientProfileId o resourceId para listar citas',
+        {},
+        SchedulingErrorReason.SEARCH_FILTER_REQUIRED,
       );
     }
     // Una cuenta de paciente sólo lista lo suyo y lo de quienes representa. Sin
@@ -2883,6 +2936,7 @@ export class SchedulingBookingsService {
           from: filters.from.toISOString(),
           to: filters.to.toISOString(),
         },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -3068,7 +3122,9 @@ export class SchedulingBookingsService {
     const em = this.em.fork();
     const booking = await this.bookingsRepo.findBookingById(em, bookingId);
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId },
+        SchedulingErrorReason.BOOKING_NOT_FOUND,
+      );
     }
     const slot = booking.bookableSlotId
       ? await this.bookingsRepo.findSlotById(em, booking.bookableSlotId)

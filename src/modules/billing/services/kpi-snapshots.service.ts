@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import { KpiSnapshotsRepository } from '../repositories';
 import { ComputeKpiSnapshotDto, KpiSnapshotResponseDto } from '../dto';
 
@@ -65,6 +66,7 @@ export class KpiSnapshotsService {
             kpiCode: dto.kpiCode,
             computedAt: computedAt.toISOString(),
           },
+          BillingErrorReason.KPI_SNAPSHOT_ALREADY_COMPUTED,
         );
       }
 

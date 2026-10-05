@@ -6,6 +6,7 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   CredentialsRepository,
   DevicesRepository,
@@ -166,7 +167,11 @@ export class IamUsersReadService {
     const em = this.em.fork();
     const user = await this.usersRepo.findById(em, userId);
     if (!user) {
-      throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      throw new ResourceNotFoundException(
+        'Usuario no encontrado',
+        { userId },
+        IamErrorReason.USER_NOT_FOUND,
+      );
     }
 
     return {
@@ -308,7 +313,11 @@ export class IamUsersReadService {
   private async forkForExistingUser(userId: string): Promise<EntityManager> {
     const em = this.em.fork();
     if (!(await this.usersRepo.findById(em, userId))) {
-      throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      throw new ResourceNotFoundException(
+        'Usuario no encontrado',
+        { userId },
+        IamErrorReason.USER_NOT_FOUND,
+      );
     }
     return em;
   }

@@ -37,6 +37,7 @@ import {
   sumarImportes,
 } from './payment-money';
 import { decidirCallback, referenciaEvento } from './payment-callback-machine';
+import { PaymentsErrorReason } from '../payments.error-reasons';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -114,19 +115,31 @@ export class PaymentsTransactionsService {
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
-        throw new ResourceNotFoundException('Intención de pago no encontrada', {
-          intentId,
-        });
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
       }
       if (intent.statusConceptId === CONCEPTS.PI_SUCCEEDED) {
-        throw new ConflictException('La intención ya fue cobrada', {
-          intentId,
-        });
+        throw new ConflictException(
+          'La intención ya fue cobrada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_ALREADY_SUCCEEDED,
+        );
       }
       if (intent.statusConceptId === CONCEPTS.PI_CANCELED) {
-        throw new PreconditionFailedException('La intención está cancelada', {
-          intentId,
-        });
+        throw new PreconditionFailedException(
+          'La intención está cancelada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
+        );
       }
 
       // Una operación abierta impide otra que el proveedor pueda confirmar a la
@@ -156,6 +169,7 @@ export class PaymentsTransactionsService {
         throw new PreconditionFailedException(
           'La intención requiere evaluación de riesgo antes de cobrar',
           { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_RISK_ASSESSMENT_MISSING,
         );
       }
       if (risk.decisionConceptId === CONCEPTS.RISK_DECLINE) {
@@ -164,6 +178,7 @@ export class PaymentsTransactionsService {
           {
             intentId,
           },
+          PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
         );
       }
 
@@ -266,6 +281,7 @@ export class PaymentsTransactionsService {
           {
             gatewayTransactionRef: dto.gatewayTransactionRef,
           },
+          PaymentsErrorReason.GATEWAY_TRANSACTION_REF_NOT_FOUND,
         );
       }
 
@@ -296,7 +312,11 @@ export class PaymentsTransactionsService {
           },
           'Rejected gateway callback with invalid signature',
         );
-        throw new UnauthorizedException('Firma del webhook inválida');
+        throw new UnauthorizedException(
+          'Firma del webhook inválida',
+          undefined,
+          PaymentsErrorReason.GATEWAY_WEBHOOK_SIGNATURE_INVALID,
+        );
       }
 
       const targetStatus = this.callbackStatus(dto.outcome);
@@ -427,9 +447,13 @@ export class PaymentsTransactionsService {
         transactionId,
       );
       if (!transaction) {
-        throw new ResourceNotFoundException('Transacción no encontrada', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Transacción no encontrada',
+          {
+            transactionId,
+          },
+          PaymentsErrorReason.PAYMENT_TRANSACTION_NOT_FOUND,
+        );
       }
 
       // Sin conector de gateway no hay a quién consultar: se devuelve el estado
@@ -475,14 +499,19 @@ export class PaymentsTransactionsService {
         transactionId,
       );
       if (!transaction) {
-        throw new ResourceNotFoundException('Transacción no encontrada', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Transacción no encontrada',
+          {
+            transactionId,
+          },
+          PaymentsErrorReason.PAYMENT_TRANSACTION_NOT_FOUND,
+        );
       }
       if (!CAPTURED_STATES.includes(transaction.statusConceptId)) {
         throw new PreconditionFailedException(
           'Solo se puede reembolsar una transacción capturada o liquidada',
           { transactionId },
+          PaymentsErrorReason.REFUND_TRANSACTION_NOT_CAPTURED,
         );
       }
 
@@ -520,6 +549,7 @@ export class PaymentsTransactionsService {
             captured: transaction.amount,
             alreadyRefunded: refunded,
           },
+          PaymentsErrorReason.REFUND_EXCEEDS_CAPTURED_AMOUNT,
         );
       }
 
@@ -565,14 +595,19 @@ export class PaymentsTransactionsService {
         transactionId,
       );
       if (!transaction) {
-        throw new ResourceNotFoundException('Transacción no encontrada', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Transacción no encontrada',
+          {
+            transactionId,
+          },
+          PaymentsErrorReason.PAYMENT_TRANSACTION_NOT_FOUND,
+        );
       }
       if (transaction.statusConceptId === CONCEPTS.TXN_SETTLED) {
         throw new PreconditionFailedException(
           'La transacción está liquidada; corresponde un reembolso en vez de una anulación',
           { transactionId },
+          PaymentsErrorReason.CANCELLATION_TRANSACTION_ALREADY_SETTLED,
         );
       }
 

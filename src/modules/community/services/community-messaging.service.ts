@@ -24,6 +24,7 @@ import { CommunityMessagingGateway } from '../gateways/community-messaging.gatew
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityChatAutoReplyService } from './community-chat-auto-reply.service';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreateConversationDto,
   SendMessageDto,
@@ -276,9 +277,13 @@ export class CommunityMessagingService {
         conversationId,
       );
       if (!conversation)
-        throw new ResourceNotFoundException('Conversación no encontrada', {
-          conversationId,
-        });
+        throw new ResourceNotFoundException(
+          'Conversación no encontrada',
+          {
+            conversationId,
+          },
+          CommunityErrorReason.CONVERSATION_NOT_FOUND,
+        );
 
       const sender = await this.conversationsRepo.findActiveParticipant(
         tx,
@@ -293,6 +298,7 @@ export class CommunityMessagingService {
             conversationId,
             senderProfileId: dto.senderProfileId,
           },
+          CommunityErrorReason.SENDER_NOT_ACTIVE_PARTICIPANT,
         );
       }
 
@@ -315,6 +321,7 @@ export class CommunityMessagingService {
             {
               conversationId,
             },
+            CommunityErrorReason.BLOCKED_BETWEEN_PARTICIPANTS,
           );
         }
       }
@@ -602,9 +609,13 @@ export class CommunityMessagingService {
         conversationId,
       );
       if (!conversation)
-        throw new ResourceNotFoundException('Conversación no encontrada', {
-          conversationId,
-        });
+        throw new ResourceNotFoundException(
+          'Conversación no encontrada',
+          {
+            conversationId,
+          },
+          CommunityErrorReason.CONVERSATION_NOT_FOUND,
+        );
 
       const participant = await this.conversationsRepo.findActiveParticipant(
         tx,
@@ -619,6 +630,7 @@ export class CommunityMessagingService {
             conversationId,
             recipientProfileId: dto.recipientProfileId,
           },
+          CommunityErrorReason.RECIPIENT_NOT_ACTIVE_PARTICIPANT,
         );
       }
 

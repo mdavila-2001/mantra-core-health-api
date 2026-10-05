@@ -13,6 +13,7 @@ import { PracticeTenantLookupService } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
 import { aCentimos, aTexto, importeEnBase } from './money';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import type {
   BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
@@ -104,6 +105,7 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'La cuenta no tiene un perfil profesional asociado',
         { actorId: actor.id },
+        AccountingErrorReason.PRACTITIONER_PROFILE_MISSING,
       );
     }
     // Sin lookup inyectado (specs previos), no hay forma de verificar: se
@@ -112,6 +114,7 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'No se pudo verificar la vinculación del profesional con la práctica',
         { practiceId },
+        AccountingErrorReason.PRACTITIONER_LINK_VERIFICATION_UNAVAILABLE,
       );
     }
     const practiceIds =
@@ -122,6 +125,7 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId },
+        AccountingErrorReason.PRACTITIONER_PRACTICE_NOT_LINKED,
       );
     }
   }
@@ -151,9 +155,13 @@ export class LedgerReadService {
       .findOne(Practices, { id: practiceId }, { fields: ['id', 'tenantId'] });
 
     if (practica === null) {
-      throw new ResourceNotFoundException('Práctica no encontrada', {
-        practiceId,
-      });
+      throw new ResourceNotFoundException(
+        'Práctica no encontrada',
+        {
+          practiceId,
+        },
+        AccountingErrorReason.PRACTICE_NOT_FOUND,
+      );
     }
     if (practica.tenantId !== tenantId) {
       throw new ForbiddenException(
@@ -260,9 +268,13 @@ export class LedgerReadService {
       transactionId,
     );
     if (!asiento) {
-      throw new ResourceNotFoundException('Asiento no encontrado', {
-        transactionId,
-      });
+      throw new ResourceNotFoundException(
+        'Asiento no encontrado',
+        {
+          transactionId,
+        },
+        AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+      );
     }
     // Acá la práctica se conoce recién al cargar el asiento, así que la
     // comprobación va después de la carga y antes de devolver nada.
@@ -424,6 +436,7 @@ export class LedgerReadService {
         {
           accountId: query.accountId,
         },
+        AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
       );
     }
     const deudora = cuenta.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;

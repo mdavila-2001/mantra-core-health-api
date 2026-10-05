@@ -32,6 +32,7 @@ import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
 import { VisitAgendaService } from './visit-agenda.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * Transiciones admitidas de la máquina de estados de la visita.
@@ -505,9 +506,11 @@ export class VisitRequestsService {
     return this.em.transactional(async (tx) => {
       const request = await this.repo.findRequest(tx, visitRequestId);
       if (!request) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          visitRequestId,
-        });
+        throw new ResourceNotFoundException(
+          'Solicitud no encontrada',
+          { visitRequestId },
+          PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+        );
       }
       this.assertOpen(request);
 
@@ -515,9 +518,11 @@ export class VisitRequestsService {
       const isVisitor = visitor?.id === request.medicalVisitorId;
       const isDoctor = request.doctorUserId === actor.id;
       if (!isVisitor && !isDoctor) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          visitRequestId,
-        });
+        throw new ResourceNotFoundException(
+          'Solicitud no encontrada',
+          { visitRequestId },
+          PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+        );
       }
 
       if (isVisitor) {
@@ -595,6 +600,7 @@ export class VisitRequestsService {
       throw new ResourceNotFoundException(
         'La cuenta no corresponde a un visitador médico',
         { userId: actor.id },
+        PharmaLabErrorReason.VISITOR_PROFILE_NOT_FOUND,
       );
     }
     return this.repo.listRequestsByVisitor(this.em, visitor.id);
@@ -631,9 +637,11 @@ export class VisitRequestsService {
   }> {
     const request = await this.repo.findRequest(this.em, visitRequestId);
     if (!request) {
-      throw new ResourceNotFoundException('Solicitud no encontrada', {
-        visitRequestId,
-      });
+      throw new ResourceNotFoundException(
+        'Solicitud no encontrada',
+        { visitRequestId },
+        PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+      );
     }
     const visitor = await this.visitorsRepo.findVisitorByUser(
       this.em,
@@ -643,9 +651,11 @@ export class VisitRequestsService {
       request.doctorUserId === actor.id ||
       visitor?.id === request.medicalVisitorId;
     if (!isParty) {
-      throw new ResourceNotFoundException('Solicitud no encontrada', {
-        visitRequestId,
-      });
+      throw new ResourceNotFoundException(
+        'Solicitud no encontrada',
+        { visitRequestId },
+        PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+      );
     }
     return {
       request,
@@ -707,9 +717,11 @@ export class VisitRequestsService {
   ): Promise<VisitRequests> {
     const request = await this.repo.findRequest(tx, visitRequestId);
     if (!request || request.doctorUserId !== actor.id) {
-      throw new ResourceNotFoundException('Solicitud no encontrada', {
-        visitRequestId,
-      });
+      throw new ResourceNotFoundException(
+        'Solicitud no encontrada',
+        { visitRequestId },
+        PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+      );
     }
     return request;
   }
@@ -721,9 +733,11 @@ export class VisitRequestsService {
   ): Promise<VisitRequests> {
     const request = await this.repo.findRequest(tx, visitRequestId);
     if (!request || request.medicalVisitorId !== medicalVisitorId) {
-      throw new ResourceNotFoundException('Solicitud no encontrada', {
-        visitRequestId,
-      });
+      throw new ResourceNotFoundException(
+        'Solicitud no encontrada',
+        { visitRequestId },
+        PharmaLabErrorReason.VISIT_REQUEST_NOT_FOUND,
+      );
     }
     return request;
   }
@@ -734,6 +748,7 @@ export class VisitRequestsService {
       throw new ConflictException(
         'La solicitud está en un estado final y ya no admite cambios',
         { visitRequestId: request.id },
+        PharmaLabErrorReason.VISIT_REQUEST_FINAL_STATE,
       );
     }
   }
@@ -744,6 +759,7 @@ export class VisitRequestsService {
       throw new ConflictException(
         'La transición solicitada no está permitida para el estado actual',
         { previous, next },
+        PharmaLabErrorReason.VISIT_REQUEST_TRANSITION_NOT_ALLOWED,
       );
     }
   }
@@ -757,6 +773,7 @@ export class VisitRequestsService {
       throw new PreconditionFailedException(
         `El plazo para reprogramar o cancelar venció (${cutoffHours} horas antes del inicio)`,
         { visitRequestId: request.id },
+        PharmaLabErrorReason.VISIT_RESCHEDULE_CUTOFF_PASSED,
       );
     }
   }
@@ -781,6 +798,7 @@ export class VisitRequestsService {
       throw new PreconditionFailedException(
         'El visitador no está autorizado a representar alguno de los productos del temario',
         { medicalVisitorId, pharmaProductIds: unauthorized },
+        PharmaLabErrorReason.VISIT_TOPIC_PRODUCT_NOT_AUTHORIZED,
       );
     }
 
@@ -796,6 +814,7 @@ export class VisitRequestsService {
       throw new PreconditionFailedException(
         'Alguno de los productos del temario está suspendido o retirado',
         { pharmaProductIds: blocked.map((product) => product.id) },
+        PharmaLabErrorReason.VISIT_TOPIC_PRODUCT_BLOCKED,
       );
     }
   }

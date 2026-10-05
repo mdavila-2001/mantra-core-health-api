@@ -9,6 +9,7 @@ import { GroupsRepository } from '../repositories';
 import { COMM } from '../community.concepts';
 import type { GroupMembers, Groups } from '../entities';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /** Roles que administran un grupo: aprueban altas y moderan el muro. */
 const ADMIN_ROLES = [COMM.GROUP_ROLE_OWNER, COMM.GROUP_ROLE_ADMIN];
@@ -96,7 +97,11 @@ export class CommunityGroupAccessService {
     );
     const group = await this.groupsRepo.findById(em, groupId);
     if (!group)
-      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      throw new ResourceNotFoundException(
+        'Grupo no encontrado',
+        { groupId },
+        CommunityErrorReason.GROUP_NOT_FOUND,
+      );
 
     const membership = actorProfileId
       ? await this.groupsRepo.findMember(em, groupId, actorProfileId)
@@ -114,7 +119,11 @@ export class CommunityGroupAccessService {
 
     const isSecret = group.visibilityConceptId === COMM.GROUP_VISIBILITY_SECRET;
     if (isSecret && !isMember && !isPlatform)
-      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      throw new ResourceNotFoundException(
+        'Grupo no encontrado',
+        { groupId },
+        CommunityErrorReason.GROUP_SECRET_NOT_VISIBLE,
+      );
 
     // TP-3 · regla 08: un grupo disuelto ya no está en pie, y su dirección deja
     // de abrir para todos —incluidos los que fueron miembros—. 404 y no 403
@@ -125,7 +134,11 @@ export class CommunityGroupAccessService {
     // después se disolvió sigue siendo su trabajo, y dejarlo fuera crearía un
     // punto ciego que se abre con sólo vaciar el grupo.
     if (group.statusConceptId !== CONCEPTS.STATE_ACTIVE && !isPlatform)
-      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      throw new ResourceNotFoundException(
+        'Grupo no encontrado',
+        { groupId },
+        CommunityErrorReason.GROUP_DISSOLVED,
+      );
 
     const isPublic = group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;
 

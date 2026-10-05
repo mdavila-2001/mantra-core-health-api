@@ -10,6 +10,7 @@ import { CreateCostAllocationDto, CreatedResourceDto } from '../dto';
 import type { PharmaCostAllocations } from '../entities';
 import { AnalyticsRepository, CatalogRepository } from '../repositories';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /** Fila de un reporte analítico: una dimensión y su importe acumulado. */
 export interface AllocationBucket {
@@ -92,9 +93,11 @@ export class PharmaAnalyticsService {
         id: dto.journalTransactionId,
       });
       if (!journal) {
-        throw new ResourceNotFoundException('Asiento contable no encontrado', {
-          journalTransactionId: dto.journalTransactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento contable no encontrado',
+          { journalTransactionId: dto.journalTransactionId },
+          PharmaLabErrorReason.JOURNAL_TRANSACTION_NOT_FOUND,
+        );
       }
       if (dto.pharmaProductId) {
         const product = await this.catalog.findProduct(tx, dto.pharmaProductId);
@@ -102,6 +105,7 @@ export class PharmaAnalyticsService {
           throw new ResourceNotFoundException(
             'Producto no encontrado en el catálogo del laboratorio',
             { pharmaProductId: dto.pharmaProductId },
+            PharmaLabErrorReason.PRODUCT_NOT_FOUND,
           );
         }
       }

@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import { SchedulingCatalogRepository } from '../repositories';
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import { SchedulingProfessionalTimeService } from './scheduling-professional-time.service';
@@ -279,10 +280,14 @@ export class SchedulingCatalogService {
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe una política con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe una política con ese código',
+        {
+          tenantId: dto.tenantId,
+          code: dto.code,
+        },
+        SchedulingErrorReason.POLICY_CODE_ALREADY_EXISTS,
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -330,6 +335,7 @@ export class SchedulingCatalogService {
           {
             dayOfWeek: rule.dayOfWeek,
           },
+          SchedulingErrorReason.TEMPLATE_RULE_TIME_INVERTED,
         );
       }
 
@@ -345,6 +351,7 @@ export class SchedulingCatalogService {
         throw new PreconditionFailedException(
           `El turno de ${slotMinutes} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min)`,
           { dayOfWeek: rule.dayOfWeek, slotMinutes, duracionFranja },
+          SchedulingErrorReason.TEMPLATE_RULE_SLOT_TOO_LONG,
         );
       }
     }
@@ -354,7 +361,9 @@ export class SchedulingCatalogService {
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
           resourceId,
-        });
+        },
+          SchedulingErrorReason.RESOURCE_NOT_FOUND,
+        );
       }
       this.assertRecursoDelActor(resource, actor);
       await this.assertSinSolapeConSusOtrasAgendas(tx, resource, dto);
@@ -691,6 +700,7 @@ export class SchedulingCatalogService {
       throw new PreconditionFailedException(
         'Elegiste «Otro» como motivo: escribí cuál es',
         { exceptionType: dto.exceptionType },
+        SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
     }
 
@@ -708,7 +718,9 @@ export class SchedulingCatalogService {
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
           resourceId,
-        });
+        },
+          SchedulingErrorReason.RESOURCE_NOT_FOUND,
+        );
       }
       this.assertRecursoDelActor(resource, actor);
 
@@ -723,6 +735,7 @@ export class SchedulingCatalogService {
         throw new ResourceNotFoundException(
           'Ninguno de esos cupos es de esta agenda',
           { resourceId, slotIds: dto.slotIds },
+          SchedulingErrorReason.SLOTS_NOT_FOUND_FOR_RESOURCE,
         );
       }
 
@@ -739,6 +752,7 @@ export class SchedulingCatalogService {
             // ya sabe pedir cada cita con su permiso.
             bookingIds: conPaciente.map((b) => b.id),
           },
+          SchedulingErrorReason.SLOTS_HAVE_ACTIVE_BOOKINGS,
         );
       }
 
@@ -786,12 +800,14 @@ export class SchedulingCatalogService {
       throw new PreconditionFailedException(
         'La ventana termina antes de empezar',
         { from: dto.from, to: dto.to },
+        SchedulingErrorReason.SHIFT_WINDOW_INVERTED,
       );
     }
     if (dto.shiftMinutes === 0) {
       throw new PreconditionFailedException(
         'Mover cero minutos no cambia nada: elegí cuánto correr la agenda',
         { shiftMinutes: 0 },
+        SchedulingErrorReason.SHIFT_MINUTES_ZERO,
       );
     }
 
@@ -809,7 +825,9 @@ export class SchedulingCatalogService {
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
           resourceId,
-        });
+        },
+          SchedulingErrorReason.RESOURCE_NOT_FOUND,
+        );
       }
       this.assertRecursoDelActor(resource, actor);
 
@@ -919,7 +937,9 @@ export class SchedulingCatalogService {
       if (!template) {
         throw new ResourceNotFoundException('Plantilla no encontrada', {
           templateId,
-        });
+        },
+          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
+        );
       }
 
       const resource = await this.catalogRepo.findResourceById(
@@ -930,6 +950,7 @@ export class SchedulingCatalogService {
         throw new ResourceNotFoundException(
           'Recurso de la plantilla no encontrado',
           { resourceId: template.resourceId },
+          SchedulingErrorReason.TEMPLATE_RESOURCE_NOT_FOUND,
         );
       }
       this.assertRecursoDelActor(resource, actor);
@@ -974,7 +995,9 @@ export class SchedulingCatalogService {
       if (!template) {
         throw new ResourceNotFoundException('Plantilla no encontrada', {
           templateId,
-        });
+        },
+          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
+        );
       }
 
       const resource = await this.catalogRepo.findResourceById(
@@ -987,6 +1010,7 @@ export class SchedulingCatalogService {
           {
             resourceId: template.resourceId,
           },
+          SchedulingErrorReason.TEMPLATE_RESOURCE_NOT_FOUND,
         );
       }
       this.assertRecursoDelActor(resource, actor);
@@ -1043,6 +1067,7 @@ export class SchedulingCatalogService {
           from: dto.from,
           to: dto.to,
         },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -1061,7 +1086,9 @@ export class SchedulingCatalogService {
       if (!template) {
         throw new ResourceNotFoundException('Plantilla no encontrada', {
           templateId,
-        });
+        },
+          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
+        );
       }
 
       // La zona de la sede, que es en la que están escritas las reglas. Sin
@@ -1257,6 +1284,7 @@ export class SchedulingCatalogService {
       throw new PreconditionFailedException(
         'Elegiste «Otro» como motivo: escribí cuál es',
         { resourceId, exceptionType: dto.exceptionType },
+        SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
     }
 
@@ -1268,6 +1296,7 @@ export class SchedulingCatalogService {
         {
           resourceId,
         },
+        SchedulingErrorReason.EXCEPTION_WINDOW_INVERTED,
       );
     }
 
@@ -1285,7 +1314,9 @@ export class SchedulingCatalogService {
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
           resourceId,
-        });
+        },
+          SchedulingErrorReason.RESOURCE_NOT_FOUND,
+        );
       }
 
       const isAvailable = dto.isAvailable ?? false;
@@ -1318,6 +1349,7 @@ export class SchedulingCatalogService {
               startAt: primera.startAt,
               endAt: primera.endAt,
             },
+            SchedulingErrorReason.PRACTITIONER_HAS_CONFIRMED_APPOINTMENT,
           );
         }
       }
@@ -1386,6 +1418,7 @@ export class SchedulingCatalogService {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: options.from.toISOString(), to: options.to.toISOString() },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -1397,7 +1430,9 @@ export class SchedulingCatalogService {
     if (!resource) {
       throw new ResourceNotFoundException('Recurso no encontrado', {
         resourceId,
-      });
+      },
+        SchedulingErrorReason.RESOURCE_NOT_FOUND,
+      );
     }
 
     // Se pide una fila de más sólo para poder declarar el recorte.
@@ -1535,6 +1570,7 @@ export class SchedulingCatalogService {
           throw new PreconditionFailedException(
             'Dos franjas de esta agenda se solapan entre sí',
             { nueva: nuevas[i].etiqueta, existente: nuevas[j].etiqueta },
+            SchedulingErrorReason.TEMPLATE_RULE_OVERLAP_SELF,
           );
         }
       }
@@ -1582,6 +1618,7 @@ export class SchedulingCatalogService {
             existente: existente.etiqueta,
             agenda: otra.resourceName,
           },
+          SchedulingErrorReason.TEMPLATE_RULE_OVERLAP_OTHER_AGENDA,
         );
       }
     }
@@ -1702,7 +1739,9 @@ export class SchedulingCatalogService {
       if (!exception) {
         throw new ResourceNotFoundException('Excepción no encontrada', {
           exceptionId,
-        });
+        },
+          SchedulingErrorReason.EXCEPTION_NOT_FOUND,
+        );
       }
       const resource = await this.catalogRepo.findResourceById(
         tx,
@@ -1718,6 +1757,7 @@ export class SchedulingCatalogService {
         throw new PreconditionFailedException(
           'El bloqueo termina antes de empezar',
           { startAt: startAt.toISOString(), endAt: endAt.toISOString() },
+          SchedulingErrorReason.EXCEPTION_WINDOW_INVERTED,
         );
       }
 
@@ -1733,6 +1773,7 @@ export class SchedulingCatalogService {
         throw new PreconditionFailedException(
           'Elegiste «Otro» como motivo: escribí cuál es',
           { exceptionType: tipoFinal },
+          SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
         );
       }
 
@@ -1797,7 +1838,9 @@ export class SchedulingCatalogService {
       if (!exception) {
         throw new ResourceNotFoundException('Excepción no encontrada', {
           exceptionId,
-        });
+        },
+          SchedulingErrorReason.EXCEPTION_NOT_FOUND,
+        );
       }
       const resource = await this.catalogRepo.findResourceById(
         tx,
@@ -1844,6 +1887,7 @@ export class SchedulingCatalogService {
         : 'Tu vínculo con esta organización no está vigente, así que no podés ' +
             'publicar agenda acá. Hablá con ellos para reactivarlo.',
       { tenantId, vinculo: veredicto },
+      SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
   }
 
@@ -1879,7 +1923,9 @@ export class SchedulingCatalogService {
     if (!resource) {
       throw new ResourceNotFoundException('Recurso no encontrado', {
         resourceId,
-      });
+      },
+        SchedulingErrorReason.RESOURCE_NOT_FOUND,
+      );
     }
     this.assertRecursoDelActor(resource, actor);
 
@@ -1965,6 +2011,7 @@ export class SchedulingCatalogService {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: from.toISOString(), to: to.toISOString() },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -1973,7 +2020,9 @@ export class SchedulingCatalogService {
     if (!resource) {
       throw new ResourceNotFoundException('Recurso no encontrado', {
         resourceId,
-      });
+      },
+        SchedulingErrorReason.RESOURCE_NOT_FOUND,
+      );
     }
     // Quién puede leer, y CUÁNTO ve, son dos preguntas distintas.
     //

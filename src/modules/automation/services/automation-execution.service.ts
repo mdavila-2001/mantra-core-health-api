@@ -11,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import type { AgentRuns, WorkflowRuns } from '../entities';
 import {
   AgentsRepository,
@@ -148,14 +149,22 @@ export class AutomationExecutionService {
         workflowId,
       );
       if (!workflow) {
-        throw new ResourceNotFoundException('Workflow no encontrado.', {
-          workflowId,
-        });
+        throw new ResourceNotFoundException(
+          'Workflow no encontrado.',
+          {
+            workflowId,
+          },
+          AutomationErrorReason.WORKFLOW_NOT_FOUND,
+        );
       }
       if (workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED) {
-        throw new PreconditionFailedException('El workflow está archivado.', {
-          workflowId,
-        });
+        throw new PreconditionFailedException(
+          'El workflow está archivado.',
+          {
+            workflowId,
+          },
+          AutomationErrorReason.WORKFLOW_ARCHIVED,
+        );
       }
 
       if (dto.triggerId) {
@@ -164,9 +173,13 @@ export class AutomationExecutionService {
           dto.triggerId,
         );
         if (!trigger) {
-          throw new ResourceNotFoundException('Disparador no encontrado.', {
-            triggerId: dto.triggerId,
-          });
+          throw new ResourceNotFoundException(
+            'Disparador no encontrado.',
+            {
+              triggerId: dto.triggerId,
+            },
+            AutomationErrorReason.TRIGGER_NOT_FOUND,
+          );
         }
         if (trigger.isEnabled !== true) {
           throw new PreconditionFailedException(
@@ -174,12 +187,14 @@ export class AutomationExecutionService {
             {
               triggerId: trigger.id,
             },
+            AutomationErrorReason.TRIGGER_DISABLED,
           );
         }
         if (trigger.workflowId !== workflowId) {
           throw new PreconditionFailedException(
             'El disparador no pertenece a ese workflow.',
             { triggerId: trigger.id, workflowId },
+            AutomationErrorReason.TRIGGER_WORKFLOW_MISMATCH,
           );
         }
       }
@@ -271,6 +286,7 @@ export class AutomationExecutionService {
           {
             workflowRunId,
           },
+          AutomationErrorReason.WORKFLOW_RUN_NOT_FOUND,
         );
       }
       if (run.statusConceptId !== CONCEPTS.AUTO_RUN_RUNNING) {
@@ -280,20 +296,29 @@ export class AutomationExecutionService {
             workflowRunId,
             statusConceptId: run.statusConceptId,
           },
+          AutomationErrorReason.WORKFLOW_RUN_NOT_RUNNING,
         );
       }
 
       const agent = await this.agentsRepo.findAgentById(tx, dto.agentId);
       if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId: dto.agentId,
-        });
+        throw new ResourceNotFoundException(
+          'Agente no encontrado.',
+          {
+            agentId: dto.agentId,
+          },
+          AutomationErrorReason.AGENT_NOT_FOUND,
+        );
       }
       if (agent.stateConceptId !== CONCEPTS.AUTO_AGENT_ACTIVE) {
-        throw new PreconditionFailedException('El agente no está activo.', {
-          agentId: agent.id,
-          stateConceptId: agent.stateConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El agente no está activo.',
+          {
+            agentId: agent.id,
+            stateConceptId: agent.stateConceptId,
+          },
+          AutomationErrorReason.AGENT_NOT_ACTIVE,
+        );
       }
 
       const version = dto.agentVersionId
@@ -306,12 +331,14 @@ export class AutomationExecutionService {
             agentId: agent.id,
             agentVersionId: dto.agentVersionId,
           },
+          AutomationErrorReason.AGENT_VERSION_NOT_FOUND_FOR_AGENT,
         );
       }
       if (version.statusConceptId !== CONCEPTS.AUTO_VERSION_PUBLISHED) {
         throw new PreconditionFailedException(
           'Sólo se puede ejecutar una versión publicada del agente.',
           { agentVersionId: version.id },
+          AutomationErrorReason.AGENT_VERSION_NOT_PUBLISHED,
         );
       }
 
@@ -371,12 +398,14 @@ export class AutomationExecutionService {
         throw new ResourceNotFoundException(
           'Ejecución de agente no encontrada.',
           { agentRunId },
+          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
         );
       }
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_RUNNING) {
         throw new PreconditionFailedException(
           'La ejecución del agente no está en marcha; no admite pasos nuevos.',
           { agentRunId, statusConceptId: agentRun.statusConceptId },
+          AutomationErrorReason.AGENT_RUN_NOT_RUNNING_FOR_STEP,
         );
       }
 
@@ -482,12 +511,14 @@ export class AutomationExecutionService {
         throw new ResourceNotFoundException(
           'Ejecución de agente no encontrada.',
           { agentRunId },
+          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
         );
       }
       if (!OPEN_AGENT_RUN_STATUSES.includes(agentRun.statusConceptId)) {
         throw new PreconditionFailedException(
           'La ejecución del agente ya terminó; no admite aprobaciones.',
           { agentRunId, statusConceptId: agentRun.statusConceptId },
+          AutomationErrorReason.AGENT_RUN_ALREADY_FINISHED,
         );
       }
 
@@ -554,15 +585,23 @@ export class AutomationExecutionService {
         approvalId,
       );
       if (!approval) {
-        throw new ResourceNotFoundException('Aprobación no encontrada.', {
-          approvalId,
-        });
+        throw new ResourceNotFoundException(
+          'Aprobación no encontrada.',
+          {
+            approvalId,
+          },
+          AutomationErrorReason.APPROVAL_NOT_FOUND,
+        );
       }
       if (approval.statusConceptId !== CONCEPTS.AUTO_APPROVAL_PENDING) {
-        throw new ConflictException('La aprobación ya está decidida.', {
-          approvalId,
-          statusConceptId: approval.statusConceptId,
-        });
+        throw new ConflictException(
+          'La aprobación ya está decidida.',
+          {
+            approvalId,
+            statusConceptId: approval.statusConceptId,
+          },
+          AutomationErrorReason.APPROVAL_ALREADY_DECIDED,
+        );
       }
 
       const agentRun = await this.runsRepo.findAgentRunForUpdate(
@@ -575,6 +614,7 @@ export class AutomationExecutionService {
           {
             agentRunId: approval.agentRunId,
           },
+          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
         );
       }
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_PAUSED) {
@@ -584,6 +624,7 @@ export class AutomationExecutionService {
             agentRunId: agentRun.id,
             statusConceptId: agentRun.statusConceptId,
           },
+          AutomationErrorReason.AGENT_RUN_NOT_PAUSED,
         );
       }
 
@@ -692,6 +733,7 @@ export class AutomationExecutionService {
           {
             workflowRunId,
           },
+          AutomationErrorReason.WORKFLOW_RUN_NOT_FOUND,
         );
       }
 
@@ -719,6 +761,7 @@ export class AutomationExecutionService {
         throw new PreconditionFailedException(
           'La ejecución tiene aprobaciones pendientes y no puede cerrarse.',
           { workflowRunId, pendingApprovals: pending.length },
+          AutomationErrorReason.WORKFLOW_RUN_HAS_PENDING_APPROVALS,
         );
       }
 
@@ -982,9 +1025,13 @@ export class AutomationExecutionService {
     if (dto.agentToolId) {
       const tool = await this.agentsRepo.findToolById(tx, dto.agentToolId);
       if (!tool) {
-        throw new ResourceNotFoundException('Herramienta no encontrada.', {
-          agentToolId: dto.agentToolId,
-        });
+        throw new ResourceNotFoundException(
+          'Herramienta no encontrada.',
+          {
+            agentToolId: dto.agentToolId,
+          },
+          AutomationErrorReason.TOOL_NOT_FOUND,
+        );
       }
 
       const binding = await this.agentsRepo.findBinding(
@@ -999,6 +1046,7 @@ export class AutomationExecutionService {
             agentToolId: dto.agentToolId,
             agentVersionId: agentRun.agentVersionId,
           },
+          AutomationErrorReason.TOOL_NOT_BOUND_TO_VERSION,
         );
       }
       // Un enlace que deniega es una decisión explícita del ingeniero; no se
@@ -1007,6 +1055,7 @@ export class AutomationExecutionService {
         throw new PreconditionFailedException(
           'El enlace deniega el uso de esa herramienta para esta versión.',
           { agentToolId: dto.agentToolId },
+          AutomationErrorReason.TOOL_BINDING_DENIED,
         );
       }
       if (
@@ -1025,6 +1074,7 @@ export class AutomationExecutionService {
               agentToolId: dto.agentToolId,
               maxCallsPerRun: binding.maxCallsPerRun,
             },
+            AutomationErrorReason.TOOL_CALL_LIMIT_EXCEEDED,
           );
         }
       }

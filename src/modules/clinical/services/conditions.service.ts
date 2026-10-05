@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -239,6 +240,7 @@ export class ConditionsService {
             patientProfileId: dto.patientProfileId,
             codeConceptId: dto.codeConceptId,
           },
+          ClinicalErrorReason.CONDITION_ALREADY_ACTIVE,
         );
       }
 
@@ -334,6 +336,7 @@ export class ConditionsService {
             fromStatus: fromStatus ?? null,
             toStatus: dto.newClinicalStatusConceptId,
           },
+          ClinicalErrorReason.CONDITION_STATUS_TRANSITION_INVALID,
         );
       }
       if (
@@ -343,6 +346,7 @@ export class ConditionsService {
         throw new PreconditionFailedException(
           'Una condición de curso crónico no pasa a resuelta; marcala inactiva o en remisión',
           { conditionId },
+          ClinicalErrorReason.CONDITION_CHRONIC_CANNOT_RESOLVE,
         );
       }
 
@@ -754,9 +758,13 @@ export class ConditionsService {
   ): Promise<Conditions> {
     const condition = await this.conditionsRepo.findById(tx, conditionId);
     if (!condition) {
-      throw new ResourceNotFoundException('Condición no encontrada', {
-        conditionId,
-      });
+      throw new ResourceNotFoundException(
+        'Condición no encontrada',
+        {
+          conditionId,
+        },
+        ClinicalErrorReason.CONDITION_NOT_FOUND,
+      );
     }
     return condition;
   }

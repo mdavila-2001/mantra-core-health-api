@@ -18,6 +18,7 @@ import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
 import type { FileContentDto } from '../../common/dto';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type {
   ChatContactPageDto,
   ConversationListItemDto,
@@ -437,9 +438,13 @@ export class CommunityMessagingReadService {
     // 404 y no 403: confirmar que la conversación existe ya diría con quién
     // habla el otro.
     if (!participant)
-      throw new ResourceNotFoundException('Conversación no encontrada', {
-        conversationId,
-      });
+      throw new ResourceNotFoundException(
+        'Conversación no encontrada',
+        {
+          conversationId,
+        },
+        CommunityErrorReason.CONVERSATION_NOT_FOUND,
+      );
 
     await this.assertNoBlockWithPeers(em, conversationId, profileId);
     const conversation = await this.conversationsRepo.findConversationById(
@@ -652,9 +657,13 @@ export class CommunityMessagingReadService {
 
     for (const peer of peers) {
       if (await this.visibility.isBlockedBetween(em, profileId, peer))
-        throw new ResourceNotFoundException('Conversación no encontrada', {
-          conversationId,
-        });
+        throw new ResourceNotFoundException(
+          'Conversación no encontrada',
+          {
+            conversationId,
+          },
+          CommunityErrorReason.CONVERSATION_BLOCKED_PEER,
+        );
     }
   }
 

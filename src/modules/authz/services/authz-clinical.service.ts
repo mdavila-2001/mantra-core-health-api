@@ -26,6 +26,7 @@ import {
   type AccessLevel,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+import { AuthzErrorReason } from '../authz.error-reasons';
 
 const PURPOSE_CONCEPT: Record<PurposeOfUse, string> = {
   TREATMENT: AUTHZ.PURPOSE_TREATMENT,
@@ -90,6 +91,7 @@ export class AuthzClinicalService {
         throw new PreconditionFailedException(
           'validTo debe ser posterior a validFrom',
           {},
+          AuthzErrorReason.CLINICAL_ACCESS_INVALID_VALIDITY_WINDOW,
         );
       }
       // Salvo tratamiento directo, se exige un consentimiento que respalde el acceso.
@@ -97,6 +99,7 @@ export class AuthzClinicalService {
         throw new PreconditionFailedException(
           'Se requiere consentimiento salvo para tratamiento directo',
           { purposeOfUse: dto.purposeOfUse },
+          AuthzErrorReason.CLINICAL_ACCESS_CONSENT_REQUIRED,
         );
       }
 
@@ -112,6 +115,7 @@ export class AuthzClinicalService {
             patientProfileId,
             grantedUserId: dto.grantedUserId,
           },
+          AuthzErrorReason.CLINICAL_ACCESS_ALREADY_ACTIVE,
         );
       }
 
@@ -252,9 +256,13 @@ export class AuthzClinicalService {
     return this.em.transactional(async (tx) => {
       const grant = await this.grantsRepo.findById(tx, grantId);
       if (!grant)
-        throw new ResourceNotFoundException('Acceso clínico no encontrado', {
-          grantId,
-        });
+        throw new ResourceNotFoundException(
+          'Acceso clínico no encontrado',
+          {
+            grantId,
+          },
+          AuthzErrorReason.CLINICAL_ACCESS_NOT_FOUND,
+        );
       if (grant.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El acceso clínico no está activo',
@@ -262,6 +270,7 @@ export class AuthzClinicalService {
             grantId,
             state: grant.stateConceptId,
           },
+          AuthzErrorReason.CLINICAL_ACCESS_NOT_ACTIVE,
         );
       }
 

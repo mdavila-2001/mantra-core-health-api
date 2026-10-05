@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
 import {
   PublicProfilesRepository,
@@ -505,9 +506,13 @@ export class CommunityPublicService {
     // que no es una publicación»: en esta superficie nada distingue una cosa de
     // la otra, y distinguirlas confirmaría qué uuids son reales.
     if (postId === null)
-      throw new ResourceNotFoundException('Comentario no encontrado', {
-        commentId,
-      });
+      throw new ResourceNotFoundException(
+        'Comentario no encontrado',
+        {
+          commentId,
+        },
+        CommunityErrorReason.PUBLIC_COMMENT_NOT_FOUND,
+      );
     await this.assertPostPublic(em, postId);
 
     return this.paginaDeComentarios(
@@ -535,9 +540,13 @@ export class CommunityPublicService {
     postId: string,
   ): Promise<void> {
     if (!(await this.repo.isPostPublic(em, postId)))
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.PUBLIC_POST_NOT_FOUND,
+      );
   }
 
   /** Envuelve una página de comentarios ya leída, raíces o respuestas. */
@@ -670,7 +679,11 @@ export class CommunityPublicService {
       // y las fotos del cuerpo del post — un adjunto de comentario visible.
       (await this.repo.isPublicCommentMedia(em, fileId));
     if (!permitido) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+      throw new ResourceNotFoundException(
+        'Archivo no encontrado',
+        { fileId },
+        CommunityErrorReason.PUBLIC_FILE_NOT_FOUND,
+      );
     }
     return this.files.downloadPublicMedia(fileId);
   }
@@ -848,7 +861,11 @@ export class CommunityPublicService {
       (expectedTargetConceptId &&
         profile.targetTypeConceptId !== expectedTargetConceptId)
     )
-      throw new ResourceNotFoundException('No encontrado', { slug });
+      throw new ResourceNotFoundException(
+        'No encontrado',
+        { slug },
+        CommunityErrorReason.PUBLIC_DIRECTORY_PROFILE_NOT_FOUND,
+      );
 
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
     // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
