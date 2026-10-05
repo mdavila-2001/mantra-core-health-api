@@ -50,6 +50,8 @@ export interface CreateCredentialData {
   issuingCountryText?: string;
   /** Profesión que acredita, miembro de `VS_BO_PROFESSION` (`profession_concept_id`). */
   professionConceptId?: string;
+  /** Cómo se llama el título, cuando no hay catálogo (`title_text`). */
+  titleText?: string;
   /**
    * Cuándo se emitió. Sin ella, una línea de tiempo de formación no se puede
    * ordenar y se lee como una lista de títulos sueltos.
@@ -127,6 +129,7 @@ export class ProfessionalCredentialsRepository {
         issuingCityText: data.issuingCityText,
         issuingCountryText: data.issuingCountryText,
         professionConceptId: data.professionConceptId,
+        titleText: data.titleText,
         issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,

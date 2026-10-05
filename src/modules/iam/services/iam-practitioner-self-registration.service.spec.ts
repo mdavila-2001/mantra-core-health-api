@@ -678,6 +678,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
             issuingCityText: ' Cochabamba ',
             issuingCountryText: 'Bolivia',
             professionConceptId: ingenierosCiviles,
+            titleText: ' Diplomado en Salud Pública ',
           },
         ],
       });
@@ -688,6 +689,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
           issuingCityText: 'Cochabamba',
           issuingCountryText: 'Bolivia',
           professionConceptId: ingenierosCiviles,
+          titleText: 'Diplomado en Salud Pública',
         }),
       );
     });

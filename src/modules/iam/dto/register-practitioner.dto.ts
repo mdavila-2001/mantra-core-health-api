@@ -767,6 +767,16 @@ export class RegisterPractitionerCredentialDto {
   professionConceptId?: string;
 
   /**
+   * Cómo se llama el título cuando no hay catálogo que lo diga
+   * («Diplomado en Salud Pública»). `title_text`, modelo v4.2.41.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
+  /**
    * PDF precargado anónimamente por `POST /iam/auth/upload-registration-document`.
    * El alta lo reclama para el usuario recién creado dentro de la misma
    * transacción y lo vincula a esta fila de credencial.

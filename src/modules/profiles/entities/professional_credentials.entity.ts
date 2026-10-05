@@ -91,6 +91,12 @@ export class ProfessionalCredentials {
   professionConceptId?: string;
 
   /**
+   * Valor de title text mantenido por la instancia.
+   */
+  @Property({ fieldName: 'title_text', columnType: 'varchar', nullable: true })
+  titleText?: string;
+
+  /**
    * Valor de issue date mantenido por la instancia.
    */
   @Property({ fieldName: 'issue_date', columnType: 'date', nullable: true })
