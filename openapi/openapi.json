@@ -23086,6 +23086,162 @@
         ]
       }
     },
+    "/insurance/patients": {
+      "get": {
+        "description": "Sólo pacientes con cobertura en un plan de esta aseguradora o con un reclamo presentado a ella. Filiación y contacto, nada clínico. Paginado por cursor, sin total.",
+        "operationId": "InsurerPatientsController_listPatients",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor opaco de la página anterior",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "type": "number",
+              "enum": [
+                10,
+                25,
+                50
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Nombre, teléfono o correo (contiene, sin tildes) o documento de identidad (exacto).",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "genderConceptId",
+            "required": false,
+            "in": "query",
+            "description": "Sexo administrativo",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "occupationConceptId",
+            "required": false,
+            "in": "query",
+            "description": "Ocupación del catálogo",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "birthDateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1980-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "birthDateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "1999-12-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "insuranceStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "ALL",
+              "type": "string",
+              "enum": [
+                "ALL",
+                "WITH_INSURANCE",
+                "NO_INSURANCE"
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "fullName",
+              "type": "string",
+              "enum": [
+                "fullName",
+                "birthDate",
+                "createdAt"
+              ]
+            }
+          },
+          {
+            "name": "sortDirection",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsurerPatientListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Filtro o cursor inválido."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "La organización activa no es una aseguradora, o la sesión no tiene permiso sobre ella."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Directorio de pacientes de la aseguradora activa",
+        "tags": [
+          "insurer-patients"
+        ]
+      }
+    },
     "/practices": {
       "get": {
         "operationId": "PracticesController_listPractices",
@@ -86487,6 +86643,10 @@
     {
       "name": "insurer-received-claims",
       "description": "Operaciones del dominio funcional insurer received claims. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "insurer-patients",
+      "description": "Operaciones del dominio funcional insurer patients. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     }
   ],
   "servers": [
@@ -133409,6 +133569,114 @@
             "type": "string"
           }
         }
+      },
+      "InsurerPatientListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsurerPatientListItemDto"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "nextCursor"
+        ]
+      },
+      "InsurerPatientListItemDto": {
+        "type": "object",
+        "properties": {
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "documentNumber": {
+            "type": "string",
+            "description": "Documento de identidad"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-04-12"
+          },
+          "age": {
+            "type": "number",
+            "description": "Años cumplidos a la fecha de La Paz"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Celular, o el fijo si no hay celular"
+          },
+          "email": {
+            "type": "string"
+          },
+          "genderConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "genderDisplay": {
+            "type": "string"
+          },
+          "occupationDisplay": {
+            "type": "string",
+            "description": "Del catálogo; si no, el texto libre"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/InsurerPatientCoverageDto"
+          },
+          "communityProfileSlug": {
+            "type": "string",
+            "description": "Slug del perfil público con el que se le puede escribir. Ausente ⇒ todavía no activó la mensajería."
+          }
+        },
+        "required": [
+          "patientProfileId",
+          "fullName",
+          "coverage"
+        ]
+      },
+      "InsurerPatientCoverageDto": {
+        "type": "object",
+        "properties": {
+          "hasActiveCoverage": {
+            "type": "boolean",
+            "description": "Si tiene una cobertura vigente con esta aseguradora. `false` ⇒ la pantalla dice «Ninguno»."
+          },
+          "planName": {
+            "type": "string"
+          },
+          "policyIdentifier": {
+            "type": "string"
+          },
+          "memberIdentifier": {
+            "type": "string"
+          },
+          "validityStatus": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "UPCOMING",
+              "EXPIRED",
+              "INACTIVE",
+              "UNKNOWN"
+            ]
+          }
+        },
+        "required": [
+          "hasActiveCoverage"
+        ]
       }
     },
     "responses": {
