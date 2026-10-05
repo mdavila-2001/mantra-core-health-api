@@ -115,6 +115,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // en la primera consulta ni en la primera línea de log. Se concatenan los dos
     // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
+      // Explicit dotenv path permits isolated QA without loading a developer remote .env.
+      envFilePath: process.env.DOTENV_CONFIG_PATH ?? '.env',
       isGlobal: true,
       validationSchema: ormEnvSchema
         .concat(dataSourcesEnvSchema)

@@ -19,14 +19,16 @@ import { INS } from '../insurance.concepts';
 
 /** Filtros ya validados y con sus valores por omisión resueltos. */
 export interface InsurerPatientCriteria {
-  readonly carrierId: string;
+  readonly carrierId?: string;
+  readonly insuranceCarrierId?: string;
+  readonly patientProfileId?: string;
   /** Fecha civil de La Paz (`YYYY-MM-DD`) contra la que se mide la vigencia. */
   readonly referenceDate: string;
   readonly limit: number;
   readonly cursor?: string;
   readonly search?: string;
   readonly genderConceptId?: string;
-  readonly occupationConceptId?: string;
+  readonly occupation?: string;
   readonly birthDateFrom?: string;
   readonly birthDateTo?: string;
   readonly insuranceStatus: InsurerPatientInsuranceStatus;
@@ -80,28 +82,39 @@ function sortExpression(
  * divergencia se vería como «Con seguro» devolviendo una fila «Ninguno»: es lo
  * que comprueba la verificación en runtime del directorio.
  */
-const ACTIVE_COVERAGE_SQL = `exists (
-  select 1
-    from insurance.patient_coverages ac
-    join insurance.insurance_plans apl on apl.id = ac.insurance_plan_id
-    join insurance.insurance_products apr on apr.id = apl.insurance_product_id
-   where ac.patient_profile_id = pa.profile_id
-     and apr.insurance_carrier_id = ?
-     and ac.status_concept_id = ?
-     and apl.status_concept_id = ?
-     and (ac.effective_to is null or ac.effective_to >= ?::date)
-     and (apl.effective_to is null or apl.effective_to >= ?::date)
-     and (ac.effective_from is null or ac.effective_from <= ?::date)
-     and (apl.effective_from is null or apl.effective_from <= ?::date)
-     and coalesce(ac.effective_from, ac.effective_to,
-                  apl.effective_from, apl.effective_to) is not null)`;
-
-function activeCoverageParams(criteria: InsurerPatientCriteria): unknown[] {
-  const d = criteria.referenceDate;
-  return [criteria.carrierId, INS.COVERAGE_ACTIVE, INS.PLAN_ACTIVE, d, d, d, d];
+export function activeCoveragePredicate(
+  carrierId: string | undefined,
+  referenceDate: string,
+): { sql: string; params: unknown[] } {
+  return {
+    sql: `exists (
+      select 1 from insurance.patient_coverages ac
+      join insurance.insurance_plans apl on apl.id = ac.insurance_plan_id
+      join insurance.insurance_products apr on apr.id = apl.insurance_product_id
+      join insurance.insurance_carriers acr on acr.id = apr.insurance_carrier_id
+      where ac.patient_profile_id = pa.profile_id
+      ${carrierId ? 'and apr.insurance_carrier_id = ?' : ''}
+      and acr.status_concept_id = ?
+      and ac.status_concept_id = ? and apl.status_concept_id = ?
+      and (ac.effective_to is null or ac.effective_to >= ?::date)
+      and (apl.effective_to is null or apl.effective_to >= ?::date)
+      and (ac.effective_from is null or ac.effective_from <= ?::date)
+      and (apl.effective_from is null or apl.effective_from <= ?::date)
+      and coalesce(ac.effective_from, ac.effective_to,
+                   apl.effective_from, apl.effective_to) is not null)`,
+    params: [
+      ...(carrierId ? [carrierId] : []),
+      INS.CARRIER_ACTIVE,
+      INS.COVERAGE_ACTIVE,
+      INS.PLAN_ACTIVE,
+      referenceDate,
+      referenceDate,
+      referenceDate,
+      referenceDate,
+    ],
+  };
 }
 
-/** Teléfono y correo en los que busca el texto libre. */
 const SEARCHABLE_CONTACT_SYSTEMS = [
   CONCEPTS.CONTACT_MOBILE,
   CONCEPTS.CONTACT_PHONE,
@@ -143,73 +156,73 @@ export function nextCursorAfter(
   });
 }
 
-/**
- * La consulta de una página del directorio de la aseguradora.
- *
- * ## Quién entra (D1)
- *
- * Sólo quien tiene relación con **esta** aseguradora: una cobertura en un plan
- * de un producto suyo, o un reclamo que se le presentó. El `carrierId` sale del
- * tenant activo (`InsurerContextService`), nunca de la petición. Todo filtro se
- * aplica **dentro** de ese conjunto.
- *
- * ## Por qué todo es parámetro
- *
- * Lo único interpolado son fragmentos fijos de este archivo (la clave de orden,
- * el operador del cursor); cada dato que llega del cliente viaja como `?`.
- *
- * @param criteria - Filtros, alcance y cursor.
- * @returns SQL y parámetros; pide `limit + 1` filas para saber si hay más.
- */
-export function buildInsurerPatientPageQuery(
-  criteria: InsurerPatientCriteria,
-): {
+/** Página y conteo comparten los filtros y el alcance autorizado. */
+function filteredPatients(criteria: InsurerPatientCriteria): {
   sql: string;
   params: unknown[];
 } {
-  const sortKey = sortExpression(criteria.sortBy, criteria.sortDirection);
-  const conditions: string[] = [];
-  const params: unknown[] = [criteria.carrierId, criteria.carrierId];
-
-  const after = readCursor(criteria);
-  if (after) {
-    const op = criteria.sortDirection === 'asc' ? '>' : '<';
-    conditions.push(`(${sortKey}, pa.profile_id::text) ${op} (?, ?)`);
-    params.push(after.value, after.id);
+  if (
+    criteria.birthDateFrom &&
+    criteria.birthDateTo &&
+    criteria.birthDateFrom > criteria.birthDateTo
+  ) {
+    throw new BadRequestException('El rango de nacimiento no es válido');
   }
-
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+  const coverage = (carrierId?: string, negate = false) => {
+    const predicate = activeCoveragePredicate(
+      carrierId,
+      criteria.referenceDate,
+    );
+    conditions.push(`${negate ? 'not ' : ''}${predicate.sql}`);
+    params.push(...predicate.params);
+  };
+  // Sólo plataforma puede llegar sin aseguradora, tras autorizarse en el servicio.
+  if (criteria.carrierId) coverage(criteria.carrierId);
+  if (criteria.insuranceCarrierId) {
+    if (
+      criteria.carrierId &&
+      criteria.insuranceCarrierId !== criteria.carrierId
+    )
+      conditions.push('false');
+    else coverage(criteria.insuranceCarrierId);
+  }
+  if (criteria.insuranceStatus === 'WITH_INSURANCE')
+    coverage(criteria.carrierId);
+  if (criteria.insuranceStatus === 'NO_INSURANCE') coverage(undefined, true);
+  if (criteria.patientProfileId) {
+    conditions.push('pa.profile_id = ?');
+    params.push(criteria.patientProfileId);
+  }
   if (criteria.search) {
-    const normalized = normalizeSearchText(criteria.search);
-    const pattern = containsPattern(normalized);
-    // Nombre, teléfono y correo por «contiene»; el documento ENTERO, por
-    // igualdad: un carnet no se busca por fragmento (mismo criterio que
-    // `PatientProfilesRepository.searchPage`).
+    const pattern = containsPattern(normalizeSearchText(criteria.search));
+    const digits = criteria.search.replace(/\D/g, '');
+    const phoneSearch =
+      digits.length > 0 && /^[+\d\s().-]+$/.test(criteria.search);
     conditions.push(`(${sqlSearchKey(FULL_NAME_SQL)} like ?
       or exists (select 1 from common.contact_points cp
-                  where cp.owner_id = pa.profile_id
-                    and cp.valid_to is null
-                    and cp.system_concept_id in (?, ?, ?)
-                    and lower(cp.value) like ?)
-      or exists (select 1 from common.identifiers i
-                  where i.owner_id = pa.profile_id
-                    and i.type_concept_id = ?
-                    and i.value = ?))`);
-    params.push(
-      pattern,
-      ...SEARCHABLE_CONTACT_SYSTEMS,
-      pattern,
-      CONCEPTS.ID_TYPE_NATIONAL,
-      criteria.search.trim(),
-    );
+        where cp.owner_id = pa.profile_id and cp.valid_to is null
+          and cp.system_concept_id in (?, ?, ?)
+          and (${sqlSearchKey('cp.value')} like ?
+          ${phoneSearch ? "or (cp.system_concept_id in (?, ?) and regexp_replace(cp.value, '[^0-9]', '', 'g') like ?)" : ''})))`);
+    params.push(pattern, ...SEARCHABLE_CONTACT_SYSTEMS, pattern);
+    if (phoneSearch)
+      params.push(
+        CONCEPTS.CONTACT_MOBILE,
+        CONCEPTS.CONTACT_PHONE,
+        containsPattern(digits),
+      );
   }
-
   if (criteria.genderConceptId) {
     conditions.push('p.administrative_gender_concept_id = ?');
     params.push(criteria.genderConceptId);
   }
-  if (criteria.occupationConceptId) {
-    conditions.push('p.occupation_concept_id = ?');
-    params.push(criteria.occupationConceptId);
+  if (criteria.occupation) {
+    conditions.push(
+      `${sqlSearchKey("coalesce(occupation.display, nullif(p.occupation_free_text, ''))")} like ?`,
+    );
+    params.push(containsPattern(normalizeSearchText(criteria.occupation)));
   }
   if (criteria.birthDateFrom) {
     conditions.push('p.birth_date >= ?::date');
@@ -219,37 +232,45 @@ export function buildInsurerPatientPageQuery(
     conditions.push('p.birth_date <= ?::date');
     params.push(criteria.birthDateTo);
   }
-  if (criteria.insuranceStatus === 'WITH_INSURANCE') {
-    conditions.push(ACTIVE_COVERAGE_SQL);
-    params.push(...activeCoverageParams(criteria));
-  } else if (criteria.insuranceStatus === 'NO_INSURANCE') {
-    conditions.push(`not ${ACTIVE_COVERAGE_SQL}`);
-    params.push(...activeCoverageParams(criteria));
-  }
+  return {
+    sql: `from profiles.patient_profiles pa
+      join profiles.persons p on p.id = pa.profile_id
+      left join terminology.catalog_concepts occupation on occupation.id = p.occupation_concept_id
+      where ${conditions.length ? conditions.join('\n and ') : 'true'}`,
+    params,
+  };
+}
 
-  const where =
-    conditions.length > 0 ? `where ${conditions.join('\n      and ')}` : '';
+/** Lee como máximo limit + 1 filas; sólo la página recibe la proyección de detalle. */
+export function buildInsurerPatientPageQuery(
+  criteria: InsurerPatientCriteria,
+): { sql: string; params: unknown[] } {
+  const filtered = filteredPatients(criteria);
+  const sortKey = sortExpression(criteria.sortBy, criteria.sortDirection);
+  const after = readCursor(criteria);
   const direction = criteria.sortDirection === 'asc' ? 'asc' : 'desc';
+  const cursorWhere = after
+    ? `and (${sortKey}, pa.profile_id::text) ${direction === 'asc' ? '>' : '<'} (?, ?)`
+    : '';
+  return {
+    sql: `select pa.profile_id as patient_profile_id, ${sortKey} as sort_value
+      ${filtered.sql} ${cursorWhere}
+      order by sort_value ${direction}, pa.profile_id::text ${direction} limit ?`,
+    params: [
+      ...filtered.params,
+      ...(after ? [after.value, after.id] : []),
+      criteria.limit + 1,
+    ],
+  };
+}
 
-  const sql = `with scope as (
-    select c.patient_profile_id
-      from insurance.patient_coverages c
-      join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
-      join insurance.insurance_products pr on pr.id = pl.insurance_product_id
-     where pr.insurance_carrier_id = ?
-    union
-    select c.patient_profile_id
-      from insurance.insurance_claims cl
-      join insurance.patient_coverages c on c.id = cl.patient_coverage_id
-     where cl.insurance_carrier_id = ?
-  )
-  select pa.profile_id as patient_profile_id, ${sortKey} as sort_value
-    from scope s
-    join profiles.patient_profiles pa on pa.profile_id = s.patient_profile_id
-    join profiles.persons p on p.id = pa.profile_id
-    ${where}
-   order by sort_value ${direction}, pa.profile_id::text ${direction}
-   limit ?`;
-  params.push(criteria.limit + 1);
-  return { sql, params };
+/** Total exacto independiente de la posición del cursor. */
+export function buildInsurerPatientCountQuery(
+  criteria: InsurerPatientCriteria,
+): { sql: string; params: unknown[] } {
+  const filtered = filteredPatients(criteria);
+  return {
+    sql: `select count(*)::int as total ${filtered.sql}`,
+    params: filtered.params,
+  };
 }
