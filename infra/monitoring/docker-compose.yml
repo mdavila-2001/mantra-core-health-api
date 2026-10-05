@@ -264,8 +264,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
-          memory: 96M
+          cpus: "0.5"
+          # matplotlib dibuja las gráficas de /graficas: ~60 MB extra al renderizar.
+          memory: 256M
     healthcheck:
       # 127.0.0.1 y no `localhost`: el wget de busybox resuelve `localhost` a ::1
       # y el exportador escucha sólo en IPv4 → el healthcheck fallaba siempre

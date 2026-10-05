@@ -9,8 +9,11 @@ from __future__ import annotations
 import html
 from datetime import datetime, timezone
 
+from dataclasses import dataclass
+
+from .charts import ChartSpec, render_line_chart
 from .docker_state import ContainerState
-from .sources import Sample, Sources
+from .sources import Point, Sample, Sources
 
 GIB = 1024**3
 MIB = 1024**2
@@ -34,6 +37,10 @@ Q_LOAD_5 = "node_load5"
 Q_LOAD_15 = "node_load15"
 Q_CONTAINER_CPU = 'sum by (name) (rate(container_cpu_usage_seconds_total{name!=""}[5m]))'
 Q_CONTAINER_MEM = 'container_memory_working_set_bytes{name!=""}'
+Q_RAM_USED_GIB_RANGE = "sum(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / 1073741824"
+Q_CORES_IN_USE_RANGE = (
+    '(1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))) * count(node_cpu_seconds_total{mode="idle"})'
+)
 Q_CONTAINER_MEM_LIMIT = 'container_spec_memory_limit_bytes{name!=""}'
 Q_CONTAINER_NET = 'sum by (name) (rate(container_network_receive_bytes_total{name!=""}[5m]) + rate(container_network_transmit_bytes_total{name!=""}[5m])) * 8'
 
@@ -44,6 +51,7 @@ HELP_TEXT = (
     "/status — resumen: RAM, CPU, disco, red, contenedores y alertas\n"
     "/ram — RAM del host y los 10 contenedores que más usan\n"
     "/cpu — uso por núcleo, carga y los contenedores que más CPU usan\n"
+    "/graficas — RAM y núcleos en uso de las últimas 24 h, en imagen\n"
     "/red — tráfico por interfaz y los contenedores que más mueven\n"
     "/contenedores — estado, health, uptime y reinicios de cada uno\n"
     "/alertas — alertas activas ahora\n"
@@ -90,6 +98,48 @@ def cpu_report(sources: Sources) -> str:
     lines.append(f"\n<b>Top {TOP_N} contenedores</b> (100 % = un núcleo entero)")
     lines.extend(f"• {_e(name)}: {_pct(value)}" for name, value in top[:TOP_N])
     return "\n".join(lines)
+
+
+@dataclass(frozen=True)
+class Photo:
+    png: bytes
+    caption: str
+
+
+def history_charts(sources: Sources) -> list[Photo]:
+    total_gib = (_scalar(sources.query(Q_MEM_TOTAL)) or 0) / GIB
+    cores = _scalar(sources.query(Q_CPU_CORES))
+    ram = sources.query_range(Q_RAM_USED_GIB_RANGE)
+    cpu = sources.query_range(Q_CORES_IN_USE_RANGE)
+    return [
+        Photo(
+            render_line_chart(
+                ram,
+                ChartSpec("RAM usada · últimas 24 h", "GiB", total_gib or None, f"Total {total_gib:.0f} GiB"),
+                sources.timezone,
+            ),
+            f"🧠 RAM últimas 24 h · {_range_summary(ram, 'GiB', total_gib)}",
+        ),
+        Photo(
+            render_line_chart(
+                cpu,
+                ChartSpec("Núcleos en uso · últimas 24 h", "núcleos", cores, f"{int(cores)} núcleos" if cores else ""),
+                sources.timezone,
+            ),
+            f"🧮 Núcleos en uso últimas 24 h · {_range_summary(cpu, 'núcleos', cores)}",
+        ),
+    ]
+
+
+def _range_summary(points: list[Point], unit: str, capacity: float | None) -> str:
+    if not points:
+        return "sin datos"
+    values = [value for _, value in points]
+    peak, average = max(values), sum(values) / len(values)
+    text = f"pico {peak:.1f} {unit}, promedio {average:.1f} {unit}"
+    if capacity:
+        text += f" (pico al {peak / capacity * 100:.0f} %)"
+    return text
 
 
 def network_report(sources: Sources) -> str:
