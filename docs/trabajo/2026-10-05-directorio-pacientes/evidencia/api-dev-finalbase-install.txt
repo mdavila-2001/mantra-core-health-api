@@ -1,0 +1,13 @@
+COMMAND: yarn install --immutable
+➤ YN0000: · Yarn 4.14.1
+➤ YN0000: ┌ Resolution step
+➤ YN0000: └ Completed in 0s 240ms
+➤ YN0000: ┌ Fetch step
+➤ YN0000: └ Completed in 1s 46ms
+➤ YN0000: ┌ Link step
+➤ YN0008: │ argon2@npm:0.45.1 must be rebuilt because its dependency tree changed
+➤ YN0008: │ cpu-features@npm:0.0.10 must be rebuilt because its dependency tree changed
+➤ YN0008: │ ssh2@npm:1.17.0 must be rebuilt because its dependency tree changed
+➤ YN0000: └ Completed in 16s 752ms
+➤ YN0000: · Done in 18s 264ms
+EXIT_CODE=0

@@ -16422,121 +16422,6 @@ paths:
       summary: Dictaminar una solicitud recibida (definitivo)
       tags:
         - insurer-received-claims
-  /insurance/patients/search:
-    post:
-      description: >-
-        Aseguradoras: cobertura vigente en el tenant activo. Administración: padrón autorizado. Filtros en el cuerpo;
-        respuesta mínima, total exacto y cursor.
-      operationId: InsurerPatientsController_listPatients
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InsurerPatientSearchQueryDto'
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InsurerPatientListDto'
-        '400':
-          description: Filtro, rango de fechas o cursor inválido.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          description: Sin acceso al directorio.
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Consultar directorio de pacientes autorizado
-      tags:
-        - insurer-patients
-  /insurance/patients/options:
-    get:
-      operationId: InsurerPatientsController_options
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InsurerPatientOptionsDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          description: Sin acceso al directorio.
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Aseguradoras disponibles en el alcance autorizado
-      tags:
-        - insurer-patients
-      description: >-
-        Aseguradoras disponibles en el alcance autorizado. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /insurance/patients/conversation:
-    post:
-      operationId: InsurerPatientsController_openConversation
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InsurerPatientConversationDto'
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InsurerPatientConversationResponseDto'
-        '400':
-          description: Paciente o canal inválido.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          description: Sin acceso al directorio.
-        '404':
-          description: Paciente fuera del alcance autorizado.
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '412':
-          description: Perfiles no disponibles para mensajería o bloqueados.
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Abrir o reutilizar la conversación interna con un paciente autorizado
-      tags:
-        - insurer-patients
-      description: >-
-        Abrir o reutilizar la conversación interna con un paciente autorizado. Requiere JWT y los roles o alcances
-        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /practices:
     get:
       operationId: PracticesController_listPractices
@@ -58017,6 +57902,93 @@ paths:
       description: >-
         Borrado lógico de un documento (soft-delete). Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /insurance/patients/search:
+    post:
+      description: >-
+        Aseguradoras: cobertura vigente en el tenant activo. Administración: padrón autorizado. Filtros en el cuerpo;
+        respuesta mínima, total exacto y cursor.
+      operationId: InsurerPatientsController_listPatients
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsurerPatientSearchQueryDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurerPatientListDto'
+        '400':
+          description: Filtro, rango de fechas o cursor inválido.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Sin acceso al directorio.
+      security:
+        - bearer: []
+      summary: Consultar directorio de pacientes autorizado
+      tags:
+        - insurer-patients
+  /insurance/patients/options:
+    get:
+      description: Devuelve nombres e identificadores de aseguradoras activas dentro del alcance autorizado del actor.
+      operationId: InsurerPatientsController_options
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurerPatientOptionsDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Sin acceso al directorio.
+      security:
+        - bearer: []
+      summary: Aseguradoras disponibles en el alcance autorizado
+      tags:
+        - insurer-patients
+  /insurance/patients/conversation:
+    post:
+      description: >-
+        Revalida cobertura y membresia vigentes, resuelve perfiles internos y devuelve el identificador de una
+        conversacion nueva o existente.
+      operationId: InsurerPatientsController_openConversation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsurerPatientConversationDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurerPatientConversationResponseDto'
+        '400':
+          description: Paciente o canal inválido.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Sin acceso al directorio.
+        '404':
+          description: Paciente fuera del alcance autorizado.
+        '422':
+          description: Perfiles no disponibles para mensajería o bloqueados.
+      security:
+        - bearer: []
+      summary: Abrir o reutilizar la conversación interna con un paciente autorizado
+      tags:
+        - insurer-patients
 info:
   title: ALOVIDA Health API
   description: >-
@@ -69294,164 +69266,6 @@ components:
           maxLength: 255
       required:
         - outcome
-    InsurerPatientSearchQueryDto:
-      type: object
-      properties:
-        cursor:
-          type: string
-          description: Cursor opaco de la página anterior
-        limit:
-          type: number
-          enum:
-            - 10
-            - 25
-            - 50
-          default: 25
-        search:
-          type: string
-          description: Nombre, teléfono o correo (contiene, sin tildes).
-          maxLength: 120
-        genderConceptId:
-          type: string
-          format: uuid
-          description: Sexo administrativo
-        occupation:
-          type: string
-          description: Profesión de catálogo o texto libre
-          maxLength: 120
-        insuranceCarrierId:
-          type: string
-          format: uuid
-        birthDateFrom:
-          type: string
-          example: '1980-01-01'
-        birthDateTo:
-          type: string
-          example: '1999-12-31'
-        insuranceStatus:
-          type: string
-          enum:
-            - ALL
-            - WITH_INSURANCE
-            - NO_INSURANCE
-          default: ALL
-        sortBy:
-          type: string
-          enum:
-            - fullName
-            - birthDate
-            - createdAt
-          default: fullName
-        sortDirection:
-          type: string
-          enum:
-            - asc
-            - desc
-          default: asc
-    InsurerPatientCarrierDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-      required:
-        - id
-        - name
-    InsurerPatientMessagingDto:
-      type: object
-      properties:
-        channel:
-          type: string
-          enum:
-            - internal
-        available:
-          type: boolean
-      required:
-        - channel
-        - available
-    InsurerPatientListItemDto:
-      type: object
-      properties:
-        patientProfileId:
-          type: string
-          format: uuid
-        fullName:
-          type: string
-        birthDate:
-          type: string
-          example: '1990-04-12'
-        age:
-          type: number
-        phone:
-          type: string
-        email:
-          type: string
-        genderCode:
-          type: string
-        occupationDisplay:
-          type: string
-        insurers:
-          type: array
-          items:
-            $ref: '#/components/schemas/InsurerPatientCarrierDto'
-        messaging:
-          $ref: '#/components/schemas/InsurerPatientMessagingDto'
-      required:
-        - patientProfileId
-        - fullName
-        - insurers
-        - messaging
-    InsurerPatientListDto:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/InsurerPatientListItemDto'
-        total:
-          type: number
-        limit:
-          type: number
-        nextCursor:
-          type: string
-          nullable: true
-      required:
-        - items
-        - total
-        - limit
-        - nextCursor
-    InsurerPatientOptionsDto:
-      type: object
-      properties:
-        insurers:
-          type: array
-          items:
-            $ref: '#/components/schemas/InsurerPatientCarrierDto'
-      required:
-        - insurers
-    InsurerPatientConversationDto:
-      type: object
-      properties:
-        patientProfileId:
-          type: string
-          format: uuid
-        channel:
-          type: string
-          enum:
-            - internal
-      required:
-        - patientProfileId
-        - channel
-    InsurerPatientConversationResponseDto:
-      type: object
-      properties:
-        conversationId:
-          type: string
-          format: uuid
-      required:
-        - conversationId
     CreatePracticeDto:
       type: object
       properties:
@@ -95078,6 +94892,164 @@ components:
           format: date-time
         path:
           type: string
+    InsurerPatientSearchQueryDto:
+      type: object
+      properties:
+        cursor:
+          type: string
+          description: Cursor opaco de la página anterior
+        limit:
+          type: number
+          enum:
+            - 10
+            - 25
+            - 50
+          default: 25
+        search:
+          type: string
+          description: Nombre, teléfono o correo (contiene, sin tildes).
+          maxLength: 120
+        genderConceptId:
+          type: string
+          format: uuid
+          description: Sexo administrativo
+        occupation:
+          type: string
+          description: Profesión de catálogo o texto libre
+          maxLength: 120
+        insuranceCarrierId:
+          type: string
+          format: uuid
+        birthDateFrom:
+          type: string
+          example: '1980-01-01'
+        birthDateTo:
+          type: string
+          example: '1999-12-31'
+        insuranceStatus:
+          type: string
+          enum:
+            - ALL
+            - WITH_INSURANCE
+            - NO_INSURANCE
+          default: ALL
+        sortBy:
+          type: string
+          enum:
+            - fullName
+            - birthDate
+            - createdAt
+          default: fullName
+        sortDirection:
+          type: string
+          enum:
+            - asc
+            - desc
+          default: asc
+    InsurerPatientCarrierDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    InsurerPatientMessagingDto:
+      type: object
+      properties:
+        channel:
+          type: string
+          enum:
+            - internal
+        available:
+          type: boolean
+      required:
+        - channel
+        - available
+    InsurerPatientListItemDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        birthDate:
+          type: string
+          example: '1990-04-12'
+        age:
+          type: number
+        phone:
+          type: string
+        email:
+          type: string
+        genderCode:
+          type: string
+        occupationDisplay:
+          type: string
+        insurers:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsurerPatientCarrierDto'
+        messaging:
+          $ref: '#/components/schemas/InsurerPatientMessagingDto'
+      required:
+        - patientProfileId
+        - fullName
+        - insurers
+        - messaging
+    InsurerPatientListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsurerPatientListItemDto'
+        total:
+          type: number
+        limit:
+          type: number
+        nextCursor:
+          type: string
+          nullable: true
+      required:
+        - items
+        - total
+        - limit
+        - nextCursor
+    InsurerPatientOptionsDto:
+      type: object
+      properties:
+        insurers:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsurerPatientCarrierDto'
+      required:
+        - insurers
+    InsurerPatientConversationDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          enum:
+            - internal
+      required:
+        - patientProfileId
+        - channel
+    InsurerPatientConversationResponseDto:
+      type: object
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+      required:
+        - conversationId
   responses:
     BadRequest:
       description: La solicitud no cumple el contrato de entrada.

@@ -1,0 +1,8 @@
+BASELINE_EQUAL origin/test /public/profiles/o/{slug}/services; security field absent in inherited GET operation
+BASELINE_EQUAL origin/test /public/profiles/f/{slug}/products; security field absent in inherited GET operation
+LINT_BASELINE git diff --exit-code origin/test -- five failing files: EXIT_CODE=0; stdout empty
+src/common/seed/audio-assets-seed.service.ts
+src/modules/insurance/services/claims.service.ts
+src/modules/scheduling/services/scheduling-bookings.service.ts
+src/modules/scheduling/services/scheduling-delay.service.ts
+src/modules/scheduling/services/scheduling-waitlist.service.ts

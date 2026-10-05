@@ -6,7 +6,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiPreconditionFailedResponse,
+  ApiUnprocessableEntityResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { PlatformTenantOptional } from '../../../common/tenant/platform-tenant-optional.decorator';
@@ -52,6 +52,8 @@ export class InsurerPatientsController {
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Aseguradoras disponibles en el alcance autorizado',
+    description:
+      'Devuelve nombres e identificadores de aseguradoras activas dentro del alcance autorizado del actor.',
   })
   @ApiOkResponse({ type: InsurerPatientOptionsDto })
   @ApiForbiddenResponse({ description: 'Sin acceso al directorio.' })
@@ -67,6 +69,8 @@ export class InsurerPatientsController {
   @ApiOperation({
     summary:
       'Abrir o reutilizar la conversación interna con un paciente autorizado',
+    description:
+      'Revalida cobertura y membresia vigentes, resuelve perfiles internos y devuelve el identificador de una conversacion nueva o existente.',
   })
   @ApiOkResponse({ type: InsurerPatientConversationResponseDto })
   @ApiBadRequestResponse({ description: 'Paciente o canal inválido.' })
@@ -74,7 +78,7 @@ export class InsurerPatientsController {
   @ApiNotFoundResponse({
     description: 'Paciente fuera del alcance autorizado.',
   })
-  @ApiPreconditionFailedResponse({
+  @ApiUnprocessableEntityResponse({
     description: 'Perfiles no disponibles para mensajería o bloqueados.',
   })
   openConversation(

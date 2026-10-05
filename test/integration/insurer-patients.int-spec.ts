@@ -2,6 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { CONCEPTS, TokenService, createdBy } from '../../src/common';
+import { DIR } from '../../src/modules/directory/directory.concepts';
 import { COMM } from '../../src/modules/community/community.concepts';
 import { PublicProfiles } from '../../src/modules/community/entities';
 import { INS } from '../../src/modules/insurance/insurance.concepts';
@@ -74,6 +75,7 @@ describe('insurer-patients directory integration', () => {
       const product = await http()
         .post(`/insurance-carriers/${carrier.id}/products`)
         .set('Authorization', `Bearer ${ctx.adminToken}`)
+        .set('X-Tenant-Id', org.body.tenantId)
         .send({
           productCode: `DIR_${label}_${suffix}`,
           name: `Producto ${label}`,
@@ -82,6 +84,7 @@ describe('insurer-patients directory integration', () => {
       const plan = await http()
         .post(`/insurance-products/${product.body.id}/plans`)
         .set('Authorization', `Bearer ${ctx.adminToken}`)
+        .set('X-Tenant-Id', org.body.tenantId)
         .send({
           planCode: `DIR_${label}_${suffix}`,
           name: `Plan ${label}`,
@@ -247,6 +250,15 @@ describe('insurer-patients directory integration', () => {
     expect(second.body.total).toBe(12);
     expect(second.body.items).toHaveLength(2);
     expect(second.body.nextCursor).toBeNull();
+    for (const limit of [25, 50]) {
+      const page = await http()
+        .post('/insurance/patients/search')
+        .set(auth())
+        .send({ search: marker, limit })
+        .expect(200);
+      expect(page.body).toMatchObject({ total: 12, limit, nextCursor: null });
+      expect(page.body.items).toHaveLength(12);
+    }
     const rows = [...first.body.items, ...second.body.items];
     expect(new Set(rows.map((row) => row.patientProfileId)).size).toBe(12);
     expect(
@@ -258,6 +270,8 @@ describe('insurer-patients directory integration', () => {
       ),
     ).toBe(true);
     for (const row of rows) {
+      expect(row.birthDate).toBe('1990-01-01');
+      expect(row.messaging.channel).toBe('internal');
       expect(Object.keys(row).sort()).toEqual(
         [
           'age',
@@ -300,6 +314,64 @@ describe('insurer-patients directory integration', () => {
     expect(
       options.body.insurers.map((insurer: { id: string }) => insurer.id),
     ).toEqual([organizations[0].carrierId]);
+  });
+
+  it('authorizes a staff INSURANCE_OPERATOR only in its assigned insurer scope', async () => {
+    const owner = organizations[0];
+    const { sid } = JSON.parse(
+      Buffer.from(owner.token.split('.')[1], 'base64url').toString('utf8'),
+    ) as { sid: string };
+    const sign = (tenantId: string) =>
+      ctx.app
+        .get(TokenService)
+        .signAccessToken(
+          owner.ownerId,
+          sid,
+          ['USER', 'INSURANCE_OPERATOR'],
+          [owner.tenantId],
+          { scopedRoles: { [tenantId]: ['INSURANCE_OPERATOR'] } },
+        );
+    await ctx.orm.em
+      .getConnection()
+      .execute(
+        'update directory.tenant_memberships set tenant_role_concept_id = ? where user_id = ? and tenant_id = ?',
+        [DIR.ROLE_STAFF, owner.ownerId, owner.tenantId],
+      );
+    try {
+      const token = sign(owner.tenantId);
+      const page = await http()
+        .post('/insurance/patients/search')
+        .set({
+          Authorization: `Bearer ${token}`,
+          'X-Tenant-Id': owner.tenantId,
+        })
+        .send({ search: marker })
+        .expect(200);
+      expect(page.body.total).toBe(12);
+      await http()
+        .post('/insurance/patients/conversation')
+        .set({
+          Authorization: `Bearer ${token}`,
+          'X-Tenant-Id': owner.tenantId,
+        })
+        .send({ patientProfileId: patients[12], channel: 'internal' })
+        .expect(404);
+      await http()
+        .post('/insurance/patients/search')
+        .set({
+          Authorization: `Bearer ${sign(organizations[1].tenantId)}`,
+          'X-Tenant-Id': owner.tenantId,
+        })
+        .send({ search: marker })
+        .expect(403);
+    } finally {
+      await ctx.orm.em
+        .getConnection()
+        .execute(
+          'update directory.tenant_memberships set tenant_role_concept_id = ? where user_id = ? and tenant_id = ?',
+          [DIR.ROLE_OWNER, owner.ownerId, owner.tenantId],
+        );
+    }
   });
 
   it('allows platform administrators to find uninsured patients with combined filters', async () => {
@@ -347,7 +419,7 @@ describe('insurer-patients directory integration', () => {
       { limit: 500 },
       { birthDateFrom: '2000-01-01', birthDateTo: '1990-01-01' },
       { birthDateFrom: '1990-01-01T00:00:00Z' },
-      { tenantId: organizations[1].tenantId },
+      { documentNumber: 'synthetic-forbidden-extra' },
     ]) {
       await http()
         .post('/insurance/patients/search')
@@ -355,6 +427,12 @@ describe('insurer-patients directory integration', () => {
         .send(body)
         .expect(400);
     }
+    // Tenant middleware rejects cross-tenant ownership before the DTO pipe runs.
+    await http()
+      .post('/insurance/patients/search')
+      .set(auth())
+      .send({ tenantId: organizations[1].tenantId })
+      .expect(403);
     await http().get('/insurance/patients').set(auth()).expect(404);
   });
 

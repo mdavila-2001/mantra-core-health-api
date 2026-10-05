@@ -1,0 +1,7 @@
+Raw complete log preserved in ignored node_modules/.cache/directory-qa/integration-core-rechecked-raw.txt.
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        39.506 s, estimated 47 s
+Ran all test suites matching insurer-patients.
+EXIT_CODE=0
