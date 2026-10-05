@@ -59,7 +59,7 @@ agente o país enviados en el DTO, y un revisor humano puede enviar un
 conflicto del índice en vez de recuperar la corrida ganadora.
 
 El detalle, los planes de corrección y las matrices de cuatro casos están en el
-[informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/health_context.md).
+[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_context.md).
 
 ## Pruebas
 

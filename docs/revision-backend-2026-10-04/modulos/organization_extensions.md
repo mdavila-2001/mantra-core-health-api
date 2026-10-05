@@ -14,14 +14,14 @@
 
 Los controladores limitan la ruta a `SECURITY_ADMIN`, pero los servicios cargan
 hospital, licencia y afiliación únicamente por UUID. `activate` y
-`addServiceLine` usan `findById(id)` ([orgext-hospitals.service.ts](../../../src/modules/organization_extensions/services/orgext-hospitals.service.ts#L118-L230));
-`verify` usa una búsqueda equivalente de licencia ([orgext-facility-licenses.service.ts](../../../src/modules/organization_extensions/services/orgext-facility-licenses.service.ts#L98-L132));
+`addServiceLine` usan `findById(id)` ([orgext-hospitals.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/services/orgext-hospitals.service.ts#L118-L230));
+`verify` usa una búsqueda equivalente de licencia ([orgext-facility-licenses.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/services/orgext-facility-licenses.service.ts#L98-L132));
 y `terminate` hace lo mismo con afiliación
-([orgext-affiliations.service.ts](../../../src/modules/organization_extensions/services/orgext-affiliations.service.ts#L137-L170)).
+([orgext-affiliations.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/services/orgext-affiliations.service.ts#L137-L170)).
 Los repositorios aplican `{ id }`, sin tenant
-([hospitals.repository.ts](../../../src/modules/organization_extensions/repositories/hospitals.repository.ts#L60-L78),
-[facility-licenses.repository.ts](../../../src/modules/organization_extensions/repositories/facility-licenses.repository.ts#L64-L83),
-[organization-affiliations.repository.ts](../../../src/modules/organization_extensions/repositories/organization-affiliations.repository.ts#L61-L82)).
+([hospitals.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/repositories/hospitals.repository.ts#L60-L78),
+[facility-licenses.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/repositories/facility-licenses.repository.ts#L64-L83),
+[organization-affiliations.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/repositories/organization-affiliations.repository.ts#L61-L82)).
 
 El interceptor de tenant contrasta los IDs declarados en cuerpo/query, pero no
 puede derivar el tenant propietario de un UUID de ruta. Como RLS es opt-in en la

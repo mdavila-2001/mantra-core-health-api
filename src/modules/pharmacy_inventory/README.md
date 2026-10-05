@@ -56,7 +56,7 @@ farmacia, sede, ubicación, lote y producto.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
 documenta que los comandos administrativos aceptan relaciones de inventario sin
 alcance de tenant y que los asientos de conteo/recall usan IDs de sede o ubicación
 como farmacia. Deben corregirse y validarse sobre PostgreSQL con FK activas antes

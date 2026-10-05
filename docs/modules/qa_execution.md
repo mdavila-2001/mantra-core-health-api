@@ -18,7 +18,7 @@
 El laboratorio (módulo 36) define suites, casos y aserciones y guarda la evidencia; este módulo
 decide **qué se llama, contra qué destino, con qué límites y con qué aprobación**, y lo ejecuta
 desde el worker `qa_lab`. El navegador pide, aprueba y observa; no ejecuta. Decisiones en
-[ADR-0025](../../../docs/adr/ADR-0025-qa-runner-en-servidor.md).
+[ADR-0025](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/adr/ADR-0025-qa-runner-en-servidor.md).
 
 ## Endpoints
 
@@ -59,3 +59,13 @@ Dominio (`domain/*.spec.ts`: guarda SSRF con IPv4/IPv6/mapeadas/encoding, plan, 
 cliente HTTP contra un servidor local real, autorización por handler, y
 `test/integration/qa-execution.int-spec.ts` de extremo a extremo.
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó las barreras de destino, SSRF, límites y
+segregación de aprobación en el alcance estático revisado. El informe con la
+matriz de regresión está en
+[`docs/revision-backend-2026-10-04/modulos/qa_execution.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_execution.md).
+
+```bash
+corepack yarn test src/modules/qa_execution --runInBand --silent
+```

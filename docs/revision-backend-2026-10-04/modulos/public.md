@@ -12,11 +12,11 @@ en vez de propagar filas completas.
 - `GET /public/profiles/f/:slug/products`
 
 El repositorio resuelve sólo perfiles activos y visibles
-([public-catalog.repository.ts](../../../src/modules/public/repositories/public-catalog.repository.ts#L70-L93)),
+([public-catalog.repository.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/public/repositories/public-catalog.repository.ts#L70-L93)),
 oculta el tipo real tras el mismo 404
-([public-catalog.service.ts](../../../src/modules/public/services/public-catalog.service.ts#L138-L150))
+([public-catalog.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/public/services/public-catalog.service.ts#L138-L150))
 y emplea parámetros para slug, tenant y cursor. Las lecturas tienen keyset y un
-tope HTTP de 50 elementos ([public-catalog.dto.ts](../../../src/modules/public/dto/public-catalog.dto.ts#L10-L46)).
+tope HTTP de 50 elementos ([public-catalog.dto.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/public/dto/public-catalog.dto.ts#L10-L46)).
 
 ## Pruebas ejecutadas
 

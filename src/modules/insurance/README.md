@@ -10,7 +10,7 @@ del plan médico, `MED-E13..E16`). El contrato canónico —actores, vocabulario
 de importes, exclusiones formales, ciclo del reclamo e inmutabilidad,
 elegibilidad y calendario del lote, idempotencia, reversión y contención
 financiera— vive en
-[`docs/contracts/insurer-practitioner-settlement-batches.md`](../../../docs/contracts/insurer-practitioner-settlement-batches.md).
+[`docs/contracts/insurer-practitioner-settlement-batches.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/contracts/insurer-practitioner-settlement-batches.md).
 
 `GET /insurance-claims/:id` expone el desglose conciliado
 (`ClaimDetailDto.settlement`, `ClaimSettlementBreakdownDto`) construido por
@@ -148,7 +148,7 @@ Proceso 4 del cliente, «MODULO DE PROMOCIONES» (Tarea 4 · M-06): la asegurado
 publica campañas de prevención junto a importadoras, fabricantes y laboratorios,
 y el afiliado las ve en su portal. El contrato —actores, decisión D4, estados,
 errores, qué ve el afiliado y los desvíos— vive en
-[`docs/contracts/insurer-preventive-campaigns.md`](../../../docs/contracts/insurer-preventive-campaigns.md).
+[`docs/contracts/insurer-preventive-campaigns.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/contracts/insurer-preventive-campaigns.md).
 
 Cinco rutas bajo `/insurance-campaigns`, todas con `@Roles()` vacío: la
 autorización la resuelve `InsuranceCampaignsService` por membresía en el tenant
@@ -239,7 +239,7 @@ Reglas que no se deducen del código:
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/insurance.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/insurance.md)
 identificó pendientes en el camino legacy de reclamos, conciliación, roles de
 lectura, cálculo de varianza y límites de lotes. La corrida dirigida actual
 deja 37 suites y 626 tests pasando, con un test rojo que espera una matriz de

@@ -22,19 +22,19 @@ este módulo tampoco consumen el contexto con `requireTenantId()`.
 
 Los repositorios de curso, cohorte, inscripción, intento y certificado hacen
 `findOne` por `id`, incluidos los métodos con bloqueo, sin `tenantId` ni join al
-curso ([`education-catalog.repository.ts`](../../../src/modules/education/repositories/education-catalog.repository.ts#L182-L210),
-[`…L648-L656`](../../../src/modules/education/repositories/education-catalog.repository.ts#L648-L656),
-[`education-learning.repository.ts`](../../../src/modules/education/repositories/education-learning.repository.ts#L145-L165),
-[`…L314-L322`](../../../src/modules/education/repositories/education-learning.repository.ts#L314-L322),
-[`…L391-L413`](../../../src/modules/education/repositories/education-learning.repository.ts#L391-L413)). Las operaciones de catálogo usan esos objetos directamente para versionar, asignar instructores, abrir cohortes y diseñar evaluaciones ([`education-catalog.service.ts`](../../../src/modules/education/services/education-catalog.service.ts#L224-L266),
-[`…L284-L347`](../../../src/modules/education/services/education-catalog.service.ts#L284-L347),
-[`…L373-L417`](../../../src/modules/education/services/education-catalog.service.ts#L373-L417)). El recorrido del alumno repite el patrón al modificar inscripciones, intentos y certificados ([`education-learning.service.ts`](../../../src/modules/education/services/education-learning.service.ts#L231-L279),
-[`…L406-L475`](../../../src/modules/education/services/education-learning.service.ts#L406-L475),
-[`…L491-L560`](../../../src/modules/education/services/education-learning.service.ts#L491-L560),
-[`…L770-L815`](../../../src/modules/education/services/education-learning.service.ts#L770-L815)).
+curso ([`education-catalog.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-catalog.repository.ts#L182-L210),
+[`…L648-L656`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-catalog.repository.ts#L648-L656),
+[`education-learning.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-learning.repository.ts#L145-L165),
+[`…L314-L322`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-learning.repository.ts#L314-L322),
+[`…L391-L413`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-learning.repository.ts#L391-L413)). Las operaciones de catálogo usan esos objetos directamente para versionar, asignar instructores, abrir cohortes y diseñar evaluaciones ([`education-catalog.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-catalog.service.ts#L224-L266),
+[`…L284-L347`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-catalog.service.ts#L284-L347),
+[`…L373-L417`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-catalog.service.ts#L373-L417)). El recorrido del alumno repite el patrón al modificar inscripciones, intentos y certificados ([`education-learning.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L231-L279),
+[`…L406-L475`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L406-L475),
+[`…L491-L560`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L491-L560),
+[`…L770-L815`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L770-L815)).
 
 El `TenantContextInterceptor` sólo rechaza un `tenantId` explícito distinto del
-contexto ([`tenant-context.interceptor.ts`](../../../src/common/tenant/tenant-context.interceptor.ts#L115-L129)); no inspecciona UUIDs de recursos. Las filas hijas de educación tampoco tienen columna de tenant (por ejemplo, inscripción y certificado), por lo que el aislamiento RLS, aun cuando se active, necesita una política por relación o una consulta que encadene al curso. Un administrador o autor con rol válido en tenant A puede elegir el UUID de un recurso del tenant B y mutarlo si la conexión no cuenta con esa política relacional.
+contexto ([`tenant-context.interceptor.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/tenant/tenant-context.interceptor.ts#L115-L129)); no inspecciona UUIDs de recursos. Las filas hijas de educación tampoco tienen columna de tenant (por ejemplo, inscripción y certificado), por lo que el aislamiento RLS, aun cuando se active, necesita una política por relación o una consulta que encadene al curso. Un administrador o autor con rol válido en tenant A puede elegir el UUID de un recurso del tenant B y mutarlo si la conexión no cuenta con esa política relacional.
 
 **Plan de corrección:** crear lectores `find…InTenant` que exijan
 `requireTenantId()` y unan cada agregado al curso (`courses.tenant_id`), usarlos
@@ -56,19 +56,19 @@ Las rutas de alumno aceptan cualquier `learnerRefId`, `enrollmentId` o
 `attemptId`: `POST /enrollments` permite a `LEARNER` crear una inscripción con el
 `learnerRefId` del cuerpo, y las rutas de progreso, intento, entrega y
 finalización aceptan el identificador de ruta o cuerpo sin comprobación de
-propiedad ([`education.controller.ts`](../../../src/modules/education/controllers/education.controller.ts#L109-L124),
-[`…L126-L215`](../../../src/modules/education/controllers/education.controller.ts#L126-L215)).
-`enrollLearner` persiste el identificador recibido ([`education-learning.service.ts`](../../../src/modules/education/services/education-learning.service.ts#L117-L201)); `recordProgress`, `startAttempt`, `submitAttempt` y `completeEnrollment` sólo comprueban estados y relaciones entre curso/evaluación, nunca que el `learnerRefId` sea el sujeto autenticado ([`education-learning.service.ts`](../../../src/modules/education/services/education-learning.service.ts#L231-L279),
-[`…L309-L389`](../../../src/modules/education/services/education-learning.service.ts#L309-L389),
-[`…L406-L475`](../../../src/modules/education/services/education-learning.service.ts#L406-L475),
-[`…L491-L560`](../../../src/modules/education/services/education-learning.service.ts#L491-L560)).
+propiedad ([`education.controller.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/controllers/education.controller.ts#L109-L124),
+[`…L126-L215`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/controllers/education.controller.ts#L126-L215)).
+`enrollLearner` persiste el identificador recibido ([`education-learning.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L117-L201)); `recordProgress`, `startAttempt`, `submitAttempt` y `completeEnrollment` sólo comprueban estados y relaciones entre curso/evaluación, nunca que el `learnerRefId` sea el sujeto autenticado ([`education-learning.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L231-L279),
+[`…L309-L389`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L309-L389),
+[`…L406-L475`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L406-L475),
+[`…L491-L560`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L491-L560)).
 
 Un usuario con el rol global o de tenant `LEARNER` que conozca identificadores
 puede inscribir a otro perfil y avanzar, entregar o completar su curso. La
 finalización deja la inscripción apta para emisión de certificado, que un worker
 o administrador podría emitir después. Las pruebas construyen un actor con sólo
 `id` y roles y no cubren la identidad del aprendiz ni el intento ajeno
-([`education-learning.service.spec.ts`](../../../src/modules/education/services/education-learning.service.spec.ts#L19-L19)).
+([`education-learning.service.spec.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.spec.ts#L19-L19)).
 
 **Plan de corrección:** definir el mapeo permitido entre `AuthenticatedUser` y
 `learnerRefId` (perfil de paciente, profesional o usuario) y resolverlo en el
@@ -89,8 +89,8 @@ cuerpo para un actor `LEARNER`.
 Al registrar progreso se carga la inscripción por UUID y la lección por UUID de
 forma independiente; tras verificar que ambas existen se inserta la fila, sin
 confirmar que la lección pertenezca al curso de la inscripción
-([`education-learning.service.ts`](../../../src/modules/education/services/education-learning.service.ts#L231-L274),
-[`education-catalog.repository.ts`](../../../src/modules/education/repositories/education-catalog.repository.ts#L350-L359)). El recálculo posterior cuenta sólo las lecciones que salen de los módulos del curso de la inscripción ([`education-learning.service.ts`](../../../src/modules/education/services/education-learning.service.ts#L842-L870)).
+([`education-learning.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L231-L274),
+[`education-catalog.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/repositories/education-catalog.repository.ts#L350-L359)). El recálculo posterior cuenta sólo las lecciones que salen de los módulos del curso de la inscripción ([`education-learning.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/education/services/education-learning.service.ts#L842-L870)).
 
 Así, una llamada válida puede guardar en el log una lección ajena que nunca suma
 al porcentaje. Esa evidencia de aprendizaje contradice al agregado y complica

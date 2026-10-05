@@ -13,7 +13,7 @@ balancea, lanza `PreconditionFailedException` → **HTTP 422**, sin persistir na
 (todo dentro de una única `em.transactional`). Los importes se comparan en
 centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante. La
 conversión de entrada sigue pasando por `Number`; los límites de precisión y de
-alcance por práctica están documentados en la [revisión backend](../../../docs/revision-backend-2026-10-04/modulos/accounting.md).
+alcance por práctica están documentados en la [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md).
 
 ## Endpoints (UC-16-01..14)
 
@@ -135,7 +135,7 @@ secretos ni PHI.
 
 ## Límites conocidos
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/accounting.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md)
 registra pendiente la validación de práctica/tenant y de recursos relacionados
 en writes, la clave de número de asiento, la aritmética decimal exacta y los
 topes de lotes. Las pruebas unitarias no sustituyen integración con PostgreSQL,

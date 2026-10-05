@@ -10,11 +10,11 @@ y ejecución.
 
 | Barrera | Evidencia |
 | --- | --- |
-| Configurar destinos | Sólo `QA_ADMIN` o `SECURITY_ADMIN` puede cambiar un destino ([qa-execution.controller.ts](../../../src/modules/qa_execution/controllers/qa-execution.controller.ts#L67-L79)); producción no admite mutaciones ([qa-execution.service.ts](../../../src/modules/qa_execution/services/qa-execution.service.ts#L130-L191)). |
-| Evitar SSRF | El destino se limita a esquema, host, puerto y prefijos aprobados; el cliente clasifica DNS y no sigue redirecciones ([target-guard.ts](../../../src/modules/qa_execution/domain/target-guard.ts#L39-L113)). |
-| Segregación | El solicitante no puede aprobar su propio hash y la aprobación se bloquea con el plan desactualizado ([qa-execution.service.ts](../../../src/modules/qa_execution/services/qa-execution.service.ts#L411-L477)). |
-| Ejecución | `run-next` exige identidad `SYSTEM`; el plan persiste límites y evidencia antes de ejecutar ([qa-execution.controller.ts](../../../src/modules/qa_execution/controllers/qa-execution.controller.ts#L160-L171)). |
-| Lecturas | Listados con límite máximo de 100 y eventos del detalle con límite de 1.000 ([qa-execution.service.ts](../../../src/modules/qa_execution/services/qa-execution.service.ts#L509-L582)). |
+| Configurar destinos | Sólo `QA_ADMIN` o `SECURITY_ADMIN` puede cambiar un destino ([qa-execution.controller.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/controllers/qa-execution.controller.ts#L67-L79)); producción no admite mutaciones ([qa-execution.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/services/qa-execution.service.ts#L130-L191)). |
+| Evitar SSRF | El destino se limita a esquema, host, puerto y prefijos aprobados; el cliente clasifica DNS y no sigue redirecciones ([target-guard.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/domain/target-guard.ts#L39-L113)). |
+| Segregación | El solicitante no puede aprobar su propio hash y la aprobación se bloquea con el plan desactualizado ([qa-execution.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/services/qa-execution.service.ts#L411-L477)). |
+| Ejecución | `run-next` exige identidad `SYSTEM`; el plan persiste límites y evidencia antes de ejecutar ([qa-execution.controller.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/controllers/qa-execution.controller.ts#L160-L171)). |
+| Lecturas | Listados con límite máximo de 100 y eventos del detalle con límite de 1.000 ([qa-execution.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/services/qa-execution.service.ts#L509-L582)). |
 
 ## Pruebas ejecutadas
 

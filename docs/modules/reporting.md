@@ -108,7 +108,8 @@ parámetros de ejecución ni direcciones de destinatarios.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=reporting` — 58 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/reporting --runInBand --silent` — 3 suites y 68 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -128,3 +129,7 @@ parámetros de ejecución ni direcciones de destinatarios.
 - **Outbox**: `ReportPublished`, `ExecutionQueued`, `ReportDistributed` se emitirán cuando exista el
   módulo 35.
 
+## Revisión ALOVIDA
+
+Las rutas por UUID aún no comparan el tenant activo con definición, ejecución o programación;
+ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/reporting.md).

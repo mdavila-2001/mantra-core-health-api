@@ -78,4 +78,4 @@ sincronización monótonos y evidencia firmada de entrega de webhooks.
 ## Revisión ALOVIDA
 
 Los recursos resueltos por UUID aún no se comparan contra el tenant activo; ver
-[el informe](../../../docs/revision-backend-2026-10-04/modulos/integration_contracts.md).
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integration_contracts.md).

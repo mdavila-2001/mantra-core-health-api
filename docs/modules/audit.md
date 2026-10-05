@@ -58,7 +58,8 @@ acceso de tercero gobernado.
   `row_version`.
 - **Cadena hash** (`audit_log`): cada fila enlaza con la anterior de su partición de
   tenant (`previous_hash`) y sella `record_hash = H(previous_hash || contenido ||
-  recorded_at)`. La verificación recomputa y coteja los eslabones.
+  recorded_at)`. La verificación tiene una limitación documentada para cadenas que
+  superan su corte de lectura; ver [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/audit.md).
 - FKs planas uuid: MikroORM no ordena inserts → `await tx.flush()` entre padre e
   hijo (p. ej. `dsar_requests` antes de su gobernanza/provenance). `em.create(...,
   { partial: true })` en todos los inserts.
@@ -78,6 +79,6 @@ Pino estructurado por operación (`audit.event.record`, `audit.integrity.verify`
 ## Tests
 
 - Unit: `services/*.service.spec.ts` (mockean repos/`em`) y `controllers/*.controller.spec.ts`
-  (mockean servicios). `jest src/modules/audit` verde.
+  (mockean servicios). `corepack yarn test src/modules/audit --runInBand --silent`:
+  8 suites y 38 pruebas aprobadas durante la revisión.
 - Smoke transversal: `test/smoke/modules/audit.smoke.ts` (`AUDIT_SMOKE`).
-

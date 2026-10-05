@@ -13,79 +13,64 @@
 
 ---
 
-# Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support
+# `clinical_ext` — coordinación y soporte clínico
 
-Coordinación de cuidado, decisión clínica (CDS), alertas, interacciones
-medicamentosas, plantillas de órdenes, referencias, brechas de cuidado /
-inmunizaciones y telesalud. Sigue la forma de los módulos de referencia
-(`iam`, `common`, `terminology`): servicios que poseen la transacción
-(`em.transactional`), repositorios stateless (reciben el `EntityManager`), FKs
-como columnas uuid planas (flush del padre antes de los hijos), auditoría con
-`createdBy`/`touch`, y `*_concept_id` tomados de `clinical_ext.concepts.ts`.
+El módulo implementa equipos de cuidado, reglas CDS, alertas, interacciones, plantillas de órdenes, referencias, brechas de cuidado, calendario de inmunización, encuentros virtuales y favoritos de prescripción. Tiene ocho controladores y **27 endpoints**. La [revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical_ext.md) documenta los hallazgos y las pruebas pendientes; este README describe el código de la rama actual.
 
-## Endpoints (UC → ruta)
+## Autenticación y autorización actuales
 
-| UC | Método y ruta | Descripción | Permiso |
-| --- | --- | --- | --- |
-| UC-18-01 | `POST /care-teams` | Crear equipo de cuidado con miembros | auth |
-| UC-18-02 | `PATCH /care-teams/{id}/members/{memberId}/set-responsible` | Transferir liderazgo | auth |
-| UC-18-03 | `POST /cds/evaluate` | Evaluar reglas CDS y generar alertas | auth |
-| UC-18-04 | `POST /cds/check-interactions` | Detectar interacciones medicamentosas | auth |
-| UC-18-05 | `PATCH /clinical-alerts/{id}/acknowledge` · `/override` | Reconocer / override de alerta | auth |
-| UC-18-06 | `POST /order-sets/{id}/apply` | Aplicar order set (fan-out) | auth |
-| UC-18-07 | `POST /referrals` | Emitir referencia | auth |
-| UC-18-08 | `PATCH /referrals/{id}/respond` | Aceptar / rechazar referencia inter-tenant | auth |
-| UC-18-09 | `POST /care-gaps/recompute` | Detectar y abrir brechas de cuidado | auth |
-| UC-18-10 | `PATCH /care-gaps/{id}/close` | Cerrar brecha por evento clínico | auth |
-| UC-18-11 | `POST /patients/{id}/immunization-plan/project` | Proyectar plan de inmunización y abrir brechas | auth |
-| UC-18-12 | `POST /virtual-encounters` · `PATCH /{id}/join` · `/end` | Telesalud: iniciar / unirse / finalizar | auth |
-| UC-18-13 | `POST /cds-rules/{id}/versions/publish` · `/rollback` | Publicar versión de regla CDS con rollback | `SECURITY_ADMIN` |
+`JwtAuthGuard` y `TenantScopeGuard` se aplican globalmente; ninguna ruta de esta unidad tiene `@Public`. Los roles de la tabla son los declarados con `@Roles`. `ClinicalRecordAccessGuard` sólo aparece en las dos rutas CDS indicadas. Un rol clínico, por sí mismo, no verifica la relación del actor con cada paciente. El servicio de encuentros virtuales sí comprueba participación en el encuentro, y favoritos deriva el perfil profesional de la cuenta mediante `ProfileOwnershipService`. Las brechas de autorización por recurso están detalladas en la revisión, en especial CE-01 y AUTHZ-T02.
 
-### Endpoints de soporte (datos de referencia / gobernanza)
+La columna «entrada» nombra el DTO de cuerpo cuando lo hay; `:id` y otros parámetros de ruta usan `ParseUUIDPipe`. Las respuestas son los DTO o entidades retornados por el controlador. En rutas con varios roles, se admite cualquiera de los indicados.
 
-| Método y ruta | Descripción | Permiso |
-| --- | --- | --- |
-| `POST /cds-rules` | Crear regla CDS en borrador (precondición de UC-18-13/03) | `SECURITY_ADMIN` |
-| `POST /drug-interactions` | Registrar par de interacción (alimenta UC-18-04) | `SECURITY_ADMIN` |
-| `POST /order-sets` | Crear plantilla de órdenes (precondición de UC-18-06) | `SECURITY_ADMIN` |
-| `POST /immunization-schedules` | Registrar dosis del calendario (alimenta UC-18-11) | `SECURITY_ADMIN` |
+| Método y ruta | Rol/guard local | Entrada | Respuesta |
+|---|---|---|---|
+| `POST /care-teams` | `CLINICIAN`, `PRACTITIONER` | `CreateCareTeamDto` | `CareTeamResponseDto` |
+| `PATCH /care-teams/:id/members/:memberId/set-responsible` | `CLINICIAN`, `PRACTITIONER` | — | `StatusResultDto` |
+| `GET /care-teams?patientProfileId=` | `CLINICIAN`, `PRACTITIONER` | query `patientProfileId` | `CareTeams[]` |
+| `POST /cds-rules` | `SECURITY_ADMIN` | `CreateCdsRuleDto` | `CdsRuleResponseDto` |
+| `POST /cds-rules/:id/versions/publish` | `SECURITY_ADMIN` | `PublishRuleVersionDto` | `CdsRuleResponseDto` |
+| `POST /cds-rules/:id/versions/rollback` | `SECURITY_ADMIN` | — | `CdsRuleResponseDto` |
+| `POST /cds/evaluate` | `CLINICIAN`, `PRACTITIONER` + `ClinicalRecordAccessGuard` | `EvaluateCdsDto` | `AlertBatchResponseDto` |
+| `POST /cds/check-interactions` | `CLINICIAN`, `PRACTITIONER` + `ClinicalRecordAccessGuard` | `CheckInteractionsDto` | `AlertBatchResponseDto` |
+| `POST /drug-interactions` | `SECURITY_ADMIN` | `CreateDrugInteractionDto` | `{ id }` |
+| `PATCH /clinical-alerts/:id/acknowledge` | `CLINICIAN`, `PRACTITIONER` | — | `ClinicalAlertResponseDto` |
+| `PATCH /clinical-alerts/:id/override` | `CLINICIAN`, `PRACTITIONER` | `OverrideAlertDto` | `ClinicalAlertResponseDto` |
+| `POST /order-sets` | `SECURITY_ADMIN` | `CreateOrderSetDto` | `OrderSetResponseDto` |
+| `POST /order-sets/:id/apply` | sólo guards globales | `ApplyOrderSetDto` | `ApplyOrderSetResponseDto` |
+| `POST /referrals` | `CLINICIAN`, `PRACTITIONER` | `CreateReferralDto` | `ReferralResponseDto` |
+| `PATCH /referrals/:id/respond` | `CLINICIAN`, `PRACTITIONER` | `RespondReferralDto` | `StatusResultDto` |
+| `GET /referrals?patientProfileId=` | `CLINICIAN`, `PRACTITIONER` | query `patientProfileId` | `Referrals[]` |
+| `GET /referrals/me` | `PATIENT` | — | `Referrals[]` |
+| `POST /care-gaps/recompute` | sólo guards globales | `RecomputeCareGapsDto` | `RecomputeCareGapsResponseDto` |
+| `PATCH /care-gaps/:id/close` | sólo guards globales | `CloseCareGapDto` | `StatusResultDto` |
+| `POST /patients/:id/immunization-plan/project` | sólo guards globales | `ProjectImmunizationPlanDto` | `ImmunizationPlanResponseDto` |
+| `POST /immunization-schedules` | `SECURITY_ADMIN` | `CreateImmunizationScheduleDto` | `{ id }` |
+| `POST /virtual-encounters` | `CLINICIAN`, `PRACTITIONER` | `CreateVirtualEncounterDto` | `VirtualEncounterResponseDto` |
+| `PATCH /virtual-encounters/:id/join` | `CLINICIAN`, `PRACTITIONER`, `PATIENT` | — | `VirtualEncounterResponseDto` |
+| `PATCH /virtual-encounters/:id/end` | `CLINICIAN`, `PRACTITIONER` | `EndVirtualEncounterDto` | `VirtualEncounterResponseDto` |
+| `GET /prescription-favorites` | perfil profesional propio en servicio | — | `PrescriptionFavoriteResponseDto[]` |
+| `POST /prescription-favorites` | perfil profesional propio en servicio | `CreatePrescriptionFavoriteDto` | `PrescriptionFavoriteResponseDto` |
+| `DELETE /prescription-favorites/:id` | perfil profesional propio en servicio | — | sin cuerpo |
 
-## Entidades (schema `clinical_ext`)
+## Persistencia y límites de transacción
 
-`care_teams`, `care_team_members`, `cds_rules`, `clinical_alerts`,
-`drug_interactions`, `order_sets`, `order_set_items`, `referrals`, `care_gaps`,
-`immunization_schedules`, `virtual_encounters`, `reference_ranges`.
+El schema `clinical_ext` contiene 13 tablas: `care_teams`, `care_team_members`, `cds_rules`, `clinical_alerts`, `drug_interactions`, `order_sets`, `order_set_items`, `referrals`, `care_gaps`, `immunization_schedules`, `virtual_encounters`, `reference_ranges` y `prescription_favorites`. El DDL versionado está en `database/SQL/18_clinical_ext`; las entidades están en `entities/`. Los servicios escriben mediante `EntityManager.transactional` y entregan el manager a repositorios sin estado. Las FK se representan como UUID planos. No se encontró publicación de evento/outbox dentro de los ocho servicios de esta unidad.
 
-## Reglas de negocio
+Las dependencias externas incluyen perfiles de paciente y profesional, `clinical.encounters`, `clinical.service_requests`, terminología y `ProfileOwnershipService`. La aplicación de order sets crea solicitudes clínicas; la autorización y la consistencia entre paciente y encuentro son pendientes documentados como AUTHZ-T02 en el informe transversal.
 
-- Equipo de cuidado: a lo sumo un miembro `is_responsible`; la transferencia limpia
-  el responsable previo y marca el nuevo (ambos deben estar activos).
-- Reglas CDS: código único; ciclo `draft → active → retired`; solo `active` es
-  evaluable; rollback solo desde `active`.
-- Alertas: `active → acknowledged | overridden`; el override de alta severidad
-  exige motivo (gobernanza).
-- Order set: aplicación atómica de los ítems seleccionados (default o explícitos);
-  el order set debe estar activo.
-- Referencia: unicidad (encuentro, destino, especialidad); respuesta solo desde
-  `requested`.
-- Brechas: upsert idempotente por (paciente, tipo, medida) con estado `open`;
-  cierre solo desde `open`. La proyección de inmunización abre una brecha por dosis
-  pendiente con `due_date = nacimiento + recommended_age_days`.
-- Telesalud: 1:1 con el encuentro; transiciones `scheduled → in-progress → completed`.
+## Semántica implementada
 
-## Cross-módulo
+- Equipo: la transferencia de responsable marca un miembro activo y desmarca el anterior.
+- CDS: `publish` incrementa `version` y reemplaza la lógica en la misma fila. El endpoint llamado `rollback` retira la regla activa; **no restaura** un snapshot previo. La evaluación usa reglas activas y puede generar alertas.
+- Alerta: `active` pasa a `acknowledged` u `overridden`; el override de severidad alta exige motivo.
+- Referencia: el servicio evita duplicados con una lectura previa; `respond` acepta o rechaza sólo desde `requested`. `GET /referrals/me` deriva el perfil de paciente de la cuenta.
+- Brecha: recomputo/proyección buscan una brecha abierta antes de insertar; cierre requiere estado abierto. La proyección calcula `dueDate` desde `birthDate` enviado por el cliente.
+- Encuentro virtual: creación para un encuentro, unión de participantes y finalización; el servicio verifica relación del actor con el encuentro.
+- Favorito: listado, creación y borrado vinculados al perfil profesional de la cuenta.
 
-`patient_profile_id`, `encounter_id`, `tenant_id`, `practitioner_profile_id`,
-`target_tenant_id`, etc. se reciben por DTO (el cliente aporta el id). El fan-out
-de `POST /order-sets/{id}/apply` deriva el plan de órdenes; el alta de las
-`clinical.service_requests` resultantes pertenece al módulo clínico.
+Las comprobaciones de duplicado mediante lectura previa carecen de índices únicos para brechas, referencias y encuentros virtuales en el DDL versionado. Esta y las demás limitaciones, con evidencia y plan, constan en la [revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical_ext.md).
 
-## Permisos, logs y tests
+## Pruebas y estado de revisión
 
-- Guard global de auth; endpoints de gobernanza / datos de referencia exigen
-  `@Roles('SECURITY_ADMIN')`. `@CurrentUser()` como actor; `ParseUUIDPipe` en params.
-- Logs Pino estructurados por operación (`clinical_ext.*`); sin secretos ni PHI.
-- Tests unitarios (`*.spec.ts`) con repos/EM mockeados: happy path, not-found,
-  conflicto y rechazos de regla de negocio. Smoke de integración transversal en
-  `test/smoke/modules/clinical_ext.smoke.ts` (export `CLINICAL_EXT_SMOKE`).
-
+Comando dirigido: `corepack yarn test src/modules/clinical_ext --runInBand --silent`. En la revisión del 2026-10-05 pasaron **15 suites y 88 tests**. Son pruebas unitarias con mocks; no verifican por sí solas RLS, permisos entre pacientes, esquema desplegado ni carreras en PostgreSQL. También existe `test/smoke/modules/clinical_ext.smoke.ts`, no ejecutado en esa revisión. El módulo aún no tiene un catálogo propio de `details.reason` estables para sus errores de dominio.

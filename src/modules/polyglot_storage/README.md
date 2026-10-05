@@ -164,7 +164,7 @@ delegación de los tres controladores).
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas y dejó registrada la brecha entre aprobar una colocación y aplicar la política sobre el motor físico. El informe está en [`docs/revision-backend-2026-10-04/modulos/polyglot_storage.md`](../../../docs/revision-backend-2026-10-04/modulos/polyglot_storage.md).
+La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas y dejó registrada la brecha entre aprobar una colocación y aplicar la política sobre el motor físico. El informe está en [`docs/revision-backend-2026-10-04/modulos/polyglot_storage.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/polyglot_storage.md).
 
 ```bash
 corepack yarn test src/modules/polyglot_storage --runInBand --silent

@@ -32,7 +32,7 @@ Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta re
 - **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
   validación explícita de que el encuentro pertenece al paciente antes de
   persistirlos. Esa validación no está completa todavía; ver la
-  [revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/chart.md).
+  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos

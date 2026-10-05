@@ -131,4 +131,4 @@ aprobadas durante la revisión.
 ## Revisión ALOVIDA
 
 Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
-[el informe](../../../docs/revision-backend-2026-10-04/modulos/qa_lab.md).
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_lab.md).

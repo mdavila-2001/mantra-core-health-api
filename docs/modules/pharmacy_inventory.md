@@ -59,3 +59,20 @@ misma moneda.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
 
+## Pruebas
+
+```bash
+corepack yarn test src/modules/pharmacy_inventory --runInBand --silent
+```
+
+La corrida dirigida de la revisión (2026-10-05) pasó 7 suites y 117 tests. Usa
+dobles de repositorio y no demuestra claves foráneas, tenant ni pertenencia entre
+farmacia, sede, ubicación, lote y producto.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
+documenta que los comandos administrativos aceptan relaciones de inventario sin
+alcance de tenant y que los asientos de conteo/recall usan IDs de sede o ubicación
+como farmacia. Deben corregirse y validarse sobre PostgreSQL con FK activas antes
+de considerar confiable el movimiento de stock.

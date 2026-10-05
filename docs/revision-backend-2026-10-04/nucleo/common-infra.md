@@ -31,7 +31,7 @@ No se revisó el dueño de cada archivo de negocio; es responsabilidad de los m�
 
 ### CIF-01 — Alta — Configuración S3 faltante produce `Error` genérico en la primera operación
 
-**Evidencia y veredicto.** El schema permite bucket vacío ([`storage.env.ts`](../../../src/common/storage/storage.env.ts#L18-L30)) y `S3FileStorageAdapter.assertConfigured` lanza `Error` si falta ([`s3-file-storage.adapter.ts`](../../../src/common/storage/s3-file-storage.adapter.ts#L308-L313)). El módulo selecciona el adaptador por entorno ([`file-storage.module.ts`](../../../src/common/storage/file-storage.module.ts#L14-L30)). Es correcto no operar sin bucket, pero la validación llega al primer uso y no tiene code/reason; un endpoint sólo deja un 500 saneado.
+**Evidencia y veredicto.** El schema permite bucket vacío ([`storage.env.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/storage/storage.env.ts#L18-L30)) y `S3FileStorageAdapter.assertConfigured` lanza `Error` si falta ([`s3-file-storage.adapter.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/storage/s3-file-storage.adapter.ts#L308-L313)). El módulo selecciona el adaptador por entorno ([`file-storage.module.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/storage/file-storage.module.ts#L14-L30)). Es correcto no operar sin bucket, pero la validación llega al primer uso y no tiene code/reason; un endpoint sólo deja un 500 saneado.
 
 **Plan.** 1. Hacer condicional el schema: adapter S3 exige bucket, endpoint y las credenciales del modo elegido. 2. Validar en bootstrap/fábrica. 3. Convertir falla operativa a error tipado seguro. 4. Añadir readiness de storage si el producto lo requiere. Riesgo: instalaciones IAM sin credencial estática; acordar modo explícito. Sin DDL.
 
@@ -44,7 +44,7 @@ No se revisó el dueño de cada archivo de negocio; es responsabilidad de los m�
 
 ### CIF-02 — Media — Respuestas S3 anómalas se relanzan como `Error`/driver sin clasificación
 
-**Evidencia y veredicto.** Una lectura con `Body` vacío construye `Error` y los demás errores no-404 se loguean y relanzan ([`s3-file-storage.adapter.ts`](../../../src/common/storage/s3-file-storage.adapter.ts#L218-L237)). Sólo 404 se vuelve `ResourceNotFoundException`. En cambio el delete responde `UNKNOWN`/`NOT_DELETED` ante incertidumbre ([líneas 274-305](../../../src/common/storage/s3-file-storage.adapter.ts#L274-L305)), por lo que se refuta que declare éxito de borrado incierto.
+**Evidencia y veredicto.** Una lectura con `Body` vacío construye `Error` y los demás errores no-404 se loguean y relanzan ([`s3-file-storage.adapter.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/storage/s3-file-storage.adapter.ts#L218-L237)). Sólo 404 se vuelve `ResourceNotFoundException`. En cambio el delete responde `UNKNOWN`/`NOT_DELETED` ante incertidumbre ([líneas 274-305](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/storage/s3-file-storage.adapter.ts#L274-L305)), por lo que se refuta que declare éxito de borrado incierto.
 
 **Impacto.** Caída, cuerpo truncado o timeout llegan como driver genérico. El filtro sanea pero no ofrece code/reason estable ni política de retry consistente.
 

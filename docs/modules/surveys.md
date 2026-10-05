@@ -9,7 +9,7 @@
 # Módulo `surveys`
 
 **Fuente:** [`src/modules/surveys/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/surveys/README.md)
-· 3 controllers · 3 services · 4 repositories · 7 entidades · 7 DTO
+· 3 controllers · 3 services · 4 repositories · 7 entidades · 10 DTO
 
 ---
 
@@ -72,16 +72,19 @@ por dominio propio.
 - **Solo responde quien tuvo atención completada.** La invitación se emite contra
   una `scheduling.appointment_bookings` en `BOOKING_COMPLETED`; sin invitación no
   hay forma de responder. Es la regla que ALOVIDA fija explícitamente.
-- **Emisión idempotente.** Único por `(reserva, versión)`, sostenido además por
-  índice en la base: cerrar dos veces la misma cita no reclama dos veces el mismo
-  cuestionario.
+- **Emisión secuencialmente idempotente.** El servicio detecta una invitación ya
+  emitida por `(reserva, versión)`, pero el DDL aún no impone la unicidad: dos
+  solicitudes concurrentes pueden duplicarla. Ver la revisión
+  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
 - **Ventana congelada al emitir.** `expires_at` se deriva de
   `response_window_days` en el momento de la emisión; cambiar el plazo después no
   mueve una ventana ya prometida.
 - **Envío único y atómico.** Todas las obligatorias o ninguna; una invitación
   respondida no admite un segundo envío.
-- **`value[x]` exclusivo**, igual que `forms.field_values`: una sola columna
-  `value_*` poblada por fila, con `CHECK` en la base.
+- **`value[x]` exclusivo en servicio**, igual que `forms.field_values`: el
+  servicio normaliza una única columna `value_*` por fila. Falta el `CHECK` de
+  respaldo en la base; ver
+  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
 - **Desactivar ≠ borrar.** Corta las emisiones nuevas; lo ya emitido sigue siendo
   contestable y lo ya respondido, legible.
 
@@ -97,8 +100,10 @@ Cómo se sostiene acá:
 1. **No existe la columna.** `survey_responses` no tiene ningún campo de
    visibilidad pública. No hay estado que alguien pueda fijar por error.
 2. **El paciente no se identifica por parámetro.** Las rutas `/surveys/me/*` no
-   aceptan `patientProfileId`: sale del claim `pid` de la sesión. Si se aceptara,
-   cualquiera podría pedir los cuestionarios de otro.
+   aceptan `patientProfileId`: sale del claim `pid` de la sesión. Este filtro no
+   incorpora todavía el tenant de la sesión, por lo que no aísla a un paciente
+   que atiende en más de una organización; ver
+   [`SURV-01`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-01--crítica--el-autoservicio-de-paciente-no-limita-invitaciones-al-tenant-activo).
 3. **La autorización de lectura es por dueño, no por rol.** Dos profesionales de
    la misma organización comparten roles y no comparten instrumentos; las
    respuestas se leen colgando de `GET /surveys/templates/:id/responses`, que
@@ -115,9 +120,11 @@ vistas de paciente de M41 scheduling.
 
 ## Tests
 
-- Unit: `services/*.service.spec.ts` — 42 casos sobre los tres servicios,
-  incluidos los de privacidad (invitación ajena, plantilla ajena, sesión sin
-  perfil) y los de validación de respuesta por tipo.
+- Unit: `corepack yarn test src/modules/surveys --runInBand --silent` — 3 suites
+  y 65 pruebas aprobadas el 2026-10-05. Cubre propiedad de plantilla,
+  invitación ajena, sesión sin perfil y validación por tipo; no cubre aislamiento
+  de tenant en autoservicio ni carreras de persistencia. Ver la
+  [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md).
 
 ## Notas de integración
 
@@ -155,4 +162,3 @@ ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero la decisión **D-13**
 de agregación: *«se puede modelar la encuesta sin el umbral, pero no se puede
 publicar ningún agregado sin él»*. El carril 10 ya lo acota a «si ya existe
 soporte». Se implementa cuando D-13 se resuelva.
-

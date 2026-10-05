@@ -3,7 +3,7 @@
 Qué tablas y columnas existen, **por qué existen**, qué representa una fila, quién responde por
 ellas, con qué evidencia y qué cambió. Separa los hechos técnicos observados en la base de la
 semántica curada por personas, que un escaneo nunca pisa. Decisiones en
-[ADR-0024](../../../docs/adr/ADR-0024-portal-admin-catalogo-de-datos.md).
+[ADR-0024](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/adr/ADR-0024-portal-admin-catalogo-de-datos.md).
 
 ## Endpoints
 
@@ -77,6 +77,6 @@ PUT sobre algo aprobado            ──> revisión N+1 en NEEDS_REVIEW; lo apr
 - Pruebas: dominio y autorización en `*.spec.ts`; PostgreSQL real en
   `test/integration/data-catalog.int-spec.ts` (opt-in `DATA_CATALOG_IT_DB_URL`).
 - Revisión ALOVIDA: las precondiciones de revisión no exponen siempre un `reason`
-  estable; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/data_catalog.md).
+  estable; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/data_catalog.md).
 - `corepack yarn test src/modules/data_catalog --runInBand --silent`: 4 suites y
   48 pruebas aprobadas durante la revisión.

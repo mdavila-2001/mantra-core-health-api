@@ -94,7 +94,7 @@ for (const name of modules) {
       (_m, rel) => `](${GITHUB_BASE}/src/modules/${name}/${rel})`,
     );
   };
-  readme = rewriteRelativeLinks(readme);
+  readme = rewriteRelativeLinks(readme).trimEnd();
 
   const mirrored = `<!--
   ESPEJO AUTOGENERADO — no editar este archivo directamente.

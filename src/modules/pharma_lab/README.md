@@ -28,4 +28,4 @@ Gestiona laboratorios farmacéuticos, personal y visitadores, agenda y registros
 
 ## Pruebas y revisión
 
-`corepack yarn test src/modules/pharma_lab --runInBand --silent` aprobó 10 suites y 120 pruebas. La guardia de alcance limita cada laboratorio a su personal activo, visitadores operativos o roles de red. Ver [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/pharma_lab.md).
+`corepack yarn test src/modules/pharma_lab --runInBand --silent` aprobó 10 suites y 120 pruebas. La guardia de alcance limita cada laboratorio a su personal activo, visitadores operativos o roles de red. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharma_lab.md).

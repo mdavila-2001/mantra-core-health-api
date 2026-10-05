@@ -86,7 +86,7 @@ rechazos de regla de negocio.
 La revisión de octubre de 2026 registró autorizaciones incompletas para cadenas
 de tenant, paciente y recurso diagnóstico, además de límites ausentes en algunos
 DTO. El detalle, correcciones y pruebas propuestas están en
-[`docs/revision-backend-2026-10-04/modulos/diagnostics.md`](../../../docs/revision-backend-2026-10-04/modulos/diagnostics.md).
+[`docs/revision-backend-2026-10-04/modulos/diagnostics.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/diagnostics.md).
 
 La ejecución dirigida actual fue:
 

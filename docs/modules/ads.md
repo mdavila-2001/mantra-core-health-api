@@ -141,7 +141,7 @@ de conversión, respuestas de leads ni identificadores de usuario.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=ads` — 99 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/ads --runInBand --silent` — 5 suites y 115 pruebas aprobadas durante la revisión. Falta integración que demuestre aislamiento multitenant en las cadenas de cuenta, datos y leads; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/ads.md).
 
 ## Pendiente
 
@@ -160,4 +160,3 @@ de conversión, respuestas de leads ni identificadores de usuario.
   plataforma.
 - **Localizaciones de producto**: `product_localizations` se poblará cuando el feed traiga
   variantes por idioma y país.
-

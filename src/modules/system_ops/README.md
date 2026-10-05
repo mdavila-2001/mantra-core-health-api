@@ -66,7 +66,7 @@ remediación y publicación de drafts genéricos.
   contadores en cero sin disponer filas de negocio; las asociaciones de assurance
   no validan aún que control, resultado y hallazgo pertenezcan a la misma
   evaluación; y la creación de bindings de residencia deja referencias inválidas
-  al manejo de FK. Véase el [informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/system_ops.md).
+  al manejo de FK. Véase el [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/system_ops.md).
 
 ## Permisos y auth
 

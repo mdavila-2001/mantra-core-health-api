@@ -16,8 +16,10 @@
 # Módulo Billing (17)
 
 Facturación al paciente (CxC), cuentas por pagar (CxP), contabilización a ledger,
-conciliación bancaria, morosidad, planes de pago y KPIs financieros. Implementa los
-12 casos de uso UC-17-01..12 del spec `casos_uso_17_billing.puml`.
+conciliación bancaria, morosidad, planes de pago y KPIs financieros. Expone los 12
+casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo. La
+[revisión de 2026-10-05](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/billing.md)
+documenta los límites de autorización, dinero e idempotencia.
 
 ## Endpoints (UC → ruta)
 
@@ -50,8 +52,10 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 
 - Totales de factura derivados de líneas (`base = cantidad*precio - descuento`,
   `total = subtotal + impuestos`); `balance = total - paid_total`.
-- Cobros/pagos: la suma asignada (más retención en CxP) no puede exceder el monto;
-  cada factura destino debe existir y tener saldo; estado → `PARTIALLY_PAID`/`PAID`.
+- Cobros/pagos: el código limita la suma asignada (más retención en CxP) contra el
+  monto y actualiza los saldos. Descuentos, signos y pertenencia de práctica todavía
+  requieren el endurecimiento registrado en el informe antes de considerarlos una
+  garantía contable completa.
 - Nota de crédito: crea factura de reverso (total negativo) y baja el saldo de la
   original; el reverso no puede exceder el saldo salvo `writeOff`.
 - Bills: vendor activo, sin doble captura de `bill_number`, three-way match (línea
@@ -62,7 +66,10 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 
 ## Permisos
 
-Todos los endpoints requieren rol `SECURITY_ADMIN` (`SUPERADMIN` es comodín).
+Las operaciones financieras requieren `SECURITY_ADMIN` (`SUPERADMIN` es comodín).
+El catálogo tiene lectura abierta y altas/ediciones con roles administrativos o
+clínicos, con comprobaciones específicas de práctica. El rol no sustituye la
+verificación de práctica/documento en los otros writes; ver BILL-01.
 
 ## Conceptos
 
@@ -78,6 +85,6 @@ etc.), inicio y éxito; rechazos de regla de negocio en `warn`/excepción. Sin P
 ## Tests
 
 - Unit: `services/*.service.spec.ts` (mockean repos/EM) y `controllers/*.controller.spec.ts`
-  (mockean servicios). `NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/billing`.
+  (mockean servicios). La pasada dirigida del 2026-10-05 ejecutó `corepack yarn test
+  src/modules/billing --runInBand --silent`: 16 suites y 94 tests pasan.
 - Smoke: `test/smoke/modules/billing.smoke.ts` (`BILLING_SMOKE`).
-

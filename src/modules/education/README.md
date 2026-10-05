@@ -91,7 +91,7 @@ El tenant de la petición se valida globalmente y los roles con alcance se eval�
 contra él. En el código actual, las mutaciones que reciben UUID no acotan el
 recurso al tenant ni anclan las operaciones `LEARNER` al perfil del sujeto;
 los hallazgos y el plan de cierre están en la
-[revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/education.md).
+[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/education.md).
 
 ## Concurrencia
 

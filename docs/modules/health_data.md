@@ -211,3 +211,10 @@ controladores).
 - **Proyecciones**: `read_models.*`, índices de `search_platform`, embeddings de `vector_rag`,
   aristas de `graph_intelligence` y las series de `time_series` los alimenta el outbox.
 
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_data.md)
+registra pendientes de alcance para `$everything`, ingesta y liberación de
+datos, más límites de arrays. La corrida dirigida ejecutó 7 suites y 98 tests
+verdes; no reemplaza pruebas con dos tenants, autorización por paciente ni
+consentimiento real.

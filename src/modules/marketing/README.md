@@ -106,7 +106,7 @@ El módulo expone roles de marketing y bloqueos de concurrencia, pero actualment
 en el cuerpo y carga recursos por UUID sin comprobar la pertenencia del actor. También hay
 desacuerdo entre la unicidad por tenant que usa el servicio y los índices globales de `code`, y la
 ruta pública de enlaces permite aportar el miembro al que atribuir un click. Véase el informe con
-evidencia y plan: [revisión de marketing](../../../docs/revision-backend-2026-10-04/modulos/marketing.md).
+evidencia y plan: [revisión de marketing](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/marketing.md).
 
 ## Pendiente
 

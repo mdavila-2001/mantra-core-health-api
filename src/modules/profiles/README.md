@@ -125,4 +125,4 @@ each operation. PHI (names, identifiers) is not logged.
 
 ## Tests
 
-`corepack yarn test src/modules/profiles --runInBand --silent` aprobó 29 suites y 535 pruebas durante la revisión (tres advertencias JSON preexistentes). La representación propia resuelve el sujeto desde la sesión; las rutas que aún emiten excepciones genéricas necesitan `reason` estable, según la [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/profiles.md). El smoke intermodular está en `test/smoke/modules/profiles.smoke.ts` (`PROFILES_SMOKE`).
+`corepack yarn test src/modules/profiles --runInBand --silent` aprobó 29 suites y 535 pruebas durante la revisión (tres advertencias JSON preexistentes). La representación propia resuelve el sujeto desde la sesión; las rutas que aún emiten excepciones genéricas necesitan `reason` estable, según la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/profiles.md). El smoke intermodular está en `test/smoke/modules/profiles.smoke.ts` (`PROFILES_SMOKE`).

@@ -69,3 +69,13 @@ catálogo de **toda** la instalación.
 Los números son orientativos: el resultado exacto depende de lo que ya haya en la
 base.
 
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó el alcance global, el guard de
+`SUPERADMIN`, la idempotencia delegada a los seeds y el tratamiento de cuentas de
+demostración. El informe está en
+[`docs/revision-backend-2026-10-04/modulos/content_packs.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/content_packs.md).
+
+```bash
+corepack yarn test src/modules/content_packs --runInBand --silent
+```

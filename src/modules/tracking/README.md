@@ -93,13 +93,13 @@ loguea qué se transporta ni datos del destinatario.
 
 ## Pruebas
 
-`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID; ver [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/tracking.md).
+`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
 
 ## Pendiente
 
 - **Firma del webhook**: la ruta es pública y hoy sólo valida que el código de transportista exista.
   La verificación de firma HMAC del proveedor debe impedir mutaciones antes del conector de integraciones;
-  el riesgo y la corrección propuesta están en la [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/tracking.md).
+  el riesgo y la corrección propuesta están en la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
 - **Geolocalización**: `location_ping_id` se acepta si llega, pero los pings viven en `geo` y los
   produce el módulo de localización. `tracked_subject_id` del envío se poblará con esa integración.
 - **Cálculo del ETA**: el módulo registra y aplica la estimación, pero no la calcula. El motor

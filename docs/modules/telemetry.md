@@ -13,30 +13,44 @@
 
 ---
 
-# src / modules / telemetry
+# Módulo Telemetry (28)
 
-Agrupa los componentes relacionados con **telemetry** y mantiene cohesionada esta responsabilidad del sistema.
+Telemetría de producto: consentimiento de tracking, esquemas de eventos, actividad,
+contexto de cliente, Core Web Vitals, journeys, conversiones y analítica administrativa.
+Persiste en el esquema PostgreSQL `telemetry`. Puede reenviar, después del commit y por
+mejor esfuerzo, eventos minimizados a un proveedor externo.
 
-## Contenido
+## Estructura
 
-### Subcarpetas
+- `controllers/`: rutas HTTP de gobernanza, consentimiento, ingesta y analítica.
+- `services/`: transacciones de dominio, gate de consentimiento y composición de lectura.
+- `repositories/`: persistencia MikroORM y consultas SQL agregadas.
+- `entities/`: tablas del esquema `telemetry`.
+- `domain/` e `infrastructure/`: puerto y adaptadores de analítica web.
+- `dto/`: contratos validados para cuerpos y consultas.
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`domain/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/domain/README.md): Contratos del dominio que no dependen de ningún proveedor concreto.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`infrastructure/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/infrastructure/README.md): Adaptadores que implementan los puertos del dominio y su selección por entorno.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+## Rutas
 
-### Archivos
+| Grupo | Método y ruta | Acceso declarado |
+| --- | --- | --- |
+| Gobernanza | `POST /telemetry/tracking-purposes`, `event-schemas`, `disclosure-versions`, `funnels` | `SECURITY_ADMIN` |
+| Consentimiento | `POST /telemetry/disclosure-acceptances`, `tracking-consents`; `POST /telemetry/tracking-consents/:id/withdraw` | JWT global |
+| Ingesta | `POST /telemetry/activity-events`, `client-contexts`, `web-vitals`, `conversion-events`; `POST /telemetry/session-journeys/:id/close` | JWT global |
+| Analítica | `GET /admin/analytics/{overview,timeseries,web-vitals,funnels,funnels/:id/report,pipeline-health}` | `PLATFORM_ADMIN`, `SECURITY_ADMIN`, `DATA_PLATFORM_ADMIN`, `MARKETING_MANAGER` o `DPO` |
+| Analítica de sesiones | `GET /admin/analytics/sessions`, `sessions/:id` | `PLATFORM_ADMIN`, `SECURITY_ADMIN` o `DPO` |
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `telemetry.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `telemetry.module.ts` | Composición de dependencias del módulo NestJS. |
-| `web-analytics.env.ts` | Configuración del reenvío a una analítica web externa (esquema Joi + lectura del entorno). |
-| `web-analytics.env.spec.ts` | Pruebas unitarias de la configuración y de sus validaciones de arranque. |
+## Persistencia y reglas actuales
+
+Las tablas principales son `tracking_purpose_definitions`,
+`activity_event_schema_definitions`, `tracking_consents`,
+`tracking_disclosure_acceptances`, `analytics_subjects`, `user_activity_events`,
+`session_journeys`, `client_contexts`, `web_vitals`, `funnel_definitions` y
+`conversion_events`.
+
+Los lotes de actividad (máximo 500) y de vitals (máximo 200) se procesan en
+transacción. La actividad usa clave de idempotencia cuando el cliente la aporta.
+La analítica administrativa limita las ventanas a 92 días y las sesiones a 100
+por página; el timeline se corta en 500 eventos y no devuelve valores de propiedades.
 
 ## Reenvío a analítica web externa
 
@@ -72,27 +86,15 @@ Variables (ver `.env.example`): `TELEMETRY_WEB_ANALYTICS_ENABLED`,
 `TELEMETRY_WEB_ANALYTICS_SITE_URL`, `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`,
 `GA4_DEBUG_VALIDATION`.
 
-## Criterios de mantenimiento
+## Pruebas
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+`corepack yarn test src/modules/telemetry --runInBand --silent` aprobó 14 suites y
+121 pruebas durante la revisión. Hay cobertura unitaria de controladores, servicios,
+ventanas, configuración y mapeo de GA4. Falta cobertura de integración para propiedad
+de consentimiento, referencias de ingesta y aislamiento de tenant.
 
-## Lectura para el portal administrativo (`/admin/analytics`)
+## Limitaciones conocidas
 
-Consultas de sólo lectura sobre lo que persiste la ingesta. Toda consulta tiene ventana
-(`from`/`to`, por defecto 7 días, máximo 92; por hora sólo hasta 7 días) y los agregados se
-calculan en la base: el portal no suma ni promedia.
-
-| Ruta | Qué devuelve |
-| --- | --- |
-| `GET overview` | Eventos, sesiones, sujetos seudónimos, vistas; top rutas y eventos; definición de cada conteo |
-| `GET timeseries` | Eventos y sesiones por cubo UTC, con cubos vacíos en 0 |
-| `GET web-vitals` | p50/p75/p95 por métrica con `percentile_cont` sobre las muestras (nunca promedio de percentiles), tamaño de muestra, ratings; `?metric=` añade p75 por ruta |
-| `GET funnels` · `funnels/:id/report` | Embudo por **sesión**, orden estricto, denominador explícito, 0/0 = null; conversiones confirmadas por servidor aparte |
-| `GET pipeline-health` | Aceptados, frescura, latencia de ingesta p50/p95, desfase de reloj, bots. Duplicados, descartes por consentimiento y rechazos se declaran **no medidos**: la ingesta no los persiste |
-| `GET sessions` · `sessions/:id` | Sesiones y su timeline, sin `session_id` ni sujeto, con nombres de propiedad pero **nunca sus valores**. Roles más restringidos que los agregados |
-
-Pruebas: `domain/analytics-window.spec.ts` y `test/integration/telemetry-analytics.int-spec.ts`
-(DDL canónico del módulo 28 y datos con resultado calculable a mano).
-
+La revisión ALOVIDA documenta problemas críticos de propiedad de consentimiento,
+referencias de ingesta, validación de propiedades y aislamiento de tenant en la
+[revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/telemetry.md).

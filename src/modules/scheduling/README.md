@@ -88,7 +88,7 @@ en una base real.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/scheduling.md)
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/scheduling.md)
 identifica que el listado por `resourceId` permite a un `PATIENT` obtener reservas ajenas sin
 validar actor, titularidad de agenda ni tenant. También quedan por acotar los lotes de reglas,
 slots y recordatorios. No se debe considerar el listado apto para datos clínicos hasta aplicar

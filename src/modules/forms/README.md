@@ -74,7 +74,7 @@ Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exig
 Aislamiento de instancias: la propiedad se ancla en el `clinical.encounter` que
 la instancia referencia (`resourceId`) y exige tenant del contexto. Falta aplicar
 la política clínica del paciente a las lecturas profesionales; ver la
-[revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/forms.md).
+[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/forms.md).
 Enmascarado deny-by-default: un campo con
 `field_value_access_rules` activa responde `masked: true` sin valor, porque la
 semántica de roles de la regla no es evaluable todavía (no existe puente

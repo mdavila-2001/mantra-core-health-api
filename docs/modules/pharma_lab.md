@@ -13,9 +13,9 @@
 
 ---
 
-# src / modules / pharma_lab
+# Módulo `pharma_lab`
 
-Agrupa los componentes relacionados con **pharma_lab** y mantiene cohesionada esta responsabilidad del sistema.
+Gestiona laboratorios farmacéuticos, personal y visitadores, agenda y registros de visita, catálogo de productos, farmacovigilancia, documentación regulatoria y analítica.
 
 ## Contenido
 
@@ -41,3 +41,6 @@ Agrupa los componentes relacionados con **pharma_lab** y mantiene cohesionada es
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
 
+## Pruebas y revisión
+
+`corepack yarn test src/modules/pharma_lab --runInBand --silent` aprobó 10 suites y 120 pruebas. La guardia de alcance limita cada laboratorio a su personal activo, visitadores operativos o roles de red. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharma_lab.md).

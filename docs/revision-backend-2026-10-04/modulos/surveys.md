@@ -17,26 +17,26 @@ materializa. `corepack yarn test src/modules/surveys --runInBand --silent` aprob
 `GET /surveys/me/invitations`, `GET /surveys/me/invitations/:id` y `POST
 /surveys/me/invitations/:id/responses` toman el paciente del claim, pero ninguno
 de los dos primeros obtiene el tenant de la petición
-([`surveys-responses.service.ts`](../../../src/modules/surveys/services/surveys-responses.service.ts#L67-L109)).
+([`surveys-responses.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-responses.service.ts#L67-L109)).
 La consulta de lista filtra sólo por `patientProfileId`
-([`surveys-responses.service.ts`](../../../src/modules/surveys/services/surveys-responses.service.ts#L279-L283),
-[`invitations.repository.ts`](../../../src/modules/surveys/repositories/invitations.repository.ts#L67-L75));
+([`surveys-responses.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-responses.service.ts#L279-L283),
+[`invitations.repository.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/repositories/invitations.repository.ts#L67-L75));
 la carga puntual verifica sólo ese mismo perfil
-([`surveys-responses.service.ts`](../../../src/modules/surveys/services/surveys-responses.service.ts#L285-L300)).
+([`surveys-responses.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-responses.service.ts#L285-L300)).
 
 Por ello, un paciente que tenga atenciones en dos organizaciones puede, dentro del
 contexto de una de ellas, listar o abrir los cuestionarios emitidos por la otra.
 El perfil de paciente es global y no lleva `tenant_id`
-([`05_profiles/02_tables.sql`](../../../database/SQL/05_profiles/02_tables.sql#L66-L81)),
+([`05_profiles/02_tables.sql`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/05_profiles/02_tables.sql#L66-L81)),
 de modo que la igualdad del perfil no prueba la pertenencia de la invitación al
 tenant seleccionado.
 En el envío, `submitResponse` sí lee el tenant actual, pero no lo compara con la
 invitación y escribe ese valor en la respuesta
-([`surveys-responses.service.ts`](../../../src/modules/surveys/services/surveys-responses.service.ts#L117-L159)).
+([`surveys-responses.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-responses.service.ts#L117-L159)).
 La respuesta puede quedar asociada al tenant de la sesión mientras su invitación,
 versión y atención pertenecen a otro tenant. Las FK independientes a tenant y
 paciente no expresan esa co-pertenencia
-([`90_fk_deferred.sql`](../../../database/SQL/65_surveys/90_fk_deferred.sql#L110-L164)).
+([`90_fk_deferred.sql`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/65_surveys/90_fk_deferred.sql#L110-L164)).
 
 **Plan de corrección:** obtener `requireTenantId()` en las tres operaciones de
 autoservicio; extender `listByPatient` y `loadOwnInvitation` con `tenantId` y
@@ -55,27 +55,27 @@ tenant de la invitación para crear la respuesta y añadir pruebas con un mismo
 ### SURV-02 — Alta — Idempotencia y unicidad dependen de comprobaciones en memoria, sin respaldo del DDL
 
 El código consulta antes de insertar para no duplicar una asignación
-([`surveys-assignments.service.ts`](../../../src/modules/surveys/services/surveys-assignments.service.ts#L112-L134)),
-una invitación ([`…156-L236`](../../../src/modules/surveys/services/surveys-assignments.service.ts#L156-L236))
+([`surveys-assignments.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-assignments.service.ts#L112-L134)),
+una invitación ([`…156-L236`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-assignments.service.ts#L156-L236))
 y las versiones se numeran a partir de la última leída
-([`surveys-templates.service.ts`](../../../src/modules/surveys/services/surveys-templates.service.ts#L147-L191)).
+([`surveys-templates.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-templates.service.ts#L147-L191)).
 Dos transacciones simultáneas pueden observar la ausencia o el mismo último número
 antes de cualquiera de los `flush`.
 
 El DDL sólo crea claves primarias, FKs e índices no únicos: no hay `UNIQUE` para
 versión de plantilla, asignación, invitación, respuesta o respuesta por pregunta
-([`02_tables.sql`](../../../database/SQL/65_surveys/02_tables.sql#L5-L118),
-[`04_indexes.sql`](../../../database/SQL/65_surveys/04_indexes.sql#L5-L37)).
+([`02_tables.sql`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/65_surveys/02_tables.sql#L5-L118),
+[`04_indexes.sql`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/65_surveys/04_indexes.sql#L5-L37)).
 Tampoco hay `CHECK` que haga exclusiva una de las cuatro columnas `value_*`.
 El patch reconoce expresamente que el índice único y ese `CHECK`, que el README
 afirmaba, no se agregaron
-([`2026-08-18_v4011_surveys_promocion_modulo_65.sql`](../../../database/SQL/patches/2026-08-18_v4011_surveys_promocion_modulo_65.sql#L22-L27)).
+([`2026-08-18_v4011_surveys_promocion_modulo_65.sql`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/patches/2026-08-18_v4011_surveys_promocion_modulo_65.sql#L22-L27)).
 
 Así, un reintento concurrente puede emitir dos encuestas iguales para una misma
 atención, crear dos versiones con el mismo número o dejar respuestas duplicadas.
 La prueba actual verifica la repetición secuencial con mocks, pero no una carrera
 ni una violación de restricción
-([`surveys-assignments.service.spec.ts`](../../../src/modules/surveys/services/surveys-assignments.service.spec.ts#L274-L291)).
+([`surveys-assignments.service.spec.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-assignments.service.spec.ts#L274-L291)).
 
 **Plan de corrección:** añadir en el modelo/migración las restricciones
 `UNIQUE (survey_template_id, version_number)`, la unicidad de asignación activa,
@@ -96,13 +96,13 @@ integración PostgreSQL dos llamadas concurrentes.
 
 Las rutas profesionales exigen `PRACTITIONER` o `CLINICIAN` y la plantilla se
 carga comprobando tenant y profesional dueño
-([`surveys-templates.controller.ts`](../../../src/modules/surveys/controllers/surveys-templates.controller.ts#L40-L43),
-[`surveys-templates.service.ts`](../../../src/modules/surveys/services/surveys-templates.service.ts#L563-L593)).
+([`surveys-templates.controller.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/controllers/surveys-templates.controller.ts#L40-L43),
+[`surveys-templates.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-templates.service.ts#L563-L593)).
 La emisión comprueba que la reserva pertenezca al tenant y esté completada
-([`surveys-assignments.service.ts`](../../../src/modules/surveys/services/surveys-assignments.service.ts#L160-L176)).
+([`surveys-assignments.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-assignments.service.ts#L160-L176)).
 Las respuestas individuales no tienen ruta pública y la lectura profesional pasa
-por la plantilla del dueño ([`surveys-templates.controller.ts`](../../../src/modules/surveys/controllers/surveys-templates.controller.ts#L185-L200),
-[`surveys-responses.service.ts`](../../../src/modules/surveys/services/surveys-responses.service.ts#L191-L238)).
+por la plantilla del dueño ([`surveys-templates.controller.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/controllers/surveys-templates.controller.ts#L185-L200),
+[`surveys-responses.service.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/surveys/services/surveys-responses.service.ts#L191-L238)).
 
 ## Cobertura que debe mantenerse
 

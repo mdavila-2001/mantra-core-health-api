@@ -27,7 +27,7 @@
 
 ## Evidencia
 
-En [`evidencia/`](evidencia/):
+En [`evidencia/`](evidencia/index.md):
 
 - `patch-v4223.txt`: aplicación doble del parche, conteos y casos negativos.
 - `typecheck.txt`, `lint.txt`, `guardrails.txt`: 0 errores, 0 avisos y 0 hallazgos bloqueantes nuevos.

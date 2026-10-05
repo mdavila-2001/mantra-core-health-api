@@ -3,7 +3,7 @@
 Facturación al paciente (CxC), cuentas por pagar (CxP), contabilización a ledger,
 conciliación bancaria, morosidad, planes de pago y KPIs financieros. Expone los 12
 casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo. La
-[revisión de 2026-10-05](../../../docs/revision-backend-2026-10-04/modulos/billing.md)
+[revisión de 2026-10-05](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/billing.md)
 documenta los límites de autorización, dinero e idempotencia.
 
 ## Endpoints (UC → ruta)

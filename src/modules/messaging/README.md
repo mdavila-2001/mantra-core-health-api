@@ -195,7 +195,7 @@ integración de restricciones DDL indicadas en la revisión.
 
 ## Revisión backend 2026-10-04
 
-Informe de evidencia: [`docs/revision-backend-2026-10-04/modulos/messaging.md`](../../../docs/revision-backend-2026-10-04/modulos/messaging.md).
+Informe de evidencia: [`docs/revision-backend-2026-10-04/modulos/messaging.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/messaging.md).
 
 Hallazgos confirmados: el índice único actual de `event_deliveries` impide el fan-out a más de
 una suscripción (MSG-01) y el contrato permite un destinatario externo que el esquema no puede

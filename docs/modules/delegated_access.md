@@ -72,4 +72,3 @@ rechazos de regla de negocio. Nunca se registran secretos ni PHI.
   `controllers/*.controller.spec.ts` (mockean servicios).
 - Smoke transversal: `test/smoke/modules/delegated_access.smoke.ts`
   (`DELEGATED_ACCESS_SMOKE`).
-

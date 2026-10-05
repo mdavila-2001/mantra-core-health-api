@@ -46,16 +46,16 @@ Los guardias globales resuelven el tenant del request, pero el interceptor sólo
 `tenantId` explícitos del cuerpo con ese valor; no puede autorizar un UUID ya persistido. Las
 conexiones, mensajes y callbacks se leen por `{ id }` sin tenant:
 
-- [`provider-connections.repository.ts:53`](../../../src/modules/integrations/repositories/provider-connections.repository.ts#L53)
-  y [`outbound-messages.repository.ts:69-105`](../../../src/modules/integrations/repositories/outbound-messages.repository.ts#L69-L105)
+- [`provider-connections.repository.ts:53`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/repositories/provider-connections.repository.ts#L53)
+  y [`outbound-messages.repository.ts:69-105`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/repositories/outbound-messages.repository.ts#L69-L105)
   realizan las búsquedas por ID, idempotencia y correlación sin scope.
-- [`integrations-messaging.service.ts:92-143`](../../../src/modules/integrations/services/integrations-messaging.service.ts#L92-L143)
+- [`integrations-messaging.service.ts:92-143`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-messaging.service.ts#L92-L143)
   permite al endpoint autenticado sin rol elegir cualquier `connectionId`; las transiciones de
   reintento, dead-letter y correlación también parten de UUIDs sin tenant
-  ([líneas 267-441](../../../src/modules/integrations/services/integrations-messaging.service.ts#L267-L441)).
-- Rotar o pausar usa `findById` de conexión ([`integrations-connections.service.ts:143-242`](../../../src/modules/integrations/services/integrations-connections.service.ts#L143-L242)).
+  ([líneas 267-441](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-messaging.service.ts#L267-L441)).
+- Rotar o pausar usa `findById` de conexión ([`integrations-connections.service.ts:143-242`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-connections.service.ts#L143-L242)).
   `RLS_ENFORCE` sólo envuelve el request si la variable vale `true`
-  ([`tenant-context.interceptor.ts:128-145`](../../../src/common/tenant/tenant-context.interceptor.ts#L128-L145));
+  ([`tenant-context.interceptor.ts:128-145`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/tenant/tenant-context.interceptor.ts#L128-L145));
   con su valor normal desactivado el servicio no tiene segunda barrera.
 
 Un usuario autenticado de A que conozca una conexión de B puede encolar un payload hacia el
@@ -73,13 +73,13 @@ fuera de alcance. Activar RLS es defensa adicional, no reemplazo de esta autoriz
 ### INT-02 — Alta — los secretos registrados no autentican webhooks ni despachos
 
 El alta y la rotación persisten `secretRef` como referencia de bóveda
-([`integrations-connections.service.ts:102-109`](../../../src/modules/integrations/services/integrations-connections.service.ts#L102-L109),
-[`165-173`](../../../src/modules/integrations/services/integrations-connections.service.ts#L165-L173)),
+([`integrations-connections.service.ts:102-109`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-connections.service.ts#L102-L109),
+[`165-173`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-connections.service.ts#L165-L173)),
 pero los dos flujos HMAC lo ignoran. En su lugar derivan una clave desde una única raíz y el UUID
-de conexión ([`integrations-webhooks.service.ts:67-75`](../../../src/modules/integrations/services/integrations-webhooks.service.ts#L67-L75),
-[`integrations-messaging.service.ts:207-216`](../../../src/modules/integrations/services/integrations-messaging.service.ts#L207-L216)).
+de conexión ([`integrations-webhooks.service.ts:67-75`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-webhooks.service.ts#L67-L75),
+[`integrations-messaging.service.ts:207-216`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-messaging.service.ts#L207-L216)).
 La propia función declara que es un puente y que debe reemplazarse por secreto real por conexión
-([`webhook-signature.ts:56-72`](../../../src/common/crypto/webhook-signature.ts#L56-L72)).
+([`webhook-signature.ts:56-72`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/crypto/webhook-signature.ts#L56-L72)).
 
 El proveedor no recibe ni puede reproducir el secreto derivado a partir de una `secretRef`; una
 firma HMAC real será rechazada. Rotar la credencial tampoco invalida el material usado por la
@@ -95,11 +95,11 @@ bóveda no entregue un secreto activo.
 ### INT-03 — Alta — la deduplicación de callbacks no es atómica
 
 El webhook consulta primero por `(connectionId, signature)` y después inserta
-([`inbound-messages.repository.ts:60-67`](../../../src/modules/integrations/repositories/inbound-messages.repository.ts#L60-L67),
-[`integrations-webhooks.service.ts:77-111`](../../../src/modules/integrations/services/integrations-webhooks.service.ts#L77-L111)).
+([`inbound-messages.repository.ts:60-67`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/repositories/inbound-messages.repository.ts#L60-L67),
+[`integrations-webhooks.service.ts:77-111`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-webhooks.service.ts#L77-L111)).
 Sin embargo, el DDL sólo declara la clave primaria de `inbound_messages`
-([`02_tables.sql:99-115`](../../../database/SQL/12_integrations/02_tables.sql#L99-L115)) y los índices no incluyen
-firma ni la pareja de deduplicación ([`04_indexes.sql:67-75`](../../../database/SQL/12_integrations/04_indexes.sql#L67-L75)).
+([`02_tables.sql:99-115`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/12_integrations/02_tables.sql#L99-L115)) y los índices no incluyen
+firma ni la pareja de deduplicación ([`04_indexes.sql:67-75`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/database/SQL/12_integrations/04_indexes.sql#L67-L75)).
 
 Dos entregas concurrentes con la misma firma ven ausencia antes de cualquiera de los `flush` y
 ambas se persisten. Después las dos pueden entrar al descubrimiento de correlación, producir dos
@@ -113,10 +113,10 @@ eventos distintos, y proteger la correlación con bloqueo/estado condicional.
 ### INT-04 — Media — los fallos del módulo no exponen `reason` estable
 
 No existe `integrations.error-reasons.ts`. Las excepciones de dominio reciben objetos como
-`{ connectionId }` o `{ messageId }`, sin `details.reason` ([`integrations-messaging.service.ts:96-104`](../../../src/modules/integrations/services/integrations-messaging.service.ts#L96-L104),
-[`267-288`](../../../src/modules/integrations/services/integrations-messaging.service.ts#L267-L288)); el
+`{ connectionId }` o `{ messageId }`, sin `details.reason` ([`integrations-messaging.service.ts:96-104`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-messaging.service.ts#L96-L104),
+[`267-288`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/integrations/services/integrations-messaging.service.ts#L267-L288)); el
 contrato de `DomainException` no lo añade automáticamente
-([`domain.exception.ts:22-29`](../../../src/common/errors/domain.exception.ts#L22-L29)). Las colisiones de los
+([`domain.exception.ts:22-29`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/errors/domain.exception.ts#L22-L29)). Las colisiones de los
 índices y las carreras de INT-03 por tanto pueden salir como 500 de ORM.
 
 **Plan de corrección.** Crear catálogo del módulo y emitir, entre otras, `INTEGRATION_CONNECTION_OUT_OF_SCOPE`,

@@ -145,8 +145,7 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/object_storage` — 76 pruebas (62 de servicio + 14 de
-delegación de los dos controladores).
+`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb todavía debe aplicar la misma política, como detalla la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/object_storage.md).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -166,8 +165,8 @@ delegación de los dos controladores).
   ejecuta.
 - **Rehidratación desde frío**: se detecta y se rechaza; encolar la rehidratación corresponde al
   worker de ciclo de vida.
-- **Autorización y consentimiento** (`authz.*`, `consent.*`): se guarda el propósito de uso y se
-  registra el acceso, pero evaluar la política cruzaría la frontera del esquema.
+- **Autorización y consentimiento** (`authz.*`, `consent.*`): la emisión y canje de URLs firmadas
+  ya reutilizan la política clínica; DICOMweb requiere el mismo control antes de exponer referencias.
 - **Bloqueo distribuido** (`redis_runtime.distributed_lock_entries`) para las verificaciones de
   integridad concurrentes: aquí lo cubre el `FOR UPDATE` sobre el manifiesto; el lock externo llegará
   con el módulo 54.
@@ -178,4 +177,3 @@ delegación de los dos controladores).
   `LargePayloadRegistered`, `ObjectRetentionApplied`, `LegalHoldPlaced/Released`, `SignedUrlIssued`,
   `ObjectIntegrityVerified`, `ObjectCorruptionDetected`, `ObjectsArchived`,
   `ObjectDeletionRequested`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
-

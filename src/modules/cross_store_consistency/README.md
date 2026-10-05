@@ -163,7 +163,7 @@ donde casi todo lo que pasa merece atención. No se loguean payloads ni localiza
 
 ## Pruebas
 
-`corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store. Ver [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/cross_store_consistency.md).
+`corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/cross_store_consistency.md).
 
 ## Divergencias con el caso de uso v3.9
 

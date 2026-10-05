@@ -71,7 +71,7 @@ Pino estructurado por operación (`orgext.hospital.specialize`,
 La revisión de octubre de 2026 identificó que las mutaciones por UUID de
 hospital, licencia y afiliación necesitan comprobar el tenant propietario antes
 de cambiar estado. El detalle y la matriz de regresión están en
-[`docs/revision-backend-2026-10-04/modulos/organization_extensions.md`](../../../docs/revision-backend-2026-10-04/modulos/organization_extensions.md).
+[`docs/revision-backend-2026-10-04/modulos/organization_extensions.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/organization_extensions.md).
 
 ```bash
 corepack yarn test src/modules/organization_extensions --runInBand --silent

@@ -10,9 +10,9 @@ con un nombre u otro dato dinámico sea reutilizado o servido entre tenants.
 | Control | Evidencia |
 | --- | --- |
 | Identidad y caché | La clave incorpora `tenantId` cuando el render usa datos identificables, y la búsqueda de binario reutilizable conserva ese alcance. |
-| Contenido | El endpoint busca el asset READY y devuelve 404 antes de leer storage cuando el tenant activo no coincide ([audio-content.service.ts](../../../src/modules/audio_assets/audio-content.service.ts#L17-L47)). |
+| Contenido | El endpoint busca el asset READY y devuelve 404 antes de leer storage cuando el tenant activo no coincide ([audio-content.service.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audio_assets/audio-content.service.ts#L17-L47)). |
 | Datos dinámicos | No hay texto libre de TTS: sólo plantillas; se valida/normaliza y el texto persistido se cifra. |
-| Procesos internos | Preparación, publicación, falla, verificación y GC quedan tras el rol `SYSTEM` ([audio-assets-internal.controller.ts](../../../src/modules/audio_assets/controllers/audio-assets-internal.controller.ts#L19-L104)). |
+| Procesos internos | Preparación, publicación, falla, verificación y GC quedan tras el rol `SYSTEM` ([audio-assets-internal.controller.ts](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audio_assets/controllers/audio-assets-internal.controller.ts#L19-L104)). |
 | Publicación | La generación exige prueba de publicación y conserva el ciclo de vida de storage en el repositorio. |
 
 La excepción de contenido sin tenant está destinada al barrido interno

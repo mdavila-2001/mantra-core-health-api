@@ -130,7 +130,7 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
 
 ## Pruebas
 
-`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb todavía debe aplicar la misma política, como detalla la [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/object_storage.md).
+`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb todavía debe aplicar la misma política, como detalla la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/object_storage.md).
 
 ## Divergencias con el caso de uso v3.9
 

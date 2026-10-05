@@ -150,7 +150,7 @@ entre un campo del agente y una columna de una tabla clínica es exactamente lo 
 La validación, en cambio, **ignora lo que no entiende**: validar de más rechazaría escrituras
 legítimas de automatizaciones ya configuradas.
 
-## Permisos
+## Permisos y alcance
 
 `AUTOMATION_ENGINEER` define agentes, herramientas, enlaces, workflows y disparadores.
 `AI_GOVERNANCE_OFFICER` define y adjunta guardrails. `SYSTEM` y `AGENT_RUNTIME` ejecutan: arrancan
@@ -158,6 +158,11 @@ runs, registran pasos, piden aprobación y escriben registros. `CLINICAL_APPROVE
 `OPERATIONAL_APPROVER` deciden. `PLATFORM_ADMIN` cubre todo.
 
 Ninguna ruta es pública.
+
+La revisión ALOVIDA identificó que los servicios todavía no aplican el alcance de
+tenant de la identidad a la cadena de workflows, runs y automatizaciones de
+registro. Ver [informe del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/automation.md)
+antes de habilitar operaciones entre tenants.
 
 ## Concurrencia
 
@@ -174,9 +179,9 @@ aprobación —los dos momentos en que una persona tiene que intervenir—. No s
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/automation` — 127 pruebas (26 catálogo + 15 definición +
-39 ejecución + 18 escritura de registros + 13 del repositorio de destino + 16 de delegación de los
-dos controladores).
+`corepack yarn test src/modules/automation --runInBand --silent` — 6 suites y 133 pruebas
+aprobadas durante la revisión. Falta cobertura de dos tenants y de errores HTTP
+catalogados del escritor dinámico.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -208,4 +213,3 @@ dos controladores).
   suscripción es el worker.
 - **Tablas `*_history`**: el caso de uso las declara junto a `audit.audit_events`. La auditoría es del
   módulo 06; las tablas de historial por entidad no están generadas en este esquema.
-

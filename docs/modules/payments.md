@@ -67,8 +67,9 @@ reconciliation    -> registros del proveedor vs ledger; descuadres abren excepci
 
 ## Reglas de negocio
 
-- **Idempotencia del intent**: `idempotency_key` única por tenant. Un reintento devuelve el
-  intent existente con `reused=true`; nunca genera un segundo cobro.
+- **Idempotencia del intent**: el servicio consulta por tenant y clave antes de crear. El índice
+  versionado actual es global sobre `idempotency_key`, por lo que la semántica entre tenants debe
+  acordarse antes de afirmarla como idempotencia por tenant; ver la [revisión de pagos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/payments.md#pay-05--media--contrato-de-idempotencia-por-tenant-contradice-el-índice-único-global).
 - **Riesgo previo al cobro**: no se procesa una transacción sin evaluación de riesgo, y una
   decisión `DECLINE` bloquea el cobro.
 - **Un solo bloqueo de cambio vigente** por intent, y solo mientras está `pending`.
@@ -99,12 +100,14 @@ El token de checkout se devuelve una vez y solo se persiste su hash SHA-256.
 
 ## Pruebas
 
-63 pruebas unitarias entre servicios y controladores:
-`yarn test --testPathPatterns=payments`.
+La pasada dirigida del 2026-10-05 ejecutó 7 suites y 104 tests con:
+`corepack yarn test src/modules/payments --runInBand --silent`. Son pruebas unitarias; faltan
+integración con PostgreSQL, RLS, carreras e integración real con proveedor.
 
 ## Pendiente
 
 La proyección eventual vía `messaging.outbox_events` (read models, search, time series) queda
-para el módulo 35, que aún no está implementado. Los servicios dejan el estado consistente en
-PostgreSQL; la publicación del evento se añadirá cuando exista el outbox.
-
+para el módulo 35, que aún no está implementado. El callback verifica HMAC por conexión, pero
+todavía no consume la configuración de endpoint, ventana de replay y CIDR modelada en DDL; los
+flujos de payout tampoco ejecutan un adaptador de proveedor. El detalle y plan están en la
+[revisión de pagos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/payments.md).

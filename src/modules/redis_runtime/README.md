@@ -43,7 +43,7 @@ lo cierra limpiamente en `onModuleDestroy` (`quit()`). Exporta
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que el consumo de challenges usa `GET` y `DEL` separados, por lo que debe hacerse atómico antes de usarlo para OTP o confirmaciones. El plan y las pruebas están en [`docs/revision-backend-2026-10-04/modulos/redis_runtime.md`](../../../docs/revision-backend-2026-10-04/modulos/redis_runtime.md).
+La revisión de octubre de 2026 detectó que el consumo de challenges usa `GET` y `DEL` separados, por lo que debe hacerse atómico antes de usarlo para OTP o confirmaciones. El plan y las pruebas están en [`docs/revision-backend-2026-10-04/modulos/redis_runtime.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/redis_runtime.md).
 
 ```bash
 corepack yarn test src/modules/redis_runtime --runInBand --silent

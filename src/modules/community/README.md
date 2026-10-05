@@ -160,4 +160,4 @@ tope de seguidores por pasada acota el daño mientras tanto.
   visibilidad `PRIVATE`/`FOLLOWERS` contra filas reales, el bloqueo en los dos
   sentidos y que la review no arrastre el encuentro clínico.
 
-La revisión ejecutó `corepack yarn test src/modules/community --runInBand --silent`: 41 suites y 616 pruebas aprobadas, con dos advertencias JSON preexistentes. Ver [auditoría backend](../../../docs/revision-backend-2026-10-04/modulos/community.md).
+La revisión ejecutó `corepack yarn test src/modules/community --runInBand --silent`: 41 suites y 616 pruebas aprobadas, con dos advertencias JSON preexistentes. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/community.md).

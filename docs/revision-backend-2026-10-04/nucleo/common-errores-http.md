@@ -29,7 +29,7 @@ No se auditaron todas las rutas consumidoras ni el catálogo total de módulos.
 
 ### CEH-01 — Alta — Pipes de query rechazan sin `ErrorCode` ni `reason`
 
-**Evidencia y veredicto.** `ParseOptionalLimitPipe` rechaza fuera de 1..max con cadena ([`parse-optional-limit.pipe.ts`](../../../src/common/http/parse-optional-limit.pipe.ts#L25-L34)); `ParseUuidListPipe` hace lo mismo para formato, cantidad y UUID ([`parse-uuid-list.pipe.ts`](../../../src/common/http/parse-uuid-list.pipe.ts#L55-L73)); el cursor inválido repite el patrón ([`keyset-cursor.ts`](../../../src/common/pagination/keyset-cursor.ts#L37-L59)). El filtro no inventa reason para una respuesta cadena ([`all-exceptions.filter.ts`](../../../src/common/filters/all-exceptions.filter.ts#L270-L283)). Confirmado.
+**Evidencia y veredicto.** `ParseOptionalLimitPipe` rechaza fuera de 1..max con cadena ([`parse-optional-limit.pipe.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/http/parse-optional-limit.pipe.ts#L25-L34)); `ParseUuidListPipe` hace lo mismo para formato, cantidad y UUID ([`parse-uuid-list.pipe.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/http/parse-uuid-list.pipe.ts#L55-L73)); el cursor inválido repite el patrón ([`keyset-cursor.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/pagination/keyset-cursor.ts#L37-L59)). El filtro no inventa reason para una respuesta cadena ([`all-exceptions.filter.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/filters/all-exceptions.filter.ts#L270-L283)). Confirmado.
 
 **Impacto.** El cliente no recibe una causa estable para corregir límite, cursor o UUID y queda atado al texto. No hay evidencia de inyección: los validadores sí frenan entradas inválidas.
 
@@ -44,7 +44,7 @@ No se auditaron todas las rutas consumidoras ni el catálogo total de módulos.
 
 ### CEH-02 — Alta — Secreto cifrado inválido escapa como `Error` genérico
 
-**Evidencia y veredicto.** `decryptSecret` sólo verifica cuatro partes y lanza `Error` textual ([`secret-cipher.ts`](../../../src/common/crypto/secret-cipher.ts#L91-L108)). Base64 truncado o tag GCM inválido alcanza primitivas crypto sin traducción local. El filtro sanea el 500, pero no distingue configuración/clave/dato corrupto. No se afirma fuga de texto porque el filtro lo evita.
+**Evidencia y veredicto.** `decryptSecret` sólo verifica cuatro partes y lanza `Error` textual ([`secret-cipher.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/crypto/secret-cipher.ts#L91-L108)). Base64 truncado o tag GCM inválido alcanza primitivas crypto sin traducción local. El filtro sanea el 500, pero no distingue configuración/clave/dato corrupto. No se afirma fuga de texto porque el filtro lo evita.
 
 **Plan.** 1. Validar longitudes de salt/IV/tag y base64 canónico. 2. Capturar errores crypto y emitir error interno seguro `SECRET_CIPHER_INVALID`. 3. En flujos HTTP, traducir al `DomainException` adecuado. 4. Medir sin registrar el secreto. Riesgo: distinguir datos históricos corruptos de cambio de clave; sin DDL.
 
@@ -57,7 +57,7 @@ No se auditaron todas las rutas consumidoras ni el catálogo total de módulos.
 
 ### CEH-03 — Media — El pipe ISO acepta fechas ambiguas y timestamps sin zona
 
-**Evidencia y veredicto.** El JSDoc exige ISO y ejemplifica `Z` ([`parse-optional-date.pipe.ts`](../../../src/common/http/parse-optional-date.pipe.ts#L8-L16)), pero sólo comprueba `new Date(value)` ([líneas 31-43](../../../src/common/http/parse-optional-date.pipe.ts#L31-L43)). `2026/07/01` y `2026-07-01T10:00:00` dependen de parser/zona. No hay spec local. Confirmado.
+**Evidencia y veredicto.** El JSDoc exige ISO y ejemplifica `Z` ([`parse-optional-date.pipe.ts`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/http/parse-optional-date.pipe.ts#L8-L16)), pero sólo comprueba `new Date(value)` ([líneas 31-43](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/common/http/parse-optional-date.pipe.ts#L31-L43)). `2026/07/01` y `2026-07-01T10:00:00` dependen de parser/zona. No hay spec local. Confirmado.
 
 **Plan.** Exigir fecha-hora con `Z` u offset, validar calendario y usar `INVALID_ISO_DATETIME`. Crear pipe separado para fecha civil si hace falta. Riesgo: clientes que hoy envían tiempo local.
 

@@ -26,7 +26,9 @@ Un asiento **solo** se postea si `sum(DEBIT) == sum(CREDIT)`. La validación viv
 en el servicio (`LedgerService.assertBalanced` / `PostingHelper.post`) y, si no
 balancea, lanza `PreconditionFailedException` → **HTTP 422**, sin persistir nada
 (todo dentro de una única `em.transactional`). Los importes se comparan en
-centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante.
+centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante. La
+conversión de entrada sigue pasando por `Number`; los límites de precisión y de
+alcance por práctica están documentados en la [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md).
 
 ## Endpoints (UC-16-01..14)
 
@@ -120,8 +122,12 @@ transversal se usa `CONCEPTS.STATE_ACTIVE` / `CONCEPTS.FILE_CATEGORY_DOCUMENT`.
 
 ## Permisos
 
-Guard global de auth. Todos los endpoints de escritura requieren
-`@Roles('SECURITY_ADMIN')`; `@Public()` no se usa (no hay flujo anónimo).
+Guard global de auth, sin `@Public()`. Los comandos administrativos exigen
+`SECURITY_ADMIN`; el flujo de borrador, clasificación y adjuntos admite además
+`PRACTITIONER`, y la aprobación admite `ACCOUNTING_APPROVER`. El servicio
+comprueba la vinculación activa del profesional para esas rutas. Los comandos
+administrativos todavía requieren la política de alcance por práctica y
+recurso descrita en la revisión.
 
 ## Logs
 
@@ -132,8 +138,9 @@ secretos ni PHI.
 ## Tests
 
 - Unit (Jest, mockean repos/em/posting): `services/*.spec.ts`,
-  `controllers/*.spec.ts` — 14 suites / 120 casos (incluye
-  `accounting-read.service.spec.ts` y `accounting-cockpit.controller.spec.ts`).
+  `controllers/*.spec.ts` — 16 suites / 150 casos en la corrida dirigida del
+  2026-10-05 (incluye `accounting-read.service.spec.ts` y
+  `accounting-cockpit.controller.spec.ts`).
 - Integration: `test/integration/fx14-cockpit-contable.int-spec.ts` siembra por
   la API (dos filas sin ruta de alta —`subledger_accounts` y `cost_centers`— nacen
   por `EntityManager`) y ejercita las seis lecturas contra la base real.
@@ -141,3 +148,10 @@ secretos ni PHI.
   (`ACCOUNTING_SMOKE`), encadena cuentas → asiento → reversa/devengo/activo con
   `ctx.vars` y ejercita casos límite 401/400/404/409/422.
 
+## Límites conocidos
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md)
+registra pendiente la validación de práctica/tenant y de recursos relacionados
+en writes, la clave de número de asiento, la aritmética decimal exacta y los
+topes de lotes. Las pruebas unitarias no sustituyen integración con PostgreSQL,
+dos tenants ni pruebas de concurrencia.

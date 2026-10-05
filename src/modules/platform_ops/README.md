@@ -178,4 +178,4 @@ aprobadas durante la revisión.
 ## Revisión ALOVIDA
 
 Los recursos operativos resueltos por UUID aún no se acotan al tenant activo; ver
-[el informe](../../../docs/revision-backend-2026-10-04/modulos/platform_ops.md).
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/platform_ops.md).

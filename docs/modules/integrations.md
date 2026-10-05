@@ -13,30 +13,46 @@
 
 ---
 
-# src / modules / integrations
+# Integraciones externas
 
-Agrupa los componentes relacionados con **integrations** y mantiene cohesionada esta responsabilidad del sistema.
+Gestiona proveedores, conexiones tenantizadas, referencias a credenciales, endpoints versionados,
+mensajería saliente, reintentos, callbacks entrantes y suscripciones de webhook. Persiste en el
+esquema PostgreSQL `integrations`; los workers consumen los endpoints internos de descubrimiento,
+despacho, reintento y correlación.
 
-## Contenido
+## Rutas
 
-### Subcarpetas
+| Ruta | Rol | DTO | Resultado |
+| --- | --- | --- | --- |
+| `POST /integrations/providers` | `SECURITY_ADMIN` | `RegisterProviderDto` | proveedor activo |
+| `POST /integrations/providers/:id/connections` | `SECURITY_ADMIN` | `ProvisionConnectionDto` | conexión y credencial |
+| `POST /integrations/providers/:id/endpoints` | `SECURITY_ADMIN` | `PublishEndpointDto` | endpoint y mapeos |
+| `POST /integrations/providers/:id/webhook-subscriptions` | `SECURITY_ADMIN` | `CreateWebhookSubscriptionDto` | suscripción creada o actualizada |
+| `POST /integrations/connections/:id/credentials:rotate` | `SECURITY_ADMIN` | `RotateCredentialDto` | nueva credencial |
+| `POST /integrations/connections/:id:pause` | `SECURITY_ADMIN` | — | conexión pausada y mensajes retenidos |
+| `POST /integrations/messages:outbound` | JWT | `EnqueueOutboundDto` | mensaje encolado idempotentemente |
+| `GET /integrations/messages/pending-*` y acciones `:dispatch`, `:retry`, `:dead-letter`, `:correlate` | `SYSTEM` o `SECURITY_ADMIN` | `DispatchMessageDto` donde aplica | trabajo del worker |
+| `POST /integrations/webhooks/inbound` | pública | `InboundWebhookDto` | callback recibido tras HMAC |
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+## Estructura y datos
 
-### Archivos
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/controllers/README.md): adaptadores HTTP.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/dto/README.md): contratos de entrada/salida.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/services/README.md): transiciones, transacciones y despacho HTTP.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/repositories/README.md): acceso a datos.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/integrations/entities/README.md): tablas `external_providers`, `provider_connections`,
+  `provider_credentials`, `integration_endpoints`, `integration_field_mappings`, mensajes,
+  reintentos y suscripciones.
+- `integrations.concepts.ts`: IDs deterministas de estados, tipos y protocolos.
+- `integrations.module.ts`: composición NestJS y `HttpDispatcherService`.
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `integrations.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `integrations.module.ts` | Composición de dependencias del módulo NestJS. |
+## Probar
 
-## Criterios de mantenimiento
+```bash
+corepack yarn test src/modules/integrations --runInBand --silent
+```
 
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
-
+Revisión 2026-10-05: **7 suites y 53 pruebas aprobadas**. Las pruebas son unitarias con mocks;
+faltan pruebas de aislamiento entre tenants, bóveda de secretos, carrera de callbacks y contrato
+`status + code + reason`. El detalle y plan de corrección están en
+[`docs/revision-backend-2026-10-04/modulos/integrations.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integrations.md).
