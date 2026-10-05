@@ -1,0 +1,1 @@
+src/modules/insurance/controllers/insurer-patients.controller.spec.ts(7,15): error TS2724: '"../../../common"' has no exported member named 'AuthenticatedRequest'. Did you mean 'AuthenticatedUser'?

@@ -1,0 +1,9 @@
+docker : WARNING: Error loading config file: open C:\Users\dmarc\.docker\config.json: Access is denied.
+En línea: 2 Carácter: 226
++ ... ame,Status; docker --host npipe:////./pipe/dockerDesktopLinuxEngine p ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (WARNING: Error ...cess is denied.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if 
+the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
