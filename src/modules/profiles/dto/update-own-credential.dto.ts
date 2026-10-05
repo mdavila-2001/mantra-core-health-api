@@ -58,6 +58,13 @@ export class UpdateOwnCredentialDto {
   @IsUUID()
   professionConceptId?: string;
 
+  /** Cómo se llama el título. Un texto vacío permite borrarlo. */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
   /** Fecha de emisión en formato ISO 8601, como en el alta. */
   @ApiPropertyOptional({ format: 'date' })
   @ValidateIf((_dto, value: unknown) => value !== undefined)

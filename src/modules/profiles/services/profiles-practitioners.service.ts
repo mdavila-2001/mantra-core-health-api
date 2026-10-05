@@ -1124,6 +1124,7 @@ export class ProfilesPractitionersService {
         issuingCityText: credential.issuingCityText,
         issuingCountryText: credential.issuingCountryText,
         professionConceptId: credential.professionConceptId,
+        titleText: credential.titleText,
         issueDate: credential.issueDate,
         expiryDate: credential.expiryDate,
         stateConceptId: credential.stateConceptId,
@@ -3124,6 +3125,7 @@ export class ProfilesPractitionersService {
         issuingCityText: dto.issuingCityText?.trim() || undefined,
         issuingCountryText: dto.issuingCountryText?.trim() || undefined,
         professionConceptId: dto.professionConceptId,
+        titleText: dto.titleText?.trim() || undefined,
         issueDate: dto.issueDate ? new Date(dto.issueDate) : undefined,
         fileId: dto.fileId,
         stateConceptId: PROF.CRED_PENDING,
@@ -3141,6 +3143,7 @@ export class ProfilesPractitionersService {
       issuingCityText: creada.issuingCityText,
       issuingCountryText: creada.issuingCountryText,
       professionConceptId: creada.professionConceptId,
+      titleText: creada.titleText,
       issueDate: creada.issueDate,
       stateConceptId: creada.stateConceptId,
       fileId: creada.fileId,
@@ -3224,6 +3227,9 @@ export class ProfilesPractitionersService {
       }
       if (dto.professionConceptId !== undefined) {
         credential.professionConceptId = dto.professionConceptId;
+      }
+      if (dto.titleText !== undefined) {
+        credential.titleText = dto.titleText.trim() || undefined;
       }
       if (dto.issueDate !== undefined) {
         credential.issueDate = new Date(dto.issueDate);

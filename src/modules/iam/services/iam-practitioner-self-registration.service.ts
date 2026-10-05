@@ -704,6 +704,7 @@ export class IamPractitionerSelfRegistrationService {
           issuingCityText: textoOpcional(declarada.issuingCityText),
           issuingCountryText: textoOpcional(declarada.issuingCountryText),
           professionConceptId: declarada.professionConceptId,
+          titleText: textoOpcional(declarada.titleText),
           fileId: declarada.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,

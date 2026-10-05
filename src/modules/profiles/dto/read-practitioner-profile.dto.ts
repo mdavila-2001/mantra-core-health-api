@@ -110,6 +110,10 @@ export class PractitionerCredentialDto {
   @ApiPropertyOptional({ format: 'uuid' })
   professionConceptId?: string;
 
+  /** Cómo se llama el título, cuando no hay catálogo. */
+  @ApiPropertyOptional()
+  titleText?: string;
+
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   issueDate?: Date;
 

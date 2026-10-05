@@ -73,6 +73,16 @@ export class AddOwnCredentialDto {
   @IsUUID()
   professionConceptId?: string;
 
+  /**
+   * Cómo se llama el título cuando no hay catálogo que lo diga
+   * («Diplomado en Salud Pública»). `title_text`, modelo v4.2.41.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
   /** Fecha de emisión del título. */
   @ApiPropertyOptional({ format: 'date' })
   @IsOptional()
@@ -117,6 +127,9 @@ export class OwnCredentialResponseDto {
 
   @ApiPropertyOptional({ format: 'uuid' })
   professionConceptId?: string;
+
+  @ApiPropertyOptional()
+  titleText?: string;
 
   @ApiPropertyOptional({ type: String, format: 'date' })
   issueDate?: Date;
