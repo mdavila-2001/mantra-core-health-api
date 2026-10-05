@@ -1,0 +1,237 @@
+{
+  "code": "NNAC_U12_02_HIPERTENSION_ARTERIAL_SISTEMIC",
+  "name": "Hipertensión arterial sistémica o esencial (NNAC)",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 2 de la unidad 12 de las NNAC, pág. 698; CIE-10 I10; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Es asintomática en la primera fase de la enfermedad, se diagnostica en forma casual en campañas o chequeos pre trabajo",
+        "Es un hallazgo, durante la consulta o en la hospitalización por otras enfermedades",
+        "Enfermedad renal: nicturia, polaquiuria, hematuria",
+        "Enfermedad cardiovascular: disnea, dolor precordial, palpitaciones, edema de miembros inferiores, arritmias cardiacas",
+        "Enfermedad del sistema nervioso: cefalea, mareos, desorientación, convulsiones, visión borrosa, ataxia, AVC",
+        "Vasos periféricos: impotencia sexual, claudicación intermitente",
+        "Retinopatía: disminución agudeza visual",
+        "Síndrome de apnea de sueño: obesidad, ronquido, períodos de apnea mayores de 10 segundos",
+        "Ingesta habitual de fármacos y otras sustancias capaces de elevar la PA",
+        "Factores psicosociales y ambientales que puedan influir sobre el control de la HAS",
+        "Toma correcta de la presión arterial",
+        "Peso, talla, índice de masa corporal, circunferencia abdominal",
+        "Fondo de ojo: exploración obligatoria en los pacientes con HAS y diabetes",
+        "Cuello: carótidas, yugulares, tiroides",
+        "Auscultación cardiaca: anormalidad del ritmo y la frecuencia, aumento del tamaño cardiaco, soplos, chasquidos, 3º y 4º ruidos",
+        "Auscultación pulmonar: estertores, bronco espasmo",
+        "Abdominal: masas, visceromegalias, soplos abdominales o lumbares",
+        "Extremidades: edema, pulsos (radiales, femorales, poplíteos, pedios y tibiales posteriores), soplos femorales",
+        "Examen de la piel",
+        "Exploración neurológica"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 698. La hipertensión arterial sistémica (HAS) es la elevación sostenida de la presión arterial sistólica igual o mayor a 140 mmHg y/o presión arterial diastólica igual o mayor a 90 mmHg (tomando en cuenta la desaparición de ruidos), medidas en tres lecturas por visita, obtenidas en dos consultas."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Reducción de peso (IMC 18-25) baja la presión entre 5 a 10 mmHg",
+        "Dieta (rica en frutas, vegetales, pobre en grasas saturadas, baja la presión entre 4 a 14 mmHg)",
+        "Actividad física (30 min. cinco veces por semana), baja la presión entre 4 a 9 mmHg"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sedentarismo",
+        "Elevada ingesta de sal",
+        "Tabaquismo",
+        "Abuso de alcohol",
+        "Hiperlipidemias",
+        "Hereditario",
+        "Obesidad",
+        "Diabetes mellitus",
+        "Gota",
+        "Enfermedad renal",
+        "Edad: > de 55 años en varones y 65 años en mujeres"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Examen general de orina",
+        "Creatinina",
+        "Electrolitos (potasio sérico)",
+        "Glicemia",
+        "Calcemia",
+        "Electrocardiograma (ECG)",
+        "Radiografía PA de tórax",
+        "Ecocardiograma Doppler",
+        "Estudio de Holter si se detectan arritmias",
+        "Ergometría en banda sin fin",
+        "El paciente se abstendrá de fumar, tomar café, productos cafeinados y refrescos de cola, por lo menos 30 minutos antes de la medición",
+        "Se efectúa después de por lo menos cinco minutos de reposo",
+        "El operador se sitúa de modo que su vista quede a nivel del menisco de la columna de mercurio",
+        "Deben hacerse tres mediciones con intervalos de tres minutos y obtener su promedio, si difieren en más de 5 mmHg, deben hacerse nuevas mediciones"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: I10."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión maligna",
+        "Enfermedad cerebral vascular",
+        "Disección aórtica",
+        "Enfermedad vascular periférica",
+        "Nefroesclerosis",
+        "Insuficiencia cardiaca congestiva",
+        "Cardiopatía coronaria",
+        "Arritmias cardiacas",
+        "Muerte súbita"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 698); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "En caso de no responder a un tratamiento convencional referir a nivel II de atención",
+        "Casos de urgencia y emergencia hipertensiva",
+        "Clínica sugestiva de hipertensión secundaria",
+        "Hipertensión refractaria a tratamiento convencional",
+        "Hipertensión en el embarazo"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

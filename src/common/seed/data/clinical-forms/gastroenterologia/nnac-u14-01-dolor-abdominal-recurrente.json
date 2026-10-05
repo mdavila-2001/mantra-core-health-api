@@ -1,0 +1,191 @@
+{
+  "code": "NNAC_U14_01_DOLOR_ABDOMINAL_RECURRENTE",
+  "name": "Dolor abdominal recurrente (NNAC)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 1 de la unidad 14 de las NNAC, pág. 767; CIE-10 R10; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cambio en características de deposiciones",
+        "Sangre en heces",
+        "Náuseas",
+        "Vómitos",
+        "Fiebre",
+        "Síndrome miccional",
+        "Pérdida de peso",
+        "Visceromegalias",
+        "Masa palpable",
+        "Úlceras peri-rectales",
+        "Fisura anal",
+        "Irritación peritoneal",
+        "Duración del dolor al menos seis meses, localizado en hemiabdomen superior, sin evidencia de lesión orgánica (incluso endoscopia)",
+        "Dolor de igual duración que el anterior, ubicado en hemiabdomen inferior",
+        "Mejora con la defecación o cambios en la consistencia de las heces",
+        "Dolor de duración de seis meses",
+        "Aparece en mayores de cinco años",
+        "Localización peri-umbilical, de tipo sordo y continuo",
+        "Sin relación con comidas o sueño",
+        "No altera el desarrollo pondoestatural",
+        "El paciente está asintomático en períodos inter-crisis",
+        "Tres o más episodios de dolor paroxístico en los últimos 12 meses",
+        "Localizado en la línea media",
+        "Cefalea",
+        "Fotofobia",
+        "Distensión abdominal",
+        "Eructos frecuentes",
+        "Paciente preocupado por una enfermedad: hipocondría",
+        "Preocupado por un defecto físico: trastorno dismórfico",
+        "Preocupación excesiva por dolor sin otros síntomas: trastorno somatomorfo por dolor"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 767. Dolor abdominal que ocurre por lo menos una vez al mes, por tres meses consecutivos, con intensidad suficiente como para alterar la vida normal del paciente."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dolor abdominal recurrente orgánico",
+        "Dolor abdominal recurrente funcional",
+        "Ulcerosa",
+        "Dismotilidad",
+        "Inespecífica",
+        "Síndrome de intestino irritable: incomodidad o dolor abdominal asociados a la defecación, acompañados de evacuaciones anormales de tipo diarrea o constipación",
+        "Dolor abdominal funcional",
+        "Migraña abdominal",
+        "Aerofagia",
+        "Dolor abdominal recurrente por somatización"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma completo",
+        "Sangre oculta en heces",
+        "Coproparasitológico seriado",
+        "Radiografía simple de abdomen de pie",
+        "Serie esófago gastroduodenal",
+        "Colon por enema",
+        "Ecografía abdominal",
+        "Endoscopia alta",
+        "Tomografía computarizada (en casos seleccionados)",
+        "Colonoscopía",
+        "Laparoscopia en casos seleccionados"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: R10."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 1, pág. 767); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}
