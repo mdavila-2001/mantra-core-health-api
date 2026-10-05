@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuditController } from './audit.controller';
+import { AuditOutcome } from '../dto/audit-event.dto';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -47,7 +48,11 @@ describe('AuditController', () => {
 
   it('delega recordEvent (UC-10-04)', async () => {
     const d = build();
-    const dto = { action: 'UPDATE', entity: 'users', outcome: 'SUCCESS' };
+    const dto = {
+      action: 'UPDATE',
+      entity: 'users',
+      outcome: AuditOutcome.SUCCESS,
+    };
     await d.controller.recordEvent(dto, actor);
     expect(d.eventsService.recordEvent).toHaveBeenCalledWith(dto, actor);
   });
@@ -83,7 +88,7 @@ describe('AuditController', () => {
 
   it('delega recordThirdPartyAccess (UC-10-12)', async () => {
     const d = build();
-    const dto = { channel: 'DELEGATED', outcome: 'SUCCESS' };
+    const dto = { channel: 'DELEGATED', outcome: AuditOutcome.SUCCESS };
     await d.controller.recordThirdPartyAccess(dto, actor);
     expect(d.thirdPartyService.record).toHaveBeenCalledWith(dto, actor);
   });

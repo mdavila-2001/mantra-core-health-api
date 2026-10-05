@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuditEventsService } from './audit-events.service';
+import { AuditOutcome } from '../dto/audit-event.dto';
+import { PurposeOfUse } from '../dto/third-party-access.dto';
 import { CONCEPTS } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -72,7 +74,7 @@ describe('AuditEventsService', () => {
         {
           patientProfileId: 'p1',
           resourceId: 'r1',
-          purposeOfUse: 'TREATMENT',
+          purposeOfUse: PurposeOfUse.TREATMENT,
         },
         actor,
       );
@@ -85,7 +87,7 @@ describe('AuditEventsService', () => {
     it('sella el evento en la cadena y devuelve el hash', async () => {
       const d = build();
       const res = await d.service.recordEvent(
-        { action: 'UPDATE', entity: 'users', outcome: 'SUCCESS' },
+        { action: 'UPDATE', entity: 'users', outcome: AuditOutcome.SUCCESS },
         actor,
       );
       expect(res).toMatchObject({

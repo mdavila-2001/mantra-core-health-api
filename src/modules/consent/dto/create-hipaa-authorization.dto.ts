@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
+  IsEnum,
   IsISO8601,
   IsOptional,
   IsString,
@@ -9,7 +9,10 @@ import {
 } from 'class-validator';
 
 /** Cómo caduca la autorización: por fecha o por evento descrito. */
-export type HipaaExpirationType = 'DATE' | 'EVENT';
+export enum HipaaExpirationType {
+  DATE = 'DATE',
+  EVENT = 'EVENT',
+}
 
 /** Cuerpo de `POST /consent/hipaa-authorizations` (UC-07-04). */
 export class CreateHipaaAuthorizationDto {
@@ -54,8 +57,8 @@ export class CreateHipaaAuthorizationDto {
   /**
    * Valor de expiration type mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Tipo de expiración', enum: ['DATE', 'EVENT'] })
-  @IsIn(['DATE', 'EVENT'])
+  @ApiProperty({ description: 'Tipo de expiración', enum: HipaaExpirationType })
+  @IsEnum(HipaaExpirationType)
   expirationType!: HipaaExpirationType;
 
   /**

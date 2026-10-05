@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsIn,
+  IsEnum,
   IsOptional,
   IsString,
   MaxLength,
@@ -9,7 +9,11 @@ import {
 } from 'class-validator';
 
 /** Plataformas de dispositivo soportadas. */
-export type DevicePlatform = 'IOS' | 'ANDROID' | 'WEB';
+export enum DevicePlatform {
+  IOS = 'IOS',
+  ANDROID = 'ANDROID',
+  WEB = 'WEB',
+}
 
 /** Cuerpo de `POST /iam/users/:id/devices` (UC-01-05). */
 export class CreateDeviceDto {
@@ -27,10 +31,10 @@ export class CreateDeviceDto {
    */
   @ApiPropertyOptional({
     description: 'Plataforma',
-    enum: ['IOS', 'ANDROID', 'WEB'],
+    enum: DevicePlatform,
   })
   @IsOptional()
-  @IsIn(['IOS', 'ANDROID', 'WEB'])
+  @IsEnum(DevicePlatform)
   platform?: DevicePlatform;
 
   /**

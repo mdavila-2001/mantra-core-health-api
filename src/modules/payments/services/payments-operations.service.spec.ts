@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsOperationsService } from './payments-operations.service';
+import { CurrencyCode } from '../dto/payment-intent.dto';
+import { FeeMethod, FeeType } from '../dto/payment-operations.dto';
 import { PaymentsCheckoutService } from './payments-checkout.service';
 import {
   CONCEPTS,
@@ -164,8 +166,8 @@ describe('PaymentsOperationsService', () => {
       tenantId: TENANT,
       code: 'GW-STD',
       name: 'Gateway estándar',
-      feeType: 'GATEWAY' as const,
-      method: 'PERCENTAGE' as const,
+      feeType: FeeType.GATEWAY as const,
+      method: FeeMethod.PERCENTAGE as const,
       percentage: '2.9',
     };
 
@@ -199,7 +201,7 @@ describe('PaymentsOperationsService', () => {
       grossAmount: '1500.00',
       feeAmount: '46.50',
       netAmount: '1453.50',
-      currency: 'BOB' as const,
+      currency: CurrencyCode.BOB as const,
       lines: [
         {
           paymentTransactionId: '44444444-4444-4444-4444-444444444444',
@@ -255,7 +257,7 @@ describe('PaymentsOperationsService', () => {
       tenantId: TENANT,
       payeeRefId: '55555555-5555-5555-5555-555555555555',
       gatewayId: GATEWAY,
-      currency: 'BOB' as const,
+      currency: CurrencyCode.BOB as const,
       periodStart: '2026-01-01T00:00:00Z',
       periodEnd: '2026-01-31T00:00:00Z',
       items: [
@@ -328,7 +330,7 @@ describe('PaymentsOperationsService', () => {
               externalTransactionId: 'ref-1',
               providerAmount: '150.00',
               providerStatusCode: 'PAID',
-              providerCurrencyCode: 'BOB',
+              providerCurrencyCode: CurrencyCode.BOB,
             },
           ],
         },
@@ -355,7 +357,7 @@ describe('PaymentsOperationsService', () => {
               externalTransactionId: 'orphan',
               providerAmount: '99.00',
               providerStatusCode: 'PAID',
-              providerCurrencyCode: 'BOB',
+              providerCurrencyCode: CurrencyCode.BOB,
             },
           ],
         },
@@ -390,7 +392,7 @@ describe('PaymentsOperationsService', () => {
               externalTransactionId: 'ref-1',
               providerAmount: '150.00',
               providerStatusCode: 'PAID',
-              providerCurrencyCode: 'BOB',
+              providerCurrencyCode: CurrencyCode.BOB,
             },
           ],
         },

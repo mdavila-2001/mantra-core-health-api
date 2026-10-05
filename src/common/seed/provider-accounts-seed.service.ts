@@ -10,6 +10,7 @@ import {
   TENANT_ROLE_CONCEPT_BY_CODE,
 } from '../../modules/directory/directory.concepts';
 import { IamUsersService } from '../../modules/iam/services';
+import { InitialRole } from '../../modules/iam/dto/create-user.dto';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 import { createdBy, touch } from '../persistence/audit-fields';
 import {
@@ -159,7 +160,7 @@ export class ProviderAccountsSeedService {
         // `initialRole` solo admite USER o SECURITY_ADMIN: es el rol GLOBAL de
         // la plataforma. El de dominio —farmacia, laboratorio…— vive en
         // `authz.roles` y se asigna aparte, acotado al tenant.
-        initialRole: 'USER',
+        initialRole: InitialRole.USER,
       },
       { id: SEED_ACTOR_ID, roles: ['SECURITY_ADMIN'] },
     );

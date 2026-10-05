@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 export const DSAR_TYPES = [
   'ACCESS',
@@ -13,6 +13,13 @@ export const DSAR_TRANSITIONS = [
   'COMPLETED',
   'REJECTED',
 ] as const;
+
+/** Jurisdicción aplicable a la solicitud DSAR. */
+export enum DsarJurisdiction {
+  PE = 'PE',
+  EU = 'EU',
+  US = 'US',
+}
 
 /** Cuerpo de `POST /privacy/dsar` (UC-10-08). */
 export class CreateDsarDto {
@@ -42,11 +49,11 @@ export class CreateDsarDto {
    */
   @ApiPropertyOptional({
     description: 'Jurisdicción aplicable',
-    enum: ['PE', 'EU', 'US'],
+    enum: DsarJurisdiction,
   })
   @IsOptional()
-  @IsIn(['PE', 'EU', 'US'])
-  jurisdiction?: string;
+  @IsEnum(DsarJurisdiction)
+  jurisdiction?: DsarJurisdiction;
 }
 
 /** Cuerpo de `PATCH /privacy/dsar/{id}` (UC-10-08). */

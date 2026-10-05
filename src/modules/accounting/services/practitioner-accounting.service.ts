@@ -29,6 +29,7 @@ import { toCents, fromCents } from './money';
 import { Appointments, Encounters } from '../../clinical/entities';
 import { Invoices } from '../../billing/entities';
 import { BILL } from '../../billing/billing.concepts';
+import { PostableDocumentType } from '../../billing/dto/posting.dto';
 import {
   PaidConsultationDto,
   PaidConsultationsResponseDto,
@@ -262,7 +263,7 @@ export class PractitionerAccountingService {
 
     await this.billingLedgerService.postToLedger(
       invoice.id,
-      { documentType: 'INVOICE', transactionId: created.id },
+      { documentType: PostableDocumentType.INVOICE, transactionId: created.id },
       actor,
     );
 

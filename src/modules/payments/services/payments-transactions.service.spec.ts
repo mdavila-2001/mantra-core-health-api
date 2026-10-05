@@ -10,6 +10,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsTransactionsService } from './payments-transactions.service';
 import {
+  TransactionOperation,
+  GatewayTransactionOutcome,
+} from '../dto/payment-transaction.dto';
+import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
@@ -38,7 +42,7 @@ function signCallback(
     /**
      * Valor de outcome mantenido por la instancia.
      */
-    outcome: 'CAPTURED' | 'FAILED' | 'AUTHORIZED';
+    outcome: GatewayTransactionOutcome;
     /**
      * Valor de authorization code mantenido por la instancia.
      */
@@ -131,7 +135,7 @@ describe('PaymentsTransactionsService', () => {
 
       const res = await d.service.processTransaction(
         'intent-1',
-        { operation: 'CAPTURE' },
+        { operation: TransactionOperation.CAPTURE },
         actor,
       );
 
@@ -271,7 +275,7 @@ describe('PaymentsTransactionsService', () => {
 
       await d.service.processTransaction(
         'intent-1',
-        { operation: 'AUTHORIZE' },
+        { operation: TransactionOperation.AUTHORIZE },
         actor,
       );
 
@@ -289,7 +293,7 @@ describe('PaymentsTransactionsService', () => {
       await expect(
         d.service.processTransaction(
           'intent-1',
-          { operation: 'SALE' },
+          { operation: TransactionOperation.SALE },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -308,7 +312,7 @@ describe('PaymentsTransactionsService', () => {
       await expect(
         d.service.processTransaction(
           'intent-1',
-          { operation: 'SALE' },
+          { operation: TransactionOperation.SALE },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -537,7 +541,7 @@ describe('PaymentsTransactionsService', () => {
       await expect(
         d.service.processTransaction(
           'intent-1',
-          { operation: 'SALE' },
+          { operation: TransactionOperation.SALE },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -565,7 +569,7 @@ describe('PaymentsTransactionsService', () => {
 
       const body = {
         gatewayTransactionRef: 'ref-1',
-        outcome: 'CAPTURED' as const,
+        outcome: GatewayTransactionOutcome.CAPTURED as const,
       };
       const res = await d.service.applyCallback('libelula', {
         ...body,
@@ -589,7 +593,7 @@ describe('PaymentsTransactionsService', () => {
       await expect(
         d.service.applyCallback('libelula', {
           gatewayTransactionRef: 'ref-1',
-          outcome: 'CAPTURED',
+          outcome: GatewayTransactionOutcome.CAPTURED,
           signature: 'deadbeef',
         }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
@@ -606,7 +610,7 @@ describe('PaymentsTransactionsService', () => {
 
       const body = {
         gatewayTransactionRef: 'ref-1',
-        outcome: 'CAPTURED' as const,
+        outcome: GatewayTransactionOutcome.CAPTURED as const,
       };
       const res = await d.service.applyCallback('libelula', {
         ...body,
@@ -757,7 +761,7 @@ describe('PaymentsTransactionsService', () => {
       await expect(
         d.service.applyCallback('libelula', {
           gatewayTransactionRef: 'unknown',
-          outcome: 'CAPTURED',
+          outcome: GatewayTransactionOutcome.CAPTURED,
         }),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });

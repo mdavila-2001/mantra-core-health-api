@@ -1,9 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Tipo de sujeto polimórfico al que refiere la evidencia. */
-export type EvidenceSubjectType =
-  'CONSENT' | 'HIPAA' | 'OBJECTION' | 'RESTRICTION' | 'TREATMENT';
+export enum EvidenceSubjectType {
+  CONSENT = 'CONSENT',
+  HIPAA = 'HIPAA',
+  OBJECTION = 'OBJECTION',
+  RESTRICTION = 'RESTRICTION',
+  TREATMENT = 'TREATMENT',
+}
 
 /** Cuerpo de `POST /consent/consent-evidence` (UC-07-10). */
 export class CreateConsentEvidenceDto {
@@ -12,9 +23,9 @@ export class CreateConsentEvidenceDto {
    */
   @ApiProperty({
     description: 'Tipo de sujeto de la evidencia',
-    enum: ['CONSENT', 'HIPAA', 'OBJECTION', 'RESTRICTION', 'TREATMENT'],
+    enum: EvidenceSubjectType,
   })
-  @IsIn(['CONSENT', 'HIPAA', 'OBJECTION', 'RESTRICTION', 'TREATMENT'])
+  @IsEnum(EvidenceSubjectType)
   subjectType!: EvidenceSubjectType;
 
   /**

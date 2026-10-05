@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsIn,
+  IsEnum,
   IsOptional,
   IsString,
   IsUUID,
@@ -10,7 +10,10 @@ import {
 } from 'class-validator';
 
 /** Tipos de factor MFA soportados. */
-export type FactorType = 'TOTP' | 'WEBAUTHN';
+export enum FactorType {
+  TOTP = 'TOTP',
+  WEBAUTHN = 'WEBAUTHN',
+}
 
 /**
  * Cuerpo de `POST /iam/users/:id/mfa-factors` (UC-01-03).
@@ -24,10 +27,10 @@ export class MfaFactorDto {
    */
   @ApiPropertyOptional({
     description: 'Tipo de factor a enrolar',
-    enum: ['TOTP', 'WEBAUTHN'],
+    enum: FactorType,
   })
   @IsOptional()
-  @IsIn(['TOTP', 'WEBAUTHN'])
+  @IsEnum(FactorType)
   factorType?: FactorType;
 
   /**

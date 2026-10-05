@@ -1,12 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
+  IsEnum,
   IsIP,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
 } from 'class-validator';
+
+/** Resultado de un evento auditado. */
+export enum AuditOutcome {
+  SUCCESS = 'SUCCESS',
+  FAILURE = 'FAILURE',
+}
 
 /** Cuerpo de `POST /audit/events` — provenance quien-qué-cuándo (UC-10-04). */
 export class RecordAuditEventDto {
@@ -48,10 +54,10 @@ export class RecordAuditEventDto {
    */
   @ApiProperty({
     description: 'Resultado del evento',
-    enum: ['SUCCESS', 'FAILURE'],
+    enum: AuditOutcome,
   })
-  @IsIn(['SUCCESS', 'FAILURE'])
-  outcome!: string;
+  @IsEnum(AuditOutcome)
+  outcome!: AuditOutcome;
 
   /**
    * Identificador asociado a tenant.

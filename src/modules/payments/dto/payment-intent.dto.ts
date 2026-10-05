@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
+  IsEnum,
   IsISO8601,
   IsNumberString,
   IsOptional,
@@ -10,12 +10,17 @@ import {
 } from 'class-validator';
 
 /** Propósito del cobro; determina el `purpose_concept_id` del intent. */
-export type PaymentPurpose = 'INVOICE' | 'DEBT' | 'OTHER';
-export const PAYMENT_PURPOSES: readonly PaymentPurpose[] = [
-  'INVOICE',
-  'DEBT',
-  'OTHER',
-];
+export enum PaymentPurpose {
+  INVOICE = 'INVOICE',
+  DEBT = 'DEBT',
+  OTHER = 'OTHER',
+}
+
+/** Monedas soportadas por el módulo de pagos (ISO-4217). */
+export enum CurrencyCode {
+  BOB = 'BOB',
+  USD = 'USD',
+}
 
 /** Cuerpo de `POST /payments/intents` (UC-42-01). */
 export class CreatePaymentIntentDto {
@@ -52,16 +57,16 @@ export class CreatePaymentIntentDto {
    */
   @ApiProperty({
     description: 'Moneda ISO-4217 del cobro',
-    enum: ['BOB', 'USD'],
+    enum: CurrencyCode,
   })
-  @IsIn(['BOB', 'USD'])
-  currency!: 'BOB' | 'USD';
+  @IsEnum(CurrencyCode)
+  currency!: CurrencyCode;
 
   /**
    * Valor de purpose mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Propósito del cobro', enum: PAYMENT_PURPOSES })
-  @IsIn(PAYMENT_PURPOSES as readonly string[])
+  @ApiProperty({ description: 'Propósito del cobro', enum: PaymentPurpose })
+  @IsEnum(PaymentPurpose)
   purpose!: PaymentPurpose;
 
   /**

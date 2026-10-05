@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsIn,
+  IsEnum,
   IsISO8601,
   IsNumberString,
   IsOptional,
@@ -12,9 +12,19 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { CurrencyCode } from './payment-intent.dto';
 
 /** Método de cálculo de una tarifa. */
-export type FeeMethod = 'PERCENTAGE' | 'FIXED';
+export enum FeeMethod {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED = 'FIXED',
+}
+
+/** Quién cobra la tarifa. */
+export enum FeeType {
+  GATEWAY = 'GATEWAY',
+  PLATFORM = 'PLATFORM',
+}
 
 /** Cuerpo de `POST /payments/fee-schedules` (UC-42-10). */
 export class CreateFeeScheduleDto {
@@ -49,19 +59,19 @@ export class CreateFeeScheduleDto {
    */
   @ApiProperty({
     description: 'Quién cobra la tarifa',
-    enum: ['GATEWAY', 'PLATFORM'],
+    enum: FeeType,
   })
-  @IsIn(['GATEWAY', 'PLATFORM'])
-  feeType!: 'GATEWAY' | 'PLATFORM';
+  @IsEnum(FeeType)
+  feeType!: FeeType;
 
   /**
    * Valor de method mantenido por la instancia.
    */
   @ApiProperty({
     description: 'Modo de cálculo',
-    enum: ['PERCENTAGE', 'FIXED'],
+    enum: FeeMethod,
   })
-  @IsIn(['PERCENTAGE', 'FIXED'])
+  @IsEnum(FeeMethod)
   method!: FeeMethod;
 
   /**
@@ -213,9 +223,9 @@ export class ImportSettlementDto {
   /**
    * Valor de currency mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['BOB', 'USD'] })
-  @IsIn(['BOB', 'USD'])
-  currency!: 'BOB' | 'USD';
+  @ApiProperty({ enum: CurrencyCode })
+  @IsEnum(CurrencyCode)
+  currency!: CurrencyCode;
 
   /**
    * Valor de settled at mantenido por la instancia.
@@ -339,9 +349,9 @@ export class CreatePayoutDto {
   /**
    * Valor de currency mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['BOB', 'USD'] })
-  @IsIn(['BOB', 'USD'])
-  currency!: 'BOB' | 'USD';
+  @ApiProperty({ enum: CurrencyCode })
+  @IsEnum(CurrencyCode)
+  currency!: CurrencyCode;
 
   /**
    * Valor de period start mantenido por la instancia.
@@ -434,9 +444,9 @@ export class ProviderRecordDto {
   /**
    * Valor de provider currency code mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['BOB', 'USD'] })
-  @IsIn(['BOB', 'USD'])
-  providerCurrencyCode!: 'BOB' | 'USD';
+  @ApiProperty({ enum: CurrencyCode })
+  @IsEnum(CurrencyCode)
+  providerCurrencyCode!: CurrencyCode;
 
   /**
    * Valor de provider fee amount mantenido por la instancia.

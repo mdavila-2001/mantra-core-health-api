@@ -1,5 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
+import { PurposeOfUse } from './third-party-access.dto';
+
+/** Base legal del acceso a datos (HL7 purposeOfUse / legalBasis). */
+export enum DataAccessLegalBasis {
+  TREATMENT = 'TREATMENT',
+  CONSENT = 'CONSENT',
+  LEGAL_OBLIGATION = 'LEGAL_OBLIGATION',
+}
 
 /** Cuerpo de `POST /audit/data-access` (UC-10-01). */
 export class RecordDataAccessDto {
@@ -76,22 +90,22 @@ export class RecordDataAccessDto {
    */
   @ApiPropertyOptional({
     description: 'Propósito de uso codificado',
-    enum: ['TREATMENT', 'PAYMENT', 'OPERATIONS', 'COVERAGE', 'VERIFICATION'],
+    enum: PurposeOfUse,
   })
   @IsOptional()
-  @IsIn(['TREATMENT', 'PAYMENT', 'OPERATIONS', 'COVERAGE', 'VERIFICATION'])
-  purposeOfUse?: string;
+  @IsEnum(PurposeOfUse)
+  purposeOfUse?: PurposeOfUse;
 
   /**
    * Valor de legal basis mantenido por la instancia.
    */
   @ApiPropertyOptional({
     description: 'Base legal del acceso',
-    enum: ['TREATMENT', 'CONSENT', 'LEGAL_OBLIGATION'],
+    enum: DataAccessLegalBasis,
   })
   @IsOptional()
-  @IsIn(['TREATMENT', 'CONSENT', 'LEGAL_OBLIGATION'])
-  legalBasis?: string;
+  @IsEnum(DataAccessLegalBasis)
+  legalBasis?: DataAccessLegalBasis;
 
   /**
    * Identificador asociado a request.

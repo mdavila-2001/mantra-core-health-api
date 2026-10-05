@@ -11,6 +11,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsIntentsService } from './payments-intents.service';
+import { CurrencyCode, PaymentPurpose } from '../dto/payment-intent.dto';
+import { RiskDecision, SplitType } from '../dto/payment-flow.dto';
 import {
   CONCEPTS,
   ConflictException,
@@ -54,8 +56,8 @@ const baseIntentDto = {
   tenantId: '11111111-1111-1111-1111-111111111111',
   gatewayId: '22222222-2222-2222-2222-222222222222',
   amount: '150.00',
-  currency: 'BOB' as const,
-  purpose: 'INVOICE' as const,
+  currency: CurrencyCode.BOB as const,
+  purpose: PaymentPurpose.INVOICE as const,
   idempotencyKey: 'key-1',
 };
 
@@ -109,8 +111,8 @@ describe('PaymentsIntentsService', () => {
 
   describe('lockFxRate (UC-42-03)', () => {
     const fxDto = {
-      fromCurrency: 'USD' as const,
-      toCurrency: 'BOB' as const,
+      fromCurrency: CurrencyCode.USD as const,
+      toCurrency: CurrencyCode.BOB as const,
       lockedRate: '6.96',
       expiresAt: '2026-12-31T00:00:00Z',
     };
@@ -166,7 +168,11 @@ describe('PaymentsIntentsService', () => {
       await expect(
         d.service.lockFxRate(
           'intent-1',
-          { ...fxDto, fromCurrency: 'BOB', toCurrency: 'BOB' },
+          {
+            ...fxDto,
+            fromCurrency: CurrencyCode.BOB,
+            toCurrency: CurrencyCode.BOB,
+          },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -192,7 +198,7 @@ describe('PaymentsIntentsService', () => {
 
       const res = await d.service.assessRisk(
         'intent-1',
-        { riskScore: '85', decision: 'DECLINE' },
+        { riskScore: '85', decision: RiskDecision.DECLINE },
         actor,
       );
 
@@ -208,7 +214,11 @@ describe('PaymentsIntentsService', () => {
 
       const res = await d.service.assessRisk(
         'intent-1',
-        { riskScore: '10', decision: 'APPROVE', threeDsAuthenticated: true },
+        {
+          riskScore: '10',
+          decision: RiskDecision.APPROVE,
+          threeDsAuthenticated: true,
+        },
         actor,
       );
 
@@ -240,7 +250,7 @@ describe('PaymentsIntentsService', () => {
 
       const res = await d.service.addSplit(
         'intent-1',
-        { ...splitBase, splitType: 'PERCENTAGE', percentage: '15' },
+        { ...splitBase, splitType: SplitType.PERCENTAGE, percentage: '15' },
         actor,
       );
 
@@ -259,7 +269,7 @@ describe('PaymentsIntentsService', () => {
       await expect(
         d.service.addSplit(
           'intent-1',
-          { ...splitBase, splitType: 'AMOUNT', amount: '50.00' },
+          { ...splitBase, splitType: SplitType.AMOUNT, amount: '50.00' },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -270,7 +280,7 @@ describe('PaymentsIntentsService', () => {
       await expect(
         d.service.addSplit(
           'intent-1',
-          { ...splitBase, splitType: 'AMOUNT' },
+          { ...splitBase, splitType: SplitType.AMOUNT },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

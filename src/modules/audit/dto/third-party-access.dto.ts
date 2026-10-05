@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsIn, IsOptional, IsUUID } from 'class-validator';
+import { AuditOutcome } from './audit-event.dto';
 
 export const TPA_CHANNELS = [
   'DELEGATED',
@@ -7,6 +8,15 @@ export const TPA_CHANNELS = [
   'IDENTITY',
   'PHARMACY',
 ] as const;
+
+/** Propósito de uso declarado al acceder a datos de un tercero (HL7 PurposeOfUse). */
+export enum PurposeOfUse {
+  TREATMENT = 'TREATMENT',
+  PAYMENT = 'PAYMENT',
+  OPERATIONS = 'OPERATIONS',
+  COVERAGE = 'COVERAGE',
+  VERIFICATION = 'VERIFICATION',
+}
 
 /**
  * Cuerpo de `POST /audit/third-party-access` (UC-10-12). El `channel` decide en qué
@@ -28,21 +38,21 @@ export class RecordThirdPartyAccessDto {
    */
   @ApiProperty({
     description: 'Resultado del acceso',
-    enum: ['SUCCESS', 'FAILURE'],
+    enum: AuditOutcome,
   })
-  @IsIn(['SUCCESS', 'FAILURE'])
-  outcome!: string;
+  @IsEnum(AuditOutcome)
+  outcome!: AuditOutcome;
 
   /**
    * Valor de purpose of use mantenido por la instancia.
    */
   @ApiPropertyOptional({
     description: 'Propósito de uso',
-    enum: ['TREATMENT', 'PAYMENT', 'OPERATIONS', 'COVERAGE', 'VERIFICATION'],
+    enum: PurposeOfUse,
   })
   @IsOptional()
-  @IsIn(['TREATMENT', 'PAYMENT', 'OPERATIONS', 'COVERAGE', 'VERIFICATION'])
-  purposeOfUse?: string;
+  @IsEnum(PurposeOfUse)
+  purposeOfUse?: PurposeOfUse;
 
   // --- DELEGATED ---
   /**

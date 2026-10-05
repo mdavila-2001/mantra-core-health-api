@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ThirdPartyAccessService } from './third-party-access.service';
+import { AuditOutcome } from '../dto/audit-event.dto';
 import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -42,7 +43,7 @@ describe('ThirdPartyAccessService (UC-10-12)', () => {
     const res = await d.service.record(
       {
         channel: 'DELEGATED',
-        outcome: 'SUCCESS',
+        outcome: AuditOutcome.SUCCESS,
         delegatingPractitionerProfileId: 'pr1',
       },
       actor,
@@ -68,7 +69,11 @@ describe('ThirdPartyAccessService (UC-10-12)', () => {
   it('canal PHARMACY registra el log de farmacia', async () => {
     const d = build();
     const res = await d.service.record(
-      { channel: 'PHARMACY', outcome: 'SUCCESS', pharmacyId: 'ph-x' },
+      {
+        channel: 'PHARMACY',
+        outcome: AuditOutcome.SUCCESS,
+        pharmacyId: 'ph-x',
+      },
       actor,
     );
     expect(res.id).toBe('ph1');

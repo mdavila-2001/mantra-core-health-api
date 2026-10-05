@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsISO8601, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsISO8601, IsOptional, IsUUID } from 'class-validator';
 
 /** Acción permitida/denegada por una provisión granular. */
-export type ProvisionAction = 'PERMIT' | 'DENY';
+export enum ProvisionAction {
+  PERMIT = 'PERMIT',
+  DENY = 'DENY',
+}
 
 /**
  * Provisión granular de un consentimiento: qué acción (permit/deny) sobre qué
@@ -14,9 +17,9 @@ export class ConsentProvisionInputDto {
    */
   @ApiProperty({
     description: 'Acción de la provisión',
-    enum: ['PERMIT', 'DENY'],
+    enum: ProvisionAction,
   })
-  @IsIn(['PERMIT', 'DENY'])
+  @IsEnum(ProvisionAction)
   action!: ProvisionAction;
 
   /**

@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID } from 'class-validator';
+import { IsEnum, IsUUID } from 'class-validator';
 
 /** Tipos de documento que pueden contabilizarse (UC-17-06). */
-export type PostableDocumentType =
-  'INVOICE' | 'BILL' | 'PAYMENT_RECEIVED' | 'PAYMENT_MADE';
+export enum PostableDocumentType {
+  INVOICE = 'INVOICE',
+  BILL = 'BILL',
+  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
+  PAYMENT_MADE = 'PAYMENT_MADE',
+}
 
 /** Cuerpo de `POST /billing/documents/{id}:post-to-ledger` (UC-17-06). */
 export class PostToLedgerDto {
@@ -12,9 +16,9 @@ export class PostToLedgerDto {
    */
   @ApiProperty({
     description: 'Tipo del documento origen',
-    enum: ['INVOICE', 'BILL', 'PAYMENT_RECEIVED', 'PAYMENT_MADE'],
+    enum: PostableDocumentType,
   })
-  @IsIn(['INVOICE', 'BILL', 'PAYMENT_RECEIVED', 'PAYMENT_MADE'])
+  @IsEnum(PostableDocumentType)
   documentType!: PostableDocumentType;
 
   /**

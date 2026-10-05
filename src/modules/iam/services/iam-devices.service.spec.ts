@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IamDevicesService } from './iam-devices.service';
+import { DevicePlatform } from '../dto/create-device.dto';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'u1', roles: ['USER'] };
@@ -58,7 +59,7 @@ describe('IamDevicesService (UC-01-05)', () => {
 
     const res = await d.service.register(
       'u1',
-      { deviceFingerprint: 'fp', platform: 'IOS', trust: true },
+      { deviceFingerprint: 'fp', platform: DevicePlatform.IOS, trust: true },
       actor,
     );
 

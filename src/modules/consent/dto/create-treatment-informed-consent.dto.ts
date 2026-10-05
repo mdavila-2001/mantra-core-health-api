@@ -1,8 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Decisión del paciente sobre el tratamiento. */
-export type TreatmentDecision = 'ACCEPTED' | 'DECLINED';
+export enum TreatmentDecision {
+  ACCEPTED = 'ACCEPTED',
+  DECLINED = 'DECLINED',
+}
 
 /** Cuerpo de `POST /consent/treatment-informed-consents` (UC-07-08). */
 export class CreateTreatmentInformedConsentDto {
@@ -31,9 +40,9 @@ export class CreateTreatmentInformedConsentDto {
    */
   @ApiProperty({
     description: 'Decisión del paciente',
-    enum: ['ACCEPTED', 'DECLINED'],
+    enum: TreatmentDecision,
   })
-  @IsIn(['ACCEPTED', 'DECLINED'])
+  @IsEnum(TreatmentDecision)
   decision!: TreatmentDecision;
 
   /**

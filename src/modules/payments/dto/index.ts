@@ -1,9 +1,9 @@
 export {
   CreatePaymentIntentDto,
   PaymentIntentResponseDto,
-  PAYMENT_PURPOSES,
+  PaymentPurpose,
+  CurrencyCode,
 } from './payment-intent.dto';
-export type { PaymentPurpose } from './payment-intent.dto';
 
 export {
   OpenCheckoutSessionDto,
@@ -14,9 +14,9 @@ export {
   RiskAssessmentResponseDto,
   CreateSplitDto,
   SplitResponseDto,
-  RISK_DECISIONS,
+  RiskDecision,
+  SplitType,
 } from './payment-flow.dto';
-export type { RiskDecision, SplitType } from './payment-flow.dto';
 
 export {
   ProcessTransactionDto,
@@ -28,9 +28,9 @@ export {
   CreateCancellationDto,
   CancellationResponseDto,
   StatusInquiryResponseDto,
-  TRANSACTION_OPERATIONS,
+  TransactionOperation,
+  GatewayTransactionOutcome,
 } from './payment-transaction.dto';
-export type { TransactionOperation } from './payment-transaction.dto';
 
 export {
   CreateFeeScheduleDto,
@@ -44,5 +44,6 @@ export {
   ProviderRecordDto,
   CreateReconciliationRunDto,
   ReconciliationRunResponseDto,
+  FeeMethod,
+  FeeType,
 } from './payment-operations.dto';
-export type { FeeMethod } from './payment-operations.dto';

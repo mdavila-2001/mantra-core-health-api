@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IamUsersService } from './iam-users.service';
+import { GlobalRole, RoleAction } from '../dto/global-role.dto';
 import {
   CONCEPTS,
   ConflictException,
@@ -169,7 +170,7 @@ describe('IamUsersService', () => {
       await expect(
         d.service.changeGlobalRole(
           'u1',
-          { role: 'SECURITY_ADMIN', action: 'GRANT' },
+          { role: GlobalRole.SECURITY_ADMIN, action: RoleAction.GRANT },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -183,7 +184,7 @@ describe('IamUsersService', () => {
       await expect(
         d.service.changeGlobalRole(
           'u1',
-          { role: 'SECURITY_ADMIN', action: 'REVOKE' },
+          { role: GlobalRole.SECURITY_ADMIN, action: RoleAction.REVOKE },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);

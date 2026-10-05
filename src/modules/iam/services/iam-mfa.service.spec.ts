@@ -11,6 +11,7 @@ import { generate, generateSecret } from 'otplib';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IamMfaService } from './iam-mfa.service';
+import { FactorType } from '../dto/mfa-factor.dto';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -101,7 +102,7 @@ describe('IamMfaService (UC-01-03)', () => {
 
     const res = await d.service.enrollOrVerify(
       'u1',
-      { factorType: 'TOTP' },
+      { factorType: FactorType.TOTP },
       actor,
     );
 
@@ -132,7 +133,7 @@ describe('IamMfaService (UC-01-03)', () => {
 
     const res = await d.service.enrollOrVerify(
       'u1',
-      { factorType: 'WEBAUTHN' },
+      { factorType: FactorType.WEBAUTHN },
       actor,
     );
 
@@ -223,7 +224,11 @@ describe('IamMfaService (UC-01-03)', () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.enrollOrVerify('u1', { factorType: 'TOTP' }, actor as any),
+      d.service.enrollOrVerify(
+        'u1',
+        { factorType: FactorType.TOTP },
+        actor as any,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 

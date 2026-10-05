@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 /** Resolución de una objeción: se mantiene (upheld) o se rechaza (rejected). */
-export type ObjectionResolution = 'UPHELD' | 'REJECTED';
+export enum ObjectionResolution {
+  UPHELD = 'UPHELD',
+  REJECTED = 'REJECTED',
+}
 
 /** Cuerpo de `POST /consent/patient-objections/{id}/resolve` (UC-07-12). */
 export class ResolvePatientObjectionDto {
@@ -11,9 +14,9 @@ export class ResolvePatientObjectionDto {
    */
   @ApiProperty({
     description: 'Resultado de la resolución',
-    enum: ['UPHELD', 'REJECTED'],
+    enum: ObjectionResolution,
   })
-  @IsIn(['UPHELD', 'REJECTED'])
+  @IsEnum(ObjectionResolution)
   resolution!: ObjectionResolution;
 
   /**

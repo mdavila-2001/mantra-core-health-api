@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
+  IsEnum,
   IsNumberString,
   IsOptional,
   IsString,
@@ -19,12 +19,18 @@ const POSITIVE_MONEY_MESSAGE =
   'El importe debe ser un número positivo con hasta 2 decimales';
 
 /** Operación solicitada al gateway. */
-export type TransactionOperation = 'AUTHORIZE' | 'CAPTURE' | 'SALE';
-export const TRANSACTION_OPERATIONS: readonly TransactionOperation[] = [
-  'AUTHORIZE',
-  'CAPTURE',
-  'SALE',
-];
+export enum TransactionOperation {
+  AUTHORIZE = 'AUTHORIZE',
+  CAPTURE = 'CAPTURE',
+  SALE = 'SALE',
+}
+
+/** Resultado informado por el gateway para una transacción. */
+export enum GatewayTransactionOutcome {
+  CAPTURED = 'CAPTURED',
+  FAILED = 'FAILED',
+  AUTHORIZED = 'AUTHORIZED',
+}
 
 /** Cuerpo de `POST /payments/intents/{id}/transactions` (UC-42-05). */
 export class ProcessTransactionDto {
@@ -33,9 +39,9 @@ export class ProcessTransactionDto {
    */
   @ApiProperty({
     description: 'Operación a ejecutar',
-    enum: TRANSACTION_OPERATIONS,
+    enum: TransactionOperation,
   })
-  @IsIn(TRANSACTION_OPERATIONS as readonly string[])
+  @IsEnum(TransactionOperation)
   operation!: TransactionOperation;
 
   /**
@@ -119,10 +125,10 @@ export class GatewayCallbackDto {
    */
   @ApiProperty({
     description: 'Resultado informado por el gateway',
-    enum: ['CAPTURED', 'FAILED', 'AUTHORIZED'],
+    enum: GatewayTransactionOutcome,
   })
-  @IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])
-  outcome!: 'CAPTURED' | 'FAILED' | 'AUTHORIZED';
+  @IsEnum(GatewayTransactionOutcome)
+  outcome!: GatewayTransactionOutcome;
 
   /**
    * Valor de authorization code mantenido por la instancia.

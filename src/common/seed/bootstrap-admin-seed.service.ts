@@ -9,6 +9,7 @@ import {
 import { TenantMemberships } from '../../modules/directory/entities';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { IamUsersService } from '../../modules/iam/services';
+import { InitialRole } from '../../modules/iam/dto/create-user.dto';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 import { createdBy } from '../persistence/audit-fields';
 
@@ -207,7 +208,7 @@ export class BootstrapAdminSeedService {
           displayName: 'Administrador de arranque',
           email,
           password,
-          initialRole: 'SECURITY_ADMIN',
+          initialRole: InitialRole.SECURITY_ADMIN,
         },
         { id: BOOTSTRAP_ACTOR_ID, roles: ['SECURITY_ADMIN'] },
       );

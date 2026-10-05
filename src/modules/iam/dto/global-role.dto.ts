@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn } from 'class-validator';
+import { IsEnum } from 'class-validator';
 
 /**
  * Roles globales gestionables.
@@ -8,52 +8,40 @@ import { IsIn } from 'class-validator';
  * auto-registro lo otorgara, o a las que un tercero dio de alta (C-18): sin esa
  * concesión el titular no puede usar el autoservicio del portal.
  */
-export type GlobalRole =
-  | 'USER'
-  | 'SECURITY_ADMIN'
-  | 'SUPERADMIN'
-  | 'PATIENT'
+export enum GlobalRole {
+  USER = 'USER',
+  SECURITY_ADMIN = 'SECURITY_ADMIN',
+  SUPERADMIN = 'SUPERADMIN',
+  PATIENT = 'PATIENT',
   /** Quién sos: agenda, recursos, tu propio perfil profesional. */
-  | 'PRACTITIONER'
+  PRACTITIONER = 'PRACTITIONER',
   /**
    * Qué podés leer y escribir de un paciente — es PHI.
    *
    * No se concede al registrarse: la matrícula nace `PENDING` y declararla no
    * es probarla. Lo concede un administrador, que es el acto que la verifica.
    */
-  | 'CLINICIAN';
+  CLINICIAN = 'CLINICIAN',
+}
 /** Acción sobre el rol. */
-export type RoleAction = 'GRANT' | 'REVOKE';
+export enum RoleAction {
+  GRANT = 'GRANT',
+  REVOKE = 'REVOKE',
+}
 
 /** Cuerpo de `POST /iam/users/:id/global-roles` (UC-01-10). */
 export class GlobalRoleDto {
   /**
    * Valor de role mantenido por la instancia.
    */
-  @ApiProperty({
-    enum: [
-      'USER',
-      'SECURITY_ADMIN',
-      'SUPERADMIN',
-      'PATIENT',
-      'PRACTITIONER',
-      'CLINICIAN',
-    ],
-  })
-  @IsIn([
-    'USER',
-    'SECURITY_ADMIN',
-    'SUPERADMIN',
-    'PATIENT',
-    'PRACTITIONER',
-    'CLINICIAN',
-  ])
+  @ApiProperty({ enum: GlobalRole })
+  @IsEnum(GlobalRole)
   role!: GlobalRole;
 
   /**
    * Valor de action mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['GRANT', 'REVOKE'] })
-  @IsIn(['GRANT', 'REVOKE'])
+  @ApiProperty({ enum: RoleAction })
+  @IsEnum(RoleAction)
   action!: RoleAction;
 }

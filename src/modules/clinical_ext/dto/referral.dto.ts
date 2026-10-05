@@ -1,12 +1,18 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
-  IsIn,
+  IsEnum,
   IsISO8601,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
 } from 'class-validator';
+
+/** Decisión del tenant destino sobre una referencia recibida. */
+export enum ReferralDecision {
+  ACCEPT = 'ACCEPT',
+  REJECT = 'REJECT',
+}
 
 /** Cuerpo de `POST /referrals` (UC-18-07). */
 @ApiSchema({ name: 'ClinicalExtCreateReferralDto' })
@@ -117,11 +123,11 @@ export class RespondReferralDto {
    * Valor de decision mantenido por la instancia.
    */
   @ApiProperty({
-    enum: ['ACCEPT', 'REJECT'],
+    enum: ReferralDecision,
     description: 'Decisión del tenant destino',
   })
-  @IsIn(['ACCEPT', 'REJECT'])
-  decision!: 'ACCEPT' | 'REJECT';
+  @IsEnum(ReferralDecision)
+  decision!: ReferralDecision;
 }
 
 /** Respuesta de una referencia. */

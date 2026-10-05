@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsIn,
+  IsEnum,
   IsISO8601,
   IsNumberString,
   IsOptional,
@@ -10,6 +10,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
+import { CurrencyCode } from './payment-intent.dto';
 
 /** Cuerpo de `POST /payments/checkout-sessions` (UC-42-02). */
 export class OpenCheckoutSessionDto {
@@ -155,16 +156,16 @@ export class CreateFxLockDto {
   /**
    * Valor de from currency mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Moneda de origen', enum: ['BOB', 'USD'] })
-  @IsIn(['BOB', 'USD'])
-  fromCurrency!: 'BOB' | 'USD';
+  @ApiProperty({ description: 'Moneda de origen', enum: CurrencyCode })
+  @IsEnum(CurrencyCode)
+  fromCurrency!: CurrencyCode;
 
   /**
    * Valor de to currency mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Moneda destino', enum: ['BOB', 'USD'] })
-  @IsIn(['BOB', 'USD'])
-  toCurrency!: 'BOB' | 'USD';
+  @ApiProperty({ description: 'Moneda destino', enum: CurrencyCode })
+  @IsEnum(CurrencyCode)
+  toCurrency!: CurrencyCode;
 
   /**
    * Valor de locked rate mantenido por la instancia.
@@ -222,12 +223,11 @@ export class FxLockResponseDto {
 }
 
 /** Decisión del motor de riesgo. */
-export type RiskDecision = 'APPROVE' | 'REVIEW' | 'DECLINE';
-export const RISK_DECISIONS: readonly RiskDecision[] = [
-  'APPROVE',
-  'REVIEW',
-  'DECLINE',
-];
+export enum RiskDecision {
+  APPROVE = 'APPROVE',
+  REVIEW = 'REVIEW',
+  DECLINE = 'DECLINE',
+}
 
 /** Cuerpo de `POST /payments/intents/{id}/risk-assessment` (UC-42-04). */
 export class CreateRiskAssessmentDto {
@@ -241,8 +241,8 @@ export class CreateRiskAssessmentDto {
   /**
    * Valor de decision mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Decisión del motor', enum: RISK_DECISIONS })
-  @IsIn(RISK_DECISIONS as readonly string[])
+  @ApiProperty({ description: 'Decisión del motor', enum: RiskDecision })
+  @IsEnum(RiskDecision)
   decision!: RiskDecision;
 
   /**
@@ -293,7 +293,7 @@ export class RiskAssessmentResponseDto {
   /**
    * Valor de decision mantenido por la instancia.
    */
-  @ApiProperty({ enum: RISK_DECISIONS })
+  @ApiProperty({ enum: RiskDecision })
   decision!: RiskDecision;
 
   /**
@@ -307,7 +307,10 @@ export class RiskAssessmentResponseDto {
 }
 
 /** Tipo de reparto de un split. */
-export type SplitType = 'AMOUNT' | 'PERCENTAGE';
+export enum SplitType {
+  AMOUNT = 'AMOUNT',
+  PERCENTAGE = 'PERCENTAGE',
+}
 
 /** Cuerpo de `POST /payments/intents/{id}/splits` (UC-42-11). */
 export class CreateSplitDto {
@@ -326,9 +329,9 @@ export class CreateSplitDto {
    */
   @ApiProperty({
     description: 'Modo de reparto',
-    enum: ['AMOUNT', 'PERCENTAGE'],
+    enum: SplitType,
   })
-  @IsIn(['AMOUNT', 'PERCENTAGE'])
+  @IsEnum(SplitType)
   splitType!: SplitType;
 
   /**

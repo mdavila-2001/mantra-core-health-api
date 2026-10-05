@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsIn,
+  IsEnum,
   IsOptional,
   IsString,
   Matches,
@@ -10,7 +10,10 @@ import {
 } from 'class-validator';
 
 /** Roles con los que puede arrancar un usuario recién creado. */
-export type InitialRole = 'USER' | 'SECURITY_ADMIN';
+export enum InitialRole {
+  USER = 'USER',
+  SECURITY_ADMIN = 'SECURITY_ADMIN',
+}
 
 /** Cuerpo de `POST /iam/users` (UC-01-01). */
 export class CreateUserDto {
@@ -76,9 +79,9 @@ export class CreateUserDto {
    */
   @ApiPropertyOptional({
     description: 'Rol inicial',
-    enum: ['USER', 'SECURITY_ADMIN'],
+    enum: InitialRole,
   })
   @IsOptional()
-  @IsIn(['USER', 'SECURITY_ADMIN'])
+  @IsEnum(InitialRole)
   initialRole?: InitialRole;
 }
