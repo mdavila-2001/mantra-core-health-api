@@ -992,7 +992,11 @@ export class ConceptsService {
       edges,
       count: nodes.length,
       limit,
-      possiblyTruncated: nodes.length === limit,
+      // `searchConcepts` devuelve el total al leer el paraguas del glosario.
+      // Compararlo con el total evita marcar como truncado un catálogo que
+      // tenga exactamente `limit` nodos, y detecta la truncación real aunque
+      // algún registro de la página no tenga slug y no pueda dibujarse.
+      possiblyTruncated: (page.total ?? page.items.length) > page.items.length,
     };
   }
 

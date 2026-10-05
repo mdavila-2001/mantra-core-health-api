@@ -1442,6 +1442,7 @@ describe('ConceptsService', () => {
             { conceptId: 'concept-2', slug: 'pulmon', display: 'Pulmón' },
           ],
           count: 2,
+          total: 2,
           limit: 2,
         } as any);
         relationshipsRepo.findByTypesForSources.mockResolvedValue([
@@ -1492,8 +1493,33 @@ describe('ConceptsService', () => {
           ],
           count: 2,
           limit: 2,
-          possiblyTruncated: true,
+          possiblyTruncated: false,
         });
+      });
+
+      it('marca truncamiento cuando el total supera los nodos de la página', async () => {
+        const { service } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+            },
+            { conceptId: 'concept-2', slug: 'pulmon', display: 'Pulmón' },
+          ],
+          count: 2,
+          total: 3,
+          limit: 2,
+        } as any);
+
+        await expect(service.readGlossaryGraph('ES', 2)).resolves.toMatchObject(
+          {
+            count: 2,
+            limit: 2,
+            possiblyTruncated: true,
+          },
+        );
       });
 
       it('no consulta relaciones si la página no contiene nodos publicables', async () => {

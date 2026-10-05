@@ -3,8 +3,8 @@ import { GLOSSARY_TERMS } from './glossary-terms.catalog';
 import { GLOSSARY_CATEGORIES, GLOSSARY_TAGS } from './glossary-taxonomy';
 
 /**
- * Guarda de consistencia del catálogo curado: fija que los 64 términos, las
- * 11 categorías y las 16 etiquetas están exactamente como el spec de
+ * Guarda de consistencia del catálogo curado: fija que los 80 términos, las
+ * 12 categorías y las 21 etiquetas están exactamente como el spec de
  * reconstrucción los declara, y que ninguna edición futura pueda colar una
  * categoría o etiqueta fuera de la taxonomía aprobada («vocabulario no
  * médico») sin que esta prueba se rompa primero.
@@ -13,8 +13,8 @@ describe('Catálogo curado del glosario médico', () => {
   const categoryKeys = new Set(GLOSSARY_CATEGORIES.map((entry) => entry.key));
   const tagKeys = new Set(GLOSSARY_TAGS.map((entry) => entry.key));
 
-  it('declara exactamente 69 términos', () => {
-    expect(GLOSSARY_TERMS).toHaveLength(69);
+  it('declara exactamente 80 términos', () => {
+    expect(GLOSSARY_TERMS).toHaveLength(80);
   });
 
   it('declara exactamente 12 categorías y 21 etiquetas', () => {
@@ -78,7 +78,7 @@ describe('Catálogo curado del glosario médico', () => {
     expect(pruebas).toEqual(['electrocardiograma', 'espirometria']);
   });
 
-  it('toda relación apunta a un slug conocido, salvo la única excepción documentada de la fuente', () => {
+  it('toda relación apunta a un slug conocido', () => {
     const slugs = new Set(GLOSSARY_TERMS.map((term) => term.slug));
     const huerfanas: string[] = [];
     for (const term of GLOSSARY_TERMS) {
@@ -90,13 +90,9 @@ describe('Catálogo curado del glosario médico', () => {
         }
       }
     }
-    // Ver la nota de cabecera de `glossary-terms.catalog.ts`: la fuente curada
-    // declara una única relación huérfana (`hipertension-arterial
-    // PROCEDURE->control-de-signos-vitales`). Cualquier otra relación huérfana
-    // que aparezca acá es una regresión real, no la discrepancia conocida.
-    expect(huerfanas).toEqual([
-      'hipertension-arterial PROCEDURE->control-de-signos-vitales',
-    ]);
+    // `control-de-signos-vitales` ya tiene ficha propia; el catálogo no admite
+    // relaciones huérfanas.
+    expect(huerfanas).toEqual([]);
   });
 
   it('siete términos tienen contenido en inglés revisado, y coinciden entre definición clínica y resumen', () => {

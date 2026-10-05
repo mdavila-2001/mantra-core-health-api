@@ -1,6 +1,6 @@
 # Plan ejecutable: ampliar el glosario clínico y su mapa de relaciones
 
-Fecha de corte: 2026-10-05. Estado: piloto de extracción local hecho; endpoint API y vista de red implementados en PRs; expansión anatómica inicial y tipado explícito de síntomas en curso.
+Fecha de corte: 2026-10-05. Estado: entregas del primer corte completadas: API/UI de red, expansión anatómica, revisión de candidatos MedlinePlus, procedencia en seed y registro de licencias. La importación masiva de nuevas nomenclaturas no forma parte de este corte.
 
 ## Objetivo
 
@@ -10,11 +10,12 @@ No existe una lista finita de “todos los sitios médicos existentes”. La cob
 
 ## Estado y línea base local
 
-- Línea base auditada antes de esta entrega: 69 términos, 12 categorías y 104 relaciones tipadas. Esta entrega añade cinco términos (cuatro estructuras anatómicas y el procedimiento de control de signos vitales) y cinco relaciones; el destino previamente huérfano ahora resuelve. El catálogo resultante queda en 74 términos y 109 relaciones tipadas.
+- Línea base auditada antes de la expansión anatómica: 69 términos, 12 categorías y 104 relaciones tipadas. La expansión añadió diez estructuras anatómicas y un procedimiento, resolvió el destino previamente huérfano y separó cerebro, cerebelo y tronco encefálico del concepto más amplio `encéfalo`. El catálogo queda en 80 términos y 120 relaciones tipadas.
 - Se descargó y procesó la distribución comprimida de temas de salud de MedlinePlus del 2026-10-03. Resultado: 2.033 temas bilingües, 6.104 referencias a temas relacionados y 3.165 referencias cruzadas; cinco temas carecen de resumen.
-- La extracción encontró 17 candidatos de nombre exacto para revisión frente al catálogo curado. Son candidatos, no equivalencias aprobadas.
-- Archivos de ejecución: `2026-10-05/medlineplus-manifest.json`, `medlineplus-topics.jsonl`, `medlineplus-review-queue.csv`, `medlineplus-glossary-coverage.json` y `curated-glossary-profile.json`.
-- La interfaz incluye un enlace a la vista de red (PR #959, fusionado); el backend expone nodos y aristas tipadas (PR #571, abierto en la fecha de esta actualización).
+- La revisión de los 17 candidatos exactos concluyó: 14 corresponden al mismo concepto y 3 sólo aportan contexto relacionado. Ninguno añade una definición copiada ni fusiona conceptos. Decisiones en `MEDLINEPLUS-REVIEW.md`.
+- El informe versionado de decisiones está en `MEDLINEPLUS-REVIEW.md`; la descarga completa y sus archivos intermedios no se distribuyen con el repositorio.
+- La interfaz incluye el enlace a la vista de red; la rama de trabajo contiene el endpoint de nodos y aristas tipadas y su integración de lectura.
+- Referencias editoriales persistidas en `concept_properties.glossary-sources` para anatomía y candidatos revisados, con ID, URL, idioma, versión, fecha, atribución, derechos y tipo de correspondencia. La ficha las presenta en «Fuente y código».
 
 ## Fuentes por ola
 
@@ -56,15 +57,15 @@ Antes de activar cada fuente se guardan: organismo editor, URL del dataset/API, 
 
 ## Modelo de relaciones para el mapa
 
-La interfaz inicial lee las relaciones existentes del catálogo y muestra vecinos directos, dirección y categoría. El vocabulario ya incluye `SYMPTOM`; esta entrega tipa explícitamente las relaciones salientes de asma, neumonía e insuficiencia cardiaca hacia síntomas existentes. Las relaciones inversas `DISEASE` desde el síntoma se conservan donde estaban. Las aristas representan asociaciones del catálogo, no causalidad ni consejo clínico.
+La interfaz lee las relaciones existentes del catálogo y muestra vecinos directos, dirección y categoría. El vocabulario ya incluye `SYMPTOM`; las relaciones salientes de asma, neumonía e insuficiencia cardiaca hacia síntomas están tipadas explícitamente. Las relaciones inversas `DISEASE` desde el síntoma se conservan donde estaban. Las aristas representan asociaciones del catálogo, no causalidad ni consejo clínico.
 
-La red global se paginará o filtrará por categoría cuando el catálogo crezca. El primer corte limita la respuesta, expone `possiblyTruncated` y deja seleccionar un término central. Las aristas deben tener etiqueta textual accesible además de color, navegación a fichas y un aviso fijo: son asociaciones catalogadas y no recomendaciones médicas.
+La red devuelve hasta 500 nodos, expone `possiblyTruncated` y deja seleccionar un término central. Las aristas tienen etiqueta textual accesible, navegación a fichas y un aviso de que son asociaciones catalogadas y no recomendaciones médicas. Con 80 nodos el conjunto no se acerca al límite; paginación/filtro quedan como regla condicional de escalado, no como trabajo abierto en este corte.
 
 ## Profundización anatómica
 
 Priorizar por sistema y dependencia entre estructuras: cardiovascular; respiratorio; digestivo; renal/urinario; nervioso; musculoesquelético; endocrino; tegumentario; hematológico e inmunitario. Cada término debe indicar localización, componentes principales, función, conexiones anatómicas relevantes y diferencias con términos que suelen confundirse. Añadir primero las estructuras que habiliten relaciones con enfermedades, síntomas y pruebas ya presentes. El atlas visual es un índice de placas y no sustituye una definición clínica estructurada.
 
-Primera pasada del catálogo actual: revisar corazón, pulmón, hígado, riñón, encéfalo y columna vertebral. Esta entrega añade páncreas, estómago, piel y médula espinal con definiciones originales y referencias editoriales NCBI Bookshelf. La siguiente ronda anatómica sigue con intestino, vasos sanguíneos y huesos; cerebro/cerebelo/tronco encefálico sólo se separan si el modelo aclara que no son duplicados de `encéfalo`.
+Primera pasada anatómica completada: corazón, pulmón, hígado, riñón, encéfalo y columna vertebral revisados; se añadieron páncreas, estómago, piel, médula espinal, intestino, vasos sanguíneos y huesos con definiciones propias y referencias editoriales NCBI Bookshelf. Cerebro, cerebelo y tronco encefálico tienen nodos separados enlazados a `encéfalo`; la ficha de éste ya no presenta «cerebro» como sinónimo, para no duplicar conceptos. Las referencias quedaron persistidas en `glossary-sources` y se muestran en la ficha.
 
 ## Validaciones de cada lote
 
@@ -77,10 +78,10 @@ Primera pasada del catálogo actual: revisar corazón, pulmón, hígado, riñón
 
 ## Entregas y criterio de salida
 
-1. **P0, implementado en PRs**: grafo API/UI, lectura desde mock y enlace en glosario; compilación completada para la UI y rama de origen API.
-2. **P1**: cerrar el piloto MedlinePlus con revisión de los 17 candidatos y hoja de discrepancias; añadir trazabilidad de procedencia al esquema/seed.
-3. **P2**: expandir definiciones anatómicas y vocabulario por sistema, empezando por conceptos conectados al catálogo actual.
-4. **P3**: añadir fuentes una por una después de revisar licencia y formato; importar candidatos por lote con control editorial. MedlinePlus XML y las otras capas españolas ya tienen importadores en `tools/terminology-import/`.
-5. **P4, primera parte implementada**: tipar explícitamente algunas aristas enfermedad→síntoma; ampliar cobertura tras revisión clínica y escalar mapa a navegación filtrada/paginada según tamaño.
+1. **P0, completado**: grafo API/UI, lectura desde mock, ficha y enlace en el glosario.
+2. **P1, completado**: los 17 candidatos tienen decisión documentada; 14 referencias equivalentes y 3 contextuales están en el seed; IDs, URLs, idiomas, versión, fecha, atribución y derechos se conservan.
+3. **P2, primera cobertura completada**: anatomía priorizada y subdivisiones del encéfalo están relacionadas sin duplicar conceptos.
+4. **P3, primera ola completada**: MedlinePlus y NCBI Bookshelf están documentados como referencias; `SOURCE-REGISTER.md` fija las condiciones de reutilización para cada fuente evaluada.
+5. **P4, completado para el tamaño actual**: relaciones de síntomas explícitas, red accesible y acotada, selección de término y aviso clínico. El umbral de 500 nodos para activar paginación/filtro aún no se alcanza.
 
 La primera liberación de contenido se acepta cuando cada término nuevo tiene fuente reutilizable, definición ES revisada, sinónimos depurados, relaciones no huérfanas y estado editorial explícito; el conteo de términos por sí solo no es criterio de calidad.
