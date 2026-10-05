@@ -63,3 +63,14 @@ Un proveedor nuevo implementa `TtsProviderPort` y se registra en el factory del 
   cambia la identidad de sus assets: los anteriores dejan de encontrarse y hay que
   volver a pre-generar lo que corresponda.
 - Un rebuild real requiere subir versión de plantilla, voz, modelo, normalizador o formato. No se sobrescribe silenciosamente un asset READY con la misma identidad.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 verificó el aislamiento de caché/contenido por
+tenant, el cifrado de valores dinámicos y las rutas internas de generación. El
+informe y la matriz de regresión están en
+[`docs/revision-backend-2026-10-04/modulos/audio_assets.md`](../../../docs/revision-backend-2026-10-04/modulos/audio_assets.md).
+
+```bash
+corepack yarn test src/modules/audio_assets --runInBand --silent
+```

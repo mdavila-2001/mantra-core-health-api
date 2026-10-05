@@ -24,3 +24,10 @@ Agrupa los componentes relacionados con **identity assurance** y mantiene cohesi
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/identity_assurance.md)
+identifica que los comandos administrativos de casos y evidencia no atan el UUID
+al tenant ni al sujeto autorizado. La corrida dirigida pasó 17 suites y 139 tests,
+sin cobertura de RLS, archivos o dos tenants reales.

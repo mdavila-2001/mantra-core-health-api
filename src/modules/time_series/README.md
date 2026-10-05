@@ -161,9 +161,8 @@ ni `raw_value`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/time_series` — 89 pruebas (18 ingesta + 8 normalización +
-15 administración + 16 consulta + 18 del repositorio de Timescale + 14 de delegación de los dos
-controladores).
+`corepack yarn test src/modules/time_series --runInBand --silent` — 6 suites y 89 pruebas
+aprobadas durante la revisión.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -201,3 +200,8 @@ controladores).
   `GovernedBackfillApplied` sale al outbox con la ventana; encadenar el refresco es del worker.
 - **`lab_analyzer_event_series` y `payment_gateway_metric_series`** se pueden ingerir por
   `points/batch-ingest` y consultar, pero ningún caso de uso del módulo 58 les da un endpoint propio.
+
+## Revisión ALOVIDA
+
+La referencia de consentimiento de ubicación se exige pero todavía no se verifica contra la
+política canónica; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/time_series.md).

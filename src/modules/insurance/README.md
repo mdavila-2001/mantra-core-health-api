@@ -236,3 +236,12 @@ Reglas que no se deducen del código:
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](../../../docs/revision-backend-2026-10-04/modulos/insurance.md)
+identificó pendientes en el camino legacy de reclamos, conciliación, roles de
+lectura, cálculo de varianza y límites de lotes. La corrida dirigida actual
+deja 37 suites y 626 tests pasando, con un test rojo que espera una matriz de
+roles distinta de la que hoy declara el controlador. Esa discrepancia debe
+resolverse con una decisión de acceso y pruebas HTTP por tenant.

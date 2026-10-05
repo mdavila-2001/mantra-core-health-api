@@ -48,11 +48,11 @@ remediación y publicación de drafts genéricos.
 `workload_assessments`, `assessment_control_results`, `assessment_findings`,
 `remediation_plans`, `remediation_actions`, `governance_change_log`, `draft_records`.
 
-## Reglas de negocio
+## Reglas de negocio y límites verificados
 
 - **UPSERT por code** en dominios/clasificaciones/políticas (unicidad).
 - **Legal hold ACTIVE excluye** objetivos del barrido de retención (UC-11-05 ⊃ UC-11-08).
-- **Idempotencia** por `transfer_reference` (transferencias) y `publish_reference` (drafts).
+- **Transferencias:** `transfer_reference` se comprueba antes de insertar. La publicación de draft tiene control optimista (`row_version`) y estado `DRAFT`, pero necesita una prueba de concurrencia para confirmar el manejo HTTP del conflicto.
 - **Segregación de funciones**: el verificador de una acción no puede ser el asignado.
 - **Cierre condicional**: un hallazgo se cierra y un plan se completa solo cuando
   todas las acciones asociadas están VERIFIED.
@@ -62,6 +62,11 @@ remediación y publicación de drafts genéricos.
   (`MET`/`BREACHED`/`NOT_MEASURED` — sin medición no se afirma cumplimiento).
 - Cada cambio de gobierno deja rastro en `governance_change_log`; los barridos y
   publicaciones dejan `record_revisions` (append-only).
+- **Limitaciones abiertas de la revisión:** el barrido genérico registra éxito con
+  contadores en cero sin disponer filas de negocio; las asociaciones de assurance
+  no validan aún que control, resultado y hallazgo pertenezcan a la misma
+  evaluación; y la creación de bindings de residencia deja referencias inválidas
+  al manejo de FK. Véase el [informe de revisión](../../../docs/revision-backend-2026-10-04/modulos/system_ops.md).
 
 ## Permisos y auth
 
@@ -83,6 +88,6 @@ Pino estructurado (`operation`, ids); nunca secretos ni PHI.
 ## Tests
 
 - Unit: `services/*.service.spec.ts` y `controllers/*.spec.ts` (repos/em/servicios
-  mockeados). `npx jest src/modules/system_ops`.
+  mockeados). Evidencia de revisión: `corepack yarn test src/modules/system_ops --runInBand --silent` → 10 suites, 86 pruebas aprobadas.
 - Smoke de contrato: `test/smoke/modules/system_ops.smoke.ts`
   (`export const SYSTEM_OPS_SMOKE`).

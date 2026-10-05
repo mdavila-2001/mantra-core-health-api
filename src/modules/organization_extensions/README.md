@@ -65,3 +65,14 @@ Pino estructurado por operación (`orgext.hospital.specialize`,
   `controllers/*.controller.spec.ts` (mockean servicios).
 - Smoke: `test/smoke/modules/organization_extensions.smoke.ts`
   (`ORGANIZATION_EXTENSIONS_SMOKE`).
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 identificó que las mutaciones por UUID de
+hospital, licencia y afiliación necesitan comprobar el tenant propietario antes
+de cambiar estado. El detalle y la matriz de regresión están en
+[`docs/revision-backend-2026-10-04/modulos/organization_extensions.md`](../../../docs/revision-backend-2026-10-04/modulos/organization_extensions.md).
+
+```bash
+corepack yarn test src/modules/organization_extensions --runInBand --silent
+```

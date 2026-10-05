@@ -43,3 +43,14 @@ para no duplicar mutaciones).
 Dominio (`domain/*.spec.ts`: guarda SSRF con IPv4/IPv6/mapeadas/encoding, plan, aprobación),
 cliente HTTP contra un servidor local real, autorización por handler, y
 `test/integration/qa-execution.int-spec.ts` de extremo a extremo.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó las barreras de destino, SSRF, límites y
+segregación de aprobación en el alcance estático revisado. El informe con la
+matriz de regresión está en
+[`docs/revision-backend-2026-10-04/modulos/qa_execution.md`](../../../docs/revision-backend-2026-10-04/modulos/qa_execution.md).
+
+```bash
+corepack yarn test src/modules/qa_execution --runInBand --silent
+```

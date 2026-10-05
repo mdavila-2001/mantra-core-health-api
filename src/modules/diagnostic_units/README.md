@@ -64,7 +64,9 @@ asignación de especialistas; más la reproyección del perfil público.
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
 `SECURITY_ADMIN` (`@Roles('SECURITY_ADMIN')`) y `@CurrentUser()` como actor.
-Los identificadores de ruta se validan con `ParseUUIDPipe`.
+Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos todavía
+no comparan el tenant activo contra los recursos cargados por UUID; ver la
+[revisión ALOVIDA](../../../docs/revision-backend-2026-10-04/modulos/diagnostic_units.md).
 
 ## Conceptos
 
@@ -85,3 +87,5 @@ reglas de aseguradora, importes internos ni PHI.
   `EntityManager`) y controladores (mockean servicios).
 - Smoke transversal: `test/smoke/modules/diagnostic_units.smoke.ts`
   (`DIAGNOSTIC_UNITS_SMOKE`) encadena los 12 casos de uso.
+- `corepack yarn test src/modules/diagnostic_units --runInBand --silent`: 11
+  suites y 94 pruebas aprobadas durante la revisión.

@@ -39,3 +39,11 @@ Ver [ADR-0023](../../docs/adr/ADR-0023-puertos-persistencia-read-write.md) y
 2. Implementar `DataConnection` y registrarla.
 3. Implementar los puertos del módulo que lo vaya a usar.
 4. Añadir su regla a la tabla de enrutado. El arranque validará que la ruta sea posible.
+
+## Despliegue gradual y verificación
+
+El enrutado nuevo es opt-in mediante `PERSISTENCE_PORTS_MODULES`; sin variable
+los módulos reciben la sesión directa heredada. Hoy el piloto es `scheduling`.
+Ejecutar `corepack yarn test --runInBand --silent src/persistence`. El inventario
+y plan de migración están en el
+[informe de revisión](../../docs/revision-backend-2026-10-04/nucleo/app-persistencia-observabilidad.md).

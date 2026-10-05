@@ -1,12 +1,8 @@
-# IAM Module
+# IAM
 
-Identity & Access Management for the ALOVIDA Health API: users, credentials
-(password + federated), sessions and refresh-token rotation, MFA factors, devices,
-global roles, account lockouts and an append-only security-event trail.
-
-Built on the shared foundation in `src/common`: `EntityManager` (MikroORM 7,
-PostgreSQL) with service-owned transactions, `CONCEPTS.*` for every `*_concept_id`
-FK, `TokenService` for JWT/refresh tokens, domain exceptions, and Pino logging.
+Identidad y acceso de ALOVIDA: cuentas, credenciales, sesiones y refresh tokens,
+MFA, dispositivos, roles globales, bloqueos y eventos de seguridad. La revisión de
+esta unidad está en [el informe de IAM](../../../docs/revision-backend-2026-10-04/modulos/iam.md).
 
 ## Endpoints
 
@@ -96,9 +92,9 @@ each operation. Secrets, password hashes, raw tokens and PHI are never logged.
 - `services/` — business logic, transaction owners.
 - `controllers/` — thin HTTP layer.
 
-## Tests
+## Pruebas
 
-Unit tests (`*.spec.ts`) mock `EntityManager` and repositories; run with
-`NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/iam`. Each service
-covers happy path, not-found, conflict and a business rule; controllers verify
-delegation.
+Ejecutar `corepack yarn test src/modules/iam --runInBand --silent`. El 2026-10-05
+pasaron 22 suites y 359 pruebas. Son principalmente unitarias con repositorios y
+servicios simulados: no sustituyen pruebas HTTP contra el filtro global, PostgreSQL,
+almacenamiento de objetos ni el ciclo de vida de precargas anónimas.

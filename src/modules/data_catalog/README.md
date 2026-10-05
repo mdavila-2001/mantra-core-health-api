@@ -76,3 +76,7 @@ PUT sobre algo aprobado            ──> revisión N+1 en NEEDS_REVIEW; lo apr
   cambios 4,7 s. Lease: 5 min; tres reclamos sin terminar ⇒ `FAILED / MAX_ATTEMPTS_EXCEEDED`.
 - Pruebas: dominio y autorización en `*.spec.ts`; PostgreSQL real en
   `test/integration/data-catalog.int-spec.ts` (opt-in `DATA_CATALOG_IT_DB_URL`).
+- Revisión ALOVIDA: las precondiciones de revisión no exponen siempre un `reason`
+  estable; ver [el informe](../../../docs/revision-backend-2026-10-04/modulos/data_catalog.md).
+- `corepack yarn test src/modules/data_catalog --runInBand --silent`: 4 suites y
+  48 pruebas aprobadas durante la revisión.
