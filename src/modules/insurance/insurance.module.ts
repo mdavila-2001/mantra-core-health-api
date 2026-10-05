@@ -54,6 +54,7 @@ import {
   InsurancePortabilityPdfService,
   PractitionerSettlementBatchesService,
   InsuranceCampaignsService,
+  InsurerContextService,
   InsurerReceivedClaimsService,
 } from './services';
 import {
@@ -175,6 +176,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurancePortabilityPdfService,
     PractitionerSettlementBatchesService,
     InsuranceCampaignsService,
+    InsurerContextService,
     InsurerReceivedClaimsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
