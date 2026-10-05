@@ -56354,7 +56354,7 @@ paths:
           description: Sin acceso al directorio.
         '404':
           description: Paciente fuera del alcance autorizado.
-        '412':
+        '422':
           description: Perfiles no disponibles para mensajería o bloqueados.
       security:
         - bearer: []
