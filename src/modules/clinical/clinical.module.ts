@@ -62,6 +62,8 @@ import {
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
 import { SchedulingBookingsRepository } from '../scheduling/repositories';
+import { ClinicalPrescriptionsController } from './controllers/clinical-prescriptions.controller';
+import { PrescriptionDocumentsService } from './services/prescription-documents.service';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -82,6 +84,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
+    ClinicalPrescriptionsController,
   ],
   providers: [
     // Repositorios
@@ -116,6 +119,7 @@ import { SchedulingBookingsRepository } from '../scheduling/repositories';
     ImmunizationsService,
     ClinicalReadService,
     ClinicalNotificationsService,
+    PrescriptionDocumentsService,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:

@@ -25,6 +25,17 @@ import {
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
+import { PatientPortalProxies } from '../../profiles/entities/patient_portal_proxies.entity';
+import { PROF } from '../../profiles/profiles.concepts';
+import { ValueSets } from '../../terminology/entities/value_sets.entity';
+
+/** Códigos internos de value set requeridos para lectura delegada. */
+export const CLINICAL_PROXY_SCOPE = {
+  SUMMARY_READ: 'patient-portal-clinical-summary-read',
+  PRESCRIPTIONS_READ: 'patient-portal-prescriptions-read',
+} as const;
+type ClinicalProxyScope =
+  (typeof CLINICAL_PROXY_SCOPE)[keyof typeof CLINICAL_PROXY_SCOPE];
 
 /**
  * Cara de lectura del registro clínico (UC-39-20).
@@ -159,11 +170,17 @@ export class ClinicalReadService {
   async assertPuedeLeerHistoria(
     patientProfileId: string,
     actor: AuthenticatedUser,
+    proxyScope: ClinicalProxyScope = CLINICAL_PROXY_SCOPE.SUMMARY_READ,
   ): Promise<void> {
     if (actor.roles.includes('SUPERADMIN')) return;
 
     if (!actor.roles.some((rol) => ROLES_QUE_ATIENDEN.includes(rol))) {
-      await this.assertOwnRecord(patientProfileId, actor);
+      await this.assertOwnRecord(
+        patientProfileId,
+        actor,
+        undefined,
+        proxyScope,
+      );
       return;
     }
 
@@ -186,7 +203,7 @@ export class ClinicalReadService {
 
     // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
     // profesional que lee su propia historia.
-    await this.assertOwnRecord(patientProfileId, actor, link);
+    await this.assertOwnRecord(patientProfileId, actor, link, proxyScope);
   }
 
   /**
@@ -321,6 +338,7 @@ export class ClinicalReadService {
     linkResuelto?: Awaited<
       ReturnType<PersonAccountLinksRepository['findActiveByUser']>
     >,
+    proxyScope: ClinicalProxyScope = CLINICAL_PROXY_SCOPE.SUMMARY_READ,
   ): Promise<void> {
     const em = this.em.fork();
     // El vínculo puede venir ya resuelto del gate: la base no garantiza que sea
@@ -335,7 +353,29 @@ export class ClinicalReadService {
       patientProfileId,
     );
 
-    if (!link || !perfil || perfil.profileId !== link.personId) {
+    if (perfil && link && perfil.profileId === link.personId) return;
+
+    // Un representante puede leer mientras el poder siga activo y vigente.
+    // La autorización se vuelve a comprobar en cada descarga.
+    const ahora = new Date();
+    const proxy = perfil
+      ? await em.findOne(PatientPortalProxies, {
+          patientProfileId,
+          proxyUserId: actor.id,
+          statusConceptId: PROF.PROXY_ACTIVE,
+          $and: [
+            { $or: [{ validFrom: null }, { validFrom: { $lte: ahora } }] },
+            { $or: [{ validTo: null }, { validTo: { $gt: ahora } }] },
+          ],
+        })
+      : null;
+    const scope = proxy
+      ? await em.findOne(ValueSets, {
+          id: proxy.scopeValueSetId,
+          internalCode: proxyScope,
+        })
+      : null;
+    if (!proxy || !scope) {
       this.logger.warn(
         {
           operation: 'clinical.patient.read.denied',
