@@ -326,9 +326,9 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     ).toEqual(['credentials.0.issuingInstitutionText']);
   });
 
-  it('rechaza una clave que el elemento no declara', async () => {
-    // `forbidNonWhitelisted` también rige adentro del arreglo: la ciudad del
-    // lugar de estudio no tiene dónde guardarse y no se acepta en silencio.
+  it('acepta la ciudad, el país y la profesión del título (v4.2.29 / v4.2.41)', async () => {
+    // Antes se rechazaba la ciudad porque no tenía columna: el formulario la
+    // pedía y la API la tiraba. Ahora los tres tienen dónde guardarse.
     expect(
       await propiedadesConError({
         ...ALTA_MINIMA,
@@ -337,10 +337,44 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
             credentialTypeConceptId: TIPO,
             number: 'T-1',
             issuingCityText: 'La Paz',
+            issuingCountryText: 'Bolivia',
+            professionConceptId: '6f1c2c3e-1d2a-5b7f-9c3d-2e4f5a6b7c8d',
           },
         ],
       }),
-    ).toEqual(['credentials.0.issuingCityText']);
+    ).toEqual([]);
+  });
+
+  it('rechaza una profesión que no es un uuid', async () => {
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'T-1',
+            professionConceptId: 'Ingeniero de sistemas',
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.professionConceptId']);
+  });
+
+  it('rechaza una clave que el elemento no declara', async () => {
+    // `forbidNonWhitelisted` también rige adentro del arreglo: lo que no tiene
+    // dónde guardarse no se acepta en silencio.
+    expect(
+      await propiedadesConError({
+        ...ALTA_MINIMA,
+        credentials: [
+          {
+            credentialTypeConceptId: TIPO,
+            number: 'T-1',
+            issuingProvinceText: 'Murillo',
+          },
+        ],
+      }),
+    ).toEqual(['credentials.0.issuingProvinceText']);
   });
 });
 

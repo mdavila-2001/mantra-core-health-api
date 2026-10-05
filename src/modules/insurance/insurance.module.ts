@@ -96,6 +96,8 @@ import { DataReleaseRepository } from '../health_data/repositories/data-release.
 import { HealthProvenanceRepository } from '../health_data/repositories/health-provenance.repository';
 import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repository';
 import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
+import { PractitionerInsuranceNetworksController } from './controllers/practitioner-insurance-networks.controller';
+import { PractitionerInsuranceNetworksService } from './services/practitioner-insurance-networks.service';
 
 /**
  * Módulo Insurance (26): redes, coberturas, elegibilidad, autorización previa,
@@ -118,6 +120,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     MessagingModule,
   ],
   controllers: [
+    PractitionerInsuranceNetworksController,
     MyClaimsController,
     InsuranceBackboneController,
     CoverageController,
@@ -138,6 +141,7 @@ import { DataAccessLogRepository } from '../audit/repositories/data-access-log.r
     InsurerPatientsController,
   ],
   providers: [
+    PractitionerInsuranceNetworksService,
     MyClaimsService,
     // Repositorios
     CatalogRepository,

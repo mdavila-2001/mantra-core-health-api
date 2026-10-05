@@ -38,6 +38,33 @@ export class UpdateOwnCredentialDto {
   @MaxLength(200)
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se cursó. Un texto vacío permite borrarla. */
+  @ApiPropertyOptional({ maxLength: 120 })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(120)
+  issuingCityText?: string;
+
+  /** País donde se cursó, como texto. Un texto vacío permite borrarlo. */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(100)
+  issuingCountryText?: string;
+
+  /** Profesión que acredita, miembro de `VS_BO_PROFESSION` (COB-2023). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsUUID()
+  professionConceptId?: string;
+
+  /** Cómo se llama el título. Un texto vacío permite borrarlo. */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @ValidateIf((_dto, value: unknown) => value !== undefined)
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
   /** Fecha de emisión en formato ISO 8601, como en el alta. */
   @ApiPropertyOptional({ format: 'date' })
   @ValidateIf((_dto, value: unknown) => value !== undefined)

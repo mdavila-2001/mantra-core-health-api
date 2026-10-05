@@ -61,6 +61,7 @@ import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -159,6 +160,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
+    BoProfessionsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
@@ -188,6 +190,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     LegalEntityTypesSeedService,
     AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
+    BoProfessionsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
