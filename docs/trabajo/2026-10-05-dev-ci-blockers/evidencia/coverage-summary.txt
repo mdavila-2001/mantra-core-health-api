@@ -1,0 +1,15 @@
+Command: NODE_OPTIONS=--max-old-space-size=6144 corepack yarn test:cov
+Exit: 0
+
+=============================== Coverage summary ===============================
+Statements   : 74.68% ( 40742/54551 )
+Branches     : 69% ( 21761/31537 )
+Functions    : 60.54% ( 8498/14037 )
+Lines        : 75.64% ( 39275/51920 )
+================================================================================
+
+Test Suites: 1 skipped, 807 passed, 807 of 808 total
+Tests:       1 skipped, 9990 passed, 9991 total
+Snapshots:   0 total
+Time:        174.231 s
+Ran all test suites.

@@ -16,6 +16,9 @@ describe('TerminologyConceptsController', () => {
       addRelationship: jest.fn(),
       upsertProperties: jest.fn(),
       deprecateConcept: jest.fn(),
+      readGlossaryGraph: jest.fn(() =>
+        Promise.resolve({ nodes: [], edges: [], count: 0, limit: 500 }),
+      ),
       searchConcepts: jest.fn(() =>
         Promise.resolve({ items: [], count: 0, limit: 50 }),
       ),
@@ -174,6 +177,100 @@ describe('TerminologyConceptsController', () => {
         undefined,
         { offset: 0, includeValueSets: false },
       );
+    });
+
+    it.each([
+      { raw: '', expected: true },
+      { raw: '1', expected: true },
+      { raw: 'false', expected: false },
+    ])(
+      'interpreta `includeValueSets=$raw` como $expected',
+      async ({ raw, expected }) => {
+        const { controller, service } = build();
+
+        await controller.searchConcepts(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          raw,
+        );
+
+        expect(service.searchConcepts).toHaveBeenCalledWith(
+          undefined,
+          undefined,
+          50,
+          undefined,
+          { includeValueSets: expected },
+        );
+      },
+    );
+
+    it.each([
+      { limit: undefined, ids: ['c-1', 'c-2'], expected: 50 },
+      {
+        limit: 10,
+        ids: Array.from({ length: 60 }, (_, index) => `c-${index}`),
+        expected: 60,
+      },
+    ])(
+      'amplía el límite a $expected cuando se resuelven ids',
+      async ({ limit, ids, expected }) => {
+        const { controller, service } = build();
+
+        await controller.searchConcepts(undefined, undefined, limit, ids);
+
+        expect(service.searchConcepts).toHaveBeenCalledWith(
+          undefined,
+          undefined,
+          expected,
+          ids,
+          { includeValueSets: false },
+        );
+      },
+    );
+
+    it('rechaza un idioma desconocido antes de consultar el catálogo', () => {
+      const { controller, service } = build();
+
+      expect(() =>
+        controller.searchConcepts(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          'pt',
+        ),
+      ).toThrow(BadRequestException);
+      expect(service.searchConcepts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('grafo del glosario', () => {
+    it('delega el idioma normalizado y el límite explícito', async () => {
+      const { controller, service } = build();
+      const expected = {
+        nodes: [],
+        edges: [],
+        count: 0,
+        limit: 24,
+        possiblyTruncated: false,
+      };
+      service.readGlossaryGraph.mockResolvedValue(expected);
+
+      await expect(controller.readGlossaryGraph('en', 24)).resolves.toBe(
+        expected,
+      );
+      expect(service.readGlossaryGraph).toHaveBeenCalledWith('EN', 24);
+    });
+
+    it('conserva idioma ausente y aplica el límite por defecto de 500', async () => {
+      const { controller, service } = build();
+
+      await controller.readGlossaryGraph();
+
+      expect(service.readGlossaryGraph).toHaveBeenCalledWith(undefined, 500);
     });
   });
 });

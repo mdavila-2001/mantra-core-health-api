@@ -163,6 +163,17 @@ describe('buildInsurerPatientPageQuery', () => {
       ).sql,
     ).toContain("'0001-01-01'");
   });
+
+  it('ordena por la fecha de creación en UTC y conserva el desempate estable', () => {
+    const { sql } = buildInsurerPatientPageQuery(
+      criteria({ sortBy: 'createdAt', sortDirection: 'desc' }),
+    );
+
+    expect(sql).toContain(
+      `to_char(pa.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US') as sort_value`,
+    );
+    expect(sql).toContain('order by sort_value desc, pa.profile_id::text desc');
+  });
 });
 
 describe('directory scope and counts', () => {
@@ -176,6 +187,25 @@ describe('directory scope and counts', () => {
     );
     expect(none.sql).toContain('where exists');
     expect(none.sql).toContain('and not exists');
+  });
+  it('accepts the same carrier as a tenant filter without denying the scope', () => {
+    const filtered = buildInsurerPatientPageQuery(
+      criteria({ insuranceCarrierId: CARRIER }),
+    );
+
+    expect(filtered.sql).not.toContain('and false');
+    expect(filtered.params.filter((param) => param === CARRIER)).toHaveLength(
+      2,
+    );
+  });
+  it('lets platform administrators filter the roster by an active carrier', () => {
+    const filtered = buildInsurerPatientPageQuery(
+      criteria({ carrierId: undefined, insuranceCarrierId: CARRIER }),
+    );
+
+    expect(filtered.sql).toContain('and apr.insurance_carrier_id = ?');
+    expect(filtered.sql).not.toContain('and false');
+    expect(filtered.params[0]).toBe(CARRIER);
   });
   it('allows the platform roster including uninsured patients', () => {
     const roster = buildInsurerPatientPageQuery(

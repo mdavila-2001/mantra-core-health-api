@@ -112,6 +112,17 @@ describe('InsurerPatientsService', () => {
     expect(d.execute).toHaveBeenCalledTimes(1);
   });
 
+  it('normaliza filtros compuestos sólo por espacios a sus valores por omisión', async () => {
+    const d = build([[]]);
+
+    await d.service.list({ search: '   ', occupation: '   ' }, actor, AHORA);
+
+    const [sql, params] = d.execute.mock.calls[0];
+    expect(sql).not.toContain('common.contact_points cp');
+    expect(sql).not.toContain('p.occupation_free_text');
+    expect(params.at(-1)).toBe(26);
+  });
+
   it('arma la fila con la cobertura vigente de ESTA aseguradora y la edad a la fecha de La Paz', async () => {
     const d = build([
       [{ patient_profile_id: 'p1', sort_value: 'paciente p1' }],
@@ -169,6 +180,34 @@ describe('InsurerPatientsService', () => {
     expect(item.messaging).toEqual({ channel: 'internal', available: false });
     expect(item).not.toHaveProperty('communityProfileSlug');
     expect(item).not.toHaveProperty('email');
+  });
+
+  it('omite nacimiento y edad cuando la persona no declaró fecha de nacimiento', async () => {
+    const d = build([
+      [{ patient_profile_id: 'p1', sort_value: 'a' }],
+      [persona('p1', { birth_date: null })],
+      [],
+    ]);
+
+    const [item] = (await d.service.list({}, actor, AHORA)).items;
+
+    expect(item).not.toHaveProperty('birthDate');
+    expect(item).not.toHaveProperty('age');
+    expect(item.patientProfileId).toBe('p1');
+  });
+
+  it('descarta una fila de página cuyo detalle de persona ya no existe', async () => {
+    const d = build([
+      [{ patient_profile_id: 'deleted', sort_value: 'a' }],
+      [],
+      [],
+    ]);
+
+    const page = await d.service.list({}, actor, AHORA);
+
+    expect(page).toEqual({ items: [], total: 1, limit: 25, nextCursor: null });
+    expect(d.dataAccess.record).not.toHaveBeenCalled();
+    expect(d.flush).toHaveBeenCalled();
   });
 
   it('resuelve mensajería sólo para cuentas y vínculos activos con perfil público', async () => {
@@ -268,6 +307,26 @@ describe('directory authorization, options and conversations', () => {
       insurers: [{ id: CARRIER, name: 'Seguro de prueba' }],
     });
     expect(d.execute.mock.calls[0][1]).toEqual([INS.CARRIER_ACTIVE, CARRIER]);
+  });
+  it('lists every active carrier option for a platform security administrator', async () => {
+    const d = build([
+      [
+        { id: CARRIER, name: 'Seguro de prueba' },
+        { id: 'carrier-2', name: 'Segundo seguro' },
+      ],
+    ]);
+
+    expect(
+      await d.service.options({ id: 'admin', roles: ['SECURITY_ADMIN'] }),
+    ).toEqual({
+      insurers: [
+        { id: CARRIER, name: 'Seguro de prueba' },
+        { id: 'carrier-2', name: 'Segundo seguro' },
+      ],
+    });
+    expect(d.insurerContext.resolve).not.toHaveBeenCalled();
+    expect(d.execute.mock.calls[0][0]).not.toContain('and id = ?');
+    expect(d.execute.mock.calls[0][1]).toEqual([INS.CARRIER_ACTIVE]);
   });
   it('deduplicates current insurers and audits only opaque identifiers', async () => {
     const d = build([

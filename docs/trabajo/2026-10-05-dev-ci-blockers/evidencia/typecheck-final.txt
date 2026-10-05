@@ -1,0 +1,2 @@
+Command: corepack yarn typecheck
+Exit: 0

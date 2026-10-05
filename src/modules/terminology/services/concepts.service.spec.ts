@@ -1357,6 +1357,167 @@ describe('ConceptsService', () => {
       });
     });
 
+    describe('grafo', () => {
+      it('descarta slugs no publicables y normaliza los campos opcionales', async () => {
+        const { service, relationshipsRepo, em } = build();
+        const search = jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+              category: {
+                internalCode: 'glossary-category-anatomy',
+                name: 'Anatomía',
+              },
+              shortDefinition: 'Órgano que bombea sangre',
+            },
+            {
+              conceptId: 'concept-2',
+              slug: 'pulmon',
+              display: 'Pulmón',
+            },
+            { conceptId: 'concept-3', slug: '', display: 'Vacío' },
+            { conceptId: 'concept-4', display: 'Sin slug' },
+          ],
+          count: 4,
+          limit: 3,
+        } as any);
+
+        const graph = await service.readGlossaryGraph();
+
+        expect(search).toHaveBeenCalledWith(
+          undefined,
+          undefined,
+          500,
+          undefined,
+          {
+            language: 'ES',
+            includeValueSets: true,
+          },
+        );
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          ['concept-1', 'concept-2'],
+        );
+        expect(graph).toEqual({
+          nodes: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+              category: {
+                internalCode: 'glossary-category-anatomy',
+                name: 'Anatomía',
+              },
+              shortDefinition: 'Órgano que bombea sangre',
+            },
+            {
+              conceptId: 'concept-2',
+              slug: 'pulmon',
+              display: 'Pulmón',
+              category: null,
+              shortDefinition: '',
+            },
+          ],
+          edges: [],
+          count: 2,
+          limit: 500,
+          possiblyTruncated: false,
+        });
+      });
+
+      it('conserva aristas internas y elimina duplicadas o externas', async () => {
+        const {
+          service,
+          relationshipsRepo,
+          conceptsRepo,
+          designationsRepo,
+          em,
+        } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            { conceptId: 'concept-1', slug: 'corazon', display: 'Corazón' },
+            { conceptId: 'concept-2', slug: 'pulmon', display: 'Pulmón' },
+          ],
+          count: 2,
+          limit: 2,
+        } as any);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          {
+            sourceConceptId: 'concept-1',
+            targetConceptId: 'concept-2',
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+          },
+          {
+            sourceConceptId: 'concept-1',
+            targetConceptId: 'concept-2',
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+          },
+          {
+            sourceConceptId: 'concept-2',
+            targetConceptId: 'concept-external',
+            relationshipTypeConceptId: CONCEPTS.REL_TREATMENT,
+          },
+        ]);
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-2', { id: 'concept-2', display: 'Pulmón' }],
+            [
+              'concept-external',
+              { id: 'concept-external', display: 'Término externo' },
+            ],
+          ]),
+        );
+        designationsRepo.findPropertyForConcepts.mockResolvedValue([
+          { conceptId: 'concept-2', valueJson: 'pulmon' },
+          { conceptId: 'concept-external', valueJson: 'externo' },
+        ]);
+
+        const graph = await service.readGlossaryGraph('EN', 2);
+
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          ['concept-1', 'concept-2'],
+        );
+        expect(graph).toMatchObject({
+          edges: [
+            {
+              sourceConceptId: 'concept-1',
+              targetConceptId: 'concept-2',
+              type: 'DISEASE',
+            },
+          ],
+          count: 2,
+          limit: 2,
+          possiblyTruncated: true,
+        });
+      });
+
+      it('no consulta relaciones si la página no contiene nodos publicables', async () => {
+        const { service, relationshipsRepo } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            { conceptId: 'concept-1', slug: '', display: 'Vacío' },
+            { conceptId: 'concept-2', slug: null, display: 'Nulo' },
+          ],
+          count: 2,
+          limit: 2,
+        } as any);
+
+        await expect(service.readGlossaryGraph('ES', 2)).resolves.toEqual({
+          nodes: [],
+          edges: [],
+          count: 0,
+          limit: 2,
+          possiblyTruncated: false,
+        });
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+      });
+    });
+
     describe('ficha', () => {
       /** Configura los mocks comunes a la ficha de un término del glosario. */
       function setUpGlossaryTermFicha({

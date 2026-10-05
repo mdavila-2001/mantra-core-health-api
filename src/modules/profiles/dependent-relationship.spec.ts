@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import {
   DEPENDENT_RELATIONSHIP_CONCEPT_IDS,
   describeDependentRelationship,
+  describeRelatedPersonRelationship,
 } from './dependent-relationship';
 import { PROF } from './profiles.concepts';
 
@@ -55,6 +56,27 @@ describe('describeDependentRelationship', () => {
       code: 'OTHER',
       display: 'Otro/a',
     });
+  });
+});
+
+describe('describeRelatedPersonRelationship', () => {
+  const labels: ReadonlyArray<readonly [string | null, string]> = [
+    [PROF.RELATIONSHIP_GUARDIAN, 'Tutor o representante legal'],
+    [PROF.RELATIONSHIP_MOTHER, 'Madre'],
+    [PROF.RELATIONSHIP_FATHER, 'Padre'],
+    [PROF.RELATIONSHIP_SPOUSE, 'Cónyuge o pareja'],
+    [PROF.RELATIONSHIP_CHILD, 'Hijo o hija'],
+    [PROF.RELATIONSHIP_SIBLING, 'Hermano o hermana'],
+    [PROF.RELATIONSHIP_OTHER_RELATIVE, 'Otro familiar'],
+    [PROF.RELATIONSHIP_FRIEND, 'Amistad'],
+    [null, 'Otra relación'],
+    [randomUUID(), 'Otra relación'],
+  ];
+
+  it.each(labels)('nombra %s como %s', (relationshipConceptId, expected) => {
+    expect(describeRelatedPersonRelationship(relationshipConceptId)).toBe(
+      expected,
+    );
   });
 });
 
