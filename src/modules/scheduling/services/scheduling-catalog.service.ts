@@ -353,9 +353,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException('Recurso no encontrado', {
-          resourceId,
-        },
+        throw new ResourceNotFoundException(
+          'Recurso no encontrado',
+          {
+            resourceId,
+          },
           SchedulingErrorReason.RESOURCE_NOT_FOUND,
         );
       }
@@ -702,9 +704,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException('Recurso no encontrado', {
-          resourceId,
-        },
+        throw new ResourceNotFoundException(
+          'Recurso no encontrado',
+          {
+            resourceId,
+          },
           SchedulingErrorReason.RESOURCE_NOT_FOUND,
         );
       }
@@ -809,9 +813,11 @@ export class SchedulingCatalogService {
     const movidos = await this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException('Recurso no encontrado', {
-          resourceId,
-        },
+        throw new ResourceNotFoundException(
+          'Recurso no encontrado',
+          {
+            resourceId,
+          },
           SchedulingErrorReason.RESOURCE_NOT_FOUND,
         );
       }
@@ -921,9 +927,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException('Plantilla no encontrada', {
-          templateId,
-        },
+        throw new ResourceNotFoundException(
+          'Plantilla no encontrada',
+          {
+            templateId,
+          },
           SchedulingErrorReason.TEMPLATE_NOT_FOUND,
         );
       }
@@ -979,9 +987,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException('Plantilla no encontrada', {
-          templateId,
-        },
+        throw new ResourceNotFoundException(
+          'Plantilla no encontrada',
+          {
+            templateId,
+          },
           SchedulingErrorReason.TEMPLATE_NOT_FOUND,
         );
       }
@@ -1070,9 +1080,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException('Plantilla no encontrada', {
-          templateId,
-        },
+        throw new ResourceNotFoundException(
+          'Plantilla no encontrada',
+          {
+            templateId,
+          },
           SchedulingErrorReason.TEMPLATE_NOT_FOUND,
         );
       }
@@ -1306,9 +1318,11 @@ export class SchedulingCatalogService {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException('Recurso no encontrado', {
-          resourceId,
-        },
+        throw new ResourceNotFoundException(
+          'Recurso no encontrado',
+          {
+            resourceId,
+          },
           SchedulingErrorReason.RESOURCE_NOT_FOUND,
         );
       }
@@ -1422,9 +1436,11 @@ export class SchedulingCatalogService {
     // existe" no es "este médico no tiene huecos".
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId,
-      },
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        {
+          resourceId,
+        },
         SchedulingErrorReason.RESOURCE_NOT_FOUND,
       );
     }
@@ -1731,9 +1747,11 @@ export class SchedulingCatalogService {
         exceptionId,
       );
       if (!exception) {
-        throw new ResourceNotFoundException('Excepción no encontrada', {
-          exceptionId,
-        },
+        throw new ResourceNotFoundException(
+          'Excepción no encontrada',
+          {
+            exceptionId,
+          },
           SchedulingErrorReason.EXCEPTION_NOT_FOUND,
         );
       }
@@ -1830,9 +1848,11 @@ export class SchedulingCatalogService {
         exceptionId,
       );
       if (!exception) {
-        throw new ResourceNotFoundException('Excepción no encontrada', {
-          exceptionId,
-        },
+        throw new ResourceNotFoundException(
+          'Excepción no encontrada',
+          {
+            exceptionId,
+          },
           SchedulingErrorReason.EXCEPTION_NOT_FOUND,
         );
       }
@@ -1915,9 +1935,11 @@ export class SchedulingCatalogService {
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId,
-      },
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        {
+          resourceId,
+        },
         SchedulingErrorReason.RESOURCE_NOT_FOUND,
       );
     }
@@ -2012,9 +2034,11 @@ export class SchedulingCatalogService {
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId,
-      },
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        {
+          resourceId,
+        },
         SchedulingErrorReason.RESOURCE_NOT_FOUND,
       );
     }
