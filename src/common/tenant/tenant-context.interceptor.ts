@@ -15,6 +15,10 @@ import {
   resolveOrdinaryTenantId,
   resolvePrivilegedTenantId,
 } from './tenant-resolution';
+import {
+  PLATFORM_TENANT_OPTIONAL_KEY,
+  hasOptionalPlatformTenant,
+} from './platform-tenant-optional.decorator';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
 import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
 import type { AuthenticatedRequest } from '../auth/authenticated-user.interface';
@@ -112,6 +116,13 @@ export class TenantContextInterceptor implements NestInterceptor {
     // existe MCH-001), se reutiliza: resolver dos veces sería el mismo trabajo
     // con el mismo resultado. El cómputo propio sigue acá como respaldo para
     // cualquier ruta que por lo que sea no pase por ese guard.
+    const platformRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      PLATFORM_TENANT_OPTIONAL_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (hasOptionalPlatformTenant(user, platformRoles))
+      return this.runSystemSweep(next);
+
     const tenantId =
       request.resolvedTenantId ??
       (hasPrivilegedTenantRole(user)

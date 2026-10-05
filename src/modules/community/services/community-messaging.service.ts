@@ -604,6 +604,14 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<ReadReceiptResponseDto> {
     const resultado = await this.em.transactional(async (tx) => {
+      // El lector sale del cuerpo, así que se prueba contra la sesión: sin
+      // esto cualquiera podía dejar «leído» un hilo ajeno a nombre de otro.
+      await this.visibility.assertActsAsProfile(
+        tx,
+        dto.recipientProfileId,
+        actor,
+      );
+
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,

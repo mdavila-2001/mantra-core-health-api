@@ -60,6 +60,13 @@ describe('TenantScopeGuard (MCH-001)', () => {
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });
 
+  it('does not make global SECURITY_ADMIN tenant-optional on undecorated routes', () => {
+    const { context } = contextFor({ id: 'admin', roles: ['SECURITY_ADMIN'] });
+    expect(() => build(false, false).canActivate(context)).toThrow(
+      ForbiddenException,
+    );
+  });
+
   it('un actor sin usuario (ruta pública) pasa sin resolver nada', () => {
     const guard = build(false, false);
     const { context, request } = contextFor(undefined);
