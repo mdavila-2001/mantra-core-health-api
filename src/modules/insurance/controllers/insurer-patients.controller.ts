@@ -6,7 +6,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiPreconditionFailedResponse,
+  ApiUnprocessableEntityResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { PlatformTenantOptional } from '../../../common/tenant/platform-tenant-optional.decorator';
@@ -74,7 +74,7 @@ export class InsurerPatientsController {
   @ApiNotFoundResponse({
     description: 'Paciente fuera del alcance autorizado.',
   })
-  @ApiPreconditionFailedResponse({
+  @ApiUnprocessableEntityResponse({
     description: 'Perfiles no disponibles para mensajería o bloqueados.',
   })
   openConversation(
