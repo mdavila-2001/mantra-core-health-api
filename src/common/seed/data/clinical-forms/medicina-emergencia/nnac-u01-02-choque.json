@@ -1,0 +1,167 @@
+{
+  "code": "NNAC_U01_02_CHOQUE",
+  "name": "Choque (NNAC)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 2 de la unidad 1 de las NNAC, pág. 98; CIE-10 R57; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Taquicardia",
+        "Hipotensión",
+        "Disminución presión venosa central (hipovolemia, sepsis, etc.)",
+        "Aumento de la presión venosa central (embolismo pulmonar, taponamiento, disfunción ventrículo derecho)",
+        "Ingurgitación yugular",
+        "Pulso paradójico",
+        "Disminución de ruidos cardíacos",
+        "Taquipnea",
+        "Frialdad",
+        "Palidez",
+        "Cianosis",
+        "Piloerección",
+        "Hemograma",
+        "Pruebas de coagulación, APTT, INR, tipificación de grupo sanguíneo, pruebas cruzadas",
+        "Gasometría arterial",
+        "Bioquímica sanguínea: ionograma, urea, glucemia, creatinina, perfil hepático, amilasa, CPK, CPKMB, troponinas, lactato sérico",
+        "Cultivos y antibiograma",
+        "Tinción de Gram",
+        "Sangre",
+        "Orina",
+        "Radiografía de tórax",
+        "Electrocardiograma (12 derivaciones y precordiales V 3R)",
+        "Ecocardiograma"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 98. Es una situación de urgencia vital producida por una mala distribución del flujo sanguíneo, como resultado de un fallo en el aporte (ej. choque cardiogénico) y/o una inadecuada utilización del oxígeno por parte de los tejidos (ej."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipovolémico: caracterizado por una pérdida del volumen intravascular",
+        "Politraumatismo",
+        "Hemorragia",
+        "Obstétrica",
+        "Digestiva",
+        "Otras",
+        "Quemaduras",
+        "Pancreatitis aguda",
+        "Pérdidas digestivas: diarrea, vómitos",
+        "Pérdidas urinarias",
+        "Diabetes mellitus descompensada",
+        "Nefropatía"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: R57."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 98); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,174 @@
+{
+  "code": "NNAC_U08_03_TRASTORNOS_USO_ALCOHOL",
+  "name": "Trastornos por USO de alcohol (NNAC)",
+  "specialty": {
+    "code": "PSIQUIATRIA",
+    "display": "Psiquiatría y salud mental"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 3 de la unidad 8 de las NNAC, pág. 548; CIE-10 F19.6; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Aliento alcohólico",
+        "Lenguaje farfullante (le cuesta articular las palabras)",
+        "Falta de coordinación",
+        "Sudoración",
+        "Alteraciones de la conciencia (confusión, desorientación, dificultad para mantener y enfocar la atención)",
+        "Alteraciones cognitivas (déficit de memoria, pensamiento disperso, delirios)",
+        "Puede tornarse grosero, excesivamente confianzudo o francamente agresivo",
+        "Desorientación (no sabe dónde está, ignora la fecha)",
+        "Puede progresar y llegar al coma, constituyendo una emergencia médica",
+        "En la mayoría de los casos mejora por sí sola",
+        "La persona queda dormida para despertar horas después con signos de “resaca” (irritabilidad, dolor de cabeza, mareo, malestar general, sed intensa y otros)",
+        "Temblor distal de las manos",
+        "Insomnio",
+        "Cefalea",
+        "Náuseas, vómitos",
+        "Agitación psicomotora",
+        "Ansiedad",
+        "Crisis epilépticas",
+        "Tiende a ser fluctuante a lo largo del día (se acentúa por la noche)",
+        "Agitación, insomnio, fiebre leve y una importante activación autonómica",
+        "Consumo de alcohol en cantidad y frecuencia excesiva",
+        "Daños causados por el alcohol (accidentes, conflictos interpersonales o familiares, problemas médicos, legales)",
+        "Presencia de intoxicación o abstinencia, evidencia de consumo prologado tal como enfermedad hepática",
+        "Intenso deseo o urgencia por consumir alcohol",
+        "Dificultad para controlar el consumo de alcohol en términos de su inicio, terminación o niveles de consumo",
+        "Presencia o antecedentes de síndromes de abstinencia cuando el consumo se interrumpe",
+        "Desinterés progresivo por otros placeres o actividades debido al consumo de alcohol",
+        "Prioridad al consumo frente a otras actividades y obligaciones",
+        "Persiste el consumo de alcohol a pesar de consecuencias perjudiciales como daño hepático, estados depresivos, o deficiencia del funcionamiento cognitivo",
+        "Deterioro paulatino en el funcionamiento laboral o académico, familiar y social"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 548. Son alteraciones físicas, mentales o sociales debidas al consumo de alcohol."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Bioquímica sanguínea, glicemia, urea, creatinina, electrolitos (Na, K, Ca y Mg)",
+        "Colesterol, triglicéridos HDL, LDL",
+        "Prueba de función hepática, TP",
+        "Orina completa",
+        "Alcoholemia y detección de otras sustancias en sangre",
+        "Serología para VDRL",
+        "Niveles de vitamina B1, B12, y ácido fólico",
+        "ELISA para VIH (previo consentimiento informado)",
+        "Antígeno de superficie para hepatitis B",
+        "Prueba de embarazo (BHCG)",
+        "Gabinete a considerar de acuerdo al caso individual"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: F19.6."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 3, pág. 548); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

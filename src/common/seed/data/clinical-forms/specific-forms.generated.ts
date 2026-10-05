@@ -95,6 +95,199 @@ import f90 from './radiologia/radio-informe-eco-obstetrica.json';
 import f91 from './patologia-clinica/patol-informe-citologia-cervical.json';
 import f92 from './bioquimica-clinica/bioq-informe-hemograma.json';
 import f93 from './bioquimica-clinica/bioq-informe-orina.json';
+import f94 from './medicina-emergencia/nnac-u01-01-paro-cardiorrespiratorio-reani.json';
+import f95 from './medicina-emergencia/nnac-u01-02-choque.json';
+import f96 from './medicina-emergencia/nnac-u01-03-choque-anafilactico.json';
+import f97 from './medicina-emergencia/nnac-u01-04-crisis-hipertensivas.json';
+import f98 from './medicina-emergencia/nnac-u01-05-hemoptisis.json';
+import f99 from './medicina-emergencia/nnac-u01-06-traumatismo-craneoencefalico.json';
+import f100 from './medicina-emergencia/nnac-u01-07-traumatismo-toracico.json';
+import f101 from './medicina-emergencia/nnac-u01-08-trauma-abdomino-pelviano.json';
+import f102 from './medicina-emergencia/nnac-u01-09-politraumatismo.json';
+import f103 from './medicina-emergencia/nnac-u01-10-quemaduras.json';
+import f104 from './medicina-emergencia/nnac-u01-11-heridas.json';
+import f105 from './traumatologia/nnac-u01-12-fracturas.json';
+import f106 from './medicina-emergencia/nnac-u01-13-intoxicaciones-agudas.json';
+import f107 from './medicina-emergencia/nnac-u01-14-intoxicacion-aguda-inhibidores.json';
+import f108 from './medicina-emergencia/nnac-u01-15-intoxicacion-aguda-paraquat.json';
+import f109 from './medicina-emergencia/nnac-u01-16-intoxicacion-aguda-paracetamol.json';
+import f110 from './medicina-emergencia/nnac-u01-17-intoxicacion-aguda-acido.json';
+import f111 from './medicina-emergencia/nnac-u01-18-intoxicacion-aguda-benzodiacep.json';
+import f112 from './medicina-emergencia/nnac-u01-19-intoxicacion-aguda-etanol.json';
+import f113 from './medicina-emergencia/nnac-u01-20-sindrome-tropoide.json';
+import f114 from './medicina-emergencia/nnac-u01-21-mordedura-serpiente.json';
+import f115 from './medicina-emergencia/nnac-u01-22-mordedura-viuda-negra.json';
+import f116 from './geriatria/nnac-u01-23-caidas-adulto-mayor.json';
+import f117 from './psicologia-clinica/nnac-u02-01-violencia-familia-domestica.json';
+import f118 from './psicologia-clinica/nnac-u02-02-maltrato-nino-nina.json';
+import f119 from './psicologia-clinica/nnac-u02-03-violencia-sexual.json';
+import f120 from './infectologia/nnac-u03-01-amebiasis.json';
+import f121 from './infectologia/nnac-u03-02-ascariasis.json';
+import f122 from './infectologia/nnac-u03-03-colera.json';
+import f123 from './infectologia/nnac-u03-04-cisticercosis.json';
+import f124 from './infectologia/nnac-u03-05-cisticercosis-neurologica.json';
+import f125 from './infectologia/nnac-u03-06-dengue.json';
+import f126 from './infectologia/nnac-u03-07-diarrea-gastroenteritis-presun.json';
+import f127 from './infectologia/nnac-u03-08-diarrea-persistente.json';
+import f128 from './infectologia/nnac-u03-09-disenteria-bacilar-shigellosis.json';
+import f129 from './infectologia/nnac-u03-10-distomatosis-hepatica-fasciola.json';
+import f130 from './infectologia/nnac-u03-11-encefalitis-viral.json';
+import f131 from './infectologia/nnac-u03-12-enfermedad-congenita-chagas.json';
+import f132 from './infectologia/nnac-u03-13-enfermedad-cronica-chagas.json';
+import f133 from './infectologia/nnac-u03-14-enfermedad-cronica-chagas.json';
+import f134 from './infectologia/nnac-u03-15-enfermedad-chagas-manejo.json';
+import f135 from './dermatologia/nnac-u03-16-erisipela.json';
+import f136 from './infectologia/nnac-u03-17-estrongiloidiasis.json';
+import f137 from './infectologia/nnac-u03-18-fiebre-tifoidea-paratifoidea.json';
+import f138 from './infectologia/nnac-u03-19-giardiasis.json';
+import f139 from './infectologia/nnac-u03-20-gingivoestomatitis-herpetica.json';
+import f140 from './infectologia/nnac-u03-21-hantavirus-sindrome-cardiopulm.json';
+import f141 from './infectologia/nnac-u03-22-hepatitis-viral-aguda.json';
+import f142 from './infectologia/nnac-u03-23-hepatitis-viral-aguda.json';
+import f143 from './infectologia/nnac-u03-24-himenolepiasis.json';
+import f144 from './infectologia/nnac-u03-25-influenza.json';
+import f145 from './dermatologia/nnac-u03-26-larva-migrans-cutanea.json';
+import f146 from './infectologia/nnac-u03-27-leishmaniasis.json';
+import f147 from './infectologia/nnac-u03-28-lepra-enfermedad-hansen.json';
+import f148 from './infectologia/nnac-u03-29-malaria-paludismo.json';
+import f149 from './infectologia/nnac-u03-30-meningoencefalitis-bacteriana-.json';
+import f150 from './dermatologia/nnac-u03-31-miasis.json';
+import f151 from './infectologia/nnac-u03-32-oxiuriasis-enterobiasis.json';
+import f152 from './infectologia/nnac-u03-33-parasitosis-intestinal.json';
+import f153 from './infectologia/nnac-u03-34-parotiditis.json';
+import f154 from './dermatologia/nnac-u03-35-pediculosis.json';
+import f155 from './infectologia/nnac-u03-36-quiste-hidatidico.json';
+import f156 from './infectologia/nnac-u03-37-rabia-humana.json';
+import f157 from './infectologia/nnac-u03-38-rubeola.json';
+import f158 from './infectologia/nnac-u03-39-salmonelosis.json';
+import f159 from './infectologia/nnac-u03-40-sarampion.json';
+import f160 from './dermatologia/nnac-u03-41-sarcoptosis-escabiosis.json';
+import f161 from './infectologia/nnac-u03-42-teniasis.json';
+import f162 from './infectologia/nnac-u03-43-trichuriasis.json';
+import f163 from './neumologia/nnac-u03-44-tuberculosis.json';
+import f164 from './neumologia/nnac-u03-45-reacciones-adversas-farmacos.json';
+import f165 from './infectologia/nnac-u03-46-toxoplasmosis-congenita.json';
+import f166 from './infectologia/nnac-u03-47-uncinariasis.json';
+import f167 from './infectologia/nnac-u03-48-varicela.json';
+import f168 from './dermatologia/nnac-u03-49-verruga-vulgar.json';
+import f169 from './oncologia/nnac-u04-01-cancer-cuello-uterino.json';
+import f170 from './oncologia/nnac-u04-02-cancer-mama.json';
+import f171 from './hematologia/nnac-u05-01-anemia-deficiencia-hierro.json';
+import f172 from './hematologia/nnac-u05-02-coagulacion-intravascular-dise.json';
+import f173 from './hematologia/nnac-u05-03-eritrocitosis.json';
+import f174 from './hematologia/nnac-u05-04-purpura-trombocitopenica-autoi.json';
+import f175 from './endocrinologia/nnac-u06-01-diabetes-mellitus-tipo.json';
+import f176 from './endocrinologia/nnac-u06-02-diabetes-mellitus-descompensad.json';
+import f177 from './endocrinologia/nnac-u06-03-neuropatia-diabetica.json';
+import f178 from './endocrinologia/nnac-u06-04-diabetes-gestacional.json';
+import f179 from './endocrinologia/nnac-u06-05-insuficiencia-suprarrenal-insu.json';
+import f180 from './endocrinologia/nnac-u06-06-hipertiroidismo.json';
+import f181 from './endocrinologia/nnac-u06-07-hipotiroidismo.json';
+import f182 from './endocrinologia/nnac-u06-08-hipotiroidismo-congenito.json';
+import f183 from './endocrinologia/nnac-u06-09-sindrome-metabolico.json';
+import f184 from './endocrinologia/nnac-u06-10-obesidad.json';
+import f185 from './endocrinologia/nnac-u06-11-talla-baja.json';
+import f186 from './endocrinologia/nnac-u06-12-pubertad-precoz.json';
+import f187 from './endocrinologia/nnac-u06-13-dislipidemias.json';
+import f188 from './psiquiatria/nnac-u08-01-trastornos-mentales-organicos.json';
+import f189 from './psiquiatria/nnac-u08-02-psicosis.json';
+import f190 from './psiquiatria/nnac-u08-03-trastornos-uso-alcohol.json';
+import f191 from './psiquiatria/nnac-u08-04-trastornos-uso-tabaco.json';
+import f192 from './psiquiatria/nnac-u08-05-trastornos-debidos-uso.json';
+import f193 from './psiquiatria/nnac-u08-06-trastornos-ansiedad.json';
+import f194 from './psiquiatria/nnac-u08-07-trastornos-depresivos.json';
+import f195 from './psiquiatria/nnac-u08-08-conducta-suicida.json';
+import f196 from './psiquiatria/nnac-u08-09-trastornos-somatomorfos.json';
+import f197 from './psiquiatria/nnac-u08-10-trastornos-conducta-alimentari.json';
+import f198 from './psiquiatria/nnac-u08-11-trastornos-conducta-infancia.json';
+import f199 from './psiquiatria/nnac-u08-12-trastornos-deficit-atencion.json';
+import f200 from './psiquiatria/nnac-u08-13-atencion-salud-mental.json';
+import f201 from './neurologia/nnac-u09-01-cefalea-tensional.json';
+import f202 from './neurologia/nnac-u09-02-convulsiones-febriles.json';
+import f203 from './traumatologia/nnac-u09-03-dolor-lumbar-agudo.json';
+import f204 from './neurologia/nnac-u09-04-enfermedad-parkinson.json';
+import f205 from './neurologia/nnac-u09-05-enfermedades-desmielinizantes-.json';
+import f206 from './neurologia/nnac-u09-06-enfermedad-cerebro-vascular.json';
+import f207 from './neurologia/nnac-u09-07-epilepsia.json';
+import f208 from './neurologia/nnac-u09-08-estado-epileptico.json';
+import f209 from './neurologia/nnac-u09-09-migrana.json';
+import f210 from './neurologia/nnac-u09-10-neuralgia-trigemino-glosofarin.json';
+import f211 from './neurologia/nnac-u09-11-paralisis-facial-periferica.json';
+import f212 from './neurologia/nnac-u09-12-polineuropatia-motora-aguda.json';
+import f213 from './oftalmologia/nnac-u10-01-ambliopia.json';
+import f214 from './oftalmologia/nnac-u10-02-blefaritis.json';
+import f215 from './oftalmologia/nnac-u10-03-catarata.json';
+import f216 from './oftalmologia/nnac-u10-04-celulitis-preseptal-peri.json';
+import f217 from './oftalmologia/nnac-u10-05-conjuntivitis-aguda-bacteriana.json';
+import f218 from './oftalmologia/nnac-u10-06-conjuntivitis-alergica.json';
+import f219 from './oftalmologia/nnac-u10-07-conjuntivitis-hiperplasica-pig.json';
+import f220 from './oftalmologia/nnac-u10-08-cuerpo-extrano.json';
+import f221 from './oftalmologia/nnac-u10-09-chalazion.json';
+import f222 from './oftalmologia/nnac-u10-10-dacriocistitis-aguda-cronica.json';
+import f223 from './oftalmologia/nnac-u10-11-degeneracion-macular-relaciona.json';
+import f224 from './oftalmologia/nnac-u10-12-desprendimiento-retina.json';
+import f225 from './oftalmologia/nnac-u10-13-entropion-ectropion.json';
+import f226 from './oftalmologia/nnac-u10-14-erosion-abrasion-corneal.json';
+import f227 from './oftalmologia/nnac-u10-15-escleritis.json';
+import f228 from './oftalmologia/nnac-u10-16-estrabismo-especificado.json';
+import f229 from './oftalmologia/nnac-u10-17-exoftalmos.json';
+import f230 from './oftalmologia/nnac-u10-18-glaucoma.json';
+import f231 from './oftalmologia/nnac-u10-19-oclusion-arteria-central.json';
+import f232 from './oftalmologia/nnac-u10-20-sindrome-ojo-seco.json';
+import f233 from './oftalmologia/nnac-u10-21-orzuelo.json';
+import f234 from './oftalmologia/nnac-u10-22-pinguecula.json';
+import f235 from './oftalmologia/nnac-u10-23-pterigion.json';
+import f236 from './oftalmologia/nnac-u10-24-ptosis-palpebral-congenita.json';
+import f237 from './oftalmologia/nnac-u10-25-quemaduras-causticaciones-ocul.json';
+import f238 from './oftalmologia/nnac-u10-26-retinopatia-prematuridad.json';
+import f239 from './oftalmologia/nnac-u10-27-retinopatia-diabetica.json';
+import f240 from './oftalmologia/nnac-u10-28-retinopatia-hipertensiva.json';
+import f241 from './oftalmologia/nnac-u10-29-trauma-ocular-abierto.json';
+import f242 from './oftalmologia/nnac-u10-30-ulcera-corneal.json';
+import f243 from './oftalmologia/nnac-u10-31-uveitis.json';
+import f244 from './otorrinolaringologia/nnac-u11-01-otitis-media.json';
+import f245 from './otorrinolaringologia/nnac-u11-02-mastoiditis.json';
+import f246 from './otorrinolaringologia/nnac-u11-03-cuerpos-extranos-oido.json';
+import f247 from './cardiologia/nnac-u12-01-fiebre-reumatica-mencion.json';
+import f248 from './cardiologia/nnac-u12-02-hipertension-arterial-sistemic.json';
+import f249 from './cardiologia/nnac-u12-03-trombo-embolismo-pulmonar.json';
+import f250 from './cardiologia/nnac-u12-04-insuficiencia-cardiaca.json';
+import f251 from './cardiologia/nnac-u12-05-enfermedad-isquemica-corazon.json';
+import f252 from './cardiologia/nnac-u12-05-1-angina-pecho-estable.json';
+import f253 from './cardiologia/nnac-u12-05-2-sindrome-coronario-agudo.json';
+import f254 from './cardiologia/nnac-u12-05-3-infarto-agudo-miocardio.json';
+import f255 from './cardiologia/nnac-u12-05-4-angina-inestable-infarto.json';
+import f256 from './cirugia-general/nnac-u12-06-obstruccion-arterial-aguda.json';
+import f257 from './cirugia-general/nnac-u12-07-obstruccion-arterial-cronica.json';
+import f258 from './cirugia-general/nnac-u12-08-trombosis-venosa-profunda.json';
+import f259 from './cirugia-general/nnac-u12-09-varices-miembro-inferior.json';
+import f260 from './otorrinolaringologia/nnac-u13-01-resfrio-comun-rinofaringitis.json';
+import f261 from './otorrinolaringologia/nnac-u13-02-faringoamigdalitis-estreptococ.json';
+import f262 from './otorrinolaringologia/nnac-u13-03-laringitis-laringotraqueitis.json';
+import f263 from './otorrinolaringologia/nnac-u13-04-epiglotitis-crup.json';
+import f264 from './otorrinolaringologia/nnac-u13-05-rinosinusitis-aguda-rinosinusi.json';
+import f265 from './pediatria/nnac-u13-06-bronquiolitis.json';
+import f266 from './neumologia/nnac-u13-07-asma-bronquial-adultos.json';
+import f267 from './pediatria/nnac-u13-08-asma-bronquial-ninos.json';
+import f268 from './neumologia/nnac-u13-09-neumonia-adquirida-comunidad.json';
+import f269 from './neumologia/nnac-u13-10-neumonia-adquirida-comunidad.json';
+import f270 from './pediatria/nnac-u13-11-neumonia-grave-neumonia.json';
+import f271 from './neumologia/nnac-u13-12-otras-neumonias-neumonia.json';
+import f272 from './neumologia/nnac-u13-13-bronquitis-aguda.json';
+import f273 from './neumologia/nnac-u13-14-insuficiencia-respiratoria-gra.json';
+import f274 from './neumologia/nnac-u13-15-edema-agudo-pulmon.json';
+import f275 from './gastroenterologia/nnac-u14-01-dolor-abdominal-recurrente.json';
+import f276 from './gastroenterologia/nnac-u14-02-enfermedad-reflujo-gastroesofa.json';
+import f277 from './gastroenterologia/nnac-u14-03-estrenimiento-cronico.json';
+import f278 from './gastroenterologia/nnac-u14-04-falla-hepatica-aguda.json';
+import f279 from './gastroenterologia/nnac-u14-05-hemorragia-digestiva-alta.json';
+import f280 from './gastroenterologia/nnac-u14-06-hemorragia-digestiva-alta.json';
+import f281 from './gastroenterologia/nnac-u14-07-hemorragia-digestiva-baja.json';
+import f282 from './gastroenterologia/nnac-u14-08-impactacion-fecal-fecaloma.json';
+import f283 from './cirugia-general/nnac-u14-09-obstruccion-intestinal.json';
+import f284 from './gastroenterologia/nnac-u14-10-pancreatitis-aguda.json';
+import f285 from './gastroenterologia/nnac-u14-11-ulcera-peptica-enfermedad.json';
+import f286 from './cirugia-general/nnac-u14-12-volvulo-sigmoide.json';
 
 export const SPECIFIC_FORMS = [
   f0,
@@ -191,4 +384,197 @@ export const SPECIFIC_FORMS = [
   f91,
   f92,
   f93,
+  f94,
+  f95,
+  f96,
+  f97,
+  f98,
+  f99,
+  f100,
+  f101,
+  f102,
+  f103,
+  f104,
+  f105,
+  f106,
+  f107,
+  f108,
+  f109,
+  f110,
+  f111,
+  f112,
+  f113,
+  f114,
+  f115,
+  f116,
+  f117,
+  f118,
+  f119,
+  f120,
+  f121,
+  f122,
+  f123,
+  f124,
+  f125,
+  f126,
+  f127,
+  f128,
+  f129,
+  f130,
+  f131,
+  f132,
+  f133,
+  f134,
+  f135,
+  f136,
+  f137,
+  f138,
+  f139,
+  f140,
+  f141,
+  f142,
+  f143,
+  f144,
+  f145,
+  f146,
+  f147,
+  f148,
+  f149,
+  f150,
+  f151,
+  f152,
+  f153,
+  f154,
+  f155,
+  f156,
+  f157,
+  f158,
+  f159,
+  f160,
+  f161,
+  f162,
+  f163,
+  f164,
+  f165,
+  f166,
+  f167,
+  f168,
+  f169,
+  f170,
+  f171,
+  f172,
+  f173,
+  f174,
+  f175,
+  f176,
+  f177,
+  f178,
+  f179,
+  f180,
+  f181,
+  f182,
+  f183,
+  f184,
+  f185,
+  f186,
+  f187,
+  f188,
+  f189,
+  f190,
+  f191,
+  f192,
+  f193,
+  f194,
+  f195,
+  f196,
+  f197,
+  f198,
+  f199,
+  f200,
+  f201,
+  f202,
+  f203,
+  f204,
+  f205,
+  f206,
+  f207,
+  f208,
+  f209,
+  f210,
+  f211,
+  f212,
+  f213,
+  f214,
+  f215,
+  f216,
+  f217,
+  f218,
+  f219,
+  f220,
+  f221,
+  f222,
+  f223,
+  f224,
+  f225,
+  f226,
+  f227,
+  f228,
+  f229,
+  f230,
+  f231,
+  f232,
+  f233,
+  f234,
+  f235,
+  f236,
+  f237,
+  f238,
+  f239,
+  f240,
+  f241,
+  f242,
+  f243,
+  f244,
+  f245,
+  f246,
+  f247,
+  f248,
+  f249,
+  f250,
+  f251,
+  f252,
+  f253,
+  f254,
+  f255,
+  f256,
+  f257,
+  f258,
+  f259,
+  f260,
+  f261,
+  f262,
+  f263,
+  f264,
+  f265,
+  f266,
+  f267,
+  f268,
+  f269,
+  f270,
+  f271,
+  f272,
+  f273,
+  f274,
+  f275,
+  f276,
+  f277,
+  f278,
+  f279,
+  f280,
+  f281,
+  f282,
+  f283,
+  f284,
+  f285,
+  f286,
 ];

@@ -1,0 +1,179 @@
+{
+  "code": "NNAC_U09_06_ENFERMEDAD_CEREBRO_VASCULAR",
+  "name": "Enfermedad cerebro vascular (ECV) o accidente vascular encefálico agudo o íctus (NNAC)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 6 de la unidad 9 de las NNAC, pág. 613; CIE-10 I64; niveles de resolución II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Trastorno de lenguaje (súbito)",
+        "Déficit neurológico focal motor o sensitivo",
+        "Compromiso de conciencia",
+        "Cefalea intensa, déficit neurológico difuso con compromiso de conciencia variable en la hemorragia subaracnoidea",
+        "Hemograma",
+        "Pruebas de función hepática y renal",
+        "TAC cerebral sin contraste",
+        "Resonancia magnética de cerebro o médula espinal sin contraste",
+        "PL en caso de sospecha de hemorragia subaracnoidea",
+        "Trastornos de las funciones cerebrales superiores (conciencia, lenguaje memoria)",
+        "Hemianopsia homónima contra lateral",
+        "Déficit motor y sensitivo contra lateral",
+        "Mal pronóstico",
+        "Sólo trastorno de las funciones cerebrales superiores (FCS)",
+        "Dos de las características del anterior síndrome",
+        "Buen pronóstico",
+        "Sólo déficit motor o sensitivo",
+        "Disartria",
+        "Trastornos cerebelosos",
+        "Parálisis homolateral de nervios craneales",
+        "Alternaciones del campo visual",
+        "Déficit motor y sensitivo generalmente bilateral",
+        "Trastornos de los movimientos conjugados de los ojos"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 613. Enfermedad producida por obstrucción vascular con lesión isquémica regional o ruptura con posterior hemorragia, que afecta directa o indirectamente a vasos arteriales o venosos del cerebro, tronco o médula espinal."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "De fuente cardíaca o embólica",
+        "Trombosis",
+        "Infartos lacunares",
+        "Hipertensiva (93%)",
+        "Trombosis venosa cerebral",
+        "Disecciones arteriales"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: I64."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": ["Hipertensión intracraneal", "Embolia pulmonar"],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 6, pág. 613); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": ["Sospecha de ECV", "No disponibilidad de TAC"],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

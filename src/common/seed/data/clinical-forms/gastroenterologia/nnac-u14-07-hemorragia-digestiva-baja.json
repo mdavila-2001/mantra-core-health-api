@@ -1,0 +1,202 @@
+{
+  "code": "NNAC_U14_07_HEMORRAGIA_DIGESTIVA_BAJA",
+  "name": "Hemorragia digestiva BAJA (NNAC)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "Norma N.º 7 de la unidad 14 de las NNAC, pág. 791; CIE-10 K62.5; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Mientras más distal y/o mayor velocidad de tránsito, más rojo el color de la sangre eliminada",
+        "Deposiciones formadas, mezcladas con sangre que se elimina al final de la defecación, sugieren patología orificial (ej. hemorroides, fisura anal)",
+        "Presencia de anemia de causa no determinada",
+        "Prurito y/o dolor anal, también sugieren patología orificial",
+        "Otras asociaciones con HDB tienen importancia diagnóstica: fiebre tifoidea, diarrea infecciosa, enfermedad inflamatoria intestinal, o linfoma intestinal",
+        "Heces acintadas, cambios de hábito intestinal o compromiso del estado general: neoplasia",
+        "Antecedentes de irradiación: rectitis actínica",
+        "Antecedentes de polipectomía reciente",
+        "Palpación de masa abdominal sugiere neoplasia, enfermedad diverticular complicada o enfermedad de Crohn",
+        "La presencia de fiebre y esplenomegalia sugieren fiebre tifoidea o linfoma intestinal",
+        "La anoscopía demuestra la patología orificial y del canal anal, y permite ver la mucosa rectal distal",
+        "Causas más frecuentes: hemorroides, enfermedad diverticular de colon, angiodisplasia colónica, cáncer color rectal y trombosis mesentérica",
+        "Colitis isquémica, pólipos rectales en niños"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 791. Es la pérdida sanguínea por el recto, cuyo origen se encuentra entre el ángulo de Treitz y el ano."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": ["Aguda", "Moderada", "Masiva", "Crónica", "Oculta"],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Edad",
+        "Magnitud del sangrado y enfermedad causante de la hemorragia",
+        "Cáncer de colon",
+        "Medicamentos",
+        "Hereditaria: poliposis familiar, neoplasias",
+        "Enfermedades asociadas"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma",
+        "Grupo sanguíneo y Rh",
+        "Nitrógeno ureico",
+        "Estudio de coagulación: protrombina, tiempo de sangría y recuento de plaquetas",
+        "Electrocardiograma y enzimas cardíacas (si hay disponibilidad y se asocia dolor coronario)",
+        "Calcemia (nivel de calcio en la sangre); en politransfundidos",
+        "Anoscopía-proctosigrnoidoscopía",
+        "Angiografía (si está disponible)",
+        "Radiología con contraste",
+        "Radioisótopos",
+        "Gammagrafía con 99 Tc pertecnectato",
+        "Cintigrafía con tecnecio marcado (pertecnectato de Tc 99 m)",
+        "Enteroscopía (si está disponible ante sospecha de hemorragia proveniente de intestino delgado)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: K62.5."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 7, pág. 791); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sospecha de hemorragia digestiva baja activa",
+        "Paciente con enfermedades asociadas (ej. cardiopatía)",
+        "Necesidad de tratamiento quirúrgico",
+        "Cuando no se cuente con métodos de diagnóstico y tratamiento",
+        "Firma del consentimiento informado por parte del paciente o familiares para procedimientos de endoscopia y quirúrgicos",
+        "Evitar el estreñimiento",
+        "Evitar manipulación anal",
+        "Mantener dieta adecuada en fibras y agua"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

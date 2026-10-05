@@ -13,6 +13,7 @@ import {
 import { PROF } from '../../profiles/profiles.concepts';
 import { DIR } from '../../directory/directory.concepts';
 import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import { boProfessionConceptId } from '../../../common/seed/bo-professions.catalog';
 import type { RegisterPractitionerDto } from '../dto';
 
 const IDENTIDAD_PROFESIONAL = {
@@ -660,6 +661,73 @@ describe('IamPractitionerSelfRegistrationService', () => {
           credentialTypeConceptId: PROF.LANGUAGE_SPANISH,
         }),
       );
+    });
+
+    it('guarda la ciudad, el país y la profesión del título, limpios', async () => {
+      const d = build();
+      const ingenierosCiviles = boProfessionConceptId('21420');
+
+      await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [
+          {
+            ...titulo,
+            issuingCityText: ' Cochabamba ',
+            issuingCountryText: 'Bolivia',
+            professionConceptId: ingenierosCiviles,
+            titleText: ' Diplomado en Salud Pública ',
+          },
+        ],
+      });
+
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          issuingCityText: 'Cochabamba',
+          issuingCountryText: 'Bolivia',
+          professionConceptId: ingenierosCiviles,
+          titleText: 'Diplomado en Salud Pública',
+        }),
+      );
+    });
+
+    it('una ciudad en blanco no se guarda como texto vacío', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...IDENTIDAD_PROFESIONAL,
+        email: dto.email,
+        password: dto.password,
+        licenseNumber: dto.licenseNumber,
+        credentials: [{ ...titulo, issuingCityText: '   ' }],
+      });
+
+      expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ issuingCityText: undefined }),
+      );
+    });
+
+    it('una profesión fuera de la COB-2023 corta el alta entera', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...IDENTIDAD_PROFESIONAL,
+          email: dto.email,
+          password: dto.password,
+          licenseNumber: dto.licenseNumber,
+          // Un idioma: la FK lo aceptaría, el dominio no.
+          credentials: [
+            { ...titulo, professionConceptId: PROF.LANGUAGE_SPANISH },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
     });
 
     it('un número en blanco corta el alta aunque el DTO no haya pasado', async () => {

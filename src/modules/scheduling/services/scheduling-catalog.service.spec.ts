@@ -832,14 +832,38 @@ describe('SchedulingCatalogService', () => {
       });
 
       /**
-       * REQ-10-026 · el slot tiene que entrar en la franja.
+       * REQ-10-026 · un día no puede quedar sin turnos en silencio.
        *
-       * Antes de esto, un slot más largo que la franja no rechazaba nada:
-       * `generateSlots` simplemente no producía ni un turno para ese día, en
-       * silencio. Quien publicó veía «Vigente» y recién descubría el hueco al
-       * contar los turnos por semana.
+       * Desde el redondeo hacia adelante (propietario, 2026-10-04) un turno más
+       * largo que su franja se COMPLETA —sale uno, que pasa la hora de fin—. Lo
+       * único que deja un día sin turnos es que ese turno pise la franja
+       * siguiente del mismo día, y eso se rechaza.
        */
-      it('rejects a slot longer than its own franja', async () => {
+      it('accepts a slot longer than its franja: the slot is completed', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+        const res = await d.service.createTemplate(
+          RESOURCE,
+          {
+            ...dto,
+            rules: [
+              {
+                dayOfWeek: 1,
+                startTime: '08:00:00',
+                endTime: '08:20:00',
+                slotMinutes: 30,
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res.ruleCount).toBe(1);
+      });
+
+      it('rejects a slot that, completed, would overlap the next franja of the day', async () => {
         const d = buildCatalog();
 
         await expect(
@@ -852,6 +876,12 @@ describe('SchedulingCatalogService', () => {
                   dayOfWeek: 1,
                   startTime: '08:00:00',
                   endTime: '08:20:00',
+                  slotMinutes: 30,
+                },
+                {
+                  dayOfWeek: 1,
+                  startTime: '08:20:00',
+                  endTime: '12:00:00',
                   slotMinutes: 30,
                 },
               ],
@@ -1446,7 +1476,7 @@ describe('SchedulingCatalogService', () => {
         expect(res.ruleCount).toBe(2);
       });
 
-      it('rechaza una franja donde el turno no entra', async () => {
+      it('rechaza una franja cuyo turno, completo, pisaría la siguiente', async () => {
         const d = buildCatalog();
         conPlantillaPropia(d);
 
@@ -1459,6 +1489,12 @@ describe('SchedulingCatalogService', () => {
                   dayOfWeek: 2,
                   startTime: '09:00',
                   endTime: '09:10',
+                  slotMinutes: 30,
+                },
+                {
+                  dayOfWeek: 2,
+                  startTime: '09:15',
+                  endTime: '12:00',
                   slotMinutes: 30,
                 },
               ],
@@ -2053,6 +2089,81 @@ describe('SchedulingCatalogService', () => {
 
         expect(res.created).toBe(4);
         expect(res.skipped).toBe(0);
+      });
+
+      /* --------------------------------------------------------------------
+         Redondeo hacia adelante (propietario, 2026-10-04): el último turno se
+         completa aunque pase la hora de fin; cada hora le cuesta al médico.
+         -------------------------------------------------------------------- */
+
+      it('completa el último turno aunque pase la hora de fin', async () => {
+        const d = buildCatalog();
+        // 08:00–10:00 en turnos de 45': 08:00, 08:45 y 09:30 (termina 10:15).
+        // Con el corte viejo salían 2 y se perdían los últimos 30 minutos.
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 45,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 45,
+            capacityPerSlot: 1,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        expect(res.created).toBe(3);
+        const ultimo = d.catalogRepo.createSlot.mock.calls.at(-1)[1];
+        expect(
+          (ultimo.endAt.getTime() - ultimo.startAt.getTime()) / 60_000,
+        ).toBe(45);
+      });
+
+      it('el turno completado no pisa la franja siguiente del mismo día', async () => {
+        const d = buildCatalog();
+        // Mañana 08:00–10:00 de 45' y tarde desde 10:00: el tercero de la
+        // mañana (09:30–10:15) pisaría la tarde, así que no se genera.
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-1',
+          resourceId: RESOURCE,
+          slotMinutes: 45,
+        });
+        d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+          {
+            dayOfWeek: 1,
+            startTime: '08:00:00',
+            endTime: '10:00:00',
+            slotMinutes: 45,
+            capacityPerSlot: 1,
+          },
+          {
+            dayOfWeek: 1,
+            startTime: '10:00:00',
+            endTime: '11:30:00',
+            slotMinutes: 45,
+            capacityPerSlot: 1,
+          },
+        ]);
+        d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+        const res = await d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          actor,
+        );
+
+        // Mañana: 08:00 y 08:45. Tarde: 10:00 y 10:45 (termina 11:30).
+        expect(res.created).toBe(4);
       });
 
       /* --------------------------------------------------------------------
