@@ -85573,6 +85573,7 @@
     },
     "/insurance/patients/options": {
       "get": {
+        "description": "Devuelve nombres e identificadores de aseguradoras activas dentro del alcance autorizado del actor.",
         "operationId": "InsurerPatientsController_options",
         "parameters": [],
         "responses": {
@@ -85606,6 +85607,7 @@
     },
     "/insurance/patients/conversation": {
       "post": {
+        "description": "Revalida cobertura y membresia vigentes, resuelve perfiles internos y devuelve el identificador de una conversacion nueva o existente.",
         "operationId": "InsurerPatientsController_openConversation",
         "parameters": [],
         "requestBody": {
