@@ -155,6 +155,14 @@ export interface GlossaryTermSeed {
 /** Los 64 términos curados, en el orden del catálogo fuente. */
 export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // --- Anatomía (glossary-category-anatomy) ---------------------------------
+  // Referencias editoriales para la revisión de estas definiciones (redacción
+  // propia; no importar ni copiar el texto de las páginas fuente):
+  // Corazón: https://www.ncbi.nlm.nih.gov/books/NBK279249/
+  // Pulmones: https://www.ncbi.nlm.nih.gov/books/NBK470197/
+  // Hígado: https://www.ncbi.nlm.nih.gov/books/NBK500014/
+  // Riñones: https://www.ncbi.nlm.nih.gov/books/NBK482385/
+  // Encéfalo: https://www.ncbi.nlm.nih.gov/books/NBK542179/
+  // Columna: https://www.ncbi.nlm.nih.gov/books/NBK279468/
   {
     key: 'corazon',
     slug: 'corazon',
@@ -163,11 +171,11 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Heart',
     esName: 'Corazón',
     clinicalDefinitionEs:
-      'Órgano muscular hueco de cuatro cámaras (dos aurículas, dos ventrículos) que impulsa la sangre a través del sistema circulatorio mediante contracciones rítmicas coordinadas por el sistema de conducción eléctrico intrínseco.',
+      'Órgano muscular situado en el mediastino, entre los pulmones, organizado en dos aurículas y dos ventrículos. Las válvulas dirigen el flujo entre sus cámaras; el lado derecho envía sangre a la circulación pulmonar y el izquierdo a la circulación sistémica. El miocardio se contrae siguiendo impulsos del sistema eléctrico de conducción para mantener un flujo sanguíneo continuo.',
     clinicalDefinitionEn:
       'Four-chambered hollow muscular organ that pumps blood through the circulatory system via rhythmic contractions coordinated by its intrinsic electrical conduction system.',
     plainSummaryEs:
-      'Es el músculo que bombea la sangre por todo el cuerpo, como una bomba que nunca deja de trabajar.',
+      'Es el órgano muscular del pecho que recibe y bombea la sangre: la envía a los pulmones para intercambiar gases y luego al resto del cuerpo.',
     plainSummaryEn:
       'The muscle that pumps blood around your whole body, like a pump that never stops working.',
     relations: [
@@ -183,9 +191,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Lung',
     esName: 'Pulmón',
     clinicalDefinitionEs:
-      'Órgano par esponjoso del sistema respiratorio donde ocurre el intercambio gaseoso entre el aire inspirado y la sangre capilar, a través de los alvéolos.',
+      'Órganos pares y esponjosos ubicados en la cavidad torácica, recubiertos por pleura y conectados a las vías respiratorias. Sus bronquios se ramifican hasta bronquiolos y alvéolos; en la membrana alveolocapilar el oxígeno pasa a la sangre y el dióxido de carbono sale de ella para ser exhalado. El pulmón derecho suele tener tres lóbulos y el izquierdo dos, dejando espacio para el corazón.',
     plainSummaryEs:
-      'Los pulmones son los órganos con los que respiramos; toman el oxígeno del aire y lo pasan a la sangre.',
+      'Son los dos órganos del tórax que reciben el aire. En sus pequeños alvéolos, el oxígeno entra en la sangre y el dióxido de carbono sale para ser expulsado al respirar.',
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'asma-bronquial' },
       { type: 'RELATED_TERM', targetSlug: 'neumonia' },
@@ -200,9 +208,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Liver',
     esName: 'Hígado',
     clinicalDefinitionEs:
-      'Víscera abdominal de mayor tamaño en el cuerpo humano, responsable de la síntesis proteica, la metabolización de fármacos y toxinas, la producción de bilis y el almacenamiento de glucógeno.',
+      'Órgano glandular sólido de mayor tamaño, situado principalmente en el cuadrante superior derecho del abdomen, bajo el diafragma. Recibe sangre de la vena porta y de la arteria hepática; procesa nutrientes, metaboliza numerosos fármacos, produce bilis y sintetiza proteínas plasmáticas. También almacena glucógeno y participa en el metabolismo de grasas y bilirrubina.',
     plainSummaryEs:
-      'Es el órgano que filtra las sustancias dañinas de la sangre y ayuda a digerir los alimentos.',
+      'Es un órgano del abdomen que procesa nutrientes, produce bilis y fabrica proteínas importantes para la sangre. También almacena energía y transforma muchas sustancias, incluidos algunos medicamentos.',
     relations: [],
   },
   {
@@ -213,9 +221,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Kidney',
     esName: 'Riñón',
     clinicalDefinitionEs:
-      'Órgano par retroperitoneal cuya unidad funcional es la nefrona; filtra la sangre para regular el balance hidroelectrolítico, el equilibrio ácido-base y excretar productos de desecho nitrogenados en forma de orina.',
+      'Órganos pares retroperitoneales cuya unidad funcional es la nefrona, formada por un glomérulo y un sistema tubular. Filtran el plasma y ajustan la reabsorción y secreción de agua y solutos para formar orina, eliminar productos de desecho y regular el volumen, los electrolitos y el equilibrio ácido-base. También contribuyen a regular la presión arterial y producen eritropoyetina y renina; activan además la vitamina D.',
     plainSummaryEs:
-      'Los riñones limpian la sangre y producen la orina para eliminar lo que el cuerpo no necesita.',
+      'Los riñones filtran la sangre y producen orina. Al hacerlo, ayudan a controlar el agua, las sales y otras sustancias que el cuerpo necesita mantener en equilibrio.',
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'enfermedad-renal-cronica' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'creatinina-serica' },
@@ -230,9 +238,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     esName: 'Encéfalo (cerebro)',
     esSynonyms: ['Cerebro'],
     clinicalDefinitionEs:
-      'Porción del sistema nervioso central contenida en la cavidad craneal, compuesta por cerebro, cerebelo y tronco encefálico, responsable del procesamiento sensorial, motor y cognitivo.',
+      'Conjunto de estructuras del sistema nervioso central alojadas dentro del cráneo: cerebro, diencéfalo, cerebelo y tronco encefálico. Integra información sensorial, planifica y coordina movimientos, sustenta funciones cognitivas y participa en la regulación de funciones autónomas esenciales. Se continúa con la médula espinal a través del foramen magno; cerebro es una parte del encéfalo y no un sinónimo anatómico de todo el conjunto.',
     plainSummaryEs:
-      'Es el órgano que controla el pensamiento, el movimiento y las funciones del cuerpo desde la cabeza.',
+      'Es el conjunto de órganos nerviosos dentro del cráneo. Procesa información, participa en el pensamiento y el movimiento, y ayuda a regular funciones automáticas del cuerpo.',
     relations: [{ type: 'RELATED_TERM', targetSlug: 'cefalea' }],
   },
   {
@@ -244,9 +252,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     esName: 'Columna vertebral',
     esSynonyms: ['Raquis'],
     clinicalDefinitionEs:
-      'Estructura ósea axial formada por 33 vértebras articuladas que aloja y protege la médula espinal, y provee soporte estructural al tronco.',
+      'Eje osteoarticular del tronco formado habitualmente por 33 segmentos vertebrales: siete cervicales, doce torácicos, cinco lumbares, cinco sacros fusionados y cuatro coccígeos fusionados, con variación anatómica individual. Sus vértebras, discos intervertebrales y ligamentos sostienen el tronco, permiten movilidad y forman el conducto vertebral que protege la médula espinal y las raíces nerviosas.',
     plainSummaryEs:
-      'Es la fila de huesos en la espalda que sostiene el cuerpo y protege los nervios que bajan desde el cerebro.',
+      'Es la estructura de huesos y discos que recorre la espalda. Sostiene el tronco, permite inclinarse y girar, y rodea y protege la médula espinal.',
     relations: [],
   },
 

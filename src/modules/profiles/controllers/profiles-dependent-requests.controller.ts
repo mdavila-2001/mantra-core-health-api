@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
@@ -23,6 +24,7 @@ import { Throttle } from '@nestjs/throttler';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { DependentLinkRequestsService } from '../services/dependent-link-requests.service';
 import {
+  AcceptDependentLinkRequestDto,
   DependentCandidateDto,
   DependentCandidatesQueryDto,
   DependentLinkRequestDecisionDto,
@@ -145,14 +147,16 @@ export class ProfilesDependentRequestsController {
   @Post('patients/me/dependent-requests/:id/accept')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aceptar una solicitud de dependiente' })
+  @ApiBody({ type: AcceptDependentLinkRequestDto, required: false })
   @ApiOkResponse({ type: DependentLinkRequestDecisionDto })
   @ApiNotFoundResponse({ description: 'No existe o no es de esta cuenta' })
   @ApiConflictResponse({ description: 'Ya fue respondida' })
   acceptDependentLinkRequest(
     @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AcceptDependentLinkRequestDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
-    return this.requests.accept(id, actor);
+    return this.requests.accept(id, dto, actor);
   }
 
   /**

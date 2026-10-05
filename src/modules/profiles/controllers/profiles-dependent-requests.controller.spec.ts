@@ -5,7 +5,12 @@ import { ArgumentMetadata, ParseUUIDPipe } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ConflictException } from '../../../common';
-import { DependentCandidatesQueryDto, RequestDependentLinkDto } from '../dto';
+import {
+  AcceptDependentLinkRequestDto,
+  DependentCandidatesQueryDto,
+  RequestDependentLinkDto,
+} from '../dto';
+import { PROF } from '../profiles.concepts';
 import { ProfilesDependentRequestsController } from './profiles-dependent-requests.controller';
 
 const actor = { id: 'user-1', roles: ['USER', 'PATIENT'] } as any;
@@ -34,8 +39,11 @@ function build() {
  * @param cuerpo - Lo que mandaría el cliente.
  * @returns Las propiedades que no pasaron.
  */
-async function erroresDe(cuerpo: unknown): Promise<string[]> {
-  const dto = plainToInstance(RequestDependentLinkDto, cuerpo);
+async function erroresDe(
+  cuerpo: unknown,
+  tipo: new () => object = RequestDependentLinkDto,
+): Promise<string[]> {
+  const dto = plainToInstance(tipo, cuerpo);
   const errores = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -57,14 +65,31 @@ describe('ProfilesDependentRequestsController', () => {
 
   it('delega el listado, aceptar y rechazar sin tomar el sujeto del cliente', async () => {
     const { controller, requests } = build();
+    const dto = { relationshipConceptId: PROF.RELATIONSHIP_CHILD };
 
     await controller.listIncomingDependentLinkRequests(actor);
-    await controller.acceptDependentLinkRequest(ID, actor);
+    await controller.acceptDependentLinkRequest(ID, dto, actor);
     await controller.rejectDependentLinkRequest(ID, actor);
 
     expect(requests.listIncoming).toHaveBeenCalledWith(actor);
-    expect(requests.accept).toHaveBeenCalledWith(ID, actor);
+    expect(requests.accept).toHaveBeenCalledWith(ID, dto, actor);
     expect(requests.reject).toHaveBeenCalledWith(ID, actor);
+  });
+
+  it('valida el parentesco al aceptar y permite omitirlo por compatibilidad', async () => {
+    expect(
+      await erroresDe(
+        { relationshipConceptId: PROF.RELATIONSHIP_MOTHER },
+        AcceptDependentLinkRequestDto,
+      ),
+    ).toEqual([]);
+    expect(await erroresDe({}, AcceptDependentLinkRequestDto)).toEqual([]);
+    expect(
+      await erroresDe(
+        { relationshipConceptId: PROF.RELATIONSHIP_FRIEND },
+        AcceptDependentLinkRequestDto,
+      ),
+    ).toEqual(['relationshipConceptId']);
   });
 
   describe('candidatos por nombre', () => {
@@ -132,7 +157,7 @@ describe('ProfilesDependentRequestsController', () => {
     requests.accept.mockRejectedValue(new ConflictException('ya respondida'));
 
     await expect(
-      controller.acceptDependentLinkRequest(ID, actor),
+      controller.acceptDependentLinkRequest(ID, {}, actor),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
