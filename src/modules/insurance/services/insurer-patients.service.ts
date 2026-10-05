@@ -35,7 +35,7 @@ interface PersonRow {
   phone: string | null;
   email: string | null;
   gender_concept_id: string | null;
-  gender_display: string | null;
+  gender_code: string | null;
   occupation_display: string | null;
   community_profile_slug: string | null;
 }
@@ -196,7 +196,7 @@ export class InsurerPatientsService {
                   and cp.system_concept_id = ?
                 order by cp.rank nulls last limit 1) as email,
               p.administrative_gender_concept_id as gender_concept_id,
-              gender.display as gender_display,
+              gender.code as gender_code,
               coalesce(occupation.display, nullif(p.occupation_free_text, ''))
                 as occupation_display,
               (select pub.slug
@@ -272,7 +272,7 @@ export class InsurerPatientsService {
       phone: person.phone,
       email: person.email,
       genderConceptId: person.gender_concept_id,
-      genderDisplay: person.gender_display,
+      genderCode: person.gender_code,
       occupationDisplay: person.occupation_display,
       coverage: this.toCoverage(coverages, referenceDate),
       communityProfileSlug: person.community_profile_slug,

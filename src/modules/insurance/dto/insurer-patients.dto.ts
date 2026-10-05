@@ -160,8 +160,11 @@ export class InsurerPatientListItemDto {
   @ApiPropertyOptional({ format: 'uuid' })
   genderConceptId?: string;
 
-  @ApiPropertyOptional()
-  genderDisplay?: string;
+  @ApiPropertyOptional({
+    description:
+      'Código del sexo administrativo (`GENDER_FEMALE`…). Se manda el código y no el display: el catálogo lo rotula en inglés técnico y la palabra la pone la pantalla.',
+  })
+  genderCode?: string;
 
   @ApiPropertyOptional({ description: 'Del catálogo; si no, el texto libre' })
   occupationDisplay?: string;

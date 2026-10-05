@@ -20,7 +20,7 @@ function persona(id: string, extra: Record<string, unknown> = {}) {
     phone: '+591 70000001',
     email: null,
     gender_concept_id: 'g-f',
-    gender_display: 'Femenino',
+    gender_code: 'GENDER_FEMALE',
     occupation_display: null,
     community_profile_slug: null,
     ...extra,
@@ -107,7 +107,7 @@ describe('InsurerPatientsService', () => {
         age: 35,
         phone: '+591 70000001',
         genderConceptId: 'g-f',
-        genderDisplay: 'Femenino',
+        genderCode: 'GENDER_FEMALE',
         coverage: {
           hasActiveCoverage: true,
           planName: 'Plan Salud Vital',

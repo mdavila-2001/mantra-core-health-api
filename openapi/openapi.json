@@ -133626,8 +133626,9 @@
             "type": "string",
             "format": "uuid"
           },
-          "genderDisplay": {
-            "type": "string"
+          "genderCode": {
+            "type": "string",
+            "description": "Código del sexo administrativo (`GENDER_FEMALE`…). Se manda el código y no el display: el catálogo lo rotula en inglés técnico y la palabra la pone la pantalla."
           },
           "occupationDisplay": {
             "type": "string",
