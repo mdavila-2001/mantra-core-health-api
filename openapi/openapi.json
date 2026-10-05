@@ -687,6 +687,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "tagValueSetId",
+            "required": false,
+            "in": "query",
+            "description": "Sólo glosario: además de `valueSetId`, el término tiene que llevar esta etiqueta (intersección)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Sólo glosario: cuántos términos saltear. La respuesta trae `total` para armar la paginación",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1174,6 +1192,42 @@
         "tags": [
           "terminology"
         ]
+      }
+    },
+    "/terminology/value-sets/$glossary-facets": {
+      "get": {
+        "operationId": "TerminologyValueSetsController_readGlossaryFacets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Facetas del glosario: conteo por categoría y etiqueta",
+        "tags": [
+          "terminology"
+        ],
+        "description": "Facetas del glosario: conteo por categoría y etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/terminology/value-sets/{id}/$expand": {
@@ -2620,6 +2674,65 @@
         "description": "Registrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/auth/upload-registration-signature-image": {
+      "post": {
+        "operationId": "IamAuthController_uploadRegistrationSignatureImage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "summary": "Pre-cargar una imagen de firma o sello para el registro",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/iam/auth/upload-registration-document": {
       "post": {
         "operationId": "IamAuthController_uploadRegistrationDocument",
@@ -3303,6 +3416,109 @@
           "iam-auth"
         ],
         "description": "Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/practitioners/me/signature-assets": {
+      "get": {
+        "operationId": "PractitionerSignatureAssetsController_getOwn",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerSignatureAssetsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar las imágenes de firma y sello propias",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Consultar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "PractitionerSignatureAssetsController_setOwn",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPractitionerSignatureAssetsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerSignatureAssetsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Guardar o quitar las imágenes de firma y sello propias",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Guardar o quitar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/patients/me/summary": {
@@ -4589,6 +4805,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptDependentLinkRequestDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -4614,6 +4840,9 @@
           },
           "409": {
             "description": "Ya fue respondida"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
           },
           "422": {
             "$ref": "#/components/responses/PreconditionFailed"
@@ -5865,6 +6094,248 @@
           }
         ],
         "summary": "Marcar una especialidad propia como la principal",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      }
+    },
+    "/profiles/practitioners/me/specialties/{specialtyId}": {
+      "patch": {
+        "description": "`404` si no existe o es ajena. `422` si ya no está pendiente o el concepto no es una especialidad del catálogo. `409` si ya tiene esa especialidad vigente.",
+        "operationId": "ProfilesPractitionersController_updateOwnSpecialty",
+        "parameters": [
+          {
+            "name": "specialtyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnSpecialtyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir una especialidad propia pendiente de verificación",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      },
+      "delete": {
+        "description": "`404` si no existe o es ajena. `422` si ya no está pendiente.",
+        "operationId": "ProfilesPractitionersController_removeOwnSpecialty",
+        "parameters": [
+          {
+            "name": "specialtyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar una especialidad propia pendiente de verificación",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      }
+    },
+    "/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}": {
+      "patch": {
+        "description": "`404` si no existe o es ajena. `422` si no está pendiente o tiene una verificación en curso.",
+        "operationId": "ProfilesPractitionersController_updateOwnLicense",
+        "parameters": [
+          {
+            "name": "licenseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir una matrícula propia pendiente de verificación",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      },
+      "delete": {
+        "description": "`404` si no existe o es ajena. `422` si no está pendiente, tiene una verificación en curso o ya tiene historial de auditoría.",
+        "operationId": "ProfilesPractitionersController_removeOwnLicense",
+        "parameters": [
+          {
+            "name": "licenseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar una matrícula propia pendiente de verificación",
         "tags": [
           "profiles-practitioners"
         ]
@@ -11776,6 +12247,167 @@
         "description": "Revocar / offboarding de un miembro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/tenants/{tenantId}/logo": {
+      "get": {
+        "operationId": "OrganizationLogoController_get",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Logo de la propia organización",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Logo de la propia organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "OrganizationLogoController_set",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetOrganizationLogoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambiar o quitar el logo como administrador de la organización",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Cambiar o quitar el logo como administrador de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/tenants/{tenantId}/logo/content": {
+      "get": {
+        "operationId": "OrganizationLogoController_content",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Imagen del logo para miembros de la organización",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Imagen del logo para miembros de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/community/public-profiles": {
       "post": {
         "operationId": "CommunitySocialController_createProfile",
@@ -13886,6 +14518,61 @@
         "description": "Soltar el mensaje fijado de la conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/community/conversations/contacts/search": {
+      "post": {
+        "operationId": "CommunityMessagingController_searchContacts",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchChatContactsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar personas para iniciar una conversación",
+        "tags": [
+          "community-messaging"
+        ],
+        "description": "Buscar personas para iniciar una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/community/conversations/{conversationId}/attachments/{fileId}/content": {
       "get": {
         "operationId": "CommunityMessagingController_getAttachmentContent",
@@ -14379,6 +15066,72 @@
           "community-moderation"
         ],
         "description": "Cola de moderación con filtros y cursor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/community/moderation/decisions/mine": {
+      "get": {
+        "operationId": "CommunityModerationController_listMyDecisions",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "query",
+            "description": "Perfil propio",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor de la página anterior",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de filas",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mis propias decisiones de moderación",
+        "tags": [
+          "community-moderation"
+        ],
+        "description": "Mis propias decisiones de moderación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/community/moderation/decisions": {
@@ -17813,6 +18566,8 @@
     },
     "/clinical/diagnostic-reports/{id}/release": {
       "post": {
+        "deprecated": true,
+        "description": "Obsoleta (D-E): no escribe diagnostic_release_events y el paciente no ve lo liberado por acá. Usar diagnostics/reports/:reportId/versions/:versionId/release.",
         "operationId": "ClinicalOrdersController_releaseDiagnosticReport",
         "parameters": [
           {
@@ -17874,8 +18629,7 @@
         "summary": "Liberar los resultados de un reporte diagnóstico",
         "tags": [
           "clinical-orders"
-        ],
-        "description": "Liberar los resultados de un reporte diagnóstico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       }
     },
     "/clinical/prescription-signature-policies": {
@@ -19863,6 +20617,106 @@
           "redis-runtime"
         ],
         "description": "Liberar un lock si el token coincide (CAS). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/{profileId}/insurance-networks": {
+      "get": {
+        "description": "Una fila por membresía vigente en una red de prestadores, por la práctica donde atiende o individual. Vacía significa que ninguna aseguradora lo tiene en su red.",
+        "operationId": "PractitionerInsuranceNetworksController_list",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aseguradoras con las que trabaja el profesional",
+        "tags": [
+          "insurance"
+        ]
+      }
+    },
+    "/insurance/my-claims": {
+      "get": {
+        "operationId": "MyClaimsController_listMyClaims",
+        "parameters": [
+          {
+            "name": "x-tenant-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyClaimListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "Sin sesión válida."
+          },
+          "403": {
+            "description": "El tenant seleccionado no es una membresía de la sesión."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Solicitudes de seguro propias, con su dictamen vigente",
+        "tags": [
+          "my-insurance-claims"
+        ],
+        "description": "Solicitudes de seguro propias, con su dictamen vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/insurance-carriers": {
@@ -22631,9 +23485,9 @@
         "description": "Consultar un lote de liquidación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-campaigns": {
+    "/insurance/campaigns": {
       "post": {
-        "operationId": "InsuranceCampaignsController_create",
+        "operationId": "InsuranceCampaignsController_create[0]",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -22693,7 +23547,7 @@
         "description": "Crear una campaña preventiva de la aseguradora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "get": {
-        "operationId": "InsuranceCampaignsController_list",
+        "operationId": "InsuranceCampaignsController_list[0]",
         "parameters": [
           {
             "name": "type",
@@ -22782,9 +23636,366 @@
         "description": "Listar las campañas de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-campaigns/patient/{patientProfileId}": {
+    "/insurance-campaigns": {
+      "post": {
+        "operationId": "InsuranceCampaignsController_create[1]",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInsuranceCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una campaña preventiva de la aseguradora",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Crear una campaña preventiva de la aseguradora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "get": {
-        "operationId": "InsuranceCampaignsController_listForPatient",
+        "operationId": "InsuranceCampaignsController_list[1]",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "LABORATORY",
+                "PHARMACY",
+                "DIAGNOSTIC_IMAGING",
+                "VACCINATION"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "PAUSED",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las campañas de la aseguradora activa",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Listar las campañas de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/campaigns/active": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_listActive[0]",
+        "parameters": [
+          {
+            "name": "carrierId",
+            "required": false,
+            "in": "query",
+            "description": "Acota a una aseguradora. Sin filtro, trae de todas.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/active": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_listActive[1]",
+        "parameters": [
+          {
+            "name": "carrierId",
+            "required": false,
+            "in": "query",
+            "description": "Acota a una aseguradora. Sin filtro, trae de todas.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/campaigns/my-benefits": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_myBenefits[0]",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de mi aseguradora, para el afiliado autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/my-benefits": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_myBenefits[1]",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de mi aseguradora, para el afiliado autenticado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/campaigns/patient/{patientProfileId}": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_listForPatient[0]",
         "parameters": [
           {
             "name": "patientProfileId",
@@ -22840,9 +24051,67 @@
         "description": "Campañas vigentes de la aseguradora del afiliado (sólo el titular). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-campaigns/{id}": {
+    "/insurance-campaigns/patient/{patientProfileId}": {
       "get": {
-        "operationId": "InsuranceCampaignsController_getById",
+        "operationId": "InsuranceCampaignsController_listForPatient[1]",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientCampaignDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Campañas vigentes de la aseguradora del afiliado (sólo el titular). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/campaigns/{id}": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_getById[0]",
         "parameters": [
           {
             "name": "id",
@@ -22893,11 +24162,284 @@
           "insurance-campaigns"
         ],
         "description": "Consultar una campaña de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "InsuranceCampaignsController_update[0]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInsuranceCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Editar una campaña en borrador o pausada (422 si está activa o vencida). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-campaigns/{id}": {
+      "get": {
+        "operationId": "InsuranceCampaignsController_getById[1]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar una campaña de la aseguradora activa",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Consultar una campaña de la aseguradora activa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "patch": {
+        "operationId": "InsuranceCampaignsController_update[1]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInsuranceCampaignDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Editar una campaña en borrador o pausada (422 si está activa o vencida). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/campaigns/{id}/status": {
+      "patch": {
+        "operationId": "InsuranceCampaignsController_changeStatus[0]",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInsuranceCampaignStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsuranceCampaignResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
+        "tags": [
+          "insurance-campaigns"
+        ],
+        "description": "Activar, pausar o finalizar una campaña (transiciones cerradas). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/insurance-campaigns/{id}/status": {
       "patch": {
-        "operationId": "InsuranceCampaignsController_changeStatus",
+        "operationId": "InsuranceCampaignsController_changeStatus[1]",
         "parameters": [
           {
             "name": "id",
@@ -23084,6 +24626,179 @@
         "tags": [
           "insurer-received-claims"
         ]
+      }
+    },
+    "/insurance/patients/search": {
+      "post": {
+        "description": "Aseguradoras: cobertura vigente en el tenant activo. Administración: padrón autorizado. Filtros en el cuerpo; respuesta mínima, total exacto y cursor.",
+        "operationId": "InsurerPatientsController_listPatients",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsurerPatientSearchQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsurerPatientListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Filtro, rango de fechas o cursor inválido."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sin acceso al directorio."
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar directorio de pacientes autorizado",
+        "tags": [
+          "insurer-patients"
+        ]
+      }
+    },
+    "/insurance/patients/options": {
+      "get": {
+        "operationId": "InsurerPatientsController_options",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsurerPatientOptionsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sin acceso al directorio."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aseguradoras disponibles en el alcance autorizado",
+        "tags": [
+          "insurer-patients"
+        ],
+        "description": "Aseguradoras disponibles en el alcance autorizado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance/patients/conversation": {
+      "post": {
+        "operationId": "InsurerPatientsController_openConversation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsurerPatientConversationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsurerPatientConversationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Paciente o canal inválido."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Sin acceso al directorio."
+          },
+          "404": {
+            "description": "Paciente fuera del alcance autorizado."
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "412": {
+            "description": "Perfiles no disponibles para mensajería o bloqueados."
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abrir o reutilizar la conversación interna con un paciente autorizado",
+        "tags": [
+          "insurer-patients"
+        ],
+        "description": "Abrir o reutilizar la conversación interna con un paciente autorizado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/practices": {
@@ -31212,6 +32927,7 @@
         "description": "Listar el catálogo de servicios de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "post": {
+        "description": "La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.",
         "operationId": "BillingServiceCatalogController_create",
         "parameters": [],
         "requestBody": {
@@ -31261,8 +32977,7 @@
         "summary": "Dar de alta un servicio en el catálogo maestro",
         "tags": [
           "billing-service-catalog"
-        ],
-        "description": "Dar de alta un servicio en el catálogo maestro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       }
     },
     "/billing/service-catalog/{id}": {
@@ -37164,6 +38879,213 @@
         ]
       }
     },
+    "/charts/me/notes": {
+      "get": {
+        "operationId": "ChartMeController_listMyNotes",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ver mis evoluciones liberadas",
+        "tags": [
+          "chart-me"
+        ],
+        "description": "Ver mis evoluciones liberadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/charts/me/documents": {
+      "get": {
+        "operationId": "ChartMeController_listMyDocuments",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ver mis documentos visibles",
+        "tags": [
+          "chart-me"
+        ],
+        "description": "Ver mis documentos visibles. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/charts/me/documents/{documentId}/files/{fileId}/content": {
+      "get": {
+        "operationId": "ChartMeController_getMyDocumentFileContent",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bytes del archivo"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "El documento no existe, no es del titular, no es visible, o el archivo no cuelga de él"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar el archivo de un documento propio",
+        "tags": [
+          "chart-me"
+        ],
+        "description": "Descargar el archivo de un documento propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/charts/me/encounters/{id}/pdf": {
+      "get": {
+        "description": "Sólo lo liberado y visible. 404 si el encuentro no es del titular; 422 si no está cerrado.",
+        "operationId": "ChartMeController_getMyEncounterPdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF oficial de la atención",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "No aplica: usa 404 en su lugar"
+          },
+          "404": {
+            "description": "El encuentro no existe o no es del titular"
+          },
+          "422": {
+            "description": "El encuentro no está cerrado"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar el PDF oficial de una atención propia",
+        "tags": [
+          "chart-me"
+        ]
+      }
+    },
     "/care-teams": {
       "post": {
         "operationId": "CareTeamsController_create",
@@ -41363,6 +43285,102 @@
         "description": "Registrar un espécimen (soporte para acesión). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/diagnostics/accessions/{id}": {
+      "get": {
+        "description": "Acotado al tenant del contexto: otro laboratorio recibe 404.",
+        "operationId": "DiagnosticsSpecimensController_getAccession",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de una acesión (especímenes, contenedores y custodia)",
+        "tags": [
+          "diagnostics-specimens"
+        ]
+      }
+    },
+    "/diagnostics/specimens/{id}": {
+      "get": {
+        "description": "Acotado al tenant del contexto: otro laboratorio recibe 404.",
+        "operationId": "DiagnosticsSpecimensController_getSpecimen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de un espécimen (con su cadena de custodia)",
+        "tags": [
+          "diagnostics-specimens"
+        ]
+      }
+    },
     "/diagnostics/accessions": {
       "post": {
         "operationId": "DiagnosticsSpecimensController_accession",
@@ -42997,6 +45015,61 @@
           "diagnostics-patient-results"
         ],
         "description": "Dejar de compartir un resultado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostics/service-requests/inbox": {
+      "post": {
+        "description": "Órdenes vigentes de laboratorio o anatomía patológica derivadas al laboratorio del tenant activo (`performer_tenant_id`) y todavía sin acesión, con las muestras ya recibidas. De la más vieja a la más nueva. Filtros en el cuerpo: la búsqueda por paciente no viaja en la URL.",
+        "operationId": "DiagnosticsReceptionController_listInbox",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabInboxQueryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bandeja de órdenes de laboratorio por recibir",
+        "tags": [
+          "diagnostics-reception"
+        ]
       }
     },
     "/education/courses/publish": {
@@ -62647,6 +64720,116 @@
         "description": "Consultar el perfil de una farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/pharmacy/pharmacies/{id}/licenses": {
+      "get": {
+        "operationId": "PharmacyReadController_listLicenses",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyLicenseListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Licencias de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Licencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies/{id}/contacts": {
+      "get": {
+        "operationId": "PharmacyReadController_getContacts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyContactsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Representante legal y gerencias de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Representante legal y gerencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/pharmacy/sites": {
       "get": {
         "operationId": "PharmacyReadController_listSites",
@@ -62725,6 +64908,96 @@
           "pharmacy-directory"
         ],
         "description": "Listar sedes publicadas, sueltas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/catalog-products": {
+      "get": {
+        "operationId": "PharmacyReadController_searchCatalogProducts",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Nombre, principio activo, ATC, titular o nº de registro (mínimo 2 letras)",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agemed",
+                "cima",
+                "invima",
+                "anvisa"
+              ]
+            }
+          },
+          {
+            "name": "atc",
+            "required": false,
+            "in": "query",
+            "description": "ATC nivel 5 exacto",
+            "schema": {
+              "example": "N02BE01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyCatalogProductPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar en el catálogo universal de medicamentos",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Buscar en el catálogo universal de medicamentos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/pharmacy/products": {
@@ -69472,6 +71745,49 @@
         ]
       }
     },
+    "/promotions/me": {
+      "get": {
+        "description": "Promociones automáticas vigentes del tenant, más las de cupón para las que el titular tiene un cupón personal activo (con su código). El titular sale del token.",
+        "operationId": "PromotionsController_listMine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPromotionsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mis promociones vigentes",
+        "tags": [
+          "promotions"
+        ]
+      }
+    },
     "/promotions": {
       "post": {
         "operationId": "PromotionsController_createPromotion",
@@ -76023,6 +78339,314 @@
         "summary": "La agenda de la organización",
         "tags": [
           "scheduling-tenant-agenda"
+        ]
+      }
+    },
+    "/scheduling/service-offerings": {
+      "get": {
+        "description": "Un paciente ve sólo lo activo y reservable. El profesional dueño ve todo lo suyo.",
+        "operationId": "SchedulingServiceOfferingsController_list",
+        "parameters": [
+          {
+            "name": "practitionerProfileId",
+            "required": false,
+            "in": "query",
+            "description": "Profesional cuyas ofertas se listan. Un profesional que no la manda ve las suyas.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Los servicios que ofrece un profesional",
+        "tags": [
+          "scheduling"
+        ]
+      },
+      "post": {
+        "description": "Duración mínima y máxima, preparación, limpieza, si el paciente puede pedirlo y si requiere aprobación.",
+        "operationId": "SchedulingServiceOfferingsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceOfferingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declarar cómo ofrezco un servicio",
+        "tags": [
+          "scheduling"
+        ]
+      }
+    },
+    "/scheduling/service-offerings/{id}": {
+      "patch": {
+        "operationId": "SchedulingServiceOfferingsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceOfferingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar o apagar la oferta de un servicio",
+        "tags": [
+          "scheduling"
+        ],
+        "description": "Editar o apagar la oferta de un servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/scheduling/service-availability": {
+      "get": {
+        "description": "Se calculan en lectura a partir de las franjas que admiten servicios y del tiempo ocupado del profesional en todas sus sedes. No reserva nada.",
+        "operationId": "SchedulingServiceOfferingsController_availability",
+        "parameters": [
+          {
+            "name": "offeringId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": false,
+            "in": "query",
+            "description": "Una sede en particular; sin ella se buscan en todas las del profesional",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Horarios donde cabe un servicio",
+        "tags": [
+          "scheduling"
+        ]
+      }
+    },
+    "/scheduling/service-offerings/{id}/holds": {
+      "post": {
+        "description": "Crea el cupo del turno con la duración máxima de la oferta y lo retiene bajo el candado del profesional. Se confirma con POST /scheduling/holds/{token}/confirm o /request.",
+        "operationId": "SchedulingServiceOfferingsController_placeHold",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceHoldDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retener el turno de un servicio",
+        "tags": [
+          "scheduling"
         ]
       }
     },
@@ -85669,6 +88293,10 @@
       "description": "Operaciones del dominio funcional chart encounters. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "chart-me",
+      "description": "Operaciones del dominio funcional chart me. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "chart-notes",
       "description": "Operaciones del dominio funcional chart notes. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -85925,6 +88553,10 @@
       "description": "Operaciones del dominio funcional diagnostics patient results. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "diagnostics-reception",
+      "description": "Operaciones del dominio funcional diagnostics reception. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "diagnostics-reports",
       "description": "Operaciones del dominio funcional diagnostics reports. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -86053,6 +88685,10 @@
       "description": "Operaciones del dominio funcional identity_assurance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "insurance",
+      "description": "Operaciones del dominio funcional insurance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "insurance-analytics",
       "description": "Operaciones del dominio funcional insurance analytics. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -86113,6 +88749,14 @@
       "description": "Operaciones del dominio funcional insurance reconciliation. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "insurer-patients",
+      "description": "Operaciones del dominio funcional insurer patients. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "insurer-received-claims",
+      "description": "Operaciones del dominio funcional insurer received claims. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "integration-contracts",
       "description": "Operaciones del dominio funcional integration contracts. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -86171,6 +88815,10 @@
     {
       "name": "messaging-webhooks",
       "description": "Operaciones del dominio funcional messaging webhooks. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "my-insurance-claims",
+      "description": "Operaciones del dominio funcional my insurance claims. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "object-storage",
@@ -86483,10 +89131,6 @@
     {
       "name": "workflow",
       "description": "Operaciones del dominio funcional workflow. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
-    },
-    {
-      "name": "insurer-received-claims",
-      "description": "Operaciones del dominio funcional insurer received claims. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     }
   ],
   "servers": [
@@ -87160,6 +89804,23 @@
             "type": "string",
             "maxLength": 200
           },
+          "issuingCityText": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "issuingCountryText": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "professionConceptId": {
+            "type": "string",
+            "description": "Concept id de VS_BO_PROFESSION (COB-2023)",
+            "format": "uuid"
+          },
+          "titleText": {
+            "type": "string",
+            "maxLength": 200
+          },
           "fileId": {
             "type": "string",
             "description": "fileId del PDF subido por POST /iam/auth/upload-registration-document",
@@ -87394,6 +90055,14 @@
           "profilePhotoBase64": {
             "type": "string",
             "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
+          },
+          "signatureFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sealFileId": {
+            "type": "string",
+            "format": "uuid"
           },
           "ownSite": {
             "description": "Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites",
@@ -87792,7 +90461,7 @@
           "constitutionFileId": {
             "type": "string",
             "format": "uuid",
-            "description": "Escritura de constitución (fileId de POST /iam/auth/upload-registration-document)"
+            "description": "Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante"
           },
           "taxIdentifierFileId": {
             "type": "string",
@@ -87816,7 +90485,6 @@
           }
         },
         "required": [
-          "constitutionFileId",
           "taxIdentifierFileId",
           "commerceRegistryFileId",
           "operatingLicenseFileId",
@@ -87874,14 +90542,13 @@
           },
           "powerOfAttorneyFileId": {
             "type": "string",
-            "description": "Id del archivo del poder notariado (PDF ya pre-cargado)",
+            "description": "Id del archivo del poder notariado (PDF ya pre-cargado). Obligatorio salvo para UNIPERSONAL, donde el titular actúa por sí; el servicio responde 422 si falta",
             "format": "uuid"
           }
         },
         "required": [
           "idNumber",
-          "email",
-          "powerOfAttorneyFileId"
+          "email"
         ]
       },
       "RegisterOrganizationExecutiveContactDto": {
@@ -88523,6 +91190,14 @@
             "type": "string",
             "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
           },
+          "signatureFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sealFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "ownSite": {
             "description": "Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites",
             "allOf": [
@@ -88673,6 +91348,40 @@
           "currentPassword",
           "newPassword"
         ]
+      },
+      "PractitionerSignatureAssetsDto": {
+        "type": "object",
+        "properties": {
+          "signatureFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sealFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "signatureFileId",
+          "sealFileId"
+        ]
+      },
+      "SetPractitionerSignatureAssetsDto": {
+        "type": "object",
+        "properties": {
+          "signatureFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sealFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
       },
       "OwnAddressDto": {
         "type": "object",
@@ -88858,6 +91567,31 @@
           "coverageOrder"
         ]
       },
+      "OwnEmergencyContactDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "Cómo se llama"
+          },
+          "relationshipConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parentesco (concept id)"
+          },
+          "relationshipDisplay": {
+            "type": "string",
+            "description": "Parentesco en palabras"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Su teléfono"
+          }
+        },
+        "required": [
+          "relationshipDisplay"
+        ]
+      },
       "OwnGuardianDto": {
         "type": "object",
         "properties": {
@@ -88870,9 +91604,9 @@
             "format": "uuid",
             "description": "Parentesco (concept id)"
           },
-          "isEmergencyContact": {
-            "type": "boolean",
-            "description": "Es a quien llamar en una urgencia"
+          "relationshipDisplay": {
+            "type": "string",
+            "description": "Parentesco en palabras"
           },
           "isLegalGuardian": {
             "type": "boolean",
@@ -88884,7 +91618,7 @@
           }
         },
         "required": [
-          "isEmergencyContact",
+          "relationshipDisplay",
           "isLegalGuardian"
         ]
       },
@@ -89017,8 +91751,15 @@
               "$ref": "#/components/schemas/OwnCoverageDto"
             }
           },
+          "emergencyContacts": {
+            "description": "Contactos de emergencia activos.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnEmergencyContactDto"
+            }
+          },
           "guardians": {
-            "description": "Tutores y personas autorizadas, con su teléfono.",
+            "description": "Representantes con apoderamiento activo, con su parentesco.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/OwnGuardianDto"
@@ -89030,6 +91771,7 @@
           "patientProfileId",
           "identityVerified",
           "coverages",
+          "emergencyContacts",
           "guardians"
         ]
       },
@@ -89712,6 +92454,16 @@
           "createdAt"
         ]
       },
+      "AcceptDependentLinkRequestDto": {
+        "type": "object",
+        "properties": {
+          "relationshipConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parentesco de quien representará al paciente"
+          }
+        }
+      },
       "DependentLinkRequestDecisionDto": {
         "type": "object",
         "properties": {
@@ -89795,6 +92547,19 @@
           "issuingInstitutionText": {
             "type": "string"
           },
+          "issuingCityText": {
+            "type": "string"
+          },
+          "issuingCountryText": {
+            "type": "string"
+          },
+          "professionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titleText": {
+            "type": "string"
+          },
           "issueDate": {
             "type": "string",
             "format": "date-time"
@@ -89850,6 +92615,11 @@
           "validTo": {
             "type": "string",
             "format": "date-time"
+          },
+          "fileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sólo en la lectura propia"
           }
         },
         "required": [
@@ -89898,6 +92668,11 @@
             "nullable": true
           },
           "practiceSiteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "healthFacilityConceptId": {
             "type": "object",
             "format": "uuid",
             "nullable": true
@@ -90048,6 +92823,16 @@
           "birthDate": {
             "type": "string",
             "format": "date"
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ],
+            "description": "Sólo en la lectura propia"
           },
           "nationalId": {
             "type": "string"
@@ -90209,6 +92994,21 @@
             "type": "object",
             "format": "date",
             "nullable": true
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ],
+            "description": "Sexo asignado al nacer"
+          },
+          "issuerAdministrativeAreaConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Departamento emisor del documento (VS_BO_DEPARTMENT)"
           },
           "phone": {
             "type": "string",
@@ -90556,6 +93356,22 @@
             "type": "string",
             "maxLength": 200
           },
+          "issuingCityText": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "issuingCountryText": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "professionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titleText": {
+            "type": "string",
+            "maxLength": 200
+          },
           "issueDate": {
             "type": "string",
             "format": "date"
@@ -90585,6 +93401,22 @@
             "pattern": "\\S"
           },
           "issuingInstitutionText": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "issuingCityText": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "issuingCountryText": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "professionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titleText": {
             "type": "string",
             "maxLength": 200
           },
@@ -90624,6 +93456,42 @@
           "boardCertified": {
             "type": "boolean",
             "description": "Certificada por junta (board certified)"
+          }
+        }
+      },
+      "UpdateOwnSpecialtyDto": {
+        "type": "object",
+        "properties": {
+          "specialtyConceptId": {
+            "type": "string",
+            "description": "Concept id de la especialidad (VS_MEDICAL_SPECIALTY)",
+            "format": "uuid"
+          },
+          "boardCertified": {
+            "type": "boolean",
+            "description": "Certificada por junta"
+          }
+        }
+      },
+      "UpdateOwnLicenseDto": {
+        "type": "object",
+        "properties": {
+          "licenseNumber": {
+            "type": "string",
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "regulatoryAuthority": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "fileId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -93081,6 +95949,19 @@
           }
         }
       },
+      "SetOrganizationLogoDto": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "fileId"
+        ]
+      },
       "CreatePublicProfileDto": {
         "type": "object",
         "properties": {
@@ -93584,16 +96465,10 @@
           },
           "conversationType": {
             "type": "string",
-            "description": "Tipo de conversación",
+            "description": "Tipo de conversación (los grupos usan su flujo de membresía)",
             "enum": [
-              "DIRECT",
-              "GROUP"
+              "DIRECT"
             ]
-          },
-          "groupId": {
-            "type": "string",
-            "description": "Grupo asociado (conversaciones de grupo)",
-            "format": "uuid"
           }
         },
         "required": [
@@ -93715,6 +96590,30 @@
         "required": [
           "profileId",
           "messageId"
+        ]
+      },
+      "SearchChatContactsRequestDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "q": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "limit": {
+            "type": "object",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          }
+        },
+        "required": [
+          "profileId",
+          "q"
         ]
       },
       "CreateReportDto": {
@@ -94905,7 +97804,8 @@
           },
           "reasonText": {
             "type": "string",
-            "description": "Motivo del cambio de estado (obligatorio)"
+            "description": "Motivo del cambio de estado (obligatorio, hasta 500 caracteres)",
+            "maxLength": 500
           }
         },
         "required": [
@@ -95717,6 +98617,220 @@
         "required": [
           "key",
           "ttlSec"
+        ]
+      },
+      "MyClaimPractitionerDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "displayName",
+          "specialty"
+        ]
+      },
+      "InsuranceConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "CARRIER_ACTIVE"
+          },
+          "display": {
+            "type": "string",
+            "example": "Aseguradora activa"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "MoneyDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "example": "1250.00"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceConceptDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ]
+      },
+      "MyClaimDecisionDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "outcome",
+          "decidedAt",
+          "reason"
+        ]
+      },
+      "MyClaimDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimIdentifier": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "practitioner": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MyClaimPractitionerDto"
+              }
+            ]
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "service": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceConceptDto"
+              }
+            ]
+          },
+          "additionalServiceCount": {
+            "type": "number"
+          },
+          "billedTotal": {
+            "$ref": "#/components/schemas/MoneyDto"
+          },
+          "approvedTotal": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoneyDto"
+              }
+            ]
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "serviceDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "insurerName": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InsuranceConceptDto"
+              }
+            ]
+          },
+          "decision": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MyClaimDecisionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "claimIdentifier",
+          "patientName",
+          "practitioner",
+          "providerName",
+          "service",
+          "additionalServiceCount",
+          "billedTotal",
+          "approvedTotal",
+          "submittedAt",
+          "serviceDate",
+          "insurerName",
+          "planName",
+          "status",
+          "decision"
+        ]
+      },
+      "MyClaimListDto": {
+        "type": "object",
+        "properties": {
+          "view": {
+            "type": "string",
+            "enum": [
+              "PATIENT",
+              "PRACTITIONER",
+              "LABORATORY",
+              "IMAGING",
+              "NONE"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyClaimDto"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "view",
+          "items",
+          "truncated"
         ]
       },
       "CreateCarrierDto": {
@@ -96990,45 +100104,6 @@
           "displayName",
           "patientCode",
           "memberIdentifier"
-        ]
-      },
-      "InsuranceConceptDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "CARRIER_ACTIVE"
-          },
-          "display": {
-            "type": "string",
-            "example": "Aseguradora activa"
-          }
-        },
-        "required": [
-          "code",
-          "display"
-        ]
-      },
-      "MoneyDto": {
-        "type": "object",
-        "properties": {
-          "amount": {
-            "type": "string",
-            "example": "1250.00"
-          },
-          "currency": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/InsuranceConceptDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "amount",
-          "currency"
         ]
       },
       "ClaimListItemDto": {
@@ -99211,6 +102286,16 @@
               "EXPIRED"
             ]
           },
+          "effectiveStatus": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "PAUSED",
+              "EXPIRED"
+            ],
+            "description": "EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron."
+          },
           "targetCondition": {
             "nullable": true,
             "type": "object",
@@ -99260,6 +102345,7 @@
           "description",
           "campaignType",
           "status",
+          "effectiveStatus",
           "targetCondition",
           "copayBonusPercentage",
           "validFrom",
@@ -99407,6 +102493,54 @@
         "required": [
           "status"
         ]
+      },
+      "UpdateInsuranceCampaignDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Chequeo Preventivo Cardiovascular y Perfil Lipídico"
+          },
+          "description": {
+            "type": "string"
+          },
+          "campaignType": {
+            "type": "string",
+            "enum": [
+              "LABORATORY",
+              "PHARMACY",
+              "DIAGNOSTIC_IMAGING",
+              "VACCINATION"
+            ]
+          },
+          "targetConditionCode": {
+            "type": "string",
+            "example": "I10",
+            "description": "Código CIE-10 de la patología que se previene. Sólo descriptivo: no filtra afiliados (D4)."
+          },
+          "copayBonusPercentage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "example": 100
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-25"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-24"
+          },
+          "partners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsuranceCampaignPartnerInputDto"
+            }
+          }
+        }
       },
       "ReceivedClaimPractitionerDto": {
         "type": "object",
@@ -99653,6 +102787,229 @@
         },
         "required": [
           "outcome"
+        ]
+      },
+      "InsurerPatientSearchQueryDto": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Cursor opaco de la página anterior"
+          },
+          "limit": {
+            "type": "number",
+            "enum": [
+              10,
+              25,
+              50
+            ],
+            "default": 25
+          },
+          "search": {
+            "type": "string",
+            "description": "Nombre, teléfono o correo (contiene, sin tildes).",
+            "maxLength": 120
+          },
+          "genderConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sexo administrativo"
+          },
+          "occupation": {
+            "type": "string",
+            "description": "Profesión de catálogo o texto libre",
+            "maxLength": 120
+          },
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "birthDateFrom": {
+            "type": "string",
+            "example": "1980-01-01"
+          },
+          "birthDateTo": {
+            "type": "string",
+            "example": "1999-12-31"
+          },
+          "insuranceStatus": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "WITH_INSURANCE",
+              "NO_INSURANCE"
+            ],
+            "default": "ALL"
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "fullName",
+              "birthDate",
+              "createdAt"
+            ],
+            "default": "fullName"
+          },
+          "sortDirection": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "default": "asc"
+          }
+        }
+      },
+      "InsurerPatientCarrierDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "InsurerPatientMessagingDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "internal"
+            ]
+          },
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "channel",
+          "available"
+        ]
+      },
+      "InsurerPatientListItemDto": {
+        "type": "object",
+        "properties": {
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-04-12"
+          },
+          "age": {
+            "type": "number"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "genderCode": {
+            "type": "string"
+          },
+          "occupationDisplay": {
+            "type": "string"
+          },
+          "insurers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsurerPatientCarrierDto"
+            }
+          },
+          "messaging": {
+            "$ref": "#/components/schemas/InsurerPatientMessagingDto"
+          }
+        },
+        "required": [
+          "patientProfileId",
+          "fullName",
+          "insurers",
+          "messaging"
+        ]
+      },
+      "InsurerPatientListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsurerPatientListItemDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "nextCursor"
+        ]
+      },
+      "InsurerPatientOptionsDto": {
+        "type": "object",
+        "properties": {
+          "insurers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InsurerPatientCarrierDto"
+            }
+          }
+        },
+        "required": [
+          "insurers"
+        ]
+      },
+      "InsurerPatientConversationDto": {
+        "type": "object",
+        "properties": {
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "internal"
+            ]
+          }
+        },
+        "required": [
+          "patientProfileId",
+          "channel"
+        ]
+      },
+      "InsurerPatientConversationResponseDto": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "conversationId"
         ]
       },
       "CreatePracticeDto": {
@@ -100374,6 +103731,16 @@
           "minAmount": {
             "type": "object",
             "nullable": true
+          },
+          "minAmountCurrency": {
+            "type": "object",
+            "nullable": true
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -100385,7 +103752,8 @@
           "equipmentCount",
           "studyCount",
           "tenantId",
-          "ratingCount"
+          "ratingCount",
+          "cities"
         ]
       },
       "SearchDiagnosticUnitsResponseDto": {
@@ -111174,23 +114542,40 @@
       "ShareDiagnosticResultDto": {
         "type": "object",
         "properties": {
-          "practitionerUserId": {
+          "practitionerProfileId": {
             "type": "string",
             "format": "uuid"
           },
           "validUntil": {
             "type": "string",
             "format": "date-time"
-          },
-          "reason": {
-            "type": "string",
-            "maxLength": 500
           }
         },
         "required": [
-          "practitionerUserId",
+          "practitionerProfileId",
           "validUntil"
         ]
+      },
+      "LabInboxQueryDto": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "description": "Cursor opaco devuelto por la página anterior (`nextCursor`)"
+          },
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "patientQuery": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "description": "Nombre o código del paciente (sin distinguir mayúsculas ni tildes)"
+          }
+        }
       },
       "LessonDto": {
         "type": "object",
@@ -120369,6 +123754,16 @@
             "description": "Código único de producto por farmacia",
             "maxLength": 100
           },
+          "catalogProductId": {
+            "type": "string",
+            "description": "Producto del catálogo universal de medicamentos (id de `GET /pharmacy/catalog-products`). Con él, marca, genérico, concentración, forma, presentación, receta y el medicamento del vademécum los deriva el servidor y mandarlos es un 400.",
+            "format": "uuid"
+          },
+          "catalogPresentationCode": {
+            "type": "string",
+            "description": "Presentación elegida del producto del catálogo (su `code`: CN, CUM…). Sólo con `catalogProductId`.",
+            "maxLength": 100
+          },
           "medicationConceptId": {
             "type": "string",
             "description": "Concept id del medicamento",
@@ -120461,6 +123856,84 @@
             "nullable": true
           }
         }
+      },
+      "PharmacyConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "PharmacyProductReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "object",
+            "nullable": true
+          },
+          "genericName": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "object",
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "object",
+            "nullable": true
+          },
+          "dosageForm": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "medication": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "requiresPrescription": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "pharmacyId",
+          "pharmacyName",
+          "productCode"
+        ]
       },
       "CreatePriceListDto": {
         "type": "object",
@@ -120632,21 +124105,6 @@
           "externalProductCode"
         ]
       },
-      "PharmacyConceptDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "display": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "display"
-        ]
-      },
       "PharmacyDirectoryItemDto": {
         "type": "object",
         "properties": {
@@ -120763,6 +124221,21 @@
           "name"
         ]
       },
+      "PharmacyGeoPointDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
       "PharmacyDetailDto": {
         "type": "object",
         "properties": {
@@ -120807,6 +124280,32 @@
             "items": {
               "$ref": "#/components/schemas/PharmacySiteReadDto"
             }
+          },
+          "taxId": {
+            "type": "object",
+            "nullable": true
+          },
+          "companyType": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "legalAddressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "headquarters": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyGeoPointDto"
+              }
+            ]
           }
         },
         "required": [
@@ -120817,6 +124316,141 @@
           "siteCount",
           "productCount",
           "sites"
+        ]
+      },
+      "PharmacyLicenseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "number": {
+            "type": "string"
+          },
+          "siteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "siteName": {
+            "type": "object",
+            "nullable": true
+          },
+          "jurisdiction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "validFrom": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "validTo": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "daysToExpiry": {
+            "type": "object",
+            "nullable": true
+          },
+          "verificationStatus": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "evidenceFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "number"
+        ]
+      },
+      "PharmacyLicenseListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyLicenseDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "PharmacyContactPersonDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "object",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "role",
+          "fullName"
+        ]
+      },
+      "PharmacyContactsResponseDto": {
+        "type": "object",
+        "properties": {
+          "legalRepresentative": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyContactPersonDto"
+              }
+            ]
+          },
+          "executives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyContactPersonDto"
+            }
+          }
+        },
+        "required": [
+          "executives"
         ]
       },
       "PharmacySiteListItemDto": {
@@ -120890,28 +124524,93 @@
           "count"
         ]
       },
-      "PharmacyProductReadDto": {
+      "CatalogIngredientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "object",
+            "nullable": true
+          },
+          "unit": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CatalogPresentationDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "object",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "gtin": {
+            "type": "object",
+            "nullable": true
+          },
+          "active": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CatalogPhotoDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "thumbUrl": {
+            "type": "object",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "attribution"
+        ]
+      },
+      "PharmacyCatalogProductDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "pharmacyId": {
+          "source": {
             "type": "string",
-            "format": "uuid"
+            "enum": [
+              "agemed",
+              "cima",
+              "invima",
+              "anvisa"
+            ]
           },
-          "pharmacyName": {
+          "sourceName": {
             "type": "string"
           },
-          "productCode": {
+          "code": {
             "type": "string"
           },
-          "brandName": {
-            "type": "object",
-            "nullable": true
+          "display": {
+            "type": "string"
           },
-          "genericName": {
+          "holder": {
             "type": "object",
             "nullable": true
           },
@@ -120919,38 +124618,95 @@
             "type": "object",
             "nullable": true
           },
-          "packageSizeText": {
+          "dosageForm": {
             "type": "object",
             "nullable": true
           },
-          "dosageForm": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "medication": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
           "requiresPrescription": {
+            "type": "object",
+            "nullable": true
+          },
+          "generic": {
+            "type": "object",
+            "nullable": true
+          },
+          "activeIngredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogIngredientDto"
+            }
+          },
+          "atc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "presentations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogPresentationDto"
+            }
+          },
+          "regulatoryStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "SUSPENDED",
+              "REVOKED"
+            ]
+          },
+          "selectable": {
+            "type": "boolean"
+          },
+          "photo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CatalogPhotoDto"
+              }
+            ]
+          },
+          "sourceUrl": {
             "type": "object",
             "nullable": true
           }
         },
         "required": [
           "id",
-          "pharmacyId",
-          "pharmacyName",
-          "productCode"
+          "source",
+          "sourceName",
+          "code",
+          "display",
+          "activeIngredients",
+          "atc",
+          "presentations",
+          "regulatoryStatus",
+          "selectable"
+        ]
+      },
+      "PharmacyCatalogProductPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyCatalogProductDto"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "truncated"
         ]
       },
       "PharmacyProductSearchResponseDto": {
@@ -121829,6 +125585,19 @@
           "display"
         ]
       },
+      "PharmacyOrderPrescriberDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "PharmacyOrderSubstitutionDto": {
         "type": "object",
         "properties": {
@@ -122019,6 +125788,15 @@
             "format": "uuid",
             "nullable": true
           },
+          "prescriber": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyOrderPrescriberDto"
+              }
+            ]
+          },
           "patientName": {
             "type": "string",
             "nullable": true
@@ -122031,6 +125809,10 @@
                 "$ref": "#/components/schemas/InventoryConceptDto"
               }
             ]
+          },
+          "deliveryAddressText": {
+            "type": "string",
+            "nullable": true
           },
           "pickupCode": {
             "type": "string",
@@ -125899,6 +129681,160 @@
           "refereeMembershipId"
         ]
       },
+      "PromotionConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "MyPromotionDiscountDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PromotionConceptDto"
+              }
+            ]
+          },
+          "percentage": {
+            "type": "string",
+            "nullable": true
+          },
+          "fixedAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PromotionConceptDto"
+              }
+            ]
+          },
+          "minPurchaseAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxDiscountAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "appliesTo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PromotionConceptDto"
+              }
+            ]
+          }
+        }
+      },
+      "MyPromotionCouponDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "MyPromotionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PromotionConceptDto"
+              }
+            ]
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "discounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyPromotionDiscountDto"
+            }
+          },
+          "coupons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyPromotionCouponDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "discounts",
+          "coupons"
+        ]
+      },
+      "MyPromotionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyPromotionDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
       "DiscountRuleDto": {
         "type": "object",
         "properties": {
@@ -127998,6 +131934,15 @@
             "type": "number",
             "description": "Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0",
             "minimum": 0
+          },
+          "bookingMode": {
+            "type": "string",
+            "enum": [
+              "CONSULTATIONS",
+              "SERVICES",
+              "MIXED"
+            ],
+            "description": "Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS"
           }
         },
         "required": [
@@ -128842,6 +132787,135 @@
         "required": [
           "tenantId",
           "requestData"
+        ]
+      },
+      "CreateServiceOfferingDto": {
+        "type": "object",
+        "properties": {
+          "serviceCatalogId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Servicio del catálogo de la práctica que se ofrece"
+          },
+          "minDurationMinutes": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 720,
+            "description": "Lo mínimo que puede tardar, en minutos"
+          },
+          "maxDurationMinutes": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 720,
+            "description": "Lo máximo que puede tardar. Es el tiempo que se reserva en la agenda"
+          },
+          "prepMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 240,
+            "description": "Preparación antes de atender; el paciente no la ve"
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 240,
+            "description": "Limpieza o cierre después de atender; el paciente no la ve"
+          },
+          "isPatientBookable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Si el paciente puede pedirlo por su cuenta desde el portal"
+          },
+          "requiresApproval": {
+            "type": "boolean",
+            "default": false,
+            "description": "Si cada pedido espera la aceptación del profesional en vez de confirmarse solo"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "PRESENCIAL",
+              "TELECONSULTA",
+              "DOMICILIO"
+            ]
+          },
+          "practitionerProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sólo para quien administra agendas: el profesional dueño de la oferta. Un profesional siempre la crea para sí mismo."
+          }
+        },
+        "required": [
+          "serviceCatalogId",
+          "minDurationMinutes",
+          "maxDurationMinutes"
+        ]
+      },
+      "UpdateServiceOfferingDto": {
+        "type": "object",
+        "properties": {
+          "minDurationMinutes": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 720
+          },
+          "maxDurationMinutes": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 720
+          },
+          "prepMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 240
+          },
+          "cleanupMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 240
+          },
+          "isPatientBookable": {
+            "type": "boolean"
+          },
+          "requiresApproval": {
+            "type": "boolean"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "PRESENCIAL",
+              "TELECONSULTA",
+              "DOMICILIO"
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Falso para dejar de ofrecerlo sin borrarlo"
+          }
+        }
+      },
+      "CreateServiceHoldDto": {
+        "type": "object",
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Sede donde se atiende"
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Cuándo empieza la atención"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Paciente para el que se reserva"
+          }
+        },
+        "required": [
+          "resourceId",
+          "startAt"
         ]
       },
       "CreateEnumDefinitionDto": {

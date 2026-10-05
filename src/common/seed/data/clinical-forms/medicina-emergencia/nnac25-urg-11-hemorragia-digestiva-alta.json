@@ -1,0 +1,189 @@
+{
+  "code": "NNAC25_URG_11_HEMORRAGIA_DIGESTIVA_ALTA",
+  "name": "Hemorragia digestiva ALTA varicosa (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Urgencias y Emergencias (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/966-norma-nacional-de-atencion-clinica-de-urgencias-y-emergencias?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 11, pág. 101; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Presencia de los factores de riesgo descritos",
+        "Palidez de piel y mucosas",
+        "Diaforesis",
+        "Llenado capilar retardado",
+        "Disminución del estado de conciencia",
+        "Desorientación (valorar tiempo, espacio y persona)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 101. Es la pérdida de sangre del tracto gastrointestinal, cuyo origen se atribuye a la presencia de várices esofágicas o gástricas, evidenciada mediante una endoscopia digestiva alta."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Trombosis de la vena porta",
+        "Sepsis intraabdominal",
+        "Pancreatitis crónica",
+        "Estados protrombóticos",
+        "Trombosis de la vena esplénica",
+        "Alteraciones pre-sinusoidales",
+        "Cirrosis",
+        "Esquistosomiasis",
+        "Hiperplasia nodular regenerativa",
+        "Enfermedades mieloproliferativas",
+        "Metástasis hepática",
+        "Síndrome de Budd-Chiari"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemograma: Es posible encontrar monocitopenia, bicitopenia o pancitopenia secundario a hiperesplenismo",
+        "Pruebas de función hepática: Es posible determinar coagulopatía, hipoglicemia e hipoproteinemia-hipoalbuminemia por insuficiencia hepática crónica",
+        "Puede existir discreta alteración de pruebas hepáticas como GOT, GPT, Bilirrubinas, Fosfatasa alcalina, GGTP",
+        "Pruebas renales, electrolitos y gases arteriales: Pueden verse alterados secundario a la perdida de volumen sanguíneo"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "I85: Várices esofágicas",
+        "I85.0: Várices esofágicas con hemorragia",
+        "I85.9: Várices esofágicas sin hemorragia",
+        "I86.4: Várices gástricas"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Encefalopatía hepática",
+        "Peritonitis bacteriana espontanea o primaria, otras infecciones",
+        "Neumonía por broncoaspiración",
+        "Falla renal aguda",
+        "Choque hipovolémico hemorrágico",
+        "Muerte"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 101); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

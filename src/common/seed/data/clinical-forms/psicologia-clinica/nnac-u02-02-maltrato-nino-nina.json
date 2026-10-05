@@ -1,0 +1,206 @@
+{
+  "code": "NNAC_U02_02_MALTRATO_NINO_NINA",
+  "name": "Maltrato al niño/niña o adolescente (NNAC)",
+  "specialty": {
+    "code": "PSICOLOGIA_CLINICA",
+    "display": "Psicología Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 2 de la unidad 2, pág. 197; CIE-10 T74.0 – T74.9 – Y04 – Y07; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "El niño/niña o adolescente que refiere o expresa que es víctima de maltrato físico, emocional o negligencia",
+        "Trastornos de la conducta (enuresis, trastornos del sueño, alimentación, cambios en el comportamiento, en el rendimiento escolar, etc.)",
+        "Contusiones en neonatos o lactantes menores (que no se movilizan autónomamente)",
+        "Contusiones en la cara (excepto la frente y mentón), espalda, abdomen, brazos, glúteos, oídos y dorso de las manos",
+        "Contusiones en regiones del cuerpo sin prominencias óseas",
+        "Contusiones múltiples, simétricas y bilaterales",
+        "Contusiones que dibujan o marcan claramente el instrumento usado",
+        "Lesión circular en la región del cuello que aparente un intento de estrangulación",
+        "Lesiones circulares en muñecas y tobillos que aparentan y sugieren marcas de ligadura",
+        "Áreas de alopecia por arrancamiento",
+        "Fractura óseas: principalmente “fracturas metafisarias” y “fracturas en esquina”, “fracturas en asa de balde”",
+        "Traumatismos cráneo-encefálicos",
+        "Lesiones en áreas genitales o anales sugerentes de violencia sexual",
+        "Embarazo a temprana edad/embarazo no planificado",
+        "Omisión de cuidados (niña/niño descuidado, sucio, desnutrido, ropa inadecuada)",
+        "Lesiones en frenillos linguales: asociado al maltrato con la alimentación forzosa o relaciones oro-genitales",
+        "Queilitis: son lesiones en las comisuras labiales por carencia de vitaminas y abuso sexual o físico",
+        "Equimosis en la mucosa labial o yugal: por contacto con objeto contundente, alimentación forzosa, por abuso sexual o físico",
+        "Equimosis en paladar blando: descrito en las clínicas dermatológicas como signo de relación oro-genital",
+        "Quemaduras peri-orales y orales",
+        "Fracturas maxilares",
+        "Fracturas dentales sin una explicación convincente",
+        "Movilidad dentaria es diagnóstico de trauma",
+        "Retracciones gingivales: localizadas, descartando otros diagnósticos, es causa posible de trauma"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 197."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Violencia física",
+        "Violencia psicológica",
+        "Violencia sexual"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "El primer diagnóstico debe indicar la lesión con la ubicación topográfica",
+        "Lugar de la ocurrencia o actividad al momento de sufrir la lesión (no intencional)",
+        "Relación con el agresor (violencia intencional)",
+        "Caso probable",
+        "Síndrome",
+        "En estudio",
+        "A descartar de",
+        "Por referencia",
+        "Sospecha diagnóstica",
+        "Caso confirmado de",
+        "Negligencia o abandono (T74.0)",
+        "Síndrome del niño/niña o bebé maltratado (T74.1)",
+        "Abuso sexual (T74.2)",
+        "Abuso psicológico (T74.03)",
+        "Otros síndromes de maltrato (formas mixtas) (T74.8)",
+        "Agresión sexual con fuerza corporal (Y05)",
+        "Negligencia y abandono (Y06.0 - Y06.9)",
+        "Otros síndromes de maltrato (Y07.0 - Y07.9)",
+        "Por esposo o pareja (Y06.0 o Y07.0)",
+        "Por padre o madre (Y06.1 o Y07.1)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: T74.0 – T74.9 – Y04 – Y07."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Daño cerebral o de otros órganos y sistemas",
+        "Dificultades del aprendizaje, deserción escolar",
+        "Trastornos de conducta (comportamientos de riesgo, abuso de alcohol y otras sustancias psicoactivas — drogas—, promiscuidad)",
+        "Disgregación familiar, niños en la calle",
+        "Delincuencia juvenil y comportamiento disocial"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 197); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

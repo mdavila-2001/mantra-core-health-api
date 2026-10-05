@@ -1,16 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  requireTenantId,
   ResourceNotFoundException,
-  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { TenantAdministrationService } from '../../directory/services';
 import { OutboxService } from '../../messaging/services';
 import { PatientProfiles, Persons } from '../../profiles/entities';
 import { CatalogConcepts } from '../../terminology/entities';
@@ -20,11 +17,7 @@ import type {
   InsuranceClaims,
 } from '../entities';
 import { INS } from '../insurance.concepts';
-import {
-  CatalogRepository,
-  ClaimReadRepository,
-  ClaimRepository,
-} from '../repositories';
+import { ClaimReadRepository, ClaimRepository } from '../repositories';
 import type {
   ClaimPatientDto,
   InsuranceConceptDto,
@@ -37,6 +30,7 @@ import type {
   ReceivedClaimOutcome,
   ReceivedClaimPractitionerDto,
 } from '../dto';
+import { InsurerContextService } from './insurer-context.service';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { matchesLinkedClaimSnapshot } from './linked-claim-validation';
 import type { MyClaimDto, MyClaimsView } from '../dto/my-claims.dto';
@@ -54,7 +48,6 @@ export const MAX_RECEIVED_CLAIMS = 500;
 const MIN_REASON_LENGTH = 5;
 
 /** Roles de negocio que pueden operar las solicitudes de una aseguradora sin ser OWNER/ADMIN. */
-const INSURER_ROLES = ['INSURANCE_OPERATOR', 'SECURITY_ADMIN', 'SUPERADMIN'];
 
 /** Evento que el dictamen favorable publica para la facturación. */
 export const CLAIM_DECIDED_EVENT = 'InsuranceClaimDecided';
@@ -168,20 +161,18 @@ export class InsurerReceivedClaimsService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia raíz.
-   * @param catalogRepo - Aseguradora de un tenant.
+   * @param insurerContext - La aseguradora del tenant activo y su permiso.
    * @param claimReadRepo - Lecturas por lote del ciclo del reclamo.
    * @param claimRepo - Escrituras y bloqueo del reclamo.
-   * @param tenantAdministration - Si una sesión administra un tenant.
    * @param linkedOrders - Pedido de origen de una solicitud enlazada.
    * @param outbox - Publicación transaccional de eventos de dominio.
    * @param logger - Registro estructurado.
    */
   constructor(
     private readonly em: EntityManager,
-    private readonly catalogRepo: CatalogRepository,
+    private readonly insurerContext: InsurerContextService,
     private readonly claimReadRepo: ClaimReadRepository,
     private readonly claimRepo: ClaimRepository,
-    private readonly tenantAdministration: TenantAdministrationService,
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly outbox: OutboxService,
     private readonly logger: PinoLogger,
@@ -318,20 +309,7 @@ export class InsurerReceivedClaimsService {
     em: EntityManager,
     actor: AuthenticatedUser,
   ): Promise<{ carrierId: string; tenantId: string }> {
-    const tenantId = requireTenantId();
-    const carrier = await this.catalogRepo.findCarrierByTenantId(em, tenantId);
-    if (!carrier) throw new ForbiddenException(ACCESS_DENIED);
-
-    const canAdminister = await this.tenantAdministration.canAdminister(
-      em,
-      tenantId,
-      actor,
-    );
-    const hasRole = INSURER_ROLES.some((role) =>
-      roleAuthorizesInTenant(actor, role, tenantId),
-    );
-    if (!canAdminister && !hasRole) throw new ForbiddenException(ACCESS_DENIED);
-    return { carrierId: carrier.id, tenantId };
+    return this.insurerContext.resolve(em, actor, ACCESS_DENIED);
   }
 
   /**

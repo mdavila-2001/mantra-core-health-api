@@ -11,6 +11,59 @@ const CATEGORIAS =
   'Guía de acceso público; se usan sus categorías clínicas, no su texto';
 
 export const FUENTES = {
+  NNAC_2025_MI: {
+    sourceTitle:
+      'Norma Nacional de Atención Clínica de Medicina Interna (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_2025_TI: {
+    sourceTitle:
+      'Norma Nacional de Atención Clínica de Terapia Intensiva (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_2025_TRA: {
+    sourceTitle: 'Norma Nacional de Atención Clínica de Traumatología (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/965-norma-nacional-de-atencion-clinica-de-traumatologia?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_2025_URG: {
+    sourceTitle:
+      'Norma Nacional de Atención Clínica de Urgencias y Emergencias (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/966-norma-nacional-de-atencion-clinica-de-urgencias-y-emergencias?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_2025_NEU: {
+    sourceTitle: 'Norma Nacional de Atención Clínica de Neurología (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_2025_PED: {
+    sourceTitle: 'Norma Nacional de Atención Clínica de Pediatría (2025)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/968-norma-nacional-de-atencion-clinica-de-pediatria?Itemid=465',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
+  NNAC_BOLIVIA: {
+    sourceTitle:
+      'Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)',
+    organization:
+      'Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia',
+    url: 'https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf',
+    license: 'Documento técnico-normativo estatal de acceso público',
+  },
   MINSA_NT022: {
     sourceTitle:
       'Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02',

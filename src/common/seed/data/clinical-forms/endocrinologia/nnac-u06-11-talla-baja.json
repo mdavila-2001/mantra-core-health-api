@@ -1,0 +1,179 @@
+{
+  "code": "NNAC_U06_11_TALLA_BAJA",
+  "name": "Talla BAJA (NNAC)",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 11 de la unidad 6, pág. 453; CIE-10 E45; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Antecedente de: patologías del embarazo, ingestión de drogas en este período (tabaco, alcohol) estado nutritivo materno, tipo de parto",
+        "Historia nutricional y mórbida del paciente, uso de medicamentos, desarrollo psicomotor",
+        "Edad de aparición del retardo de crecimiento; en lo posible confeccionar una curva de crecimiento retrospectiva para detectar el inicio de la desaceleración",
+        "Hemograma completo",
+        "Examen general de orina",
+        "Parasitológico seriado",
+        "TSH, T4 libre",
+        "Determinación de GH ( hormona de crecimiento) con pruebas de estímulo",
+        "Edad ósea",
+        "Determinaciones IGF-1, exámenes funcionales según la patología encontrada",
+        "Cariotipo en casos seleccionados",
+        "Evaluación antropométrica (peso, talla) y determinar velocidad de crecimiento",
+        "Estigmas genéticos o facies características",
+        "Evidencias de disfunción endocrina (hipotiroidismo, hipercortisolismo, déficit de GH)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 453. Se define como la talla acumulada para la edad cronológica menor al percentil tres de la población o menor a -2,5 desviaciones estándar (DE). Se utiliza las tablas de la OMS (NCHS modificado) como parámetro."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Formas familiares",
+        "Talla baja familiar",
+        "Infecciones prenatales",
+        "Uso materno de drogas",
+        "Hipocrecimiento nutricional (desnutrición un año de vida)",
+        "Enfermedades sistémicas crónicas",
+        "Enfermedades endocrinológicas",
+        "Displasias óseas",
+        "Raquitismos y enfermedades óseas y metabólicas",
+        "Trastornos congénitos o adquiridos de columna vertebral"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: E45."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 453); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Talla final alcanzada",
+        "Seguimiento y control por consulta externa ambulatoria",
+        "Trabajar autoestima positiva y auto aceptación con los y las adolescentes con talla baja",
+        "Importancia del control prenatal para la detección de problemas prenatales",
+        "Parto institucional para detección precoz de patologías congénitas y sindrómicas",
+        "Apoyo a la lactancia materna",
+        "Controles mensuales de peso y talla desde el nacimiento por un año, luego bimensual",
+        "Uso saludable del tiempo libre: una hora de ejercicio diario en actividades deportivas, artísticas u otros intereses",
+        "Higiene del cuerpo, ducha diaria, cuidado de los dientes, lavado frecuente de manos",
+        "Consumo diario de dos a tres vasos de leche por lo menos",
+        "Reconocimiento y manejo de sus emociones y sentimientos",
+        "Fortalecer sus habilidades sociales, afectivas y cognitivas",
+        "Mejorar su autoestima y autovaloración",
+        "Formación de grupos de pares",
+        "Capacitación en temas de interés para ellas o ellos"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

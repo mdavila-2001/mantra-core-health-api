@@ -12,6 +12,7 @@ import {
   InsurerReceivedClaimsService,
   MAX_RECEIVED_CLAIMS,
 } from './insurer-received-claims.service';
+import { InsurerContextService } from './insurer-context.service';
 
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -208,10 +209,12 @@ function build(opciones: Opciones = {}) {
 
   const service = new InsurerReceivedClaimsService(
     em as never,
-    catalogRepo as never,
+    new InsurerContextService(
+      catalogRepo as never,
+      tenantAdministration as never,
+    ),
     claimReadRepo as never,
     claimRepo as never,
-    tenantAdministration as never,
     linkedOrders as never,
     outbox as never,
     logger as never,

@@ -18,7 +18,13 @@
  * - Toda condición `showWhen` apunta a un campo anterior y a un valor que ese
  *   campo puede tomar (`validarFicha`).
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,6 +33,7 @@ import prettier from 'prettier';
 import { ESPECIFICAS_1 } from './especificas-1.mjs';
 import { ESPECIFICAS_2 } from './especificas-2.mjs';
 import { ESPECIFICAS_3 } from './especificas-3.mjs';
+import { ESPECIFICAS_NNAC } from './especificas-nnac.mjs';
 import { CLINICAS } from './fichas-clinicas.mjs';
 import { FUENTES } from './fuentes.mjs';
 import {
@@ -42,7 +49,12 @@ const DATOS = join(RAIZ, 'src', 'common', 'seed', 'data', 'clinical-forms');
 const FECHA_V2 = '2026-10-02';
 const MARCA_V2 = `v2 (${FECHA_V2})`;
 const CONSTRUCTORES = { ...CLINICAS, ...PROCEDIMIENTO, ...OTRAS };
-const ESPECIFICAS = [...ESPECIFICAS_1, ...ESPECIFICAS_2, ...ESPECIFICAS_3];
+const ESPECIFICAS = [
+  ...ESPECIFICAS_1,
+  ...ESPECIFICAS_2,
+  ...ESPECIFICAS_3,
+  ...ESPECIFICAS_NNAC,
+];
 const FECHA_ESPECIFICAS = '2026-10-02';
 
 /**
@@ -127,12 +139,37 @@ async function crearEspecificas(soloComprobar) {
       name: e.nombre,
       specialty: base.specialty,
       version: 1,
-      provenance: { ...fuente, retrievedAt: FECHA_ESPECIFICAS, note: e.nota },
+      provenance: {
+        ...fuente,
+        retrievedAt: e.fecha ?? FECHA_ESPECIFICAS,
+        note: e.nota,
+      },
       fields: [],
     };
     writeFileSync(archivo, `${JSON.stringify(nueva, null, 2)}\n`);
   }
   return creadas;
+}
+
+/**
+ * Retira las fichas NNAC que ya no se generan (una enfermedad pasó a otra
+ * edición de la norma o a otra carpeta). Solo toca archivos `nnac*`: el resto
+ * del catálogo no se borra nunca desde acá.
+ */
+function retirarObsoletas(soloComprobar) {
+  const vigentes = new Set(ESPECIFICAS.map((e) => archivoDe(e.code)));
+  let retiradas = 0;
+  for (const carpeta of readdirSync(DATOS, { withFileTypes: true })) {
+    if (!carpeta.isDirectory()) continue;
+    for (const nombre of readdirSync(join(DATOS, carpeta.name))) {
+      if (!/^nnac.*\.json$/.test(nombre) || vigentes.has(nombre)) continue;
+      retiradas += 1;
+      const ruta = join(DATOS, carpeta.name, nombre);
+      if (soloComprobar) console.error(`obsoleta: ${relative(RAIZ, ruta)}`);
+      else unlinkSync(ruta);
+    }
+  }
+  return retiradas;
 }
 
 /**
@@ -269,6 +306,7 @@ const VERSION_V2 = { ODONTO_ODONTOGRAMA_OMS: 3 };
 
 async function main() {
   const soloComprobar = process.argv.includes('--check');
+  const retiradas = retirarObsoletas(soloComprobar);
   const creadas = await crearEspecificas(soloComprobar);
   const barrel = await escribirBarrel(soloComprobar);
   const archivos = readdirSync(DATOS, { withFileTypes: true })
@@ -336,7 +374,7 @@ async function main() {
     const k = JSON.parse(readFileSync(a, 'utf8')).kind ?? '?';
     return { ...cuenta, [k]: (cuenta[k] ?? 0) + 1 };
   }, {});
-  const total = cambiadas + creadas + barrel;
+  const total = cambiadas + creadas + barrel + retiradas;
   console.log(
     `${archivos.length} fichas (${JSON.stringify(porClase)}) · ${totalCampos} campos · ` +
       `${total} ${soloComprobar ? 'desactualizadas' : 'escritas'}`,

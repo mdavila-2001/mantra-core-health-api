@@ -1,0 +1,183 @@
+{
+  "code": "NNAC_U06_13_DISLIPIDEMIAS",
+  "name": "Dislipidemias (NNAC)",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 13 de la unidad 6, pág. 458; CIE-10 E78; niveles de resolución III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Edad (hombres > 45 años; mujeres > 55 años)",
+        "Hipertensión (PA > 130/85 mmHg o con tratamiento anti-hipertensivo)",
+        "Hemograma VES",
+        "Perfil lipídico",
+        "Glicemia",
+        "TSH (en sospecha de hipotiroidismo)",
+        "Creatinina"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 458. Es el grupo de alteraciones en la concentración de lípidos en la sangre, cuya importancia radica en sus complicaciones cardiovasculares."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: E78."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Cardiopatía isquémica",
+        "Accidente cerebrovascular",
+        "Diabetes mellitus",
+        "Pancreatitis",
+        "Hiperuricemia"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 13, pág. 458); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Paciente con dislipidemia y enfermedades concomitantes de difícil control",
+        "Paciente con complicaciones",
+        "Involucra individuos que ya tienen ECV"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dislipidemia controlada clínica y laboratorialmente",
+        "Para seguimiento y control posterior",
+        "Régimen alimentario adecuado",
+        "Actividad física",
+        "Evitar el tabaco",
+        "Evitar sedentarismo",
+        "Evitar consumo de alcohol",
+        "Educación comunitaria",
+        "Detección temprana de enfermedad cardiovascular",
+        "Promoción en la importancia de prácticas de estilos de vida saludables",
+        "NO consumir tabaco y evitar consumo de alcohol",
+        "Consumir alimentos frescos y naturales, y cotidianamente frutas y verduras de la temporada",
+        "Evitar el consumo de grasas de origen animal y comida chatarra",
+        "Acostumbrarse al consumo menor a seis gramos de sal al día",
+        "La Circunferencia de Cintura (CC), con la que se evalúa el riesgo de enfermar patologías relacionadas con la obesidad como IAM/AVC, HTA, etc"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

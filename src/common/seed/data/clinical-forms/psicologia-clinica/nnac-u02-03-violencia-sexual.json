@@ -1,0 +1,223 @@
+{
+  "code": "NNAC_U02_03_VIOLENCIA_SEXUAL",
+  "name": "Violencia sexual (NNAC)",
+  "specialty": {
+    "code": "PSICOLOGIA_CLINICA",
+    "display": "Psicología Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 3 de la unidad 2, pág. 203; CIE-10 T74.2 – Y08; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "El o la responsable de la entrevista debe desempeñarse con serenidad, empatía y escucha para establecer una relación de confianza",
+        "Datos generales: nombre, edad, sexo",
+        "Antecedentes gineco-obstétricos",
+        "Estado de la víctima, consciente, bajo efectos de alcohol o drogas, estado mental, etc",
+        "Consentimiento informado firmado para la realización de exámenes",
+        "Información, a la víctima sobreviviente, sobre cada procedimiento a realizar",
+        "Para todo procedimiento el personal de salud debe utilizar guantes de látex, gorra y barbijo, con el fin de evitar la contaminación de las muestras",
+        "Tener la presencia de un segundo profesional y también de un familiar o persona de confianza, en todos los casos",
+        "Sugilaciones (equimosis por succión, “chupones”) en cuello y regiones mamarias",
+        "Hematomas y equimosis perineales y/o de áreas próximas",
+        "Hemorragia genital, contusiones, hematomas y/o desgarros (genitales, perineal o anales)",
+        "Mordeduras",
+        "Lesiones por traumatismos",
+        "Marcas de mordedura",
+        "Lesiones en frenillos linguales: asociado al maltrato con la alimentación forzosa o relaciones oro-genitales",
+        "Queilitis: son lesiones en las comisuras labiales por carencia de vitaminas y abuso sexual o físico",
+        "Equimosis en la mucosa labial o yugal: por contacto con objeto contundente, alimentación forzosa por abuso sexual o físico",
+        "Equimosis en paladar blando: descrito en las clínicas dermatológicas como signo de relación oro-genital",
+        "Quemaduras peri-orales y orales",
+        "Fracturas maxilares",
+        "Fracturas dentales sin una explicación convincente",
+        "Movilidad dentaria es diagnóstico de trauma",
+        "Retracciones gingivales localizadas, descartando otros diagnósticos, causa posible de trauma",
+        "Posición de litotomía o ginecológica: es la más usada en mujeres",
+        "Posición de rana: recomendable en niñas pequeñas",
+        "Integro",
+        "Desgarrado",
+        "Presente: indagar acerca del “quién, qué, dónde, cuándo y cómo”; se requiere saber quién está implicado, qué pasó, cuándo, etc",
+        "Futuro: enfocarse hacia cuáles son las eventuales dificultades para la persona y su familia para enfrentar los problemas",
+        "Ordenamiento del grado de necesidades: jerarquizar los problemas que deben tratarse inmediatamente sobre los problemas que pueden posponerse"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 203. La violencia sexual comprende una serie de actos que vulneran la sexualidad de una persona, desde miradas lascivas, toques impúdicos, hasta violación (relación sexual no consentida)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Genital-perineal-anal",
+        "Paragenital (muslos, abdomen bajo, región mamaria, nalgas)",
+        "Extragenital (resto del cuerpo)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Mujer",
+        "Menor de edad",
+        "Adulto mayor",
+        "Dependencia económica y emocional",
+        "Baja autoestima",
+        "Bajo nivel educativo",
+        "Pasividad e inseguridad",
+        "Educación basada en estereotipos de género",
+        "Desconocimiento de sus derechos",
+        "Limitaciones o discapacidad física, mental o sensitiva",
+        "Menores al cuidado de propios o extraños",
+        "Recluso/reclusa, huérfano/huérfana",
+        "Costumbres culturales",
+        "Desconocimiento de los derechos",
+        "Práctica del machismo como forma de relación",
+        "Inadecuada educación para la sexualidad",
+        "Padrastros y familiares con débiles lazos afectivos",
+        "Trastornos de personalidad y/o trastornos sexuales",
+        "Haber sido víctima de agresión sexual",
+        "Consumo abusivo de alcohol y/u otras drogas"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sangre para toxicología y genética (enviar al Instituto de Investigaciones Forenses)",
+        "Frotis vaginal y anal para búsqueda de espermatozoides (guardar uno o dos hisopos para luego enviar al Instituto de Investigación Forenses, si se solicitan)",
+        "Marcar (rotular: quién tomó, a quién se tomó, cuándo se tomó, de dónde se tomó) y embalar bien las muestras",
+        "Envío de las muestras al Instituto de Investigaciones Forenses",
+        "El primer diagnóstico debe indicar la lesión con la ubicación topográfica",
+        "Lugar de la ocurrencia o actividad al momento de sufrir la lesión (no intencional)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: T74.2 – Y08."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": ["Psicológicas", "Físicas"],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 3, pág. 203); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

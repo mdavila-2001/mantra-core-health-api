@@ -2,6 +2,7 @@ import { MyClaimsController } from './controllers/my-claims.controller';
 import { MyClaimsService } from './services/my-claims.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { CommunityModule } from '../community/community.module';
 import { PracticeModule } from '../practice/practice.module';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 // Antiduplicación de estudios (subtarea 3.2, T-26): `DuplicateStudyDetector`
@@ -37,6 +38,7 @@ import {
   PractitionerSettlementBatchesController,
   InsuranceCampaignsController,
   InsurerReceivedClaimsController,
+  InsurerPatientsController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -56,7 +58,9 @@ import {
   InsurancePortabilityPdfService,
   PractitionerSettlementBatchesService,
   InsuranceCampaignsService,
+  InsurerContextService,
   InsurerReceivedClaimsService,
+  InsurerPatientsService,
 } from './services';
 import {
   CatalogRepository,
@@ -115,6 +119,7 @@ import { PractitionerInsuranceNetworksService } from './services/practitioner-in
     CommonModule,
     AuditModule,
     MessagingModule,
+    CommunityModule,
   ],
   controllers: [
     PractitionerInsuranceNetworksController,
@@ -135,6 +140,7 @@ import { PractitionerInsuranceNetworksService } from './services/practitioner-in
     PractitionerSettlementBatchesController,
     InsuranceCampaignsController,
     InsurerReceivedClaimsController,
+    InsurerPatientsController,
   ],
   providers: [
     PractitionerInsuranceNetworksService,
@@ -183,7 +189,9 @@ import { PractitionerInsuranceNetworksService } from './services/practitioner-in
     InsurancePortabilityPdfService,
     PractitionerSettlementBatchesService,
     InsuranceCampaignsService,
+    InsurerContextService,
     InsurerReceivedClaimsService,
+    InsurerPatientsService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

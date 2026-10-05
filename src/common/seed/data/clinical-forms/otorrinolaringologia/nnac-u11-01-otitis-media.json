@@ -1,0 +1,211 @@
+{
+  "code": "NNAC_U11_01_OTITIS_MEDIA",
+  "name": "Otitis media (aguda y crónica) (NNAC)",
+  "specialty": {
+    "code": "OTORRINOLARINGOLOGIA",
+    "display": "Otorrinolaringología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 1 de la unidad 11, pág. 683; CIE-10 H65 – H66; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Otalgia intensa",
+        "Otorrea (drenaje del oído)",
+        "Prurito en el oído o en el conducto auditivo externo",
+        "Hipoacusia",
+        "Tinnitus (zumbido en oído)",
+        "Mareo",
+        "Fiebre",
+        "Cefalea",
+        "Sensación de oído ocupado",
+        "Irritabilidad",
+        "Escalofríos",
+        "Náuseas",
+        "Vómitos",
+        "Diarrea",
+        "Inapetencia",
+        "Decaimiento",
+        "Movimientos violentos poco comunes de la cabeza (azotamiento de la cabeza)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 683. Es la inflamación e infección de la mucosa del oído medio (caja timpánica mastoides y trompa de Eustaquio)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin perforación",
+        "Simple",
+        "Colesteatomatosa",
+        "Fibroadhesiva (a tímpano cerrado)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Radiografía de senos paranasales por sinusitis complicada con OMA",
+        "Radiografía lateral de rinofaringe (CAVUM) para hipertrofia de adenoides",
+        "Radiografía utilizando técnica de Schuller bilateral, y tomografía en caso de colesteatoma o radiografía Chausse III",
+        "Audiometría tonal, logoaudiometría (en mayores de cinco años), impedanciometría (lactantes, niños/niñas, adolescentes)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: H65 – H66."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 1, pág. 683); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de referencia que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Otalgia mayor a siete días, para timpanocentesis",
+        "Otorrea mayor a siete días pese a tratamiento antibiótico",
+        "Recurrencia de otitis media para tratamiento quirúrgico, tímpanoplastia",
+        "Mastoiditis (infección de la mastoides con abombamiento o fistula)",
+        "Hipertrofia adenoamigdalina para cirugía",
+        "Hipoacusia y retraso en el desarrollo del lenguaje para equipamiento audio protésico",
+        "Meningitis",
+        "Obstrucción nasal: desvío de tabique nasal, hipertrofia de adenoides, poliposis nasal",
+        "Alteraciones rinosinusales (rinitis alérgica y/o sinusitis)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resolución del problema de salud",
+        "Para continuar controles en forma ambulatoria",
+        "Cuidados higiénicos y tratamiento de los oídos",
+        "Utilizar pañuelos desechables, evitar el pañuelo de tela",
+        "Los niños/niñas no deben acudir a la escuela durante la fase aguda",
+        "Precauciones relativas al exudado y las secreciones",
+        "Desinfectar las superficies de contacto común",
+        "En caso de pacientes hospitalizados, precauciones en el manejo e higiene de forma personalizada",
+        "Hacer hincapié en la necesidad de aplicar la bioseguridad",
+        "Evitar ingreso de agua al oído (usar tapón de algodón con vaselina)",
+        "En niños menores de dos años verificar carnet de vacunación y crecimiento y desarrollo"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

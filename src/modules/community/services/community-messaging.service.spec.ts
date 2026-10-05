@@ -598,6 +598,32 @@ describe('CommunityMessagingService', () => {
         lastReadMessageId: 'msg9',
       });
     });
+
+    it('exige que el perfil lector pertenezca al actor', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'conv1',
+      });
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue({
+        id: 'part1',
+        updatedAt: new Date(),
+      });
+      d.conversationsRepo.findLastMessage.mockResolvedValue({ id: 'msg9' });
+
+      await expect(
+        d.service.markRead('conv1', { recipientProfileId: 'p-ajeno' }, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'p-ajeno',
+        actor,
+      );
+      expect(d.conversationsRepo.createReceipt).not.toHaveBeenCalled();
+      expect(d.gateway.emitRead).not.toHaveBeenCalled();
+    });
   });
 
   /* --- F4.4 · favorita, fijada, archivada ---------------------------------- */
