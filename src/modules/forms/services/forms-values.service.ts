@@ -7,7 +7,9 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import type { DynamicFieldDefinitions } from '../entities';
 import {
+  FieldDefinitionsRepository,
   FieldValuesRepository,
   FormInstancesRepository,
 } from '../repositories';
@@ -41,9 +43,68 @@ export class FormsValuesService {
     private readonly em: EntityManager,
     private readonly valuesRepo: FieldValuesRepository,
     private readonly instancesRepo: FormInstancesRepository,
+    private readonly fieldsRepo: FieldDefinitionsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(FormsValuesService.name);
+  }
+
+  /**
+   * Valida que un `code` sin `valueSetId` sea una de sus {@link
+   * DynamicFieldDefinitions.options}, o el texto libre de «Otro» cuando el
+   * campo lo permite.
+   *
+   * No valida nada cuando el campo tiene `valueSetId`: ese catálogo lo
+   * administra terminología y esta pasada no lo consulta — es el mismo
+   * alcance que tenía la captura antes de este cambio, no uno nuevo.
+   */
+  private validateCodeValue(
+    field: Pick<
+      DynamicFieldDefinitions,
+      'id' | 'valueSetId' | 'options' | 'allowOther'
+    >,
+    value: unknown,
+  ): void {
+    if (field.valueSetId !== undefined) return;
+
+    const opciones = field.options ?? [];
+    if (opciones.length === 0) {
+      throw new PreconditionFailedException(
+        'El campo no tiene opciones declaradas',
+        { fieldId: field.id },
+      );
+    }
+    if (typeof value === 'string' && opciones.includes(value)) return;
+    if (
+      field.allowOther === true &&
+      typeof value === 'string' &&
+      value.trim() !== ''
+    ) {
+      return;
+    }
+    throw new PreconditionFailedException(
+      'El valor no está entre las opciones del campo',
+      { fieldId: field.id },
+    );
+  }
+
+  /** Los campos de un lote, por id — para threadear `valueSetId`/`options` a `buildValueColumns`. */
+  private async fieldsById(
+    tx: EntityManager,
+    fieldIds: readonly string[],
+  ): Promise<ReadonlyMap<string, DynamicFieldDefinitions>> {
+    const fields = await this.fieldsRepo.findFieldsByIds(tx, fieldIds);
+    return new Map(fields.map((f) => [f.id, f]));
+  }
+
+  /** Construye las columnas `value_*` de una entrada, validando si es `code`. */
+  private columnsFor(
+    dataType: string,
+    value: unknown,
+    field: DynamicFieldDefinitions | undefined,
+  ) {
+    if (dataType === 'code' && field) this.validateCodeValue(field, value);
+    return buildValueColumns(dataType, value, field);
   }
 
   /** UC-09-08: captura valores en una instancia abierta. */
@@ -72,6 +133,10 @@ export class FormsValuesService {
         });
       }
 
+      const campos = await this.fieldsById(
+        tx,
+        dto.values.map((v) => v.fieldId),
+      );
       const created = dto.values.map((v) =>
         this.valuesRepo.create(tx, {
           formInstanceId: instanceId,
@@ -86,7 +151,7 @@ export class FormsValuesService {
           valueVersion: 1,
           effectiveFrom: new Date(),
           actorUserId: actor.id,
-          ...buildValueColumns(v.dataType, v.value),
+          ...this.columnsFor(v.dataType, v.value, campos.get(v.fieldId)),
         }),
       );
       // FK planas: persistir los valores antes de su auditoría.
@@ -128,6 +193,7 @@ export class FormsValuesService {
       }
 
       const previousSnapshot = this.snapshot(previous);
+      const field = await this.fieldsRepo.findFieldById(tx, previous.fieldId);
 
       const corrected = this.valuesRepo.create(tx, {
         formInstanceId: previous.formInstanceId,
@@ -143,7 +209,7 @@ export class FormsValuesService {
         supersedesValueId: previous.id,
         effectiveFrom: new Date(),
         actorUserId: actor.id,
-        ...buildValueColumns(dto.dataType, dto.value),
+        ...this.columnsFor(dto.dataType, dto.value, field ?? undefined),
       });
       await tx.flush();
 
@@ -193,6 +259,11 @@ export class FormsValuesService {
         item: (typeof dto.items)[number];
       }[] = [];
 
+      const campos = await this.fieldsById(
+        tx,
+        dto.items.map((item) => item.fieldId),
+      );
+
       for (const item of dto.items) {
         const instance = await this.instancesRepo.findById(
           tx,
@@ -214,7 +285,11 @@ export class FormsValuesService {
           valueVersion: 1,
           effectiveFrom: new Date(),
           actorUserId: actor.id,
-          ...buildValueColumns(item.dataType, item.value),
+          ...this.columnsFor(
+            item.dataType,
+            item.value,
+            campos.get(item.fieldId),
+          ),
         });
         created.push({ id: value.id, snapshot: this.snapshot(value), item });
       }
@@ -290,6 +365,8 @@ export class FormsValuesService {
      * Identificador asociado a value concept.
      */
     valueConceptId?: string;
+    /** La opción libre de un `code` sin `valueSetId`. */
+    valueCode?: string;
     /**
      * Identificador asociado a value reference.
      */
@@ -307,6 +384,7 @@ export class FormsValuesService {
       valueBoolean: value.valueBoolean,
       valueJson: value.valueJson,
       valueConceptId: value.valueConceptId,
+      valueCode: value.valueCode,
       valueReferenceId: value.valueReferenceId,
     };
   }

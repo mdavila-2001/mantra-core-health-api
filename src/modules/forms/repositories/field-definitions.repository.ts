@@ -51,6 +51,14 @@ export interface CreateFieldData {
    * Valor de regex mantenido por la instancia.
    */
   regex?: string;
+  /** Opciones propias de un campo de elección (dataType 'code' sin valueSetId). */
+  options?: string[];
+  /** Si admite marcar varias opciones. */
+  multiple?: boolean;
+  /** Si ofrece además «Otro», con texto libre. */
+  allowOther?: boolean;
+  /** La ayuda que se lee bajo la pregunta. */
+  description?: string;
   /**
    * Valor de schema version mantenido por la instancia.
    */

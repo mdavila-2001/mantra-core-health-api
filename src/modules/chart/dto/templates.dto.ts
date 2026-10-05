@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -146,6 +147,64 @@ export class TemplateFieldInputDto {
   valueSetId?: string;
 
   /**
+   * Opciones propias de un campo de elección sin `valueSetId`: texto libre,
+   * en el orden en que se ofrecen. Mutuamente excluyente con `valueSetId` —
+   * un campo "code" declara una de las dos, nunca las dos.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Opciones propias de un campo de elección (dataType "code" sin valueSetId)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(2, {
+    message: 'Un campo de elección necesita al menos dos opciones',
+  })
+  @IsString({ each: true })
+  options?: string[];
+
+  /** Si el campo admite marcar varias opciones («casillas de verificación»). */
+  @ApiPropertyOptional({
+    description: 'Admite varias respuestas en vez de una sola',
+  })
+  @IsOptional()
+  @IsBoolean()
+  multiple?: boolean;
+
+  /** Si el campo ofrece además «Otro», con un texto libre que no está entre `options`. */
+  @ApiPropertyOptional({ description: 'Ofrece «Otro», con texto libre' })
+  @IsOptional()
+  @IsBoolean()
+  allowOther?: boolean;
+
+  /** La ayuda que se lee bajo la pregunta cuando el nombre no alcanza. */
+  @ApiPropertyOptional({
+    description: 'Ayuda que se lee bajo la pregunta (se sirve como "hint")',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  /** Casillas: marcar al menos N. Sólo tiene sentido con `multiple: true`. */
+  @ApiPropertyOptional({
+    description: 'Cardinalidad mínima (sólo con multiple)',
+  })
+  @IsOptional()
+  @IsInt()
+  cardinalityMin?: number;
+
+  /** Casillas: marcar como máximo N. Sólo tiene sentido con `multiple: true`. */
+  @ApiPropertyOptional({
+    description: 'Cardinalidad máxima (sólo con multiple)',
+  })
+  @IsOptional()
+  @IsInt()
+  cardinalityMax?: number;
+
+  /**
    * Si el campo es obligatorio al completar la plantilla.
    */
   @ApiPropertyOptional({ default: false })
@@ -281,6 +340,30 @@ export class ChartTemplateFieldDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   valueSetId?: string;
+
+  /** Opciones propias de un campo de elección sin `valueSetId`. */
+  @ApiPropertyOptional({ type: [String] })
+  options?: string[];
+
+  /** Si el campo admite marcar varias opciones. */
+  @ApiPropertyOptional()
+  multiple?: boolean;
+
+  /** Si el campo ofrece además «Otro», con texto libre. */
+  @ApiPropertyOptional()
+  allowOther?: boolean;
+
+  /** La ayuda que se lee bajo la pregunta. Se sirve como `hint` del campo. */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /** Casillas: marcar al menos N. Sólo con `multiple`. */
+  @ApiPropertyOptional()
+  cardinalityMin?: number;
+
+  /** Casillas: marcar como máximo N. Sólo con `multiple`. */
+  @ApiPropertyOptional()
+  cardinalityMax?: number;
 
   /**
    * Si el campo es obligatorio al completar la plantilla.
