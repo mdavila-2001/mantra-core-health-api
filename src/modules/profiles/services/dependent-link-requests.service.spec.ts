@@ -524,13 +524,17 @@ describe('DependentLinkRequestsService', () => {
         solicitud,
       });
 
-      const r = await service.accept(REQUEST_ID, abuelo);
+      const r = await service.accept(
+        REQUEST_ID,
+        { relationshipConceptId: PROF.RELATIONSHIP_CHILD },
+        abuelo,
+      );
 
       expect(r).toEqual({ id: REQUEST_ID, status: 'ACCEPTED' });
       expect(relatedPersonsRepo.create.mock.calls[0][1]).toMatchObject({
         patientProfileId: 'person-abuelo',
         personId: 'person-madre',
-        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+        relationshipConceptId: PROF.RELATIONSHIP_CHILD,
         isLegalGuardian: false,
         statusConceptId: PROF.RELATED_ACTIVE,
       });
@@ -548,15 +552,27 @@ describe('DependentLinkRequestsService', () => {
       );
     });
 
+    it('mantiene compatibilidad con clientes anteriores usando Otra relación', async () => {
+      const { service, relatedPersonsRepo } = build({
+        solicitud: pendienteDelAbuelo(),
+      });
+
+      await service.accept(REQUEST_ID, {}, abuelo);
+
+      expect(relatedPersonsRepo.create.mock.calls[0][1]).toMatchObject({
+        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+      });
+    });
+
     it('una solicitud ya respondida es 409 y no se toca', async () => {
       const solicitud = pendienteDelAbuelo({
         statusConceptId: PROF.PROXY_REJECTED,
       });
       const { service, relatedPersonsRepo } = build({ solicitud });
 
-      await expect(service.accept(REQUEST_ID, abuelo)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, abuelo),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(relatedPersonsRepo.create).not.toHaveBeenCalled();
       expect(solicitud.statusConceptId).toBe(PROF.PROXY_REJECTED);
     });
@@ -567,9 +583,9 @@ describe('DependentLinkRequestsService', () => {
         vigente: { id: 'proxy-otro' },
       });
 
-      await expect(service.accept(REQUEST_ID, abuelo)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, abuelo),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(relatedPersonsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -579,9 +595,9 @@ describe('DependentLinkRequestsService', () => {
         sinCuenta: ['user-madre'],
       });
 
-      await expect(service.accept(REQUEST_ID, abuelo)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, abuelo),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('una solicitud ajena responde 404, igual que una inexistente', async () => {
@@ -589,9 +605,9 @@ describe('DependentLinkRequestsService', () => {
       const solicitud = pendienteDelAbuelo();
       const { service, notifications } = build({ solicitud });
 
-      await expect(service.accept(REQUEST_ID, madre)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, madre),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(solicitud.statusConceptId).toBe(PROF.PROXY_PENDING);
       expect(notifications.emitInApp).not.toHaveBeenCalled();
     });
@@ -601,17 +617,17 @@ describe('DependentLinkRequestsService', () => {
         solicitud: pendienteDelAbuelo({ proxyUserId: 'user-abuelo' }),
       });
 
-      await expect(service.accept(REQUEST_ID, abuelo)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, abuelo),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('una solicitud inexistente es 404', async () => {
       const { service } = build({ solicitud: null });
 
-      await expect(service.accept(REQUEST_ID, abuelo)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, abuelo),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 

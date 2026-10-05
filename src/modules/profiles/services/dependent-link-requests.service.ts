@@ -14,6 +14,7 @@ import { IdentifiersRepository } from '../../common/repositories';
 import { NotificationsService } from '../../messaging/services';
 import { normalizeSearchText } from '../../terminology/repositories/glossary-search.sql';
 import type {
+  AcceptDependentLinkRequestDto,
   DependentCandidateDto,
   DependentLinkRequestDecisionDto,
   DependentLinkRequestSentDto,
@@ -277,6 +278,7 @@ export class DependentLinkRequestsService {
    */
   async accept(
     requestId: string,
+    dto: AcceptDependentLinkRequestDto,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
     const { solicitante, yo } = await this.em.transactional(async (tx) => {
@@ -315,7 +317,8 @@ export class DependentLinkRequestsService {
       const parentesco = this.relatedPersonsRepo.create(tx, {
         patientProfileId: yo.patientProfileId,
         personId: vinculo.personId,
-        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+        relationshipConceptId:
+          dto.relationshipConceptId ?? PROF.RELATIONSHIP_OTHER,
         isEmergencyContact: false,
         isLegalGuardian: false,
         statusConceptId: PROF.RELATED_ACTIVE,

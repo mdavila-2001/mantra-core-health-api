@@ -82,6 +82,14 @@ export interface DependentRow {
   readonly national_id: string | null;
 }
 
+/** Representante activo del paciente, listo para la ficha propia. */
+export interface GuardianRow {
+  readonly display_name: string | null;
+  readonly relationship_concept_id: string | null;
+  readonly is_legal_guardian: boolean | null;
+  readonly phone: string | null;
+}
+
 /**
  * Una fila de {@link PatientPortalProxiesRepository.listPendingForPatient}.
  *
@@ -286,6 +294,46 @@ export class PatientPortalProxiesRepository {
         CONCEPTS.ID_TYPE_NATIONAL,
         CONCEPTS.STATE_ACTIVE,
         proxyUserId,
+        PROF.PROXY_ACTIVE,
+        now,
+        now,
+      ],
+    );
+  }
+
+  /** Personas que hoy pueden actuar por el paciente. */
+  listActiveGuardiansOfPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    now: Date,
+  ): Promise<GuardianRow[]> {
+    return em.getConnection().execute<GuardianRow[]>(
+      `select p.display_name,
+              rp.relationship_concept_id,
+              rp.is_legal_guardian,
+              (select cp.value from common.contact_points cp
+                where cp.owner_id = p.id
+                  and cp.system_concept_id = ?
+                  and cp.valid_to is null
+                order by cp.rank nulls last limit 1) as phone
+         from profiles.patient_portal_proxies pr
+         join profiles.person_account_links pal
+           on pal.user_id = pr.proxy_user_id
+          and pal.status_concept_id = ?
+         join profiles.persons p on p.id = pal.person_id
+         left join profiles.related_persons rp
+           on rp.id = pr.related_person_id
+          and rp.status_concept_id = ?
+        where pr.patient_profile_id = ?
+          and pr.status_concept_id = ?
+          and (pr.valid_from is null or pr.valid_from <= ?)
+          and (pr.valid_to is null or pr.valid_to > ?)
+        order by pr.created_at asc`,
+      [
+        CONCEPTS.CONTACT_PHONE,
+        PROF.ACCOUNT_LINK_ACTIVE,
+        PROF.RELATED_ACTIVE,
+        patientProfileId,
         PROF.PROXY_ACTIVE,
         now,
         now,
