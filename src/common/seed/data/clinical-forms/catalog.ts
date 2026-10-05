@@ -47,6 +47,11 @@ import controlObstetrico from './obstetricia/control-obstetrico.json';
 import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
 // v2 (2026-10-02) — las fichas específicas por condición, generadas.
 import { SPECIFIC_FORMS } from './specific-forms.generated';
+// v4.2.0 — los dos tamizajes de salud mental que el README dejaba como
+// «reemplazo libre propuesto» (PHQ-9/GAD-7/Beck/AUDIT ilustrado tienen
+// copyright comercial): SRQ-20 y AUDIT, ambos publicados por la OMS.
+import srq20TamizajeSaludMental from './psiquiatria/srq-20-tamizaje-salud-mental.json';
+import auditTamizajeConsumoAlcohol from './psiquiatria/audit-tamizaje-consumo-alcohol.json';
 
 /**
  * Los tipos de dato que un formulario del catálogo puede declarar.
@@ -389,4 +394,7 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   controlObstetrico,
   anamnesisOdontologica,
   ...(SPECIFIC_FORMS as readonly RawForm[]),
+  // v4.2.0 — tamizajes de salud mental de dominio público (OMS)
+  srq20TamizajeSaludMental,
+  auditTamizajeConsumoAlcohol,
 ].map(validar);

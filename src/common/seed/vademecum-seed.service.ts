@@ -60,6 +60,15 @@ import vademecumDataset from './data/vademecum/vademecum.dataset.json';
  * cargada el nombre, la definición, la designación preferida y el valor de las
  * propiedades, para que los 17 de desarrollo dejen de mostrarse en inglés.
  *
+ * Nota de una ronda anterior (2026-10, superada por la LINAME): se habían
+ * agregado 12 psicofármacos de desarrollo a mano porque el vademécum no
+ * tenía ningún ISRS, benzodiacepina, antipsicótico ni estabilizador del
+ * ánimo. La LINAME ya trae la mayoría (fluoxetina, alprazolam, clonazepam,
+ * quetiapina, risperidona, litio, haloperidol); siguen sin estar
+ * sertralina, escitalopram, venlafaxina, lorazepam y olanzapina — quedan
+ * para quien retome el trabajo de LINAME, no para un seed de desarrollo
+ * aparte.
+ *
  * ## B-13 — sin contenido clínico ni fuentes que no lo respaldan
  *
  * Hasta el 2026-09-02 el dataset citaba RxNorm, SNOMED CT y WHO ATC/DDD como
@@ -322,15 +331,15 @@ export class VademecumSeedService {
     return inserted;
   }
 
-  /** Los 17 medicamentos, con su código ATC como `code`. */
+  /** Los medicamentos del dataset, con su código ATC como `code`. */
   private async seedConcepts(
     em: EntityManager,
     now: Date,
     idReal: Map<string, string>,
   ): Promise<number> {
     // Una sola consulta por la clave natural (version, code) en vez de una por
-    // concepto: son 17 hoy, pero el dataset crece con cada versión del
-    // vademécum y esto corre en cada arranque.
+    // concepto: son ~489 hoy (LINAME), pero el dataset crece con cada versión
+    // del vademécum y esto corre en cada arranque.
     const versionIds = [
       ...new Set(
         vademecumDataset.concepts.map(

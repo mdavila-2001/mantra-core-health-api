@@ -1,0 +1,152 @@
+{
+  "code": "PSIQ_SRQ20_TAMIZAJE",
+  "name": "SRQ-20 — Cuestionario de Autorreporte (tamizaje de trastornos mentales comunes)",
+  "specialty": {
+    "code": "PSIQUIATRIA",
+    "display": "Psiquiatría y salud mental"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Self-Reporting Questionnaire (SRQ-20) — A user's guide to the Self Reporting Questionnaire (SRQ)",
+    "organization": "Organización Mundial de la Salud (OMS) — División de Salud Mental",
+    "url": "https://iris.who.int/handle/10665/61113",
+    "license": "Publicación de la OMS, dominio público / acceso libre",
+    "sourceVersion": "1994",
+    "retrievedAt": "2026-10-04",
+    "note": "Reemplazo de PHQ-9/GAD-7/Beck propuesto en el README de este catálogo: los tres son instrumentos con copyright comercial (Pfizer, Pearson) que no se pudieron cargar. El SRQ-20 es el instrumento de tamizaje de la OMS para trastornos mentales comunes (ansiedad, depresión, somatización) en atención primaria, validado en más de 20 países. Las 20 preguntas son de respuesta Sí/No referidas a las últimas 4 semanas. Puntaje: se suma 1 por cada 'Sí'. Punto de corte orientativo (validación en Latinoamérica): ≥7 en mujeres, ≥6 en varones sugiere malestar psicológico significativo y amerita evaluación clínica — el corte varía por país/validación y nunca sustituye el juicio clínico. La pregunta 17 (ideación suicida) exige revisión inmediata ante cualquier respuesta afirmativa, independientemente del puntaje total."
+  },
+  "fields": [
+    {
+      "code": "q01_dolor_cabeza",
+      "name": "1. ¿Tiene frecuentemente dolores de cabeza?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q02_mal_apetito",
+      "name": "2. ¿Tiene mal apetito?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q03_duerme_mal",
+      "name": "3. ¿Duerme mal?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q04_se_asusta_facil",
+      "name": "4. ¿Se asusta con facilidad?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q05_temblor_manos",
+      "name": "5. ¿Tiene temblor de manos?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q06_nervioso_tenso",
+      "name": "6. ¿Se siente nervioso, tenso o aburrido?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q07_mala_digestion",
+      "name": "7. ¿Tiene mala digestión?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q08_no_piensa_claro",
+      "name": "8. ¿No puede pensar con claridad?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q09_se_siente_triste",
+      "name": "9. ¿Se siente triste?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q10_llora_mas",
+      "name": "10. ¿Llora usted con más frecuencia de lo habitual?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q11_dificil_disfrutar",
+      "name": "11. ¿Encuentra difícil disfrutar de sus actividades diarias?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q12_dificil_decidir",
+      "name": "12. ¿Encuentra difícil tomar decisiones?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q13_trabajo_afectado",
+      "name": "13. ¿Su trabajo diario está afectado?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q14_incapaz_rol_util",
+      "name": "14. ¿Es incapaz de desempeñar un papel útil en su vida?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q15_perdido_interes",
+      "name": "15. ¿Ha perdido interés en las cosas?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q16_se_siente_inutil",
+      "name": "16. ¿Se siente una persona inútil, incapaz de servir para algo?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q17_idea_acabar_con_vida",
+      "name": "17. ¿Ha tenido la idea de acabar con su vida?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q18_cansado_todo_el_tiempo",
+      "name": "18. ¿Se siente cansado todo el tiempo?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q19_sensaciones_desagradables_estomago",
+      "name": "19. ¿Tiene sensaciones desagradables en el estómago?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "q20_se_cansa_facil",
+      "name": "20. ¿Se cansa con facilidad?",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "puntaje_total",
+      "name": "Puntaje total (suma de respuestas afirmativas, 0-20)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "impresion_clinica",
+      "name": "Impresión clínica y conducta a seguir",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}
