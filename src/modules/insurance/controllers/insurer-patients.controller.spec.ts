@@ -155,6 +155,12 @@ describe('InsurerPatientsController contract', () => {
     expect(
       document.paths['/insurance/patients/conversation'].post,
     ).toBeDefined();
+    expect(
+      document.paths['/insurance/patients/conversation'].post?.responses['422'],
+    ).toBeDefined();
+    expect(
+      document.paths['/insurance/patients/conversation'].post?.responses['412'],
+    ).toBeUndefined();
     const item = document.components?.schemas?.InsurerPatientListItemDto as {
       properties: Record<string, unknown>;
     };
