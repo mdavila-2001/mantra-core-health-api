@@ -1,0 +1,3 @@
+src/modules/community/services/public-profile-projection.service.spec.ts(9,16): error TS2554: Expected 0 arguments, but got 1.
+src/modules/community/services/public-profile-projection.service.spec.ts(13,16): error TS2554: Expected 0 arguments, but got 1.
+EXIT_CODE=2

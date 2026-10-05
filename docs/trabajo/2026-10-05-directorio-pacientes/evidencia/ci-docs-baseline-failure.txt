@@ -1,0 +1,11 @@
+COMMAND: gh run view 37330017105 --log-failed (fragmento literal; log bruto fuera de Git)
+docs	UNKNOWN STEP	2026-10-05T15:14:12.0120525Z   ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+docs	UNKNOWN STEP	2026-10-05T15:14:12.0124666Z     ^[[0m ^[[90m 260 |^[[39m   it(^[[32m'la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN'^[[39m^[[33m,^[[39m () ^[[33m=>^[[39m {
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7790689Z Summary of all failing tests
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7791459Z FAIL modules/insurance/controllers/insurance-controllers.spec.ts
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7794453Z   ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7805401Z     ^[[0m ^[[90m 260 |^[[39m   it(^[[32m'la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN'^[[39m^[[33m,^[[39m () ^[[33m=>^[[39m {
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7828579Z Test Suites: 1 failed, 1 skipped, 806 passed, 807 of 808 total
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7829332Z Tests:       1 failed, 1 skipped, 9948 passed, 9950 total
+docs	UNKNOWN STEP	2026-10-05T15:22:48.7830682Z Time:        581.254 s
+docs	UNKNOWN STEP	2026-10-05T15:22:48.8882824Z ##[error]Process completed with exit code 1.
