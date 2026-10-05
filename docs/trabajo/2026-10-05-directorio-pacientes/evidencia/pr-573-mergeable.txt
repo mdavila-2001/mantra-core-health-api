@@ -1,0 +1,7 @@
+CONSULTED_UTC=2026-10-05T17:51:44Z
+COMMAND: gh pr view 573 --json number,url,state,isDraft,mergeable,mergeStateStatus,reviewDecision,baseRefName,headRefName,headRefOid
+{"baseRefName":"test","headRefName":"marcelo/insurer-patient-directory-test","headRefOid":"a05c6e4539fc7e6ba375afa0a031919179586f38","isDraft":false,"mergeStateStatus":"CLEAN","mergeable":"MERGEABLE","number":573,"reviewDecision":"","state":"OPEN","url":"https://github.com/mdavila-2001/mantra-core-health-api/pull/573"}
+VIEW_EXIT_CODE=0
+COMMAND: gh pr checks 573
+no checks reported on the 'marcelo/insurer-patient-directory-test' branch
+CHECKS_EXIT_CODE=1

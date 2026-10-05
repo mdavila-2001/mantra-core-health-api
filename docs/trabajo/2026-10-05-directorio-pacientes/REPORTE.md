@@ -340,3 +340,10 @@ STDOUT: (empty); EXIT_CODE=0
 COMMAND: structural equality of three failing OpenAPI operations against origin/dev
 EXIT_CODE=0
 ```
+
+## Estado de PR consultado después de publicar código y QA
+
+- API572 — OPEN, isDraft=false, MERGEABLE, BLOCKED, REVIEW_REQUIRED; docs pending y fork-guard skipping. Consultado2026-10-05T17:51:42Z tras push07e45072. [Salida literal](./evidencia/pr-572-mergeable.txt).
+- API573 — OPEN, isDraft=false, MERGEABLE, CLEAN; gh pr checks informa no checks reported. Consultado2026-10-05T17:51:44Z tras pusha05c6e45. [Salida literal](./evidencia/pr-573-mergeable.txt). La ausencia de checks no subsana los fallos globales locales heredados.
+- Frontend960 — OPEN, MERGEABLE, UNSTABLE; tres checks pending por runner offline. Frontend956 — MERGED externamente con head17d0f205, checks históricos pendientes. Un PR ya mergeado devuelve UNKNOWN en mergeable y no se presenta como PR abierto listo para merge.
+- La entrega coordinada permanece A MEDIAS. No se pidió review a terceros ni se mergeó por este agente. La publicación siguiente sólo versiona esta evidencia; la consulta posterior al último push se realiza nuevamente en el cierre.
