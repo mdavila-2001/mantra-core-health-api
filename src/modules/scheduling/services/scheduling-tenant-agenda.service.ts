@@ -5,6 +5,7 @@ import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import { TenantAdministrationService } from '../../directory/services';
 // Se importa la ENTIDAD de `profiles` y no su módulo —el mismo criterio que ya
 // usa la agenda del profesional para resolver nombres—: traer el módulo entero
@@ -107,18 +108,21 @@ export class SchedulingTenantAgendaService {
           from: query.from,
           to: query.to,
         },
+        SchedulingErrorReason.AGENDA_WINDOW_INVALID,
       );
     }
     if (from >= to) {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: query.from, to: query.to },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
     if (to.getTime() - from.getTime() > MAX_RANGO_AGENDA_DIAS * UN_DIA_MS) {
       throw new PreconditionFailedException(
         `El rango no puede superar los ${MAX_RANGO_AGENDA_DIAS} días`,
         { from: query.from, to: query.to },
+        SchedulingErrorReason.AGENDA_WINDOW_TOO_WIDE,
       );
     }
 

@@ -28,6 +28,7 @@ import type {
 import { CatalogRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /** Estados en los que un producto puede difundirse a profesionales. */
 const PUBLISHABLE_STATUSES = [PHL.PRODUCT_APPROVED, PHL.PRODUCT_MARKETED];
@@ -222,6 +223,7 @@ export class PharmaCatalogService {
         throw new ConflictException(
           'La transición de estado regulatorio no está permitida',
           { productId, current: product.regulatoryStatusConceptId },
+          PharmaLabErrorReason.PRODUCT_STATUS_TRANSITION_NOT_ALLOWED,
         );
       }
 
@@ -342,6 +344,7 @@ export class PharmaCatalogService {
         throw new PreconditionFailedException(
           'No se puede modificar el contenido de un material ya aprobado; creá una versión nueva',
           { materialId },
+          PharmaLabErrorReason.MATERIAL_APPROVED_IMMUTABLE,
         );
       }
       const asset = this.repo.createAsset(tx, {
@@ -379,6 +382,7 @@ export class PharmaCatalogService {
         throw new ConflictException(
           'Solo se envía a revisión un material en borrador',
           { materialId },
+          PharmaLabErrorReason.MATERIAL_NOT_IN_DRAFT,
         );
       }
       const assets = await this.repo.listAssets(tx, material.id);
@@ -386,6 +390,7 @@ export class PharmaCatalogService {
         throw new PreconditionFailedException(
           'El material no tiene ningún adjunto que revisar',
           { materialId },
+          PharmaLabErrorReason.MATERIAL_NO_ASSETS_TO_REVIEW,
         );
       }
       material.statusConceptId = PHL.MATERIAL_IN_REVIEW;
@@ -425,6 +430,7 @@ export class PharmaCatalogService {
         throw new ConflictException(
           'Solo se decide sobre un material en revisión',
           { materialId },
+          PharmaLabErrorReason.MATERIAL_NOT_IN_REVIEW,
         );
       }
       if (
@@ -434,6 +440,7 @@ export class PharmaCatalogService {
         throw new PreconditionFailedException(
           'La decisión debe ser aprobar o rechazar',
           { materialId },
+          PharmaLabErrorReason.MATERIAL_DECISION_INVALID,
         );
       }
 
@@ -521,6 +528,7 @@ export class PharmaCatalogService {
       throw new PreconditionFailedException(
         'No se puede declarar una indicación autorizada en un producto que no está aprobado',
         { statusConceptId },
+        PharmaLabErrorReason.PRODUCT_INDICATION_REQUIRES_APPROVAL,
       );
     }
   }
@@ -535,6 +543,7 @@ export class PharmaCatalogService {
       throw new ResourceNotFoundException(
         'Producto no encontrado en el catálogo del laboratorio',
         { pharmaLabId, productId },
+        PharmaLabErrorReason.PRODUCT_NOT_FOUND,
       );
     }
     return product;
@@ -550,6 +559,7 @@ export class PharmaCatalogService {
       throw new ResourceNotFoundException(
         'Material informativo no encontrado en el laboratorio',
         { pharmaLabId, materialId },
+        PharmaLabErrorReason.MATERIAL_NOT_FOUND,
       );
     }
     return material;

@@ -6,6 +6,7 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   UsersRepository,
   DevicesRepository,
@@ -58,9 +59,11 @@ export class IamDevicesService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       const trusted = dto.trust === true;
       const device = this.devicesRepo.create(tx, {

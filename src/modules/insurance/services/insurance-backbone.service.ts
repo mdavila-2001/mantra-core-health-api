@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   PreconditionFailedException,
   requireTenantId,
@@ -162,9 +163,13 @@ export class InsuranceBackboneService {
     return this.em.transactional(async (tx) => {
       const carrier = await this.repo.findCarrier(tx, carrierId);
       if (!carrier)
-        throw new ResourceNotFoundException('Aseguradora no encontrada', {
-          carrierId,
-        });
+        throw new ResourceNotFoundException(
+          'Aseguradora no encontrada',
+          {
+            carrierId,
+          },
+          InsuranceErrorReason.CARRIER_NOT_FOUND,
+        );
       const product = this.repo.createProduct(tx, {
         insuranceCarrierId: carrierId,
         productCode: dto.productCode,
@@ -200,9 +205,13 @@ export class InsuranceBackboneService {
         carrier.id,
       );
       if (!product)
-        throw new ResourceNotFoundException('Producto no encontrado', {
-          productId,
-        });
+        throw new ResourceNotFoundException(
+          'Producto no encontrado',
+          {
+            productId,
+          },
+          InsuranceErrorReason.PRODUCT_NOT_FOUND,
+        );
       const plan = this.repo.createPlan(tx, {
         insuranceProductId: productId,
         planCode: dto.planCode,
@@ -239,7 +248,11 @@ export class InsuranceBackboneService {
       const carrier = await this.administrableCarrier(tx, actor);
       const plan = await this.repo.findPlanForCarrier(tx, planId, carrier.id);
       if (!plan)
-        throw new ResourceNotFoundException('Plan no encontrado', { planId });
+        throw new ResourceNotFoundException(
+          'Plan no encontrado',
+          { planId },
+          InsuranceErrorReason.PLAN_NOT_FOUND,
+        );
       const benefit = this.repo.createBenefit(tx, {
         insurancePlanId: planId,
         benefitCategoryConceptId: dto.benefitCategoryConceptId,
@@ -401,9 +414,13 @@ export class InsuranceBackboneService {
     return this.em.transactional(async (tx) => {
       const carrier = await this.repo.findCarrier(tx, dto.insuranceCarrierId);
       if (!carrier)
-        throw new ResourceNotFoundException('Aseguradora no encontrada', {
-          carrierId: dto.insuranceCarrierId,
-        });
+        throw new ResourceNotFoundException(
+          'Aseguradora no encontrada',
+          {
+            carrierId: dto.insuranceCarrierId,
+          },
+          InsuranceErrorReason.CARRIER_NOT_FOUND,
+        );
       const network = this.repo.createProviderNetwork(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
         networkCode: dto.networkCode,
@@ -488,14 +505,22 @@ export class InsuranceBackboneService {
     return this.em.transactional(async (tx) => {
       const broker = await this.repo.findBroker(tx, brokerId);
       if (!broker)
-        throw new ResourceNotFoundException('Broker no encontrado', {
-          brokerId,
-        });
+        throw new ResourceNotFoundException(
+          'Broker no encontrado',
+          {
+            brokerId,
+          },
+          InsuranceErrorReason.BROKER_NOT_FOUND,
+        );
       const carrier = await this.repo.findCarrier(tx, dto.insuranceCarrierId);
       if (!carrier)
-        throw new ResourceNotFoundException('Aseguradora no encontrada', {
-          carrierId: dto.insuranceCarrierId,
-        });
+        throw new ResourceNotFoundException(
+          'Aseguradora no encontrada',
+          {
+            carrierId: dto.insuranceCarrierId,
+          },
+          InsuranceErrorReason.CARRIER_NOT_FOUND,
+        );
       const agreement = this.repo.createAgreement(tx, {
         insuranceBrokerId: brokerId,
         insuranceCarrierId: dto.insuranceCarrierId,
@@ -529,16 +554,25 @@ export class InsuranceBackboneService {
         throw new ResourceNotFoundException(
           'Red de prestadores no encontrada',
           { networkId },
+          InsuranceErrorReason.PROVIDER_NETWORK_NOT_FOUND,
         );
       if (network.statusConceptId !== INS.NETWORK_ACTIVE) {
-        throw new PreconditionFailedException('La red no está activa', {
-          networkId,
-        });
+        throw new PreconditionFailedException(
+          'La red no está activa',
+          {
+            networkId,
+          },
+          InsuranceErrorReason.PROVIDER_NETWORK_NOT_ACTIVE,
+        );
       }
       if (network.effectiveTo && network.effectiveTo.getTime() < Date.now()) {
-        throw new PreconditionFailedException('La red está fuera de vigencia', {
-          networkId,
-        });
+        throw new PreconditionFailedException(
+          'La red está fuera de vigencia',
+          {
+            networkId,
+          },
+          InsuranceErrorReason.PROVIDER_NETWORK_EXPIRED,
+        );
       }
       const membership = this.repo.createMembership(tx, {
         providerNetworkId: networkId,

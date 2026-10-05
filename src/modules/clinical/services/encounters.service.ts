@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConcurrencyConflictException,
   ConflictException,
@@ -150,6 +151,7 @@ export class EncountersService {
             {
               episodeId: dto.episodeId,
             },
+            ClinicalErrorReason.CARE_EPISODE_NOT_FOUND,
           );
         }
       }
@@ -333,9 +335,13 @@ export class EncountersService {
     const cerrado = await this.em.transactional(async (tx) => {
       const encounter = await this.encountersRepo.findById(tx, encounterId);
       if (!encounter) {
-        throw new ResourceNotFoundException('Encuentro no encontrado', {
-          encounterId,
-        });
+        throw new ResourceNotFoundException(
+          'Encuentro no encontrado',
+          {
+            encounterId,
+          },
+          ClinicalErrorReason.ENCOUNTER_NOT_FOUND,
+        );
       }
       // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
       await this.clinicalRead.assertPuedeEscribirHistoria(
@@ -343,10 +349,14 @@ export class EncountersService {
         actor,
       );
       if (encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS) {
-        throw new PreconditionFailedException('El encuentro no está en curso', {
-          encounterId,
-          status: encounter.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El encuentro no está en curso',
+          {
+            encounterId,
+            status: encounter.statusConceptId,
+          },
+          ClinicalErrorReason.ENCOUNTER_NOT_IN_PROGRESS,
+        );
       }
       if (
         dto.expectedRowVersion !== undefined &&
@@ -358,6 +368,7 @@ export class EncountersService {
             expected: dto.expectedRowVersion,
             actual: encounter.rowVersion,
           },
+          ClinicalErrorReason.ENCOUNTER_VERSION_MISMATCH,
         );
       }
 

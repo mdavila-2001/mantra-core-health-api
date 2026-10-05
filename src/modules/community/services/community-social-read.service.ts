@@ -29,6 +29,7 @@ import {
   CommunityEngagementService,
   type PostEngagement,
 } from './community-engagement.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import type {
@@ -130,7 +131,11 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const perfil = await this.profilesRepo.findBySlug(em, slug);
     if (!perfil) {
-      throw new ResourceNotFoundException('Perfil no encontrado', { slug });
+      throw new ResourceNotFoundException(
+        'Perfil no encontrado',
+        { slug },
+        CommunityErrorReason.PROFILE_NOT_FOUND_BY_SLUG,
+      );
     }
     return this.getProfile(perfil.id, actor);
   }
@@ -142,9 +147,13 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.PUBLIC_PROFILE_NOT_FOUND,
+      );
 
     // Un bloqueo responde 404 y no 403, por lo mismo que en las publicaciones:
     // «existe pero no podés verlo» ya confirma que ese perfil existe, y quien
@@ -157,9 +166,13 @@ export class CommunitySocialReadService {
       actorProfileId &&
       (await this.visibility.isBlockedBetween(em, actorProfileId, profile.id))
     )
-      throw new ResourceNotFoundException('Perfil público no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil público no encontrado',
+        {
+          profileId,
+        },
+        CommunityErrorReason.PUBLIC_PROFILE_BLOCKED,
+      );
 
     const [badges, prestige] = await Promise.all([
       this.profilesRepo.listBadgesBySubject(
@@ -302,9 +315,13 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const post = await this.postsRepo.findById(em, postId);
     if (!post)
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_FOUND,
+      );
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
       em,
@@ -313,9 +330,13 @@ export class CommunitySocialReadService {
     );
     const canView = await this.visibility.canViewPost(em, post, actorProfileId);
     if (!canView)
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_VISIBLE,
+      );
 
     const [media, hashtags, mentions, engagement] = await Promise.all([
       this.postsRepo.listMedia(em, post.id),
@@ -450,14 +471,22 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const adjunto = await this.commentsRepo.findMediaByFileId(em, fileId);
     if (!adjunto) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+      throw new ResourceNotFoundException(
+        'Archivo no encontrado',
+        { fileId },
+        CommunityErrorReason.COMMENT_MEDIA_NOT_FOUND,
+      );
     }
     const comentario = await this.commentsRepo.findById(em, adjunto.commentId);
     if (
       !comentario ||
       comentario.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
     ) {
-      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
+      throw new ResourceNotFoundException(
+        'Archivo no encontrado',
+        { fileId },
+        CommunityErrorReason.COMMENT_MEDIA_INVALID_PARENT,
+      );
     }
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
@@ -685,9 +714,13 @@ export class CommunitySocialReadService {
   ): Promise<void> {
     const post = await this.postsRepo.findById(em, postId);
     if (!post || !(await this.visibility.canViewPost(em, post, actorProfileId)))
-      throw new ResourceNotFoundException('Publicación no encontrada', {
-        postId,
-      });
+      throw new ResourceNotFoundException(
+        'Publicación no encontrada',
+        {
+          postId,
+        },
+        CommunityErrorReason.POST_NOT_VISIBLE,
+      );
   }
 
   /** Clave de continuación `(createdAt, id)` de un cursor, si es válida. */

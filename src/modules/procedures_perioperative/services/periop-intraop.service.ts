@@ -14,6 +14,7 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // El procedimiento que el informe describe vive en la historia clínica: se pide
 // a su dueño en vez de escribir `clinical.procedures` desde este módulo.
 import { ProceduresService } from '../../clinical/services';
@@ -197,9 +198,13 @@ export class PeriopIntraopService {
           dto.operativeStepId,
         );
         if (!step) {
-          throw new ResourceNotFoundException('Paso operatorio no encontrado', {
-            operativeStepId: dto.operativeStepId,
-          });
+          throw new ResourceNotFoundException(
+            'Paso operatorio no encontrado',
+            {
+              operativeStepId: dto.operativeStepId,
+            },
+            ProceduresPerioperativeErrorReason.OPERATIVE_STEP_NOT_FOUND,
+          );
         }
         if (step.procedureCaseId !== caseId) {
           throw new PreconditionFailedException(
@@ -208,6 +213,7 @@ export class PeriopIntraopService {
               caseId,
               operativeStepId: dto.operativeStepId,
             },
+            ProceduresPerioperativeErrorReason.STEP_NOT_IN_CASE,
           );
         }
       }
@@ -353,6 +359,7 @@ export class PeriopIntraopService {
               caseId,
               operativeStepId: dto.operativeStepId,
             },
+            ProceduresPerioperativeErrorReason.STEP_NOT_IN_CASE,
           );
         }
       }
@@ -399,6 +406,7 @@ export class PeriopIntraopService {
               caseId,
               operativeStepId: dto.operativeStepId,
             },
+            ProceduresPerioperativeErrorReason.STEP_NOT_IN_CASE,
           );
         }
       }
@@ -436,14 +444,22 @@ export class PeriopIntraopService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const last = await this.intraopRepo.findLastReport(tx, caseId);
@@ -530,6 +546,7 @@ export class PeriopIntraopService {
       throw new PreconditionFailedException(
         'Indique el procedimiento por `procedureId` o por `procedureCodeConceptId`',
         {},
+        ProceduresPerioperativeErrorReason.PROCEDURE_REFERENCE_REQUIRED,
       );
     }
     const procedure = await this.procedures.create(
@@ -567,6 +584,7 @@ export class PeriopIntraopService {
         throw new ResourceNotFoundException(
           'Reporte operatorio no encontrado',
           { reportId },
+          ProceduresPerioperativeErrorReason.REPORT_NOT_FOUND,
         );
       }
       if (report.procedureCaseId !== caseId) {
@@ -576,17 +594,26 @@ export class PeriopIntraopService {
             caseId,
             reportId,
           },
+          ProceduresPerioperativeErrorReason.REPORT_BELONGS_TO_ANOTHER_CASE,
         );
       }
       if (report.statusConceptId === CONCEPTS.OPERATIVE_REPORT_SIGNED) {
-        throw new ConflictException('El reporte ya está firmado', { reportId });
+        throw new ConflictException(
+          'El reporte ya está firmado',
+          { reportId },
+          ProceduresPerioperativeErrorReason.REPORT_ALREADY_SIGNED,
+        );
       }
 
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
 
       report.statusConceptId = CONCEPTS.OPERATIVE_REPORT_SIGNED;
@@ -636,14 +663,22 @@ export class PeriopIntraopService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const existing = await this.intraopRepo.findPacuStayByCase(tx, caseId);
@@ -654,6 +689,7 @@ export class PeriopIntraopService {
             caseId,
             pacuStayId: existing.id,
           },
+          ProceduresPerioperativeErrorReason.PACU_STAY_ALREADY_EXISTS,
         );
       }
 
@@ -702,12 +738,17 @@ export class PeriopIntraopService {
         throw new ResourceNotFoundException(
           'Estancia en recuperación no encontrada',
           { stayId },
+          ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
         );
       }
       if (stay.statusConceptId === CONCEPTS.PACU_DISCHARGED) {
-        throw new ConflictException('El paciente ya salió de recuperación', {
-          stayId,
-        });
+        throw new ConflictException(
+          'El paciente ya salió de recuperación',
+          {
+            stayId,
+          },
+          ProceduresPerioperativeErrorReason.PACU_ALREADY_DISCHARGED,
+        );
       }
 
       const assessment = this.intraopRepo.createPacuAssessment(tx, {
@@ -759,12 +800,17 @@ export class PeriopIntraopService {
         throw new ResourceNotFoundException(
           'Estancia en recuperación no encontrada',
           { stayId },
+          ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
         );
       }
       if (stay.statusConceptId === CONCEPTS.PACU_DISCHARGED) {
-        throw new ConflictException('El paciente ya salió de recuperación', {
-          stayId,
-        });
+        throw new ConflictException(
+          'El paciente ya salió de recuperación',
+          {
+            stayId,
+          },
+          ProceduresPerioperativeErrorReason.PACU_ALREADY_DISCHARGED,
+        );
       }
 
       const assessments = await this.intraopRepo.findAssessmentsByStay(
@@ -776,12 +822,14 @@ export class PeriopIntraopService {
         throw new PreconditionFailedException(
           'El alta de recuperación exige al menos una valoración',
           { stayId },
+          ProceduresPerioperativeErrorReason.PACU_DISCHARGE_REQUIRES_ASSESSMENT,
         );
       }
       if ((latest.aldreteScore ?? 0) < ALDRETE_DISCHARGE_THRESHOLD) {
         throw new PreconditionFailedException(
           'La última valoración no cumple el criterio de alta',
           { stayId, aldreteScore: latest.aldreteScore },
+          ProceduresPerioperativeErrorReason.PACU_DISCHARGE_CRITERIA_NOT_MET,
         );
       }
 
@@ -845,15 +893,23 @@ export class PeriopIntraopService {
   private async assertCaseInProgress(tx: EntityManager, caseId: string) {
     const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
     if (!surgicalCase) {
-      throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-        caseId,
-      });
+      throw new ResourceNotFoundException(
+        'Caso quirúrgico no encontrado',
+        {
+          caseId,
+        },
+        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+      );
     }
     if (surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS) {
-      throw new PreconditionFailedException('El caso no está en curso', {
-        caseId,
-        statusConceptId: surgicalCase.statusConceptId,
-      });
+      throw new PreconditionFailedException(
+        'El caso no está en curso',
+        {
+          caseId,
+          statusConceptId: surgicalCase.statusConceptId,
+        },
+        ProceduresPerioperativeErrorReason.CASE_NOT_IN_PROGRESS,
+      );
     }
     return surgicalCase;
   }

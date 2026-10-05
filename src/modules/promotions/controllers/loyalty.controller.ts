@@ -23,6 +23,7 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 import { PromotionsLoyaltyService } from '../services';
 import {
   CreateLoyaltyProgramDto,
@@ -83,6 +84,8 @@ export class LoyaltyController {
     if (!tenantId) {
       throw new PreconditionFailedException(
         'Se requiere X-Tenant-Id para listar programas de lealtad',
+        undefined,
+        PromotionsErrorReason.TENANT_ID_REQUIRED_FOR_LISTING,
       );
     }
     return this.loyaltyService.listActivePrograms(query.limit, tenantId);

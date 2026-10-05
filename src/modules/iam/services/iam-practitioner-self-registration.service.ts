@@ -17,6 +17,7 @@ import {
   sniffMimeType,
   type AuthenticatedUser,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 // El alta administrativa deja al profesional operativo: los roles asistenciales
 // viven en `authz`, que es quien decide si un código existe y es asignable.
 import { AuthzEffectiveRolesService } from '../../authz/services';
@@ -437,7 +438,11 @@ export class IamPractitionerSelfRegistrationService {
           },
           'Rejected self-registration: email already registered',
         );
-        throw new ConflictException('Ya existe una cuenta con ese correo');
+        throw new ConflictException(
+          'Ya existe una cuenta con ese correo',
+          undefined,
+          IamErrorReason.EMAIL_ALREADY_REGISTERED,
+        );
       }
 
       const practitionerCode = `PRC-${randomUUID()}`;
@@ -446,9 +451,11 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCode,
       );
       if (clashCode) {
-        throw new ConflictException('El practitioner_code ya está en uso', {
-          practitionerCode,
-        });
+        throw new ConflictException(
+          'El practitioner_code ya está en uso',
+          { practitionerCode },
+          IamErrorReason.PRACTITIONER_CODE_IN_USE,
+        );
       }
 
       // El CI y su departamento emisor son requisitos del alta médica. Se
@@ -856,6 +863,7 @@ export class IamPractitionerSelfRegistrationService {
           throw new PreconditionFailedException(
             'Alguno de los roles indicados no existe o no es asignable',
             { roles: rolesRechazados },
+            IamErrorReason.ROLE_NOT_ASSIGNABLE,
           );
         }
       }

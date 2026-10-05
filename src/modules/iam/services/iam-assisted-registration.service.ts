@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { composeAccountDisplayName } from '../../profiles/person-name';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -109,6 +110,7 @@ export class IamAssistedRegistrationService {
         throw new ConflictException(
           'Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado',
           { email: dto.email, suggestion: 'invitation' },
+          IamErrorReason.IDENTIFIER_ALREADY_REGISTERED_PREFER_INVITATION,
         );
       }
 

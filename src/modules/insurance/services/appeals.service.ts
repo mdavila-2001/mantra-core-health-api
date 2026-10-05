@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -54,9 +55,13 @@ export class AppealsService {
     return this.em.transactional(async (tx) => {
       const dispute = await this.repo.findDispute(tx, disputeId);
       if (!dispute)
-        throw new ResourceNotFoundException('Disputa no encontrada', {
-          disputeId,
-        });
+        throw new ResourceNotFoundException(
+          'Disputa no encontrada',
+          {
+            disputeId,
+          },
+          InsuranceErrorReason.DISPUTE_NOT_FOUND,
+        );
       if (
         ![INS.DISPUTE_OPEN, INS.DISPUTE_IN_REVIEW].includes(
           dispute.statusConceptId,
@@ -65,6 +70,7 @@ export class AppealsService {
         throw new PreconditionFailedException(
           'La disputa no admite decisión en su estado actual',
           { disputeId },
+          InsuranceErrorReason.DISPUTE_NOT_DECIDABLE,
         );
       }
 

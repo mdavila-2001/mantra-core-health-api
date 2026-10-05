@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   ResourceNotFoundException,
   type AuthenticatedUser,
@@ -55,9 +56,13 @@ export class ReconciliationService {
         dto.insuranceCarrierId,
       );
       if (!carrier)
-        throw new ResourceNotFoundException('Aseguradora no encontrada', {
-          carrierId: dto.insuranceCarrierId,
-        });
+        throw new ResourceNotFoundException(
+          'Aseguradora no encontrada',
+          {
+            carrierId: dto.insuranceCarrierId,
+          },
+          InsuranceErrorReason.CARRIER_NOT_FOUND,
+        );
 
       const batch = this.repo.createBatch(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
@@ -93,12 +98,17 @@ export class ReconciliationService {
         throw new ResourceNotFoundException(
           'Lote de conciliación no encontrado',
           { batchId },
+          InsuranceErrorReason.RECONCILIATION_BATCH_NOT_FOUND,
         );
       const claim = await this.claims.findClaim(tx, dto.insuranceClaimId);
       if (!claim)
-        throw new ResourceNotFoundException('Reclamo no encontrado', {
-          claimId: dto.insuranceClaimId,
-        });
+        throw new ResourceNotFoundException(
+          'Reclamo no encontrado',
+          {
+            claimId: dto.insuranceClaimId,
+          },
+          InsuranceErrorReason.CLAIM_NOT_FOUND,
+        );
       const version = await this.claims.findVersion(
         tx,
         dto.claimAdjudicationVersionId,
@@ -109,6 +119,7 @@ export class ReconciliationService {
           {
             versionId: dto.claimAdjudicationVersionId,
           },
+          InsuranceErrorReason.ADJUDICATION_VERSION_NOT_FOUND,
         );
       }
 

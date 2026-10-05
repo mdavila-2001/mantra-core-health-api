@@ -5,6 +5,7 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import {
   persistenceSessionToken,
   type PersistenceSession,
@@ -292,7 +293,9 @@ export class SchedulingWaitlistService {
         const context = { transaction };
         const slot = await this.writer.findSlotCapacity(slotId, context);
         if (!slot) {
-          throw new ResourceNotFoundException('Slot no encontrado', { slotId });
+          throw new ResourceNotFoundException('Slot no encontrado', { slotId },
+            SchedulingErrorReason.SLOT_NOT_FOUND,
+          );
         }
         if (slot.remainingCapacity <= 0) {
           return { processed: 0, promotedIds: [] as string[] };
@@ -398,7 +401,9 @@ export class SchedulingWaitlistService {
           // que no debe describirse en una respuesta de la API.
           throw new ResourceNotFoundException('Cita no encontrada', {
             bookingId,
-          });
+          },
+            SchedulingErrorReason.BOOKING_NOT_FOUND,
+          );
         }
 
         const channelConceptId =

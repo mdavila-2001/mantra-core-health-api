@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { PreconditionFailedException } from '../../../common';
 import { ValueSetsRepository } from '../../terminology/repositories/value-sets.repository';
+import { ProfilesErrorReason } from '../profiles.error-reasons';
 
 /**
  * El código interno estable del catálogo de departamentos de Bolivia.
@@ -51,6 +52,7 @@ export class AdministrativeAreaCatalogService {
       throw new PreconditionFailedException(
         'El departamento no pertenece al catálogo de departamentos de Bolivia',
         { conceptId, valueSet: ADMINISTRATIVE_AREA_VALUE_SET },
+        ProfilesErrorReason.NOT_ADMINISTRATIVE_AREA,
       );
     }
   }
@@ -78,6 +80,7 @@ export class AdministrativeAreaCatalogService {
       throw new PreconditionFailedException(
         'El catálogo de departamentos no está disponible',
         { valueSet: ADMINISTRATIVE_AREA_VALUE_SET },
+        ProfilesErrorReason.ADMINISTRATIVE_AREA_CATALOG_UNAVAILABLE,
       );
     }
     return new Set(miembros);

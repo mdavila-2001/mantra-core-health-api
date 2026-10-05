@@ -37,6 +37,7 @@ import {
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * UC-17-06 a UC-17-10: ciclo de vida del visitador médico y su dependencia
@@ -160,15 +161,18 @@ export class MedicalVisitorsService {
 
       const user = await tx.findOne(Users, { id: dto.userId });
       if (!user) {
-        throw new ResourceNotFoundException('Cuenta no encontrada', {
-          userId: dto.userId,
-        });
+        throw new ResourceNotFoundException(
+          'Cuenta no encontrada',
+          { userId: dto.userId },
+          PharmaLabErrorReason.USER_ACCOUNT_NOT_FOUND,
+        );
       }
       const already = await this.repo.findVisitorByUser(tx, dto.userId);
       if (already) {
         throw new ConflictException(
           'La cuenta ya está registrada como visitador',
           { userId: dto.userId, medicalVisitorId: already.id },
+          PharmaLabErrorReason.VISITOR_ALREADY_REGISTERED,
         );
       }
       const codeClash = await this.repo.findVisitorByCode(
@@ -180,6 +184,7 @@ export class MedicalVisitorsService {
         throw new ConflictException(
           'El código interno ya está en uso en el laboratorio',
           { pharmaLabId, internalCode: dto.internalCode },
+          PharmaLabErrorReason.VISITOR_INTERNAL_CODE_TAKEN,
         );
       }
 
@@ -422,9 +427,11 @@ export class MedicalVisitorsService {
         medicalVisitorId,
       );
       if (visitor.statusConceptId === PHL.LINK_TERMINATED) {
-        throw new ConflictException('El visitador ya está desvinculado', {
-          medicalVisitorId,
-        });
+        throw new ConflictException(
+          'El visitador ya está desvinculado',
+          { medicalVisitorId },
+          PharmaLabErrorReason.VISITOR_ALREADY_UNLINKED,
+        );
       }
 
       const now = new Date();
@@ -588,9 +595,11 @@ export class MedicalVisitorsService {
         medicalVisitorId,
       );
       if (visitor.statusConceptId === PHL.LINK_ACTIVE) {
-        throw new ConflictException('El visitador ya está vinculado', {
-          medicalVisitorId,
-        });
+        throw new ConflictException(
+          'El visitador ya está vinculado',
+          { medicalVisitorId },
+          PharmaLabErrorReason.VISITOR_ALREADY_LINKED,
+        );
       }
 
       visitor.statusConceptId = PHL.LINK_ACTIVE;
@@ -660,6 +669,7 @@ export class MedicalVisitorsService {
       throw new ResourceNotFoundException(
         'La cuenta no corresponde a un visitador médico',
         { userId: actor.id },
+        PharmaLabErrorReason.VISITOR_PROFILE_NOT_FOUND,
       );
     }
     return visitor;
@@ -678,6 +688,7 @@ export class MedicalVisitorsService {
       throw new PreconditionFailedException(
         'Algún producto no pertenece al catálogo del laboratorio',
         { pharmaLabId },
+        PharmaLabErrorReason.VISITOR_PRODUCT_NOT_IN_LAB_CATALOG,
       );
     }
   }

@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AdsErrorReason } from '../ads.error-reasons';
 import { AdsAccountsRepository, AdsCampaignsRepository } from '../repositories';
 import { PLATFORM_CONCEPT } from './ads-accounts.service';
 import {
@@ -136,6 +137,7 @@ export class AdsCampaignsService {
           startAt: dto.startAt,
           stopAt: dto.stopAt,
         },
+        AdsErrorReason.CAMPAIGN_SCHEDULE_INVERTED,
       );
     }
     if (
@@ -146,6 +148,7 @@ export class AdsCampaignsService {
       throw new PreconditionFailedException(
         'La campaña o sus conjuntos necesitan presupuesto',
         { adAccountId },
+        AdsErrorReason.CAMPAIGN_BUDGET_MISSING,
       );
     }
 
@@ -158,6 +161,7 @@ export class AdsCampaignsService {
         throw new ResourceNotFoundException(
           'Cuenta publicitaria no encontrada',
           { adAccountId },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
       if (account.accountStatusConceptId !== CONCEPTS.AD_ACCOUNT_ACTIVE) {
@@ -166,6 +170,7 @@ export class AdsCampaignsService {
           {
             adAccountId,
           },
+          AdsErrorReason.AD_ACCOUNT_NOT_ACTIVE,
         );
       }
       // Gastar por encima del tope es lo que el tope existe para impedir.
@@ -179,6 +184,7 @@ export class AdsCampaignsService {
             adAccountId,
             spendCapAmount: account.spendCapAmount,
           },
+          AdsErrorReason.AD_ACCOUNT_SPEND_CAP_EXHAUSTED,
         );
       }
 
@@ -209,9 +215,13 @@ export class AdsCampaignsService {
             spec.targetingSpecId,
           );
           if (!targeting) {
-            throw new ResourceNotFoundException('Segmentación no encontrada', {
-              targetingSpecId: spec.targetingSpecId,
-            });
+            throw new ResourceNotFoundException(
+              'Segmentación no encontrada',
+              {
+                targetingSpecId: spec.targetingSpecId,
+              },
+              AdsErrorReason.TARGETING_SPEC_NOT_FOUND,
+            );
           }
         }
 
@@ -300,10 +310,14 @@ export class AdsCampaignsService {
     );
 
     if (dto.ageMin && dto.ageMax && dto.ageMax < dto.ageMin) {
-      throw new PreconditionFailedException('El rango de edad está invertido', {
-        ageMin: dto.ageMin,
-        ageMax: dto.ageMax,
-      });
+      throw new PreconditionFailedException(
+        'El rango de edad está invertido',
+        {
+          ageMin: dto.ageMin,
+          ageMax: dto.ageMax,
+        },
+        AdsErrorReason.TARGETING_AGE_RANGE_INVERTED,
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -315,6 +329,7 @@ export class AdsCampaignsService {
         throw new ResourceNotFoundException(
           'Cuenta publicitaria no encontrada',
           { adAccountId },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
 
@@ -341,6 +356,7 @@ export class AdsCampaignsService {
               {
                 adAccountId,
               },
+              AdsErrorReason.LOOKALIKE_COUNTRY_MISSING,
             );
           }
           const lookalike = this.campaignsRepo.createLookalikeSpec(tx, {
@@ -400,6 +416,7 @@ export class AdsCampaignsService {
         throw new ResourceNotFoundException(
           'Conjunto de anuncios no encontrado',
           { adSetId },
+          AdsErrorReason.AD_SET_NOT_FOUND,
         );
       }
 
@@ -408,14 +425,22 @@ export class AdsCampaignsService {
         dto.adIdentityAssetId,
       );
       if (!identity) {
-        throw new ResourceNotFoundException('Identidad no encontrada', {
-          adIdentityAssetId: dto.adIdentityAssetId,
-        });
+        throw new ResourceNotFoundException(
+          'Identidad no encontrada',
+          {
+            adIdentityAssetId: dto.adIdentityAssetId,
+          },
+          AdsErrorReason.IDENTITY_NOT_FOUND,
+        );
       }
       if (identity.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La identidad no está activa', {
-          adIdentityAssetId: dto.adIdentityAssetId,
-        });
+        throw new PreconditionFailedException(
+          'La identidad no está activa',
+          {
+            adIdentityAssetId: dto.adIdentityAssetId,
+          },
+          AdsErrorReason.IDENTITY_NOT_ACTIVE,
+        );
       }
 
       const current = await this.accountsRepo.findActiveAssignmentForUpdate(
@@ -466,6 +491,7 @@ export class AdsCampaignsService {
           validFrom: dto.validFrom,
           validTo: dto.validTo,
         },
+        AdsErrorReason.BUDGET_SCHEDULE_RANGE_INVERTED,
       );
     }
 
@@ -475,6 +501,7 @@ export class AdsCampaignsService {
         throw new ResourceNotFoundException(
           'Conjunto de anuncios no encontrado',
           { adSetId },
+          AdsErrorReason.AD_SET_NOT_FOUND,
         );
       }
 
@@ -488,6 +515,7 @@ export class AdsCampaignsService {
           {
             campaignId: adSet.campaignId,
           },
+          AdsErrorReason.CAMPAIGN_NOT_FOUND,
         );
       }
       const account = await this.accountsRepo.findAdAccountById(
@@ -502,6 +530,7 @@ export class AdsCampaignsService {
         throw new PreconditionFailedException(
           'El presupuesto del tramo excede el tope de gasto de la cuenta',
           { amount: dto.amount, spendCapAmount: account.spendCapAmount },
+          AdsErrorReason.BUDGET_SCHEDULE_EXCEEDS_SPEND_CAP,
         );
       }
 
@@ -517,10 +546,14 @@ export class AdsCampaignsService {
         this.overlaps(s.validFrom, s.validTo, validFrom, validTo),
       );
       if (overlapping) {
-        throw new ConflictException('El tramo se solapa con otro vigente', {
-          adSetId,
-          existingScheduleId: overlapping.id,
-        });
+        throw new ConflictException(
+          'El tramo se solapa con otro vigente',
+          {
+            adSetId,
+            existingScheduleId: overlapping.id,
+          },
+          AdsErrorReason.BUDGET_SCHEDULE_OVERLAP,
+        );
       }
 
       const schedule = this.campaignsRepo.createBudgetSchedule(tx, {

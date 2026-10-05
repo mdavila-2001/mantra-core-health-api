@@ -15,6 +15,7 @@ import {
   Public,
   ResourceNotFoundException,
 } from '../../../common';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CommunityPublicService,
   CommunityReviewsReadService,
@@ -435,7 +436,11 @@ export class CommunityPublicController {
     // esta superficie nada distingue «no existe» de «no está publicado», y un
     // 400 acá abriría esa distinción por la puerta de al lado.
     if (concepto === undefined)
-      throw new ResourceNotFoundException('No encontrado', { slug });
+      throw new ResourceNotFoundException(
+        'No encontrado',
+        { slug },
+        CommunityErrorReason.PUBLIC_DIRECTORY_PROFILE_PREFIX_INVALID,
+      );
 
     return this.service.getBySlug(slug, concepto);
   }

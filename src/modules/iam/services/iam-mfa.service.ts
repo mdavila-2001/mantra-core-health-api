@@ -11,6 +11,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { IamErrorReason } from '../iam.error-reasons';
 import {
   UsersRepository,
   MfaFactorsRepository,
@@ -84,9 +85,11 @@ export class IamMfaService {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
       if (!user)
-        throw new ResourceNotFoundException('Usuario no encontrado', {
-          userId,
-        });
+        throw new ResourceNotFoundException(
+          'Usuario no encontrado',
+          { userId },
+          IamErrorReason.USER_NOT_FOUND,
+        );
 
       if (dto.verify) {
         this.logger.info(
@@ -96,6 +99,8 @@ export class IamMfaService {
         if (!dto.factorId) {
           throw new PreconditionFailedException(
             'factorId es obligatorio para verificar',
+            undefined,
+            IamErrorReason.MFA_FACTOR_ID_REQUIRED_TO_VERIFY,
           );
         }
         const factor = await this.mfaRepo.findByIdAndUser(
@@ -104,16 +109,19 @@ export class IamMfaService {
           userId,
         );
         if (!factor) {
-          throw new ResourceNotFoundException('Factor MFA no encontrado', {
-            userId,
-            factorId: dto.factorId,
-          });
+          throw new ResourceNotFoundException(
+            'Factor MFA no encontrado',
+            { userId, factorId: dto.factorId },
+            IamErrorReason.MFA_FACTOR_NOT_FOUND,
+          );
         }
 
         // El código es obligatorio para verificar un factor TOTP.
         if (!dto.code) {
           throw new PreconditionFailedException(
             'code es obligatorio para verificar',
+            undefined,
+            IamErrorReason.MFA_CODE_REQUIRED_TO_VERIFY,
           );
         }
 
@@ -121,6 +129,8 @@ export class IamMfaService {
         if (!factor.secretEncrypted) {
           throw new PreconditionFailedException(
             'El factor no tiene un secreto TOTP asociado',
+            undefined,
+            IamErrorReason.MFA_FACTOR_MISSING_SECRET,
           );
         }
 
@@ -140,7 +150,11 @@ export class IamMfaService {
             detailJson: { factorId: factor.id, action: 'verify' },
           });
           await auditEm.flush();
-          throw new PreconditionFailedException('Código MFA inválido');
+          throw new PreconditionFailedException(
+            'Código MFA inválido',
+            undefined,
+            IamErrorReason.MFA_CODE_INVALID,
+          );
         }
 
         factor.stateConceptId = CONCEPTS.STATE_VERIFIED;
@@ -173,6 +187,8 @@ export class IamMfaService {
       if (!dto.factorType) {
         throw new PreconditionFailedException(
           'factorType es obligatorio para enrolar',
+          undefined,
+          IamErrorReason.MFA_FACTOR_TYPE_REQUIRED_TO_ENROLL,
         );
       }
       const factorTypeConceptId =

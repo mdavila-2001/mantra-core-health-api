@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 // Dónde se atiende lo sabe `practice`: es su dato y no se copia acá. La
 // dependencia va en un solo sentido —`practice` no importa `scheduling`— así
 // que no cierra ciclo.
@@ -182,12 +183,14 @@ export class SchedulingAgendaService {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: from.toISOString(), to: to.toISOString() },
+        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
     if (to.getTime() - from.getTime() > MAX_WINDOW_MS) {
       throw new PreconditionFailedException(
         `La ventana no puede superar ${MAX_WINDOW_DAYS} días`,
         { maxWindowDays: MAX_WINDOW_DAYS, maxLimit: AGENDA_MAX_LIMIT },
+        SchedulingErrorReason.AGENDA_WINDOW_TOO_WIDE,
       );
     }
   }

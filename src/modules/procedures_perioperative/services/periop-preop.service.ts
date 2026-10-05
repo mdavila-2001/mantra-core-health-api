@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PeriopCasesRepository, PeriopPreopRepository } from '../repositories';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // La orden clínica que la orden preoperatoria referencia vive en `clinical`.
 import { ServiceRequestsService } from '../../clinical/services';
 import {
@@ -175,20 +176,29 @@ export class PeriopPreopService {
       throw new PreconditionFailedException(
         'Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`',
         {},
+        ProceduresPerioperativeErrorReason.SERVICE_REQUEST_REFERENCE_REQUIRED,
       );
     }
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       // La orden clínica vive en `clinical`: se le pide a su dueño en vez de
@@ -255,20 +265,29 @@ export class PeriopPreopService {
       throw new PreconditionFailedException(
         'La valoración exige revisar alergias y medicación',
         { caseId },
+        ProceduresPerioperativeErrorReason.ASSESSMENT_REQUIRES_ALLERGY_AND_MEDICATION_REVIEW,
       );
     }
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const previous = await this.preopRepo.findAssessmentByCase(tx, caseId);
@@ -279,6 +298,7 @@ export class PeriopPreopService {
             caseId,
             assessmentId: previous.id,
           },
+          ProceduresPerioperativeErrorReason.ASSESSMENT_ALREADY_EXISTS,
         );
       }
 
@@ -370,14 +390,19 @@ export class PeriopPreopService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId !== CONCEPTS.CASE_SCHEDULED) {
         throw new PreconditionFailedException(
           'Sólo un caso programado admite verificación de órdenes',
           { caseId, statusConceptId: surgicalCase.statusConceptId },
+          ProceduresPerioperativeErrorReason.ORDERS_VERIFICATION_REQUIRES_SCHEDULED_CASE,
         );
       }
 
@@ -394,6 +419,7 @@ export class PeriopPreopService {
               caseId,
               orderId,
             },
+            ProceduresPerioperativeErrorReason.PREOP_ORDER_NOT_IN_CASE,
           );
         }
         if (order.statusConceptId === CONCEPTS.ORDER_VERIFIED) continue;
@@ -454,6 +480,7 @@ export class PeriopPreopService {
           {
             itemId: response.itemId,
           },
+          ProceduresPerioperativeErrorReason.CHECKLIST_EXCEPTION_REQUIRES_REASON,
         );
       }
     }
@@ -464,9 +491,13 @@ export class PeriopPreopService {
         checklistId,
       );
       if (!checklist) {
-        throw new ResourceNotFoundException('Checklist no encontrado', {
-          checklistId,
-        });
+        throw new ResourceNotFoundException(
+          'Checklist no encontrado',
+          {
+            checklistId,
+          },
+          ProceduresPerioperativeErrorReason.CHECKLIST_NOT_FOUND,
+        );
       }
       if (checklist.procedureCaseId !== caseId) {
         throw new PreconditionFailedException(
@@ -475,18 +506,27 @@ export class PeriopPreopService {
             caseId,
             checklistId,
           },
+          ProceduresPerioperativeErrorReason.CHECKLIST_BELONGS_TO_ANOTHER_CASE,
         );
       }
       if (checklist.statusConceptId === CONCEPTS.CHECKLIST_COMPLETED) {
-        throw new ConflictException('El checklist ya está completo', {
-          checklistId,
-        });
+        throw new ConflictException(
+          'El checklist ya está completo',
+          {
+            checklistId,
+          },
+          ProceduresPerioperativeErrorReason.CHECKLIST_ALREADY_COMPLETED,
+        );
       }
       if (this.phaseCompletedAt(checklist, dto.phase)) {
-        throw new ConflictException('La fase ya está completa', {
-          checklistId,
-          phase: dto.phase,
-        });
+        throw new ConflictException(
+          'La fase ya está completa',
+          {
+            checklistId,
+            phase: dto.phase,
+          },
+          ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_ALREADY_COMPLETED,
+        );
       }
 
       const items = await this.preopRepo.findItemsByPhase(
@@ -503,6 +543,7 @@ export class PeriopPreopService {
             checklistId,
             phase: dto.phase,
           },
+          ProceduresPerioperativeErrorReason.CHECKLIST_PHASE_HAS_NO_ITEMS,
         );
       }
       const itemIds = new Set(items.map((i) => i.id));
@@ -516,6 +557,7 @@ export class PeriopPreopService {
               checklistId,
               itemId: response.itemId,
             },
+            ProceduresPerioperativeErrorReason.CHECKLIST_ITEM_NOT_IN_PHASE,
           );
         }
         this.preopRepo.createResponse(tx, {
@@ -606,20 +648,29 @@ export class PeriopPreopService {
       throw new PreconditionFailedException(
         'Una vía aérea difícil anticipada necesita plan de rescate',
         { caseId },
+        ProceduresPerioperativeErrorReason.DIFFICULT_AIRWAY_REQUIRES_RESCUE_PLAN,
       );
     }
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const previous = await this.preopRepo.findAnesthesiaPlanByCase(
@@ -627,10 +678,14 @@ export class PeriopPreopService {
         caseId,
       );
       if (previous) {
-        throw new ConflictException('El caso ya tiene plan de anestesia', {
-          caseId,
-          planId: previous.id,
-        });
+        throw new ConflictException(
+          'El caso ya tiene plan de anestesia',
+          {
+            caseId,
+            planId: previous.id,
+          },
+          ProceduresPerioperativeErrorReason.ANESTHESIA_PLAN_ALREADY_EXISTS,
+        );
       }
 
       const plan = this.preopRepo.createAnesthesiaPlan(tx, {
@@ -693,25 +748,41 @@ export class PeriopPreopService {
     return this.em.transactional(async (tx) => {
       const plan = await this.preopRepo.findAnesthesiaPlanForUpdate(tx, planId);
       if (!plan) {
-        throw new ResourceNotFoundException('Plan de anestesia no encontrado', {
-          planId,
-        });
+        throw new ResourceNotFoundException(
+          'Plan de anestesia no encontrado',
+          {
+            planId,
+          },
+          ProceduresPerioperativeErrorReason.ANESTHESIA_PLAN_NOT_FOUND,
+        );
       }
       if (plan.procedureCaseId !== caseId) {
-        throw new PreconditionFailedException('El plan pertenece a otro caso', {
-          caseId,
-          planId,
-        });
+        throw new PreconditionFailedException(
+          'El plan pertenece a otro caso',
+          {
+            caseId,
+            planId,
+          },
+          ProceduresPerioperativeErrorReason.ANESTHESIA_PLAN_BELONGS_TO_ANOTHER_CASE,
+        );
       }
       if (plan.statusConceptId === CONCEPTS.PLAN_APPROVED) {
-        throw new ConflictException('El plan ya está aprobado', { planId });
+        throw new ConflictException(
+          'El plan ya está aprobado',
+          { planId },
+          ProceduresPerioperativeErrorReason.ANESTHESIA_PLAN_ALREADY_APPROVED,
+        );
       }
 
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
 
       plan.statusConceptId = CONCEPTS.PLAN_APPROVED;
@@ -750,14 +821,22 @@ export class PeriopPreopService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const plan = await this.preopRepo.findAnesthesiaPlanByCase(tx, caseId);
@@ -770,6 +849,7 @@ export class PeriopPreopService {
         throw new PreconditionFailedException(
           'La inducción exige un plan de anestesia aprobado',
           { caseId },
+          ProceduresPerioperativeErrorReason.INDUCTION_REQUIRES_APPROVED_ANESTHESIA_PLAN,
         );
       }
 

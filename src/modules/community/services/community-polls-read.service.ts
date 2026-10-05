@@ -7,6 +7,7 @@ import {
 } from '../../../common';
 import { PollsRepository, PostsRepository } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type { PollDetailDto } from '../dto';
 
 /**
@@ -58,11 +59,19 @@ export class CommunityPollsReadService {
     );
     const poll = await this.pollsRepo.findPollById(em, pollId);
     if (!poll)
-      throw new ResourceNotFoundException('Encuesta no encontrada', { pollId });
+      throw new ResourceNotFoundException(
+        'Encuesta no encontrada',
+        { pollId },
+        CommunityErrorReason.POLL_NOT_FOUND,
+      );
 
     const post = await this.postsRepo.findById(em, poll.postId);
     if (!post || !(await this.visibility.canViewPost(em, post, actorProfileId)))
-      throw new ResourceNotFoundException('Encuesta no encontrada', { pollId });
+      throw new ResourceNotFoundException(
+        'Encuesta no encontrada',
+        { pollId },
+        CommunityErrorReason.POLL_POST_NOT_VISIBLE,
+      );
 
     const [options, tallies, votedOptionIds] = await Promise.all([
       this.pollsRepo.listOptions(em, pollId),

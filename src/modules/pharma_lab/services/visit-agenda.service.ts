@@ -22,6 +22,7 @@ import {
   VisitsRepository,
 } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /** Ventana de la agenda tal como la ve quien va a solicitar una visita. */
 export interface PublishedWindow {
@@ -173,6 +174,7 @@ export class VisitAgendaService {
       throw new ResourceNotFoundException(
         'El doctor no tiene agenda de visitas habilitada',
         { doctorUserId },
+        PharmaLabErrorReason.DOCTOR_AGENDA_NOT_CONFIGURED,
       );
     }
     const windows = await this.repo.listWindows(this.em, policy.id);
@@ -211,6 +213,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'Indicá el laboratorio o el visitador a bloquear',
         {},
+        PharmaLabErrorReason.VISIT_BLOCK_TARGET_MISSING,
       );
     }
     return this.em.transactional(async (tx) => {
@@ -249,14 +252,18 @@ export class VisitAgendaService {
     return this.em.transactional(async (tx) => {
       const block = await this.repo.findBlock(tx, blockId);
       if (!block || block.doctorUserId !== actor.id) {
-        throw new ResourceNotFoundException('Bloqueo no encontrado', {
-          blockId,
-        });
+        throw new ResourceNotFoundException(
+          'Bloqueo no encontrado',
+          { blockId },
+          PharmaLabErrorReason.VISIT_BLOCK_NOT_FOUND,
+        );
       }
       if (block.statusConceptId !== PHL.BLOCK_ACTIVE) {
-        throw new ConflictException('El bloqueo ya estaba levantado', {
-          blockId,
-        });
+        throw new ConflictException(
+          'El bloqueo ya estaba levantado',
+          { blockId },
+          PharmaLabErrorReason.VISIT_BLOCK_ALREADY_LIFTED,
+        );
       }
       block.statusConceptId = PHL.BLOCK_LIFTED;
       block.liftedAt = new Date();
@@ -321,6 +328,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El doctor no recibe visitas de laboratorio',
         { doctorUserId },
+        PharmaLabErrorReason.DOCTOR_AGENDA_NOT_CONFIGURED,
       );
     }
     const timeZone = policy.timeZone ?? FALLBACK_TIME_ZONE;
@@ -331,6 +339,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         `La visita debe solicitarse con al menos ${policy.minNoticeHours} horas de antelación`,
         { doctorUserId },
+        PharmaLabErrorReason.VISIT_MIN_NOTICE_NOT_MET,
       );
     }
     if (
@@ -340,6 +349,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         `La duración máxima admitida es de ${policy.maxDurationMinutes} minutos`,
         { doctorUserId },
+        PharmaLabErrorReason.VISIT_DURATION_EXCEEDS_MAX,
       );
     }
 
@@ -351,12 +361,14 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El horario solicitado queda fuera de las ventanas de visita del doctor',
         { doctorUserId },
+        PharmaLabErrorReason.VISIT_OUTSIDE_WINDOWS,
       );
     }
     if (window.modalityConceptId !== modalityConceptId) {
       throw new PreconditionFailedException(
         'La modalidad solicitada no coincide con la de la ventana de visita',
         { doctorUserId },
+        PharmaLabErrorReason.VISIT_MODALITY_MISMATCH,
       );
     }
 
@@ -378,6 +390,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El doctor ya alcanzó el máximo de visitas para ese día',
         { doctorUserId },
+        PharmaLabErrorReason.VISIT_DAILY_QUOTA_REACHED,
       );
     }
     const overlapping = sameDay.find((request) => {
@@ -390,6 +403,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El horario se superpone con otra visita ya registrada',
         { doctorUserId, visitRequestId: overlapping.id },
+        PharmaLabErrorReason.VISIT_SLOT_OVERLAPS_REQUEST,
       );
     }
     if (window.maxVisits !== undefined) {
@@ -408,6 +422,7 @@ export class VisitAgendaService {
         throw new PreconditionFailedException(
           'La ventana de visita ya está completa',
           { doctorUserId },
+          PharmaLabErrorReason.VISIT_WINDOW_FULL,
         );
       }
     }
@@ -422,6 +437,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El horario se superpone con la agenda clínica del doctor',
         { doctorUserId, conflictKind: conflicts[0].kind },
+        PharmaLabErrorReason.VISIT_SLOT_OVERLAPS_CLINICAL_AGENDA,
       );
     }
 
@@ -462,6 +478,7 @@ export class VisitAgendaService {
       throw new PreconditionFailedException(
         'El doctor bloqueó las visitas de este laboratorio o visitador',
         { doctorUserId, blockId: block.id },
+        PharmaLabErrorReason.VISIT_BLOCKED_BY_DOCTOR,
       );
     }
     const policy = await this.repo.findPolicy(tx, doctorUserId);
@@ -474,6 +491,7 @@ export class VisitAgendaService {
         throw new PreconditionFailedException(
           'El doctor solo recibe visitadores de determinadas especialidades',
           { doctorUserId },
+          PharmaLabErrorReason.VISIT_VISITOR_SPECIALTY_NOT_ACCEPTED,
         );
       }
     }
@@ -485,6 +503,7 @@ export class VisitAgendaService {
         throw new PreconditionFailedException(
           'La hora de fin debe ser posterior a la de inicio',
           { weekday: window.weekday },
+          PharmaLabErrorReason.VISIT_WINDOW_TIME_RANGE_INVALID,
         );
       }
     }
@@ -501,6 +520,7 @@ export class VisitAgendaService {
           throw new PreconditionFailedException(
             'Dos ventanas del mismo día se superponen',
             { weekday },
+            PharmaLabErrorReason.VISIT_WINDOWS_OVERLAP,
           );
         }
       }

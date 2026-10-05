@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   BillsRepository,
@@ -71,16 +72,24 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       const doc = await this.loadDocument(tx, documentId, dto.documentType);
       if (!doc) {
-        throw new ResourceNotFoundException('Documento no encontrado', {
-          documentId,
-          documentType: dto.documentType,
-        });
+        throw new ResourceNotFoundException(
+          'Documento no encontrado',
+          {
+            documentId,
+            documentType: dto.documentType,
+          },
+          BillingErrorReason.LEDGER_DOCUMENT_NOT_FOUND,
+        );
       }
       if (doc.transactionId) {
-        throw new ConflictException('El documento ya fue contabilizado', {
-          documentId,
-          transactionId: doc.transactionId,
-        });
+        throw new ConflictException(
+          'El documento ya fue contabilizado',
+          {
+            documentId,
+            transactionId: doc.transactionId,
+          },
+          BillingErrorReason.LEDGER_DOCUMENT_ALREADY_POSTED,
+        );
       }
 
       doc.transactionId = dto.transactionId;

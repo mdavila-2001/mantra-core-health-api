@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import { ImmunizationsRepository } from '../repositories';
 import { CreateImmunizationDto, ImmunizationResponseDto } from '../dto';
 import { CLIN } from '../clinical.concepts';
@@ -52,6 +53,7 @@ export class ImmunizationsService {
             vaccineConceptId: dto.vaccineConceptId,
             doseNumber: dto.doseNumber ?? null,
           },
+          ClinicalErrorReason.IMMUNIZATION_DOSE_ALREADY_RECORDED,
         );
       }
 

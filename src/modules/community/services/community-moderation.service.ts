@@ -16,6 +16,7 @@ import {
   MODERATION_DECISION_BY_CODE,
   STRIKE_SEVERITY_BY_CODE,
 } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreateReportDto,
   ModerationDecisionDto,
@@ -119,13 +120,21 @@ export class CommunityModerationService {
     return this.em.transactional(async (tx) => {
       const queue = await this.moderationRepo.findQueueById(tx, queueId);
       if (!queue)
-        throw new ResourceNotFoundException('Entrada de cola no encontrada', {
-          queueId,
-        });
+        throw new ResourceNotFoundException(
+          'Entrada de cola no encontrada',
+          {
+            queueId,
+          },
+          CommunityErrorReason.MODERATION_QUEUE_ENTRY_NOT_FOUND,
+        );
       if (queue.statusConceptId === COMM.QUEUE_RESOLVED) {
-        throw new ConflictException('La entrada de cola ya está resuelta', {
-          queueId,
-        });
+        throw new ConflictException(
+          'La entrada de cola ya está resuelta',
+          {
+            queueId,
+          },
+          CommunityErrorReason.MODERATION_QUEUE_ALREADY_RESOLVED,
+        );
       }
 
       const map = MODERATION_DECISION_BY_CODE[dto.decision];
@@ -200,9 +209,13 @@ export class CommunityModerationService {
         decisionId,
       );
       if (!decision)
-        throw new ResourceNotFoundException('Decisión no encontrada', {
-          decisionId,
-        });
+        throw new ResourceNotFoundException(
+          'Decisión no encontrada',
+          {
+            decisionId,
+          },
+          CommunityErrorReason.MODERATION_DECISION_NOT_FOUND,
+        );
 
       // AG-18: el apelante tiene que ser el sancionado, no sólo el dueño del
       // perfil que declaró. `assertActsAsProfile` de arriba ya probó que el
@@ -230,6 +243,7 @@ export class CommunityModerationService {
         throw new ConflictException(
           'Ya existe una apelación abierta para esta decisión',
           { decisionId },
+          CommunityErrorReason.APPEAL_ALREADY_OPEN,
         );
 
       const appeal = this.moderationRepo.createAppeal(tx, {
@@ -304,13 +318,21 @@ export class CommunityModerationService {
     return this.em.transactional(async (tx) => {
       const appeal = await this.moderationRepo.findAppealById(tx, appealId);
       if (!appeal)
-        throw new ResourceNotFoundException('Apelación no encontrada', {
-          appealId,
-        });
+        throw new ResourceNotFoundException(
+          'Apelación no encontrada',
+          {
+            appealId,
+          },
+          CommunityErrorReason.APPEAL_NOT_FOUND,
+        );
       if (appeal.statusConceptId !== COMM.APPEAL_OPEN) {
-        throw new ConflictException('La apelación ya está resuelta', {
-          appealId,
-        });
+        throw new ConflictException(
+          'La apelación ya está resuelta',
+          {
+            appealId,
+          },
+          CommunityErrorReason.APPEAL_ALREADY_RESOLVED,
+        );
       }
 
       const resolucion = APPEAL_RESOLUTION_BY_CODE[dto.resolution];

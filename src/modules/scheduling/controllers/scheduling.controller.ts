@@ -26,6 +26,7 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
+import { SchedulingErrorReason } from '../scheduling.error-reasons';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
@@ -147,6 +148,8 @@ export class SchedulingController {
     if (!from || !to) {
       throw new PreconditionFailedException(
         'Indique la ventana con from y to (ISO 8601)',
+        undefined,
+        SchedulingErrorReason.AGENDA_WINDOW_REQUIRED,
       );
     }
     return this.catalogService.getResourceAgenda(id, {

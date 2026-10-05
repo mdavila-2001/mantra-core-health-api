@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { SubledgerRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
 import { toCents, fromCents } from './money';
@@ -61,9 +62,13 @@ export class SubledgerService {
         dto.subledgerAccountId,
       );
       if (!subledger) {
-        throw new ResourceNotFoundException('Subledger no encontrado', {
-          subledgerAccountId: dto.subledgerAccountId,
-        });
+        throw new ResourceNotFoundException(
+          'Subledger no encontrado',
+          {
+            subledgerAccountId: dto.subledgerAccountId,
+          },
+          AccountingErrorReason.SUBLEDGER_ACCOUNT_NOT_FOUND,
+        );
       }
 
       const item = this.subledgerRepo.createOpenItem(tx, {
@@ -111,23 +116,35 @@ export class SubledgerService {
           it.openItemId,
         );
         if (!openItem) {
-          throw new ResourceNotFoundException('Partida abierta no encontrada', {
-            openItemId: it.openItemId,
-          });
+          throw new ResourceNotFoundException(
+            'Partida abierta no encontrada',
+            {
+              openItemId: it.openItemId,
+            },
+            AccountingErrorReason.OPEN_ITEM_NOT_FOUND,
+          );
         }
         if (openItem.statusConceptId === ACCT.OPEN_ITEM_CLEARED) {
-          throw new ConflictException('La partida ya está compensada', {
-            openItemId: it.openItemId,
-          });
+          throw new ConflictException(
+            'La partida ya está compensada',
+            {
+              openItemId: it.openItemId,
+            },
+            AccountingErrorReason.OPEN_ITEM_ALREADY_CLEARED,
+          );
         }
         const cleared = toCents(it.clearedAmount);
         const outstanding = toCents(openItem.outstandingAmount ?? '0');
         if (cleared <= 0 || cleared > outstanding) {
-          throw new PreconditionFailedException('Importe compensado inválido', {
-            openItemId: it.openItemId,
-            clearedAmount: it.clearedAmount,
-            outstanding: fromCents(outstanding),
-          });
+          throw new PreconditionFailedException(
+            'Importe compensado inválido',
+            {
+              openItemId: it.openItemId,
+              clearedAmount: it.clearedAmount,
+              outstanding: fromCents(outstanding),
+            },
+            AccountingErrorReason.OPEN_ITEM_INVALID_CLEARED_AMOUNT,
+          );
         }
         subledgerAccountId = subledgerAccountId ?? openItem.subledgerAccountId;
         if (openItem.subledgerAccountId !== subledgerAccountId) {
@@ -136,6 +153,7 @@ export class SubledgerService {
             {
               openItemId: it.openItemId,
             },
+            AccountingErrorReason.OPEN_ITEM_SUBLEDGER_MISMATCH,
           );
         }
         loaded.push({
@@ -151,9 +169,13 @@ export class SubledgerService {
         subledgerAccountId as string,
       );
       if (!subledger) {
-        throw new ResourceNotFoundException('Subledger no encontrado', {
-          subledgerAccountId,
-        });
+        throw new ResourceNotFoundException(
+          'Subledger no encontrado',
+          {
+            subledgerAccountId,
+          },
+          AccountingErrorReason.SUBLEDGER_ACCOUNT_NOT_FOUND,
+        );
       }
 
       const totalCleared = loaded.reduce((acc, l) => acc + l.clearedCents, 0);
@@ -169,6 +191,7 @@ export class SubledgerService {
           {
             clearingNumber: number,
           },
+          AccountingErrorReason.CLEARING_NUMBER_ALREADY_EXISTS,
         );
       }
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, LockMode } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -109,7 +110,11 @@ export class PriorAuthService {
           dto.patientCoverageId,
         );
         if (!coverage)
-          throw new ResourceNotFoundException('Cobertura no encontrada');
+          throw new ResourceNotFoundException(
+            'Cobertura no encontrada',
+            { coverageId: dto.patientCoverageId },
+            InsuranceErrorReason.COVERAGE_NOT_FOUND,
+          );
       }
       let providerType = INS.ELIG_PROVIDER_TYPE_PRACTICE;
       let items = dto.items;
@@ -317,6 +322,10 @@ export class PriorAuthService {
       ) {
         throw new PreconditionFailedException(
           'La solicitud no admite determinación en su estado actual',
+          {
+            requestId,
+          },
+          InsuranceErrorReason.PRIOR_AUTH_NOT_DETERMINABLE,
         );
       }
       if (linked) {
