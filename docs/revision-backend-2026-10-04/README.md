@@ -407,3 +407,5 @@ bash -n docker/db-init/init-postgres.sh infra/monitoring/scripts/configure-secre
 ```
 
 No se ejecutaron el smoke, la integración completa, migraciones, Compose en vivo ni pruebas contra datos reales. El smoke se dejó sin ejecutar porque su implementación actual puede truncar datos de negocio de la base configurada; ese es el hallazgo SP-01, no un bloqueo sin documentar.
+
+El job de documentación del PR ejecutó la suite completa y conserva dos bloqueos heredados que esta rama no corrige: `modules/insurance/controllers/insurance-controllers.spec.ts` espera una matriz de roles anterior (20 pruebas pasan y una falla) y la cobertura global de ramas queda en 68,73 % frente al umbral de 69 %. La rama sólo modifica Markdown; la corrección debe ir en un cambio de código y pruebas separado, sin relajar aserciones ni umbrales.
