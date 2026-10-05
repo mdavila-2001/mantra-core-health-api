@@ -53,6 +53,36 @@ export class AddOwnCredentialDto {
   @MaxLength(200)
   issuingInstitutionText?: string;
 
+  /** Ciudad donde se cursó (`issuing_city_text`). */
+  @ApiPropertyOptional({ maxLength: 120 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  issuingCityText?: string;
+
+  /** País donde se cursó, como texto (`issuing_country_text`). */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  issuingCountryText?: string;
+
+  /** Profesión que acredita, miembro de `VS_BO_PROFESSION` (COB-2023). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  professionConceptId?: string;
+
+  /**
+   * Cómo se llama el título cuando no hay catálogo que lo diga
+   * («Diplomado en Salud Pública»). `title_text`, modelo v4.2.41.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  titleText?: string;
+
   /** Fecha de emisión del título. */
   @ApiPropertyOptional({ format: 'date' })
   @IsOptional()
@@ -88,6 +118,18 @@ export class OwnCredentialResponseDto {
 
   @ApiPropertyOptional()
   issuingInstitutionText?: string;
+
+  @ApiPropertyOptional()
+  issuingCityText?: string;
+
+  @ApiPropertyOptional()
+  issuingCountryText?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  professionConceptId?: string;
+
+  @ApiPropertyOptional()
+  titleText?: string;
 
   @ApiPropertyOptional({ type: String, format: 'date' })
   issueDate?: Date;
