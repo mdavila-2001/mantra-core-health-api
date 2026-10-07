@@ -538,17 +538,22 @@ services:
       - alovida
 
   minio:
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
-    # `pull_policy: missing` (M1, 2026-09-26): además de `mc`, quay.io también
-    # bloqueó el acceso público anónimo al repo `minio/minio` — reproducido en
-    # vivo: un `docker pull` fresco de ESTE MISMO tag devuelve 401 hoy. Todo
-    # despliegue hace `docker compose pull` antes de `up`, así que sin esto
-    # cualquier redeploy vuelve a fallar aunque el contenedor viejo siga sano.
-    # La imagen ya está en la cache local del host (se confirmó con
-    # `docker images`) desde antes del bloqueo; `missing` la usa sin volver a
-    # pedirla al registro. Riesgo que esto NO resuelve, documentado aparte: si
-    # la cache local se pierde (host nuevo, `docker system prune -a`), esta
-    # imagen exacta deja de ser obtenible por cualquier medio público conocido.
+    # quay.io y Docker Hub ya no sirven `minio/minio` sin autenticación: un
+    # `docker pull` de este tag devuelve 401 (quay.io) o «pull access denied»
+    # (Docker Hub), comprobado el 2026-10-07 desde 62.169.18.132. Coolify corre
+    # `docker compose pull` antes de cada `up`, así que en un host sin la imagen
+    # en caché TODO despliegue fallaba; `pull_policy: missing` solo lo salvaba
+    # donde la imagen ya estaba bajada desde antes del bloqueo.
+    #
+    # `bitnamilegacy/minio:2025.4.22` es el MISMO binario
+    # (RELEASE.2025-04-22T22-12-26Z, commit 0d7408fc), se descarga sin login y
+    # trae `mc` para el healthcheck. Se salta el entrypoint de Bitnami y se corre
+    # como root para conservar el comando y la ruta `/data` de siempre: el
+    # volumen `minio_data` existente sirve tal cual. Es la misma imagen que ya
+    # corre sana en 62.169.18.132 (dev y test) desde el 2026-10-06.
+    image: bitnamilegacy/minio:2025.4.22
+    user: "0:0"
+    entrypoint: ["minio"]
     pull_policy: missing
     restart: always
     logging: *logging
