@@ -1292,15 +1292,15 @@ Campos de la respuesta:
 | `operativeReports[].reportVersion` | Sí | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
 | `operativeReports[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado: borrador o firmado. | `00000000-0000-4000-8000-000000000001` |
 | `operativeReports[].signedAt` | No | `string` | formato `date-time` | Cuándo se firmó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
-| `operativeSteps` | Sí | `array<object>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"id":"00000000-0000-4000-8000-000000000001","stepNumber":1,"stepCodeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","performedByProfileId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z"}]` |
-| `operativeSteps[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps` | Sí | `array<OperativeStepItemDto>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"id":"00000000-0000-4000-8000-000000000001","stepNumber":1,"stepCodeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","performedByProfileId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `operativeSteps[].id` | Sí | `string` | formato `uuid` | Identificador del paso. | `00000000-0000-4000-8000-000000000001` |
 | `operativeSteps[].stepNumber` | Sí | `number` | Sin restricción adicional declarada | Orden dentro de la intervención. | `1` |
-| `operativeSteps[].stepCodeConceptId` | Sí | `string` | Sin restricción adicional declarada | Código del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].stepCodeConceptId` | Sí | `string` | formato `uuid` | Código del paso. | `00000000-0000-4000-8000-000000000001` |
 | `operativeSteps[].description` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo registró. | `Texto descriptivo de ejemplo` |
-| `operativeSteps[].performedByProfileId` | No | `string` | Sin restricción adicional declarada | Profesional que lo ejecutó, si se registró. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
-| `operativeSteps[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].performedByProfileId` | No | `string` | formato `uuid` | Profesional que lo ejecutó, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].bodySiteConceptId` | No | `string` | formato `uuid` | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].lateralityConceptId` | No | `string` | formato `uuid` | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del paso. | `00000000-0000-4000-8000-000000000001` |
 | `operativeSteps[].startedAt` | No | `string` | formato `date-time` | Cuándo empezó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
 | `operativeSteps[].endedAt` | No | `string` | formato `date-time` | Cuándo terminó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
 | `findings` | Sí | `array<object>` | Sin restricción adicional declarada | Hallazgos registrados durante la intervención | `[{"id":"00000000-0000-4000-8000-000000000001","operativeStepId":"00000000-0000-4000-8000-000000000001","findingCodeConceptId":"00000000-0000-4000-8000-000000000001","findingText":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","recordedByProfileId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
@@ -2478,6 +2478,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique la condición por `conditionId` o por `conditionCodeConceptId` | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un diagnóstico se registra presuntivo o confirmado. | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/clinical/services/encounter-seal-guard.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

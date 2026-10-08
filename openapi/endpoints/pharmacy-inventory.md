@@ -989,7 +989,7 @@ Content-Type: application/json
 | `inventoryLocationId` | Sí | `string` | formato `uuid` | Ubicación destino del stock | `00000000-0000-4000-8000-000000000001` |
 | `supplierDeliveryReference` | No | `string` | Sin restricción adicional declarada | Referencia de entrega del proveedor | `valor-ejemplo` |
 | `idempotencyKey` | No | `string` | Sin restricción adicional declarada | Clave de idempotencia | `valor-ejemplo` |
-| `lines` | Sí | `array<GoodsReceiptLineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"pharmacyPurchaseOrderLineId":"00000000-0000-4000-8000-000000000001","pharmacyProductId":"00000000-0000-4000-8000-000000000001","lotNumber":"valor-ejemplo","receivedQuantity":1,"acceptedQuantity":1,"rejectedQuantity":1,"unitCostAmount":1,"expiresAt":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<GoodsReceiptLineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"pharmacyPurchaseOrderLineId":"00000000-0000-4000-8000-000000000001","pharmacyProductId":"00000000-0000-4000-8000-000000000001","lotNumber":"valor-ejemplo","receivedQuantity":1,"acceptedQuantity":1,"rejectedQuantity":1,"unitCostAmount":1,"expiresAt":"2026-07-31"}]` |
 | `lines[].pharmacyPurchaseOrderLineId` | Sí | `string` | formato `uuid` | Línea de la orden de compra | `00000000-0000-4000-8000-000000000001` |
 | `lines[].pharmacyProductId` | Sí | `string` | formato `uuid` | Producto de farmacia | `00000000-0000-4000-8000-000000000001` |
 | `lines[].lotNumber` | Sí | `string` | longitud máxima 128 | Número de lote recibido | `valor-ejemplo` |
@@ -997,7 +997,7 @@ Content-Type: application/json
 | `lines[].acceptedQuantity` | No | `number` | mínimo 0 | Cantidad aceptada (default = recibida) | `1` |
 | `lines[].rejectedQuantity` | No | `number` | mínimo 0 | Cantidad rechazada | `1` |
 | `lines[].unitCostAmount` | No | `number` | mínimo 0 | Costo unitario | `1` |
-| `lines[].expiresAt` | No | `string` | Sin restricción adicional declarada | Fecha de expiración del lote (ISO) | `valor-ejemplo` |
+| `lines[].expiresAt` | No | `string` | formato `date` | Fecha de expiración del lote (ISO) | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -1024,7 +1024,7 @@ Content-Type: application/json
       "acceptedQuantity": 1,
       "rejectedQuantity": 1,
       "unitCostAmount": 1,
-      "expiresAt": "valor-ejemplo"
+      "expiresAt": "2026-07-31"
     }
   ]
 }
@@ -2361,11 +2361,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "pharmacyId": "00000000-0000-4000-8000-000000000001",
       "pharmacyName": "Nombre de ejemplo",
       "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+      "prescriber": {
+        "name": "Nombre de ejemplo",
+        "specialty": "valor-ejemplo"
+      },
       "patientName": "Nombre de ejemplo",
       "deliveryMode": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
       },
+      "deliveryAddressText": "valor-ejemplo",
       "pickupCode": "CODIGO_EJEMPLO",
       "totalAmount": "valor-ejemplo",
       "currency": {
@@ -2430,7 +2435,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"reservationLines":[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}],"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
+| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"reservationLines":[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}],"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","prescriber":{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"},"patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"deliveryAddressText":"valor-ejemplo","pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
 | `items[].reservationLines` | Sí | `array<PharmacyOrderReservationLineDto>` | Sin restricción adicional declarada | Porciones confirmadas o entregadas vigentes para facturación | `[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].reservationLines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].reservationLines[].productId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -2471,10 +2476,14 @@ Campos de la respuesta:
 | `items[].pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `items[].prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -2701,11 +2710,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -2807,10 +2821,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -3005,11 +3023,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -3111,10 +3134,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -3308,11 +3335,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -3414,10 +3446,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -3611,11 +3647,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -3717,10 +3758,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -3934,11 +3979,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -4040,10 +4090,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -4264,11 +4318,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -4370,10 +4429,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -4574,11 +4637,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -4680,10 +4748,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -4877,11 +4949,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -4983,10 +5060,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -5199,11 +5280,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -5305,10 +5391,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -5505,11 +5595,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "pharmacyName": "Nombre de ejemplo",
   "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+  "prescriber": {
+    "name": "Nombre de ejemplo",
+    "specialty": "valor-ejemplo"
+  },
   "patientName": "Nombre de ejemplo",
   "deliveryMode": {
     "code": "CODIGO_EJEMPLO",
     "display": "valor-ejemplo"
   },
+  "deliveryAddressText": "valor-ejemplo",
   "pickupCode": "CODIGO_EJEMPLO",
   "totalAmount": "valor-ejemplo",
   "currency": {
@@ -5611,10 +5706,14 @@ Campos de la respuesta:
 | `pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
@@ -5805,11 +5904,16 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "pharmacyId": "00000000-0000-4000-8000-000000000001",
       "pharmacyName": "Nombre de ejemplo",
       "medicationRequestId": "00000000-0000-4000-8000-000000000001",
+      "prescriber": {
+        "name": "Nombre de ejemplo",
+        "specialty": "valor-ejemplo"
+      },
       "patientName": "Nombre de ejemplo",
       "deliveryMode": {
         "code": "CODIGO_EJEMPLO",
         "display": "valor-ejemplo"
       },
+      "deliveryAddressText": "valor-ejemplo",
       "pickupCode": "CODIGO_EJEMPLO",
       "totalAmount": "valor-ejemplo",
       "currency": {
@@ -5874,7 +5978,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"reservationLines":[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}],"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
+| `items` | Sí | `array<PharmacyOrderDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"reservationLines":[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}],"insuranceSettlement":{"claimId":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","adjudicationVersionId":"00000000-0000-4000-8000-000000000001","adjudicationVersion":1,"eobId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","policyIdentifier":"valor-ejemplo","totalBilledAmount":"valor-ejemplo","totalApprovedAmount":"valor-ejemplo","totalPatientAmount":"valor-ejemplo","totalDeniedAmount":"valor-ejemplo","currencyCode":"BOB","result":"APPROVED","exclusions":[{"claimLineId":"00000000-0000-4000-8000-000000000001","itemId":"00000000-0000-4000-8000-000000000001","itemName":"Nombre de ejemplo","amount":"valor-ejemplo","policyClauseReference":"valor-ejemplo","denialRationale":"valor-ejemplo"}]},"insuranceSettlementAvailability":"AVAILABLE","id":"00000000-0000-4000-8000-000000000001","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"createdAt":"valor-ejemplo","expiresAt":"valor-ejemplo","siteId":"00000000-0000-4000-8000-000000000001","siteName":"Nombre de ejemplo","pharmacyId":"00000000-0000-4000-8000-000000000001","pharmacyName":"Nombre de ejemplo","medicationRequestId":"00000000-0000-4000-8000-000000000001","prescriber":{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"},"patientName":"Nombre de ejemplo","deliveryMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"deliveryAddressText":"valor-ejemplo","pickupCode":"CODIGO_EJEMPLO","totalAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"rejectionReasonText":"Texto descriptivo de ejemplo","substitutions":[{"id":"00000000-0000-4000-8000-000000000001","originalProductId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","originalUnitPriceAmount":"valor-ejemplo","proposedProductId":"00000000-0000-4000-8000-000000000001","proposedName":"Nombre de ejemplo","proposedUnitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"decidedAt":"valor-ejemplo"}],"lines":[{"productId":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","productCode":"CODIGO_EJEMPLO","brandName":"Nombre de ejemplo","genericName":"Nombre de ejemplo","strengthText":"valor-ejemplo","packageSizeText":"valor-ejemplo","medication":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"requestedQuantity":1,"reservedQuantity":1,"fulfilledQuantity":1,"unitPriceAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]}]` |
 | `items[].reservationLines` | Sí | `array<PharmacyOrderReservationLineDto>` | Sin restricción adicional declarada | Porciones confirmadas o entregadas vigentes para facturación | `[{"id":"00000000-0000-4000-8000-000000000001","productId":"00000000-0000-4000-8000-000000000001","quantity":"valor-ejemplo","unitPriceAmount":"valor-ejemplo","billedAmount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].reservationLines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].reservationLines[].productId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -5915,10 +6019,14 @@ Campos de la respuesta:
 | `items[].pharmacyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].pharmacyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].medicationRequestId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].prescriber` | No | `PharmacyOrderPrescriberDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `items[].prescriber.name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].prescriber.specialty` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].patientName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].deliveryMode` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].deliveryMode.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].deliveryMode.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].deliveryAddressText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].pickupCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].currency` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |

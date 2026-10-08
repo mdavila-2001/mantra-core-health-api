@@ -9,7 +9,7 @@
 # Módulo `surveys`
 
 **Fuente:** [`src/modules/surveys/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/surveys/README.md)
-· 3 controllers · 3 services · 4 repositories · 7 entidades · 7 DTO
+· 3 controllers · 3 services · 4 repositories · 7 entidades · 10 DTO
 
 ---
 

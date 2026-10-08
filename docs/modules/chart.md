@@ -9,7 +9,7 @@
 # Módulo `chart`
 
 **Fuente:** [`src/modules/chart/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/chart/README.md)
-· 6 controllers · 7 services · 4 repositories · 11 entidades · 5 DTO
+· 7 controllers · 8 services · 4 repositories · 11 entidades · 6 DTO
 
 ---
 

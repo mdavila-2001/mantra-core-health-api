@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 28 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 29 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticesController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -19,26 +19,27 @@ Referencia exhaustiva de 28 operación(es) del módulo `practice`, derivada del 
 6. [POST /practices/{practiceId}/healthcare-services](#6-post-practices-practiceid-healthcare-services) — Publicar un servicio de salud
 7. [POST /practices/{practiceId}/inventory-items](#7-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
 8. [GET /practices/{practiceId}/organization](#8-get-practices-practiceid-organization) — Consola de organización médica: estructura, plantilla y legajo
-9. [POST /practices/{practiceId}/role-assignments](#9-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
-10. [POST /practices/{practiceId}/role-assignments/self-request](#10-post-practices-practiceid-role-assignments-self-request) — Solicitar la propia vinculación a una organización
-11. [PUT /practices/{practiceId}/settings/{settingKey}](#11-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
-12. [GET /practices/{practiceId}/sites](#12-get-practices-practiceid-sites) — Listar las sedes de una práctica
-13. [POST /practices/{practiceId}/sites](#13-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
-14. [DELETE /practices/{practiceId}/sites/{siteId}](#14-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
-15. [GET /practitioners/{profileId}/sites](#15-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
-16. [GET /practitioners/me/role-assignments](#16-get-practitioners-me-role-assignments) — Mis vinculaciones con organizaciones
-17. [POST /practitioners/me/sites](#17-post-practitioners-me-sites) — Registrar un consultorio propio
-18. [DELETE /practitioners/me/sites/{siteId}](#18-delete-practitioners-me-sites-siteid) — Retirar un consultorio propio
-19. [PATCH /practitioners/me/sites/{siteId}](#19-patch-practitioners-me-sites-siteid) — Corregir un consultorio propio
-20. [PUT /practitioners/me/sites/{siteId}/bank-qr](#20-put-practitioners-me-sites-siteid-bank-qr) — Fijar o quitar el QR bancario de una sede
-21. [POST /role-assignments/{roleId}/approve](#21-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
-22. [POST /role-assignments/{roleId}/end](#22-post-role-assignments-roleid-end) — Finalizar una vinculación
-23. [POST /role-assignments/{roleId}/reject](#23-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
-24. [POST /role-assignments/{roleId}/support-assignments](#24-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-25. [POST /role-assignments/{roleId}/suspend](#25-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
-26. [GET /sites/{siteId}/care-spaces](#26-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
-27. [POST /sites/{siteId}/care-spaces](#27-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-28. [POST /sites/{siteId}/clinical-units](#28-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+9. [GET /practices/{practiceId}/role-assignments](#9-get-practices-practiceid-role-assignments) — Listar las vinculaciones profesional-organización de la práctica
+10. [POST /practices/{practiceId}/role-assignments](#10-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
+11. [POST /practices/{practiceId}/role-assignments/self-request](#11-post-practices-practiceid-role-assignments-self-request) — Solicitar la propia vinculación a una organización
+12. [PUT /practices/{practiceId}/settings/{settingKey}](#12-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
+13. [GET /practices/{practiceId}/sites](#13-get-practices-practiceid-sites) — Listar las sedes de una práctica
+14. [POST /practices/{practiceId}/sites](#14-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
+15. [DELETE /practices/{practiceId}/sites/{siteId}](#15-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
+16. [GET /practitioners/{profileId}/sites](#16-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
+17. [GET /practitioners/me/role-assignments](#17-get-practitioners-me-role-assignments) — Mis vinculaciones con organizaciones
+18. [POST /practitioners/me/sites](#18-post-practitioners-me-sites) — Registrar un consultorio propio
+19. [DELETE /practitioners/me/sites/{siteId}](#19-delete-practitioners-me-sites-siteid) — Retirar un consultorio propio
+20. [PATCH /practitioners/me/sites/{siteId}](#20-patch-practitioners-me-sites-siteid) — Corregir un consultorio propio
+21. [PUT /practitioners/me/sites/{siteId}/bank-qr](#21-put-practitioners-me-sites-siteid-bank-qr) — Fijar o quitar el QR bancario de una sede
+22. [POST /role-assignments/{roleId}/approve](#22-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
+23. [POST /role-assignments/{roleId}/end](#23-post-role-assignments-roleid-end) — Finalizar una vinculación
+24. [POST /role-assignments/{roleId}/reject](#24-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
+25. [POST /role-assignments/{roleId}/support-assignments](#25-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+26. [POST /role-assignments/{roleId}/suspend](#26-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
+27. [GET /sites/{siteId}/care-spaces](#27-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+28. [POST /sites/{siteId}/care-spaces](#28-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+29. [POST /sites/{siteId}/clinical-units](#29-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
 
 ---
 
@@ -1403,7 +1404,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practices/{practiceId}/role-assignments
+## 9. GET /practices/{practiceId}/role-assignments
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Listar las vinculaciones profesional-organización de la práctica
+- **Operation ID:** `PracticesController_listRoleAssignments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.listRoleAssignments](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Listar las vinculaciones profesional-organización de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Vinculaciones profesional-organización de la práctica, paginadas por cursor (CV-14). Antes de esto, `POST …/role-assignments/:roleId/approve` existía sin ninguna forma de ver qué había pendiente: el administrador tenía que conseguir el uuid por otro canal.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practices/{practiceId}/role-assignments` en `PracticesController_listRoleAssignments`. El controlador delega en `PracticeWorkforceService.listPracticeAssignments`. No recibe body. El tipo de retorno estático es `Promise<ListPracticeRoleAssignmentsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | query | No | `string` | Sin restricción adicional declarada | Concepto de estado (p. ej. la vinculación pendiente) | `ok` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Vinculaciones por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `practiceId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/role-assignments?status=ok&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPracticeRoleAssignmentsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RoleAssignmentResponseDto>` | Sin restricción adicional declarada | Vinculaciones de esta página, ordenadas por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","status":"ok","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices/{practiceId}/role-assignments"
+}
+```
+
+---
+
+## 10. POST /practices/{practiceId}/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1557,7 +1688,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /practices/{practiceId}/role-assignments/self-request
+## 11. POST /practices/{practiceId}/role-assignments/self-request
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1699,7 +1830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PUT /practices/{practiceId}/settings/{settingKey}
+## 12. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1832,7 +1963,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /practices/{practiceId}/sites
+## 13. GET /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1944,7 +2075,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /practices/{practiceId}/sites
+## 14. POST /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2095,7 +2226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. DELETE /practices/{practiceId}/sites/{siteId}
+## 15. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2206,7 +2337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /practitioners/{profileId}/sites
+## 16. GET /practitioners/{profileId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2339,7 +2470,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /practitioners/me/role-assignments
+## 17. GET /practitioners/me/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2454,7 +2585,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /practitioners/me/sites
+## 18. POST /practitioners/me/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2614,7 +2745,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. DELETE /practitioners/me/sites/{siteId}
+## 19. DELETE /practitioners/me/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2695,7 +2826,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | No tenés una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 404 | `NOT_FOUND` | No tiene una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2713,7 +2844,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. PATCH /practitioners/me/sites/{siteId}
+## 20. PATCH /practitioners/me/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2856,7 +2987,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Esa sede no es un consultorio propio tuyo | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 404 | `NOT_FOUND` | Esa sede no es un consultorio propio suyo | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2875,7 +3006,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PUT /practitioners/me/sites/{siteId}/bank-qr
+## 21. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3002,7 +3133,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | No tenés una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 404 | `NOT_FOUND` | No tiene una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3021,7 +3152,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /role-assignments/{roleId}/approve
+## 22. POST /role-assignments/{roleId}/approve
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3153,7 +3284,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /role-assignments/{roleId}/end
+## 23. POST /role-assignments/{roleId}/end
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3285,7 +3416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /role-assignments/{roleId}/reject
+## 24. POST /role-assignments/{roleId}/reject
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3417,7 +3548,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /role-assignments/{roleId}/support-assignments
+## 25. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3556,7 +3687,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /role-assignments/{roleId}/suspend
+## 26. POST /role-assignments/{roleId}/suspend
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3688,7 +3819,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /sites/{siteId}/care-spaces
+## 27. GET /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3801,7 +3932,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /sites/{siteId}/care-spaces
+## 28. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3950,7 +4081,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /sites/{siteId}/clinical-units
+## 29. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

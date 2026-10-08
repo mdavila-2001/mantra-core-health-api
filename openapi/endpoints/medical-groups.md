@@ -354,7 +354,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 409 | `CONFLICT` | Un mismo profesional no puede repetirse (ni ser también el creador) | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Seleccioná primero el paciente para poder elegir un diagnóstico | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Seleccione primero el paciente para poder elegir un diagnóstico | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
