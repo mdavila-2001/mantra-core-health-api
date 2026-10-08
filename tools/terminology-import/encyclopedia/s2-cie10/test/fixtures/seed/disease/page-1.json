@@ -1,0 +1,1561 @@
+[
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-c69-2",
+  "code": "C69.2",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Neoplasia maligna de retina",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "tagKeys": [
+   "oncologic"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.02",
+    "display": "NEOPLASIAS (C00-D49)"
+   },
+   {
+    "code": "C00-C96",
+    "display": "NEOPLASIAS MALIGNAS (C00-C96)"
+   },
+   {
+    "code": "C69-C72",
+    "display": "NEOPLASIAS MALIGNAS DE OJO, CEREBRO Y OTRAS PARTES DEL SISTEMA NERVIOSO CENTRAL (C69-C72)"
+   },
+   {
+    "code": "C69",
+    "display": "Neoplasia maligna de ojo y sus anexos"
+   }
+  ],
+  "flags": {
+   "final": false
+  },
+  "externalIds": {
+   "icd10cm": "C69.2",
+   "wikidata": "Q500695"
+  },
+  "relations": [
+   {
+    "type": "ANATOMY",
+    "targetSlug": "wikidata-anatomia-q169342",
+    "provenance": "wikidata:P927 Q18556412→Q169342 (CIE-10 = C69.2; Wikidata = Q169342)",
+    "targetId": "16dc5287-baa0-43f7-af4e-92507b8625ee",
+    "targetName": "Retina"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "medlineplus-es-3954",
+    "provenance": "wikidata:P923 Q500695→Q161238 (CIE-10 = C69.2; MeSH = D008279)",
+    "targetId": "7cba43c0-cf95-4c94-aa23-50d445a12994",
+    "targetName": "Imágenes por resonancia magnética"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "wikidata-prueba-q234904",
+    "provenance": "wikidata:P923 Q500695→Q234904 (CIE-10 = C69.2; Wikidata = Q234904)",
+    "targetId": "30223207-4690-40a1-aab4-5f7adfb78cb8",
+    "targetName": "Ecografía"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-c69",
+    "provenance": "cie10es:jerarquía C69.2 ⊂ C69",
+    "targetId": "d02e88e1-1b96-4c61-a138-dfa0a5299b52",
+    "targetName": "Neoplasia maligna de ojo y sus anexos"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q161437",
+    "provenance": "wikidata:P1995 Q18556413→Q161437 (CIE-10 = C69.2; Wikidata = Q161437)",
+    "targetId": "4361b7dc-1baa-4a4a-a47f-edee19b706c6",
+    "targetName": "Oftalmología"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q162555",
+    "provenance": "wikidata:P1995 Q18556412→Q162555 (CIE-10 = C69.2; Wikidata = Q162555)",
+    "targetId": "6d5f41bc-fc7e-4588-ab06-fb4c31bd9fc4",
+    "targetName": "Oncología"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-h50-8",
+    "provenance": "wikidata:P780 Q500695→Q179951 (CIE-10 = C69.2; CIE-10 = H50.8)",
+    "targetId": "71c90cf9-6ddd-4b7d-a535-cda4bd7a0046",
+    "targetName": "Otros estrabismos especificados"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "wikidata-sintoma-q1862805",
+    "provenance": "wikidata:P780 Q500695→Q1862805 (CIE-10 = C69.2; Wikidata = Q1862805)",
+    "targetId": "0a85fa7d-248a-4a53-aac3-ef7677ba3a00",
+    "targetName": "Leucocoria"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "wikidata-sintoma-q7885682",
+    "provenance": "wikidata:P780 Q500695→Q7885682 (CIE-10 = C69.2; Wikidata = Q7885682)",
+    "targetId": "7755b43d-dbc3-4da9-af24-410c0f4ffc76",
+    "targetName": "Glaucoma neovascular"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-74470007",
+    "provenance": "wikidata:P2176 Q18556413→Q408524 (CIE-10 = C69.2; ATC = L01AA01)",
+    "targetId": "ec434bf1-9971-4363-a598-15921cd36584",
+    "targetName": "Ciclofosfamida"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-medicamento-q186127",
+    "provenance": "wikidata:P2176 Q18556413→Q186127 (CIE-10 = C69.2; Wikidata = Q186127)",
+    "targetId": "6b07cab3-c132-4961-a724-050e3f61da24",
+    "targetName": "Actinomicina"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Retinoblastoma.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Retinoblastoma.jpg/330px-Retinoblastoma.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "http://visualsonline.cancer.gov/details.cfm?imageid=2418 · Public domain · vía Wikimedia Commons",
+  "imageLicense": "Public domain",
+  "imageLicenseUrl": null,
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Retinoblastoma.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": null,
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Retinoblastoma.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Retinoblastoma.jpg/330px-Retinoblastoma.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "http://visualsonline.cancer.gov/details.cfm?imageid=2418 · Public domain · vía Wikimedia Commons",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Retinoblastoma.jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q500695",
+    "matchProperty": "P4229 (ICD-10-CM) = C69.2"
+   }
+  ],
+  "imageMatch": "P4229 (ICD-10-CM) = C69.2",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "dbdf3da2-2550-4c06-a558-a2a456322a08"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-j18",
+  "code": "J18",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Neumonía, microorganismo no especificado",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "tagKeys": [
+   "respiratory"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.10",
+    "display": "ENFERMEDADES DEL APARATO RESPIRATORIO (J00-J99)"
+   },
+   {
+    "code": "J09-J18",
+    "display": "GRIPE Y NEUMONÍA (J09-J18)"
+   }
+  ],
+  "flags": {
+   "final": false
+  },
+  "externalIds": {
+   "icd10cm": "J18"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18-0",
+    "provenance": "cie10es:jerarquía J18.0 ⊂ J18",
+    "targetId": "9e81af17-10f5-46c3-a2a9-4a8cbec8320a",
+    "targetName": "Bronconeumonía, microorganismo no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18-1",
+    "provenance": "cie10es:jerarquía J18.1 ⊂ J18",
+    "targetId": "9d81ad84-8fd8-48fe-a28c-7bfa2ae1b662",
+    "targetName": "Neumonía lobar, microorganismo no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18-2",
+    "provenance": "cie10es:jerarquía J18.2 ⊂ J18",
+    "targetId": "a081b23d-0ebb-4b39-ae70-709c9afb4106",
+    "targetName": "Neumonía hipostática, microorganismo no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18-8",
+    "provenance": "cie10es:jerarquía J18.8 ⊂ J18",
+    "targetId": "9681a27f-19da-44eb-a38c-b24c4dfbf61a",
+    "targetName": "Otros tipos de neumonía, microorganismo no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18-9",
+    "provenance": "cie10es:jerarquía J18.9 ⊂ J18",
+    "targetId": "9581a0ec-98bd-4726-a36f-e3baba157a72",
+    "targetName": "Neumonía, microorganismo no especificado"
+   }
+  ],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "2a9a63e2-0cd7-43c6-a589-2c2404e2b408"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-j18-9",
+  "code": "J18.9",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Neumonía, microorganismo no especificado",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "¿Qué es la neumonía?\n\nLa neumonía es una infección en uno o ambos pulmones. Causa que los alvéolos pulmonares se llenen de líquido o pus. Puede variar de leve a grave, dependiendo de la causa de la infección, su edad y su estado general de salud.\n\n¿Qué causa la neumonía?\n\nLas infecciones bacterianas, virales y fúngicas pueden causar neumonía.\n\nLas bacterias son la causa más común. La neumonía bacteriana puede ocurrir por sí sola. También puede desarrollarse después de haber tenido ciertas infecciones virales, como resfríos o gripe. Varios tipos diferentes de bacterias pueden causar neumonía, incluyendo:\n\n• Streotococcus pneumoniae\n\n• Legionella pneumophila: Este tipo de neumonía a menudo se llama enfermedad del legionario\n\n• Mycoplasma pneumoniae\n\n• Chlamydia pneumoniae\n\n• Haemophilus influenzae tipo b (hib)\n\nLos virus que infectan las vías respiratorias pueden causar neumonía. A menudo, la neumonía viral es leve y desaparece por sí sola en pocas semanas. Pero en ocasiones es lo suficientemente grave como para necesitar tratamiento en un hospital. Si tiene neumonía viral, corre el riesgo de contraer también neumonía bacteriana. Los diferentes virus que pueden causar neumonía incluyen:\n\n• Virus respiratorio sincitial\n\n• Algunos virus del resfrío común y la gripe\n\n• SARS-CoV-2, el virus que causa COVID-19\n\nLa neumonía fúngica es más común en personas con problemas de salud crónicos o sistemas inmunitarios debilitados. Algunos de los tipos incluyen:\n\n• Neumonía por Pneumocystis\n\n• Fiebre del valle (coccidioidomicosis)\n\n• Histoplasmosis\n\n• Neumonía criptocócica\n\nLa aspiración también puede causar neumonía. Puede ocurrir cuando aspira (inhala accidentalmente) alimentos o líquidos hacia los pulmones. Si no puede expulsar la comida o el líquido, puede causar una infección.\n\n¿Quién tiene más probabilidades de tener neumonía?\n\nCualquier persona puede tener neumonía, pero ciertos factores pueden aumentar su riesgo:\n\n• Su edad: El riesgo es mayor para los niños menores de 2 años y los adultos mayores de 65 años\n\n• Exposición a ciertos químicos, contaminantes o humos tóxicos\n\n• Estilo de vida: Como fumar, consumo excesivo de alcohol y desnutrición\n\n• Estar en un hospital, especialmente si está en la UCI. Estar sedado y / o conectado a un ventilador aumenta aún más el riesgo\n\n• Tener una enfermedad pulmonar\n\n• Tener un sistema inmunitario debilitado\n\n• Tener problemas para toser o tragar, por un derrame cerebral u otra afección\n\n• Haberse enfermado recientemente con un resfriado o gripe\n\n• Otras afecciones de salud crónicas (de larga duración), como diabetes, insuficiencia cardíaca, anemia falciforme, enfermedad hepática y renal\n\n¿Cuáles son los síntomas de la neumonía?\n\nLos síntomas de la neumonía pueden variar de leves a graves e incluyen:\n\n• Fiebre\n\n• Escalofríos\n\n• Tos, generalmente con flema ((un tipo de mucosidad espesa que se produce en los pulmones)\n\n• Dificultad para respirar\n\n• Dolor en el pecho cuando respira o tose\n\n• Náuseas y / o vómitos\n\n• Diarrea\n\nLos síntomas pueden variar para diferentes grupos. Los recién nacidos y los bebés pueden no mostrar ningún signo de infección. Otros pueden vomitar y tener fiebre y tos. Pueden parecer enfermos, sin energía o estar inquietos.\n\nLos adultos mayores y las personas con enfermedades graves o sistemas inmunitarios débiles pueden tener síntomas menores y más leves. Incluso pueden tener una temperatura inferior a la normal. En ocasiones, los adultos mayores que tienen neumonía pueden sentirse débiles o confundidos súbitamente.\n\n¿Qué otros problemas puede causar la neumonía?\n\nA veces, la neumonía puede causar complicaciones graves, como:\n\n• Bacteriemia: Ocurre cuando las bacterias entran al torrente sanguíneo. Es grave y puede provocar un shock séptico\n\n• Abscesos pulmonares: Acumulaciones de pus en las cavidades de los pulmones\n\n• Trastornos pleurales: Afecciones que afectan la pleura, el tejido que cubre el exterior de los pulmones y recubre el interior de la cavidad torácica\n\n• Insuficiencia renal\n\n• Insuficiencia respiratoria\n\n¿Cómo se diagnostica la neumonía?\n\nEn ocasiones, la neumonía puede ser difícil de diagnosticar porque puede causar algunos de los mismos síntomas que un resfriado o gripe. Puede llevarle tiempo darse cuenta de que tiene una afección más grave.\n\nPara saber si tiene neumonía, su profesional de la salud:\n\n• Analizará su historia clínica, incluyendo preguntas sobre sus síntomas\n\n• Realizará un examen físico, que incluye escuchar sus pulmones con un estetoscopio\n\n• Puede solicitar varias pruebas, incluyendo:\n\n• Radiografía de tórax\n\n• Exámenes de sangre como un conteo sanguíneo completo para ver si su sistema inmunitario está combatiendo activamente una infección\n\n• Un hemocultivo para determinar si tiene una infección bacteriana que se ha diseminado al torrente sanguíneo\n\nSi está en el hospital, tiene síntomas graves, es adulto mayor o tiene otros problemas de salud, también es posible que le hagan más pruebas, como:\n\n• Prueba de esputo: Busca bacterias en una muestra de su esputo (saliva) o flema (mucosidad que se expulsa de los pulmones al toser)\n\n• Tomografía computarizada del tórax para ver cuánto de sus pulmones están afectados. También puede mostrar si tiene complicaciones como abscesos pulmonares o derrames pleurales (acumulación de líquido en el espacio pleural)\n\n• Cultivo de líquido pleural: Busca bacterias en una muestra de líquido que se tomó del espacio pleural\n\n• Oximetría de pulso o prueba de nivel de oxígeno en la sangre: Busca verificar cuánto oxígeno hay en su sangre\n\n• Broncoscopia: Procedimiento que se utiliza para observar el interior de las vías respiratorias de los pulmones\n\n¿Cuáles son los tratamientos para la neumonía?\n\nEl tratamiento para la neumonía depende del tipo de neumonía, qué germen la causa y qué tan grave es:\n\n• Los antibióticos tratan la neumonía bacteriana y algunos tipos de neumonía por neumococo. No funcionan para la neumonía viral\n\n• En algunos casos, su profesional de la salud puede recetarle medicamentos antivirales para la neumonía viral\n\n• Los medicamentos antimicóticos tratan otros tipos de neumonía fúngica\n\nEs posible que deba ser tratado en un hospital si sus síntomas son graves o si está en riesgo de complicaciones. Mientras esté allí, puede recibir tratamientos adicionales. Por ejemplo, puede recibir oxigenoterapia si su nivel de oxígeno en la sangre es bajo.\n\nPuede tomar tiempo recuperarse de la neumonía. Algunas personas se sienten mejor en una semana. Para otras puede tomar un mes o más.\n\n¿Se puede prevenir la neumonía?\n\nLas vacunas pueden ayudar a prevenir la neumonía por neumococo o el virus de la gripe. Lavarse las manos frecuentemente, no fumar y tener un estilo de vida saludable también puede ayudar a prevenirla.\n\nNIH: Instituto Nacional del Corazón, los Pulmones y la Sangre",
+  "definitionSource": {
+   "name": "MedlinePlus en español — «Neumonía» — «Neumonía», el mismo concepto según Wikidata Q12192",
+   "url": "https://medlineplus.gov/spanish/pneumonia.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "enfermedad del sistema respiratorio",
+  "tagKeys": [
+   "respiratory"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.10",
+    "display": "ENFERMEDADES DEL APARATO RESPIRATORIO (J00-J99)"
+   },
+   {
+    "code": "J09-J18",
+    "display": "GRIPE Y NEUMONÍA (J09-J18)"
+   },
+   {
+    "code": "J18",
+    "display": "Neumonía, microorganismo no especificado"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "J18.9",
+   "wikidata": "Q12192"
+  },
+  "relations": [
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "medlineplus-es-3952",
+    "provenance": "wikidata:P923 Q12192→Q32566 (CIE-10 = J18.9; MeSH = D014057)",
+    "targetId": "82ba4d32-cd5b-410a-a1eb-3a1825d43edc",
+    "targetName": "Tomografía computarizada"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "wikidata-prueba-q1283318",
+    "provenance": "wikidata:P923 Q12192→Q1283318 (CIE-10 = J18.9; Wikidata = Q1283318)",
+    "targetId": "f2eec53f-6262-43c7-ad4c-36687b765576",
+    "targetName": "Radiografía de tórax"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "wikidata-prueba-q7581635",
+    "provenance": "wikidata:P923 Q12192→Q7581635 (CIE-10 = J18.9; Wikidata = Q7581635)",
+    "targetId": "2af16d3e-2ce9-468e-a025-5110266becac",
+    "targetName": "Cultivo de esputo"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a21",
+    "provenance": "wikidata:P780 Q153861→Q12192 (CIE-10 = A21; CIE-10 = J18.9)",
+    "targetId": "3548de37-5477-4a7f-a84a-e328d14080a6",
+    "targetName": "Tularemia"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a28-0",
+    "provenance": "wikidata:P780 Q2589418→Q12192 (CIE-10 = A28.0; CIE-10 = J18.9)",
+    "targetId": "334ecbf9-5b8f-41a7-a21a-14ce47d44810",
+    "targetName": "Pasteurelosis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a48-1",
+    "provenance": "wikidata:P780 Q154882→Q12192 (CIE-10 = A48.1; CIE-10 = J18.9)",
+    "targetId": "498423dc-5f5b-4c6c-a65c-34109e9dc708",
+    "targetName": "Enfermedad de los legionarios"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a96-2",
+    "provenance": "wikidata:P780 Q706845→Q12192 (CIE-10 = A96.2; CIE-10 = J18.9)",
+    "targetId": "9ab911e2-1110-4e98-ad79-88f6bccf59fa",
+    "targetName": "Fiebre de Lassa"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-b44-1",
+    "provenance": "wikidata:P780 Q3625278→Q12192 (CIE-10 = B44.1; CIE-10 = J18.9)",
+    "targetId": "10e0d041-a947-48cf-a480-d0ae4ea1f600",
+    "targetName": "Otras aspergilosis pulmonares"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-b66-4",
+    "provenance": "wikidata:P780 Q2528129→Q12192 (CIE-10 = B66.4; CIE-10 = J18.9)",
+    "targetId": "181e13b2-766e-4e66-a213-00f4f5769878",
+    "targetName": "Paragonimiasis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-e84",
+    "provenance": "wikidata:P780 Q178194→Q12192 (CIE-10 = E84; CIE-10 = J18.9)",
+    "targetId": "e7ad1e7e-ea16-48e0-a80d-0a227329055e",
+    "targetName": "Fibrosis quística"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j09",
+    "provenance": "wikidata:P780 Q43987→Q12192 (CIE-10 = J09; CIE-10 = J18.9)",
+    "targetId": "9f9d5aa8-e843-434a-ac51-cda20c1e6292",
+    "targetName": "Gripe debida a virus de la gripe identificados"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j12-9",
+    "provenance": "wikidata:P780 Q2603200→Q12192 (CIE-10 = J12.9; CIE-10 = J18.9)",
+    "targetId": "1f7436e6-29ed-4d74-a900-a34ee8420b9a",
+    "targetName": "Neumonía vírica, no especificada"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j15-9",
+    "provenance": "wikidata:P780 Q3776920→Q12192 (CIE-10 = J15.9; CIE-10 = J18.9)",
+    "targetId": "369d1587-f09f-4bdf-ada4-e73831311f56",
+    "targetName": "Neumonía bacteriana no especificada"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j18-0",
+    "provenance": "wikidata:P780 Q734512→Q12192 (CIE-10 = J18.0; CIE-10 = J18.9)",
+    "targetId": "9e81af17-10f5-46c3-a2a9-4a8cbec8320a",
+    "targetName": "Bronconeumonía, microorganismo no especificado"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j69-0",
+    "provenance": "wikidata:P780 Q2979344→Q12192 (CIE-10 = J69.0; CIE-10 = J18.9)",
+    "targetId": "9e62e25f-98f3-47c1-a6ec-8142c6877630",
+    "targetName": "Neumonitis debida a inhalación de alimentos y vómito"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-j18",
+    "provenance": "cie10es:jerarquía J18.9 ⊂ J18",
+    "targetId": "2a9a63e2-0cd7-43c6-a589-2c2404e2b408",
+    "targetName": "Neumonía, microorganismo no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "medlineplus-es-2094",
+    "provenance": "wikidata:identidad Q12192 (CIE-10 = J18.9; MeSH = D011014)",
+    "targetId": "a819dbfa-7f85-449c-aaa7-77e21ffcfa56",
+    "targetName": "Neumonía"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q203337",
+    "provenance": "wikidata:P1995 Q12192→Q203337 (CIE-10 = J18.9; Wikidata = Q203337)",
+    "targetId": "4fc341b2-3860-4e36-a105-b2c40e2fe348",
+    "targetName": "Neumología"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q788926",
+    "provenance": "wikidata:P1995 Q12192→Q788926 (CIE-10 = J18.9; Wikidata = Q788926)",
+    "targetId": "d220900c-3ff5-4a3e-a1e6-ebb2116dae2a",
+    "targetName": "Infectología"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-r04-2",
+    "provenance": "wikidata:P780 Q12192→Q647099 (CIE-10 = J18.9; CIE-10 = R04.2)",
+    "targetId": "ddfaf9c4-a394-40e4-a4f8-7fa0bad348e8",
+    "targetName": "Hemoptisis"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-r06-0",
+    "provenance": "wikidata:P780 Q12192→Q188008 (CIE-10 = J18.9; CIE-10 = R06.0)",
+    "targetId": "9d025510-7f97-4d24-a2df-7a14160c5474",
+    "targetName": "Disnea"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-r06-5",
+    "provenance": "wikidata:P780 Q12192→Q205835 (CIE-10 = J18.9; CIE-10 = R06.5)",
+    "targetId": "a2025cef-fc41-43d5-aa8a-94c66258ee14",
+    "targetName": "Respiración por la boca"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-r50",
+    "provenance": "wikidata:P780 Q12192→Q38933 (CIE-10 = J18.9; CIE-10 = R50)",
+    "targetId": "8278f376-5d18-48f2-a9be-743cb1217b88",
+    "targetName": "Fiebre de otro origen y de origen desconocido"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "medlineplus-es-1839",
+    "provenance": "wikidata:P780 Q12192→Q35805 (CIE-10 = J18.9; MeSH = D003371)",
+    "targetId": "3cea6ad4-d83f-4d1c-a8a2-0cc8991b59b0",
+    "targetName": "Tos"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "wikidata-sintoma-q2260058",
+    "provenance": "wikidata:P780 Q12192→Q2260058 (CIE-10 = J18.9; Wikidata = Q2260058)",
+    "targetId": "7a404e1a-d216-4368-afe0-188e6dc12802",
+    "targetName": "Escalofrío"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-10504007",
+    "provenance": "wikidata:P2176 Q12192→Q422442 (CIE-10 = J18.9; ATC = A01AB22)",
+    "targetId": "a509853f-7ee4-401f-ab0c-12c0123d774e",
+    "targetName": "Doxiciclina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-1222004",
+    "provenance": "wikidata:P2176 Q12192→Q169569 (CIE-10 = J18.9; ATC = D06BX01)",
+    "targetId": "5af88cc3-1675-4b2f-aa8e-16ccd8be4ae2",
+    "targetName": "Metronidazol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-125695009",
+    "provenance": "wikidata:P2176 Q12192→Q411377 (CIE-10 = J18.9; ATC = J01XX08)",
+    "targetId": "462cba77-edfe-4d61-ad69-81ca141a7de8",
+    "targetName": "Linezolid"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-19841008",
+    "provenance": "wikidata:P2176 Q12192→Q421713 (CIE-10 = J18.9; ATC = J01DD04)",
+    "targetId": "e2d2b281-60ac-4f0d-a82f-ecac4e43f25e",
+    "targetName": "Ceftriaxona"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-370371004",
+    "provenance": "wikidata:P2176 Q12192→Q2552927 (CIE-10 = J18.9; ATC = J01DE01)",
+    "targetId": "021ee0c7-e577-4b71-a734-d38a3f103348",
+    "targetName": "Cefepima"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-371296007",
+    "provenance": "wikidata:P2176 Q12192→Q424940 (CIE-10 = J18.9; ATC = J01MA14)",
+    "targetId": "4b03aaad-7e1c-471b-a38e-620eaaebd378",
+    "targetName": "Moxifloxacino"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-386116008",
+    "provenance": "wikidata:P2176 Q12192→Q412236 (CIE-10 = J18.9; ATC = J02AC03)",
+    "targetId": "ba1b576d-e9a2-45af-a2f2-3be23de8580c",
+    "targetName": "Voriconazol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-407730002",
+    "provenance": "wikidata:P2176 Q12192→Q424316 (CIE-10 = J18.9; ATC = R03BB04)",
+    "targetId": "443ebb03-9f97-4551-a330-6aaedd52d564",
+    "targetName": "Tiotropio"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-413717007",
+    "provenance": "wikidata:P2176 Q12192→Q863389 (CIE-10 = J18.9; ATC = R03AK07)",
+    "targetId": "3f5df950-edfe-4530-aa5f-85e00d41a180",
+    "targetName": "Budesonida + formoterol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-418631002",
+    "provenance": "wikidata:P2176 Q12192→Q420595 (CIE-10 = J18.9; ATC = J01AA12)",
+    "targetId": "46ca8333-8f5b-4543-a1e1-2870cbda1ca6",
+    "targetName": "Tigeciclina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-42082003",
+    "provenance": "wikidata:P2176 Q12192→Q424027 (CIE-10 = J18.9; ATC = A07AA09)",
+    "targetId": "ca9b683b-c15a-4307-aa2b-b22ca196abb2",
+    "targetName": "Vancomicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-73986003",
+    "provenance": "wikidata:P2176 Q12192→Q413728 (CIE-10 = J18.9; ATC = J01DC02)",
+    "targetId": "6a64fc8a-9c17-440c-ae51-f8c2c7f2a156",
+    "targetName": "Cefuroxima"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-7577004",
+    "provenance": "wikidata:P2176 Q12192→Q256602 (CIE-10 = J18.9; ATC = J01MA02)",
+    "targetId": "283f965c-2647-4452-a5fb-1976b305bfce",
+    "targetName": "Ciprofloxacino"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-77731008",
+    "provenance": "wikidata:P2176 Q12192→Q375613 (CIE-10 = J18.9; ATC = R05CB01)",
+    "targetId": "77f95467-6849-4e99-af7b-271264e22c90",
+    "targetName": "Acetilcisteína"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-83999008",
+    "provenance": "wikidata:P2176 Q12192→Q118551 (CIE-10 = J18.9; ATC = J01FA09)",
+    "targetId": "f237c824-1eeb-4586-a3ac-e1e2ffddc60a",
+    "targetName": "Claritromicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-89695009",
+    "provenance": "wikidata:P2176 Q12192→Q1758380 (CIE-10 = J18.9; ATC = J01GB01)",
+    "targetId": "73242cb6-2bdf-4f0a-ad40-c9145cf97c60",
+    "targetName": "Tobramicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-91143003",
+    "provenance": "wikidata:P2176 Q12192→Q410358 (CIE-10 = J18.9; ATC = R03AC02)",
+    "targetId": "143ef787-a993-4c19-ad33-657257092530",
+    "targetName": "Salbutamol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-96034006",
+    "provenance": "wikidata:P2176 Q12192→Q165399 (CIE-10 = J18.9; ATC = J01FA10)",
+    "targetId": "aa38b316-7a1a-460e-a6f8-05b8c5f86a04",
+    "targetName": "Azitromicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "medlineplus-es-1750",
+    "provenance": "wikidata:P2176 Q12192→Q12187 (CIE-10 = J18.9; MeSH = D000900)",
+    "targetId": "5f7ef76c-cc7b-4a0c-acdb-9020f3b43238",
+    "targetName": "Antibióticos"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "medlineplus-es-5335",
+    "provenance": "wikidata:P2176 Q12192→Q1988216 (CIE-10 = J18.9; MeSH = D010102)",
+    "targetId": "c7eab8a9-5f9b-48e3-a507-a55a213a8fbc",
+    "targetName": "Terapia con oxígeno"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-tratamiento-q846227",
+    "provenance": "wikidata:P2176 Q12192→Q846227 (CIE-10 = J18.9; Wikidata = Q846227)",
+    "targetId": "cec4e75b-0b83-459f-a55b-29a4927a66ea",
+    "targetName": "Antiviral"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg/330px-Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Yale Rosen from USA · CC BY-SA 2.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY-SA 2.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Pneumonia,_mixed_patterns,_lobar_and_bronchopneumonia_(3679096639).jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "enfermedad del sistema respiratorio",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg/330px-Pneumonia%2C_mixed_patterns%2C_lobar_and_bronchopneumonia_%283679096639%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Yale Rosen from USA · CC BY-SA 2.0 · vía Wikimedia Commons",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Pneumonia,_mixed_patterns,_lobar_and_bronchopneumonia_(3679096639).jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q12192",
+    "matchProperty": "P494 (CIE-10 (OMS)) = J18.9"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q12192 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q12192",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P494 (CIE-10 (OMS)) = J18.9",
+  "definitionKind": "same-concept-medlineplus",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "9581a0ec-98bd-4726-a36f-e3baba157a72"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-d70",
+  "code": "D70",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Neutropenia",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "concentración anormalmente baja de neutrófilos en la sangre",
+  "tagKeys": [
+   "hematologic"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.03",
+    "display": "ENFERMEDADES DE LA SANGRE Y ÓRGANOS HEMATOPOYÉTICOS Y CIERTOS TRASTORNOS QUE AFECTAN AL MECANISMO INMUNOLÓGICO (D50-D89)"
+   },
+   {
+    "code": "D70-D77",
+    "display": "OTROS TRASTORNOS DE LA SANGRE Y DE LOS ÓRGANOS HEMATOPOYÉTICOS (D70-D77)"
+   }
+  ],
+  "flags": {
+   "final": false
+  },
+  "externalIds": {
+   "icd10cm": "D70",
+   "wikidata": "Q1435822"
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-d82-8",
+    "provenance": "wikidata:P780 Q26492775→Q1435822 (CIE-10 = D82.8; CIE-10 = D70)",
+    "targetId": "2ca58d7a-6108-4dbe-a914-5f849e31a718",
+    "targetName": "Inmunodeficiencia asociada con otros defectos mayores especificados"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-e71-1",
+    "provenance": "wikidata:P780 Q928424→Q1435822 (CIE-10 = E71.1; CIE-10 = D70)",
+    "targetId": "59b2cc9c-f313-4ac6-afba-41aa7dfdf3c2",
+    "targetName": "Otros trastornos del metabolismo de aminoácidos de cadena ramificada"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-0",
+    "provenance": "cie10es:jerarquía D70.0 ⊂ D70",
+    "targetId": "b649c907-4d4f-4453-a03e-ac2cd88e628a",
+    "targetName": "Agranulocitosis congénita"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-1",
+    "provenance": "cie10es:jerarquía D70.1 ⊂ D70",
+    "targetId": "b549c774-cc32-468e-a021-dd9a44a7e6e2",
+    "targetName": "Agranulocitosis secundaria a quimioterapia antineoplásica"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-2",
+    "provenance": "cie10es:jerarquía D70.2 ⊂ D70",
+    "targetId": "b849cc2d-4b16-48c9-ac05-d23cb4c17186",
+    "targetName": "Otras agranulocitosis inducidas por fármacos"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-3",
+    "provenance": "cie10es:jerarquía D70.3 ⊂ D70",
+    "targetId": "b749ca9a-c9f9-4b04-abe9-03aa20daf5de",
+    "targetName": "Neutropenia debida a infección"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-4",
+    "provenance": "cie10es:jerarquía D70.4 ⊂ D70",
+    "targetId": "b249c2bb-48dc-4d3f-afcb-71e488f473ea",
+    "targetName": "Neutropenia cíclica"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-8",
+    "provenance": "cie10es:jerarquía D70.8 ⊂ D70",
+    "targetId": "ae49bc6f-5634-427b-a122-13ec67c2269a",
+    "targetName": "Otras neutropenias"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-d70-9",
+    "provenance": "cie10es:jerarquía D70.9 ⊂ D70",
+    "targetId": "ad49badc-d517-44b6-a105-455ad3dbaaf2",
+    "targetName": "Neutropenia, no especificada"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q103824",
+    "provenance": "wikidata:P1995 Q1337441→Q103824 (CIE-10 = D70; Wikidata = Q103824)",
+    "targetId": "9ddb8e54-680a-474c-a5a0-637886882a60",
+    "targetName": "Hematología"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-108965009",
+    "provenance": "wikidata:P2176 Q1435822→Q3151081 (CIE-10 = D70; ATC = L03AA02)",
+    "targetId": "5a1adc30-f4ac-4406-aded-8dd699960096",
+    "targetName": "Filgrastim"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-354049008",
+    "provenance": "wikidata:P2176 Q1435822→Q412223 (CIE-10 = D70; ATC = J02AA01)",
+    "targetId": "65ec6453-82d7-48df-aa77-ceec163e9b22",
+    "targetName": "Amfotericina B"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-36893000",
+    "provenance": "wikidata:P2176 Q1435822→Q808845 (CIE-10 = D70; ATC = J01DD02)",
+    "targetId": "1cfaa2ab-40cd-44a7-a327-575c6aa291c2",
+    "targetName": "Ceftazidima"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-370371004",
+    "provenance": "wikidata:P2176 Q1435822→Q2552927 (CIE-10 = D70; ATC = J01DE01)",
+    "targetId": "021ee0c7-e577-4b71-a734-d38a3f103348",
+    "targetName": "Cefepima"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-388379009",
+    "provenance": "wikidata:P2176 Q1435822→Q1592932 (CIE-10 = D70; ATC = L03AA13)",
+    "targetId": "2f431eab-0591-4767-aeb2-4e1c8dee2c82",
+    "targetName": "Pegfilgrastim"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-42082003",
+    "provenance": "wikidata:P2176 Q1435822→Q424027 (CIE-10 = D70; ATC = A07AA09)",
+    "targetId": "ca9b683b-c15a-4307-aa2b-b22ca196abb2",
+    "targetName": "Vancomicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-7577004",
+    "provenance": "wikidata:P2176 Q1435822→Q256602 (CIE-10 = D70; ATC = J01MA02)",
+    "targetId": "283f965c-2647-4452-a5fb-1976b305bfce",
+    "targetName": "Ciprofloxacino"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-96038009",
+    "provenance": "wikidata:P2176 Q1435822→Q411229 (CIE-10 = D70; ATC = J02AC02)",
+    "targetId": "2d713c9b-d126-4399-a1dc-7a5e10f999c4",
+    "targetName": "Itraconazol"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Neutropenia.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Neutropenia.JPG/330px-Neutropenia.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Roberto J. Galindo · CC BY-SA 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY-SA 3.0",
+  "imageLicenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Neutropenia.JPG",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "concentración anormalmente baja de neutrófilos en la sangre",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Neutropenia.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Neutropenia.JPG/330px-Neutropenia.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Roberto J. Galindo · CC BY-SA 3.0 · vía Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Neutropenia.JPG",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q1435822",
+    "matchProperty": "P4229 (ICD-10-CM) = D70"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q1435822 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q1435822",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P4229 (ICD-10-CM) = D70",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "c9667cf2-61a6-4676-a50f-57c445701ac8"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-o03",
+  "code": "O03",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Aborto espontáneo",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "¿Qué es la pérdida del embarazo o aborto espontáneo?\n\nLa pérdida del embarazo, también llamada aborto espontáneo, es la que sucede antes de la semana 20 del embarazo. La mayoría de los abortos espontáneos ocurren muy temprano en el embarazo, a menudo antes de que la mujer sepa que está embarazada.\n\n¿Qué causa la pérdida del embarazo o aborto espontáneo?\n\nUn aborto espontáneo puede ocurrir en cualquier embarazo. La mayoría ocurre porque el feto no se desarrolla correctamente. Esto por lo general se relaciona con problemas genéticos del feto, como la falta o el exceso de un cromosoma.\n\nEn muchos casos se desconoce qué causa la pérdida del embarazo. Algunos de los factores que podrían aumentar el riesgo de un aborto espontáneo incluyen:\n\n• Problemas con el útero o el cuello uterino\n\n• Enfermedades crónicas, incluyendo el síndrome de ovario poliquístico\n\n• Problemas genéticos del feto\n\n• Embarazarse luego de los 35 años\n\n• El uso de cigarrillos, drogas o alcohol\n\n• Ciertas condiciones de salud crónicas (de larga duración), como una diabetes no controlada\n\n• Desnutrición severa\n\n¿Cuáles son las señales de una pérdida del embarazo o aborto espontáneo?\n\nLas señales de una pérdida del embarazo son diferentes en cada caso y pueden variar según que avanzada esté la gestación.\n\nLas señales incluyen:\n\n• Manchado o sangrado vaginal con o sin dolor. Algunas mujeres pueden presentar manchado en las fases tempranas del embarazo y no tener un aborto espontáneo. Para asegurarse, contacte a su proveedor de servicios de salud de inmediato en caso de sangrado\n\n• Flujo vaginal de color oscuro\n\n• Un chorro de fluido o tejido que sale de la vagina\n\n• Calambres o dolores en el abdomen o la espalda baja\n\nEn ocasiones es difícil saber qué es normal durante el embarazo. Si algo le parece inusual o le preocupa, hable con su proveedor de servicios de salud.\n\n¿Cómo se diagnostica una pérdida del embarazo o aborto espontáneo?\n\nPara revisar si tiene un aborto espontáneo, su proveedor puede realizar lo siguiente:\n\n• Un examen pélvico para evaluar el cuello uterino\n\n• Pruebas de sangre para revisar factores como la cantidad de sangre pérdida y para confirmar el embarazo\n\n• Un ultrasonido para ver la condición del feto\n\n¿Cuál es el tratamiento para una pérdida del embarazo o aborto espontáneo?\n\nEl tratamiento para una pérdida del embarazo con frecuencia depende del momento de la gestación en el que ocurra. Si sucede en la fase temprana, puede que no requiera tratamiento. Si usted ya tiene 12 semanas o más de embarazo, podría necesitar una inyección para prevenir problemas con el factor Rh en el futuro.\n\nEn algunos casos, queda tejido en el útero. Si usted no tiene síntomas de infección, su proveedor puede recomendar esperar hasta que el tejido sea expulsado naturalmente. En caso de necesitar tratamiento para remover el tejido, éste puede incluir:\n\n• Medicinas\n\n• Un procedimiento llamado dilatación y curetaje o aspirado\n\nSin importar cuándo ocurra, un aborto espontáneo puede ser difícil. La asesoría psicológica puede serle de ayuda para enfrentar el duelo. Más adelante, si decide intentar embarazarse de nuevo, converse con su proveedor de atención médica para entender los riesgos. Muchas mujeres que tienen abortos espontáneos pueden tener embarazos saludables en el futuro.\n\n¿Se puede prevenir la pérdida del embarazo o aborto espontáneo?\n\nLas pérdidas del embarazo pueden afectar a cualquiera y con frecuencia no pueden prevenirse. Se recomienda concentrarse en el cuidado personal y comenzar las visitas prenatales temprano.\n\nNIH: Instituto Nacional de Salud Infantil y Desarrollo",
+  "definitionSource": {
+   "name": "MedlinePlus en español — «Pérdida del embarazo» — «Pérdida del embarazo», el mismo concepto según Wikidata Q28693",
+   "url": "https://medlineplus.gov/spanish/miscarriage.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "terminación prematura natural del embarazo",
+  "tagKeys": [
+   "gyn-ob"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.15",
+    "display": "EMBARAZO, PARTO Y PUERPERIO (O00-O9A)"
+   },
+   {
+    "code": "O00-O08",
+    "display": "EMBARAZO CON RESULTADO ABORTIVO (O00-O08)"
+   }
+  ],
+  "flags": {
+   "final": false
+  },
+  "externalIds": {
+   "icd10cm": "O03",
+   "wikidata": "Q28693"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-0",
+    "provenance": "cie10es:jerarquía O03.0 ⊂ O03",
+    "targetId": "3e153be0-a841-40b4-acd3-90d46a6b97d4",
+    "targetName": "Infección pélvica y del tracto genital después de un aborto espontáneo incompleto"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-1",
+    "provenance": "cie10es:jerarquía O03.1 ⊂ O03",
+    "targetId": "3f153d73-295d-4e79-acf0-5f66fe52137c",
+    "targetName": "Hemorragia tardía o excesiva después de un aborto espontáneo incompleto"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-2",
+    "provenance": "cie10es:jerarquía O03.2 ⊂ O03",
+    "targetId": "40153f06-aa7a-4c3e-ad0d-2df892388f24",
+    "targetName": "Embolia después de un aborto espontáneo incompleto"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-3",
+    "provenance": "cie10es:jerarquía O03.3 ⊂ O03",
+    "targetId": "41154099-2b97-4a03-ad29-fc8a261f0acc",
+    "targetName": "Otras complicaciones y complicaciones no especificadas después de un aborto espontáneo incompleto"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-4",
+    "provenance": "cie10es:jerarquía O03.4 ⊂ O03",
+    "targetId": "4215422c-a3ce-49a0-a461-dcf422d1b5cc",
+    "targetName": "Aborto espontáneo incompleto sin complicaciones"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-5",
+    "provenance": "cie10es:jerarquía O03.5 ⊂ O03",
+    "targetId": "431543bf-24eb-4765-a47e-ab86b6b83174",
+    "targetName": "Infección pélvica y del tracto genital después de un aborto espontáneo completo o no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-6",
+    "provenance": "cie10es:jerarquía O03.6 ⊂ O03",
+    "targetId": "44154552-a608-452a-a49b-7a184a9ead1c",
+    "targetName": "Hemorragia tardía o excesiva después de un aborto espontáneo completo o no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-7",
+    "provenance": "cie10es:jerarquía O03.7 ⊂ O03",
+    "targetId": "451546e5-2724-42ef-a4b8-48aade8528c4",
+    "targetName": "Embolia después de un aborto espontáneo completo o no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-8",
+    "provenance": "cie10es:jerarquía O03.8 ⊂ O03",
+    "targetId": "46154878-b126-4edc-adba-0564099f7514",
+    "targetName": "Otras complicaciones y complicaciones no especificadas después de un aborto espontáneo completo o no especificado"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-o03-9",
+    "provenance": "cie10es:jerarquía O03.9 ⊂ O03",
+    "targetId": "47154a0b-3242-4ca1-add6-d3f69d85f0bc",
+    "targetName": "Aborto espontáneo completo o no especificado sin complicación"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "medlineplus-es-2105",
+    "provenance": "wikidata:identidad Q28693 (CIE-10 = O03; MeSH = D000022)",
+    "targetId": "3871444b-f6ff-4ead-acb7-03c29f6cedc8",
+    "targetName": "Pérdida del embarazo"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+  "imageAttribution": "Mikael Häggström.\n\nWhen using this image in external works, it may be cited as:\n\n• Häggström, Mikael (2014). \"Medical gallery of Mikael Häggström 2014\". WikiJournal of Medicine 1 (2). DOI:10.15347/wjm/2014.008. ISSN 2002-4436. Public Domain.\n\nor\n\n• By Mikael Häggström, used with permission. · CC0 · vía Wikimedia Commons",
+  "imageLicense": "CC0",
+  "imageLicenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Anembryonic_gestation.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "terminación prematura natural del embarazo",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    "attribution": "Mikael Häggström.\n\nWhen using this image in external works, it may be cited as:\n\n• Häggström, Mikael (2014). \"Medical gallery of Mikael Häggström 2014\". WikiJournal of Medicine 1 (2). DOI:10.15347/wjm/2014.008. ISSN 2002-4436. Public Domain.\n\nor\n\n• By Mikael Häggström, used with permission. · CC0 · vía Wikimedia Commons",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Anembryonic_gestation.jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q28693",
+    "matchProperty": "P494 (CIE-10 (OMS)) = O03"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q28693 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q28693",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P494 (CIE-10 (OMS)) = O03",
+  "definitionKind": "same-concept-medlineplus",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "f850d71d-4ca3-4e29-ae6d-caac0f3077d6"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-l83",
+  "code": "L83",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Acantosis nigricans",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "afección de la piel",
+  "tagKeys": [
+   "dermatologic"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.12",
+    "display": "ENFERMEDADES DE LA PIEL Y DEL TEJIDO SUBCUTÁNEO (L00-L99)"
+   },
+   {
+    "code": "L80-L99",
+    "display": "OTROS TRASTORNOS DE LA PIEL Y DEL TEJIDO SUBCUTÁNEO (L80-L99)"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "L83",
+   "wikidata": "Q415833"
+  },
+  "relations": [
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q171171",
+    "provenance": "wikidata:P1995 Q415833→Q171171 (CIE-10 = L83; Wikidata = Q171171)",
+    "targetId": "a1eb6742-4018-4f34-ab9a-2032e38df9b6",
+    "targetName": "Dermatología"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/Acanthosis-nigricans4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Acanthosis-nigricans4.jpg/330px-Acanthosis-nigricans4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Madhero88 · CC BY-SA 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY-SA 3.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Acanthosis-nigricans4.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "afección de la piel",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/df/Acanthosis-nigricans4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Acanthosis-nigricans4.jpg/330px-Acanthosis-nigricans4.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Madhero88 · CC BY-SA 3.0 · vía Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Acanthosis-nigricans4.jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q415833",
+    "matchProperty": "P4229 (ICD-10-CM) = L83"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q415833 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q415833",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P4229 (ICD-10-CM) = L83",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "3f406164-8629-452e-aef4-d04a27f9b972"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-q77-0",
+  "code": "Q77.0",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Acondrogénesis",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "tagKeys": [
+   "congenital"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.17",
+    "display": "MALFORMACIONES CONGÉNITAS, DEFORMIDADES Y ANOMALÍAS CROMOSÓMICAS (Q00-Q99)"
+   },
+   {
+    "code": "Q65-Q79",
+    "display": "MALFORMACIONES Y DEFORMIDADES CONGÉNITAS DEL APARATO MUSCULOESQUELÉTICO (Q65-Q79)"
+   },
+   {
+    "code": "Q77",
+    "display": "Osteocondrodisplasia con defectos del crecimiento de los huesos largos y de la columna vertebral"
+   }
+  ],
+  "flags": {
+   "final": true,
+   "poaExempt": true
+  },
+  "externalIds": {
+   "icd10cm": "Q77.0",
+   "wikidata": "Q2823145"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-q77",
+    "provenance": "cie10es:jerarquía Q77.0 ⊂ Q77",
+    "targetId": "71fbf0cc-1353-432c-a0d5-8be0ba8586b8",
+    "targetName": "Osteocondrodisplasia con defectos del crecimiento de los huesos largos y de la columna vertebral"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q1071953",
+    "provenance": "wikidata:P1995 Q2823145→Q1071953 (CIE-10 = Q77.0; Wikidata = Q1071953)",
+    "targetId": "c9a2aa64-1f81-40b8-aa34-22d4e13c369c",
+    "targetName": "Genética médica"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Achondrogenesis_type_I.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Achondrogenesis_type_I.jpg/330px-Achondrogenesis_type_I.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "see below · CC BY 2.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY 2.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Achondrogenesis_type_I.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": null,
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Achondrogenesis_type_I.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Achondrogenesis_type_I.jpg/330px-Achondrogenesis_type_I.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "see below · CC BY 2.0 · vía Wikimedia Commons",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Achondrogenesis_type_I.jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q2823145",
+    "matchProperty": "P4229 (ICD-10-CM) = Q77.0"
+   }
+  ],
+  "imageMatch": "P4229 (ICD-10-CM) = Q77.0",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "e8e2bab9-da91-4989-ae06-95f06c944cd2"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-e84",
+  "code": "E84",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Fibrosis quística",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "La fibrosis quística es una enfermedad hereditaria de las glándulas mucosas y sudoríparas. Afecta principalmente los pulmones, el páncreas, el hígado, los intestinos, los senos paranasales y los órganos sexuales. La fibrosis quística hace que la mucosidad sea espesa y pegajosa. Esta mucosidad tapa los pulmones, causando problemas para respirar y facilitando el crecimiento de bacterias. Esto puede provocar infecciones pulmonares repetidas y daños pulmonares.\n\nLos síntomas y la severidad de la fibrosis quística pueden variar. Algunas personas tienen problemas serios desde el nacimiento. Otras pueden tener un tipo más leve de la enfermedad que no se manifiesta hasta la adolescencia o al inicio de la edad adulta. A veces se tienen pocos síntomas, pero más tarde es posible tener más.\n\nLa fibrosis quística se diagnostica a través de varias pruebas, tales como genes, sangre y pruebas de sudor. No existe cura, pero los tratamientos han mejorado mucho en los últimos años. En el pasado, la mayoría de las muertes por fibrosis quística eran niños y adolescentes. Hoy en día, con la mejora de los tratamientos, algunas personas con fibrosis quística viven pasados los cuarenta, cincuenta años o más. Los tratamientos pueden incluir terapia física para el pecho, terapias nutricionales y respiratorias, medicinas y ejercicio.\n\nNIH: Instituto Nacional del Corazón, los Pulmones y la Sangre",
+  "definitionSource": {
+   "name": "MedlinePlus en español — «Fibrosis quística» — «Fibrosis quística», el mismo concepto según Wikidata Q178194",
+   "url": "https://medlineplus.gov/spanish/cysticfibrosis.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "enfermedad autosómica recesiva que afecta principalmente a los pulmones",
+  "tagKeys": [
+   "endocrine"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.04",
+    "display": "ENFERMEDADES ENDOCRINAS, NUTRICIONALES Y METABÓLICAS (E00-E89)"
+   },
+   {
+    "code": "E70-E88",
+    "display": "ALTERACIONES METABÓLICAS (E70-E88)"
+   }
+  ],
+  "flags": {
+   "final": false
+  },
+  "externalIds": {
+   "icd10cm": "E84",
+   "wikidata": "Q178194"
+  },
+  "relations": [
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "medlineplus-es-4752",
+    "provenance": "wikidata:P923 Q178194→Q835153 (CIE-10 = E84; MeSH = D010808)",
+    "targetId": "8707a793-b0e1-463b-aacf-31084607f17e",
+    "targetName": "Chequeo médico"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "wikidata-prueba-q1163564",
+    "provenance": "wikidata:P923 Q178194→Q1163564 (CIE-10 = E84; Wikidata = Q1163564)",
+    "targetId": "1b3fa647-b93e-45df-a5f3-487868602a16",
+    "targetName": "Cribado"
+   },
+   {
+    "type": "DIAGNOSTIC_TEST",
+    "targetSlug": "wikidata-prueba-q1528100",
+    "provenance": "wikidata:P923 Q178194→Q1528100 (CIE-10 = E84; Wikidata = Q1528100)",
+    "targetId": "3b887b8a-829d-4c92-a824-e248e805313c",
+    "targetName": "Test del sudor"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-e84-0",
+    "provenance": "cie10es:jerarquía E84.0 ⊂ E84",
+    "targetId": "051ae4db-f6f5-4c75-a537-02fa6b64f8a0",
+    "targetName": "Fibrosis quística con manifestaciones pulmonares"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-e84-1",
+    "provenance": "cie10es:jerarquía E84.1 ⊂ E84",
+    "targetId": "041ae348-75d8-4eb0-a51a-3468d77e7cf8",
+    "targetName": "Fibrosis quística con manifestaciones intestinales"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-e84-8",
+    "provenance": "cie10es:jerarquía E84.8 ⊂ E84",
+    "targetId": "fd1ad843-ffda-4a9d-a61a-6abafa98bcb0",
+    "targetName": "Fibrosis quística con otras manifestaciones"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-e84-9",
+    "provenance": "cie10es:jerarquía E84.9 ⊂ E84",
+    "targetId": "fc1ad6b0-7ebd-4cd8-a5fd-9c2866b24108",
+    "targetName": "Fibrosis quística, no especificada"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "medlineplus-es-1843",
+    "provenance": "wikidata:identidad Q178194 (CIE-10 = E84; MeSH = D003550)",
+    "targetId": "2ed90ba9-d366-4651-afae-ffc838a9070a",
+    "targetName": "Fibrosis quística"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "medlineplus-es-1815",
+    "provenance": "wikidata:P1995 Q178194→Q123028 (CIE-10 = E84; MeSH = D010372)",
+    "targetId": "c4e530be-a78e-4b12-af4f-1214e5560cf0",
+    "targetName": "Salud del niño"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q1071953",
+    "provenance": "wikidata:P1995 Q178194→Q1071953 (CIE-10 = E84; Wikidata = Q1071953)",
+    "targetId": "c9a2aa64-1f81-40b8-aa34-22d4e13c369c",
+    "targetName": "Genética médica"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q203337",
+    "provenance": "wikidata:P1995 Q178194→Q203337 (CIE-10 = E84; Wikidata = Q203337)",
+    "targetId": "4fc341b2-3860-4e36-a105-b2c40e2fe348",
+    "targetName": "Neumología"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-i50",
+    "provenance": "wikidata:P780 Q178194→Q181754 (CIE-10 = E84; CIE-10 = I50)",
+    "targetId": "852d1433-0252-41dd-a2c7-a40aaca263e0",
+    "targetName": "Insuficiencia cardiaca"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-j18-9",
+    "provenance": "wikidata:P780 Q178194→Q12192 (CIE-10 = E84; CIE-10 = J18.9)",
+    "targetId": "9581a0ec-98bd-4726-a36f-e3baba157a72",
+    "targetName": "Neumonía, microorganismo no especificado"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-j20",
+    "provenance": "wikidata:P780 Q178194→Q173022 (CIE-10 = E84; CIE-10 = J20)",
+    "targetId": "2c982871-959e-4c05-ac0b-d1b41c25d4c6",
+    "targetName": "Bronquitis aguda"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-j47",
+    "provenance": "wikidata:P780 Q178194→Q32778 (CIE-10 = E84; CIE-10 = J47)",
+    "targetId": "2da7348e-54c3-4110-ac03-3e42cea9269e",
+    "targetName": "Bronquiectasias"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-j84-1",
+    "provenance": "wikidata:P780 Q178194→Q32446 (CIE-10 = E84; CIE-10 = J84.1)",
+    "targetId": "a50331dd-0362-47b3-aec5-4176de88e4c0",
+    "targetName": "Otras enfermedades pulmonares intersticiales con fibrosis"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-j98-1",
+    "provenance": "wikidata:P780 Q178194→Q754031 (CIE-10 = E84; CIE-10 = J98.1)",
+    "targetId": "a739dedc-5de1-4656-ade3-a2fae335ea92",
+    "targetName": "Colapso pulmonar"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-k27",
+    "provenance": "wikidata:P780 Q178194→Q172941 (CIE-10 = E84; CIE-10 = K27)",
+    "targetId": "410aa40b-0e74-45eb-aebe-634036c788a6",
+    "targetName": "Úlcera péptica, no especificado sitio"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-k73-9",
+    "provenance": "wikidata:P780 Q178194→Q131742 (CIE-10 = E84; CIE-10 = K73.9)",
+    "targetId": "3f80f294-16ec-4da2-a789-bd8ec5332a56",
+    "targetName": "Hepatitis crónica, no especificada"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-k80",
+    "provenance": "wikidata:P780 Q178194→Q272714 (CIE-10 = E84; CIE-10 = K80)",
+    "targetId": "a9f1b170-a991-4ab2-add5-e742ec99c742",
+    "targetName": "Colelitiasis"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-k83-1",
+    "provenance": "wikidata:P780 Q178194→Q1075923 (CIE-10 = E84; CIE-10 = K83.1)",
+    "targetId": "54e9dcc7-c81f-4175-a071-0d8e9efe458c",
+    "targetName": "Obstrucción de conducto biliar"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-m81",
+    "provenance": "wikidata:P780 Q178194→Q165328 (CIE-10 = E84; CIE-10 = M81)",
+    "targetId": "c4a90185-38d6-4fa1-a94d-5ebc8ae22b36",
+    "targetName": "Osteoporosis sin fractura patológica actual"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "cie10es-dx-r06-0",
+    "provenance": "wikidata:P780 Q178194→Q188008 (CIE-10 = E84; CIE-10 = R06.0)",
+    "targetId": "9d025510-7f97-4d24-a2df-7a14160c5474",
+    "targetName": "Disnea"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "medlineplus-es-1824",
+    "provenance": "wikidata:P780 Q178194→Q147778 (CIE-10 = E84; MeSH = D008103)",
+    "targetId": "33e81e12-e696-4a34-afb1-ae6283decb86",
+    "targetName": "Cirrosis"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "medlineplus-es-5276",
+    "provenance": "wikidata:P780 Q178194→Q16244733 (CIE-10 = E84; MeSH = D007415)",
+    "targetId": "6a942dc7-0b5b-405d-a34c-9b762ba043f4",
+    "targetName": "Obstrucción intestinal"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "wikidata-sintoma-q192120",
+    "provenance": "wikidata:P780 Q178194→Q192120 (CIE-10 = E84; Wikidata = Q192120)",
+    "targetId": "7a41cc66-83a2-493e-a199-f99838079984",
+    "targetName": "Cianosis"
+   },
+   {
+    "type": "SYMPTOM",
+    "targetSlug": "wikidata-sintoma-q270421",
+    "provenance": "wikidata:P780 Q178194→Q270421 (CIE-10 = E84; Wikidata = Q270421)",
+    "targetId": "23648645-2607-47ed-af34-2a48a9eaed02",
+    "targetName": "Debilidad muscular"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-146561000140103",
+    "provenance": "wikidata:P2176 Q178194→Q6095693 (CIE-10 = E84; ATC = R07AX02)",
+    "targetId": "126f3afa-da82-4066-a5fa-94ac9518b1c0",
+    "targetName": "Ivacaftor"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-329472001",
+    "provenance": "wikidata:P2176 Q178194→Q7553358 (CIE-10 = E84; ATC = A16AX03)",
+    "targetId": "438c689a-87af-474c-a5b0-41f2463574a6",
+    "targetName": "Fenilbutirato de sodio"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-69918003",
+    "provenance": "wikidata:P2176 Q178194→Q418546 (CIE-10 = E84; ATC = J01DF01)",
+    "targetId": "fcbcc88c-25a2-44ec-a07f-2de07c8dfc38",
+    "targetName": "Aztreonam"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-77731008",
+    "provenance": "wikidata:P2176 Q178194→Q375613 (CIE-10 = E84; ATC = R05CB01)",
+    "targetId": "77f95467-6849-4e99-af7b-271264e22c90",
+    "targetName": "Acetilcisteína"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-89695009",
+    "provenance": "wikidata:P2176 Q178194→Q1758380 (CIE-10 = E84; ATC = J01GB01)",
+    "targetId": "73242cb6-2bdf-4f0a-ad40-c9145cf97c60",
+    "targetName": "Tobramicina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-medicamento-q419995",
+    "provenance": "wikidata:P2176 Q178194→Q419995 (CIE-10 = E84; Wikidata = Q419995)",
+    "targetId": "eddfdb3b-b75e-42bf-a57a-4ee41b2ac9ea",
+    "targetName": "Amilorida"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-tratamiento-q2067922",
+    "provenance": "wikidata:P2176 Q178194→Q2067922 (CIE-10 = E84; Wikidata = Q2067922)",
+    "targetId": "f3949a18-ed72-4d10-ac71-05f8b82cc828",
+    "targetName": "Dornasa alfa"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-tratamiento-q72184040",
+    "provenance": "wikidata:P2176 Q178194→Q72184040 (CIE-10 = E84; Wikidata = Q72184040)",
+    "targetId": "c7b177f0-7cd9-46da-ab57-2cea12258c6a",
+    "targetName": "Elexacaftor/tezacaftor/ivacaftor"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/ClubbingCF.JPG/330px-ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Jerry Nick, M.D. · CC BY 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY 3.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:ClubbingCF.JPG",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "enfermedad autosómica recesiva que afecta principalmente a los pulmones",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/ClubbingCF.JPG/330px-ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Jerry Nick, M.D. · CC BY 3.0 · vía Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:ClubbingCF.JPG",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q178194",
+    "matchProperty": "P4229 (ICD-10-CM) = E84"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q178194 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q178194",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P4229 (ICD-10-CM) = E84",
+  "definitionKind": "same-concept-medlineplus",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "e7ad1e7e-ea16-48e0-a80d-0a227329055e"
+ },
+ {
+  "categoryKey": "disease",
+  "slug": "cie10es-dx-e84-0",
+  "code": "E84.0",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Fibrosis quística con manifestaciones pulmonares",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "enfermedad autosómica recesiva que afecta principalmente a los pulmones",
+  "tagKeys": [
+   "endocrine"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.04",
+    "display": "ENFERMEDADES ENDOCRINAS, NUTRICIONALES Y METABÓLICAS (E00-E89)"
+   },
+   {
+    "code": "E70-E88",
+    "display": "ALTERACIONES METABÓLICAS (E70-E88)"
+   },
+   {
+    "code": "E84",
+    "display": "Fibrosis quística"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "E84.0",
+   "wikidata": "Q178194"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-e84",
+    "provenance": "cie10es:jerarquía E84.0 ⊂ E84",
+    "targetId": "e7ad1e7e-ea16-48e0-a80d-0a227329055e",
+    "targetName": "Fibrosis quística"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4e/ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/ClubbingCF.JPG/330px-ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Jerry Nick, M.D. · CC BY 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY 3.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:ClubbingCF.JPG",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "enfermedad autosómica recesiva que afecta principalmente a los pulmones",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/ClubbingCF.JPG/330px-ClubbingCF.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Jerry Nick, M.D. · CC BY 3.0 · vía Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:ClubbingCF.JPG",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q178194",
+    "matchProperty": "P4229 (ICD-10-CM) = E84.0"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q178194 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q178194",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P4229 (ICD-10-CM) = E84.0",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "051ae4db-f6f5-4c75-a537-02fa6b64f8a0"
+ }
+]

@@ -1,0 +1,16 @@
+#description: "HPO annotations for rare diseases [8478: OMIM; 47: DECIPHER; 4357 ORPHANET]"
+#version: 2026-09-02
+#tracker: https://github.com/obophenotype/human-phenotype-ontology/issues
+#hpo-version: http://purl.obolibrary.org/obo/hp/releases/2026-09-01/hp.json
+database_id	disease_name	qualifier	hpo_id	reference	evidence	onset	frequency	sex	modifier	aspect	biocuration
+ORPHA:586	Cystic fibrosis		HP:0000716	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:586	Cystic fibrosis		HP:0000739	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:586	Cystic fibrosis		HP:0000938	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:586	Cystic fibrosis		HP:0001392	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:586	Cystic fibrosis		HP:0002020	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:586	Cystic fibrosis		HP:0002035	ORPHA:586	TAS		HP:0040283			P	ORPHA:orphadata[2026-09-02]
+ORPHA:1401	CHAND syndrome	NOT	HP:0001270	ORPHA:1401	TAS					P	ORPHA:orphadata[2026-09-02]
+ORPHA:1401	CHAND syndrome	NOT	HP:0200041	ORPHA:1401	TAS					P	ORPHA:orphadata[2026-09-02]
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0011097	PMID:31675180	PCS		1/2			P	HPO:probinson[2021-06-21]
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0002187	PMID:31675180	PCS		1/1			P	HPO:probinson[2021-06-21]
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0001518	PMID:31675180	PCS		1/2			P	HPO:probinson[2021-06-21]
