@@ -340,7 +340,7 @@ export class PharmaCatalogService {
       const material = await this.requireMaterial(tx, pharmaLabId, materialId);
       if (material.statusConceptId === PHL.MATERIAL_APPROVED) {
         throw new PreconditionFailedException(
-          'No se puede modificar el contenido de un material ya aprobado; creá una versión nueva',
+          'No se puede modificar el contenido de un material ya aprobado; cree una versión nueva',
           { materialId },
         );
       }

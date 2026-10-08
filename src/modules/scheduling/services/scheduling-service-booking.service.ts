@@ -283,7 +283,7 @@ export class SchedulingServiceBookingService {
       ]);
       if (!cabeElServicio(franjas, ocupado, servicio, startAt)) {
         throw new ConflictException(
-          'Ese horario ya no está disponible para este servicio. Elegí otro.',
+          'Ese horario ya no está disponible para este servicio. Elija otro.',
           { offeringId, startAt: startAt.toISOString() },
         );
       }
@@ -463,8 +463,8 @@ export class SchedulingServiceBookingService {
     if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
     throw new PreconditionFailedException(
       veredicto === 'pendiente'
-        ? 'Tu vínculo con esta organización todavía está pendiente de aprobación.'
-        : 'Tu vínculo con esta organización ya no está vigente.',
+        ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'
+        : 'Su vínculo con esta organización ya no está vigente.',
       { tenantId, vinculo: veredicto },
     );
   }

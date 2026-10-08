@@ -442,7 +442,7 @@ describe('VisitAgendaService', () => {
 
       await expect(
         service.createBlock({ reason: 'Sin justificación' } as any, ACTOR),
-      ).rejects.toThrow('Indicá el laboratorio o el visitador');
+      ).rejects.toThrow('Indique el laboratorio o el visitador');
     });
   });
 });

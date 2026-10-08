@@ -935,7 +935,7 @@ async function deleteAccounts(
       }
       throw new Error(
         `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
-          `(constraint "${pgErr.constraint ?? '?'}"). Agregala a CUENTA_ESCRIBE_EN ` +
+          `(constraint "${pgErr.constraint ?? '?'}"). Agréguela a CUENTA_ESCRIBE_EN ` +
           `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
       );
     }
@@ -1132,7 +1132,7 @@ export async function deleteRegisteredOrganizations(
         }
         throw new Error(
           `No se pudo limpiar directory.tenants: sigue referenciado desde ` +
-            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agregala ` +
+            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agréguela ` +
             `a TENANT_ESCRIBE_EN en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
         );
       }

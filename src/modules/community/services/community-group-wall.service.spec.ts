@@ -111,7 +111,7 @@ describe('CommunityGroupWallService (P7)', () => {
     it('exige ser integrante activo', async () => {
       const d = build();
       d.access.assertCanPost.mockImplementation(() => {
-        throw new Error('no sos integrante');
+        throw new Error('no es integrante');
       });
 
       await expect(
@@ -120,7 +120,7 @@ describe('CommunityGroupWallService (P7)', () => {
           { authorProfileId: 'p1', bodyText: 'hola' },
           actor,
         ),
-      ).rejects.toThrow('no sos integrante');
+      ).rejects.toThrow('no es integrante');
       expect(d.commentsRepo.create).not.toHaveBeenCalled();
     });
 

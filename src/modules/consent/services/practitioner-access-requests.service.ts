@@ -149,10 +149,10 @@ export class PractitionerAccessRequestsService {
       await this.notices.emit({
         kind: 'ACCESS_REQUESTED',
         recipientUserId: patientUserId,
-        subject: 'Un médico pidió acceder a tu historia clínica',
+        subject: 'Un médico pidió acceder a su historia clínica',
         bodyText:
           dto.reasonText ??
-          'Un profesional te encontró en el padrón y pidió acceder a tu expediente. Vos elegís qué áreas autorizar.',
+          'Un profesional le encontró en el padrón y pidió acceder a su expediente. Usted elige qué áreas autorizar.',
         requestId: consent.id,
       });
     } else {
@@ -285,7 +285,7 @@ export class PractitionerAccessRequestsService {
           kind: 'ACCESS_DECLINED',
           recipientUserId: practitionerUserId,
           subject: 'El paciente no autorizó el acceso',
-          bodyText: 'El paciente decidió no darte acceso a su expediente.',
+          bodyText: 'El paciente decidió no darle acceso a su expediente.',
           requestId: id,
         });
 
@@ -307,7 +307,7 @@ export class PractitionerAccessRequestsService {
       }
       if (autorizadas.length === 0) {
         throw new PreconditionFailedException(
-          'Aceptar exige autorizar al menos una especialidad; si no autorizás ninguna, rechazá la solicitud',
+          'Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud',
           {},
         );
       }
@@ -376,7 +376,7 @@ export class PractitionerAccessRequestsService {
         kind: 'ACCESS_ACCEPTED',
         recipientUserId: practitionerUserId,
         subject: 'El paciente autorizó el acceso',
-        bodyText: `El paciente autorizó tu acceso para ${autorizadas.length} de ${especialidadesPedidas.size} área(s) pedida(s).`,
+        bodyText: `El paciente autorizó su acceso para ${autorizadas.length} de ${especialidadesPedidas.size} área(s) pedida(s).`,
         requestId: id,
       });
 

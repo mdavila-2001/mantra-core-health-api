@@ -123,7 +123,7 @@ export class PrescriptionFavoritesService {
       );
       if (cuantos >= MAX_FAVORITES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
-          'La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro',
+          'La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro',
           { max: MAX_FAVORITES_PER_PRACTITIONER },
         );
       }
@@ -133,7 +133,7 @@ export class PrescriptionFavoritesService {
         practitionerProfileId,
       );
       if (existentes.some((favorite) => favorite.name === dto.name)) {
-        throw new ConflictException('Ya tenés un favorito con ese nombre', {
+        throw new ConflictException('Ya tiene un favorito con ese nombre', {
           name: dto.name,
         });
       }

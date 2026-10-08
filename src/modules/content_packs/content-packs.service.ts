@@ -182,7 +182,7 @@ export class ContentPacksService {
     const password = demoPassword ?? process.env.SEED_DEMO_PASSWORD;
     if (!password) {
       throw new PreconditionFailedException(
-        'Las cuentas de demostración necesitan una contraseña: declarala en la ' +
+        'Las cuentas de demostración necesitan una contraseña: declárela en la ' +
           'petición o en SEED_DEMO_PASSWORD.',
         { code: 'CUENTAS_DEMO' },
       );
@@ -196,7 +196,7 @@ export class ContentPacksService {
     if (resultado.skipped === 'production-not-allowed') {
       throw new PreconditionFailedException(
         'Las cuentas de demostración no se crean en producción. Si de verdad ' +
-          'las querés acá, hace falta habilitarlo explícitamente en el entorno.',
+          'las quiere acá, hace falta habilitarlo explícitamente en el entorno.',
         { code: 'CUENTAS_DEMO' },
       );
     }

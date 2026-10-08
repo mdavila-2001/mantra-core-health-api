@@ -268,7 +268,7 @@ describe('ProfilesPatientsController', () => {
     it('lo decide el mismo servicio: el 422 por falta de criterio le llega al cliente', async () => {
       const d = build();
       d.patientsService.searchPatients.mockRejectedValue(
-        new PreconditionFailedException('Indicá un nombre o un documento'),
+        new PreconditionFailedException('Indique un nombre o un documento'),
       );
 
       await expect(

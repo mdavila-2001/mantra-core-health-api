@@ -76,7 +76,7 @@ function avisoDeCancelacion(debounceKey: string): AgendaNotice {
     kind: 'BOOKING_STATE_CHANGED',
     // Cuenta directa: mide la relación, no la resolución perfil → cuenta.
     recipient: { userId: destinatarioReal },
-    subject: 'Tu cita fue cancelada',
+    subject: 'Su cita fue cancelada',
     bodyText: 'El profesional canceló la cita.\nMotivo: agenda reprogramada.',
     relatedResourceType: 'scheduling.bookings',
     relatedResourceId: randomUUID(),

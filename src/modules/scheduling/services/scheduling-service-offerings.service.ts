@@ -113,7 +113,7 @@ export class SchedulingServiceOfferingsService {
       );
       if (existente !== null) {
         throw new ConflictException(
-          'Ya ofrecés ese servicio. Editá la oferta que ya tenés.',
+          'Ya ofrece ese servicio. Edite la oferta que ya tiene.',
           { offeringId: existente.id },
         );
       }
@@ -198,7 +198,7 @@ export class SchedulingServiceOfferingsService {
     const objetivo = practitionerProfileId ?? actor.practitionerProfileId;
     if (objetivo === undefined) {
       throw new PreconditionFailedException(
-        'Indicá de qué profesional querés ver los servicios.',
+        'Indique de qué profesional quiere ver los servicios.',
         {},
       );
     }
@@ -240,7 +240,7 @@ export class SchedulingServiceOfferingsService {
     // Pidió una oferta para OTRO profesional: sólo quien administra agendas puede.
     if (pedido !== undefined && pedido !== propio) {
       if (!administra) {
-        throw new ForbiddenException('Sólo podés crear ofertas para vos.');
+        throw new ForbiddenException('Sólo puede crear ofertas para usted.');
       }
       return pedido;
     }
@@ -250,7 +250,7 @@ export class SchedulingServiceOfferingsService {
     if (propio !== undefined) return propio;
     if (administra) {
       throw new PreconditionFailedException(
-        'Indicá de qué profesional es la oferta.',
+        'Indique de qué profesional es la oferta.',
         {},
       );
     }

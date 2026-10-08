@@ -67,9 +67,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu receta está lista',
+      subject: 'Su receta está lista',
       bodyText:
-        'Tu médico emitió una receta nueva. Podés verla en tu historia clínica.',
+        'Su médico emitió una receta nueva. Puede verla en su historia clínica.',
       destinationType: 'PRESCRIPTION',
       destinationId: medicationRequestId,
       actorUserId,
@@ -90,9 +90,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu consulta está disponible',
+      subject: 'Su consulta está disponible',
       bodyText:
-        'Se cerró tu consulta y ya podés consultar lo que quedó registrado.',
+        'Se cerró su consulta y ya puede consultar lo que quedó registrado.',
       destinationType: 'ENCOUNTER',
       destinationId: encounterId,
       actorUserId,
@@ -126,9 +126,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu médico te dejó una orden',
+      subject: 'Su médico le dejó una orden',
       bodyText:
-        'Tenés una orden de estudios nueva. Podés verla en tus órdenes médicas.',
+        'Tiene una orden de estudios nueva. Puede verla en sus órdenes médicas.',
       destinationType: 'SERVICE_REQUEST',
       destinationId: serviceRequestId,
       actorUserId,

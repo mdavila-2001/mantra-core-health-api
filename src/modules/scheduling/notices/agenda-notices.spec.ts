@@ -55,7 +55,7 @@ describe('redacción de los avisos de agenda (P8)', () => {
       expect(aviso.kind).toBe('SLOT_RELEASED');
       expect(aviso.recipient).toEqual({ patientProfileId: PACIENTE });
       expect(aviso.bodyText).toContain('Dra. Rivas');
-      expect(aviso.bodyText).toContain('Reservalo');
+      expect(aviso.bodyText).toContain('Resérvelo');
       expect(aviso.relatedResourceType).toBe(RECURSO_CUPO);
       expect(aviso.relatedResourceId).toBe(CUPO);
     });
@@ -103,13 +103,13 @@ describe('redacción de los avisos de agenda (P8)', () => {
   describe('recordatorio', () => {
     it('la víspera habla de mañana', () => {
       const aviso = avisoDeRecordatorio(cita, 24 * 60);
-      expect(aviso.subject).toBe('Mañana tenés turno');
+      expect(aviso.subject).toBe('Mañana tiene turno');
       expect(aviso.bodyText).toContain('Mañana');
     });
 
     it('el del mismo día habla de hoy', () => {
       const aviso = avisoDeRecordatorio(cita, 120);
-      expect(aviso.subject).toBe('Tu turno es hoy');
+      expect(aviso.subject).toBe('Su turno es hoy');
       expect(aviso.bodyText).toContain('Hoy');
     });
 

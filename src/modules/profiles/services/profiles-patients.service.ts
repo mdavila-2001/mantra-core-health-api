@@ -1781,7 +1781,7 @@ export class ProfilesPatientsService {
       !options.nationalId
     ) {
       throw new PreconditionFailedException(
-        'Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes',
+        'Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes',
       );
     }
 

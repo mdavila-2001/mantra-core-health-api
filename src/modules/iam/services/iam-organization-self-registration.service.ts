@@ -479,9 +479,9 @@ export class IamOrganizationSelfRegistrationService {
           recipientUserId: userId,
           recipientAddress: email,
           payloadJson: {
-            subject: 'Verificá el correo de tu organización',
+            subject: 'Verifique el correo de su organización',
             bodyText:
-              'Para verificar tu correo, usá este código: ' +
+              'Para verificar su correo, use este código: ' +
               `${token}\n\nTu organización quedó registrada y está pendiente ` +
               'de verificación por parte de la plataforma.',
           },

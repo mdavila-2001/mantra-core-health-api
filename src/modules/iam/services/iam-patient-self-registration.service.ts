@@ -617,10 +617,10 @@ export class IamPatientSelfRegistrationService {
           recipientUserId: userId,
           recipientAddress: email,
           payloadJson: {
-            subject: 'Verificá tu correo',
+            subject: 'Verifique su correo',
             bodyText:
-              'Para verificar tu correo, usá este código: ' +
-              `${token}\n\nSi no creaste esta cuenta, ignorá este mensaje.`,
+              'Para verificar su correo, use este código: ' +
+              `${token}\n\nSi no creó esta cuenta, ignore este mensaje.`,
           },
         },
         actor,
