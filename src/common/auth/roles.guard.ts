@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
+import { IS_PUBLIC_KEY } from './public.decorator';
 import type {
   AuthenticatedRequest,
   AuthenticatedUser,
@@ -59,6 +60,18 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // Una ruta `@Public()` nunca pasa por `JwtAuthGuard`, así que no hay
+    // `request.user` que evaluar. Si además declarara `@Roles(...)` por error,
+    // sin este corte se vería un 403 "Rol insuficiente" que esconde el problema
+    // real (ruta mal anotada) en vez de señalarlo.
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+
     const required = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),

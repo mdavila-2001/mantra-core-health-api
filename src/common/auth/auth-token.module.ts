@@ -20,10 +20,13 @@ import { TokenService } from './token.service';
 @Global()
 @Module({
   imports: [
-    JwtModule.register({
-      secret: loadAuthEnv().secret,
-      signOptions: { expiresIn: loadAuthEnv().accessTtl },
-    } as JwtModuleOptions),
+    JwtModule.register(((): JwtModuleOptions => {
+      const env = loadAuthEnv();
+      return {
+        secret: env.secret,
+        signOptions: { expiresIn: env.accessTtl },
+      } as JwtModuleOptions;
+    })()),
   ],
   providers: [TokenService],
   exports: [TokenService, JwtModule],

@@ -4,6 +4,8 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ErrorCode } from '../errors/error-codes';
 import { IdentityVerificationRequiredException } from '../errors/domain.exception';
 import { VerifiedIdentityGuard } from './verified-identity.guard';
+import { REQUIRES_VERIFIED_IDENTITY_KEY } from './requires-verified-identity.decorator';
+import { IS_PUBLIC_KEY } from './public.decorator';
 
 /** Contexto de ejecución HTTP mínimo con el usuario ya autenticado. */
 function contextFor(user?: { id: string; roles: string[] }) {
@@ -20,10 +22,17 @@ describe('VerifiedIdentityGuard', () => {
    * @param required - Si el handler declara `@RequiresVerifiedIdentity()`.
    * @returns Resultado de build.
    */
-  function build(required: boolean) {
+  function build(required: boolean, isPublic = false) {
     const forked = { findOne: fn().mockResolvedValue(null) };
     const em = { fork: fn(() => forked) };
-    const reflector = { getAllAndOverride: fn(() => required) };
+    // Distingue por clave: el guard ahora lee primero `IS_PUBLIC_KEY` y después
+    // `REQUIRES_VERIFIED_IDENTITY_KEY`, y un mock que ignore el argumento
+    // devolvería el mismo booleano para las dos, enmascarando una regresión.
+    const reflector = {
+      getAllAndOverride: fn((key: string) =>
+        key === IS_PUBLIC_KEY ? isPublic : required,
+      ),
+    };
     const guard = new VerifiedIdentityGuard(reflector as never, em as never);
     return { guard, forked, em };
   }
@@ -66,6 +75,15 @@ describe('VerifiedIdentityGuard', () => {
     await expect(d.guard.canActivate(contextFor(actor))).rejects.toBeInstanceOf(
       IdentityVerificationRequiredException,
     );
+  });
+
+  it('lets a @Public() route through even if it also declares the decorator by mistake', async () => {
+    const d = build(true, true);
+
+    await expect(
+      d.guard.canActivate(contextFor(undefined)),
+    ).resolves.toBe(true);
+    expect(d.em.fork).not.toHaveBeenCalled();
   });
 
   it('refuses when there is no authenticated user at all', async () => {
