@@ -30,7 +30,7 @@ DROP_IN=/etc/ssh/sshd_config.d/00-alovida-hardening.conf
 ssh_key() { ssh -i "$SSH_KEY" -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new "$SSH_USER@$HOST" "$@"; }
 
 # --- 1. Tu llave entra ----------------------------------------------------------
-echo "▶ Comprobando que tu llave entra a $SSH_USER@$HOST…"
+echo "▶ Comprobando que tu llave entra a $SSH_USER@${HOST}…"
 ssh_key true || { echo "✖ Tu llave NO entra. No toco nada." >&2; exit 1; }
 echo "✔ Tu llave entra."
 

@@ -24,11 +24,11 @@ STACK_DIR="$REMOTE_DIR/infra/monitoring"
 remote() { ssh -i "$SSH_KEY" -o BatchMode=yes -o ConnectTimeout=15 "root@$HOST" "$@"; }
 json() { python3 -c "import sys,json; d=json.load(sys.stdin); $1"; }
 
-echo "▶ Comprobando acceso a root@$HOST…"
+echo "▶ Comprobando acceso a root@${HOST}…"
 remote true || { echo "✖ La llave $SSH_KEY no entra a $HOST." >&2; exit 1; }
 
 # --- 1. Código en el servidor (sólo infra/monitoring, clon liviano) ----------
-echo "▶ Bajando infra/monitoring (rama $BRANCH) en $REMOTE_DIR…"
+echo "▶ Bajando infra/monitoring (rama $BRANCH) en ${REMOTE_DIR}…"
 remote "set -e
 if [ ! -d $REMOTE_DIR/.git ]; then
   git clone -q --depth 1 --filter=blob:none --sparse --branch $BRANCH $REPO_URL $REMOTE_DIR
