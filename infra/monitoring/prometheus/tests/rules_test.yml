@@ -5,6 +5,7 @@ rule_files:
   - ../rules/containers.yml
   - ../rules/endpoints.yml
   - ../rules/watchdog.yml
+  - ../rules/traffic.yml
 
 evaluation_interval: 30s
 
@@ -54,25 +55,29 @@ tests:
               summary: "alovida-backend-central/api está UNHEALTHY"
               description: "Su healthcheck falla hace más de 3 min. Si tiene la etiqueta autoheal=true, autoheal lo reinicia solo."
 
-  - name: Un one-shot terminado NO es un contenedor caído; uno con restart always sí
-    interval: 30s
+  - name: Avisa si un contenedor que corría se detiene; no por restos viejos ni one-shots
+    interval: 1m
     input_series:
       - series: 'alovida_container_running{name="api-migrate",display="x/api-migrate"}'
-        values: '0x10'
+        values: '1 1 0 0 0 0 0'
       - series: 'alovida_container_expected_running{name="api-migrate",display="x/api-migrate"}'
-        values: '0x10'
+        values: '0x6'
       - series: 'alovida_container_running{name="minio",display="x/minio"}'
-        values: '0x10'
+        values: '1 1 0 0 0 0 0'
       - series: 'alovida_container_expected_running{name="minio",display="x/minio"}'
-        values: '1x10'
+        values: '1x6'
+      - series: 'alovida_container_running{name="viejo",display="x/viejo"}'
+        values: '0x6'
+      - series: 'alovida_container_expected_running{name="viejo",display="x/viejo"}'
+        values: '1x6'
     alert_rule_test:
-      - eval_time: 4m
+      - eval_time: 5m
         alertname: ContainerDown
         exp_alerts:
           - exp_labels: { severity: critical, name: minio, display: x/minio }
             exp_annotations:
-              summary: "x/minio está DETENIDO"
-              description: "Tiene política de reinicio y no está corriendo hace más de 3 min."
+              summary: "x/minio se DETUVO"
+              description: "Estaba corriendo hace menos de 15 min, tiene política de reinicio y ahora está parado. Si no fue un despliegue o una parada a mano, revisalo."
 
   - name: Más de 3 reinicios en 15 min es un bucle
     interval: 1m
@@ -133,3 +138,82 @@ tests:
           - exp_labels: { severity: none }
             exp_annotations:
               summary: "Latido del monitoreo (siempre activo, no es un problema)"
+
+  - name: 5xx de un sitio avisa con el dominio, no con el uuid del router
+    interval: 30s
+    input_series:
+      # 60 pedidos/min, 6 de ellos 5xx (10 %) desde el minuto 0.
+      - series: 'traefik_router_requests_total{router="https-0-abc-proxy@docker",code="200"}'
+        values: '0+27x40'
+      - series: 'traefik_router_requests_total{router="https-0-abc-proxy@docker",code="502"}'
+        values: '0+3x40'
+      - series: 'alovida_router_info{router="https-0-abc-proxy@docker",site="test.example"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: SiteErrors5xx
+        exp_alerts: []
+      - eval_time: 12m
+        alertname: SiteErrors5xx
+        exp_alerts:
+          - exp_labels: { severity: warning, router: "https-0-abc-proxy@docker", site: test.example }
+            exp_annotations:
+              summary: "test.example: 10% de los pedidos dan error 5xx"
+              description: "Más del 5 % de errores del servidor durante 5 min. /trafico muestra el detalle; los logs, en Coolify."
+      - eval_time: 12m
+        alertname: SiteErrors5xxCritical
+        exp_alerts: []
+
+  - name: un sitio casi sin tráfico no alerta por un error suelto
+    interval: 30s
+    input_series:
+      # 1 pedido cada 5 min y siempre 502: tasa por debajo del mínimo.
+      - series: 'traefik_router_requests_total{router="r@docker",code="502"}'
+        values: '0+0.1x40'
+      - series: 'alovida_router_info{router="r@docker",site="quieto.example"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: SiteErrors5xxCritical
+        exp_alerts: []
+
+  - name: latencia p95 alta sostenida 10 min
+    interval: 30s
+    input_series:
+      # Todos los pedidos caen entre 3 y 5 s.
+      - series: 'traefik_router_request_duration_seconds_bucket{router="r@docker",le="1.2"}'
+        values: '0x40'
+      - series: 'traefik_router_request_duration_seconds_bucket{router="r@docker",le="5"}'
+        values: '0+30x40'
+      - series: 'traefik_router_request_duration_seconds_bucket{router="r@docker",le="+Inf"}'
+        values: '0+30x40'
+      - series: 'traefik_router_requests_total{router="r@docker",code="200"}'
+        values: '0+30x40'
+      - series: 'alovida_router_info{router="r@docker",site="lento.example"}'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: SiteLatencyHigh
+        exp_alerts: []
+      - eval_time: 17m
+        alertname: SiteLatencyHigh
+        exp_alerts:
+          - exp_labels: { severity: warning, router: "r@docker", site: lento.example }
+            exp_annotations:
+              summary: "lento.example lento: el 5 % más lento tarda 4.81 s"
+              description: "Latencia p95 por encima de 2 s durante 10 min, medida en el proxy. /tablero muestra la tendencia."
+
+  - name: proxy sin métricas
+    interval: 30s
+    input_series:
+      - series: 'up{job="traefik",instance="coolify-proxy:8082"}'
+        values: '0x20'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: TraefikMetricsDown
+        exp_alerts:
+          - exp_labels: { severity: warning, job: traefik, instance: "coolify-proxy:8082" }
+            exp_annotations:
+              summary: "No llegan las métricas del proxy (Traefik)"
+              description: "Prometheus no alcanza coolify-proxy:8082. Si el proxy se recreó, correr coolify-proxy-reconnect y revisar que el monitoreo siga en la red «coolify»."
+

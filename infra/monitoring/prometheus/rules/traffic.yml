@@ -1,0 +1,60 @@
+# Lo que entra a cada sitio, medido en el proxy Traefik de Coolify.
+#
+# Las alertas se cruzan con `alovida_router_info` (del bot) para que digan el
+# dominio y no el uuid del router. Un sitio sin tráfico no alerta: con 2
+# pedidos en 5 min, uno fallado sería un 50 % de error.
+groups:
+  - name: traffic
+    rules:
+      - record: router:requests:rate5m
+        expr: sum by (router) (rate(traefik_router_requests_total[5m]))
+
+      - record: router:errors5xx:rate5m
+        expr: sum by (router) (rate(traefik_router_requests_total{code=~"5.."}[5m]))
+
+      - record: router:latency_p95_seconds:5m
+        expr: histogram_quantile(0.95, sum by (le, router) (rate(traefik_router_request_duration_seconds_bucket[5m])))
+
+      - alert: TraefikMetricsDown
+        expr: up{job="traefik"} == 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "No llegan las métricas del proxy (Traefik)"
+          description: "Prometheus no alcanza coolify-proxy:8082. Si el proxy se recreó, correr coolify-proxy-reconnect y revisar que el monitoreo siga en la red «coolify»."
+
+      - alert: SiteErrors5xx
+        expr: |
+          (
+            router:errors5xx:rate5m / router:requests:rate5m > 0.05
+            and router:requests:rate5m > 0.05
+          ) * on (router) group_left (site) alovida_router_info
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.site }}: {{ $value | humanizePercentage }} de los pedidos dan error 5xx"
+          description: "Más del 5 % de errores del servidor durante 5 min. /trafico muestra el detalle; los logs, en Coolify."
+
+      - alert: SiteErrors5xxCritical
+        expr: |
+          (
+            router:errors5xx:rate5m / router:requests:rate5m > 0.25
+            and router:requests:rate5m > 0.05
+          ) * on (router) group_left (site) alovida_router_info
+        for: 3m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.site }}: {{ $value | humanizePercentage }} de los pedidos FALLAN (5xx)"
+          description: "Uno de cada cuatro pedidos o más da error durante 3 min: los usuarios lo están viendo."
+
+      - alert: SiteLatencyHigh
+        expr: |
+          (
+            router:latency_p95_seconds:5m > 2
+            and router:requests:rate5m > 0.05
+          ) * on (router) group_left (site) alovida_router_info
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.site }} lento: el 5 % más lento tarda {{ $value | humanize }} s"
+          description: "Latencia p95 por encima de 2 s durante 10 min, medida en el proxy. /tablero muestra la tendencia."
