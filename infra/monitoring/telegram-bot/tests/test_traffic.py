@@ -95,3 +95,11 @@ def test_commands_and_menu_include_traffic():
     for command in ("/trafico", "/tráfico", "/traffic", "/tablero", "/dashboard"):
         assert command in COMMANDS
     assert {"tablero", "trafico"} <= {name for name, _ in MENU}
+
+
+def test_sites_without_requests_go_in_one_line_at_the_end():
+    samples = _site_samples()
+    samples[traffic.Q_SITE_REQ_24H] = samples[traffic.Q_SITE_REQ_24H] + [({"site": "ai.example"}, 0.0)]
+    text = traffic.traffic_report(FakeSources(samples=samples))
+    assert "<b>ai.example</b>" not in text
+    assert "⚪ Sin pedidos en 24 h: ai.example" in text
