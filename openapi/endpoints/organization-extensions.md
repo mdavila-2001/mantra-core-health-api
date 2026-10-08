@@ -127,6 +127,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "organizationName": "Nombre de ejemplo",
   "roleTitle": {},
   "practiceSiteId": {},
+  "healthFacilityConceptId": {},
   "affiliationTypeConceptId": {},
   "startDate": "2026-07-31",
   "endDate": "2026-07-31",
@@ -147,6 +148,7 @@ Campos de la respuesta:
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |

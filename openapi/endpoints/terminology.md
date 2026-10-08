@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 21 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -21,17 +21,20 @@ Referencia exhaustiva de 21 operación(es) del módulo `terminology`, derivada d
 8. [GET /terminology/concepts/{conceptId}](#8-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
 9. [POST /terminology/concepts/{conceptId}/$deprecate](#9-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
 10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-11. [POST /terminology/concepts/{conceptId}/properties](#11-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-12. [POST /terminology/concepts/{conceptId}/relationships](#12-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-13. [GET /terminology/import-template](#13-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
-14. [PUT /terminology/tenants/{tenantId}/catalog-policies](#14-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-15. [GET /terminology/value-sets](#15-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-16. [POST /terminology/value-sets](#16-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-17. [GET /terminology/value-sets/{id}/$expand](#17-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-18. [POST /terminology/ValueSet/{id}/$expand](#18-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-19. [POST /terminology/versions/{versionId}/import](#19-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-20. [POST /terminology/versions/{versionId}/import-file](#20-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
-21. [POST /terminology/versions/{versionId}/publish](#21-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+11. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#11-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+12. [POST /terminology/concepts/{conceptId}/properties](#12-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+13. [POST /terminology/concepts/{conceptId}/relationships](#13-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+14. [GET /terminology/concepts/glossary-graph](#14-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
+15. [GET /terminology/import-template](#15-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
+16. [PUT /terminology/tenants/{tenantId}/catalog-policies](#16-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+17. [GET /terminology/value-sets](#17-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+18. [POST /terminology/value-sets](#18-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+19. [GET /terminology/value-sets/{id}/$expand](#19-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+20. [GET /terminology/value-sets/$glossary-facets](#20-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
+21. [POST /terminology/ValueSet/{id}/$expand](#21-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+22. [POST /terminology/versions/{versionId}/import](#22-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+23. [POST /terminology/versions/{versionId}/import-file](#23-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+24. [POST /terminology/versions/{versionId}/publish](#24-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -861,6 +864,8 @@ NestJS resuelve `GET /terminology/concepts` en `TerminologyConceptsController_se
 | `lang` | query | No | `string` | valores: `ES`, `EN` | Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false` | `ES` |
 | `includeValueSets` | query | No | `string` | Sin restricción adicional declarada | Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand` | `valor-ejemplo` |
 | `valueSetId` | query | No | `string` | Sin restricción adicional declarada | Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand` | `00000000-0000-4000-8000-000000000001` |
+| `tagValueSetId` | query | No | `string` | Sin restricción adicional declarada | Sólo glosario: además de `valueSetId`, el término tiene que llevar esta etiqueta (intersección) | `00000000-0000-4000-8000-000000000001` |
+| `offset` | query | No | `string` | Sin restricción adicional declarada | Sólo glosario: cuántos términos saltear. La respuesta trae `total` para armar la paginación | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -885,7 +890,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1&ids=valor-ejemplo&lang=ES&includeValueSets=valor-ejemplo&valueSetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1&ids=valor-ejemplo&lang=ES&includeValueSets=valor-ejemplo&valueSetId=00000000-0000-4000-8000-000000000001&tagValueSetId=00000000-0000-4000-8000-000000000001&offset=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -931,11 +936,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "valor-ejemplo"
       ],
       "relationsCount": 1,
-      "status": "active"
+      "status": "active",
+      "imageThumbnailUrl": "https://example.com/recurso"
     }
   ],
   "count": 1,
-  "limit": 1
+  "limit": 1,
+  "offset": 1,
+  "total": 1
 }
 ```
 
@@ -943,7 +951,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","translated":true,"valueSets":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}],"slug":"hipertension-arterial","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"shortDefinition":"valor-ejemplo","tags":["valor-ejemplo"],"relationsCount":1,"status":"active"}]` |
+| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","translated":true,"valueSets":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}],"slug":"hipertension-arterial","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"shortDefinition":"valor-ejemplo","tags":["valor-ejemplo"],"relationsCount":1,"status":"active","imageThumbnailUrl":"https://example.com/recurso"}]` |
 | `items[].conceptId` | Sí | `string` | formato `uuid` | Valor a enviar en los campos `*ConceptId` del contrato | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del concepto | `GENDER_FEMALE` |
 | `items[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación principal | `valor-ejemplo` |
@@ -963,8 +971,11 @@ Campos de la respuesta:
 | `items[].tags` | No | `array<string>` | Sin restricción adicional declarada | Nombres de las etiquetas del término (la categoría no se repite acá). | `["valor-ejemplo"]` |
 | `items[].relationsCount` | No | `number` | Sin restricción adicional declarada | Cuántas relaciones tipadas tiene el término; la lista completa vive en la ficha. | `1` |
 | `items[].status` | No | `string` | Sin restricción adicional declarada | Estado publicado del término (`active`, hoy el único que puede llegar al glosario público). | `active` |
+| `items[].imageThumbnailUrl` | No | `string` | formato `uri` | Miniatura de la imagen del término, si tiene una cargada (propiedad `glossary-image`). Sólo la URL: la atribución y la licencia viajan en la ficha, que es donde se muestra la imagen entera con su crédito. | `https://example.com/recurso` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `offset` | No | `number` | Sin restricción adicional declarada | Desplazamiento aplicado (sólo glosario) | `1` |
+| `total` | No | `number` | Sin restricción adicional declarada | Total que coincide (sólo glosario) | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -976,6 +987,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | El conjunto de valores no existe o no tiene versión vigente | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 404 | `NOT_FOUND` | La etiqueta no existe o no tiene versión vigente | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1122,7 +1134,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "license": "valor-ejemplo",
     "attribution": "valor-ejemplo",
     "alt": "valor-ejemplo",
-    "status": "approved"
+    "status": "approved",
+    "thumbnailSource": "https://example.com/recurso",
+    "sourcePage": "https://example.com/recurso"
   }
 }
 ```
@@ -1167,12 +1181,14 @@ Campos de la respuesta:
 | `relations[].slug` | Sí | `string` | Sin restricción adicional declarada | Slug del término destino. | `valor-ejemplo` |
 | `relations[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación del término destino (EN, `CatalogConcepts.display`). | `valor-ejemplo` |
 | `properties` | Sí | `object` | Sin restricción adicional declarada | Propiedades declaradas del concepto, indexadas por su código. Es donde cada code system guarda lo suyo sin que el modelo tenga que declarar una columna por vocabulario: el vademécum publica acá `dose_forms`, `strengths` y `routes` —lo que la pantalla de receta necesita para que el profesional elija presentación y concentración en vez de teclearlas—, y también `rxnorm_cui` o `snomed_code` para cruzar con otros catálogos. Se devuelve como mapa `código -> valor` y no como lista de pares porque se consume por nombre (`properties.strengths`), nunca recorriéndolo. El valor es el `value_json` tal como se guardó: un texto, una lista o un objeto, según lo que declare cada propiedad. Va sólo en la ficha, no en la búsqueda: son varias filas por concepto y traerlas para cada resultado de un autocompletar es peso que la lista no usa. | `{"clave":"valor"}` |
-| `image` | No | `ConceptImageDto` | Sin restricción adicional declarada | Imagen ilustrativa. Siempre ausente hoy (ver ); el campo existe para que un carril futuro pueda adjuntar una sin romper el contrato. | `{"source":"valor-ejemplo","license":"valor-ejemplo","attribution":"valor-ejemplo","alt":"valor-ejemplo","status":"approved"}` |
+| `image` | No | `ConceptImageDto` | Sin restricción adicional declarada | Imagen ilustrativa. Siempre ausente hoy (ver ); el campo existe para que un carril futuro pueda adjuntar una sin romper el contrato. | `{"source":"valor-ejemplo","license":"valor-ejemplo","attribution":"valor-ejemplo","alt":"valor-ejemplo","status":"approved","thumbnailSource":"https://example.com/recurso","sourcePage":"https://example.com/recurso"}` |
 | `image.source` | No | `string` | Sin restricción adicional declarada | URL o referencia del activo. | `valor-ejemplo` |
 | `image.license` | No | `string` | Sin restricción adicional declarada | Licencia bajo la que se usa la imagen. | `valor-ejemplo` |
 | `image.attribution` | No | `string` | Sin restricción adicional declarada | A quién atribuir la imagen. | `valor-ejemplo` |
 | `image.alt` | No | `string` | Sin restricción adicional declarada | Texto alternativo, para accesibilidad. | `valor-ejemplo` |
 | `image.status` | No | `string` | valores: `approved`, `pending`, `rejected` | Estado de revisión de la imagen. | `approved` |
+| `image.thumbnailSource` | No | `string` | formato `uri` | Miniatura del mismo activo, para la lista y para no bajar el original de entrada. | `https://example.com/recurso` |
+| `image.sourcePage` | No | `string` | formato `uri` | Página de la fuente donde se publica la imagen con su licencia (p. ej. Wikimedia Commons). | `https://example.com/recurso` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1489,7 +1505,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /terminology/concepts/{conceptId}/properties
+## 11. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+- **Operation ID:** `TerminologyConceptsController_readGlossaryNeighborhood`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyConceptsController.readGlossaryNeighborhood](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
+
+### Descripción de negocio
+
+Sin `type` ni `direction` devuelve una muestra de `perGroup` vecinos por grupo, con el `total` real. Con `type` y `direction` devuelve ese único grupo, paginado con `offset` y `limit`.
+
+Contexto declarado en el controlador: El vecindario de un término para el mapa: sus relaciones salientes y entrantes por tipo, con el total real de cada grupo. Va **antes** de `@Get(':conceptId')`, igual que `glossary-graph`: el orden de declaración es el orden de resolución, y una ruta con parámetro declarada antes se comería el segmento fijo. Mismo acceso que `glossary-graph`: lectura del glosario público, sin rol.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/concepts/{conceptId}/glossary-neighborhood` en `TerminologyConceptsController_readGlossaryNeighborhood`. El controlador delega en `ConceptsService.readGlossaryNeighborhood`. No recibe body. El tipo de retorno estático es `Promise<GlossaryNeighborhoodDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lang` | query | No | `string` | valores: `ES`, `EN` | Sin descripción específica en OpenAPI. | `ES` |
+| `perGroup` | query | No | `number` | mínimo 1; máximo 50 | Sin descripción específica en OpenAPI. | `8` |
+| `type` | query | No | `string` | valores: `RELATED_TERM`, `DISEASE`, `PROCEDURE`, `TREATMENT`, `ANATOMY`, `DIAGNOSTIC_TEST`, `SYMPTOM`, `SPECIALTY` | Sin descripción específica en OpenAPI. | `RELATED_TERM` |
+| `direction` | query | No | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en OpenAPI. | `outgoing` |
+| `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-neighborhood HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conceptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-neighborhood?lang=ES&perGroup=8&type=RELATED_TERM&direction=outgoing&offset=0&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryNeighborhoodDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "focus": {
+    "conceptId": "00000000-0000-4000-8000-000000000001",
+    "slug": "valor-ejemplo",
+    "display": "valor-ejemplo",
+    "category": {
+      "internalCode": "glossary-category-anatomy",
+      "name": "Anatomía"
+    },
+    "shortDefinition": "valor-ejemplo"
+  },
+  "groups": [
+    {
+      "type": {},
+      "direction": "outgoing",
+      "total": 1,
+      "items": [
+        {
+          "conceptId": "00000000-0000-4000-8000-000000000001",
+          "slug": "valor-ejemplo",
+          "display": "valor-ejemplo",
+          "category": {
+            "internalCode": "glossary-category-anatomy",
+            "name": "Anatomía"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `focus` | Sí | `GlossaryGraphNodeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"shortDefinition":"valor-ejemplo"}` |
+| `focus.conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `focus.slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `focus.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `focus.category` | Sí | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
+| `focus.category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
+| `focus.category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+| `focus.shortDefinition` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `groups` | Sí | `array<GlossaryNeighborGroupDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{},"direction":"outgoing","total":1,"items":[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]}]` |
+| `groups[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `groups[].direction` | Sí | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en el contrato OpenAPI. | `outgoing` |
+| `groups[].total` | Sí | `number` | Sin restricción adicional declarada | Tamaño real del grupo, no lo que vino en `items`. | `1` |
+| `groups[].items` | Sí | `array<GlossaryNeighborDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]` |
+| `groups[].items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `groups[].items[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `groups[].items[].display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `groups[].items[].category` | Sí | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
+| `groups[].items[].category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
+| `groups[].items[].category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/concepts/{conceptId}/glossary-neighborhood"
+}
+```
+
+---
+
+## 12. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1632,7 +1805,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /terminology/concepts/{conceptId}/relationships
+## 13. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1773,7 +1946,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /terminology/import-template
+## 14. GET /terminology/concepts/glossary-graph
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Lee el grafo de términos publicados del glosario médico
+- **Operation ID:** `TerminologyConceptsController_readGlossaryGraph`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyConceptsController.readGlossaryGraph](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
+
+### Descripción de negocio
+
+Lee el grafo de términos publicados del glosario médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lee los nodos activos del glosario y las relaciones entre ellos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/concepts/glossary-graph` en `TerminologyConceptsController_readGlossaryGraph`. El controlador delega en `ConceptsService.readGlossaryGraph`. No recibe body. El tipo de retorno estático es `Promise<GlossaryGraphDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `lang` | query | No | `string` | valores: `ES`, `EN` | Sin descripción específica en OpenAPI. | `ES` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Máximo de nodos devueltos; por defecto 500 | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/concepts/glossary-graph HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/concepts/glossary-graph?lang=ES&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryGraphDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "nodes": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "slug": "valor-ejemplo",
+      "display": "valor-ejemplo",
+      "category": {
+        "internalCode": "glossary-category-anatomy",
+        "name": "Anatomía"
+      },
+      "shortDefinition": "valor-ejemplo"
+    }
+  ],
+  "edges": [
+    {
+      "sourceConceptId": "00000000-0000-4000-8000-000000000001",
+      "targetConceptId": "00000000-0000-4000-8000-000000000001",
+      "type": {}
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "possiblyTruncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `nodes` | Sí | `array<GlossaryGraphNodeDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"shortDefinition":"valor-ejemplo"}]` |
+| `nodes[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `nodes[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nodes[].display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nodes[].category` | Sí | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
+| `nodes[].category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
+| `nodes[].category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+| `nodes[].shortDefinition` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `edges` | Sí | `array<GlossaryGraphEdgeDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"sourceConceptId":"00000000-0000-4000-8000-000000000001","targetConceptId":"00000000-0000-4000-8000-000000000001","type":{}}]` |
+| `edges[].sourceConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `edges[].targetConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `edges[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `possiblyTruncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El conjunto de valores no existe o no tiene versión vigente | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 404 | `NOT_FOUND` | La etiqueta no existe o no tiene versión vigente | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/concepts/glossary-graph"
+}
+```
+
+---
+
+## 15. GET /terminology/import-template
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1867,7 +2182,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 16. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2034,7 +2349,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /terminology/value-sets
+## 17. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2166,7 +2481,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /terminology/value-sets
+## 18. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2312,7 +2627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /terminology/value-sets/{id}/$expand
+## 19. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2458,7 +2773,151 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /terminology/ValueSet/{id}/$expand
+## 20. GET /terminology/value-sets/$glossary-facets
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Facetas del glosario: conteo por categoría y etiqueta
+- **Operation ID:** `TerminologyValueSetsController_readGlossaryFacets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyValueSetsController.readGlossaryFacets](../../src/modules/terminology/controllers/terminology-value-sets.controller.ts)
+
+### Descripción de negocio
+
+Facetas del glosario: conteo por categoría y etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las facetas del glosario médico: cuántos términos publicados tiene cada categoría y cada etiqueta, y qué etiquetas aparecen dentro de cada categoría. Es lo que pinta la rejilla de categorías sin traer términos. Sale de una consulta agregada: con el glosario en cientos de miles de términos, la alternativa —derivarlo en el navegador recorriendo el corpus— dejó de existir. Público por lo mismo que el listado de arriba: devuelve códigos, nombres y conteos del catálogo global, sin `tenant_id` ni datos de nadie. Un solo segmento, así que no compite con `:id/$expand`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/value-sets/$glossary-facets` en `TerminologyValueSetsController_readGlossaryFacets`. El controlador delega en `ValueSetsService.readGlossaryFacets`. No recibe body. El tipo de retorno estático es `Promise<GlossaryFacetsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/value-sets/$glossary-facets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit particular: `Throttle(PUBLIC_CATALOG_READ_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/value-sets/$glossary-facets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryFacetsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "categories": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "glossary-category-pharmacology",
+      "name": "Farmacología clínica",
+      "description": "Texto descriptivo de ejemplo",
+      "count": 1,
+      "translatedCount": 1,
+      "tags": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "internalCode": "glossary-tag-cardiovascular",
+          "name": "Cardiovascular",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "glossary-tag-cardiovascular",
+      "name": "Cardiovascular",
+      "count": 1
+    }
+  ],
+  "total": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `categories` | Sí | `array<GlossaryFacetCategoryDto>` | Sin restricción adicional declarada | Las categorías con al menos un término publicado. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-category-pharmacology","name":"Farmacología clínica","description":"Texto descriptivo de ejemplo","count":1,"translatedCount":1,"tags":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-tag-cardiovascular","name":"Cardiovascular","count":1}]}]` |
+| `categories[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores de la categoría. | `00000000-0000-4000-8000-000000000001` |
+| `categories[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-pharmacology`. | `glossary-category-pharmacology` |
+| `categories[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Farmacología clínica` |
+| `categories[].description` | No | `string` | Sin restricción adicional declarada | Qué agrupa, si el catálogo lo declara. | `Texto descriptivo de ejemplo` |
+| `categories[].count` | Sí | `number` | Sin restricción adicional declarada | Términos publicados de la categoría. | `1` |
+| `categories[].translatedCount` | Sí | `number` | Sin restricción adicional declarada | Cuántos de ellos tienen nombre en castellano. Una categoría puede sumar miles de nombres oficiales en inglés: el total solo engaña. | `1` |
+| `categories[].tags` | Sí | `array<GlossaryFacetTagDto>` | Sin restricción adicional declarada | Etiquetas que llevan sus términos, de la más frecuente a la menos. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-tag-cardiovascular","name":"Cardiovascular","count":1}]` |
+| `categories[].tags[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores de la etiqueta. | `00000000-0000-4000-8000-000000000001` |
+| `categories[].tags[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-tag-cardiovascular`. | `glossary-tag-cardiovascular` |
+| `categories[].tags[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Cardiovascular` |
+| `categories[].tags[].count` | Sí | `number` | Sin restricción adicional declarada | Términos publicados que la llevan (en la categoría, dentro de una categoría). | `1` |
+| `tags` | Sí | `array<GlossaryFacetTagDto>` | Sin restricción adicional declarada | Las etiquetas con al menos un término publicado, en todo el glosario. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-tag-cardiovascular","name":"Cardiovascular","count":1}]` |
+| `tags[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores de la etiqueta. | `00000000-0000-4000-8000-000000000001` |
+| `tags[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-tag-cardiovascular`. | `glossary-tag-cardiovascular` |
+| `tags[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Cardiovascular` |
+| `tags[].count` | Sí | `number` | Sin restricción adicional declarada | Términos publicados que la llevan (en la categoría, dentro de una categoría). | `1` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Términos publicados en todo el glosario (miembros del paraguas). | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_CATALOG_READ_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/value-sets/$glossary-facets"
+}
+```
+
+---
+
+## 21. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2600,7 +3059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /terminology/versions/{versionId}/import
+## 22. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2744,7 +3203,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /terminology/versions/{versionId}/import-file
+## 23. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2910,7 +3369,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /terminology/versions/{versionId}/publish
+## 24. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
