@@ -191,7 +191,8 @@ def _kpis(sources: Sources) -> dict[str, float | None]:
 
 def _site_series(sources: Sources, expr: str) -> list[tuple[str, list[Point]]]:
     series = [(_site_of(labels), _finite(points)) for labels, points in sources.query_range_series(expr)]
-    series = [(site, points) for site, points in series if points]
+    # Un sitio sin pedidos sería una línea en cero que sólo ocupa leyenda.
+    series = [(site, points) for site, points in series if points and max(v for _, v in points) > 0]
     series.sort(key=lambda item: -max(value for _, value in item[1]))
     return series[:MAX_SITES]
 
