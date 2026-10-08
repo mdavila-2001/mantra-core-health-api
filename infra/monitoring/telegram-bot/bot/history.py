@@ -18,40 +18,48 @@ Q_NET_OUT_MBPS = 'sum(rate(node_network_transmit_bytes_total[5m])) * 8 / 1e6'
 Q_TOP_CONTAINER_RAM = f'topk({TOP_CONTAINERS}, container_memory_working_set_bytes{{name!=""}} / 1073741824)'
 
 
+def ram_chart(sources: Sources) -> Photo:
+    total = (_scalar(sources.query(Q_MEM_TOTAL)) or 0) / GIB
+    points = sources.query_range(Q_RAM_GIB)
+    spec = ChartSpec("RAM usada · últimas 24 h", "GiB", total or None, f"Total {total:.0f} GiB")
+    return Photo(render_line_chart(points, spec, sources.timezone), f"🧠 RAM · {_range_summary(points, 'GiB', total)}")
+
+
+def cpu_chart(sources: Sources) -> Photo:
+    cores = _scalar(sources.query(Q_CPU_CORES))
+    points = sources.query_range(Q_CORES_IN_USE)
+    spec = ChartSpec("Núcleos en uso · últimas 24 h", "núcleos", cores, f"{int(cores)} núcleos" if cores else "")
+    return Photo(render_line_chart(points, spec, sources.timezone), f"🧮 CPU · {_range_summary(points, 'núcleos', cores)}")
+
+
+def disk_chart(sources: Sources) -> Photo:
+    size = (_scalar(sources.query(Q_DISK_SIZE)) or 0) / GIB
+    points = sources.query_range(Q_DISK_USED_GIB)
+    spec = ChartSpec("Disco / usado · últimas 24 h", "GiB", size or None, f"Total {size:.0f} GiB")
+    return Photo(render_line_chart(points, spec, sources.timezone), f"💾 Disco · {_range_summary(points, 'GiB', size)}")
+
+
+def net_chart(sources: Sources) -> Photo:
+    rx, tx = sources.query_range(Q_NET_IN_MBPS), sources.query_range(Q_NET_OUT_MBPS)
+    spec = ChartSpec("Tráfico de red · últimas 24 h", "Mbit/s", None, "")
+    caption = f"🌐 Red · entrada {_range_summary(rx, 'Mbit/s', None)} · salida {_range_summary(tx, 'Mbit/s', None)}"
+    return Photo(render_multi_line_chart([("Entrada", rx), ("Salida", tx)], spec, sources.timezone), caption)
+
+
+def containers_chart(sources: Sources) -> Photo:
+    spec = ChartSpec(f"RAM de los {TOP_CONTAINERS} contenedores que más usan · 24 h", "GiB", None, "")
+    return Photo(
+        render_multi_line_chart(_top_container_series(sources), spec, sources.timezone),
+        f"📦 Los {TOP_CONTAINERS} contenedores que más RAM usan ahora, con su historia de 24 h",
+    )
+
+
+CHARTS = {"ram": ram_chart, "cpu": cpu_chart, "disk": disk_chart, "net": net_chart, "containers": containers_chart}
+
+
 def resource_charts(sources: Sources) -> list[Photo]:
     """RAM, núcleos, disco y red de las últimas 24 h, más los contenedores que más RAM usan."""
-    tz = sources.timezone
-    total_gib = (_scalar(sources.query(Q_MEM_TOTAL)) or 0) / GIB
-    cores = _scalar(sources.query(Q_CPU_CORES))
-    disk_gib = (_scalar(sources.query(Q_DISK_SIZE)) or 0) / GIB
-    ram = sources.query_range(Q_RAM_GIB)
-    cpu = sources.query_range(Q_CORES_IN_USE)
-    disk = sources.query_range(Q_DISK_USED_GIB)
-    net_in = sources.query_range(Q_NET_IN_MBPS)
-    net_out = sources.query_range(Q_NET_OUT_MBPS)
-    top = _top_container_series(sources)
-    return [
-        Photo(
-            render_line_chart(ram, ChartSpec("RAM usada · últimas 24 h", "GiB", total_gib or None, f"Total {total_gib:.0f} GiB"), tz),
-            f"🧠 RAM · {_range_summary(ram, 'GiB', total_gib)}",
-        ),
-        Photo(
-            render_line_chart(cpu, ChartSpec("Núcleos en uso · últimas 24 h", "núcleos", cores, f"{int(cores)} núcleos" if cores else ""), tz),
-            f"🧮 CPU · {_range_summary(cpu, 'núcleos', cores)}",
-        ),
-        Photo(
-            render_line_chart(disk, ChartSpec("Disco / usado · últimas 24 h", "GiB", disk_gib or None, f"Total {disk_gib:.0f} GiB"), tz),
-            f"💾 Disco · {_range_summary(disk, 'GiB', disk_gib)}",
-        ),
-        Photo(
-            render_multi_line_chart([("Entrada", net_in), ("Salida", net_out)], ChartSpec("Tráfico de red · últimas 24 h", "Mbit/s", None, ""), tz),
-            f"🌐 Red · entrada {_range_summary(net_in, 'Mbit/s', None)} · salida {_range_summary(net_out, 'Mbit/s', None)}",
-        ),
-        Photo(
-            render_multi_line_chart(top, ChartSpec(f"RAM de los {TOP_CONTAINERS} contenedores que más usan · 24 h", "GiB", None, ""), tz),
-            f"📦 Los {TOP_CONTAINERS} contenedores que más RAM usan ahora, con su historia de 24 h",
-        ),
-    ]
+    return [chart(sources) for chart in CHARTS.values()]
 
 
 def _top_container_series(sources: Sources) -> list[tuple[str, list]]:

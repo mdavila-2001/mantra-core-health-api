@@ -202,6 +202,7 @@ services:
     image: tecnativa/docker-socket-proxy:0.3.0
     environment:
       CONTAINERS: "1"
+      EVENTS: "1"  # avisos de despliegue y caídas (sólo lectura del flujo de eventos)
       POST: "0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -275,6 +276,14 @@ services:
       DOCKER_URL: http://docker-read-proxy:2375
       DAILY_SUMMARY_HOUR: "8"
       SUMMARY_TIMEZONE: America/La_Paz
+      # IPs del equipo: sus logins por SSH se marcan como conocidos.
+      KNOWN_IPS: ${KNOWN_IPS:-}
+    # Logs del servidor de sólo lectura para los avisos de seguridad (logins
+    # SSH y bloqueos de fail2ban). Grupo 4 = adm, el dueño de esos archivos.
+    volumes:
+      - /var/log:/host/log:ro
+    group_add:
+      - "4"
     depends_on:
       - docker-read-proxy
     networks:

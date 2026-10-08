@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import threading
 import time
 from datetime import datetime, date
@@ -15,6 +16,7 @@ from .docker_state import fetch_container_states
 from .exporter import DockerStateCache, serve_exporter
 from .sources import LiveSources, Sources
 from .telegram import TelegramClient
+from .watchers import start_watchers
 
 log = logging.getLogger("alovida-bot")
 
@@ -37,6 +39,7 @@ def main() -> None:
         telegram.set_commands(MENU)
     except Exception as exc:  # noqa: BLE001 — sin menú los comandos igual funcionan
         log.warning("no se pudo registrar el menú de comandos: %s", exc)
+    _start_watchers(config, telegram, sources)
     _safe_send(telegram, config.telegram_chat_id, "🟢 Monitoreo del VPS iniciado. Probá /status o /ayuda.")
     log.info("exportador en :%s y bot escuchando", config.exporter_port)
     _poll_forever(config, telegram, sources)
@@ -72,6 +75,18 @@ def _daily_summary_loop(config: Config, telegram: TelegramClient, sources: Sourc
             except Exception as exc:  # noqa: BLE001 — el resumen en texto ya salió
                 log.warning("no se pudieron mandar las gráficas del resumen: %s", exc)
         time.sleep(SUMMARY_CHECK_SECONDS)
+
+
+def _start_watchers(config: Config, telegram: TelegramClient, sources: Sources) -> None:
+    def notify(text: str) -> None:
+        _safe_send(telegram, config.telegram_chat_id, text)
+
+    def send_chart(resource: str) -> None:
+        photo = history.CHARTS[resource](sources)
+        telegram.send_photo(config.telegram_chat_id, photo.png, "📈 Tendencia de la alerta · " + photo.caption)
+
+    known = frozenset(ip.strip() for ip in os.environ.get("KNOWN_IPS", "").split(",") if ip.strip())
+    start_watchers(notify, send_chart, config.docker_url, config.alertmanager_url, known_ips=known)
 
 
 def _deliver(telegram: TelegramClient, chat_id: int, reply) -> None:
