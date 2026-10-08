@@ -27,6 +27,8 @@ function rejection(scope, seedRow, reason, extra = {}) {
   return {
     scope,
     conceptRef: seedRow ? conceptRefOf(seedRow) : null,
+    term: seedRow?.esName ?? null,
+    category: seedRow?.categoryKey ?? null,
     reason,
     ...extra,
   };
@@ -60,12 +62,9 @@ export function mapBlocksToSections({ blocks, family, seedRow, base }) {
       rejected.push(rejection('section', seedRow, 'unmapped-heading', { ...where, detail: `Encabezado sin regla en la familia «${family}»` }));
       return;
     }
-    if (!allowed.includes(mapped.kind)) {
-      rejected.push(rejection('section', seedRow, 'kind-not-in-category-catalog', { ...where, kind: mapped.kind }));
-      return;
-    }
     if (!block.text) return;
-    for (const flag of block.flags ?? []) {
+    const [flag] = block.flags ?? [];
+    if (flag) {
       rejected.push(rejection('section', seedRow, flag, { ...where, kind: mapped.kind }));
       return;
     }
@@ -106,7 +105,7 @@ function factsAndReferences({ seedRow, pageUrl, source, extraFacts = [], referen
   ];
   return {
     facts,
-    references: [{ title: `MedlinePlus: ${seedRow.esName}`, url: pageUrl, source }, ...references],
+    references: [{ title: `Fuente: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. — ${seedRow.esName}`, url: pageUrl, source }, ...references],
   };
 }
 

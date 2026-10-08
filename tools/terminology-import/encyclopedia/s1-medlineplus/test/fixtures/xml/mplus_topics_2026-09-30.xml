@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Recorte de https://medlineplus.gov/xml/mplus_topics_2026-09-30.xml: solo los elementos <health-topic> citados por las pruebas (sin modificar). -->
-<health-topics total="14">
+<health-topics total="16">
 <health-topic meta-desc="Un ataque cerebral isquémico ocurre por un coágulo que bloquea o tapa un vaso sanguíneo en el cerebro. Entérese sobre síntomas, diagnóstico y tratamiento. " title="Accidente cerebrovascular isquémico" url="https://medlineplus.gov/spanish/ischemicstroke.html" id="6249" language="Spanish" date-created="08/26/2015">
 <also-called>Accidente cerebral isquémico</also-called>
 <also-called>Ataque isquémico</also-called>
@@ -3494,6 +3494,148 @@ Hay diferentes tipos de biopsias. Una biopsia por punción extrae con una aguja 
 <site title="Ureteral retrograde brush biopsy" url="https://medlineplus.gov/ency/article/003906.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003906.htm">
 <information-category>Encyclopedia</information-category>
 <organization>Medical Encyclopedia</organization>
+</site>
+</health-topic>
+<health-topic meta-desc="Un aborto es un procedimiento médico para terminar un embarazo. Usa medicinas o cirugía para retirar el embrión o el feto y la placenta del útero." title="Aborto" url="https://medlineplus.gov/spanish/abortion.html" id="2238" language="Spanish" date-created="10/31/2006">
+<also-called>Aborto inducido</also-called>
+<also-called>Aborto provocado</also-called>
+<also-called>Aborto terapéutico</also-called>
+<also-called>Interrupción del embarazo</also-called>
+<full-summary>&lt;p&gt;Un aborto inducido es un procedimiento para terminar un embarazo. Se puede hacer de dos maneras diferentes:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/ency/article/007382.htm"&gt;Aborto con medicamentos&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/ency/article/002912.htm"&gt;Aborto quirúrgico&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Un aborto inducido es diferente de un aborto espontáneo. Es la pérdida de un embarazo antes de la semana 20 de embarazo. Se le conoce más comúnmente como &lt;a href="https://medlineplus.gov/spanish/miscarriage.html"&gt;pérdida del embarazo&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Si está pensando en hacerse un aborto inducido, hable con su profesional de la salud. Su proveedor puede explicarle cómo se realizan los procedimientos, así como los riesgos y beneficios de cada tipo.&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/spanish/pregnancyandreproduction.html" id="20">Embarazo y reproducción</group>
+<group url="https://medlineplus.gov/spanish/femalereproductivesystem.html" id="42">Sistema reproductor femenino</group>
+<language-mapped-topic url="https://medlineplus.gov/abortion.html" id="122" language="English">Abortion</language-mapped-topic>
+<see-reference>Embriotomía</see-reference>
+<site title="Aborto médico" url="https://www.mayoclinic.org/es/tests-procedures/medical-abortion/about/pac-20394687?p=1" language-mapped-url="https://www.mayoclinic.org/tests-procedures/medical-abortion/about/pac-20394687?p=1">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+<site title="Aborto: Medicamento" url="https://medlineplus.gov/spanish/ency/article/007382.htm" language-mapped-url="https://medlineplus.gov/ency/article/007382.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Aborto: Procedimiento" url="https://medlineplus.gov/spanish/ency/article/002912.htm" language-mapped-url="https://medlineplus.gov/ency/article/002912.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Aborto: Procedimiento y cuidados posteriores" url="https://medlineplus.gov/spanish/ency/patientinstructions/000658.htm" language-mapped-url="https://medlineplus.gov/ency/patientinstructions/000658.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Dilatación y legrado" url="https://medlineplus.gov/spanish/ency/article/002914.htm" language-mapped-url="https://medlineplus.gov/ency/article/002914.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Serie del procedimiento de dilatación y legrado" url="https://medlineplus.gov/spanish/ency/esp_presentations/100013_1.htm" language-mapped-url="https://medlineplus.gov/ency/presentations/100013_1.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Terminación del embarazo con medicamentos" url="https://medlineplus.gov/spanish/ency/patientinstructions/000835.htm" language-mapped-url="https://medlineplus.gov/ency/patientinstructions/000835.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="¿Podría un aborto aumentar el riesgo de problemas en un embarazo posterior?" url="https://www.mayoclinic.org/es/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1" language-mapped-url="https://www.mayoclinic.org/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+</health-topic>
+<health-topic meta-desc="An abortion is a medical procedure to end a pregnancy. It uses medicine or surgery to remove the embryo or fetus and placenta from the uterus. " title="Abortion" url="https://medlineplus.gov/abortion.html" id="122" language="English" date-created="03/19/2002">
+<also-called>Induced Abortion</also-called>
+<full-summary>&lt;p&gt;An induced abortion is a procedure to end a pregnancy. It can be done two different ways:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/ency/article/007382.htm"&gt;Medication abortion&lt;/a&gt; (also called medical abortion)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/ency/article/002912.htm"&gt;Procedural abortion&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An induced abortion is different from a spontaneous abortion. That is the loss of a pregnancy before the 20th week of pregnancy. It is more commonly known as a &lt;a href="https://medlineplus.gov/miscarriage.html"&gt;miscarriage&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you are thinking of having an induced abortion, talk with your health care provider. Your provider can explain how the procedures are done, as well as the risks and benefits of each.&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/pregnancyandreproduction.html" id="20">Pregnancy and Reproduction</group>
+<group url="https://medlineplus.gov/femalereproductivesystem.html" id="42">Female Reproductive System</group>
+<language-mapped-topic url="https://medlineplus.gov/spanish/abortion.html" id="2238" language="Spanish">Aborto</language-mapped-topic>
+<mesh-heading>
+<descriptor id="D000028">Abortion, Induced</descriptor>
+</mesh-heading>
+<other-language vernacular-name="简体中文" url="https://medlineplus.gov/languages/abortion.html#Chinese, Simplified (Mandarin dialect)">Chinese, Simplified (Mandarin dialect)</other-language>
+<other-language vernacular-name="繁體中文" url="https://medlineplus.gov/languages/abortion.html#Chinese, Traditional (Cantonese dialect)">Chinese, Traditional (Cantonese dialect)</other-language>
+<other-language vernacular-name="हिन्दी" url="https://medlineplus.gov/languages/abortion.html#Hindi">Hindi</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/spanish/abortion.html">Spanish</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/languages/abortion.html#Spanish">Spanish</other-language>
+<other-language vernacular-name="Tiếng Việt" url="https://medlineplus.gov/languages/abortion.html#Vietnamese">Vietnamese</other-language>
+<site title="Abortion - medication" url="https://medlineplus.gov/ency/article/007382.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/007382.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion - procedure" url="https://medlineplus.gov/ency/article/002912.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/002912.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion - procedure - aftercare" url="https://medlineplus.gov/ency/patientinstructions/000658.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/patientinstructions/000658.htm">
+<information-category>Patient Handouts</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion Care" url="https://www.acog.org/womens-health/faqs/induced-abortion" language-mapped-url="https://www.acog.org/Patients/Search-Patient-Education-Pamphlets-Spanish/Files/El-aborto-provocado">
+<information-category>Learn More</information-category>
+<organization>American College of Obstetricians and Gynecologists</organization>
+</site>
+<site title="Could an Elective Abortion Raise the Risk of Problems in a Future Pregnancy?" url="https://www.mayoclinic.org/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1" language-mapped-url="https://www.mayoclinic.org/es/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="D and C" url="https://medlineplus.gov/ency/article/002914.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/002914.htm">
+<information-category>Learn More</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Dilation and Curettage (D&amp;C)" url="https://www.mayoclinic.org/tests-procedures/dilation-and-curettage/about/pac-20384910?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="Ending a Pregnancy" url="https://familydoctor.org/ending-a-pregnancy/" language-mapped-url="https://es.familydoctor.org/ponerle-fin-a-un-embarazo/">
+<information-category>Learn More</information-category>
+<organization>American Academy of Family Physicians</organization>
+</site>
+<site title="Ending pregnancy with medicines" url="https://medlineplus.gov/ency/patientinstructions/000835.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/patientinstructions/000835.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Medical Abortion" url="https://www.mayoclinic.org/tests-procedures/medical-abortion/about/pac-20394687?p=1" language-mapped-url="https://www.mayoclinic.org/es/tests-procedures/medical-abortion/about/pac-20394687?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="Pregnancy Choices: Raising the Baby, Adoption, and Abortion" url="https://www.acog.org/womens-health/faqs/pregnancy-choices-raising-the-baby-adoption-and-abortion">
+<information-category>Learn More</information-category>
+<organization>American College of Obstetricians and Gynecologists</organization>
+</site>
+<site title="Induced abortion" url="https://pubmed.ncbi.nlm.nih.gov/?term=%22Abortion%2C+Induced%22%5Bmajr%3Anoexp%5D+AND+humans%5Bmh%5D+AND+english%5Bla%5D+AND+%22last+1+Year%22+%5Bedat%5D+AND+%28patient+education+handout%5Bpt%5D+OR+guideline%5Bpt%5D+OR+clinical+trial%5Bpt%5D%29++NOT+%28letter%5Bpt%5D+OR+case+reports%5Bpt%5D+OR+editorial%5Bpt%5D+OR+comment%5Bpt%5D%29+AND+free+full+text%5Bsb%5D+">
+<information-category>Journal Articles</information-category>
+</site>
+<site title="Questions and Answers on Mifepristone for Medical Termination of Pregnancy Through Ten Weeks Gestation" url="https://www.fda.gov/drugs/postmarket-drug-safety-information-patients-and-providers/questions-and-answers-mifepristone-medical-termination-pregnancy-through-ten-weeks-gestation">
+<information-category>Learn More</information-category>
+<organization>Food and Drug Administration</organization>
+</site>
+<site title="What to Do When Your Pregnancy Is Unexpected" url="https://familydoctor.org/what-to-do-when-your-pregnancy-is-unexpected/" language-mapped-url="https://es.familydoctor.org/que-hacer-cuando-su-embarazo-es-inesperado/">
+<information-category>Learn More</information-category>
+<organization>American Academy of Family Physicians</organization>
 </site>
 </health-topic>
 </health-topics>

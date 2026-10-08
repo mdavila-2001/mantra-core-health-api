@@ -34,8 +34,11 @@ lib/guards.mjs      dosis y A.D.A.M.
 lib/pages.mjs       lectura de la página cacheada (verificación de literalidad)
 lib/article.mjs     ensamblado del artículo (temas y guías)
 lib/images.mjs      selección y validación de imágenes (Wikidata → Commons)
+lib/contract.mjs    validador del contrato de §12.3: la corrida falla si un artículo lo rompe
 lib/coverage.mjs    cifras de cobertura medidas sobre la salida
-test/               pruebas con fixtures reales y chicos
+render-evidence.mjs tablas de COVERAGE.md (cuenta, no interpreta)
+render-gaps.mjs     tablas de GAPS.md
+test/               31 pruebas con fixtures reales y chicos (node --test)
 ```
 
 ## Correr
@@ -55,6 +58,10 @@ Insumos (fuera de git, raíz del workspace): `glossary-data-build-catalogos/ndjs
 `glossary-data-build/cache/medlineplus/` (XML del 2026-09-30 y guías), la semilla
 `mantra-core-health/public/glossary-seed/shards/` y `wikidata-images.ndjson`.
 Salida por defecto: `docs/progress/evidence/lane-41/F9/s1-medlineplus/output/`.
+
+> Las pruebas de este corte no están enganchadas al script `test:terminology-import` del
+> `package.json` (su glob es `tools/terminology-import/test/*.test.mjs`); correrlas con el
+> comando de arriba o ampliar el glob en otra tarjeta.
 
 Idempotente: con las mismas entradas y la misma caché, `articles.ndjson` sale
 byte a byte igual (la fecha de consulta a Commons se guarda dentro de su caché).
