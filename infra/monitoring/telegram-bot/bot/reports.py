@@ -160,9 +160,13 @@ def containers_report(states: list[ContainerState], docker_up: bool, now: dateti
     if not docker_up:
         return "⚠️ No pude consultar Docker. Revisá el contenedor docker-read-proxy."
     now = now or datetime.now(timezone.utc)
-    lines = [f"<b>📦 Contenedores ({len(states)})</b>"]
-    ordered = sorted(states, key=lambda state: (_severity_rank(state), state.display))
+    current = [state for state in states if not state.stale(now)]
+    hidden = len(states) - len(current)
+    lines = [f"<b>📦 Contenedores ({len(current)})</b>"]
+    ordered = sorted(current, key=lambda state: (_severity_rank(state), state.display))
     lines.extend(_container_line(state, now) for state in ordered)
+    if hidden:
+        lines.append(f"\n<i>+ {hidden} detenidos hace más de 1 h (restos de despliegues viejos), no se muestran.</i>")
     return "\n".join(lines)
 
 
@@ -219,6 +223,8 @@ def _cpu_line(sources: Sources) -> str:
 def _containers_summary(states: list[ContainerState], docker_up: bool) -> str:
     if not docker_up:
         return "📦 Contenedores: ⚠️ no pude consultar Docker"
+    now = datetime.now(timezone.utc)
+    states = [state for state in states if not state.stale(now)]
     running = sum(state.running for state in states)
     unhealthy = [state for state in states if state.unhealthy]
     down = [state for state in states if state.expected_running and not state.running]

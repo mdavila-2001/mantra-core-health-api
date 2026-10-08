@@ -54,25 +54,29 @@ tests:
               summary: "alovida-backend-central/api está UNHEALTHY"
               description: "Su healthcheck falla hace más de 3 min. Si tiene la etiqueta autoheal=true, autoheal lo reinicia solo."
 
-  - name: Un one-shot terminado NO es un contenedor caído; uno con restart always sí
-    interval: 30s
+  - name: Avisa si un contenedor que corría se detiene; no por restos viejos ni one-shots
+    interval: 1m
     input_series:
       - series: 'alovida_container_running{name="api-migrate",display="x/api-migrate"}'
-        values: '0x10'
+        values: '1 1 0 0 0 0 0'
       - series: 'alovida_container_expected_running{name="api-migrate",display="x/api-migrate"}'
-        values: '0x10'
+        values: '0x6'
       - series: 'alovida_container_running{name="minio",display="x/minio"}'
-        values: '0x10'
+        values: '1 1 0 0 0 0 0'
       - series: 'alovida_container_expected_running{name="minio",display="x/minio"}'
-        values: '1x10'
+        values: '1x6'
+      - series: 'alovida_container_running{name="viejo",display="x/viejo"}'
+        values: '0x6'
+      - series: 'alovida_container_expected_running{name="viejo",display="x/viejo"}'
+        values: '1x6'
     alert_rule_test:
-      - eval_time: 4m
+      - eval_time: 5m
         alertname: ContainerDown
         exp_alerts:
           - exp_labels: { severity: critical, name: minio, display: x/minio }
             exp_annotations:
-              summary: "x/minio está DETENIDO"
-              description: "Tiene política de reinicio y no está corriendo hace más de 3 min."
+              summary: "x/minio se DETUVO"
+              description: "Estaba corriendo hace menos de 15 min, tiene política de reinicio y ahora está parado. Si no fue un despliegue o una parada a mano, revisalo."
 
   - name: Más de 3 reinicios en 15 min es un bucle
     interval: 1m

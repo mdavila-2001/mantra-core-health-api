@@ -7,7 +7,7 @@ contador de reinicios, ni la política de reinicio. Eso sale de acá.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
 from .http_json import get_json
@@ -15,6 +15,10 @@ from .http_json import get_json
 # Políticas con las que Docker promete mantener el contenedor vivo. Un
 # contenedor con `restart: "no"` (los *-init, api-migrate) termina a propósito.
 RESTARTING_POLICIES = frozenset({"always", "unless-stopped", "on-failure"})
+
+# Un contenedor detenido hace más que esto es un resto de un despliegue viejo
+# (Coolify deja los anteriores parados), no una caída: no se cuenta como tal.
+STALE_AFTER = timedelta(hours=1)
 
 # Etiquetas que Coolify y compose ponen, de la más legible a la menos.
 RESOURCE_LABELS = ("coolify.resourceName", "coolify.name", "com.docker.compose.project")
@@ -32,6 +36,7 @@ class ContainerState:
     oom_killed: bool
     restart_policy: str
     started_at: datetime | None
+    finished_at: datetime | None = None
 
     @property
     def running(self) -> bool:
@@ -39,7 +44,13 @@ class ContainerState:
 
     @property
     def unhealthy(self) -> bool:
-        return self.health == "unhealthy"
+        # Sólo si corre: un contenedor detenido conserva su último health.
+        return self.running and self.health == "unhealthy"
+
+    def stale(self, now: datetime) -> bool:
+        if self.running or self.finished_at is None:
+            return False
+        return now - self.finished_at > STALE_AFTER
 
     @property
     def expected_running(self) -> bool:
@@ -76,6 +87,7 @@ def parse_inspect(inspect: dict[str, Any]) -> ContainerState:
         oom_killed=bool(state.get("OOMKilled", False)),
         restart_policy=policy,
         started_at=_parse_docker_time(state.get("StartedAt")),
+        finished_at=_parse_docker_time(state.get("FinishedAt")),
     )
 
 
