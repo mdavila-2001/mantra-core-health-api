@@ -28,6 +28,7 @@ import { HttpClient, ensureDir, readNdjson, sha256File, writeJson, writeNdjson }
 import { parseTopics } from '../../lib/glossary-es/medlineplus.mjs';
 import { LAB_SOURCE, TOPIC_SOURCE, buildLabArticle, buildTopicArticle } from './lib/article.mjs';
 import { DEFAULTS, S1_USER_AGENT } from './lib/config.mjs';
+import { validateArticle } from './lib/contract.mjs';
 import { measureCoverage, plain } from './lib/coverage.mjs';
 import { buildImage, commonsRequestUrl, imageCandidate, indexMeshImages, parseCommonsResponse } from './lib/images.mjs';
 import { isoFromSpanishDate, parseTopicPage, topicPageCachePath } from './lib/pages.mjs';
@@ -167,7 +168,7 @@ export async function buildAll(opts) {
     const built = buildImage({ commons: commons.get(c.candidate.row.file), term: c.term, wikidataId: c.candidate.row.wikidataId });
     if (built.reject) {
       trace.push({ ...base, outcome: 'rejected', reason: built.reject.reason, detail: built.reject.detail });
-      rejected.push({ scope: 'image', conceptRef: { system: c.seedRow.codeSystem, code: c.seedRow.code, slug: c.seedRow.slug }, reason: built.reject.reason, detail: built.reject.detail, file: c.candidate.row.file });
+      rejected.push({ scope: 'image', conceptRef: { system: c.seedRow.codeSystem, code: c.seedRow.code, slug: c.seedRow.slug }, term: c.seedRow.esName, category: c.seedRow.categoryKey, reason: built.reject.reason, detail: built.reject.detail, file: c.candidate.row.file });
       continue;
     }
     c.article.images.push(built.image);
@@ -175,6 +176,8 @@ export async function buildAll(opts) {
   }
 
   articles.sort((a, b) => a.conceptRef.slug.localeCompare(b.conceptRef.slug));
+  const contractErrors = articles.flatMap(validateArticle);
+  if (contractErrors.length) throw new Error(`El contrato de §12.3 no se cumple (${contractErrors.length} errores). Primeros: ${contractErrors.slice(0, 5).join(' | ')}`);
   const coverage = measureCoverage({ terms: termsInScope, articles, rejected });
 
   ensureDir(o.outDir);

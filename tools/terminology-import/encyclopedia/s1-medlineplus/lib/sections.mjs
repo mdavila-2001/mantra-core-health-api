@@ -10,6 +10,9 @@
 //   - `malformed-markup`: etiquetas fuera de la gramática de la NLM
 //     (`<ph3>`, `<topic>` en minúscula con contenido, etc.).
 //   - `table`: una tabla no cabe en texto plano sin inventar separadores.
+//   - `adam-encyclopedia-link`: el bloque enlaza a la Enciclopedia Médica de
+//     MedlinePlus (`/ency/`, contenido de A.D.A.M.); el texto que acompaña es un
+//     puntero a ese contenido, así que el bloque no se publica.
 // =============================================================================
 
 import { decodeEntities, htmlToText } from '../../../lib/glossary-es/common.mjs';
@@ -19,6 +22,7 @@ const SELF_CLOSED_TOPIC = /<topic\s+id="\d+"\s+linktext="([^"]*)"\s*\/>/gi;
 /** Cualquier otra forma de `<topic …>` / `<ph3>` no tiene gramática segura. */
 const MALFORMED = /<\/?(topic|ph3)\b/i;
 const TABLE = /<table\b/i;
+const ADAM_ENCYCLOPEDIA_LINK = /medlineplus\.gov\/(?:spanish\/)?ency\//i;
 const IMG = /<img\b[^>]*>/gi;
 
 /** Sustituye los `<TOPIC … LINKTEXT="x"/>` autocerrados por su texto visible. Devuelve HTML. */
@@ -50,6 +54,7 @@ export function splitSections(rawHtml) {
     const flags = [];
     if (MALFORMED.test(bodyHtml) || MALFORMED.test(part.slice(0, 40))) flags.push('malformed-markup');
     if (TABLE.test(html)) flags.push('table');
+    if (ADAM_ENCYCLOPEDIA_LINK.test(bodyHtml)) flags.push('adam-encyclopedia-link');
     blocks.push({ heading, text, images, flags });
   }
   return blocks;

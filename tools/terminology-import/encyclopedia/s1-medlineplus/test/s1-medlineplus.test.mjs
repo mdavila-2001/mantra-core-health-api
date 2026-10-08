@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { readNdjson } from '../../../lib/glossary-es/common.mjs';
 import { parseTopics } from '../../../lib/glossary-es/medlineplus.mjs';
 import { buildAll } from '../build-articles.mjs';
+import { validateArticle } from '../lib/contract.mjs';
 import { adamCheck, doseCheck } from '../lib/guards.mjs';
 import {
   ALLOWED_IMAGE_HOSTS, allowedLicense, buildImage, commonsCaption, imageCandidate, indexMeshImages, isAllowedImageUrl,
@@ -85,6 +86,12 @@ test('markup fuera de la gramática y tablas quedan marcados, no deformados', ()
   assert.ok(malformed.some((b) => b.flags.includes('malformed-markup')), '<ph3> debe marcarse');
   const tables = splitSections(topicById.get(HDL).fullSummaryHtml);
   assert.ok(tables.some((b) => b.flags.includes('table')), '<table> debe marcarse');
+});
+
+test('un bloque que enlaza a la Enciclopedia Médica (A.D.A.M.) queda marcado', () => {
+  const topic = topics.find((x) => x.language === 'Spanish' && x.title === 'Aborto');
+  assert.ok(topic, 'Aborto está en el XML real');
+  assert.ok(splitSections(topic.fullSummaryHtml).some((b) => b.flags.includes('adam-encyclopedia-link')));
 });
 
 test('bulletItems devuelve las viñetas literales en orden', () => {
@@ -333,4 +340,23 @@ test('parseCommonsResponse lee la respuesta real de la API', () => {
   const map = parseCommonsResponse(entry.response);
   assert.equal(map.get('Leonardo da vinci, Drawing of a Woman\'s Torso.jpg').license, 'Public domain');
   assert.equal(map.get('Brain biopsy under stereotaxy.jpg').author, null);
+});
+
+// --- contrato -------------------------------------------------------------------------
+
+test('contrato §12.3: los artículos de los fixtures lo cumplen y las violaciones se detectan', async () => {
+  const { articles } = await runFixtures();
+  assert.ok(articles.length > 0);
+  for (const a of articles) assert.deepEqual(validateArticle(a), [], a.conceptRef.slug);
+  const stroke = articles.find((x) => x.conceptRef.slug === 'medlineplus-es-6249');
+  const broken = structuredClone(stroke);
+  delete broken.sections[0].sourceUrl;
+  broken.sections[1].kind = 'inventado';
+  broken.sections[2].lang = 'en';
+  assert.ok(validateArticle(broken).length >= 3);
+  const withBadImage = structuredClone(articles.find((x) => x.images.length));
+  withBadImage.images[0].url = 'https://medlineplus.gov/images/IschemicStroke.jpg';
+  withBadImage.images[0].license = 'CC BY-NC 4.0';
+  assert.ok(validateArticle(withBadImage).some((e) => /CSP/.test(e)));
+  assert.ok(validateArticle(withBadImage).some((e) => /licencia no permitida/.test(e)));
 });
