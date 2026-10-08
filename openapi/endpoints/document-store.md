@@ -46,7 +46,7 @@ NestJS resuelve `GET /document-store/collections/{collection}/documents` en `Doc
 | `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
 | `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
 | `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
-| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento | `createdAt` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
 | `tenantId` | query | Sí | `string` | formato `uuid` | Tenant cuyos documentos se listan | `00000000-0000-4000-8000-000000000001` |
 | `documentType` | query | No | `string` | Sin restricción adicional declarada | Filtrar por clasificación de documento | `valor-ejemplo` |
 

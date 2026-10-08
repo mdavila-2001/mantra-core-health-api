@@ -50,6 +50,8 @@ function build() {
     findEquivalent: jest.fn(),
     create: jest.fn(),
     findByTypesForSources: jest.fn(() => Promise.resolve([])),
+    findByTypesForTargets: jest.fn(() => Promise.resolve([])),
+    countNeighborsByType: jest.fn(() => Promise.resolve([])),
   } as any;
   const valueSetsRepo = {
     findMembersByConceptForUpdate: jest.fn(() => Promise.resolve([])),
@@ -1354,6 +1356,414 @@ describe('ConceptsService', () => {
           imageThumbnailUrl: 'https://upload.wikimedia.org/heart-320.jpg',
         });
         expect(result.items[1]).not.toHaveProperty('imageThumbnailUrl');
+      });
+    });
+
+    describe('vecindario', () => {
+      const FOCUS = 'concept-fiebre';
+      const CATEGORY = {
+        id: 'vs-cat-sintomas',
+        internalCode: 'glossary-category-symptoms',
+        name: 'Síntomas',
+      };
+      const UMBRELLA = glossaryValueSets[2];
+
+      interface FixtureTerm {
+        id: string;
+        display: string;
+        slug?: string;
+        state?: string;
+      }
+
+      const edge = (
+        sourceConceptId: string,
+        targetConceptId: string,
+        relationshipTypeConceptId: string,
+      ) => ({ sourceConceptId, targetConceptId, relationshipTypeConceptId });
+
+      /**
+       * Un glosario mínimo: el término central («Fiebre») más los vecinos que
+       * cada prueba declare. Todos pertenecen al paraguas; `categorized` los
+       * pone además en la categoría «Síntomas».
+       */
+      function setUpNeighborhood(
+        neighbors: FixtureTerm[],
+        {
+          focusState = CONCEPTS.TERM_ACTIVE,
+          focusInGlossary = true,
+          focusSlug = 'fiebre',
+        }: {
+          focusState?: string;
+          focusInGlossary?: boolean;
+          focusSlug?: string | null;
+        } = {},
+      ) {
+        const built = build();
+        const {
+          conceptsRepo,
+          designationsRepo,
+          valueSetsRepo,
+          relationshipsRepo,
+        } = built;
+        const terms: FixtureTerm[] = [
+          {
+            id: FOCUS,
+            display: 'Fiebre',
+            slug: focusSlug ?? undefined,
+            state: focusState,
+          },
+          ...neighbors,
+        ];
+        const concept = (term: FixtureTerm) => ({
+          id: term.id,
+          display: term.display,
+          stateConceptId: term.state ?? CONCEPTS.TERM_ACTIVE,
+        });
+        conceptsRepo.findById.mockImplementation((_em: unknown, id: string) =>
+          Promise.resolve(
+            terms.filter((term) => term.id === id).map(concept)[0] ?? null,
+          ),
+        );
+        conceptsRepo.findByIds.mockImplementation(
+          (_em: unknown, ids: string[]) =>
+            Promise.resolve(
+              new Map(
+                terms
+                  .filter((term) => ids.includes(term.id))
+                  .map((term) => [term.id, concept(term)]),
+              ),
+            ),
+        );
+        designationsRepo.findPropertyForConcepts.mockImplementation(
+          (_em: unknown, ids: string[], code: string) =>
+            Promise.resolve(
+              code === GLOSSARY_SLUG_PROPERTY_CODE
+                ? terms
+                    .filter(
+                      (term) =>
+                        ids.includes(term.id) && term.slug !== undefined,
+                    )
+                    .map((term) => ({
+                      conceptId: term.id,
+                      valueJson: term.slug,
+                    }))
+                : [],
+            ),
+        );
+        valueSetsRepo.findValueSetsByConceptIds.mockImplementation(
+          (_em: unknown, ids: string[]) =>
+            Promise.resolve(
+              new Map(
+                ids.map((id) => [
+                  id,
+                  id === FOCUS && !focusInGlossary
+                    ? [CATEGORY]
+                    : [UMBRELLA, CATEGORY],
+                ]),
+              ),
+            ),
+        );
+        return built;
+      }
+
+      const diseases: FixtureTerm[] = [
+        { id: 'c-neumonia', display: 'Neumonía', slug: 'neumonia' },
+        { id: 'c-gripe', display: 'Gripe', slug: 'gripe' },
+        { id: 'c-dengue', display: 'Dengue', slug: 'dengue' },
+      ];
+
+      it('lee los dos sentidos: el síntoma muestra las enfermedades que lo presentan (entrantes)', async () => {
+        const { service, relationshipsRepo, em } = setUpNeighborhood(diseases);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 3,
+          },
+        ]);
+        // La relación se guarda en la enfermedad: enfermedad → síntoma.
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          diseases.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(relationshipsRepo.findByTypesForTargets).toHaveBeenCalledWith(
+          em,
+          expect.arrayContaining([CONCEPTS.REL_SYMPTOM]),
+          [FOCUS],
+        );
+        expect(result.focus).toEqual({
+          conceptId: FOCUS,
+          slug: 'fiebre',
+          display: 'Fiebre',
+          category: { internalCode: CATEGORY.internalCode, name: 'Síntomas' },
+          shortDefinition: '',
+        });
+        expect(result.groups).toEqual([
+          {
+            type: 'SYMPTOM',
+            direction: 'incoming',
+            total: 3,
+            // Alfabético en castellano, no el orden en que vinieron las aristas.
+            items: [
+              expect.objectContaining({
+                conceptId: 'c-dengue',
+                display: 'Dengue',
+              }),
+              expect.objectContaining({
+                conceptId: 'c-gripe',
+                display: 'Gripe',
+              }),
+              expect.objectContaining({
+                conceptId: 'c-neumonia',
+                slug: 'neumonia',
+                category: {
+                  internalCode: CATEGORY.internalCode,
+                  name: 'Síntomas',
+                },
+              }),
+            ],
+          },
+        ]);
+      });
+
+      it('lee las relaciones salientes con el término como origen', async () => {
+        const treatments: FixtureTerm[] = [
+          { id: 'c-paracetamol', display: 'Paracetamol', slug: 'paracetamol' },
+        ];
+        const { service, relationshipsRepo, em } =
+          setUpNeighborhood(treatments);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_TREATMENT,
+            direction: 'outgoing',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          edge(FOCUS, 'c-paracetamol', CONCEPTS.REL_TREATMENT),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          [FOCUS],
+        );
+        expect(result.groups).toEqual([
+          expect.objectContaining({
+            type: 'TREATMENT',
+            direction: 'outgoing',
+            total: 1,
+            items: [
+              expect.objectContaining({
+                conceptId: 'c-paracetamol',
+                slug: 'paracetamol',
+              }),
+            ],
+          }),
+        ]);
+      });
+
+      it('el total es el del grupo y no el de la muestra: perGroup recorta los ítems, no el total', async () => {
+        const many: FixtureTerm[] = Array.from({ length: 12 }, (_, i) => ({
+          id: `c-enf-${String(i).padStart(2, '0')}`,
+          display: `Enfermedad ${String(i).padStart(2, '0')}`,
+          slug: `enfermedad-${i}`,
+        }));
+        const { service, relationshipsRepo } = setUpNeighborhood(many);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 12,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          many.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 5,
+        });
+
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0].total).toBe(12);
+        expect(result.groups[0].items.map((i) => i.display)).toEqual([
+          'Enfermedad 00',
+          'Enfermedad 01',
+          'Enfermedad 02',
+          'Enfermedad 03',
+          'Enfermedad 04',
+        ]);
+      });
+
+      it('la página de un grupo pide sólo ese tipo y ese sentido, y respeta offset y limit', async () => {
+        const many: FixtureTerm[] = Array.from({ length: 6 }, (_, i) => ({
+          id: `c-enf-${i}`,
+          display: `Enfermedad ${i}`,
+          slug: `enfermedad-${i}`,
+        }));
+        const { service, relationshipsRepo, em } = setUpNeighborhood(many);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 6,
+          },
+          // El otro sentido existe pero no se pidió: no puede colarse.
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'outgoing',
+            total: 99,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          many.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          type: 'SYMPTOM',
+          direction: 'incoming',
+          offset: 2,
+          limit: 3,
+        });
+
+        expect(relationshipsRepo.countNeighborsByType).toHaveBeenCalledWith(
+          em,
+          FOCUS,
+          [CONCEPTS.REL_SYMPTOM],
+          expect.any(Object),
+        );
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0]).toMatchObject({
+          type: 'SYMPTOM',
+          direction: 'incoming',
+          total: 6,
+        });
+        expect(result.groups[0].items.map((i) => i.display)).toEqual([
+          'Enfermedad 2',
+          'Enfermedad 3',
+          'Enfermedad 4',
+        ]);
+      });
+
+      it('omite vecinos sin slug, sin publicar, repetidos y el propio término', async () => {
+        const mixed: FixtureTerm[] = [
+          { id: 'c-ok', display: 'Gripe', slug: 'gripe' },
+          { id: 'c-sin-slug', display: 'Sin slug', slug: undefined },
+          {
+            id: 'c-borrador',
+            display: 'Borrador',
+            slug: 'borrador',
+            state: CONCEPTS.TERM_DRAFT,
+          },
+        ];
+        const { service, relationshipsRepo } = setUpNeighborhood(mixed);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+          edge('c-ok', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-ok', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-sin-slug', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-borrador', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge(FOCUS, FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-inexistente', FOCUS, CONCEPTS.REL_SYMPTOM),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0].items.map((i) => i.conceptId)).toEqual([
+          'c-ok',
+        ]);
+      });
+
+      it('un término sin vecinos devuelve el foco y ningún grupo', async () => {
+        const { service, relationshipsRepo } = setUpNeighborhood([]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(result.focus.conceptId).toBe(FOCUS);
+        expect(result.groups).toEqual([]);
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+        expect(relationshipsRepo.findByTypesForTargets).not.toHaveBeenCalled();
+      });
+
+      it('ordena los grupos por tipo y sentido de forma estable', async () => {
+        const { service, relationshipsRepo } = setUpNeighborhood(diseases);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 1,
+          },
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+            direction: 'outgoing',
+            total: 1,
+          },
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'outgoing',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          edge(FOCUS, 'c-gripe', CONCEPTS.REL_DISEASE),
+          edge(FOCUS, 'c-dengue', CONCEPTS.REL_SYMPTOM),
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+          edge('c-neumonia', FOCUS, CONCEPTS.REL_SYMPTOM),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(
+          result.groups.map((group) => `${group.type}|${group.direction}`),
+        ).toEqual(['DISEASE|outgoing', 'SYMPTOM|outgoing', 'SYMPTOM|incoming']);
+      });
+
+      it.each([
+        ['no existe', () => ({ found: false })],
+        ['no es del glosario', () => ({ found: true, inGlossary: false })],
+        ['es un borrador', () => ({ found: true, state: CONCEPTS.TERM_DRAFT })],
+        ['no tiene slug', () => ({ found: true, slug: null })],
+      ])('responde 404 si el concepto %s', async (_name, makeCase) => {
+        const scenario = makeCase() as {
+          found: boolean;
+          inGlossary?: boolean;
+          state?: string;
+          slug?: string | undefined;
+        };
+        const { service, conceptsRepo } = setUpNeighborhood([], {
+          focusInGlossary: scenario.inGlossary ?? true,
+          focusState: scenario.state ?? CONCEPTS.TERM_ACTIVE,
+          focusSlug: 'slug' in scenario ? scenario.slug : 'fiebre',
+        });
+        if (!scenario.found) conceptsRepo.findById.mockResolvedValue(null);
+
+        await expect(
+          service.readGlossaryNeighborhood(FOCUS, 'ES', { perGroup: 8 }),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
       });
     });
 

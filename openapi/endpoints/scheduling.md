@@ -237,6 +237,10 @@ Content-Type: application/json
 | `durationMinutes` | Sí | `number` | mínimo 5; máximo 480 | Sin descripción específica en el contrato OpenAPI. | `5` |
 | `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Modalidad de la atención. Ausente = PRESENCIAL. No es el canal de la reserva. | `PRESENCIAL` |
+| `followUpOf` | No | `FollowUpOriginDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001"}` |
+| `followUpOf.bookingId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `followUpOf.encounterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `followUpOf.formInstanceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -254,7 +258,12 @@ Content-Type: application/json
   "startAt": "2026-07-31T12:00:00.000Z",
   "durationMinutes": 5,
   "reasonText": "Texto descriptivo de ejemplo",
-  "channel": "PRESENCIAL"
+  "channel": "PRESENCIAL",
+  "followUpOf": {
+    "bookingId": "00000000-0000-4000-8000-000000000001",
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "formInstanceId": "00000000-0000-4000-8000-000000000001"
+  }
 }
 ```
 
@@ -303,11 +312,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no podés comprometer turnos suyos.'         : 'Tu vínculo con esta organización ya no está vigente, así que no ' +             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +             'en pie: hablá con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer turnos suyos.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar turnos suyos. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -491,11 +505,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no podés comprometer turnos suyos.'         : 'Tu vínculo con esta organización ya no está vigente, así que no ' +             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +             'en pie: hablá con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer turnos suyos.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar turnos suyos. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -768,6 +787,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "statusDisplay": "Reclamo enviado",
         "submittedAt": "2026-07-31T12:00:00.000Z"
       },
+      "followUpOf": {
+        "bookingId": "00000000-0000-4000-8000-000000000001",
+        "encounterId": "00000000-0000-4000-8000-000000000001",
+        "startAt": "2026-07-31T12:00:00.000Z",
+        "formInstanceId": "00000000-0000-4000-8000-000000000001"
+      },
+      "followUpBookingId": "00000000-0000-4000-8000-000000000001",
       "rescheduledFrom": "2026-07-31T12:00:00.000Z",
       "statusReason": {
         "reasonText": "Texto descriptivo de ejemplo",
@@ -793,7 +819,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"followUpOf":{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"},"followUpBookingId":"00000000-0000-4000-8000-000000000001","rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].paymentState.state` | No | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
 | `items[].paymentState.label` | No | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
@@ -824,10 +850,16 @@ Campos de la respuesta:
 | `items[].insuranceClaim.statusCode` | No | `string` | Sin restricción adicional declarada | Código del concepto de estado (`CLAIM_SUBMITTED`, `CLAIM_ADJUDICATED`, `CLAIM_PAID`, `CLAIM_REVERSED`…). Es la clave estable para decidir color o icono; la lista puede crecer, así que un código desconocido no es error. | `CLAIM_SUBMITTED` |
 | `items[].insuranceClaim.statusDisplay` | No | `string` | Sin restricción adicional declarada | Etiqueta del estado en castellano, tal como está en el catálogo. | `Reclamo enviado` |
 | `items[].insuranceClaim.submittedAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió, en ISO 8601; `null` si todavía no se envió. | `2026-07-31T12:00:00.000Z` |
+| `items[].followUpOf` | No | `BookingFollowUpOriginDto` | Sin restricción adicional declarada | P42: la consulta de la que sale esta cita, si es una reconsulta. Misma compuerta de privacidad que `patientName` y `reasonText`: viaja al titular (y a quien lo representa) y al profesional de esa agenda. **Ausente** es «no te corresponde verlo»; `null` es «se buscó y no es una reconsulta». | `{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"}` |
+| `items[].followUpOf.bookingId` | No | `string` | formato `uuid` | La reserva de la que nace la reconsulta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].followUpOf.encounterId` | No | `string` | formato `uuid`; admite null | El encuentro clínico de esa reserva, si lo tuvo. Lo resuelve el servidor (cita → encuentro), igual que `BookingItemDto.encounterId`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].followUpOf.startAt` | No | `string` | formato `date-time`; admite null | Cuándo fue la consulta de origen; `null` si su cupo no se encontró. | `2026-07-31T12:00:00.000Z` |
+| `items[].followUpOf.formInstanceId` | No | `string` | formato `uuid` | P43: la instancia del formulario médico de esa consulta de la que sale la reconsulta. Se omite si no se declaró. | `00000000-0000-4000-8000-000000000001` |
+| `items[].followUpBookingId` | No | `string` | formato `uuid`; admite null | P42: la reconsulta viva (no cancelada ni ausente) que salió de esta cita, derivada al leer —el vínculo se guarda sólo en la reconsulta—. Misma compuerta y mismo trato del `null` que `followUpOf`. | `00000000-0000-4000-8000-000000000001` |
 | `items[].rescheduledFrom` | No | `string` | formato `date-time` | De cuándo se movió, si la cita se reprogramó. Ausente cuando nunca se movió — que es distinto de «se movió y no sé desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla costaría una petición por cita para pintar una línea. | `2026-07-31T12:00:00.000Z` |
 | `items[].statusReason` | No | `BookingStatusReasonDto` | Sin restricción adicional declarada | Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo. | `{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].statusReason.reasonText` | No | `string` | Sin restricción adicional declarada | Lo que escribió quien hizo el cambio | `Texto descriptivo de ejemplo` |
-| `items[].statusReason.actorKind` | No | `string` | valores: `PATIENT`, `PROVIDER` | Desde qué lado se hizo el cambio. Permite decir «tu médico canceló» en vez de «la cita fue cancelada». | `PATIENT` |
+| `items[].statusReason.actorKind` | No | `string` | valores: `PATIENT`, `PROVIDER` | Desde qué lado se hizo el cambio. Permite decir «su médico canceló» en vez de «la cita fue cancelada». | `PATIENT` |
 | `items[].statusReason.toStateConceptId` | No | `string` | formato `uuid` | Estado al que llevó el cambio, si fue una transición | `00000000-0000-4000-8000-000000000001` |
 | `items[].statusReason.changedAt` | No | `string` | formato `date-time` | Valor de changed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `items[].delayNotice` | No | `BookingDelayNoticeDto` | Sin restricción adicional declarada | Última demora informada por el profesional, con sus minutos y su mensaje. | `{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"}` |
@@ -971,6 +1003,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "statusDisplay": "Reclamo enviado",
     "submittedAt": "2026-07-31T12:00:00.000Z"
   },
+  "followUpOf": {
+    "bookingId": "00000000-0000-4000-8000-000000000001",
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "startAt": "2026-07-31T12:00:00.000Z",
+    "formInstanceId": "00000000-0000-4000-8000-000000000001"
+  },
+  "followUpBookingId": "00000000-0000-4000-8000-000000000001",
   "rescheduledFrom": "2026-07-31T12:00:00.000Z",
   "statusReason": {
     "reasonText": "Texto descriptivo de ejemplo",
@@ -1021,10 +1060,16 @@ Campos de la respuesta:
 | `insuranceClaim.statusCode` | No | `string` | Sin restricción adicional declarada | Código del concepto de estado (`CLAIM_SUBMITTED`, `CLAIM_ADJUDICATED`, `CLAIM_PAID`, `CLAIM_REVERSED`…). Es la clave estable para decidir color o icono; la lista puede crecer, así que un código desconocido no es error. | `CLAIM_SUBMITTED` |
 | `insuranceClaim.statusDisplay` | No | `string` | Sin restricción adicional declarada | Etiqueta del estado en castellano, tal como está en el catálogo. | `Reclamo enviado` |
 | `insuranceClaim.submittedAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió, en ISO 8601; `null` si todavía no se envió. | `2026-07-31T12:00:00.000Z` |
+| `followUpOf` | No | `BookingFollowUpOriginDto` | Sin restricción adicional declarada | P42: la consulta de la que sale esta cita, si es una reconsulta. Misma compuerta de privacidad que `patientName` y `reasonText`: viaja al titular (y a quien lo representa) y al profesional de esa agenda. **Ausente** es «no te corresponde verlo»; `null` es «se buscó y no es una reconsulta». | `{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"}` |
+| `followUpOf.bookingId` | No | `string` | formato `uuid` | La reserva de la que nace la reconsulta. | `00000000-0000-4000-8000-000000000001` |
+| `followUpOf.encounterId` | No | `string` | formato `uuid`; admite null | El encuentro clínico de esa reserva, si lo tuvo. Lo resuelve el servidor (cita → encuentro), igual que `BookingItemDto.encounterId`. | `00000000-0000-4000-8000-000000000001` |
+| `followUpOf.startAt` | No | `string` | formato `date-time`; admite null | Cuándo fue la consulta de origen; `null` si su cupo no se encontró. | `2026-07-31T12:00:00.000Z` |
+| `followUpOf.formInstanceId` | No | `string` | formato `uuid` | P43: la instancia del formulario médico de esa consulta de la que sale la reconsulta. Se omite si no se declaró. | `00000000-0000-4000-8000-000000000001` |
+| `followUpBookingId` | No | `string` | formato `uuid`; admite null | P42: la reconsulta viva (no cancelada ni ausente) que salió de esta cita, derivada al leer —el vínculo se guarda sólo en la reconsulta—. Misma compuerta y mismo trato del `null` que `followUpOf`. | `00000000-0000-4000-8000-000000000001` |
 | `rescheduledFrom` | No | `string` | formato `date-time` | De cuándo se movió, si la cita se reprogramó. Ausente cuando nunca se movió — que es distinto de «se movió y no sé desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla costaría una petición por cita para pintar una línea. | `2026-07-31T12:00:00.000Z` |
 | `statusReason` | No | `BookingStatusReasonDto` | Sin restricción adicional declarada | Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo. | `{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"}` |
 | `statusReason.reasonText` | No | `string` | Sin restricción adicional declarada | Lo que escribió quien hizo el cambio | `Texto descriptivo de ejemplo` |
-| `statusReason.actorKind` | No | `string` | valores: `PATIENT`, `PROVIDER` | Desde qué lado se hizo el cambio. Permite decir «tu médico canceló» en vez de «la cita fue cancelada». | `PATIENT` |
+| `statusReason.actorKind` | No | `string` | valores: `PATIENT`, `PROVIDER` | Desde qué lado se hizo el cambio. Permite decir «su médico canceló» en vez de «la cita fue cancelada». | `PATIENT` |
 | `statusReason.toStateConceptId` | No | `string` | formato `uuid` | Estado al que llevó el cambio, si fue una transición | `00000000-0000-4000-8000-000000000001` |
 | `statusReason.changedAt` | No | `string` | formato `date-time` | Valor de changed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `delayNotice` | No | `BookingDelayNoticeDto` | Sin restricción adicional declarada | Última demora informada por el profesional, con sus minutos y su mensaje. | `{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"}` |
@@ -1180,7 +1225,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no podés comprometer turnos suyos.'         : 'Tu vínculo con esta organización ya no está vigente, así que no ' +             'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +             'en pie: hablá con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer turnos suyos.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar turnos suyos. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1319,7 +1364,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
 | 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Podés cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2220,7 +2265,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
 | 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Podés cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2631,6 +2676,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se reprograma una cita vigente | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene un turno confirmado a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3756,7 +3803,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Excepción no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El bloqueo termina antes de empezar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Elegiste «Otro» como motivo: escribí cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3905,7 +3952,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tenés un turno confirmado ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancelalo primero si querés cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene un turno confirmado ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4051,7 +4098,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tenés un turno confirmado ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancelalo primero si querés cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene un turno confirmado ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4811,7 +4858,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Un profesional solo puede publicar su propia agenda: el recurso debe ' +           'apuntar a su perfil profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Tu vínculo con esta organización todavía está pendiente de ' +             'aprobación. Cuando la acepten vas a poder publicar tu agenda acá.'         : 'Tu vínculo con esta organización no está vigente, así que no podés ' +             'publicar agenda acá. Hablá con ellos para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación. Cuando la acepten va a poder publicar su agenda acá.'         : 'Su vínculo con esta organización no está vigente, así que no puede ' +             'publicar agenda acá. Hable con ellos para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4953,9 +5000,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancelá cada turno antes de cerrarlos | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancele cada turno antes de cerrarlos | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Elegiste «Otro» como motivo: escribí cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5226,7 +5273,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No podés ver los bloqueos de esta agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | No puede ver los bloqueos de esta agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
@@ -5372,9 +5419,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Elegiste «Otro» como motivo: escribí cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | La excepción debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Tenés una cita confirmada en ese rato${               primera.resourceName ? ` en «${primera.resourceName}»` : ''             }. Reprogramala primero o elegí otro horario. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${               primera.resourceName ? ` en «${primera.resourceName}»` : ''             }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5516,7 +5563,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ventana termina antes de empezar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Mover cero minutos no cambia nada: elegí cuánto correr la agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Mover cero minutos no cambia nada: elija cuánto correr la agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5974,9 +6021,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El turno de ${slotMinutes} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min) | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | Dos franjas de esta agenda se solapan entre sí | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tenés «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +             'horario. Cambiá el horario o el día, o editá esa otra agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +             'horario. Cambie el horario o el día, o edite esa otra agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6410,9 +6456,9 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Rechaza con 409 si tiene citas confirmadas o presentadas.
+La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.
 
-Contexto declarado en el controlador: Retirar un horario publicado (TAREA-10, punto 6). `DELETE` y no `PATCH` porque para quien lo usa **es** el botón de dar de baja el horario; lo que cambia es qué significa dar de baja acá, y eso lo dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó. Responde **409 con la lista** cuando el horario tiene citas comprometidas: no lo retira y nombra lo que hay que resolver primero.
+Contexto declarado en el controlador: Retirar un horario publicado (TAREA-10, punto 6). `DELETE` y no `PATCH` porque para quien lo usa **es** el botón de dar de baja el horario; lo que cambia es qué significa dar de baja acá, y eso lo dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó. Con citas comprometidas **también retira** (M4 · H1.S2.M2): conserva sus cupos, no toca ninguna cita, y devuelve cuántas siguen vivas y sus ids.
 
 ### Descripción del sistema
 
@@ -6475,7 +6521,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
   "releasedSlots": 1,
-  "keptSlots": 1
+  "keptSlots": 1,
+  "liveBookings": 1,
+  "liveBookingIds": [
+    "valor-ejemplo"
+  ],
+  "truncated": true
 }
 ```
 
@@ -6487,6 +6538,9 @@ Campos de la respuesta:
 | `statusConceptId` | Sí | `string` | formato `uuid` | El estado con el que queda: `TPL_RETIRED`. | `00000000-0000-4000-8000-000000000001` |
 | `releasedSlots` | Sí | `number` | Sin restricción adicional declarada | Cupos libres que se soltaron al retirar el horario | `1` |
 | `keptSlots` | Sí | `number` | Sin restricción adicional declarada | Cupos conservados porque tienen una cita detrás | `1` |
+| `liveBookings` | Sí | `number` | Sin restricción adicional declarada | Citas confirmadas o presentadas que siguen vivas en cupos conservados | `1` |
+| `liveBookingIds` | Sí | `array<string>` | formato `uuid` | Ids (nunca nombres) de esas citas, hasta un tope. | `["valor-ejemplo"]` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | `true` si hay más citas vivas que las listadas en `liveBookingIds`. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -6500,7 +6554,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 409 | `CONFLICT` | El horario tiene citas comprometidas: resolvelas antes de retirarlo | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6658,7 +6711,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El turno de ${slotMinutesDeLaFranja} min no entra en la franja de ${rule.startTime} a ${rule.endTime} (${duracionFranja} min) | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

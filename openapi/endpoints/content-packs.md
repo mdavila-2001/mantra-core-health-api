@@ -245,8 +245,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Paquete de contenido no encontrado | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
 | 409 | `CONFLICT` | El email ya tiene una credencial de contraseña activa | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Las cuentas de demostración necesitan una contraseña: declarala en la ' +           'petición o en SEED_DEMO_PASSWORD. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
-| 422 | `PRECONDITION_FAILED` | Las cuentas de demostración no se crean en producción. Si de verdad ' +           'las querés acá, hace falta habilitarlo explícitamente en el entorno. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las cuentas de demostración necesitan una contraseña: declárela en la ' +           'petición o en SEED_DEMO_PASSWORD. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las cuentas de demostración no se crean en producción. Si de verdad ' +           'las quiere acá, hace falta habilitarlo explícitamente en el entorno. | Excepción explícita en src/modules/content_packs/content-packs.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

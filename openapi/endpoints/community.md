@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 90 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 92 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
 - **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PatientReviewsController`
@@ -31,76 +31,78 @@ Referencia exhaustiva de 90 operación(es) del módulo `community`, derivada del
 18. [POST /community/conversations/{conversationId}/pin](#18-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
 19. [GET /community/conversations/{conversationId}/presence](#19-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
 20. [POST /community/conversations/{conversationId}/read](#20-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
-21. [GET /community/feed](#21-get-community-feed) — Timeline de un perfil
-22. [DELETE /community/follows](#22-delete-community-follows) — Dejar de seguir un objeto social
-23. [GET /community/follows](#23-get-community-follows) — Seguimientos activos de un perfil
-24. [POST /community/follows](#24-post-community-follows) — Seguir un objeto social
-25. [GET /community/groups](#25-get-community-groups) — Grupos de una organización
-26. [POST /community/groups](#26-post-community-groups) — Crear un grupo/comunidad
-27. [GET /community/groups/{groupId}](#27-get-community-groups-groupid) — Ficha de un grupo
-28. [GET /community/groups/{groupId}/members](#28-get-community-groups-groupid-members) — Integrantes de un grupo
-29. [POST /community/groups/{groupId}/members](#29-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
-30. [DELETE /community/groups/{groupId}/members/{member}](#30-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
-31. [PATCH /community/groups/{groupId}/members/{member}](#31-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
-32. [GET /community/groups/{groupId}/posts](#32-get-community-groups-groupid-posts) — Muro de un grupo
-33. [POST /community/groups/{groupId}/posts](#33-post-community-groups-groupid-posts) — Publicar en el muro del grupo
-34. [GET /community/moderation/appeals](#34-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
-35. [POST /community/moderation/appeals/{appealId}/resolve](#35-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
-36. [GET /community/moderation/decisions](#36-get-community-moderation-decisions) — Decisiones de moderación tomadas
-37. [POST /community/moderation/decisions/{decisionId}/appeal](#37-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
-38. [GET /community/moderation/queue](#38-get-community-moderation-queue) — Cola de moderación con filtros y cursor
-39. [POST /community/moderation/queue/{queueId}/decision](#39-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
-40. [GET /community/notifications](#40-get-community-notifications) — Notificaciones sociales de un perfil
-41. [GET /community/polls/{pollId}](#41-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
-42. [POST /community/polls/{pollId}/votes](#42-post-community-polls-pollid-votes) — Votar en una encuesta
-43. [GET /community/posts/{postId}](#43-get-community-posts-postid) — Publicación con media, hashtags y menciones
-44. [GET /community/posts/{postId}/comments](#44-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
-45. [POST /community/posts/{postId}/polls](#45-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
-46. [GET /community/posts/{postId}/reactions](#46-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
-47. [GET /community/profiles/{profileId}](#47-get-community-profiles-profileid) — Ficha de un perfil público
-48. [GET /community/profiles/{profileId}/auto-reply](#48-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
-49. [PUT /community/profiles/{profileId}/auto-reply](#49-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
-50. [GET /community/profiles/{profileId}/posts](#50-get-community-profiles-profileid-posts) — Publicaciones de un perfil
-51. [POST /community/profiles/{profileId}/posts](#51-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
-52. [GET /community/profiles/{profileId}/reviews](#52-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
-53. [POST /community/profiles/{profileId}/reviews](#53-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-54. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#54-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
-55. [GET /community/profiles/by-slug/{slug}](#55-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
-56. [GET /community/profiles/me](#56-get-community-profiles-me) — Consultar la vitrina pública propia
-57. [PUT /community/profiles/me](#57-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
-58. [GET /community/profiles/me/stats](#58-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-59. [POST /community/public-profiles](#59-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-60. [PUT /community/reactions](#60-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-61. [POST /community/reports](#61-post-community-reports) — Reportar contenido y encolar moderación
-62. [GET /community/topics](#62-get-community-topics) — Temas de la comunidad
-63. [GET /f/{slug}](#63-get-f-slug) — Ficha pública de una farmacia
-64. [GET /internal/community/feed/pending](#64-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-65. [POST /internal/community/feed/rebuild](#65-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-66. [GET /internal/community/search/health](#66-get-internal-community-search-health) — Estado del índice del directorio público
-67. [POST /internal/community/search/reindex](#67-post-internal-community-search-reindex) — Reindexar el directorio público
-68. [POST /internal/community/verification/badges](#68-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-69. [POST /internal/community/verification/badges/{targetId}/revoke](#69-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-70. [POST /internal/community/verification/badges/expire-sweep](#70-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-71. [GET /l/{slug}](#71-get-l-slug) — Ficha pública de un laboratorio
-72. [GET /o/{slug}](#72-get-o-slug) — Ficha pública de una organización
-73. [GET /p/{slug}](#73-get-p-slug) — Ficha pública de un profesional
-74. [POST /patients/me/reviews](#74-post-patients-me-reviews) — Calificar una atención recibida
-75. [GET /public/comments/{commentId}/replies](#75-get-public-comments-commentid-replies) — Respuestas de un comentario público
-76. [GET /public/media/{id}](#76-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-77. [GET /public/nearby](#77-get-public-nearby) — Prestadores cercanos, en línea recta
-78. [GET /public/posts](#78-get-public-posts) — Últimas publicaciones de todos los profesionales
-79. [GET /public/posts/{postId}/comments](#79-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-80. [GET /public/posts/{postId}/reactions](#80-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-81. [GET /public/profiles/{prefijo}/{slug}](#81-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-82. [GET /public/profiles/{prefijo}/{slug}/reviews](#82-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-83. [GET /public/search](#83-get-public-search) — Buscador público unificado
-84. [GET /public/search/diagnostic-units](#84-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-85. [GET /public/search/insurers](#85-get-public-search-insurers) — Aseguradoras en el directorio público
-86. [GET /public/search/medications](#86-get-public-search-medications) — Medicamentos ofertados públicamente
-87. [GET /public/search/organizations](#87-get-public-search-organizations) — Organizaciones en el directorio público
-88. [GET /public/search/pharmacies](#88-get-public-search-pharmacies) — Farmacias en el directorio público
-89. [GET /public/search/practitioners](#89-get-public-search-practitioners) — Profesionales en el directorio público
-90. [GET /s/{slug}](#90-get-s-slug) — Ficha pública de una aseguradora
+21. [POST /community/conversations/contacts/search](#21-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
+22. [GET /community/feed](#22-get-community-feed) — Timeline de un perfil
+23. [DELETE /community/follows](#23-delete-community-follows) — Dejar de seguir un objeto social
+24. [GET /community/follows](#24-get-community-follows) — Seguimientos activos de un perfil
+25. [POST /community/follows](#25-post-community-follows) — Seguir un objeto social
+26. [GET /community/groups](#26-get-community-groups) — Grupos de una organización
+27. [POST /community/groups](#27-post-community-groups) — Crear un grupo/comunidad
+28. [GET /community/groups/{groupId}](#28-get-community-groups-groupid) — Ficha de un grupo
+29. [GET /community/groups/{groupId}/members](#29-get-community-groups-groupid-members) — Integrantes de un grupo
+30. [POST /community/groups/{groupId}/members](#30-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
+31. [DELETE /community/groups/{groupId}/members/{member}](#31-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
+32. [PATCH /community/groups/{groupId}/members/{member}](#32-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
+33. [GET /community/groups/{groupId}/posts](#33-get-community-groups-groupid-posts) — Muro de un grupo
+34. [POST /community/groups/{groupId}/posts](#34-post-community-groups-groupid-posts) — Publicar en el muro del grupo
+35. [GET /community/moderation/appeals](#35-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
+36. [POST /community/moderation/appeals/{appealId}/resolve](#36-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
+37. [GET /community/moderation/decisions](#37-get-community-moderation-decisions) — Decisiones de moderación tomadas
+38. [POST /community/moderation/decisions/{decisionId}/appeal](#38-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
+39. [GET /community/moderation/decisions/mine](#39-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
+40. [GET /community/moderation/queue](#40-get-community-moderation-queue) — Cola de moderación con filtros y cursor
+41. [POST /community/moderation/queue/{queueId}/decision](#41-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
+42. [GET /community/notifications](#42-get-community-notifications) — Notificaciones sociales de un perfil
+43. [GET /community/polls/{pollId}](#43-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
+44. [POST /community/polls/{pollId}/votes](#44-post-community-polls-pollid-votes) — Votar en una encuesta
+45. [GET /community/posts/{postId}](#45-get-community-posts-postid) — Publicación con media, hashtags y menciones
+46. [GET /community/posts/{postId}/comments](#46-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
+47. [POST /community/posts/{postId}/polls](#47-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
+48. [GET /community/posts/{postId}/reactions](#48-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
+49. [GET /community/profiles/{profileId}](#49-get-community-profiles-profileid) — Ficha de un perfil público
+50. [GET /community/profiles/{profileId}/auto-reply](#50-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
+51. [PUT /community/profiles/{profileId}/auto-reply](#51-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
+52. [GET /community/profiles/{profileId}/posts](#52-get-community-profiles-profileid-posts) — Publicaciones de un perfil
+53. [POST /community/profiles/{profileId}/posts](#53-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
+54. [GET /community/profiles/{profileId}/reviews](#54-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
+55. [POST /community/profiles/{profileId}/reviews](#55-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
+56. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#56-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
+57. [GET /community/profiles/by-slug/{slug}](#57-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
+58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
+59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
+61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+62. [PUT /community/reactions](#62-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+63. [POST /community/reports](#63-post-community-reports) — Reportar contenido y encolar moderación
+64. [GET /community/topics](#64-get-community-topics) — Temas de la comunidad
+65. [GET /f/{slug}](#65-get-f-slug) — Ficha pública de una farmacia
+66. [GET /internal/community/feed/pending](#66-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+67. [POST /internal/community/feed/rebuild](#67-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+68. [GET /internal/community/search/health](#68-get-internal-community-search-health) — Estado del índice del directorio público
+69. [POST /internal/community/search/reindex](#69-post-internal-community-search-reindex) — Reindexar el directorio público
+70. [POST /internal/community/verification/badges](#70-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+71. [POST /internal/community/verification/badges/{targetId}/revoke](#71-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+72. [POST /internal/community/verification/badges/expire-sweep](#72-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+73. [GET /l/{slug}](#73-get-l-slug) — Ficha pública de un laboratorio
+74. [GET /o/{slug}](#74-get-o-slug) — Ficha pública de una organización
+75. [GET /p/{slug}](#75-get-p-slug) — Ficha pública de un profesional
+76. [POST /patients/me/reviews](#76-post-patients-me-reviews) — Calificar una atención recibida
+77. [GET /public/comments/{commentId}/replies](#77-get-public-comments-commentid-replies) — Respuestas de un comentario público
+78. [GET /public/media/{id}](#78-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+79. [GET /public/nearby](#79-get-public-nearby) — Prestadores cercanos, en línea recta
+80. [GET /public/posts](#80-get-public-posts) — Últimas publicaciones de todos los profesionales
+81. [GET /public/posts/{postId}/comments](#81-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+82. [GET /public/posts/{postId}/reactions](#82-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+83. [GET /public/profiles/{prefijo}/{slug}](#83-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+84. [GET /public/profiles/{prefijo}/{slug}/reviews](#84-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+85. [GET /public/search](#85-get-public-search) — Buscador público unificado
+86. [GET /public/search/diagnostic-units](#86-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+87. [GET /public/search/insurers](#87-get-public-search-insurers) — Aseguradoras en el directorio público
+88. [GET /public/search/medications](#88-get-public-search-medications) — Medicamentos ofertados públicamente
+89. [GET /public/search/organizations](#89-get-public-search-organizations) — Organizaciones en el directorio público
+90. [GET /public/search/pharmacies](#90-get-public-search-pharmacies) — Farmacias en el directorio público
+91. [GET /public/search/practitioners](#91-get-public-search-practitioners) — Profesionales en el directorio público
+92. [GET /s/{slug}](#92-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -1313,8 +1315,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `participantProfileIds` | Sí | `array<string>` | formato `uuid`; mínimo 2 elemento(s) | Perfiles participantes | `["valor-ejemplo","valor-ejemplo"]` |
-| `conversationType` | No | `string` | valores: `DIRECT`, `GROUP` | Tipo de conversación | `DIRECT` |
-| `groupId` | No | `string` | formato `uuid` | Grupo asociado (conversaciones de grupo) | `00000000-0000-4000-8000-000000000001` |
+| `conversationType` | No | `string` | valores: `DIRECT` | Tipo de conversación (los grupos usan su flujo de membresía) | `DIRECT` |
 
 ### Payload completo de ejemplo
 
@@ -1331,8 +1332,7 @@ Content-Type: application/json
     "valor-ejemplo",
     "valor-ejemplo"
   ],
-  "conversationType": "DIRECT",
-  "groupId": "00000000-0000-4000-8000-000000000001"
+  "conversationType": "DIRECT"
 }
 ```
 
@@ -1373,7 +1373,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Las conversaciones grupales se crean desde el flujo de grupos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los participantes de una conversación deben ser distintos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una conversación directa requiere exactamente dos participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | La persona no está disponible para iniciar una conversación | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede iniciar una conversación entre perfiles bloqueados | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2689,6 +2695,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El perfil no es participante activo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
@@ -2709,7 +2716,143 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /community/feed
+## 21. POST /community/conversations/contacts/search
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Buscar personas para iniciar una conversación
+- **Operation ID:** `CommunityMessagingController_searchContacts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.searchContacts](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Buscar personas para iniciar una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Personas activas —pacientes y profesionales— con quienes iniciar un chat.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/conversations/contacts/search` en `CommunityMessagingController_searchContacts`. El controlador delega en `CommunityMessagingReadService.searchContacts`. Valida el body como `SearchChatContactsRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChatContactPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SearchChatContactsRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /community/conversations/contacts/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "q": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `q` | Sí | `string` | longitud mínima 2; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `limit` | No | `object` | mínimo 1; máximo 20 | Sin descripción específica en el contrato OpenAPI. | `10` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/conversations/contacts/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "q": "valor-ejemplo",
+  "limit": 10
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatContactPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "headline": "valor-ejemplo",
+      "avatarUrl": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ChatContactDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","headline":"valor-ejemplo","avatarUrl":"valor-ejemplo"}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Perfil interno necesario para crear la conversación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible en el resultado. | `Nombre de ejemplo` |
+| `items[].headline` | No | `string` | admite null | Descripción breve, si la persona la configuró. | `valor-ejemplo` |
+| `items[].avatarUrl` | No | `string` | admite null | Avatar servido por la ruta pública de archivos, o `null`. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/contacts/search"
+}
+```
+
+---
+
+## 22. GET /community/feed
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -2882,7 +3025,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. DELETE /community/follows
+## 23. DELETE /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -2991,7 +3134,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /community/follows
+## 24. GET /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3119,7 +3262,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /community/follows
+## 25. POST /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3248,7 +3391,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /community/groups
+## 26. GET /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3387,7 +3530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /community/groups
+## 27. POST /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3505,9 +3648,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Tema no encontrado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 409 | `CONFLICT` | Ya hay un grupo con ese slug | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo público necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo público, tu perfil público tiene que estar completo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo necesita su perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público necesita su perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público, su perfil público tiene que estar completo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3525,7 +3668,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /community/groups/{groupId}
+## 28. GET /community/groups/{groupId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3675,7 +3818,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /community/groups/{groupId}/members
+## 29. GET /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3808,7 +3951,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /community/groups/{groupId}/members
+## 30. POST /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3936,7 +4079,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. DELETE /community/groups/{groupId}/members/{member}
+## 31. DELETE /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4054,7 +4197,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. PATCH /community/groups/{groupId}/members/{member}
+## 32. PATCH /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4196,7 +4339,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /community/groups/{groupId}/posts
+## 33. GET /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4335,7 +4478,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /community/groups/{groupId}/posts
+## 34. POST /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4490,7 +4633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /community/moderation/appeals
+## 35. GET /community/moderation/appeals
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4644,7 +4787,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /community/moderation/appeals/{appealId}/resolve
+## 36. POST /community/moderation/appeals/{appealId}/resolve
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4770,7 +4913,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /community/moderation/decisions
+## 37. GET /community/moderation/decisions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4903,7 +5046,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /community/moderation/decisions/{decisionId}/appeal
+## 38. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5010,6 +5153,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el sancionado por esta decisión puede apelarla | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Decisión no encontrada | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 409 | `CONFLICT` | Ya existe una apelación abierta para esta decisión | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
@@ -5031,7 +5175,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /community/moderation/queue
+## 39. GET /community/moderation/decisions/mine
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Mis propias decisiones de moderación
+- **Operation ID:** `CommunityModerationController_listMyDecisions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.listMyDecisions](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Mis propias decisiones de moderación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-19-10 (AG-18) · «Mis sanciones»: el autor lee sus propias decisiones. Sin `@Roles`, a propósito: es la lectura que le falta a cualquier cuenta para poder apelar — sin ella, el autor sancionado nunca conoce el `decisionId` que `POST .../appeal` le exige. Declarada **antes** que `moderation/decisions` (la de `SECURITY_ADMIN`) para que un futuro `GET moderation/decisions/:id` no la capture primero.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/moderation/decisions/mine` en `CommunityModerationController_listMyDecisions`. El controlador delega en `CommunityModerationReadService.listMyDecisions`. No recibe body. El tipo de retorno estático es `Promise<MyModerationDecisionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | query | Sí | `string` | formato `uuid` | Perfil propio | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1 | Tope de filas | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/moderation/decisions/mine?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/moderation/decisions/mine?profileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyModerationDecisionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "decisionId": "00000000-0000-4000-8000-000000000001",
+      "policyConceptId": "00000000-0000-4000-8000-000000000001",
+      "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+      "rationaleText": "valor-ejemplo",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "appealable": true
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyModerationDecisionItemDto>` | Sin restricción adicional declarada | Decisiones de la página. | `[{"decisionId":"00000000-0000-4000-8000-000000000001","policyConceptId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","rationaleText":"valor-ejemplo","decidedAt":"2026-07-31T12:00:00.000Z","appealable":true}]` |
+| `items[].decisionId` | Sí | `string` | formato `uuid` | Identificador de la decisión, el que viaja en `POST .../appeal`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].policyConceptId` | Sí | `string` | formato `uuid` | Concept id de la política aplicada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decisionConceptId` | Sí | `string` | formato `uuid` | Concept id de la decisión tomada (removido, restringido, advertido). | `00000000-0000-4000-8000-000000000001` |
+| `items[].rationaleText` | No | `string` | admite null | Motivo escrito por quien decidió. | `valor-ejemplo` |
+| `items[].decidedAt` | No | `string` | formato `date-time`; admite null | Cuándo se decidió. | `2026-07-31T12:00:00.000Z` |
+| `items[].appealable` | Sí | `boolean` | Sin restricción adicional declarada | `false` si ya hay una apelación abierta para esta decisión. | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/decisions/mine"
+}
+```
+
+---
+
+## 40. GET /community/moderation/queue
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5179,7 +5451,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /community/moderation/queue/{queueId}/decision
+## 41. POST /community/moderation/queue/{queueId}/decision
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5316,7 +5588,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /community/notifications
+## 42. GET /community/notifications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -5452,7 +5724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /community/polls/{pollId}
+## 43. GET /community/polls/{pollId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -5590,7 +5862,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /community/polls/{pollId}/votes
+## 44. POST /community/polls/{pollId}/votes
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -5720,7 +5992,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /community/posts/{postId}
+## 45. GET /community/posts/{postId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5864,7 +6136,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /community/posts/{postId}/comments
+## 46. GET /community/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6017,7 +6289,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /community/posts/{postId}/polls
+## 47. POST /community/posts/{postId}/polls
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -6158,7 +6430,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /community/posts/{postId}/reactions
+## 48. GET /community/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6282,7 +6554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /community/profiles/{profileId}
+## 49. GET /community/profiles/{profileId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6440,7 +6712,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /community/profiles/{profileId}/auto-reply
+## 50. GET /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6565,7 +6837,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. PUT /community/profiles/{profileId}/auto-reply
+## 51. PUT /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6723,7 +6995,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /community/profiles/{profileId}/posts
+## 52. GET /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6880,7 +7152,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /community/profiles/{profileId}/posts
+## 53. POST /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7054,7 +7326,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /community/profiles/{profileId}/reviews
+## 54. GET /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7212,7 +7484,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. POST /community/profiles/{profileId}/reviews
+## 55. POST /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7363,7 +7635,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+## 56. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7491,7 +7763,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. GET /community/profiles/by-slug/{slug}
+## 57. GET /community/profiles/by-slug/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7649,7 +7921,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. GET /community/profiles/me
+## 58. GET /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7774,7 +8046,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. PUT /community/profiles/me
+## 59. PUT /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7943,7 +8215,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. GET /community/profiles/me/stats
+## 60. GET /community/profiles/me/stats
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8061,7 +8333,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. POST /community/public-profiles
+## 61. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8206,7 +8478,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. PUT /community/reactions
+## 62. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8338,7 +8610,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /community/reports
+## 63. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -8467,7 +8739,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /community/topics
+## 64. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -8585,7 +8857,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. GET /f/{slug}
+## 65. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8795,7 +9067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /internal/community/feed/pending
+## 66. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -8911,7 +9183,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. POST /internal/community/feed/rebuild
+## 67. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9039,7 +9311,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /internal/community/search/health
+## 68. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9149,7 +9421,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. POST /internal/community/search/reindex
+## 69. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9278,7 +9550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. POST /internal/community/verification/badges
+## 70. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9402,7 +9674,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. POST /internal/community/verification/badges/{targetId}/revoke
+## 71. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9523,7 +9795,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. POST /internal/community/verification/badges/expire-sweep
+## 72. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9629,7 +9901,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. GET /l/{slug}
+## 73. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9839,7 +10111,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /o/{slug}
+## 74. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10049,7 +10321,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /p/{slug}
+## 75. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10259,7 +10531,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. POST /patients/me/reviews
+## 76. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -10408,7 +10680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. GET /public/comments/{commentId}/replies
+## 77. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10500,7 +10772,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. GET /public/media/{id}
+## 78. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10593,7 +10865,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. GET /public/nearby
+## 79. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10687,7 +10959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. GET /public/posts
+## 80. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10774,7 +11046,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /public/posts/{postId}/comments
+## 81. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10865,7 +11137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /public/posts/{postId}/reactions
+## 82. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10956,7 +11228,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /public/profiles/{prefijo}/{slug}
+## 83. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11167,7 +11439,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. GET /public/profiles/{prefijo}/{slug}/reviews
+## 84. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11272,7 +11544,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/search
+## 85. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11371,7 +11643,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/search/diagnostic-units
+## 86. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11470,7 +11742,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/search/insurers
+## 87. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11569,7 +11841,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/search/medications
+## 88. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11668,7 +11940,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/search/organizations
+## 89. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11770,7 +12042,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/search/pharmacies
+## 90. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11869,7 +12141,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/search/practitioners
+## 91. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11972,7 +12244,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /s/{slug}
+## 92. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

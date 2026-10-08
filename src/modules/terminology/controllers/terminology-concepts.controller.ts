@@ -34,6 +34,11 @@ import {
   DeprecateConceptDto,
   DeprecateConceptResponseDto,
   SearchConceptsResponseDto,
+  GlossaryNeighborhoodDto,
+  GlossaryNeighborhoodQueryDto,
+  type GlossaryNeighborhoodRequest,
+  DEFAULT_NEIGHBORS_PER_GROUP,
+  DEFAULT_NEIGHBOR_PAGE_SIZE,
   ConceptDetailDto,
   type DesignationLanguage,
 } from '../dto';
@@ -236,6 +241,48 @@ export class TerminologyConceptsController {
         ...(parsedOffset === undefined ? {} : { offset: parsedOffset }),
         includeValueSets: parseFlag(includeValueSets),
       },
+    );
+  }
+
+  /**
+   * El vecindario de un término para el mapa: sus relaciones salientes y
+   * entrantes por tipo, con el total real de cada grupo.
+   *
+   * Va **antes** de `@Get(':conceptId')`, igual que `glossary-graph`: el orden
+   * de declaración es el orden de resolución, y una ruta con parámetro
+   * declarada antes se comería el segmento fijo.
+   *
+   * Mismo acceso que `glossary-graph`: lectura del glosario público, sin rol.
+   *
+   * @param conceptId - Término central.
+   * @param query - Idioma, muestra por grupo o página de un grupo.
+   * @returns El término central y sus grupos de vecinos.
+   */
+  @Get(':conceptId/glossary-neighborhood')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo',
+    description:
+      'Sin `type` ni `direction` devuelve una muestra de `perGroup` vecinos por grupo, con el `total` real. Con `type` y `direction` devuelve ese único grupo, paginado con `offset` y `limit`.',
+  })
+  readGlossaryNeighborhood(
+    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+    @Query() query: GlossaryNeighborhoodQueryDto,
+  ): Promise<GlossaryNeighborhoodDto> {
+    const request: GlossaryNeighborhoodRequest =
+      query.type !== undefined && query.direction !== undefined
+        ? {
+            type: query.type,
+            direction: query.direction,
+            offset: query.offset ?? 0,
+            limit: query.limit ?? DEFAULT_NEIGHBOR_PAGE_SIZE,
+          }
+        : { perGroup: query.perGroup ?? DEFAULT_NEIGHBORS_PER_GROUP };
+    return this.conceptsService.readGlossaryNeighborhood(
+      conceptId,
+      parseLanguage(query.lang),
+      request,
     );
   }
 

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `forms`
 
-Referencia exhaustiva de 21 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 25 operación(es) del módulo `forms`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values`
 - **Controladores:** `FormsAssignmentsController`, `FormsDefinitionSetsController`, `FormsFieldsController`, `FormsInstancesController`, `FormsMeController`, `FormsValuesController`
@@ -13,25 +13,29 @@ Referencia exhaustiva de 21 operación(es) del módulo `forms`, derivada del con
 
 1. [GET /forms/assignments](#1-get-forms-assignments) — Listar asignaciones de campo (globales y del tenant)
 2. [POST /forms/assignments](#2-post-forms-assignments) — Asignar campos a un target con política de extensión
-3. [GET /forms/assignments/budget](#3-get-forms-assignments-budget) — Presupuesto de extensión del target para el tenant actual
-4. [GET /forms/definition-sets](#4-get-forms-definition-sets) — Listar los sets de definiciones visibles
-5. [POST /forms/definition-sets](#5-post-forms-definition-sets) — Definir un set de campos dinámicos y su versión inicial
-6. [GET /forms/definition-sets/{id}](#6-get-forms-definition-sets-id) — Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
-7. [POST /forms/definition-sets/{id}/migrations/{migrationId}/run](#7-post-forms-definition-sets-id-migrations-migrationid-run) — Migrar valores entre versiones de schema
-8. [POST /forms/definition-sets/{id}/versions/{ver}/publish](#8-post-forms-definition-sets-id-versions-ver-publish) — Componer miembros del set y publicar la versión
-9. [POST /forms/field-definitions](#9-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
-10. [POST /forms/fields/{id}/access-rules](#10-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
-11. [POST /forms/fields/{id}/dependencies](#11-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
-12. [PUT /forms/fields/{id}/localizations/{lang}](#12-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
-13. [GET /forms/instances](#13-get-forms-instances) — Listar las instancias de formulario de un encuentro
-14. [POST /forms/instances](#14-post-forms-instances) — Abrir una instancia de formulario para un recurso
-15. [GET /forms/instances/{id}](#15-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
-16. [POST /forms/instances/{id}/close](#16-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
-17. [POST /forms/instances/{id}/values](#17-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
-18. [GET /forms/me/instances](#18-get-forms-me-instances) — Ver mis formularios clínicos
-19. [GET /forms/me/instances/{id}](#19-get-forms-me-instances-id) — Leer un formulario propio con sus respuestas
-20. [PATCH /forms/values/{id}](#20-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
-21. [POST /forms/values/import](#21-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
+3. [DELETE /forms/assignments/{id}](#3-delete-forms-assignments-id) — Quitar una asignación propia (baja lógica)
+4. [PATCH /forms/assignments/{id}](#4-patch-forms-assignments-id) — Editar una asignación propia
+5. [GET /forms/assignments/budget](#5-get-forms-assignments-budget) — Presupuesto de extensión del target para el tenant actual
+6. [PUT /forms/assignments/order](#6-put-forms-assignments-order) — Reordenar los campos propios de un formulario
+7. [GET /forms/definition-sets](#7-get-forms-definition-sets) — Listar los sets de definiciones visibles
+8. [POST /forms/definition-sets](#8-post-forms-definition-sets) — Definir un set de campos dinámicos y su versión inicial
+9. [GET /forms/definition-sets/{id}](#9-get-forms-definition-sets-id) — Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
+10. [POST /forms/definition-sets/{id}/migrations/{migrationId}/run](#10-post-forms-definition-sets-id-migrations-migrationid-run) — Migrar valores entre versiones de schema
+11. [POST /forms/definition-sets/{id}/versions/{ver}/publish](#11-post-forms-definition-sets-id-versions-ver-publish) — Componer miembros del set y publicar la versión
+12. [POST /forms/field-definitions](#12-post-forms-field-definitions) — Declarar una definición de campo con reglas de validación
+13. [PATCH /forms/field-definitions/{id}](#13-patch-forms-field-definitions-id) — Corregir el nombre o el tipo de un campo propio
+14. [POST /forms/fields/{id}/access-rules](#14-post-forms-fields-id-access-rules) — Definir reglas de acceso y enmascarado por campo
+15. [POST /forms/fields/{id}/dependencies](#15-post-forms-fields-id-dependencies) — Definir dependencias condicionales entre campos
+16. [PUT /forms/fields/{id}/localizations/{lang}](#16-put-forms-fields-id-localizations-lang) — Localizar (i18n) una definición de campo
+17. [GET /forms/instances](#17-get-forms-instances) — Listar las instancias de formulario de un encuentro
+18. [POST /forms/instances](#18-post-forms-instances) — Abrir una instancia de formulario para un recurso
+19. [GET /forms/instances/{id}](#19-get-forms-instances-id) — Leer una instancia con sus valores vigentes, por tipo resuelto
+20. [POST /forms/instances/{id}/close](#20-post-forms-instances-id-close) — Cerrar formulario y proyectar vista de recurso
+21. [POST /forms/instances/{id}/values](#21-post-forms-instances-id-values) — Capturar valores de formulario (value[x] exclusivo)
+22. [GET /forms/me/instances](#22-get-forms-me-instances) — Ver mis formularios clínicos
+23. [GET /forms/me/instances/{id}](#23-get-forms-me-instances-id) — Leer un formulario propio con sus respuestas
+24. [PATCH /forms/values/{id}](#24-patch-forms-values-id) — Corregir valor con supersede y snapshot inmutable
+25. [POST /forms/values/import](#25-post-forms-values-import) — Registrar procedencia de valores importados (batch ETL)
 
 ---
 
@@ -336,7 +340,249 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /forms/assignments/budget
+## 3. DELETE /forms/assignments/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-assignments`
+- **Nombre:** Quitar una asignación propia (baja lógica)
+- **Operation ID:** `FormsAssignmentsController_retireAssignment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsAssignmentsController.retireAssignment](../../src/modules/forms/controllers/forms-assignments.controller.ts)
+
+### Descripción de negocio
+
+Quitar una asignación propia (baja lógica). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-61: descuelga un campo propio (baja lógica; los valores siguen).
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /forms/assignments/{id}` en `FormsAssignmentsController_retireAssignment`. El controlador delega en `FormsAssignmentsService.retireAssignment`. No recibe body. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /forms/assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /forms/assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Los campos del formulario estándar no se editan desde una organización | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 403 | `FORBIDDEN` | Sólo se pueden editar los campos propios de la organización | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 404 | `NOT_FOUND` | Asignación no encontrada | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 409 | `CONFLICT` | La asignación ya fue retirada | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/assignments/{id}"
+}
+```
+
+---
+
+## 4. PATCH /forms/assignments/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-assignments`
+- **Nombre:** Editar una asignación propia
+- **Operation ID:** `FormsAssignmentsController_updateAssignment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsAssignmentsController.updateAssignment](../../src/modules/forms/controllers/forms-assignments.controller.ts)
+
+### Descripción de negocio
+
+Editar una asignación propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-61: cambia lo obligatorio, visible o editable de un campo propio.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /forms/assignments/{id}` en `FormsAssignmentsController_updateAssignment`. El controlador delega en `FormsAssignmentsService.updateAssignment`. Valida el body como `UpdateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateAssignmentDto`; los campos opcionales se omiten.
+
+```http
+PATCH /forms/assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `required` | No | `boolean` | Sin restricción adicional declarada | ¿Requerido? | `true` |
+| `visible` | No | `boolean` | Sin restricción adicional declarada | ¿Visible? | `true` |
+| `editable` | No | `boolean` | Sin restricción adicional declarada | ¿Editable? | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /forms/assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "required": true,
+  "visible": true,
+  "editable": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Los campos del formulario estándar no se editan desde una organización | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 403 | `FORBIDDEN` | Sólo se pueden editar los campos propios de la organización | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 404 | `NOT_FOUND` | Asignación no encontrada | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/assignments/{id}"
+}
+```
+
+---
+
+## 5. GET /forms/assignments/budget
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-assignments`
@@ -449,7 +695,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /forms/definition-sets
+## 6. PUT /forms/assignments/order
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-assignments`
+- **Nombre:** Reordenar los campos propios de un formulario
+- **Operation ID:** `FormsAssignmentsController_reorderAssignments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsAssignmentsController.reorderAssignments](../../src/modules/forms/controllers/forms-assignments.controller.ts)
+
+### Descripción de negocio
+
+Reordenar los campos propios de un formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-61: reordena los campos propios de un target. **Declarada antes** que las rutas con `:id` para que `order` nunca se lea como un identificador.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /forms/assignments/order` en `FormsAssignmentsController_reorderAssignments`. El controlador delega en `FormsAssignmentsService.reorderAssignments`. Valida el body como `ReorderAssignmentsDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReorderAssignmentsDto`; los campos opcionales se omiten.
+
+```http
+PUT /forms/assignments/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "assignmentIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `targetResourceConceptId` | Sí | `string` | formato `uuid` | Recurso destino (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `assignmentIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s) | Asignaciones propias en el orden final (sin repetidos) | `["00000000-0000-4000-8000-000000000001"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /forms/assignments/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "assignmentIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Hay asignaciones que no son campos propios y activos de este formulario | Excepción explícita en src/modules/forms/services/forms-assignments.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/assignments/order"
+}
+```
+
+---
+
+## 7. GET /forms/definition-sets
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -577,7 +951,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /forms/definition-sets
+## 8. POST /forms/definition-sets
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -713,7 +1087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /forms/definition-sets/{id}
+## 9. GET /forms/definition-sets/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -962,7 +1336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
+## 10. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -1105,7 +1479,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /forms/definition-sets/{id}/versions/{ver}/publish
+## 11. POST /forms/definition-sets/{id}/versions/{ver}/publish
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-definition-sets`
@@ -1247,7 +1621,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /forms/field-definitions
+## 12. POST /forms/field-definitions
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1289,6 +1663,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1311,6 +1686,10 @@ Content-Type: application/json
 | `validationRules[].parameters` | No | `object` | Sin restricción adicional declarada | Parámetros de la regla | `{}` |
 | `validationRules[].severity` | No | `string` | valores: `ERROR`, `WARNING` | Sin descripción específica en el contrato OpenAPI. | `ERROR` |
 | `validationRules[].errorMessage` | No | `string` | longitud máxima 500 | Mensaje de error asociado | `valor-ejemplo` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones propias de un campo de elección (dataType "code" sin valueSetId) | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas en vez de una sola | `false` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `false` |
+| `description` | No | `string` | longitud máxima 1000 | Ayuda que se lee bajo la pregunta (se sirve como "hint") | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1341,7 +1720,14 @@ Content-Type: application/json
       "severity": "ERROR",
       "errorMessage": "valor-ejemplo"
     }
-  ]
+  ],
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": false,
+  "allowOther": false,
+  "description": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -1381,9 +1767,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El código de campo ya existe | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1401,7 +1794,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /forms/fields/{id}/access-rules
+## 13. PATCH /forms/field-definitions/{id}
+
+- **Módulo:** `forms`
+- **Etiqueta OpenAPI:** `forms-fields`
+- **Nombre:** Corregir el nombre o el tipo de un campo propio
+- **Operation ID:** `FormsFieldsController_updateFieldDefinition`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FormsFieldsController.updateFieldDefinition](../../src/modules/forms/controllers/forms-fields.controller.ts)
+
+### Descripción de negocio
+
+Corregir el nombre o el tipo de un campo propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-61 / CL-69: corrige nombre o tipo de un campo **propio**. Sólo lo que el modelo ya tiene (D-D registra el resto). Cambiar el tipo con valores capturados es 409: no se reescribe la historia clínica.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /forms/field-definitions/{id}` en `FormsFieldsController_updateFieldDefinition`. El controlador delega en `FormsFieldsService.updateFieldDefinition`. Valida el body como `UpdateFieldDefinitionDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateFieldDefinitionDto`; los campos opcionales se omiten.
+
+```http
+PATCH /forms/field-definitions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible del campo | `Nombre de ejemplo` |
+| `dataType` | No | `string` | valores: `string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`, `time`, `uuid`, `json`, `binary`, `reference`, `code` | Tipo de dato técnico; con valores capturados no se cambia (409) | `string` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones, reemplazadas enteras | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas | `true` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `true` |
+| `description` | No | `object` | longitud máxima 1000; admite null | Ayuda bajo la pregunta; null la quita | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /forms/field-definitions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "dataType": "string",
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": true,
+  "allowOther": true,
+  "description": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 404 | `NOT_FOUND` | Campo no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 409 | `CONFLICT` | El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No se puede quitar una opción que ya tiene respuestas capturadas | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/forms/field-definitions/{id}"
+}
+```
+
+---
+
+## 14. POST /forms/fields/{id}/access-rules
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1537,7 +2076,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /forms/fields/{id}/dependencies
+## 15. POST /forms/fields/{id}/dependencies
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1581,6 +2120,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1652,7 +2192,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Campo destino no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 404 | `NOT_FOUND` | Campo fuente no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 409 | `CONFLICT` | La dependencia ya existe en ese grupo lógico | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
@@ -1675,7 +2215,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PUT /forms/fields/{id}/localizations/{lang}
+## 16. PUT /forms/fields/{id}/localizations/{lang}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-fields`
@@ -1716,6 +2256,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1783,7 +2324,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Campo no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Idioma no soportado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
@@ -1804,7 +2345,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /forms/instances
+## 17. GET /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -1934,7 +2475,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /forms/instances
+## 18. POST /forms/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2066,7 +2607,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /forms/instances/{id}
+## 19. GET /forms/instances/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2202,7 +2743,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /forms/instances/{id}/close
+## 20. POST /forms/instances/{id}/close
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2312,7 +2853,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /forms/instances/{id}/values
+## 21. POST /forms/instances/{id}/values
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-instances`
@@ -2443,6 +2984,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La instancia no está abierta | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2460,7 +3003,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /forms/me/instances
+## 22. GET /forms/me/instances
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-me`
@@ -2586,7 +3129,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /forms/me/instances/{id}
+## 23. GET /forms/me/instances/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-me`
@@ -2721,7 +3264,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PATCH /forms/values/{id}
+## 24. PATCH /forms/values/{id}
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`
@@ -2834,6 +3377,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Valor no encontrado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El valor ya fue superado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2851,7 +3396,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /forms/values/import
+## 25. POST /forms/values/import
 
 - **Módulo:** `forms`
 - **Etiqueta OpenAPI:** `forms-values`
@@ -2985,6 +3530,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

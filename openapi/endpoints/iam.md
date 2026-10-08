@@ -2,46 +2,49 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 31 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 34 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
-- **Controladores:** `IamAuthController`, `IamUsersController`
+- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamUsersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /iam/auth/activate](#1-post-iam-auth-activate) — Activar la cuenta con el token de un solo uso y fijar la contraseña
-2. [POST /iam/auth/forgot-password](#2-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
-3. [POST /iam/auth/login](#3-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
-4. [POST /iam/auth/logout](#4-post-iam-auth-logout) — Cerrar la sesión actual del usuario
-5. [POST /iam/auth/logout-all](#5-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
-6. [POST /iam/auth/register-organization](#6-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
-7. [POST /iam/auth/register-patient](#7-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
-8. [POST /iam/auth/register-practitioner](#8-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
-9. [POST /iam/auth/resend-verification](#9-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
-10. [POST /iam/auth/reset-password](#10-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
-11. [POST /iam/auth/sessions/purge](#11-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
-12. [POST /iam/auth/token/refresh](#12-post-iam-auth-token-refresh) — Rotar el refresh token
-13. [POST /iam/auth/upload-registration-document](#13-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
-14. [POST /iam/auth/verify-email](#14-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-15. [GET /iam/users](#15-get-iam-users) — Listado paginado de usuarios
-16. [POST /iam/users](#16-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-17. [GET /iam/users/{id}](#17-get-iam-users-id) — Ficha de un usuario
-18. [POST /iam/users/{id}/anonymize](#18-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-19. [GET /iam/users/{id}/credentials](#19-get-iam-users-id-credentials) — Credenciales del usuario
-20. [POST /iam/users/{id}/credentials/{cid}/revoke](#20-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-21. [POST /iam/users/{id}/credentials/federated](#21-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-22. [GET /iam/users/{id}/devices](#22-get-iam-users-id-devices) — Dispositivos del usuario
-23. [POST /iam/users/{id}/devices](#23-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-24. [GET /iam/users/{id}/global-roles](#24-get-iam-users-id-global-roles) — Roles globales del usuario
-25. [POST /iam/users/{id}/global-roles](#25-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-26. [POST /iam/users/{id}/lock](#26-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-27. [GET /iam/users/{id}/mfa-factors](#27-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-28. [POST /iam/users/{id}/mfa-factors](#28-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-29. [GET /iam/users/{id}/sessions](#29-get-iam-users-id-sessions) — Sesiones del usuario
-30. [POST /iam/users/assisted-practitioner-registration](#30-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-31. [POST /iam/users/assisted-registration](#31-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+2. [POST /iam/auth/change-password](#2-post-iam-auth-change-password) — Cambiar la contraseña de la propia cuenta
+3. [POST /iam/auth/forgot-password](#3-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
+4. [POST /iam/auth/login](#4-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
+5. [POST /iam/auth/logout](#5-post-iam-auth-logout) — Cerrar la sesión actual del usuario
+6. [POST /iam/auth/logout-all](#6-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
+7. [POST /iam/auth/register-organization](#7-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
+8. [POST /iam/auth/register-patient](#8-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
+9. [POST /iam/auth/register-practitioner](#9-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
+10. [POST /iam/auth/resend-verification](#10-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
+11. [POST /iam/auth/reset-password](#11-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
+12. [POST /iam/auth/sessions/purge](#12-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
+13. [POST /iam/auth/token/refresh](#13-post-iam-auth-token-refresh) — Rotar el refresh token
+14. [POST /iam/auth/upload-registration-document](#14-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
+15. [POST /iam/auth/verify-email](#15-post-iam-auth-verify-email) — Verificar el correo con el token recibido
+16. [GET /iam/me/sessions](#16-get-iam-me-sessions) — Listar mis sesiones abiertas
+17. [POST /iam/me/sessions/{id}/revoke](#17-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+18. [GET /iam/users](#18-get-iam-users) — Listado paginado de usuarios
+19. [POST /iam/users](#19-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+20. [GET /iam/users/{id}](#20-get-iam-users-id) — Ficha de un usuario
+21. [POST /iam/users/{id}/anonymize](#21-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+22. [GET /iam/users/{id}/credentials](#22-get-iam-users-id-credentials) — Credenciales del usuario
+23. [POST /iam/users/{id}/credentials/{cid}/revoke](#23-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+24. [POST /iam/users/{id}/credentials/federated](#24-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+25. [GET /iam/users/{id}/devices](#25-get-iam-users-id-devices) — Dispositivos del usuario
+26. [POST /iam/users/{id}/devices](#26-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+27. [GET /iam/users/{id}/global-roles](#27-get-iam-users-id-global-roles) — Roles globales del usuario
+28. [POST /iam/users/{id}/global-roles](#28-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+29. [POST /iam/users/{id}/lock](#29-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+30. [GET /iam/users/{id}/mfa-factors](#30-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+31. [POST /iam/users/{id}/mfa-factors](#31-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+32. [GET /iam/users/{id}/sessions](#32-get-iam-users-id-sessions) — Sesiones del usuario
+33. [POST /iam/users/assisted-practitioner-registration](#33-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+34. [POST /iam/users/assisted-registration](#34-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -168,7 +171,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /iam/auth/forgot-password
+## 2. POST /iam/auth/change-password
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Cambiar la contraseña de la propia cuenta
+- **Operation ID:** `IamAccountSecurityController_changePassword`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.changePassword](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Cambiar la contraseña de la propia cuenta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cambia la contraseña y cierra las otras sesiones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/change-password` en `IamAccountSecurityController_changePassword`. El controlador delega en `IamAccountSecurityService.changePassword`. Valida el body como `ChangePasswordDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChangePasswordResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ChangePasswordDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/change-password HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "currentPassword": "ClaveSegura2026!",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `currentPassword` | Sí | `string` | longitud máxima 200 | Contraseña actual | `ClaveSegura2026!` |
+| `newPassword` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Contraseña nueva | `ClaveSegura2026!` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/change-password HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "currentPassword": "ClaveSegura2026!",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangePasswordResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Nº de las otras sesiones que se revocaron | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una contraseña que cambiar | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña actual no coincide | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña nueva tiene que ser distinta de la actual | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/change-password"
+}
+```
+
+---
+
+## 3. POST /iam/auth/forgot-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -287,7 +415,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /iam/auth/login
+## 4. POST /iam/auth/login
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -392,6 +520,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | Credenciales inválidas | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {         message: 'Se requiere el código de verificación en dos pasos',         details: { reason: 'MFA_REQUIRED' },       } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {       message: 'El código de verificación no es válido',       details: { reason: 'MFA_INVALID' },     } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -410,7 +540,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /iam/auth/logout
+## 5. POST /iam/auth/logout
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -513,7 +643,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /iam/auth/logout-all
+## 6. POST /iam/auth/logout-all
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -615,7 +745,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /iam/auth/register-organization
+## 7. POST /iam/auth/register-organization
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -676,7 +806,7 @@ Content-Type: application/json
 | `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS`, `DIAGNOSTIC_CENTER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
 | `organization.legalEntityType` | No | `string` | valores: `UNIPERSONAL`, `SRL`, `LTDA`, `SA`, `SOCIEDAD_COLECTIVA`, `COMANDITA_SIMPLE`, `COMANDITA_ACCIONES`, `SUCURSAL_EXTRANJERA`, `BR_LTDA`, `BR_SA`, `BR_MEI`, `BR_EI`, `BR_SLU`, `BR_FILIAL_EST`, `US_LLC`, `US_CORP`, `US_SOLE_PROP`, `US_LLP`, `US_BRANCH`, `AR_SAS`, `MX_S_RL` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin él, la organización nace con la forma legada `COMPANY`. | `SRL` |
 | `organization.legalDocuments` | No | `RegisterOrganizationLegalDocumentsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"}` |
-| `organization.legalDocuments.constitutionFileId` | No | `string` | formato `uuid` | Escritura de constitución (fileId de POST /iam/auth/upload-registration-document) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalDocuments.constitutionFileId` | No | `string` | formato `uuid` | Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.taxIdentifierFileId` | No | `string` | formato `uuid` | Identificación tributaria (NIT en Bolivia) | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.commerceRegistryFileId` | No | `string` | formato `uuid` | Registro mercantil (matrícula SEPREC en Bolivia) | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.operatingLicenseFileId` | No | `string` | formato `uuid` | Licencia de funcionamiento | `00000000-0000-4000-8000-000000000001` |
@@ -690,7 +820,7 @@ Content-Type: application/json
 | `organization.legalRepresentative.idNumber` | No | `string` | longitud mínima 4; longitud máxima 50 | Cédula de identidad o documento legal equivalente | `4872190 SC` |
 | `organization.legalRepresentative.email` | No | `string` | formato `email`; longitud máxima 320 | Correo oficial para notificaciones legales | `legal@aseguradora.com` |
 | `organization.legalRepresentative.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono de contacto del representante | `+591 70012345` |
-| `organization.legalRepresentative.powerOfAttorneyFileId` | No | `string` | formato `uuid` | Id del archivo del poder notariado (PDF ya pre-cargado) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalRepresentative.powerOfAttorneyFileId` | No | `string` | formato `uuid` | Id del archivo del poder notariado (PDF ya pre-cargado). Obligatorio salvo para UNIPERSONAL, donde el titular actúa por sí; el servicio responde 422 si falta | `00000000-0000-4000-8000-000000000001` |
 | `organization.executives` | No | `RegisterOrganizationExecutivesDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}}` |
 | `organization.executives.generalManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
 | `organization.executives.generalManager.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Carlos` |
@@ -1037,7 +1167,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /iam/auth/register-patient
+## 8. POST /iam/auth/register-patient
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1242,7 +1372,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /iam/auth/register-practitioner
+## 9. POST /iam/auth/register-practitioner
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1334,7 +1464,7 @@ Content-Type: application/json
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
 | `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
@@ -1345,10 +1475,14 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
@@ -1425,6 +1559,10 @@ Content-Type: application/json
       "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "number": "valor-ejemplo",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ]
@@ -1491,9 +1629,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
@@ -1530,7 +1669,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /iam/auth/resend-verification
+## 10. POST /iam/auth/resend-verification
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1649,7 +1788,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /iam/auth/reset-password
+## 11. POST /iam/auth/reset-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1770,7 +1909,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /iam/auth/sessions/purge
+## 12. POST /iam/auth/sessions/purge
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1875,7 +2014,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /iam/auth/token/refresh
+## 13. POST /iam/auth/token/refresh
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1993,7 +2132,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /iam/auth/upload-registration-document
+## 14. POST /iam/auth/upload-registration-document
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2115,7 +2254,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /iam/auth/verify-email
+## 15. POST /iam/auth/verify-email
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2232,7 +2371,221 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /iam/users
+## 16. GET /iam/me/sessions
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Listar mis sesiones abiertas
+- **Operation ID:** `IamAccountSecurityController_listSessions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.listSessions](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Listar mis sesiones abiertas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Sesiones abiertas de la propia cuenta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/sessions` en `IamAccountSecurityController_listSessions`. El controlador delega en `IamAccountSecurityService.listSessions`. No recibe body. El tipo de retorno estático es `Promise<MySessionDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MySessionDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "expiresAt": "2026-07-31T12:00:00.000Z",
+    "ip": "valor-ejemplo",
+    "current": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/sessions"
+}
+```
+
+---
+
+## 17. POST /iam/me/sessions/{id}/revoke
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Cerrar una de mis sesiones
+- **Operation ID:** `IamAccountSecurityController_revokeSession`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.revokeSession](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cierra una sesión propia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/sessions/{id}/revoke` en `IamAccountSecurityController_revokeSession`. El controlador delega en `IamAccountSecurityService.revokeSession`. No recibe body. El tipo de retorno estático es `Promise<RevokeMySessionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/me/sessions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/me/sessions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeMySessionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revoked": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revoked` | Sí | `boolean` | Sin restricción adicional declarada | `false` si la sesión ya no estaba activa (no es un error). | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/sessions/{id}/revoke"
+}
+```
+
+---
+
+## 18. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2365,7 +2718,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /iam/users
+## 19. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2503,7 +2856,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /iam/users/{id}
+## 20. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2629,7 +2982,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /iam/users/{id}/anonymize
+## 21. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2738,7 +3091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /iam/users/{id}/credentials
+## 22. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2867,7 +3220,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /iam/users/{id}/credentials/{cid}/revoke
+## 23. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2977,7 +3330,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /iam/users/{id}/credentials/federated
+## 24. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3111,7 +3464,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /iam/users/{id}/devices
+## 25. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3236,7 +3589,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /iam/users/{id}/devices
+## 26. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3369,7 +3722,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /iam/users/{id}/global-roles
+## 27. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3490,7 +3843,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /iam/users/{id}/global-roles
+## 28. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3619,7 +3972,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /iam/users/{id}/lock
+## 29. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3741,7 +4094,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /iam/users/{id}/mfa-factors
+## 30. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3864,7 +4217,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /iam/users/{id}/mfa-factors
+## 31. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3984,6 +4337,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -4009,7 +4363,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /iam/users/{id}/sessions
+## 32. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4134,7 +4488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /iam/users/assisted-practitioner-registration
+## 33. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4227,7 +4581,7 @@ Content-Type: application/json
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
 | `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
@@ -4238,10 +4592,14 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
@@ -4320,6 +4678,10 @@ Content-Type: application/json
       "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "number": "valor-ejemplo",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
@@ -4379,9 +4741,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
@@ -4418,7 +4781,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /iam/users/assisted-registration
+## 34. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
