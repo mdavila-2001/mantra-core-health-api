@@ -1,5 +1,6 @@
 import { describe, it, expect, jest } from '@jest/globals';
 import { BadRequestException } from '@nestjs/common';
+import { PATH_METADATA } from '@nestjs/common/constants';
 import { TerminologyConceptsController } from './terminology-concepts.controller';
 import { type AuthenticatedUser } from '../../../common';
 
@@ -16,6 +17,9 @@ describe('TerminologyConceptsController', () => {
       addRelationship: jest.fn(),
       upsertProperties: jest.fn(),
       deprecateConcept: jest.fn(),
+      readGlossaryNeighborhood: jest.fn(() =>
+        Promise.resolve({ focus: {}, groups: [] }),
+      ),
       readGlossaryGraph: jest.fn(() =>
         Promise.resolve({ nodes: [], edges: [], count: 0, limit: 500 }),
       ),
@@ -88,6 +92,87 @@ describe('TerminologyConceptsController', () => {
 
     expect(service.deprecateConcept).toHaveBeenCalledWith('c-1', dto, user);
     expect(result).toBe(expected);
+  });
+
+  describe('vecindario del glosario', () => {
+    const conceptId = '3f2b6c14-0000-4000-8000-000000000001';
+
+    it('la ruta está declarada antes que `:conceptId`, que si no la capturaría', () => {
+      const proto = TerminologyConceptsController.prototype;
+      const declared = Object.getOwnPropertyNames(proto);
+
+      const handler = Object.getOwnPropertyDescriptor(
+        proto,
+        'readGlossaryNeighborhood',
+      )?.value as object;
+
+      expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(
+        ':conceptId/glossary-neighborhood',
+      );
+      expect(declared.indexOf('readGlossaryNeighborhood')).toBeLessThan(
+        declared.indexOf('readConcept'),
+      );
+    });
+
+    it('sin tipo ni sentido pide la muestra, con 8 por grupo por omisión', async () => {
+      const { controller, service } = build();
+
+      await controller.readGlossaryNeighborhood(conceptId, {});
+
+      expect(service.readGlossaryNeighborhood).toHaveBeenCalledWith(
+        conceptId,
+        undefined,
+        { perGroup: 8 },
+      );
+    });
+
+    it('pasa perGroup y el idioma tal como llegan', async () => {
+      const { controller, service } = build();
+
+      await controller.readGlossaryNeighborhood(conceptId, {
+        lang: 'EN',
+        perGroup: 20,
+      });
+
+      expect(service.readGlossaryNeighborhood).toHaveBeenCalledWith(
+        conceptId,
+        'EN',
+        { perGroup: 20 },
+      );
+    });
+
+    it('con tipo y sentido pide un grupo, con offset 0 y límite 50 por omisión', async () => {
+      const { controller, service } = build();
+
+      await controller.readGlossaryNeighborhood(conceptId, {
+        type: 'SYMPTOM',
+        direction: 'incoming',
+      });
+
+      expect(service.readGlossaryNeighborhood).toHaveBeenCalledWith(
+        conceptId,
+        undefined,
+        { type: 'SYMPTOM', direction: 'incoming', offset: 0, limit: 50 },
+      );
+    });
+
+    it('con tipo y sentido ignora perGroup: la página manda', async () => {
+      const { controller, service } = build();
+
+      await controller.readGlossaryNeighborhood(conceptId, {
+        type: 'TREATMENT',
+        direction: 'outgoing',
+        offset: 50,
+        limit: 25,
+        perGroup: 3,
+      });
+
+      expect(service.readGlossaryNeighborhood).toHaveBeenCalledWith(
+        conceptId,
+        undefined,
+        { type: 'TREATMENT', direction: 'outgoing', offset: 50, limit: 25 },
+      );
+    });
   });
 
   describe('búsqueda paginada del glosario', () => {

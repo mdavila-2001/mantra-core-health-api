@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `promotions`
 
-Referencia exhaustiva de 18 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `loyalty`, `promotions`
 - **Controladores:** `LoyaltyController`, `PromotionsController`
@@ -25,10 +25,11 @@ Referencia exhaustiva de 18 operación(es) del módulo `promotions`, derivada de
 12. [POST /loyalty/programs/{id}/memberships](#12-post-loyalty-programs-id-memberships) — Inscribir a un miembro en el programa
 13. [POST /promotions](#13-post-promotions) — Crear una promoción con sus reglas de descuento
 14. [POST /promotions/{id}/coupons/batch](#14-post-promotions-id-coupons-batch) — Emitir un lote de cupones
-15. [POST /redemptions](#15-post-redemptions) — Redimir un cupón y registrar la redención
-16. [POST /redemptions/{id}/reverse](#16-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
-17. [POST /referral-programs/{id}/referrals](#17-post-referral-programs-id-referrals) — Generar el código de referido del miembro
-18. [POST /referrals/{id}/qualify](#18-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
+15. [GET /promotions/me](#15-get-promotions-me) — Mis promociones vigentes
+16. [POST /redemptions](#16-post-redemptions) — Redimir un cupón y registrar la redención
+17. [POST /redemptions/{id}/reverse](#17-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
+18. [POST /referral-programs/{id}/referrals](#18-post-referral-programs-id-referrals) — Generar el código de referido del miembro
+19. [POST /referrals/{id}/qualify](#19-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
 
 ---
 
@@ -831,7 +832,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Membresía no encontrada | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 409 | `CONFLICT` | La clave de idempotencia pertenece a otro canje | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No tenés una membresía de lealtad en este programa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
+| 422 | `PRECONDITION_FAILED` | No tiene una membresía de lealtad en este programa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canje debe ser de puntos positivos | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
 | 422 | `PRECONDITION_FAILED` | La membresía no está activa | Excepción explícita en src/modules/promotions/services/promotions-loyalty.service.ts |
@@ -2067,7 +2068,177 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /redemptions
+## 15. GET /promotions/me
+
+- **Módulo:** `promotions`
+- **Etiqueta OpenAPI:** `promotions`
+- **Nombre:** Mis promociones vigentes
+- **Operation ID:** `PromotionsController_listMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PromotionsController.listMine](../../src/modules/promotions/controllers/promotions.controller.ts)
+
+### Descripción de negocio
+
+Promociones automáticas vigentes del tenant, más las de cupón para las que el titular tiene un cupón personal activo (con su código). El titular sale del token.
+
+Contexto declarado en el controlador: B-REAL-13: las promociones vigentes para el paciente autenticado. Sin parámetros a propósito: el titular sale del token y el tenant del contexto, así que la URL no lleva ningún dato de la persona.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /promotions/me` en `PromotionsController_listMine`. El controlador delega en `PromotionsReadService.listMine`. No recibe body. El tipo de retorno estático es `Promise<MyPromotionsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /promotions/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /promotions/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyPromotionsResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyPromotionsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPromotionsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "discounts": [
+        {
+          "type": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "percentage": "valor-ejemplo",
+          "fixedAmount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "minPurchaseAmount": "valor-ejemplo",
+          "maxDiscountAmount": "valor-ejemplo",
+          "appliesTo": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          }
+        }
+      ],
+      "coupons": [
+        {
+          "code": "CODIGO_EJEMPLO",
+          "validTo": "2026-07-31T12:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyPromotionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","discounts":[{"type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"percentage":"valor-ejemplo","fixedAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"minPurchaseAmount":"valor-ejemplo","maxDiscountAmount":"valor-ejemplo","appliesTo":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}],"coupons":[{"code":"CODIGO_EJEMPLO","validTo":"2026-07-31T12:00:00.000Z"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].type` | No | `PromotionConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].type.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].type.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].discounts` | Sí | `array<MyPromotionDiscountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"percentage":"valor-ejemplo","fixedAmount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"minPurchaseAmount":"valor-ejemplo","maxDiscountAmount":"valor-ejemplo","appliesTo":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `items[].discounts[].type` | No | `PromotionConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].discounts[].type.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].discounts[].type.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].percentage` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].fixedAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].currency` | No | `PromotionConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].discounts[].currency.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].discounts[].currency.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].minPurchaseAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].maxDiscountAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].discounts[].appliesTo` | No | `PromotionConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].discounts[].appliesTo.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].discounts[].appliesTo.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].coupons` | Sí | `array<MyPromotionCouponDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].coupons[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].coupons[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/promotions/services/promotions-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/promotions/me"
+}
+```
+
+---
+
+## 16. POST /redemptions
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2216,7 +2387,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /redemptions/{id}/reverse
+## 17. POST /redemptions/{id}/reverse
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2350,7 +2521,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /referral-programs/{id}/referrals
+## 18. POST /referral-programs/{id}/referrals
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -2480,7 +2651,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /referrals/{id}/qualify
+## 19. POST /referrals/{id}/qualify
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`

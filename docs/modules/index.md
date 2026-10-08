@@ -20,7 +20,7 @@
 | [`chart`](chart.md) | 7 | 8 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 8 | 7 | 36 | 9 |
 | [`scheduling`](scheduling.md) | 7 | 14 | 7 | 18 | 8 |
-| [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 18 |
+| [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 19 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 16 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **273** | **412** | **410** | **1262** | **510** |
+| **Total** | **273** | **412** | **410** | **1262** | **511** |

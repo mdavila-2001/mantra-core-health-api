@@ -1637,7 +1637,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Material informativo no encontrado en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-catalog.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No se puede modificar el contenido de un material ya aprobado; creá una versión nueva | Excepción explícita en src/modules/pharma_lab/services/pharma-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede modificar el contenido de un material ya aprobado; cree una versión nueva | Excepción explícita en src/modules/pharma_lab/services/pharma-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2179,11 +2179,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Cuenta no encontrada | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
+| 404 | `NOT_FOUND` | Rol no encontrado | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 409 | `CONFLICT` | La cuenta ya está registrada como visitador | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
 | 409 | `CONFLICT` | El código interno ya está en uso en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
+| 409 | `CONFLICT` | El usuario ya tiene ese rol asignado y activo en ese ámbito | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Algún producto no pertenece al catálogo del laboratorio | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2447,10 +2452,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Rol no encontrado | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 404 | `NOT_FOUND` | Laboratorio no encontrado | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 404 | `NOT_FOUND` | Visitador no encontrado en el laboratorio | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 409 | `CONFLICT` | El visitador ya está vinculado | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
+| 409 | `CONFLICT` | El usuario ya tiene ese rol asignado y activo en ese ámbito | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6593,7 +6603,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Indicá el laboratorio o el visitador a bloquear | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique el laboratorio o el visitador a bloquear | Excepción explícita en src/modules/pharma_lab/services/visit-agenda.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
