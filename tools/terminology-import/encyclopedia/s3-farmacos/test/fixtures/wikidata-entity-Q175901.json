@@ -1,0 +1,340 @@
+{
+ "id": "Q175901",
+ "modified": "2026-06-19T12:51:36Z",
+ "lastrevid": 2507890244,
+ "labels": {
+  "es": {
+   "language": "es",
+   "value": "17-Hidroxiprogesterona"
+  },
+  "en": {
+   "language": "en",
+   "value": "17α-hydroxyprogesterone"
+  }
+ },
+ "descriptions": {
+  "es": {
+   "language": "es",
+   "value": "hormona esteroide"
+  },
+  "en": {
+   "language": "en",
+   "value": "chemical compound"
+  }
+ },
+ "claims": {
+  "P267": [
+   {
+    "mainsnak": {
+     "snaktype": "value",
+     "property": "P267",
+     "hash": "6eb12768acb0942926d3cda2a1bc73bcea670ed2",
+     "datavalue": {
+      "value": "G03DA03",
+      "type": "string"
+     },
+     "datatype": "external-id"
+    },
+    "type": "statement",
+    "id": "Q175901$53AA343F-A3DF-4DFA-A1EC-8807038A0CD9",
+    "rank": "normal"
+   }
+  ],
+  "P231": [
+   {
+    "mainsnak": {
+     "snaktype": "value",
+     "property": "P231",
+     "hash": "59dd047d10bac2bbcd17ee76c8a2c0f1bf750ebb",
+     "datavalue": {
+      "value": "68-96-2",
+      "type": "string"
+     },
+     "datatype": "external-id"
+    },
+    "type": "statement",
+    "id": "Q175901$86043DEE-712C-41DD-B749-B8804EF03066",
+    "rank": "normal",
+    "references": [
+     {
+      "hash": "6ac9049533149d0e376e6645b0a359e7de62dece",
+      "snaks": {
+       "P248": [
+        {
+         "snaktype": "value",
+         "property": "P248",
+         "hash": "035ffafe3658988588e5ada618ac8e2ef4f8b8a1",
+         "datavalue": {
+          "value": {
+           "entity-type": "item",
+           "numeric-id": 116031405,
+           "id": "Q116031405"
+          },
+          "type": "wikibase-entityid"
+         },
+         "datatype": "wikibase-item"
+        }
+       ],
+       "P652": [
+        {
+         "snaktype": "value",
+         "property": "P652",
+         "hash": "b9f45d081bf5745ecad88c21215d9ff93a827127",
+         "datavalue": {
+          "value": "21807M87J2",
+          "type": "string"
+         },
+         "datatype": "external-id"
+        }
+       ],
+       "P813": [
+        {
+         "snaktype": "value",
+         "property": "P813",
+         "hash": "71798096bea815082e5212ff955f2ea7486e2083",
+         "datavalue": {
+          "value": {
+           "time": "+2018-02-14T00:00:00Z",
+           "timezone": 0,
+           "before": 0,
+           "after": 0,
+           "precision": 11,
+           "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+          },
+          "type": "time"
+         },
+         "datatype": "time"
+        }
+       ]
+      },
+      "snaks-order": [
+       "P248",
+       "P652",
+       "P813"
+      ]
+     },
+     {
+      "hash": "1766b7f52dfe043931c3048a9a337f8a930ac753",
+      "snaks": {
+       "P235": [
+        {
+         "snaktype": "value",
+         "property": "P235",
+         "hash": "662f6ddca5bcaf31f44754e9e4771e9353f44222",
+         "datavalue": {
+          "value": "DBPWSSGDRRHUNT-CEGNMAFCSA-N",
+          "type": "string"
+         },
+         "datatype": "external-id"
+        }
+       ],
+       "P248": [
+        {
+         "snaktype": "value",
+         "property": "P248",
+         "hash": "ebfb3b965b5e13f031178f114e6a6833e39b641a",
+         "datavalue": {
+          "value": {
+           "entity-type": "item",
+           "numeric-id": 18907859,
+           "id": "Q18907859"
+          },
+          "type": "wikibase-entityid"
+         },
+         "datatype": "wikibase-item"
+        }
+       ],
+       "P813": [
+        {
+         "snaktype": "value",
+         "property": "P813",
+         "hash": "94ec541d1e675dcf3b5a274d6c1452b4fa8cc84e",
+         "datavalue": {
+          "value": {
+           "time": "+2021-04-10T00:00:00Z",
+           "timezone": 0,
+           "before": 0,
+           "after": 0,
+           "precision": 11,
+           "calendarmodel": "http://www.wikidata.org/entity/Q1985727"
+          },
+          "type": "time"
+         },
+         "datatype": "time"
+        }
+       ],
+       "P854": [
+        {
+         "snaktype": "value",
+         "property": "P854",
+         "hash": "57ef224e1fea3647a6f466544f2dc513553015cd",
+         "datavalue": {
+          "value": "https://commonchemistry.cas.org/detail?cas_rn=68-96-2",
+          "type": "string"
+         },
+         "datatype": "url"
+        }
+       ]
+      },
+      "snaks-order": [
+       "P235",
+       "P248",
+       "P813",
+       "P854"
+      ]
+     }
+    ]
+   }
+  ],
+  "P715": [
+   {
+    "mainsnak": {
+     "snaktype": "value",
+     "property": "P715",
+     "hash": "38db2a1b4dfb1cce8f8a4d97d46467a4522a126e",
+     "datavalue": {
+      "value": "DB14570",
+      "type": "string"
+     },
+     "datatype": "external-id"
+    },
+    "type": "statement",
+    "id": "Q175901$71BDCB78-E575-4F48-8024-FADED66B3A77",
+    "rank": "normal",
+    "references": [
+     {
+      "hash": "a164cf66cd6999bbc9af7c75cb7eb4baf6248586",
+      "snaks": {
+       "P11797": [
+        {
+         "snaktype": "value",
+         "property": "P11797",
+         "hash": "968248c37781399a8c50feb4ec6dd716030b2a7f",
+         "datavalue": {
+          "value": {
+           "entity-type": "item",
+           "numeric-id": 21445422,
+           "id": "Q21445422"
+          },
+          "type": "wikibase-entityid"
+         },
+         "datatype": "wikibase-item"
+        }
+       ],
+       "P235": [
+        {
+         "snaktype": "value",
+         "property": "P235",
+         "hash": "662f6ddca5bcaf31f44754e9e4771e9353f44222",
+         "datavalue": {
+          "value": "DBPWSSGDRRHUNT-CEGNMAFCSA-N",
+          "type": "string"
+         },
+         "datatype": "external-id"
+        }
+       ]
+      },
+      "snaks-order": [
+       "P11797",
+       "P235"
+      ]
+     }
+    ]
+   }
+  ],
+  "P486": [
+   {
+    "mainsnak": {
+     "snaktype": "value",
+     "property": "P486",
+     "hash": "233b29d78f2cc6b896e5e04d0d248b190a7ced7f",
+     "datavalue": {
+      "value": "D019326",
+      "type": "string"
+     },
+     "datatype": "external-id"
+    },
+    "type": "statement",
+    "qualifiers": {
+     "P1810": [
+      {
+       "snaktype": "value",
+       "property": "P1810",
+       "hash": "f19c86f30823ec97a5896c184e42e45f8c6d50ed",
+       "datavalue": {
+        "value": "17-alpha-Hydroxyprogesterone",
+        "type": "string"
+       },
+       "datatype": "string"
+      }
+     ]
+    },
+    "qualifiers-order": [
+     "P1810"
+    ],
+    "id": "Q175901$F9D3B999-AEA6-4381-9F99-2572C50AFEF8",
+    "rank": "normal"
+   }
+  ],
+  "P2868": [
+   {
+    "mainsnak": {
+     "snaktype": "value",
+     "property": "P2868",
+     "hash": "8453409714a9a9a7f4c76d439e193efacebfefa3",
+     "datavalue": {
+      "value": {
+       "entity-type": "item",
+       "numeric-id": 3333419,
+       "id": "Q3333419"
+      },
+      "type": "wikibase-entityid"
+     },
+     "datatype": "wikibase-item"
+    },
+    "type": "statement",
+    "id": "Q175901$ED4FDD83-4753-45A5-874F-9F46849BA4B2",
+    "rank": "normal",
+    "references": [
+     {
+      "hash": "4232cc3858860bae7bfbd71fe814e933b133050c",
+      "snaks": {
+       "P248": [
+        {
+         "snaktype": "value",
+         "property": "P248",
+         "hash": "f32066d9c8e0e12fe6bdec70bd52343c2e929d99",
+         "datavalue": {
+          "value": {
+           "entity-type": "item",
+           "numeric-id": 2134522,
+           "id": "Q2134522"
+          },
+          "type": "wikibase-entityid"
+         },
+         "datatype": "wikibase-item"
+        }
+       ],
+       "P854": [
+        {
+         "snaktype": "value",
+         "property": "P854",
+         "hash": "c1d302ed3b7fe40151b6270b7d04d37dc34ea89f",
+         "datavalue": {
+          "value": "https://reactome.org/PathwayBrowser/#/R-HSA-1430728&DTAB=MT",
+          "type": "string"
+         },
+         "datatype": "url"
+        }
+       ]
+      },
+      "snaks-order": [
+       "P248",
+       "P854"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

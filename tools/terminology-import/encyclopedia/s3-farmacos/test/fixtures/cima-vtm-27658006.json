@@ -1,0 +1,278 @@
+{
+ "slug": "cima-vtm-27658006",
+ "code": "27658006",
+ "codeSystem": "cima-vtm",
+ "display": "Amoxicilina",
+ "esName": "Amoxicilina",
+ "externalIds": {
+  "atc": [
+   "J01CA04"
+  ]
+ },
+ "drugFacts": {
+  "atc": [
+   {
+    "code": "J01C",
+    "name": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+    "level": 3
+   },
+   {
+    "code": "J01CA",
+    "name": "Penicilinas con espectro ampliado",
+    "level": 4
+   },
+   {
+    "code": "J01CA04",
+    "name": "Amoxicilina",
+    "level": 5
+   }
+  ],
+  "referenceProduct": {
+   "nregistro": "50239",
+   "name": "CLAMOXYL 500 mg CAPSULAS DURAS",
+   "criterion": "comercializado primero; luego nº de registro más bajo, entre los que tienen ficha técnica segmentada"
+  },
+  "products": [
+   {
+    "nregistro": "50239",
+    "name": "CLAMOXYL 500 mg CAPSULAS DURAS",
+    "holder": "Glaxosmithkline S.A.",
+    "dose": "500 mg",
+    "dosageForm": "CÁPSULA DURA",
+    "dosageFormSimplified": "CAPSULA",
+    "routes": [
+     "VÍA ORAL"
+    ],
+    "prescription": "Medicamento Sujeto A Prescripción Médica",
+    "generic": false,
+    "commercialized": true,
+    "authorizedAt": "1972-05-31T23:00:00.000Z",
+    "suspendedAt": null,
+    "revokedAt": null,
+    "activeIngredients": [
+     {
+      "name": "AMOXICILINA TRIHIDRATO",
+      "amount": "500",
+      "unit": "mg"
+     }
+    ],
+    "atc": [
+     {
+      "code": "J01C",
+      "name": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+      "level": 3
+     },
+     {
+      "code": "J01CA",
+      "name": "Penicilinas con espectro ampliado",
+      "level": 4
+     },
+     {
+      "code": "J01CA04",
+      "name": "Amoxicilina",
+      "level": 5
+     }
+    ],
+    "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/50239/FT_50239.html",
+    "fichaTecnicaSegmented": true,
+    "fichaTecnicaDate": "2025-06-06T23:03:43.000Z",
+    "prospectoUrl": "https://cima.aemps.es/cima/dochtml/p/50239/P_50239.html",
+    "cimaUrl": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=50239",
+    "presentations": [
+     {
+      "cn": "695334",
+      "name": "CLAMOXYL 500 mg CAPSULAS DURAS , 20 cápsulas",
+      "commercialized": true
+     },
+     {
+      "cn": "695335",
+      "name": "CLAMOXYL 500 mg CAPSULAS DURAS , 30 cápsulas",
+      "commercialized": false
+     }
+    ],
+    "photos": [
+     {
+      "kind": "materialas",
+      "url": "https://cima.aemps.es/cima/fotos/full/materialas/50239/50239_materialas.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/materialas/50239/50239_materialas.jpg",
+      "attribution": "AEMPS · CIMA — CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), foto de envase",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=50239",
+      "updatedAt": "2023-06-20T11:46:32.000Z"
+     },
+     {
+      "kind": "formafarmac",
+      "url": "https://cima.aemps.es/cima/fotos/full/formafarmac/50239/50239_formafarmac.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/formafarmac/50239/50239_formafarmac.jpg",
+      "attribution": "AEMPS · CIMA — CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), foto de forma farmacéutica",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=50239",
+      "updatedAt": "2017-11-06T09:43:34.000Z"
+     }
+    ]
+   },
+   {
+    "nregistro": "62880",
+    "name": "AMOXICILINA CINFA 1000 MG COMPRIMIDOS EFG",
+    "holder": "Laboratorios Cinfa S.A.",
+    "dose": "1000 mg",
+    "dosageForm": "COMPRIMIDO",
+    "dosageFormSimplified": "COMPRIMIDO",
+    "routes": [
+     "VÍA ORAL"
+    ],
+    "prescription": "Medicamento Sujeto A Prescripción Médica",
+    "generic": true,
+    "commercialized": true,
+    "authorizedAt": "2000-02-01T23:00:00.000Z",
+    "suspendedAt": null,
+    "revokedAt": null,
+    "activeIngredients": [
+     {
+      "name": "AMOXICILINA TRIHIDRATO",
+      "amount": "1000",
+      "unit": "mg"
+     }
+    ],
+    "atc": [
+     {
+      "code": "J01C",
+      "name": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+      "level": 3
+     },
+     {
+      "code": "J01CA",
+      "name": "Penicilinas con espectro ampliado",
+      "level": 4
+     },
+     {
+      "code": "J01CA04",
+      "name": "Amoxicilina",
+      "level": 5
+     }
+    ],
+    "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/62880/FT_62880.html",
+    "fichaTecnicaSegmented": true,
+    "fichaTecnicaDate": "2023-05-11T22:41:50.000Z",
+    "prospectoUrl": "https://cima.aemps.es/cima/dochtml/p/62880/P_62880.html",
+    "cimaUrl": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=62880",
+    "presentations": [
+     {
+      "cn": "694688",
+      "name": "AMOXICILINA CINFA 1000 MG COMPRIMIDOS EFG , 20 comprimidos",
+      "commercialized": true
+     },
+     {
+      "cn": "694689",
+      "name": "AMOXICILINA CINFA 1000 MG COMPRIMIDOS EFG , 30 comprimidos",
+      "commercialized": true
+     }
+    ],
+    "photos": [
+     {
+      "kind": "materialas",
+      "url": "https://cima.aemps.es/cima/fotos/full/materialas/62880/62880_materialas.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/materialas/62880/62880_materialas.jpg",
+      "attribution": "AEMPS · CIMA — AMOXICILINA CINFA 1000 MG COMPRIMIDOS EFG (nº reg. 62880), foto de envase",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=62880",
+      "updatedAt": "2024-09-09T06:23:49.000Z"
+     },
+     {
+      "kind": "formafarmac",
+      "url": "https://cima.aemps.es/cima/fotos/full/formafarmac/62880/62880_formafarmac.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/formafarmac/62880/62880_formafarmac.jpg",
+      "attribution": "AEMPS · CIMA — AMOXICILINA CINFA 1000 MG COMPRIMIDOS EFG (nº reg. 62880), foto de forma farmacéutica",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=62880",
+      "updatedAt": "2024-09-09T06:23:50.000Z"
+     }
+    ]
+   },
+   {
+    "nregistro": "64117",
+    "name": "AMOXICILINA CINFA 1000 MG POLVO PARA SUSPENSIÓN ORAL EN SOBRES EFG",
+    "holder": "Laboratorios Cinfa S.A.",
+    "dose": "1000 mg",
+    "dosageForm": "POLVO PARA SUSPENSIÓN ORAL",
+    "dosageFormSimplified": "SOLUCIÓN/SUSPENSIÓN ORAL",
+    "routes": [
+     "VÍA ORAL"
+    ],
+    "prescription": "Medicamento Sujeto A Prescripción Médica",
+    "generic": true,
+    "commercialized": true,
+    "authorizedAt": "2001-07-23T22:00:00.000Z",
+    "suspendedAt": null,
+    "revokedAt": null,
+    "activeIngredients": [
+     {
+      "name": "AMOXICILINA TRIHIDRATO",
+      "amount": "1000",
+      "unit": "mg"
+     }
+    ],
+    "atc": [
+     {
+      "code": "J01C",
+      "name": "ANTIBACTERIANOS BETALACTAMICOS, PENICILINAS",
+      "level": 3
+     },
+     {
+      "code": "J01CA",
+      "name": "Penicilinas con espectro ampliado",
+      "level": 4
+     },
+     {
+      "code": "J01CA04",
+      "name": "Amoxicilina",
+      "level": 5
+     }
+    ],
+    "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/64117/FT_64117.html",
+    "fichaTecnicaSegmented": true,
+    "fichaTecnicaDate": "2023-05-11T22:44:10.000Z",
+    "prospectoUrl": "https://cima.aemps.es/cima/dochtml/p/64117/P_64117.html",
+    "cimaUrl": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=64117",
+    "presentations": [
+     {
+      "cn": "694690",
+      "name": "AMOXICILINA CINFA 1000 MG POLVO PARA SUSPENSIÓN ORAL EN SOBRES EFG , 20 sobres",
+      "commercialized": true
+     },
+     {
+      "cn": "694691",
+      "name": "AMOXICILINA CINFA 1000 MG POLVO PARA SUSPENSIÓN ORAL EN SOBRES EFG , 30 sobres",
+      "commercialized": true
+     }
+    ],
+    "photos": [
+     {
+      "kind": "materialas",
+      "url": "https://cima.aemps.es/cima/fotos/full/materialas/64117/64117_materialas.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/materialas/64117/64117_materialas.jpg",
+      "attribution": "AEMPS · CIMA — AMOXICILINA CINFA 1000 MG POLVO PARA SUSPENSIÓN ORAL EN SOBRES EFG (nº reg. 64117), foto de envase",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=64117",
+      "updatedAt": "2024-10-03T07:10:38.000Z"
+     },
+     {
+      "kind": "formafarmac",
+      "url": "https://cima.aemps.es/cima/fotos/full/formafarmac/64117/64117_formafarmac.jpg",
+      "thumbUrl": "https://cima.aemps.es/cima/fotos/thumbnails/formafarmac/64117/64117_formafarmac.jpg",
+      "attribution": "AEMPS · CIMA — AMOXICILINA CINFA 1000 MG POLVO PARA SUSPENSIÓN ORAL EN SOBRES EFG (nº reg. 64117), foto de forma farmacéutica",
+      "license": "AEMPS/CIMA — reproducción autorizada citando la fuente",
+      "licenseUrl": "https://www.aemps.gob.es/aviso-legal/",
+      "sourcePage": "https://cima.aemps.es/cima/publico/detalle.html?nregistro=64117",
+      "updatedAt": "2024-10-03T07:10:41.000Z"
+     }
+    ]
+   }
+  ]
+ }
+}
