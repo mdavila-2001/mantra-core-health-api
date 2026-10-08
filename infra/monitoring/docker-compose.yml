@@ -53,6 +53,9 @@ services:
       - --web.enable-lifecycle
     volumes:
       - prometheus_data:/prometheus
+    # node-exporter corre con la red del host: se lo alcanza por el gateway.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         limits:
@@ -123,11 +126,19 @@ services:
       retries: 3
       start_period: 30s
 
+  # Red del HOST (no la de monitoring): con red propia, node-exporter mide el
+  # tráfico de su contenedor y no el del servidor (medía 0,00 Mbit/s).
+  # Prometheus llega por host.docker.internal:9100; el firewall sólo deja
+  # entrar a 9100 desde los bridges de Docker (ufw allow in on br+), nunca
+  # desde internet.
   node-exporter:
-    <<: *base
     image: prom/node-exporter:v1.9.1
+    restart: always
+    logging: *logging
+    network_mode: host
     pid: host
     command:
+      - --web.listen-address=:9100
       - --path.procfs=/host/proc
       - --path.sysfs=/host/sys
       - --path.rootfs=/host/root
