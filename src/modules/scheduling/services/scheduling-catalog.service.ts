@@ -744,7 +744,7 @@ export class SchedulingCatalogService {
       );
       if (conPaciente.length > 0) {
         throw new ConflictException(
-          'Esos ratos tienen pacientes citados: cancele cada turno antes de cerrarlos',
+          'Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos',
           {
             // Los ids y no los nombres: quien recibe esto es la pantalla, que
             // ya sabe pedir cada cita con su permiso.
@@ -2285,7 +2285,7 @@ function assertPrimerTurnoEntra(
   const finDelPrimero = minutosDelDia(franja.startTime) + slotMinutes;
   if (finDelPrimero > minutosDelDia(siguiente)) {
     throw new PreconditionFailedException(
-      `El turno de ${slotMinutes} min que empieza a las ${franja.startTime} pisaría la franja de las ${siguiente}`,
+      `La cita de ${slotMinutes} min que empieza a las ${franja.startTime} pisaría la franja de las ${siguiente}`,
       { dayOfWeek: franja.dayOfWeek, slotMinutes, siguiente },
     );
   }

@@ -360,7 +360,7 @@ export class SchedulingServiceBookingService {
       ahora.getTime() + grupo.minNoticeMinutes * MS_POR_MINUTO
     ) {
       throw new PreconditionFailedException(
-        `Ese turno empieza demasiado pronto: hay que pedirlo con al menos ${grupo.minNoticeMinutes} minutos de anticipación.`,
+        `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${grupo.minNoticeMinutes} minutos de anticipación.`,
         { minNoticeMinutes: grupo.minNoticeMinutes },
       );
     }
