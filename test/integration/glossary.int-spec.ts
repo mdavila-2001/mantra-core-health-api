@@ -295,6 +295,123 @@ describe('Glosario médico (integración)', () => {
     });
   });
 
+  describe('vecindario de un término (glossary-neighborhood)', () => {
+    const neighborhoodOf = (slug: string) =>
+      `/terminology/concepts/${glossaryTermConceptId(slug)}/glossary-neighborhood`;
+
+    it('lee las relaciones salientes: el corazón apunta a sus términos relacionados', async () => {
+      const res = await http()
+        .get(neighborhoodOf('corazon'))
+        .query({ lang: 'ES' })
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+
+      expect(res.body.focus).toMatchObject({
+        conceptId: glossaryTermConceptId('corazon'),
+        slug: 'corazon',
+        display: 'Corazón',
+      });
+      const related = res.body.groups.find(
+        (group: { type: string; direction: string }) =>
+          group.type === 'RELATED_TERM' && group.direction === 'outgoing',
+      );
+      expect(related.items.map((item: { slug: string }) => item.slug)).toEqual(
+        expect.arrayContaining([
+          'insuficiencia-cardiaca',
+          'electrocardiograma',
+        ]),
+      );
+      expect(related.total).toBeGreaterThanOrEqual(2);
+    });
+
+    it('lee las entrantes: el encéfalo muestra los términos que lo señalan, que él no guarda', async () => {
+      const res = await http()
+        .get(neighborhoodOf('encefalo'))
+        .query({ lang: 'ES' })
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+
+      const incoming = res.body.groups.find(
+        (group: { type: string; direction: string }) =>
+          group.type === 'ANATOMY' && group.direction === 'incoming',
+      );
+      expect(incoming.total).toBeGreaterThanOrEqual(3);
+      expect(incoming.items.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('perGroup recorta la muestra pero el total sigue siendo el del grupo, y "Ver todos" lo pagina', async () => {
+      const sample = await http()
+        .get(neighborhoodOf('encefalo'))
+        .query({ perGroup: 1 })
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+      const group = sample.body.groups.find(
+        (g: { type: string; direction: string }) =>
+          g.type === 'ANATOMY' && g.direction === 'incoming',
+      );
+      expect(group.items).toHaveLength(1);
+      expect(group.total).toBeGreaterThanOrEqual(3);
+
+      const page = await http()
+        .get(neighborhoodOf('encefalo'))
+        .query({ type: 'ANATOMY', direction: 'incoming', offset: 1, limit: 2 })
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+      expect(page.body.groups).toHaveLength(1);
+      expect(page.body.groups[0]).toMatchObject({
+        type: 'ANATOMY',
+        direction: 'incoming',
+        total: group.total,
+      });
+      expect(page.body.groups[0].items).toHaveLength(2);
+      // Alfabético: la muestra de 1 es el primero de la lista completa.
+      expect(page.body.groups[0].items[0].display).not.toBe(
+        group.items[0].display,
+      );
+    });
+
+    it('no lo captura `:conceptId`: la respuesta es un vecindario y no la ficha', async () => {
+      const res = await http()
+        .get(neighborhoodOf('corazon'))
+        .set(bearer(ctx.adminToken))
+        .expect(200);
+
+      expect(res.body).toHaveProperty('groups');
+      expect(res.body).not.toHaveProperty('relations');
+    });
+
+    it('responde 404 si el concepto no es un término del glosario', async () => {
+      await http()
+        .get(
+          `/terminology/concepts/${CONCEPTS.TERM_ACTIVE}/glossary-neighborhood`,
+        )
+        .set(bearer(ctx.adminToken))
+        .expect(404);
+    });
+
+    it.each([
+      ['un tipo desconocido', { type: 'CAUSES', direction: 'incoming' }],
+      ['un tipo sin sentido', { type: 'ANATOMY' }],
+      ['perGroup fuera de rango', { perGroup: 51 }],
+      [
+        'limit fuera de rango',
+        { type: 'ANATOMY', direction: 'incoming', limit: 201 },
+      ],
+    ])('responde 400 VALIDATION_FAILED ante %s', async (_name, query) => {
+      const res = await http()
+        .get(neighborhoodOf('corazon'))
+        .query(query)
+        .set(bearer(ctx.adminToken))
+        .expect(400);
+
+      expect(res.body.code).toBe('VALIDATION_FAILED');
+    });
+
+    it('exige sesión', async () => {
+      await http().get(neighborhoodOf('corazon')).expect(401);
+    });
+  });
+
   describe('exclusión de borradores', () => {
     // Id determinista propio de la prueba, fuera del namespace `glossary:term:*`
     // del catálogo real: no colisiona con ningún término sembrado y se elimina
