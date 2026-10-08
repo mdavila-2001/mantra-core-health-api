@@ -93,7 +93,7 @@ export function avisoDeCupoLiberado(
     subject: 'Se liberó un horario que estaba esperando',
     bodyText:
       `Se liberó un horario con ${slot.resourceLabel} el ${cuando(slot.startAt)}. ` +
-      'Resérvelo desde «Mis turnos» antes de que lo tome otra persona.',
+      'Resérvelo desde «Mis citas» antes de que lo tome otra persona.',
     relatedResourceType: RECURSO_CUPO,
     relatedResourceId: slot.slotId,
     payload: {
@@ -137,7 +137,7 @@ export function avisoDeCupoLiberado(
  * «, en el Consultorio del Sur» — o nada, si el recurso no declara sede.
  *
  * Se arma como sufijo y no como campo aparte porque el aviso es una frase, y
- * una frase con un hueco («pidió turno para el jueves en ») se lee peor que sin
+ * una frase con un hueco («pidió cita para el jueves en ») se lee peor que sin
  * el dato.
  */
 function enTalLugar(booking: BookingNoticeSnapshot): string {
@@ -156,7 +156,7 @@ export function avisoDeSolicitudAlProfesional(
     tenantId: booking.tenantId,
     subject: 'Tiene una nueva solicitud de consulta',
     bodyText:
-      `${quien} pidió turno para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
+      `${quien} pidió cita para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
       'Puede aceptarla o rechazarla desde su agenda.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -196,9 +196,9 @@ export function avisoDeSolicitudAlPaciente(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: 'Enviamos su solicitud de turno',
+    subject: 'Enviamos su solicitud de cita',
     bodyText:
-      `Pidió turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
+      `Pidió cita con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
       `${enTalLugar(booking)}. ` +
       'Todavía falta que lo confirmen: le avisamos apenas respondan.',
     relatedResourceType: RECURSO_CITA,
@@ -238,13 +238,13 @@ export function avisoDeDemora(
     tenantId: booking.tenantId,
     subject: `${booking.resourceLabel} se demora ${minutos} minutos`,
     bodyText:
-      `Su turno de las ${hora(booking.startAt)} con ${booking.resourceLabel} ` +
+      `Su cita de las ${hora(booking.startAt)} con ${booking.resourceLabel} ` +
       `se atrasa unos ${minutos} minutos` +
       (nuevaHora === undefined
         ? '. '
         : `: se estima para las ${hora(nuevaHora)}. `) +
       (mensaje === undefined || mensaje.trim() === ''
-        ? 'Puede ver el detalle en «Mis turnos».'
+        ? 'Puede ver el detalle en «Mis citas».'
         : mensaje.trim()),
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -276,10 +276,10 @@ export function avisoDeRecordatorio(
     kind: 'APPOINTMENT_REMINDER',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: esVispera ? 'Mañana tiene turno' : 'Su turno es hoy',
+    subject: esVispera ? 'Mañana tiene cita' : 'Su cita es hoy',
     bodyText: esVispera
-      ? `Mañana ${cuando(booking.startAt)} tiene turno con ${booking.resourceLabel}.`
-      : `Hoy a las ${hora(booking.startAt)} tiene turno con ${booking.resourceLabel}.`,
+      ? `Mañana ${cuando(booking.startAt)} tiene cita con ${booking.resourceLabel}.`
+      : `Hoy a las ${hora(booking.startAt)} tiene cita con ${booking.resourceLabel}.`,
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
@@ -302,13 +302,13 @@ export type CambioDeCita =
 
 /** Encabezado de cada cambio, en la voz de quien lo recibe. */
 const TITULO: Readonly<Record<CambioDeCita, string>> = {
-  ACCEPTED: 'Su turno quedó confirmado',
+  ACCEPTED: 'Su cita quedó confirmada',
   // La cita puntual (AG-2): el doctor la asigna y el paciente SE ENTERA — no
   // confirma, porque ya se acordó en el consultorio.
-  ASSIGNED: 'Le agendaron un turno',
-  REJECTED: 'No se pudo tomar su solicitud de turno',
-  RESCHEDULED: 'Su turno se movió de horario',
-  CANCELLED: 'Su turno se canceló',
+  ASSIGNED: 'Le agendaron una cita',
+  REJECTED: 'No se pudo tomar su solicitud de cita',
+  RESCHEDULED: 'Su cita se movió de horario',
+  CANCELLED: 'Su cita se canceló',
 };
 
 /**
@@ -329,11 +329,11 @@ export function avisoDeCambioDeCita(
 ): AgendaNotice {
   const conQuien = `con ${booking.resourceLabel}`;
   const cuerpo: Readonly<Record<CambioDeCita, string>> = {
-    ACCEPTED: `Su turno ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
+    ACCEPTED: `Su cita ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
     ASSIGNED: `${booking.resourceLabel} le agendó para el ${cuando(booking.startAt)}. Si no puede asistir, pida el cambio desde sus turnos.`,
-    REJECTED: `Su solicitud de turno ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
-    RESCHEDULED: `Su turno ${conQuien} pasó al ${cuando(booking.startAt)}.`,
-    CANCELLED: `Se canceló su turno ${conQuien} del ${cuando(booking.startAt)}.`,
+    REJECTED: `Su solicitud de cita ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
+    RESCHEDULED: `Su cita ${conQuien} pasó al ${cuando(booking.startAt)}.`,
+    CANCELLED: `Se canceló su cita ${conQuien} del ${cuando(booking.startAt)}.`,
   };
 
   return {
@@ -391,9 +391,9 @@ export function avisoDeHorarioMovido(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { userId: destinatarioUserId },
     tenantId: booking.tenantId,
-    subject: 'Se movió el horario de su turno',
+    subject: 'Se movió el horario de su cita',
     bodyText:
-      `Su turno con ${booking.resourceLabel} pasa a ser el ` +
+      `Su cita con ${booking.resourceLabel} pasa a ser el ` +
       `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
       `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
       'Si no le sirve, puede pedir otro horario desde la app.',

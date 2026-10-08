@@ -89,7 +89,7 @@ describe('redacción de los avisos de agenda (P8)', () => {
 
     it('sin mensaje no deja la frase colgando', () => {
       const aviso = avisoDeDemora(cita, 15, '   ');
-      expect(aviso.bodyText).toContain('Mis turnos');
+      expect(aviso.bodyText).toContain('Mis citas');
       expect(aviso.bodyText).not.toContain('undefined');
     });
 
@@ -103,13 +103,13 @@ describe('redacción de los avisos de agenda (P8)', () => {
   describe('recordatorio', () => {
     it('la víspera habla de mañana', () => {
       const aviso = avisoDeRecordatorio(cita, 24 * 60);
-      expect(aviso.subject).toBe('Mañana tiene turno');
+      expect(aviso.subject).toBe('Mañana tiene cita');
       expect(aviso.bodyText).toContain('Mañana');
     });
 
     it('el del mismo día habla de hoy', () => {
       const aviso = avisoDeRecordatorio(cita, 120);
-      expect(aviso.subject).toBe('Su turno es hoy');
+      expect(aviso.subject).toBe('Su cita es hoy');
       expect(aviso.bodyText).toContain('Hoy');
     });
 
@@ -221,11 +221,11 @@ describe('el lugar en los avisos de solicitud', () => {
   });
 
   it('sin sede la frase se omite ENTERA, no queda un hueco', () => {
-    // «pidió turno para el jueves en .» se lee peor que sin el dato. Un recurso
+    // «pidió cita para el jueves en .» se lee peor que sin el dato. Un recurso
     // sin sede declarada es corriente, no un error.
     const aviso = avisoDeSolicitudAlProfesional(cita, 'Ana Quispe', USUARIO);
     expect(aviso.bodyText).not.toContain(' en .');
     expect(aviso.bodyText).not.toContain('undefined');
-    expect(aviso.bodyText).toContain('pidió turno para el');
+    expect(aviso.bodyText).toContain('pidió cita para el');
   });
 });
