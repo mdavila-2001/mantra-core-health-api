@@ -1,0 +1,106 @@
+{
+ "query": {
+  "pages": {
+   "33577216": {
+    "pageid": 33577216,
+    "ns": 6,
+    "title": "File:Anembryonic gestation.jpg",
+    "imagerepository": "local",
+    "imageinfo": [
+     {
+      "thumburl": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "thumbwidth": 330,
+      "thumbheight": 363,
+      "thumbattribs": {
+       "src": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+       "decoding": "async",
+       "loading": "lazy",
+       "width": 330,
+       "height": 363
+      },
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Anembryonic_gestation.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "descriptionurl": "https://commons.wikimedia.org/wiki/File:Anembryonic_gestation.jpg",
+      "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=33577216",
+      "extmetadata": {
+       "Credit": {
+        "value": "<span class=\"int-own-work\" lang=\"en\">Own work</span>",
+        "source": "commons-desc-page"
+       },
+       "Artist": {
+        "value": "<p><a href=\"https://en.wikipedia.org/wiki/User:Mikael_H%C3%A4ggstr%C3%B6m\" class=\"extiw\" title=\"en:User:Mikael Häggström\">Mikael Häggström</a>.\n</p><p>When using this image in external works, it may be cited as:\n</p>\n<ul><li><cite style=\"font-style:normal\">Häggström, Mikael (2014). \"<a class=\"external text\" href=\"https://en.wikiversity.org/wiki/WikiJournal_of_Medicine/Medical_gallery_of_Mikael_H%C3%A4ggstr%C3%B6m_2014\">Medical gallery of Mikael Häggström 2014</a>\". <i>WikiJournal of Medicine</i> <b>1</b> (2). <span lang=\"en\" dir=\"ltr\"><a href=\"https://en.wikipedia.org/wiki/Digital_object_identifier\" class=\"extiw\" title=\"en:Digital object identifier\">DOI</a></span>:<a rel=\"nofollow\" class=\"external text\" href=\"https://doi.org/10.15347/wjm/2014.008\">10.15347/wjm/2014.008</a>. <span lang=\"en\" dir=\"ltr\"><a href=\"https://en.wikipedia.org/wiki/ISSN\" class=\"extiw\" title=\"en:ISSN\"><span lang=\"en\" dir=\"ltr\">ISSN</span></a></span> <a rel=\"nofollow\" class=\"external text\" href=\"https://www.worldcat.org/issn/2002-4436\">2002-4436</a>.</cite> <a rel=\"nofollow\" class=\"external text\" href=\"https://creativecommons.org/publicdomain/zero/1.0/deed.en\">Public Domain</a>.</li></ul>\n<p>or\n</p>\n<ul><li><i>By Mikael Häggström, used with permission.</i></li></ul>",
+        "source": "commons-desc-page"
+       },
+       "LicenseShortName": {
+        "value": "CC0",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "UsageTerms": {
+        "value": "Creative Commons Zero, Public Domain Dedication",
+        "source": "commons-desc-page"
+       },
+       "AttributionRequired": {
+        "value": "false",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "LicenseUrl": {
+        "value": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+        "source": "commons-desc-page"
+       }
+      },
+      "mime": "image/jpeg"
+     }
+    ]
+   },
+   "305422": {
+    "pageid": 305422,
+    "ns": 6,
+    "title": "File:Baby With Cradle Cap.jpg",
+    "imagerepository": "local",
+    "imageinfo": [
+     {
+      "thumburl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Baby_With_Cradle_Cap.jpg/330px-Baby_With_Cradle_Cap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "thumbwidth": 330,
+      "thumbheight": 317,
+      "responsiveUrls": {
+       "2": "https://upload.wikimedia.org/wikipedia/commons/5/50/Baby_With_Cradle_Cap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled"
+      },
+      "thumbattribs": {
+       "src": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Baby_With_Cradle_Cap.jpg/330px-Baby_With_Cradle_Cap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+       "decoding": "async",
+       "loading": "lazy",
+       "width": 330,
+       "height": 317,
+       "srcset": "https://upload.wikimedia.org/wikipedia/commons/5/50/Baby_With_Cradle_Cap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled 2x"
+      },
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/50/Baby_With_Cradle_Cap.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "descriptionurl": "https://commons.wikimedia.org/wiki/File:Baby_With_Cradle_Cap.jpg",
+      "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=305422",
+      "extmetadata": {
+       "LicenseShortName": {
+        "value": "CC BY-SA 3.0",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "UsageTerms": {
+        "value": "Creative Commons Attribution-Share Alike 3.0",
+        "source": "commons-desc-page"
+       },
+       "AttributionRequired": {
+        "value": "true",
+        "source": "commons-desc-page",
+        "hidden": ""
+       },
+       "LicenseUrl": {
+        "value": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "commons-desc-page"
+       }
+      },
+      "mime": "image/jpeg"
+     }
+    ]
+   }
+  }
+ }
+}

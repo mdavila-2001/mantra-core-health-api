@@ -1,0 +1,592 @@
+{
+ "graphs": [
+  {
+   "id": "http://purl.obolibrary.org/obo/mondo.owl",
+   "meta": {
+    "version": "http://purl.obolibrary.org/obo/mondo/releases/2026-10-06/mondo.owl",
+    "basicPropertyValues": [
+     {
+      "pred": "http://purl.org/dc/terms/license",
+      "val": "http://creativecommons.org/licenses/by/4.0/"
+     }
+    ]
+   },
+   "nodes": [
+    {
+     "id": "http://purl.obolibrary.org/obo/MONDO_0003072",
+     "lbl": "retinal cancer",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A malignant neoplasm involving the retina.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-6601-2165"
+       ]
+      },
+      "subsets": [
+       "http://purl.obolibrary.org/obo/mondo#otar"
+      ],
+      "synonyms": [
+       {
+        "pred": "hasBroadSynonym",
+        "val": "retinal tumor"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/OMO_0003005",
+        "pred": "hasBroadSynonym",
+        "val": "retinal tumour"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "cancer of retina",
+        "xrefs": [
+         "MONDO:patterns/cancer"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant neoplasm of retina",
+        "xrefs": [
+         "DOID:4645",
+         "ICD10CM:C69.2",
+         "MONDO:patterns/cancer",
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant neoplasm of the retina",
+        "xrefs": [
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant retina neoplasm",
+        "xrefs": [
+         "MONDO:patterns/cancer",
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant retina tumor",
+        "xrefs": [
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/OMO_0003005",
+        "pred": "hasExactSynonym",
+        "val": "malignant retina tumour"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant retinal neoplasm",
+        "xrefs": [
+         "DOID:4645",
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant retinal tumor",
+        "xrefs": [
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/OMO_0003005",
+        "pred": "hasExactSynonym",
+        "val": "malignant retinal tumour",
+        "xrefs": [
+         "icd11.foundation:1758820365"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant tumor of retina",
+        "xrefs": [
+         "DOID:4645",
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "malignant tumor of the retina",
+        "xrefs": [
+         "NCIT:C3216"
+        ]
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/OMO_0003005",
+        "pred": "hasExactSynonym",
+        "val": "malignant tumour of retina",
+        "xrefs": [
+         "icd11.foundation:1758820365"
+        ]
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/OMO_0003005",
+        "pred": "hasExactSynonym",
+        "val": "malignant tumour of the retina"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "retina cancer",
+        "xrefs": [
+         "MONDO:patterns/location"
+        ]
+       }
+      ],
+      "xrefs": [
+       {
+        "val": "DOID:4645"
+       },
+       {
+        "val": "EFO:0005716"
+       },
+       {
+        "val": "ICD10CM:C69.2"
+       },
+       {
+        "val": "ICD9:190.5"
+       },
+       {
+        "val": "MEDGEN:6192"
+       },
+       {
+        "val": "MESH:D019572"
+       },
+       {
+        "val": "NCIT:C3216"
+       },
+       {
+        "val": "SCTID:363465007"
+       },
+       {
+        "val": "UMLS:C0024622"
+       },
+       {
+        "val": "icd11.foundation:1758820365"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0000233",
+        "val": "https://github.com/monarch-initiative/mondo/issues/9097"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#curated_content_resource",
+        "val": "https://www.malacards.org/card/retinal_cancer"
+       },
+       {
+        "pred": "http://purl.org/dc/terms/conformsTo",
+        "val": "http://purl.obolibrary.org/obo/mondo/patterns/cancer.yaml"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://id.who.int/icd/entity/1758820365"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/medgen/6192"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/mesh/D019572"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/snomedct/363465007"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://linkedlifedata.com/resource/umls/id/C0024622"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.bioontology.org/ontology/ICD10CM/C69.2"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/DOID_4645"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/NCIT_C3216"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://www.ebi.ac.uk/efo/EFO_0005716"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/MONDO_0007035",
+     "lbl": "acanthosis nigricans",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A melanotic cutaneous lesion that develops in the axilla and other body folds. It may be idiopathic, drug-induced, or it may be associated with the presence of an endocrine disorder or malignancy.",
+       "xrefs": [
+        "NCIT:P378"
+       ]
+      },
+      "subsets": [
+       "http://purl.obolibrary.org/obo/mondo#doid_rare",
+       "http://purl.obolibrary.org/obo/mondo#otar"
+      ],
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "acanthosis nigricans",
+        "xrefs": [
+         "DOID:3138",
+         "ICD10CM:L83",
+         "ICD10WHO:L83",
+         "MONDO:ambiguous",
+         "NCIT:C26687",
+         "icd11.foundation:71488193"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "acanthosis nigricans (disease)",
+        "xrefs": [
+         "https://orcid.org/0000-0002-6601-2165"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "an - acanthosis nigricans"
+       }
+      ],
+      "xrefs": [
+       {
+        "val": "DOID:3138"
+       },
+       {
+        "val": "EFO:1000660"
+       },
+       {
+        "val": "HP:0000956"
+       },
+       {
+        "val": "ICD10CM:L83"
+       },
+       {
+        "val": "ICD10WHO:L83"
+       },
+       {
+        "val": "MEDGEN:54"
+       },
+       {
+        "val": "MESH:D000052"
+       },
+       {
+        "val": "NCIT:C26687"
+       },
+       {
+        "val": "Orphanet:924"
+       },
+       {
+        "val": "SCTID:402599005"
+       },
+       {
+        "val": "UMLS:C0000889"
+       },
+       {
+        "val": "Wikipedia:Acanthosis_nigricans"
+       },
+       {
+        "val": "icd11.foundation:71488193"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0000589",
+        "val": "acanthosis nigricans (disease)"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#curated_content_resource",
+        "val": "https://www.malacards.org/card/acanthosis_nigricans"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://id.who.int/icd/entity/71488193"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/medgen/54"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/mesh/D000052"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/snomedct/402599005"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://linkedlifedata.com/resource/umls/id/C0000889"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.bioontology.org/ontology/ICD10CM/L83"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/DOID_3138"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/NCIT_C26687"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://www.ebi.ac.uk/efo/EFO_1000660"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "https://icd.who.int/browse10/2019/en#/L83"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/MONDO_0009061",
+     "lbl": "cystic fibrosis",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "Autosomal recessive disorder caused by pathogenic variants in the CFTR gene (cystic fibrosis transmembrane conductance regulator), which encodes a chloride and bicarbonate channel expressed in epithelial cells, and follow the diagnosis criteria. Diagnosis requires evidence of CFTR dysfunction, defined as a sweat chloride concentration of 60 mmol/L or greater, or identification of two CF-causing CFTR pathogenic variants, or an abnormal nasal potential difference measurement. CF is a progressive, multi-organ disease characterized by chronic obstructive lung disease with recurrent infections, exocrine pancreatic insufficiency, intestinal obstruction (including meconium ileus in neonates), male infertility due to obstructive azoospermia, hepatobiliary complications, and elevated sweat chloride concentrations.",
+       "xrefs": [
+        "Orphanet:586",
+        "PMID:20301428",
+        "PMID:27140670",
+        "PMID:37278811"
+       ]
+      },
+      "comments": [
+       "Diagnosis of CF requires **one clinical indicator** (positive newborn screen, symptoms consistent with CF, or family history) **plus one functional/genetic indicator**:\n1. Sweat chloride concentration ≥60 mmol/L, or\n2. Identification of two CF-causing CFTR pathogenic variants, or\n3. Abnormal nasal potential difference measurement\n\nSee also CFTR-related disorders (MONDO:7770004), which involve CFTR dysfunction limited to a single organ system and do not meet CF diagnostic criteria."
+      ],
+      "subsets": [
+       "http://purl.obolibrary.org/obo/mondo#doid_rare",
+       "http://purl.obolibrary.org/obo/mondo#gard_rare",
+       "http://purl.obolibrary.org/obo/mondo#omim_susceptibility",
+       "http://purl.obolibrary.org/obo/mondo#ordo_disorder",
+       "http://purl.obolibrary.org/obo/mondo#orphanet_rare",
+       "http://purl.obolibrary.org/obo/mondo#otar",
+       "http://purl.obolibrary.org/obo/mondo#rare"
+      ],
+      "synonyms": [
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/mondo#ABBREVIATION",
+        "pred": "hasExactSynonym",
+        "val": "CF",
+        "xrefs": [
+         "DOID:1485",
+         "OMIM:219700",
+         "Orphanet:586"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "cystic fibrosis",
+        "xrefs": [
+         "DOID:1485",
+         "ICD10CM:E84",
+         "ICD10WHO:E84",
+         "NCIT:C2975",
+         "OMIM:219700",
+         "Orphanet:586",
+         "icd11.foundation:514403112"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "cystic fibrosis lung disease, modifier of"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "mucoviscidosis",
+        "xrefs": [
+         "DOID:1485",
+         "ICD10CM:E84",
+         "OMIM:219700",
+         "Orphanet:586",
+         "icd11.foundation:514403112"
+        ]
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "pseudomonas aeruginosa, susceptibility to chronic infection by, in cystic fibrosis"
+       },
+       {
+        "pred": "hasRelatedSynonym",
+        "val": "fibrocystic disease of the pancreas",
+        "xrefs": [
+         "PMID:27140670"
+        ]
+       }
+      ],
+      "xrefs": [
+       {
+        "val": "DOID:1485"
+       },
+       {
+        "val": "GARD:0006233"
+       },
+       {
+        "val": "ICD10CM:E84"
+       },
+       {
+        "val": "ICD10WHO:E84"
+       },
+       {
+        "val": "ICD9:277.0"
+       },
+       {
+        "val": "MEDGEN:41393"
+       },
+       {
+        "val": "MESH:D003550"
+       },
+       {
+        "val": "MedDRA:10011762"
+       },
+       {
+        "val": "NANDO:1200922"
+       },
+       {
+        "val": "NANDO:1201021"
+       },
+       {
+        "val": "NANDO:2100035"
+       },
+       {
+        "val": "NANDO:2200205"
+       },
+       {
+        "val": "NCIT:C2975"
+       },
+       {
+        "val": "OMIM:219700"
+       },
+       {
+        "val": "Orphanet:586"
+       },
+       {
+        "val": "SCTID:190905008"
+       },
+       {
+        "val": "UMLS:C0010674"
+       },
+       {
+        "val": "icd11.foundation:514403112"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0000233",
+        "val": "https://github.com/monarch-initiative/mondo/issues/4521"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0000233",
+        "val": "https://github.com/monarch-initiative/mondo/issues/7432"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#curated_content_resource",
+        "val": "https://www.malacards.org/card/cystic_fibrosis"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#excluded_subClassOf",
+        "val": "http://purl.obolibrary.org/obo/MONDO_0002356"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#excluded_subClassOf",
+        "val": "http://purl.obolibrary.org/obo/MONDO_0015509"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#excluded_subClassOf",
+        "val": "http://purl.obolibrary.org/obo/MONDO_0018396"
+       },
+       {
+        "pred": "http://purl.obolibrary.org/obo/mondo#excluded_subClassOf",
+        "val": "http://purl.obolibrary.org/obo/MONDO_0018409"
+       },
+       {
+        "pred": "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+        "val": "https://rarediseases.info.nih.gov/diseases/6233/cystic-fibrosis"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#closeMatch",
+        "val": "http://identifiers.org/meddra/10011762"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://id.who.int/icd/entity/514403112"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/medgen/41393"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/mesh/D003550"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://identifiers.org/snomedct/190905008"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://linkedlifedata.com/resource/umls/id/C0010674"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.bioontology.org/ontology/ICD10CM/E84"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/DOID_1485"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://purl.obolibrary.org/obo/NCIT_C2975"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "http://www.orpha.net/ORDO/Orphanet_586"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "https://icd.who.int/browse10/2019/en#/E84"
+       },
+       {
+        "pred": "http://www.w3.org/2004/02/skos/core#exactMatch",
+        "val": "https://omim.org/entry/219700"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/CHEBI_36684",
+     "type": "CLASS",
+     "meta": {
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0100001",
+        "val": "http://purl.obolibrary.org/obo/CHEBI_17792"
+       }
+      ],
+      "deprecated": true
+     }
+    }
+   ]
+  }
+ ]
+}
