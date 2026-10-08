@@ -36,7 +36,13 @@ import {
   type ConceptRelationDto,
   type ConceptImageDto,
   type ConceptSearchItemDto,
+  type GlossaryGraphNodeDto,
+  type GlossaryNeighborDto,
+  type GlossaryNeighborGroupDto,
+  type GlossaryNeighborhoodDto,
+  type GlossaryNeighborhoodRequest,
   SearchConceptsResponseDto,
+  DEFAULT_NEIGHBORS_PER_GROUP,
 } from '../dto';
 import type { CatalogConcepts } from '../entities';
 import {
@@ -52,14 +58,34 @@ import {
   GLOSSARY_SLUG_PROPERTY_CODE,
   GLOSSARY_TAG_PREFIX,
   GLOSSARY_ALL_TERMS_CODE,
+  GLOSSARY_RELATION_DIRECTIONS,
+  GLOSSARY_RELATION_TYPES,
+  glossaryRelationTypeConceptId,
   glossaryRelationTypeFromConceptId,
   glossaryStatusOf,
   isGlossaryValueSetCode,
   type GlossaryBilingualText,
+  type GlossaryRelationDirection,
+  type GlossaryRelationType,
 } from '../glossary.constants';
 
 /** Tipo de dato por defecto para propiedades de concepto sin `dataType` explícito. */
 const DEFAULT_PROPERTY_DATA_TYPE = 'string';
+
+/** Un vecino ya resuelto, antes de ponerle categoría. */
+interface SortedNeighbor {
+  readonly conceptId: string;
+  readonly slug: string;
+  readonly display: string;
+}
+
+/** Clave de un grupo del vecindario: tipo y sentido. */
+function neighborGroupKey(
+  type: GlossaryRelationType,
+  direction: GlossaryRelationDirection,
+): string {
+  return `${type}|${direction}`;
+}
 
 /** Idioma por defecto de los textos del glosario cuando no se pide uno explícito. */
 const DEFAULT_GLOSSARY_LANGUAGE: DesignationLanguage = 'ES';
@@ -939,6 +965,312 @@ export class ConceptsService {
   }
 
   /**
+   * El vecindario de un término del glosario: sus relaciones **salientes y
+   * entrantes** agrupadas por tipo y sentido, para el mapa.
+   *
+   * ## Por qué no alcanzaba `readGlossaryGraph`
+   *
+   * El grafo global lee los primeros N términos y sólo conserva las aristas con
+   * ambos extremos dentro del lote: a casi cualquier término le faltaban
+   * vecinos, y un síntoma nunca mostraba las enfermedades que lo presentan,
+   * porque esa relación se guarda en la enfermedad (sentido saliente). Acá se
+   * parte del término y se leen los dos caminos de `concept_relationships`.
+   *
+   * ## Qué devuelve
+   *
+   * - **Muestra** (`{ perGroup }`): por cada tipo y sentido con vecinos, el
+   *   `total` real y los primeros `perGroup` en orden alfabético.
+   * - **Un grupo** (`{ type, direction, offset, limit }`): sólo ese grupo,
+   *   paginado. Es el «Ver los N».
+   *
+   * Los grupos vacíos no viajan. Un vecino sin `glossary-slug`, sin publicar o
+   * que es el propio término se omite (y tampoco cuenta en el `total`), con el
+   * mismo criterio que `resolveGlossaryRelations`: es preferible un vecino de
+   * menos que uno que el cliente no puede abrir.
+   *
+   * TODO(TAREA-41 F1): hoy se traen las aristas del término y se ordenan en
+   * memoria por nombre; con ~1 M de relaciones el orden pasa a ser por
+   * `strength_score` en la base, con los índices compuestos de esa fase.
+   *
+   * @param conceptId - Término central.
+   * @param language - Idioma de los nombres (castellano por omisión).
+   * @param request - Muestra por grupo, o la página de un grupo.
+   * @returns El término central y sus grupos de vecinos.
+   */
+  async readGlossaryNeighborhood(
+    conceptId: string,
+    language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
+    request: GlossaryNeighborhoodRequest = {
+      perGroup: DEFAULT_NEIGHBORS_PER_GROUP,
+    },
+  ): Promise<GlossaryNeighborhoodDto> {
+    this.logger.info(
+      {
+        operation: 'terminology.concept.glossary-neighborhood',
+        conceptId,
+        language,
+        mode: 'type' in request ? 'group' : 'sample',
+      },
+      'Leyendo el vecindario de un término',
+    );
+
+    const focus = await this.readGlossaryFocus(conceptId, language);
+    const wantedGroup = 'type' in request ? request : undefined;
+    const typeConceptIds =
+      wantedGroup === undefined
+        ? [...GLOSSARY_RELATION_TYPE_CONCEPT_IDS]
+        : [glossaryRelationTypeConceptId(wantedGroup.type)];
+
+    const counts = await this.relationshipsRepo.countNeighborsByType(
+      this.em,
+      conceptId,
+      typeConceptIds,
+      {
+        neighborStateConceptId: CONCEPTS.TERM_ACTIVE,
+        slugPropertyCode: GLOSSARY_SLUG_PROPERTY_CODE,
+      },
+    );
+    const totals = new Map<string, number>();
+    for (const count of counts) {
+      const type = glossaryRelationTypeFromConceptId(
+        count.relationshipTypeConceptId,
+      );
+      if (!type) continue;
+      if (
+        wantedGroup !== undefined &&
+        wantedGroup.direction !== count.direction
+      ) {
+        continue;
+      }
+      totals.set(neighborGroupKey(type, count.direction), count.total);
+    }
+    if (totals.size === 0) return { focus, groups: [] };
+
+    const sortedByGroup = await this.collectSortedNeighbors(
+      conceptId,
+      typeConceptIds,
+      wantedGroup?.direction,
+      totals,
+      language,
+    );
+
+    const perGroup =
+      'perGroup' in request ? request.perGroup : DEFAULT_NEIGHBORS_PER_GROUP;
+    const pageOf = (
+      neighbors: readonly SortedNeighbor[],
+    ): readonly SortedNeighbor[] =>
+      wantedGroup === undefined
+        ? neighbors.slice(0, perGroup)
+        : neighbors.slice(
+            wantedGroup.offset,
+            wantedGroup.offset + wantedGroup.limit,
+          );
+
+    const pages = new Map<string, readonly SortedNeighbor[]>();
+    for (const [key, neighbors] of sortedByGroup) {
+      pages.set(key, pageOf(neighbors));
+    }
+    const categoryByConcept = await this.resolveNeighborCategories(
+      [...pages.values()].flatMap((page) =>
+        page.map((neighbor) => neighbor.conceptId),
+      ),
+    );
+
+    const groups: GlossaryNeighborGroupDto[] = [];
+    for (const type of GLOSSARY_RELATION_TYPES) {
+      for (const direction of GLOSSARY_RELATION_DIRECTIONS) {
+        const key = neighborGroupKey(type, direction);
+        const total = totals.get(key);
+        if (total === undefined) continue;
+        groups.push({
+          type,
+          direction,
+          total,
+          items: (pages.get(key) ?? []).map(
+            (neighbor): GlossaryNeighborDto => ({
+              conceptId: neighbor.conceptId,
+              slug: neighbor.slug,
+              display: neighbor.display,
+              category: categoryByConcept.get(neighbor.conceptId) ?? null,
+            }),
+          ),
+        });
+      }
+    }
+    return { focus, groups };
+  }
+
+  /**
+   * El término central del mapa como nodo, o 404 si no es un término publicado
+   * del glosario con slug (un concepto de otro catálogo, un borrador o un
+   * término a medio sembrar no se puede dibujar ni abrir).
+   */
+  private async readGlossaryFocus(
+    conceptId: string,
+    language: DesignationLanguage,
+  ): Promise<GlossaryGraphNodeDto> {
+    const concept = await this.conceptsRepo.findById(this.em, conceptId);
+    const notFound = (): ResourceNotFoundException =>
+      new ResourceNotFoundException('Término del glosario no encontrado', {
+        conceptId,
+      });
+    if (!concept) throw notFound();
+
+    const [textos, etiquetas, glossaryTexts] = await Promise.all([
+      this.resolveTexts([conceptId], language),
+      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+      this.resolveGlossaryTexts([conceptId], language),
+    ]);
+    const etiquetasDelConcepto = etiquetas.get(conceptId);
+    const esTerminoDelGlosario = (etiquetasDelConcepto ?? []).some(
+      (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
+    );
+    const glossaryText = glossaryTexts.get(conceptId);
+    if (
+      !esTerminoDelGlosario ||
+      concept.stateConceptId !== CONCEPTS.TERM_ACTIVE ||
+      glossaryText?.slug === undefined
+    ) {
+      throw notFound();
+    }
+
+    const { category } = splitCategoryAndTags(etiquetasDelConcepto);
+    return {
+      conceptId: concept.id,
+      slug: glossaryText.slug,
+      display: textos.get(conceptId)?.display ?? concept.display,
+      category: category
+        ? { internalCode: category.internalCode, name: category.name }
+        : null,
+      shortDefinition: glossaryText.plainSummary?.text ?? '',
+    };
+  }
+
+  /**
+   * Los vecinos de cada grupo pedido, ya resueltos y en orden alfabético.
+   *
+   * Lee las aristas de un solo camino por vez que haga falta (`findByTypesForSources`
+   * para las salientes, `findByTypesForTargets` para las entrantes), saca los
+   * repetidos y la autorreferencia, resuelve slug y nombre de los vecinos con
+   * el mismo helper que las relaciones de la ficha y descarta los que no están
+   * publicados.
+   *
+   * @param conceptId - Término central.
+   * @param typeConceptIds - Tipos de relación a leer.
+   * @param onlyDirection - Si se pidió un solo sentido, cuál; si no, ambos.
+   * @param wantedGroups - Claves `tipo|sentido` que importan (las que tienen total).
+   * @param language - Idioma del nombre y del orden.
+   * @returns Mapa `clave de grupo -> vecinos ordenados`.
+   */
+  private async collectSortedNeighbors(
+    conceptId: string,
+    typeConceptIds: string[],
+    onlyDirection: GlossaryRelationDirection | undefined,
+    wantedGroups: ReadonlyMap<string, number>,
+    language: DesignationLanguage,
+  ): Promise<Map<string, SortedNeighbor[]>> {
+    const wantsDirection = (direction: GlossaryRelationDirection): boolean =>
+      onlyDirection === undefined || onlyDirection === direction;
+    const [outgoing, incoming] = await Promise.all([
+      wantsDirection('outgoing')
+        ? this.relationshipsRepo.findByTypesForSources(
+            this.em,
+            typeConceptIds,
+            [conceptId],
+          )
+        : Promise.resolve([]),
+      wantsDirection('incoming')
+        ? this.relationshipsRepo.findByTypesForTargets(
+            this.em,
+            typeConceptIds,
+            [conceptId],
+          )
+        : Promise.resolve([]),
+    ]);
+
+    const links: {
+      key: string;
+      neighborId: string;
+    }[] = [];
+    const addLinks = (
+      edges: typeof outgoing,
+      direction: GlossaryRelationDirection,
+    ): void => {
+      for (const edge of edges) {
+        const type = glossaryRelationTypeFromConceptId(
+          edge.relationshipTypeConceptId,
+        );
+        const neighborId =
+          direction === 'outgoing'
+            ? edge.targetConceptId
+            : edge.sourceConceptId;
+        if (!type || neighborId === conceptId) continue;
+        const key = neighborGroupKey(type, direction);
+        if (wantedGroups.has(key)) links.push({ key, neighborId });
+      }
+    };
+    addLinks(outgoing, 'outgoing');
+    addLinks(incoming, 'incoming');
+
+    const neighborIds = links.map((link) => link.neighborId);
+    const [terms, textos] = await Promise.all([
+      this.resolveGlossaryTerms(neighborIds),
+      this.resolveTexts([...new Set(neighborIds)], language),
+    ]);
+
+    const byGroup = new Map<string, Map<string, SortedNeighbor>>();
+    for (const { key, neighborId } of links) {
+      const term = terms.get(neighborId);
+      if (!term || term.concept.stateConceptId !== CONCEPTS.TERM_ACTIVE) {
+        continue;
+      }
+      const group = byGroup.get(key) ?? new Map<string, SortedNeighbor>();
+      group.set(neighborId, {
+        conceptId: neighborId,
+        slug: term.slug,
+        display: textos.get(neighborId)?.display ?? term.concept.display,
+      });
+      byGroup.set(key, group);
+    }
+
+    const sorted = new Map<string, SortedNeighbor[]>();
+    for (const [key, group] of byGroup) {
+      sorted.set(
+        key,
+        [...group.values()].sort(
+          (a, b) =>
+            a.display.localeCompare(b.display, 'es') ||
+            a.conceptId.localeCompare(b.conceptId),
+        ),
+      );
+    }
+    return sorted;
+  }
+
+  /** La categoría del glosario de cada vecino, resuelta igual que en la búsqueda. */
+  private async resolveNeighborCategories(
+    conceptIds: string[],
+  ): Promise<Map<string, ConceptTaxonomyRefDto>> {
+    const result = new Map<string, ConceptTaxonomyRefDto>();
+    const uniqueIds = [...new Set(conceptIds)];
+    if (uniqueIds.length === 0) return result;
+    const valueSets = await this.valueSetsRepo.findValueSetsByConceptIds(
+      this.em,
+      uniqueIds,
+    );
+    for (const conceptId of uniqueIds) {
+      const { category } = splitCategoryAndTags(valueSets.get(conceptId));
+      if (category) {
+        result.set(conceptId, {
+          internalCode: category.internalCode,
+          name: category.name,
+        });
+      }
+    }
+    return result;
+  }
+
+  /**
    * La ficha completa de un término: sus textos en el idioma pedido, las
    * categorías bajo las que cae y sus otras denominaciones.
    *
@@ -1257,21 +1589,8 @@ export class ConceptsService {
     );
     if (edges.length === 0) return result;
 
-    const targetConceptIds = [
-      ...new Set(edges.map((edge) => edge.targetConceptId)),
-    ];
-    const [targets, targetSlugProperties] = await Promise.all([
-      this.conceptsRepo.findByIds(this.em, targetConceptIds),
-      this.designationsRepo.findPropertyForConcepts(
-        this.em,
-        targetConceptIds,
-        GLOSSARY_SLUG_PROPERTY_CODE,
-      ),
-    ]);
-    const slugByTarget = new Map(
-      targetSlugProperties
-        .filter((property) => typeof property.valueJson === 'string')
-        .map((property) => [property.conceptId, property.valueJson as string]),
+    const targets = await this.resolveGlossaryTerms(
+      edges.map((edge) => edge.targetConceptId),
     );
 
     for (const edge of edges) {
@@ -1283,12 +1602,56 @@ export class ConceptsService {
       // publicarse.
       if (!type) continue;
       const target = targets.get(edge.targetConceptId);
-      const slug = slugByTarget.get(edge.targetConceptId);
-      if (!target || slug === undefined) continue;
+      if (!target) continue;
 
       const list = result.get(edge.sourceConceptId) ?? [];
-      list.push({ type, conceptId: target.id, slug, display: target.display });
+      list.push({
+        type,
+        conceptId: target.concept.id,
+        slug: target.slug,
+        display: target.concept.display,
+      });
       result.set(edge.sourceConceptId, list);
+    }
+    return result;
+  }
+
+  /**
+   * Los conceptos que además tienen `glossary-slug`: el mínimo para poder
+   * mostrarlos y navegar a ellos desde una relación.
+   *
+   * Un id sin concepto, o un concepto sin slug cargado —indicio de una FK rota
+   * o de un término a medio sembrar— no aparece en el mapa: quien lo usa lo
+   * omite en vez de publicar una fila que el cliente no puede abrir. Es el
+   * bloque que comparten las relaciones de la ficha y el vecindario del mapa.
+   *
+   * @param conceptIds - Conceptos a resolver (se admiten repetidos).
+   * @returns Mapa `conceptId -> { concept, slug }`.
+   */
+  private async resolveGlossaryTerms(
+    conceptIds: string[],
+  ): Promise<Map<string, { concept: CatalogConcepts; slug: string }>> {
+    const result = new Map<
+      string,
+      { concept: CatalogConcepts; slug: string }
+    >();
+    const uniqueIds = [...new Set(conceptIds)];
+    if (uniqueIds.length === 0) return result;
+
+    const [concepts, slugProperties] = await Promise.all([
+      this.conceptsRepo.findByIds(this.em, uniqueIds),
+      this.designationsRepo.findPropertyForConcepts(
+        this.em,
+        uniqueIds,
+        GLOSSARY_SLUG_PROPERTY_CODE,
+      ),
+    ]);
+    for (const property of slugProperties) {
+      if (typeof property.valueJson !== 'string') continue;
+      const concept = concepts.get(property.conceptId);
+      if (concept) {
+        result.set(property.conceptId, { concept, slug: property.valueJson });
+      }
     }
     return result;
   }

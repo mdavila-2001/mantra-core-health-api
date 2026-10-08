@@ -245,6 +245,24 @@ export class ConceptRelationDto {
   display!: string;
 }
 
+/** Nodo publicado del grafo navegable del glosario. */
+export class GlossaryGraphNodeDto {
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  @ApiProperty()
+  slug!: string;
+
+  @ApiProperty()
+  display!: string;
+
+  @ApiProperty({ type: () => ConceptTaxonomyRefDto, nullable: true })
+  category!: ConceptTaxonomyRefDto | null;
+
+  @ApiProperty()
+  shortDefinition!: string;
+}
+
 /**
  * Imagen ilustrativa de un término. El tipo existe para que el contrato pueda
  * cargarla en el futuro; hoy ningún término del catálogo curado la trae (no

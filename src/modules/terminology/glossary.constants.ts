@@ -133,6 +133,17 @@ export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
   'SPECIALTY',
 ];
 
+/**
+ * De qué lado de la relación está el término consultado: `outgoing` si es el
+ * origen de la arista (la enfermedad que apunta al síntoma) e `incoming` si es
+ * el destino (el síntoma al que apuntan las enfermedades).
+ */
+export type GlossaryRelationDirection = 'outgoing' | 'incoming';
+
+/** Los dos sentidos, en el orden en que se publican los grupos de un vecindario. */
+export const GLOSSARY_RELATION_DIRECTIONS: readonly GlossaryRelationDirection[] =
+  ['outgoing', 'incoming'];
+
 /** Tipo de relación (API) -> concepto `terminology:relationship:*`. */
 const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
   Record<GlossaryRelationType, string>
