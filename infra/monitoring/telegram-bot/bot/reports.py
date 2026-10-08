@@ -47,16 +47,16 @@ Q_CONTAINER_NET = 'sum by (name) (rate(container_network_receive_bytes_total{nam
 BAR_WIDTH = 10
 
 HELP_TEXT = (
-    "<b>Monitoreo del VPS</b>\n"
+    "<b>Monitoreo del servidor</b>\n"
     "/status — resumen: RAM, CPU, disco, red, contenedores y alertas\n"
-    "/ram — RAM del host y los 10 contenedores que más usan\n"
-    "/cpu — uso por núcleo, carga y los contenedores que más CPU usan\n"
-    "/graficas — RAM y núcleos en uso de las últimas 24 h, en imagen\n"
-    "/red — tráfico por interfaz y los contenedores que más mueven\n"
-    "/contenedores — estado, health, uptime y reinicios de cada uno\n"
-    "/alertas — alertas activas ahora\n"
+    "/graficas — RAM, CPU, disco, red y contenedores de las últimas 24 h\n"
+    "/ram · /cpu · /disco · /red — detalle de cada recurso\n"
+    "/top — los 10 contenedores que más CPU y RAM usan\n"
+    "/sitios — estado, latencia y certificado de cada sitio\n"
+    "/contenedores — estado, salud, uptime y reinicios\n"
+    "/alertas — alertas activas · /uptime — encendido y carga\n"
     "/ayuda — esta lista\n\n"
-    "También en castellano: /estado. Sólo lectura: el bot no reinicia ni cambia nada."
+    "También en inglés (/memory, /network, /disk, /sites…). Sólo lectura: el bot no reinicia ni cambia nada."
 )
 
 

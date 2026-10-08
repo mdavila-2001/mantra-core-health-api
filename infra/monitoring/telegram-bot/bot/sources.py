@@ -21,15 +21,23 @@ class Sources(Protocol):
 
     def query(self, expr: str) -> list[Sample]: ...
     def query_range(self, expr: str) -> list[Point]: ...
+    def query_range_series(self, expr: str) -> list[tuple[dict[str, str], list[Point]]]: ...
     def query_range(self, expr: str) -> list[Point]:
         """Últimas 24 h de la PRIMERA serie del resultado (las consultas suman a una)."""
+        series = self.query_range_series(expr)
+        return series[0][1] if series else []
+
+    def query_range_series(self, expr: str) -> list[tuple[dict[str, str], list[Point]]]:
+        """Últimas 24 h de TODAS las series, un punto cada 5 min."""
         end = time.time()
         params = {"query": expr, "start": str(end - DAY_SECONDS), "end": str(end), "step": str(RANGE_STEP_SECONDS)}
         payload = get_json(f"{self.prometheus_url}/api/v1/query_range", params)
         if payload.get("status") != "success":
             raise RuntimeError(f"Prometheus rechazó la consulta: {payload.get('error', '?')}")
-        result = payload["data"]["result"]
-        return [(float(ts), float(value)) for ts, value in result[0]["values"]] if result else []
+        return [
+            (item["metric"], [(float(ts), float(value)) for ts, value in item["values"]])
+            for item in payload["data"]["result"]
+        ]
 
     def active_alerts(self) -> list[dict[str, Any]]: ...
     def containers(self) -> tuple[list[ContainerState], bool]: ...
@@ -50,13 +58,20 @@ class LiveSources:
 
     def query_range(self, expr: str) -> list[Point]:
         """Últimas 24 h de la PRIMERA serie del resultado (las consultas suman a una)."""
+        series = self.query_range_series(expr)
+        return series[0][1] if series else []
+
+    def query_range_series(self, expr: str) -> list[tuple[dict[str, str], list[Point]]]:
+        """Últimas 24 h de TODAS las series, un punto cada 5 min."""
         end = time.time()
         params = {"query": expr, "start": str(end - DAY_SECONDS), "end": str(end), "step": str(RANGE_STEP_SECONDS)}
         payload = get_json(f"{self.prometheus_url}/api/v1/query_range", params)
         if payload.get("status") != "success":
             raise RuntimeError(f"Prometheus rechazó la consulta: {payload.get('error', '?')}")
-        result = payload["data"]["result"]
-        return [(float(ts), float(value)) for ts, value in result[0]["values"]] if result else []
+        return [
+            (item["metric"], [(float(ts), float(value)) for ts, value in item["values"]])
+            for item in payload["data"]["result"]
+        ]
 
     def active_alerts(self) -> list[dict[str, Any]]:
         params = {"active": "true", "silenced": "false", "inhibited": "false"}

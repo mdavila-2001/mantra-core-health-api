@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
-from . import reports
+from . import extra_reports, history, reports
 from .sources import Sources
 
 log = logging.getLogger(__name__)
@@ -27,9 +27,15 @@ COMMANDS: dict[str, Report] = {
     "/ram": reports.memory_report,
     "/memory": reports.memory_report,
     "/cpu": reports.cpu_report,
-    "/graficas": reports.history_charts,
-    "/gráficas": reports.history_charts,
-    "/charts": reports.history_charts,
+    "/graficas": history.resource_charts,
+    "/gráficas": history.resource_charts,
+    "/charts": history.resource_charts,
+    "/disco": extra_reports.disk_report,
+    "/disk": extra_reports.disk_report,
+    "/top": extra_reports.top_report,
+    "/sitios": extra_reports.sites_report,
+    "/sites": extra_reports.sites_report,
+    "/uptime": extra_reports.uptime_report,
     "/red": reports.network_report,
     "/network": reports.network_report,
     "/contenedores": _CONTAINERS,
@@ -40,13 +46,17 @@ COMMANDS: dict[str, Report] = {
 
 # Lo que Telegram muestra en el menú al tocar «/» (setMyCommands).
 MENU: list[tuple[str, str]] = [
-    ("status", "Resumen: RAM, CPU, disco, red y contenedores"),
+    ("status", "Resumen: RAM, CPU, disco, red, contenedores y alertas"),
+    ("graficas", "Gráficas 24 h: RAM, CPU, disco, red y contenedores"),
     ("ram", "RAM del servidor y contenedores que más usan"),
-    ("cpu", "Uso por núcleo y carga"),
-    ("graficas", "Gráficas de RAM y núcleos de las últimas 24 h"),
+    ("cpu", "Uso por núcleo, carga y contenedores que más CPU usan"),
+    ("disco", "Espacio por disco y cuánto creció en 24 h"),
     ("red", "Tráfico de red por interfaz y contenedor"),
+    ("top", "Los 10 contenedores que más CPU y RAM usan"),
+    ("sitios", "Estado, latencia y certificado de cada sitio"),
     ("contenedores", "Estado y salud de cada contenedor"),
     ("alertas", "Alertas activas"),
+    ("uptime", "Hace cuánto está encendido el servidor y su carga"),
     ("ayuda", "Lista de comandos"),
 ]
 

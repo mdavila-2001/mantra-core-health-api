@@ -8,7 +8,7 @@ import time
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
 
-from . import reports
+from . import history, reports
 from .commands import MENU, reply_for
 from .config import Config, load_config
 from .docker_state import fetch_container_states
@@ -68,7 +68,7 @@ def _daily_summary_loop(config: Config, telegram: TelegramClient, sources: Sourc
                 text = f"☀️ Resumen diario: no pude armarlo ({type(exc).__name__})."
             _safe_send(telegram, config.telegram_chat_id, text)
             try:
-                _deliver(telegram, config.telegram_chat_id, reports.history_charts(sources))
+                _deliver(telegram, config.telegram_chat_id, history.resource_charts(sources))
             except Exception as exc:  # noqa: BLE001 — el resumen en texto ya salió
                 log.warning("no se pudieron mandar las gráficas del resumen: %s", exc)
         time.sleep(SUMMARY_CHECK_SECONDS)

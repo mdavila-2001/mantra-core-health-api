@@ -29,6 +29,9 @@ SERIES = "#2a78d6"
 CAPACITY = "#8c8b86"
 
 Point = tuple[float, float]  # (unix time, valor)
+# Paleta categórica validada (guía de visualización), en orden fijo y nunca
+# ciclada: la serie N siempre lleva el color N.
+CATEGORICAL = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948")
 
 
 @dataclass(frozen=True)
@@ -82,6 +85,60 @@ def render_line_chart(points: list[Point], spec: ChartSpec, timezone: str) -> by
     ax.spines["bottom"].set_color(GRID)
 
     fig.tight_layout()
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png", facecolor=SURFACE)
+    plt.close(fig)
+    return buffer.getvalue()
+
+
+def render_multi_line_chart(
+    series: list[tuple[str, list[Point]]], spec: ChartSpec, timezone: str
+) -> bytes:
+    """Varias series con la MISMA unidad (un solo eje) y leyenda abajo."""
+    zone = ZoneInfo(timezone)
+    fig, ax = plt.subplots(figsize=(10, 4.6), dpi=110)
+    fig.patch.set_facecolor(SURFACE)
+    ax.set_facecolor(SURFACE)
+    top = 0.0
+    for index, (label, points) in enumerate(series[: len(CATEGORICAL)]):
+        if not points:
+            continue
+        times = [datetime.fromtimestamp(ts, zone) for ts, _ in points]
+        values = [value for _, value in points]
+        top = max(top, max(values))
+        ax.plot(times, values, color=CATEGORICAL[index], linewidth=2, label=label,
+                solid_joinstyle="round", solid_capstyle="round")
+    if top == 0 and not any(points for _, points in series):
+        ax.text(0.5, 0.5, "Sin datos en las últimas 24 h", transform=ax.transAxes,
+                ha="center", va="center", color=INK_SECONDARY, fontsize=11)
+    if spec.capacity:
+        ax.axhline(spec.capacity, color=CAPACITY, linewidth=1)
+        ax.annotate(spec.capacity_label, xy=(0, spec.capacity), xycoords=("axes fraction", "data"),
+                    xytext=(4, 4), textcoords="offset points", fontsize=9, color=INK_SECONDARY)
+        top = max(top, spec.capacity)
+    ax.set_ylim(0, top * 1.12 or 1)
+    ax.set_title(spec.title, loc="left", fontsize=13, color=INK, pad=12)
+    ax.set_ylabel(spec.unit, color=INK_SECONDARY, fontsize=10)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M", tz=zone))
+    _style_axes(ax)
+    if any(points for _, points in series):
+        legend = ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=min(len(series), 4),
+                           frameon=False, fontsize=9)
+        for text in legend.get_texts():
+            text.set_color(INK)
+    fig.tight_layout()
+    return _to_png(fig)
+
+
+def _style_axes(ax) -> None:
+    ax.grid(axis="y", color=GRID, linewidth=1)
+    ax.tick_params(colors=INK_SECONDARY, labelsize=9, length=0)
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.spines["bottom"].set_color(GRID)
+
+
+def _to_png(fig) -> bytes:
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png", facecolor=SURFACE)
     plt.close(fig)

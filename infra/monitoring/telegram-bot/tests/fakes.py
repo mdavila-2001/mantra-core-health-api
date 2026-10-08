@@ -42,6 +42,10 @@ class FakeSources:
     def query_range(self, expr):
         return self.ranges.get(expr, [])
 
+    def query_range_series(self, expr):
+        points = self.ranges.get(expr)
+        return [({}, points)] if points else []
+
     def active_alerts(self):
         return self.alerts
 

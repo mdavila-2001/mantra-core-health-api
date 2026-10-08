@@ -35,7 +35,7 @@ def test_history_charts_without_prometheus_data_still_answers():
 
 def test_graficas_command_returns_photos_in_the_authorized_chat():
     reply = reply_for({"chat": {"id": 1}, "text": "/graficas"}, 1, FakeSources())
-    assert isinstance(reply, list) and len(reply) == 2
+    assert isinstance(reply, list) and len(reply) == 5
 
 
 def test_multipart_carries_fields_and_the_png():
