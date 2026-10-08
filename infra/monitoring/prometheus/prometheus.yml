@@ -51,9 +51,13 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-          - https://test.173.249.39.237.sslip.io/
-          - https://demo.alovidasalud.arauzsoftware.com/
-          - http://173.249.39.237:8000/api/health
+          # Servidor 62.169.18.132 (desde 2026-10-08; el 173.249.39.237 quedó fuera
+          # de servicio el 2026-10-05). app.alovidasalud.com y demo.* se suman cuando
+          # su DNS apunte a este servidor: hoy no responden desde afuera.
+          - https://test.62.169.18.132.sslip.io/
+          - https://dev.62.169.18.132.sslip.io/
+          - https://mockup.62.169.18.132.sslip.io/
+          - http://62.169.18.132:8000/api/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
