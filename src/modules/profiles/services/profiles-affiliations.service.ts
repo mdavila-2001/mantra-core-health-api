@@ -411,7 +411,7 @@ export class ProfilesAffiliationsService {
    * No cancela las citas ya confirmadas. Dejarlas caer en bloque plantaría a
    * pacientes que tenían un turno prometido, por un trámite entre el médico y la
    * organización del que no fueron parte. Lo que sí ocurre desde la revocación:
-   * no puede aceptar turnos nuevos ni publicar más agenda ahí.
+   * no puede aceptar citas nuevas ni publicar más agenda ahí.
    *
    * @param tenantId - La organización que revoca.
    * @param affiliationId - El vínculo.
@@ -789,7 +789,7 @@ const CUERPO: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_REJECTED:
     'La organización no aceptó el vínculo que pidió. Si cree que es un error, hable con ellos.',
   AFFILIATION_REVOKED:
-    'La organización dio de baja su vínculo. Las citas que ya confirmó siguen en pie, pero no va a poder aceptar turnos nuevos ni publicar más agenda ahí.',
+    'La organización dio de baja su vínculo. Las citas que ya confirmó siguen en pie, pero no va a poder aceptar citas nuevas ni publicar más agenda ahí.',
   AFFILIATION_REQUESTED:
     'Un profesional pidió vincularse a su organización. Puede aceptarlo o rechazarlo desde la bandeja de solicitudes.',
 };

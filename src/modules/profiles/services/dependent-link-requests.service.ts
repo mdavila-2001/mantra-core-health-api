@@ -190,7 +190,7 @@ export class DependentLinkRequestsService {
       recipientUserId: resultado.destinatario,
       category: 'CLINICAL',
       subject: 'Le quieren registrar como dependiente',
-      bodyText: `${resultado.quienPide} pide registrarse como su dependiente. Si acepta, va a poder pedirle turnos y ver su historia clínica.`,
+      bodyText: `${resultado.quienPide} pide registrarse como su dependiente. Si acepta, va a poder pedirle citas y ver su historia clínica.`,
       destination: { type: 'DEPENDENT_LINK_REQUEST', id: resultado.id },
       debounceKey: `dependent-link:${resultado.id}:requested`,
       actorUserId: actor.id,
