@@ -103,3 +103,10 @@ def test_sites_without_requests_go_in_one_line_at_the_end():
     text = traffic.traffic_report(FakeSources(samples=samples))
     assert "<b>ai.example</b>" not in text
     assert "⚪ Sin pedidos en 24 h: ai.example" in text
+
+
+def test_catchall_router_gets_a_readable_name():
+    samples = {traffic.Q_SITE_REQ_24H: [({"site": "catchall"}, 11.0)], traffic.Q_SITE_5XX_24H: [({"site": "catchall"}, 11.0)]}
+    text = traffic.traffic_report(FakeSources(samples=samples))
+    assert "🔴 <b>dominios sin app activa (catchall)</b>" in text
+    assert "100.0 % con 5xx" in text

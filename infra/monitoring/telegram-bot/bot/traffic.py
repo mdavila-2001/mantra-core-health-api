@@ -38,9 +38,19 @@ SITE_24H = (
 REQS = f"traefik_router_requests_total{{{ROUTERS}}}"
 BUCKETS = f"traefik_router_request_duration_seconds_bucket{{{ROUTERS}}}"
 
-Q_SITE_RPM = f"sum by (site) (rate({REQS}[5m]) {SITE}) * 60"
-Q_SITE_REQ_24H = f"sum by (site) (increase({REQS}[24h]) {SITE_24H})"
-Q_SITE_5XX_24H = f'sum by (site) (increase(traefik_router_requests_total{{{ROUTERS},code=~"5.."}}[24h]) {SITE_24H})'
+def _per_site(series: str, join: str) -> str:
+    """Suma por sitio; un router sin sitio conocido aparece con su nombre crudo
+    en vez de perderse (sus pedidos y sus 5xx también cuentan)."""
+    info = join.split("group_left (site) ", 1)[1]
+    return (
+        f"sum by (site) (({series}) {join} "
+        f'or label_replace(({series}) unless on (router) ({info}), "site", "$1", "router", "(.*)@.*"))'
+    )
+
+
+Q_SITE_RPM = _per_site(f"rate({REQS}[5m])", SITE) + " * 60"
+Q_SITE_REQ_24H = _per_site(f"increase({REQS}[24h])", SITE_24H)
+Q_SITE_5XX_24H = _per_site(f'increase(traefik_router_requests_total{{{ROUTERS},code=~"5.."}}[24h])', SITE_24H)
 Q_SITE_P95_NOW = f"histogram_quantile(0.95, sum by (le, site) (rate({BUCKETS}[15m]) {SITE}))"
 Q_SITE_P95_24H = f"histogram_quantile(0.95, sum by (le, site) (rate({BUCKETS}[24h]) {SITE_24H}))"
 Q_SITE_RPM_RANGE = Q_SITE_RPM
@@ -69,6 +79,10 @@ Q_ENDPOINT_P95_24H = (
 )
 
 Window = tuple[datetime, datetime]
+
+# Routers propios de Traefik/Coolify que no son un sitio. `catchall` contesta
+# 503 a todo dominio sin app activa: si crece, un sitio apagado sigue recibiendo pedidos.
+ROUTER_NAMES = {"catchall": "dominios sin app activa (catchall)"}
 
 CODE_COLORS = {"2xx": CATEGORICAL[2], "3xx": CATEGORICAL[0], "4xx": CATEGORICAL[3], "5xx": "#e34948"}
 
@@ -176,7 +190,7 @@ def _kpis(sources: Sources) -> dict[str, float | None]:
 
 
 def _site_series(sources: Sources, expr: str) -> list[tuple[str, list[Point]]]:
-    series = [(labels.get("site", "?"), _finite(points)) for labels, points in sources.query_range_series(expr)]
+    series = [(_site_of(labels), _finite(points)) for labels, points in sources.query_range_series(expr)]
     series = [(site, points) for site, points in series if points]
     series.sort(key=lambda item: -max(value for _, value in item[1]))
     return series[:MAX_SITES]
@@ -280,8 +294,13 @@ def _finish_axes(ax, title: str, unit: str, window: Window) -> None:
 # --- utilidades ------------------------------------------------------------------
 
 
+def _site_of(labels: dict[str, str]) -> str:
+    site = labels.get("site", "?")
+    return ROUTER_NAMES.get(site, site)
+
+
 def _by_site(samples: list[Sample]) -> dict[str, float]:
-    return {labels.get("site", "?"): value for labels, value in samples if not math.isnan(value)}
+    return {_site_of(labels): value for labels, value in samples if not math.isnan(value)}
 
 
 def _scalar(samples: list[Sample]) -> float | None:
