@@ -44,6 +44,15 @@ git -C $REMOTE_DIR log -1 --format='   commit %h · %s'"
 # El token puede venir en la variable TELEGRAM_BOT_TOKEN (una sola línea, sin
 # preguntas) o se pide por la terminal sin mostrarlo.
 BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+# FROM_CLIPBOARD=1: el token se toma del portapapeles de la Mac (lo copiaste de
+# @BotFather), así no se escribe en el chat ni en el historial de la terminal.
+if [ -z "$BOT_TOKEN" ] && [ "${FROM_CLIPBOARD:-0}" = "1" ] && command -v pbpaste >/dev/null; then
+  BOT_TOKEN="$(pbpaste | tr -d '[:space:]')"
+  echo "▶ Token tomado del portapapeles."
+fi
+case "$BOT_TOKEN" in
+  *PEG*|*TOKEN*) echo "✖ Eso es el texto de ejemplo, no un token. Copiá el token de @BotFather." >&2; exit 1 ;;
+esac
 if [ -z "$BOT_TOKEN" ]; then
   read -r -s -p "Pegá el token del bot de Telegram (no se va a ver) y Enter: " BOT_TOKEN </dev/tty; echo
 fi
