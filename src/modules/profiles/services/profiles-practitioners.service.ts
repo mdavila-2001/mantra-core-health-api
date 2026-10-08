@@ -2308,7 +2308,7 @@ export class ProfilesPractitionersService {
       // vive acá, que es donde se decide.
       if (specialty.validTo) {
         throw new PreconditionFailedException(
-          'Una especialidad que ya no ejercés no puede ser la principal',
+          'Una especialidad que ya no ejerce no puede ser la principal',
           { specialtyId, validTo: specialty.validTo },
         );
       }
@@ -2797,7 +2797,7 @@ export class ProfilesPractitionersService {
         );
         if (yaPedida) {
           throw new ConflictException(
-            'Ya pediste vincularte a esa sede',
+            'Ya pidió vincularse a esa sede',
             {
               practiceSiteId: dto.practiceSiteId,
               statusConceptId: yaPedida.statusConceptId,

@@ -74,7 +74,7 @@ export function validarObjetivo(
       valor,
       mensaje:
         campo === 'rtoSeconds' && valor === 0
-          ? 'Un RTO de cero segundos no es alcanzable: indicá el tiempo de indisponibilidad que el negocio tolera'
+          ? 'Un RTO de cero segundos no es alcanzable: indique el tiempo de indisponibilidad que el negocio tolera'
           : `El ${etiqueta} no puede ser menor que ${min} segundos`,
     };
   }
@@ -82,7 +82,7 @@ export function validarObjetivo(
     return {
       campo,
       valor,
-      mensaje: `El ${etiqueta} no puede superar ${max} segundos (un año); revisá si cargaste milisegundos`,
+      mensaje: `El ${etiqueta} no puede superar ${max} segundos (un año); revise si cargó milisegundos`,
     };
   }
   return null;

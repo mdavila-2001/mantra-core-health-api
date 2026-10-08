@@ -163,10 +163,10 @@ export class AuthzCareRelationshipsService {
       await this.notifications.emitInApp({
         recipientUserId,
         category: 'CLINICAL',
-        subject: 'Un profesional pide ver tu historia clínica',
+        subject: 'Un profesional pide ver su historia clínica',
         bodyText:
           dto.reasonText ??
-          'Un profesional te encontró en la red y pide tu autorización para ver tu expediente. Podés elegir qué áreas autorizar, o rechazarlo.',
+          'Un profesional le encontró en la red y pide su autorización para ver su expediente. Puede elegir qué áreas autorizar, o rechazarlo.',
         destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: relId },
         tenantId,
         actorUserId: actor.id,

@@ -172,7 +172,7 @@ describe('TJ-2 · reglas finas de la cita (integración)', () => {
       .send({ cancelledBy: 'PATIENT', reasonText: 'No llego' })
       .expect(422);
 
-    expect(JSON.stringify(res.body)).toContain('Podés cancelar hasta');
+    expect(JSON.stringify(res.body)).toContain('Puede cancelar hasta');
   });
 
   it('pero quien atiende cancela igual: una urgencia no espera a la ventana', async () => {

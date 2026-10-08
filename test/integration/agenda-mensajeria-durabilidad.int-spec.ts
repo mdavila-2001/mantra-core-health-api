@@ -76,7 +76,7 @@ function aviso(
   return {
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { userId: destinatarioReal },
-    subject: 'Tu cita fue cancelada',
+    subject: 'Su cita fue cancelada',
     bodyText: 'El profesional canceló la cita.',
     relatedResourceType: 'scheduling.bookings',
     relatedResourceId: randomUUID(),

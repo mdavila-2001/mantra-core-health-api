@@ -602,7 +602,7 @@ describe('ClinicalReadService · assertOwnRecord', () => {
 
       await expect(
         d.service.assertOwnRecord(PERSONA_AJENA, titular),
-      ).rejects.toThrow('Sólo podés consultar tu propia historia clínica.');
+      ).rejects.toThrow('Sólo puede consultar su propia historia clínica.');
     });
   });
 });

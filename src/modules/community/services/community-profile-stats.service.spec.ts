@@ -87,7 +87,7 @@ describe('CommunityProfileStatsService', () => {
     });
   });
 
-  describe('«tu perfil esta semana»', () => {
+  describe('«su perfil esta semana»', () => {
     it('suma la ventana y la desglosa por día, del más viejo al más nuevo', async () => {
       const d = build(
         new Map([

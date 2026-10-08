@@ -89,8 +89,8 @@ export class CommunityMessageNotificationsService {
         await this.notifications.emitInApp({
           recipientUserId,
           category: 'MESSAGES',
-          subject: `${deQuien} te escribió`,
-          bodyText: 'Tenés un mensaje nuevo.',
+          subject: `${deQuien} le escribió`,
+          bodyText: 'Tiene un mensaje nuevo.',
           destination: { type: 'CONVERSATION', id: conversationId },
           // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
           // La clave incluye al destinatario: si no, el rebote de uno taparía

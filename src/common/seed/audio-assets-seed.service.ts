@@ -69,8 +69,8 @@ const ONBOARDING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'Antes de empezar, queremos que sepas cómo cuidamos tu información. ' +
-      'Todo lo que compartas aquí es confidencial y solo tu profesional tratante puede verlo.',
+      'Antes de empezar, queremos que sepa cómo cuidamos su información. ' +
+      'Todo lo que comparta aquí es confidencial y solo su profesional tratante puede verlo.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -80,9 +80,9 @@ const ONBOARDING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'ENUMERATED',
     language: 'es-419',
     textTemplate:
-      'Vamos a pedirte tu consentimiento para {consentPurpose}. Podés leerlo con calma y aceptar cuando estés listo.',
+      'Vamos a pedirle su consentimiento para {consentPurpose}. Puede leerlo con calma y aceptar cuando esté listo.',
     fallbackText:
-      'Vamos a pedirte tu consentimiento antes de continuar. Podés leerlo con calma y aceptar cuando estés listo.',
+      'Vamos a pedirle su consentimiento antes de continuar. Puede leerlo con calma y aceptar cuando esté listo.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [
       {
@@ -90,8 +90,8 @@ const ONBOARDING_TEMPLATES: readonly AudioTemplateSeed[] = [
         type: 'ENUM',
         required: true,
         allowedValues: [
-          'iniciar tu tratamiento',
-          'compartir tu información con tu profesional',
+          'iniciar su tratamiento',
+          'compartir su información con su profesional',
           'recibir recordatorios por mensaje',
         ],
       },
@@ -103,7 +103,7 @@ const ONBOARDING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'Esta es tu pantalla principal. Acá vas a ver tus próximas citas, tus formularios pendientes y los mensajes de tu profesional.',
+      'Esta es su pantalla principal. Acá va a ver sus próximas citas, sus formularios pendientes y los mensajes de su profesional.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -113,7 +113,7 @@ const ONBOARDING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'En esta pantalla encontrarás todos tus pacientes, su próxima cita y los formularios que te enviaron.',
+      'En esta pantalla encontrará todos sus pacientes, su próxima cita y los formularios que le enviaron.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -127,8 +127,8 @@ const SCHEDULING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'CACHED_DYNAMIC',
     language: 'es-419',
     textTemplate:
-      'Hola {preferredName}. Te recordamos tu cita con {professionalName} el {appointmentSlot}.',
-    fallbackText: 'Tenés una cita próxima. Revisá el detalle en la app.',
+      'Hola {preferredName}. Le recordamos su cita con {professionalName} el {appointmentSlot}.',
+    fallbackText: 'Tiene una cita próxima. Revise el detalle en la app.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [
       PERSON_NAME_FIELD('preferredName'),
@@ -146,8 +146,8 @@ const SCHEDULING_TEMPLATES: readonly AudioTemplateSeed[] = [
     version: 1,
     strategy: 'CACHED_DYNAMIC',
     language: 'es-419',
-    textTemplate: 'Tu cita con {professionalName} quedó confirmada.',
-    fallbackText: 'Tu cita quedó confirmada.',
+    textTemplate: 'Su cita con {professionalName} quedó confirmada.',
+    fallbackText: 'Su cita quedó confirmada.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [PERSON_NAME_FIELD('professionalName')],
   },
@@ -156,8 +156,9 @@ const SCHEDULING_TEMPLATES: readonly AudioTemplateSeed[] = [
     version: 1,
     strategy: 'CACHED_DYNAMIC',
     language: 'es-419',
-    textTemplate: 'Tu cita con {professionalName} fue cancelada.',
-    fallbackText: 'Una de tus citas fue cancelada. Revisá el detalle en la app.',
+    textTemplate: 'Su cita con {professionalName} fue cancelada.',
+    fallbackText:
+      'Una de sus citas fue cancelada. Revise el detalle en la app.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [PERSON_NAME_FIELD('professionalName')],
   },
@@ -167,7 +168,7 @@ const SCHEDULING_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'Tu profesional necesita reprogramar tu próxima cita. Elegí un nuevo horario cuando puedas.',
+      'Su profesional necesita reprogramar su próxima cita. Elija un nuevo horario cuando pueda.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -180,7 +181,8 @@ const CLINICAL_TEMPLATES: readonly AudioTemplateSeed[] = [
     version: 1,
     strategy: 'STATIC',
     language: 'es-419',
-    textTemplate: 'Tu sesión está por comenzar. Cuando quieras, podés ingresar a la sala.',
+    textTemplate:
+      'Su sesión está por comenzar. Cuando quiera, puede ingresar a la sala.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -190,7 +192,7 @@ const CLINICAL_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'La sesión terminó. Tu profesional te va a escribir si necesita algo más de vos antes del próximo encuentro.',
+      'La sesión terminó. Su profesional le va a escribir si necesita algo más de usted antes del próximo encuentro.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -200,8 +202,8 @@ const CLINICAL_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'ENUMERATED',
     language: 'es-419',
     textTemplate:
-      'Tu profesional te asignó un formulario de {formCategory}. Podés completarlo cuando tengas un momento tranquilo.',
-    fallbackText: 'Tenés un formulario nuevo para completar.',
+      'Su profesional le asignó un formulario de {formCategory}. Puede completarlo cuando tenga un momento tranquilo.',
+    fallbackText: 'Tiene un formulario nuevo para completar.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [
       {
@@ -226,7 +228,7 @@ const COMMUNITY_TEMPLATES: readonly AudioTemplateSeed[] = [
     strategy: 'STATIC',
     language: 'es-419',
     textTemplate:
-      'Bienvenido a la comunidad. Acá vas a encontrar espacios para compartir y acompañarte con otras personas.',
+      'Bienvenido a la comunidad. Acá va a encontrar espacios para compartir y acompañarte con otras personas.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [],
   },
@@ -235,8 +237,8 @@ const COMMUNITY_TEMPLATES: readonly AudioTemplateSeed[] = [
     version: 1,
     strategy: 'CACHED_DYNAMIC',
     language: 'es-419',
-    textTemplate: 'Tenés un mensaje nuevo de {professionalName}.',
-    fallbackText: 'Tenés un mensaje nuevo.',
+    textTemplate: 'Tiene un mensaje nuevo de {professionalName}.',
+    fallbackText: 'Tiene un mensaje nuevo.',
     voiceProfile: VOICE,
     dynamicFieldsJson: [PERSON_NAME_FIELD('professionalName')],
   },

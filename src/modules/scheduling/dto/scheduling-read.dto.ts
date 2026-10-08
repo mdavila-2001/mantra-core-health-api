@@ -144,7 +144,7 @@ export class BookingStatusReasonDto {
   @ApiPropertyOptional({
     enum: ['PATIENT', 'PROVIDER'],
     description:
-      'Desde qué lado se hizo el cambio. Permite decir «tu médico canceló» en vez de «la cita fue cancelada».',
+      'Desde qué lado se hizo el cambio. Permite decir «su médico canceló» en vez de «la cita fue cancelada».',
   })
   actorKind?: 'PATIENT' | 'PROVIDER';
 

@@ -90,10 +90,10 @@ export function avisoDeCupoLiberado(
     kind: 'SLOT_RELEASED',
     recipient: { patientProfileId },
     tenantId,
-    subject: 'Se liberó un horario que estabas esperando',
+    subject: 'Se liberó un horario que estaba esperando',
     bodyText:
       `Se liberó un horario con ${slot.resourceLabel} el ${cuando(slot.startAt)}. ` +
-      'Reservalo desde «Mis turnos» antes de que lo tome otra persona.',
+      'Resérvelo desde «Mis turnos» antes de que lo tome otra persona.',
     relatedResourceType: RECURSO_CUPO,
     relatedResourceId: slot.slotId,
     payload: {
@@ -154,10 +154,10 @@ export function avisoDeSolicitudAlProfesional(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { userId: destinatarioUserId },
     tenantId: booking.tenantId,
-    subject: 'Tenés una nueva solicitud de consulta',
+    subject: 'Tiene una nueva solicitud de consulta',
     bodyText:
       `${quien} pidió turno para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
-      'Aceptala o rechazala desde tu agenda.',
+      'Puede aceptarla o rechazarla desde su agenda.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
@@ -196,11 +196,11 @@ export function avisoDeSolicitudAlPaciente(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: 'Enviamos tu solicitud de turno',
+    subject: 'Enviamos su solicitud de turno',
     bodyText:
-      `Pediste turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
+      `Pidió turno con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
       `${enTalLugar(booking)}. ` +
-      'Todavía falta que lo confirmen: te avisamos apenas respondan.',
+      'Todavía falta que lo confirmen: le avisamos apenas respondan.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
@@ -238,13 +238,13 @@ export function avisoDeDemora(
     tenantId: booking.tenantId,
     subject: `${booking.resourceLabel} se demora ${minutos} minutos`,
     bodyText:
-      `Tu turno de las ${hora(booking.startAt)} con ${booking.resourceLabel} ` +
+      `Su turno de las ${hora(booking.startAt)} con ${booking.resourceLabel} ` +
       `se atrasa unos ${minutos} minutos` +
       (nuevaHora === undefined
         ? '. '
         : `: se estima para las ${hora(nuevaHora)}. `) +
       (mensaje === undefined || mensaje.trim() === ''
-        ? 'Podés ver el detalle en «Mis turnos».'
+        ? 'Puede ver el detalle en «Mis turnos».'
         : mensaje.trim()),
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
@@ -276,10 +276,10 @@ export function avisoDeRecordatorio(
     kind: 'APPOINTMENT_REMINDER',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: esVispera ? 'Mañana tenés turno' : 'Tu turno es hoy',
+    subject: esVispera ? 'Mañana tiene turno' : 'Su turno es hoy',
     bodyText: esVispera
-      ? `Mañana ${cuando(booking.startAt)} tenés turno con ${booking.resourceLabel}.`
-      : `Hoy a las ${hora(booking.startAt)} tenés turno con ${booking.resourceLabel}.`,
+      ? `Mañana ${cuando(booking.startAt)} tiene turno con ${booking.resourceLabel}.`
+      : `Hoy a las ${hora(booking.startAt)} tiene turno con ${booking.resourceLabel}.`,
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {
@@ -302,13 +302,13 @@ export type CambioDeCita =
 
 /** Encabezado de cada cambio, en la voz de quien lo recibe. */
 const TITULO: Readonly<Record<CambioDeCita, string>> = {
-  ACCEPTED: 'Tu turno quedó confirmado',
+  ACCEPTED: 'Su turno quedó confirmado',
   // La cita puntual (AG-2): el doctor la asigna y el paciente SE ENTERA — no
   // confirma, porque ya se acordó en el consultorio.
-  ASSIGNED: 'Te agendaron un turno',
-  REJECTED: 'No se pudo tomar tu solicitud de turno',
-  RESCHEDULED: 'Tu turno se movió de horario',
-  CANCELLED: 'Tu turno se canceló',
+  ASSIGNED: 'Le agendaron un turno',
+  REJECTED: 'No se pudo tomar su solicitud de turno',
+  RESCHEDULED: 'Su turno se movió de horario',
+  CANCELLED: 'Su turno se canceló',
 };
 
 /**
@@ -329,11 +329,11 @@ export function avisoDeCambioDeCita(
 ): AgendaNotice {
   const conQuien = `con ${booking.resourceLabel}`;
   const cuerpo: Readonly<Record<CambioDeCita, string>> = {
-    ACCEPTED: `Tu turno ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
-    ASSIGNED: `${booking.resourceLabel} te agendó para el ${cuando(booking.startAt)}. Si no podés asistir, pedí el cambio desde tus turnos.`,
-    REJECTED: `Tu solicitud de turno ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
-    RESCHEDULED: `Tu turno ${conQuien} pasó al ${cuando(booking.startAt)}.`,
-    CANCELLED: `Se canceló tu turno ${conQuien} del ${cuando(booking.startAt)}.`,
+    ACCEPTED: `Su turno ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
+    ASSIGNED: `${booking.resourceLabel} le agendó para el ${cuando(booking.startAt)}. Si no puede asistir, pida el cambio desde sus turnos.`,
+    REJECTED: `Su solicitud de turno ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
+    RESCHEDULED: `Su turno ${conQuien} pasó al ${cuando(booking.startAt)}.`,
+    CANCELLED: `Se canceló su turno ${conQuien} del ${cuando(booking.startAt)}.`,
   };
 
   return {
@@ -391,12 +391,12 @@ export function avisoDeHorarioMovido(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { userId: destinatarioUserId },
     tenantId: booking.tenantId,
-    subject: 'Se movió el horario de tu turno',
+    subject: 'Se movió el horario de su turno',
     bodyText:
-      `Tu turno con ${booking.resourceLabel} pasa a ser el ` +
+      `Su turno con ${booking.resourceLabel} pasa a ser el ` +
       `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
       `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
-      'Si no te sirve, podés pedir otro horario desde la app.',
+      'Si no le sirve, puede pedir otro horario desde la app.',
     relatedResourceType: RECURSO_CITA,
     relatedResourceId: booking.bookingId,
     payload: {

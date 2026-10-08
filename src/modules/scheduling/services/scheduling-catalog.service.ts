@@ -686,7 +686,7 @@ export class SchedulingCatalogService {
       (dto.reason === undefined || dto.reason.trim() === '')
     ) {
       throw new PreconditionFailedException(
-        'Elegiste «Otro» como motivo: escribí cuál es',
+        'Eligió «Otro» como motivo: escriba cuál es',
         { exceptionType: dto.exceptionType },
         SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
@@ -736,7 +736,7 @@ export class SchedulingCatalogService {
       );
       if (conPaciente.length > 0) {
         throw new ConflictException(
-          'Esos ratos tienen pacientes citados: cancelá cada turno antes de cerrarlos',
+          'Esos ratos tienen pacientes citados: cancele cada turno antes de cerrarlos',
           {
             // Los ids y no los nombres: quien recibe esto es la pantalla, que
             // ya sabe pedir cada cita con su permiso.
@@ -795,7 +795,7 @@ export class SchedulingCatalogService {
     }
     if (dto.shiftMinutes === 0) {
       throw new PreconditionFailedException(
-        'Mover cero minutos no cambia nada: elegí cuánto correr la agenda',
+        'Mover cero minutos no cambia nada: elija cuánto correr la agenda',
         { shiftMinutes: 0 },
         SchedulingErrorReason.SHIFT_MINUTES_ZERO,
       );
@@ -1288,7 +1288,7 @@ export class SchedulingCatalogService {
       (dto.reason === undefined || dto.reason.trim() === '')
     ) {
       throw new PreconditionFailedException(
-        'Elegiste «Otro» como motivo: escribí cuál es',
+        'Eligió «Otro» como motivo: escriba cuál es',
         { resourceId, exceptionType: dto.exceptionType },
         SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
@@ -1349,9 +1349,9 @@ export class SchedulingCatalogService {
         if (confirmadas.length > 0) {
           const primera = confirmadas[0];
           throw new PreconditionFailedException(
-            `Tenés una cita confirmada en ese rato${
+            `Tiene una cita confirmada en ese rato${
               primera.resourceName ? ` en «${primera.resourceName}»` : ''
-            }. Reprogramala primero o elegí otro horario.`,
+            }. Reprográmela primero o elija otro horario.`,
             {
               bookingId: primera.id,
               startAt: primera.startAt,
@@ -1620,8 +1620,8 @@ export class SchedulingCatalogService {
         // y no tenía forma de saber contra qué. Con varias agendas por
         // médico en los datos sembrados, eso es un callejón sin salida.
         throw new PreconditionFailedException(
-          `Ya tenés «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +
-            'horario. Cambiá el horario o el día, o editá esa otra agenda.',
+          `Ya tiene «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +
+            'horario. Cambie el horario o el día, o edite esa otra agenda.',
           {
             dayOfWeek: otra.rule.dayOfWeek,
             nueva: choque.etiqueta,
@@ -1783,7 +1783,7 @@ export class SchedulingCatalogService {
         (textoFinal === undefined || textoFinal.trim() === '')
       ) {
         throw new PreconditionFailedException(
-          'Elegiste «Otro» como motivo: escribí cuál es',
+          'Eligió «Otro» como motivo: escriba cuál es',
           { exceptionType: tipoFinal },
           SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
         );
@@ -1896,10 +1896,10 @@ export class SchedulingCatalogService {
 
     throw new PreconditionFailedException(
       veredicto === 'pendiente'
-        ? 'Tu vínculo con esta organización todavía está pendiente de ' +
-            'aprobación. Cuando la acepten vas a poder publicar tu agenda acá.'
-        : 'Tu vínculo con esta organización no está vigente, así que no podés ' +
-            'publicar agenda acá. Hablá con ellos para reactivarlo.',
+        ? 'Su vínculo con esta organización todavía está pendiente de ' +
+            'aprobación. Cuando la acepten va a poder publicar su agenda acá.'
+        : 'Su vínculo con esta organización no está vigente, así que no puede ' +
+            'publicar agenda acá. Hable con ellos para reactivarlo.',
       { tenantId, vinculo: veredicto },
       SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
@@ -2058,7 +2058,7 @@ export class SchedulingCatalogService {
       );
     }
     if (!puedeLeer) {
-      throw new ForbiddenException('No podés ver los bloqueos de esta agenda');
+      throw new ForbiddenException('No puede ver los bloqueos de esta agenda');
     }
 
     const filas = await this.catalogRepo.findExceptionsByResourceInRange(

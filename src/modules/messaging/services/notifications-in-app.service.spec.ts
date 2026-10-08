@@ -93,8 +93,8 @@ function fila(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'in-app-1',
     categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.CLINICAL,
-    subject: 'Tu receta está lista',
-    bodyText: 'Podés verla en tu historia clínica.',
+    subject: 'Su receta está lista',
+    bodyText: 'Puede verla en su historia clínica.',
     relatedResourceType: 'PRESCRIPTION',
     relatedResourceId: 'rx-1',
     statusConceptId: CONCEPTS.INAPP_UNREAD,
@@ -112,7 +112,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
 
@@ -153,7 +153,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'SOCIAL',
-        subject: 'Le gustó tu publicación',
+        subject: 'Le gustó su publicación',
       });
 
       expect(res.suppressed).toBe(true);
@@ -212,7 +212,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.failed).toBe(true);
@@ -225,8 +225,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
       await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
-        bodyText: 'Podés verla en tu historia clínica.',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
 
@@ -237,7 +237,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(payload).toMatchObject({
         id: 'in-app-1',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
     });
@@ -308,7 +308,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.suppressed).toBe(false);
@@ -330,8 +330,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(page.items[0]).toEqual({
         id: 'in-app-1',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
-        bodyText: 'Podés verla en tu historia clínica.',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
         payloadJson: null,
         unread: true,

@@ -72,7 +72,7 @@ export class ProfilesDependentRequestsController {
   @ApiCreatedResponse({
     type: DependentLinkRequestSentDto,
     description:
-      'La solicitud quedó pendiente y a esa cuenta le llegó un aviso. `404` es «no hay cuenta con ese CI»; `422`, «ese CI es el tuyo».',
+      'La solicitud quedó pendiente y a esa cuenta le llegó un aviso. `404` es «no hay cuenta con ese CI»; `422`, «ese CI es el suyo».',
   })
   @ApiNotFoundResponse({ description: 'No hay cuenta de paciente con ese CI' })
   @ApiConflictResponse({

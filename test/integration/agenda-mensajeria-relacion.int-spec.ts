@@ -62,7 +62,7 @@ function avisoDeCancelacion(
     kind: 'BOOKING_STATE_CHANGED',
     recipient: { patientProfileId: CUALQUIER_UUID() },
     tenantId: CUALQUIER_UUID(),
-    subject: 'Tu cita fue cancelada',
+    subject: 'Su cita fue cancelada',
     bodyText:
       'El profesional canceló la cita del martes 10:00.\nMotivo: agenda reprogramada.',
     relatedResourceType: 'scheduling.bookings',

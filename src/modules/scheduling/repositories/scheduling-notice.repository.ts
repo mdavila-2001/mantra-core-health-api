@@ -291,9 +291,9 @@ export class SchedulingNoticeRepository {
     em: EntityManager,
     resourceId: string | undefined,
   ): Promise<string> {
-    if (resourceId === undefined) return 'tu agenda';
+    if (resourceId === undefined) return 'su agenda';
     const resource = await em.findOne(SchedulableResources, { id: resourceId });
-    if (!resource) return 'tu agenda';
+    if (!resource) return 'su agenda';
 
     if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
       const nombre = await this.findDisplayNameForProfile(

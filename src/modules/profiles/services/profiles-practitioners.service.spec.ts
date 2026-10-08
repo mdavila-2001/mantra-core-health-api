@@ -3147,7 +3147,7 @@ describe('ProfilesPractitionersService', () => {
      * retoma donde quedó, con lo anterior persistido — y sin que nadie haya
      * guardado en qué paso iba.
      */
-    it('con matrícula, especialidad y foto retoma en «dónde atendés»', async () => {
+    it('con matrícula, especialidad y foto retoma en «dónde atiende»', async () => {
       const d = build();
       recienRegistrado(d);
       d.practitionersRepo.findById.mockResolvedValue({
@@ -3174,7 +3174,7 @@ describe('ProfilesPractitionersService', () => {
      * agendable que crea el asistente de agenda alcanza. Sin este «o», quien
      * atiende particular quedaría trabado para siempre en el paso 3.
      */
-    it('un recurso propio cumple «dónde atendés» sin ninguna afiliación', async () => {
+    it('un recurso propio cumple «dónde atiende» sin ninguna afiliación', async () => {
       const d = build();
       recienRegistrado(d);
       d.em.find.mockResolvedValue([{ id: 'res-1' }]);
