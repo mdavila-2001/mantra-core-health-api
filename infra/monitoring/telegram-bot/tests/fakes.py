@@ -27,8 +27,9 @@ def container(**overrides) -> ContainerState:
 class FakeSources:
     timezone = "America/La_Paz"
 
-    def __init__(self, samples=None, alerts=None, states=None, docker_up=True, ranges=None):
+    def __init__(self, samples=None, alerts=None, states=None, docker_up=True, ranges=None, series=None):
         self.samples = samples or {}
+        self.series = series or {}
         self.ranges = ranges or {}
         self.alerts = alerts or []
         self.states = states if states is not None else [container()]
@@ -43,6 +44,8 @@ class FakeSources:
         return self.ranges.get(expr, [])
 
     def query_range_series(self, expr):
+        if expr in self.series:
+            return self.series[expr]
         points = self.ranges.get(expr)
         return [({}, points)] if points else []
 

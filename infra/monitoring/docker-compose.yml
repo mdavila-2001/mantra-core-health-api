@@ -11,6 +11,8 @@
 #   telegram-bot   → health, reinicios y OOM de cada contenedor (cAdvisor no
 #                    los da) + comandos /estado /ram /red /contenedores /alertas
 #   blackbox       → los sitios públicos responden y su certificado no vence
+#   coolify-proxy  → (Traefik, de Coolify) tráfico, latencia y 5xx por sitio
+#   otel-collector → trazas de la API → pedidos, latencia y errores POR ENDPOINT
 #   prometheus     → guarda 15 días y evalúa las reglas de `prometheus/rules/`
 #   alertmanager   → manda las alertas al grupo de Telegram y el latido
 #                    (Watchdog) a Healthchecks.io, que avisa si el VPS entero muere
@@ -56,6 +58,12 @@ services:
     # node-exporter corre con la red del host: se lo alcanza por el gateway.
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # `coolify`: la red del proxy Traefik de Coolify, para leer sus métricas
+    # (coolify-proxy:8082, que no se publica afuera). Así salen el tráfico, la
+    # latencia y los errores 5xx de cada sitio.
+    networks:
+      - monitoring
+      - coolify
     deploy:
       resources:
         limits:
@@ -67,6 +75,22 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+  # Recibe las trazas de la API y las vuelve métricas por endpoint (spanmetrics).
+  # El puerto OTLP se publica SÓLO en la IP del bridge docker0 del host
+  # (OTLP_BIND_ADDRESS, 172.27.0.1 en el VPS): las APIs lo alcanzan desde sus
+  # redes de Coolify y desde internet no existe. Por defecto, 127.0.0.1.
+  otel-collector:
+    <<: *base
+    build:
+      context: ./otel-collector
+    ports:
+      - "${OTLP_BIND_ADDRESS:-127.0.0.1}:4318:4318"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
 
   alertmanager:
     <<: *base
@@ -318,3 +342,6 @@ networks:
     internal: true
   docker-restart:
     internal: true
+  # La crea Coolify; si no existe, el compose falla en vez de inventar una vacía.
+  coolify:
+    external: true

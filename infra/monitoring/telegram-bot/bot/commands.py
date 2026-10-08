@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
-from . import extra_reports, history, reports
+from . import extra_reports, history, reports, traffic
 from .sources import Sources
 
 log = logging.getLogger(__name__)
@@ -40,6 +40,11 @@ COMMANDS: dict[str, Report] = {
     "/network": reports.network_report,
     "/contenedores": _CONTAINERS,
     "/containers": _CONTAINERS,
+    "/trafico": traffic.traffic_report,
+    "/tráfico": traffic.traffic_report,
+    "/traffic": traffic.traffic_report,
+    "/tablero": traffic.dashboard,
+    "/dashboard": traffic.dashboard,
     "/alertas": _ALERTS,
     "/alerts": _ALERTS,
 }
@@ -53,6 +58,8 @@ MENU: list[tuple[str, str]] = [
     ("disco", "Espacio por disco y cuánto creció en 24 h"),
     ("red", "Tráfico de red por interfaz y contenedor"),
     ("top", "Los 10 contenedores que más CPU y RAM usan"),
+    ("tablero", "Tablero 24 h: tráfico, latencia, códigos y endpoints"),
+    ("trafico", "Pedidos, latencia p95 y errores 5xx por sitio"),
     ("sitios", "Estado, latencia y certificado de cada sitio"),
     ("contenedores", "Estado y salud de cada contenedor"),
     ("alertas", "Alertas activas"),

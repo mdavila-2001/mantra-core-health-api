@@ -52,6 +52,8 @@ HELP_TEXT = (
     "/graficas — RAM, CPU, disco, red y contenedores de las últimas 24 h\n"
     "/ram · /cpu · /disco · /red — detalle de cada recurso\n"
     "/top — los 10 contenedores que más CPU y RAM usan\n"
+    "/tablero — tráfico, latencia, códigos y endpoints de 24 h en una imagen\n"
+    "/trafico — pedidos, latencia p95 y errores 5xx por sitio\n"
     "/sitios — estado, latencia y certificado de cada sitio\n"
     "/contenedores — estado, salud, uptime y reinicios\n"
     "/alertas — alertas activas · /uptime — encendido y carga\n"

@@ -47,6 +47,6 @@ def test_exports_start_time_so_api_restarts_are_counted():
     from datetime import datetime, timezone
 
     text = render_metrics([container(started_at=datetime(2026, 10, 4, 4, 53, 43, tzinfo=timezone.utc))], True)
-    assert 'alovida_container_started_at_seconds{name="api-abc-1"' in text
-    assert text.rstrip().endswith(" 1791089623")
+    line = next(l for l in text.splitlines() if l.startswith('alovida_container_started_at_seconds{name="api-abc-1"'))
+    assert line.endswith(" 1791089623")
     assert "alovida_container_started_at_seconds" in render_metrics([container(started_at=None)], True)
