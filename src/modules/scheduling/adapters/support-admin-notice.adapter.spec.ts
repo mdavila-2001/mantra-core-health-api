@@ -11,7 +11,7 @@ const aviso: AgendaNotice = {
   recipient: { userId: 'user-medico' },
   tenantId: 'tenant-1',
   subject: 'Tiene una nueva solicitud de consulta',
-  bodyText: 'Un paciente pidió turno para el lunes a las 09:00.',
+  bodyText: 'Un paciente pidió cita para el lunes a las 09:00.',
   relatedResourceType: 'scheduling.appointment_bookings',
   relatedResourceId: 'booking-1',
   payload: { route: '/schedule?vista=citas' },

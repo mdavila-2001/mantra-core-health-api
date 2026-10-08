@@ -49,7 +49,7 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0005-4a00-9000-5713ca110005',
     clave: 'confirmado',
-    nombre: 'Turno confirmado',
+    nombre: 'Cita confirmada',
   },
   {
     id: 'a7c1f0e2-0006-4a00-9000-5713ca110006',

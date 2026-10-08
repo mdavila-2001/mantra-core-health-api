@@ -246,7 +246,7 @@ export class SchedulingDelayService {
   private assertMinutos(minutos: number): void {
     if (minutos > MAX_DELAY_MINUTES) {
       throw new PreconditionFailedException(
-        'Una demora mayor a cuatro horas se resuelve reprogramando el turno, no avisando',
+        'Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando',
         { failureCode: 'DELAY_TOO_LONG', maxMinutes: MAX_DELAY_MINUTES },
       );
     }

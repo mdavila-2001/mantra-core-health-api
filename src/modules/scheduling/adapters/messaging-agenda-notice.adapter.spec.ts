@@ -19,7 +19,7 @@ const aviso: AgendaNotice = {
   recipient: { patientProfileId: 'perfil-1' },
   tenantId: 'tenant-1',
   subject: 'La Dra. Rivas se demora 20 minutos',
-  bodyText: 'Su turno de las 14:00 se atrasa unos 20 minutos.',
+  bodyText: 'Su cita de las 14:00 se atrasa unos 20 minutos.',
   relatedResourceType: 'scheduling.appointment_bookings',
   relatedResourceId: 'booking-1',
   payload: { route: '/my-account/appointments?turno=booking-1' },

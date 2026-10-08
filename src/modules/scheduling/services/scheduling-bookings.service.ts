@@ -142,7 +142,7 @@ const APPOINTMENT_CHANNEL_CONCEPT: Readonly<
  * médico le dijo que sí primero—.
  */
 const MOTIVO_DESPLAZADA =
-  'Se canceló automáticamente: le confirmaron otro turno a la misma hora.';
+  'Se canceló automáticamente: le confirmaron otra cita a la misma hora.';
 
 /**
  * Estados en los que una solicitud está esperando respuesta.
@@ -541,7 +541,7 @@ export class SchedulingBookingsService {
         throw new PreconditionFailedException(
           yaPaso
             ? 'Ese horario ya pasó.'
-            : `Ese turno empieza demasiado pronto: hay que pedirlo con al menos ${minutosDeAviso} minutos de anticipación.`,
+            : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${minutosDeAviso} minutos de anticipación.`,
           { slotId, startAt: slot.startAt.toISOString(), minutosDeAviso },
         );
       }
@@ -839,7 +839,7 @@ export class SchedulingBookingsService {
       if (yaComprometido.length > 0) {
         const choque = yaComprometido[0];
         throw new PreconditionFailedException(
-          `Ya tiene un turno confirmado ese día a esa hora${
+          `Ya tiene una cita confirmada ese día a esa hora${
             choque.resourceName ? ` en «${choque.resourceName}»` : ''
           }. Cancélelo primero si quiere cambiarlo por éste.`,
           {
@@ -1266,7 +1266,7 @@ export class SchedulingBookingsService {
     if (yaComprometido.length > 0) {
       const choque = yaComprometido[0];
       throw new PreconditionFailedException(
-        `El paciente ya tiene un turno confirmado en ese rato${
+        `El paciente ya tiene una cita confirmada en ese rato${
           choque.resourceName ? ` en «${choque.resourceName}»` : ''
         }.`,
         { bookingId: choque.id, startAt: choque.startAt },
@@ -1532,7 +1532,7 @@ export class SchedulingBookingsService {
       if (choqueDelPaciente.length > 0) {
         const choque = choqueDelPaciente[0];
         throw new PreconditionFailedException(
-          `El paciente ya tiene un turno confirmado a esa hora${
+          `El paciente ya tiene una cita confirmada a esa hora${
             choque.resourceName ? ` en «${choque.resourceName}»` : ''
           }.`,
           {
@@ -2833,9 +2833,9 @@ export class SchedulingBookingsService {
     throw new PreconditionFailedException(
       veredicto === 'pendiente'
         ? 'Su vínculo con esta organización todavía está pendiente de ' +
-            'aprobación, así que todavía no puede comprometer turnos suyos.'
+            'aprobación, así que todavía no puede comprometer citas suyas.'
         : 'Su vínculo con esta organización ya no está vigente, así que no ' +
-            'puede aceptar turnos suyos. Las citas que ya confirmó siguen ' +
+            'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +
             'en pie: hable con la organización para reactivarlo.',
       { tenantId, vinculo: veredicto },
     );
