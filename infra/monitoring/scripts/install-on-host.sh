@@ -36,7 +36,7 @@ if [ ! -d $REMOTE_DIR/.git ]; then
   git -C $REMOTE_DIR sparse-checkout set infra/monitoring
 else
   git -C $REMOTE_DIR fetch -q --depth 1 origin $BRANCH
-  git -C $REMOTE_DIR checkout -q -B $BRANCH FETCH_HEAD
+  git -C $REMOTE_DIR checkout -q -B $BRANCH FETCH_HEAD 2>/dev/null || git -C $REMOTE_DIR reset -q --hard FETCH_HEAD
 fi
 git -C $REMOTE_DIR log -1 --format='   commit %h · %s'"
 

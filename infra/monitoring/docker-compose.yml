@@ -145,7 +145,10 @@ services:
 
   cadvisor:
     <<: *base
-    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    # 0.55.1 y no 0.52.1: con el almacén de imágenes containerd de Docker 29
+    # la 0.52 no ve ningún contenedor («failed to identify the read-write layer
+    # ID»). Medido en 62.169.18.132 el 2026-10-08.
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     privileged: true
     devices:
       - /dev/kmsg
