@@ -98,7 +98,9 @@ export class SchedulingDelayService {
     const em = this.em.fork();
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId },
+      throw new ResourceNotFoundException(
+        'Cita no encontrada',
+        { bookingId },
         SchedulingErrorReason.BOOKING_NOT_FOUND,
       );
     }
@@ -143,9 +145,11 @@ export class SchedulingDelayService {
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId,
-      },
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        {
+          resourceId,
+        },
         SchedulingErrorReason.RESOURCE_NOT_FOUND,
       );
     }
@@ -252,7 +256,7 @@ export class SchedulingDelayService {
   private assertMinutos(minutos: number): void {
     if (minutos > MAX_DELAY_MINUTES) {
       throw new PreconditionFailedException(
-        'Una demora mayor a cuatro horas se resuelve reprogramando el turno, no avisando',
+        'Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando',
         { failureCode: 'DELAY_TOO_LONG', maxMinutes: MAX_DELAY_MINUTES },
         SchedulingErrorReason.DELAY_TOO_LONG,
       );

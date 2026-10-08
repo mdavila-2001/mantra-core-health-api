@@ -1289,7 +1289,7 @@ describe('SchedulingBookingsService', () => {
       const alPro = avisos.find(
         (a: any) => a.recipient.userId === 'user-medico',
       );
-      expect(alPro.bodyText).toMatch(/^Un paciente pidió turno/);
+      expect(alPro.bodyText).toMatch(/^Un paciente pidió cita/);
     });
 
     it('una sala no tiene a quién avisarle, pero el paciente igual recibe su acuse', async () => {
@@ -1599,7 +1599,7 @@ describe('SchedulingBookingsService', () => {
 
         await expect(
           d.service.createDirectAppointment(dto as never, medico),
-        ).rejects.toThrow(/paciente ya tiene un turno/);
+        ).rejects.toThrow(/paciente ya tiene una cita/);
       });
 
       it('retira los cupos libres que pisa y lo INFORMA', async () => {
