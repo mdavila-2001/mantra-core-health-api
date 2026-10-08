@@ -1,0 +1,9 @@
+{
+ "source": "nlm-medlineplus-es",
+ "retrievedAt": "2026-09-30T15:38:39.949Z",
+ "topicsXml": {
+  "url": "https://medlineplus.gov/xml/mplus_topics_2026-09-30.xml",
+  "sha256": "128db73b0e56236d167e466105e5ce1580ae8710e92683932763d22f4c2a9e9c",
+  "nota": "sha256 del RECORTE de este fixture, no del XML completo"
+ }
+}
