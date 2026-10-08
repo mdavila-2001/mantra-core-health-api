@@ -224,7 +224,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: 'user-2',
         category: 'SOCIAL',
-        subject: 'Le gustó tu publicación',
+        subject: 'Le gustó su publicación',
       });
 
       expect(res.suppressed).toBe(true);
@@ -245,7 +245,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: 'user-2',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.suppressed).toBe(false);

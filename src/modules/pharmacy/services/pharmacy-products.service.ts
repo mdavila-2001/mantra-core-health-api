@@ -338,7 +338,7 @@ export class PharmacyProductsService {
       dto.catalogPresentationCode ?? null,
     );
     if (duplicate) {
-      throw new ConflictException('Ya cargaste ese producto y presentación', {
+      throw new ConflictException('Ya cargó ese producto y presentación', {
         catalogProductId: catalog.id,
         catalogPresentationCode: dto.catalogPresentationCode,
       });
@@ -369,7 +369,7 @@ export class PharmacyProductsService {
     if (code === undefined) {
       if (sellable.length > 1) {
         throw new BadRequestException(
-          'El producto tiene más de una presentación: mandá catalogPresentationCode',
+          'El producto tiene más de una presentación: mande catalogPresentationCode',
         );
       }
       return undefined;

@@ -196,7 +196,7 @@ export class CommunityGroupsService {
       // rollback llegue, y así ni siquiera hace falta.
       if (!ownerProfileId) {
         throw new PreconditionFailedException(
-          'Para crear un grupo necesitás tu perfil público configurado',
+          'Para crear un grupo necesita su perfil público configurado',
           { code: PERFIL_PUBLICO_REQUERIDO },
           CommunityErrorReason.OWNER_PUBLIC_PROFILE_REQUIRED,
         );
@@ -619,7 +619,7 @@ export class CommunityGroupsService {
     const perfil = await this.publicProfilesRepo.findById(em, ownerProfileId);
     if (!perfil) {
       throw new PreconditionFailedException(
-        'Para crear un grupo público necesitás tu perfil público configurado',
+        'Para crear un grupo público necesita su perfil público configurado',
         { code: PERFIL_PUBLICO_REQUERIDO },
         CommunityErrorReason.PUBLIC_GROUP_OWNER_PROFILE_MISSING,
       );
@@ -634,7 +634,7 @@ export class CommunityGroupsService {
 
     if (falta.length > 0) {
       throw new PreconditionFailedException(
-        'Para crear un grupo público, tu perfil público tiene que estar completo',
+        'Para crear un grupo público, su perfil público tiene que estar completo',
         { code: PERFIL_PUBLICO_REQUERIDO, missing: falta },
         CommunityErrorReason.PUBLIC_GROUP_OWNER_PROFILE_INCOMPLETE,
       );

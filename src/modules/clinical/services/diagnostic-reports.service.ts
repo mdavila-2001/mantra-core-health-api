@@ -139,7 +139,7 @@ export class DiagnosticReportsService {
       'Camino de liberación obsoleto (D-E): usar diagnostics/reports/:reportId/versions/:versionId/release',
     );
     throw new PreconditionFailedException(
-      'Esta ruta ya no libera informes. Usá ' +
+      'Esta ruta ya no libera informes. Use ' +
         'POST /diagnostics/reports/:reportId/versions/:versionId/release, ' +
         'que es el único camino que el paciente ve en «Mis resultados».',
       {

@@ -2034,7 +2034,7 @@ describe('SchedulingBookingsService', () => {
         const d = conVeredicto(build(), 'ausente');
 
         await expect(d.service.accept('booking-1', {}, medico)).rejects.toThrow(
-          /ya confirmaste siguen/,
+          /ya confirmó siguen/,
         );
       });
 
@@ -3520,7 +3520,7 @@ describe('SchedulingBookingsService', () => {
         'booking-1',
         {
           infoRequested: 'MEDICAL_ORDER',
-          reasonText: 'Traé la orden de tu médico y vení en ayunas',
+          reasonText: 'Traiga la orden de su médico y venga en ayunas',
         },
         actor,
       );
@@ -3537,7 +3537,7 @@ describe('SchedulingBookingsService', () => {
         expect.objectContaining({
           dataSnapshot: expect.objectContaining({
             infoRequested: 'MEDICAL_ORDER',
-            reasonText: 'Traé la orden de tu médico y vení en ayunas',
+            reasonText: 'Traiga la orden de su médico y venga en ayunas',
             actorKind: 'PROVIDER',
           }),
         }),

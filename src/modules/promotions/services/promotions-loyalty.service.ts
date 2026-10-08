@@ -1487,7 +1487,7 @@ export class PromotionsLoyaltyService {
     const propia = await this.findOwnMembership(this.em, tenantId, memberRefId);
     if (!propia) {
       throw new PreconditionFailedException(
-        'No tenés una membresía de lealtad en este programa',
+        'No tiene una membresía de lealtad en este programa',
       );
     }
 

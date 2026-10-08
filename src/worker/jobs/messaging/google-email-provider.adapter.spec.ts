@@ -16,15 +16,15 @@ describe('createGoogleEmailProviderAdapter', () => {
       statusConceptId: 'NOTIF_PENDING',
       recipientAddress: 'paciente@example.com',
       payloadJson: {
-        subject: 'Verifica tu correo',
-        bodyText: 'Tu código es 123456',
+        subject: 'Verifica su correo',
+        bodyText: 'Su código es 123456',
       },
     });
 
     expect(client.sendEmail).toHaveBeenCalledWith({
       to: 'paciente@example.com',
-      subject: 'Verifica tu correo',
-      bodyText: 'Tu código es 123456',
+      subject: 'Verifica su correo',
+      bodyText: 'Su código es 123456',
       bodyHtml: undefined,
     });
     expect(outcome).toEqual({

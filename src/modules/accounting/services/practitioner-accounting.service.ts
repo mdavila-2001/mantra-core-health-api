@@ -290,7 +290,7 @@ export class PractitionerAccountingService {
     const notificationRequestId = await this.notifyAccounting(
       actor,
       created.id,
-      `Registraste el ingreso de la consulta (factura ${invoice.invoiceNumber}) por ${amount}.`,
+      `Registró el ingreso de la consulta (factura ${invoice.invoiceNumber}) por ${amount}.`,
     );
 
     this.logger.info(
@@ -353,7 +353,7 @@ export class PractitionerAccountingService {
     const notificationRequestId = await this.notifyAccounting(
       actor,
       created.id,
-      `Registraste un ${label}: ${dto.description} (${dto.amount}).`,
+      `Registró un ${label}: ${dto.description} (${dto.amount}).`,
     );
 
     return {

@@ -252,7 +252,7 @@ export class PractitionerSitesService {
         : null;
       if (!site) {
         throw new ResourceNotFoundException(
-          'No tenés una vinculación vigente con esa sede',
+          'No tiene una vinculación vigente con esa sede',
           { siteId },
         );
       }
@@ -298,7 +298,7 @@ export class PractitionerSitesService {
       );
       if (!assignment) {
         throw new ResourceNotFoundException(
-          'No tenés una vinculación vigente con esa sede',
+          'No tiene una vinculación vigente con esa sede',
           { siteId },
         );
       }
@@ -523,7 +523,7 @@ export class PractitionerSitesService {
       (await this.isOwnPractice(em, site.practiceId, actor.id, tenantId));
     if (!site || !esPropia) {
       throw new ResourceNotFoundException(
-        'Esa sede no es un consultorio propio tuyo',
+        'Esa sede no es un consultorio propio suyo',
         { siteId },
       );
     }

@@ -70,7 +70,7 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
     expect(input.category).toBe('MESSAGES');
     // El nombre es lo que hace útil el aviso: «Mensaje nuevo» a secas obliga a
     // abrir el hilo para saber si vale la pena.
-    expect(input.subject).toBe('Dra. Marisol Quispe te escribió');
+    expect(input.subject).toBe('Dra. Marisol Quispe le escribió');
     expect(input.destination).toEqual({
       type: 'CONVERSATION',
       id: CONVERSACION,

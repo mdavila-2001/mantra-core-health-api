@@ -10,7 +10,7 @@ const aviso: AgendaNotice = {
   kind: 'BOOKING_STATE_CHANGED',
   recipient: { userId: 'user-medico' },
   tenantId: 'tenant-1',
-  subject: 'Tenés una nueva solicitud de consulta',
+  subject: 'Tiene una nueva solicitud de consulta',
   bodyText: 'Un paciente pidió turno para el lunes a las 09:00.',
   relatedResourceType: 'scheduling.appointment_bookings',
   relatedResourceId: 'booking-1',

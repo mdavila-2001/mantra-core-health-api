@@ -200,7 +200,7 @@ export class VisitRecordsService {
           templateCode: 'PHARMA_LAB_VISIT_RECORDED',
           subject: 'Registro de visita pendiente de confirmación',
           bodyText:
-            'El visitador registró la visita. Confirmá si ocurrió tal como se describe.',
+            'El visitador registró la visita. Confirme si ocurrió tal como se describe.',
           relatedResourceType: 'visit_record',
           relatedResourceId: record.id,
           tenantId: request.doctorTenantId,

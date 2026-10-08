@@ -144,7 +144,7 @@ export class DependentLinkRequestsService {
           ahora,
         );
       if (vigente) {
-        throw new ConflictException('Esa persona ya es tu dependiente.');
+        throw new ConflictException('Esa persona ya es su dependiente.');
       }
       const pendiente =
         await this.portalProxiesRepo.findPendingByProxyUserAndPatient(
@@ -154,7 +154,7 @@ export class DependentLinkRequestsService {
         );
       if (pendiente) {
         throw new ConflictException(
-          'Ya le enviaste una solicitud a esa persona. Falta que la acepte.',
+          'Ya le envió una solicitud a esa persona. Falta que la acepte.',
         );
       }
 
@@ -188,8 +188,8 @@ export class DependentLinkRequestsService {
     await this.notifications.emitInApp({
       recipientUserId: resultado.destinatario,
       category: 'CLINICAL',
-      subject: 'Te quieren registrar como dependiente',
-      bodyText: `${resultado.quienPide} pide registrarte como su dependiente. Si aceptás, va a poder pedirte turnos y ver tu historia clínica.`,
+      subject: 'Le quieren registrar como dependiente',
+      bodyText: `${resultado.quienPide} pide registrarse como su dependiente. Si acepta, va a poder pedirle turnos y ver su historia clínica.`,
       destination: { type: 'DEPENDENT_LINK_REQUEST', id: resultado.id },
       debounceKey: `dependent-link:${resultado.id}:requested`,
       actorUserId: actor.id,
@@ -296,7 +296,7 @@ export class DependentLinkRequestsService {
         );
       if (yaLaRepresenta) {
         throw new ConflictException(
-          'Esa persona ya te representa. Podés rechazar esta solicitud.',
+          'Esa persona ya le representa. Puede rechazar esta solicitud.',
         );
       }
 
@@ -306,7 +306,7 @@ export class DependentLinkRequestsService {
       );
       if (!vinculo) {
         throw new ConflictException(
-          'La cuenta que lo pidió ya no está activa. Podés rechazar esta solicitud.',
+          'La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud.',
         );
       }
 
@@ -401,7 +401,7 @@ export class DependentLinkRequestsService {
     // su CI por error merece saber qué hizo, y no hay nada que ocultarle.
     if (identificador?.ownerId === titular.person.id) {
       throw new PreconditionFailedException(
-        'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
+        'Ese CI es el suyo: no puede registrarse como su propio dependiente.',
       );
     }
 
@@ -425,7 +425,7 @@ export class DependentLinkRequestsService {
     if (!cuenta || !paciente) throw noHayCuenta();
     if (cuenta.userId === actor.id) {
       throw new PreconditionFailedException(
-        'Ese CI es el tuyo: no podés registrarte como tu propio dependiente.',
+        'Ese CI es el suyo: no puede registrarse como su propio dependiente.',
       );
     }
     return { cuenta, paciente };
@@ -455,7 +455,7 @@ export class DependentLinkRequestsService {
   ) {
     const propio = () =>
       new PreconditionFailedException(
-        'Esa persona sos vos: no podés registrarte como tu propio dependiente.',
+        'Esa persona es usted: no puede registrarse como su propio dependiente.',
       );
     if (patientProfileId === titular.patientProfileId) throw propio();
 
@@ -553,10 +553,10 @@ export class DependentLinkRequestsService {
       recipientUserId: destinatario,
       category: 'CLINICAL',
       subject: acepto
-        ? `${quien} aceptó ser tu dependiente`
-        : `${quien} rechazó ser tu dependiente`,
+        ? `${quien} aceptó ser su dependiente`
+        : `${quien} rechazó ser su dependiente`,
       bodyText: acepto
-        ? 'Ya aparece en tu lista de dependientes.'
+        ? 'Ya aparece en su lista de dependientes.'
         : 'No se creó ningún vínculo.',
       destination: { type: 'DEPENDENT_LINK_REQUEST', id: requestId },
       debounceKey: `dependent-link:${requestId}:${decision.toLowerCase()}`,

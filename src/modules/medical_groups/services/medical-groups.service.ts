@@ -111,7 +111,7 @@ export class MedicalGroupsService {
 
       if (dto.conditionId !== undefined && dto.patientProfileId === undefined) {
         throw new PreconditionFailedException(
-          'Seleccioná primero el paciente para poder elegir un diagnóstico',
+          'Seleccione primero el paciente para poder elegir un diagnóstico',
         );
       }
 

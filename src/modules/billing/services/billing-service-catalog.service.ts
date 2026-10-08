@@ -258,7 +258,7 @@ export class BillingServiceCatalogService {
     this.templatesRepo.createQuestion(tx, {
       surveyVersionId: version.id,
       position: 1,
-      questionText: '¿Qué tan satisfecho quedaste con la atención?',
+      questionText: '¿Qué tan satisfecho quedó con la atención?',
       answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
       required: true,
       scaleMin: 1,

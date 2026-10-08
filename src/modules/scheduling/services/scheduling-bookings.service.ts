@@ -141,7 +141,7 @@ const APPOINTMENT_CHANNEL_CONCEPT: Readonly<
  * médico le dijo que sí primero—.
  */
 const MOTIVO_DESPLAZADA =
-  'Se canceló automáticamente: te confirmaron otro turno a la misma hora.';
+  'Se canceló automáticamente: le confirmaron otro turno a la misma hora.';
 
 /**
  * Estados en los que una solicitud está esperando respuesta.
@@ -462,21 +462,27 @@ export class SchedulingBookingsService {
     return this.em.transactional(async (tx) => {
       const slot = await this.bookingsRepo.findSlotForUpdate(tx, slotId);
       if (!slot) {
-        throw new ResourceNotFoundException('Slot no encontrado', { slotId },
+        throw new ResourceNotFoundException(
+          'Slot no encontrado',
+          { slotId },
           SchedulingErrorReason.SLOT_NOT_FOUND,
         );
       }
       if (slot.statusConceptId === CONCEPTS.SLOT_BLOCKED) {
-        throw new PreconditionFailedException('El slot está bloqueado', {
-          slotId,
-        },
+        throw new PreconditionFailedException(
+          'El slot está bloqueado',
+          {
+            slotId,
+          },
           SchedulingErrorReason.SLOT_BLOCKED,
         );
       }
       if (slot.remainingCapacity <= 0) {
-        throw new ConflictException('El slot no tiene cupos disponibles', {
-          slotId,
-        },
+        throw new ConflictException(
+          'El slot no tiene cupos disponibles',
+          {
+            slotId,
+          },
           SchedulingErrorReason.SLOT_NO_CAPACITY,
         );
       }
@@ -765,9 +771,11 @@ export class SchedulingBookingsService {
         );
       }
       if (hold.expiresAt.getTime() <= Date.now()) {
-        throw new ConflictException('La reserva temporal expiró', {
-          holdId: hold.id,
-        },
+        throw new ConflictException(
+          'La reserva temporal expiró',
+          {
+            holdId: hold.id,
+          },
           SchedulingErrorReason.HOLD_EXPIRED,
         );
       }
@@ -777,9 +785,11 @@ export class SchedulingBookingsService {
         hold.bookableSlotId,
       );
       if (!slot) {
-        throw new ResourceNotFoundException('Slot no encontrado', {
-          slotId: hold.bookableSlotId,
-        },
+        throw new ResourceNotFoundException(
+          'Slot no encontrado',
+          {
+            slotId: hold.bookableSlotId,
+          },
           SchedulingErrorReason.SLOT_NOT_FOUND,
         );
       }
@@ -788,10 +798,12 @@ export class SchedulingBookingsService {
       // recién pasado. Cubre a la vez confirmar y solicitar, que es por lo que
       // vive acá y no en cada una.
       if (slot.startAt.getTime() <= Date.now()) {
-        throw new PreconditionFailedException('Ese horario ya pasó.', {
-          slotId: slot.id,
-          startAt: slot.startAt.toISOString(),
-        },
+        throw new PreconditionFailedException(
+          'Ese horario ya pasó.',
+          {
+            slotId: slot.id,
+            startAt: slot.startAt.toISOString(),
+          },
           SchedulingErrorReason.APPOINTMENT_SLOT_PAST,
         );
       }
@@ -814,9 +826,9 @@ export class SchedulingBookingsService {
       if (yaComprometido.length > 0) {
         const choque = yaComprometido[0];
         throw new PreconditionFailedException(
-          `Ya tenés un turno confirmado ese día a esa hora${
+          `Ya tiene un turno confirmado ese día a esa hora${
             choque.resourceName ? ` en «${choque.resourceName}»` : ''
-          }. Cancelalo primero si querés cambiarlo por éste.`,
+          }. Cancélelo primero si quiere cambiarlo por éste.`,
           {
             bookingId: choque.id,
             startAt: choque.startAt,
@@ -1043,7 +1055,7 @@ export class SchedulingBookingsService {
     const pedido = dto.followUpOf!;
     if (!esSuAgenda) {
       throw new ForbiddenException(
-        'La reconsulta se agenda en tu propia agenda, no en la de otro profesional.',
+        'La reconsulta se agenda en su propia agenda, no en la de otro profesional.',
       );
     }
 
@@ -1412,9 +1424,11 @@ export class SchedulingBookingsService {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException('Cita no encontrada', {
-          bookingId,
-        },
+        throw new ResourceNotFoundException(
+          'Cita no encontrada',
+          {
+            bookingId,
+          },
           SchedulingErrorReason.BOOKING_NOT_FOUND,
         );
       }
@@ -1453,16 +1467,20 @@ export class SchedulingBookingsService {
         dto.toSlotId,
       );
       if (!target) {
-        throw new ResourceNotFoundException('Slot destino no encontrado', {
-          slotId: dto.toSlotId,
-        },
+        throw new ResourceNotFoundException(
+          'Slot destino no encontrado',
+          {
+            slotId: dto.toSlotId,
+          },
           SchedulingErrorReason.TARGET_SLOT_NOT_FOUND,
         );
       }
       if (target.remainingCapacity <= 0) {
-        throw new ConflictException('El slot destino no tiene cupos', {
-          slotId: dto.toSlotId,
-        },
+        throw new ConflictException(
+          'El slot destino no tiene cupos',
+          {
+            slotId: dto.toSlotId,
+          },
           SchedulingErrorReason.TARGET_SLOT_NO_CAPACITY,
         );
       }
@@ -1625,9 +1643,11 @@ export class SchedulingBookingsService {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException('Cita no encontrada', {
-          bookingId,
-        },
+        throw new ResourceNotFoundException(
+          'Cita no encontrada',
+          {
+            bookingId,
+          },
           SchedulingErrorReason.BOOKING_NOT_FOUND,
         );
       }
@@ -1644,7 +1664,9 @@ export class SchedulingBookingsService {
       );
 
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
-        throw new ConflictException('La cita ya está cancelada', { bookingId },
+        throw new ConflictException(
+          'La cita ya está cancelada',
+          { bookingId },
           SchedulingErrorReason.BOOKING_ALREADY_CANCELLED,
         );
       }
@@ -1720,7 +1742,7 @@ export class SchedulingBookingsService {
 
       if (esElPacienteTitular && withinWindow && !isNoShow) {
         throw new PreconditionFailedException(
-          `Podés cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio.`,
+          `Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio.`,
           {
             bookingId,
             cancellationWindowMinutes: windowMinutes,
@@ -2346,16 +2368,20 @@ export class SchedulingBookingsService {
         dto.proposedSlotId,
       );
       if (!destino) {
-        throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
-          slotId: dto.proposedSlotId,
-        },
+        throw new ResourceNotFoundException(
+          'Cupo propuesto no encontrado',
+          {
+            slotId: dto.proposedSlotId,
+          },
           SchedulingErrorReason.PROPOSED_SLOT_NOT_FOUND,
         );
       }
       if (destino.remainingCapacity <= 0) {
-        throw new ConflictException('El cupo propuesto no tiene lugar', {
-          slotId: dto.proposedSlotId,
-        },
+        throw new ConflictException(
+          'El cupo propuesto no tiene lugar',
+          {
+            slotId: dto.proposedSlotId,
+          },
           SchedulingErrorReason.PROPOSED_SLOT_NO_CAPACITY,
         );
       }
@@ -2573,9 +2599,11 @@ export class SchedulingBookingsService {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException('Cita no encontrada', {
-          bookingId,
-        },
+        throw new ResourceNotFoundException(
+          'Cita no encontrada',
+          {
+            bookingId,
+          },
           SchedulingErrorReason.BOOKING_NOT_FOUND,
         );
       }
@@ -2668,7 +2696,9 @@ export class SchedulingBookingsService {
       bookingId,
     );
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId },
+      throw new ResourceNotFoundException(
+        'Cita no encontrada',
+        { bookingId },
         SchedulingErrorReason.BOOKING_NOT_FOUND,
       );
     }
@@ -2789,11 +2819,11 @@ export class SchedulingBookingsService {
 
     throw new PreconditionFailedException(
       veredicto === 'pendiente'
-        ? 'Tu vínculo con esta organización todavía está pendiente de ' +
-            'aprobación, así que todavía no podés comprometer turnos suyos.'
-        : 'Tu vínculo con esta organización ya no está vigente, así que no ' +
-            'podés aceptar turnos suyos. Las citas que ya confirmaste siguen ' +
-            'en pie: hablá con la organización para reactivarlo.',
+        ? 'Su vínculo con esta organización todavía está pendiente de ' +
+            'aprobación, así que todavía no puede comprometer turnos suyos.'
+        : 'Su vínculo con esta organización ya no está vigente, así que no ' +
+            'puede aceptar turnos suyos. Las citas que ya confirmó siguen ' +
+            'en pie: hable con la organización para reactivarlo.',
       { tenantId, vinculo: veredicto },
       SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
@@ -3122,7 +3152,9 @@ export class SchedulingBookingsService {
     const em = this.em.fork();
     const booking = await this.bookingsRepo.findBookingById(em, bookingId);
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId },
+      throw new ResourceNotFoundException(
+        'Cita no encontrada',
+        { bookingId },
         SchedulingErrorReason.BOOKING_NOT_FOUND,
       );
     }

@@ -90,7 +90,7 @@ export class RequestDependentLinkDto {
     (dto: RequestDependentLinkDto) => dto.patientProfileId !== undefined,
   )
   @IsExclusiveWith('nationalId', {
-    message: 'Mandá el documento o el perfil elegido, no los dos',
+    message: 'Mande el documento o el perfil elegido, no los dos',
   })
   @IsUUID()
   patientProfileId?: string;

@@ -162,7 +162,7 @@ describe('SurveysResponsesService', () => {
       });
       d.templatesRepo.findTemplateById.mockResolvedValue({
         id: 'tpl-1',
-        title: 'Cómo fue tu consulta',
+        title: 'Cómo fue su consulta',
         description: 'Tres preguntas',
       });
 
@@ -175,7 +175,7 @@ describe('SurveysResponsesService', () => {
       expect(result).toEqual([
         expect.objectContaining({
           id: 'inv-1',
-          title: 'Cómo fue tu consulta',
+          title: 'Cómo fue su consulta',
           status: 'PENDING',
         }),
       ]);

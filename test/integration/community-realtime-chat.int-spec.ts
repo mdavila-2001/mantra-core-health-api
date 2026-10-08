@@ -248,7 +248,10 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       await http()
         .post(`/community/conversations/${conversacionAjena.body.id}/messages`)
         .set(bearer(doctorToken))
-        .send({ senderProfileId: doctorProfileId, bodyText: 'no es para vos' })
+        .send({
+          senderProfileId: doctorProfileId,
+          bodyText: 'no es para usted',
+        })
         .expect(201);
       expect(await mensajePromise).toBeNull();
     } finally {
@@ -276,7 +279,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       // Sin esto la unión podría no haber terminado cuando se manda el REST.
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const textoEnviado = `Hola, ¿cómo estás? ${randomUUID().slice(0, 6)}`;
+      const textoEnviado = `Hola, ¿cómo está? ${randomUUID().slice(0, 6)}`;
       const mensajeEsperado = waitFor<{ bodyText: string }>(
         socketPaciente,
         'conversation:message',

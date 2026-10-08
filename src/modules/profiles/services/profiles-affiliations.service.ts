@@ -649,7 +649,7 @@ export class ProfilesAffiliationsService {
         recipientUserId: admin.user_id,
         tenantId,
         subject: ASUNTO.AFFILIATION_REQUESTED,
-        bodyText: `${quien} pidió vincularse a tu organización. Podés aceptarlo o rechazarlo desde la bandeja de solicitudes.`,
+        bodyText: `${quien} pidió vincularse a su organización. Puede aceptarlo o rechazarlo desde la bandeja de solicitudes.`,
         affiliationId,
       });
     }
@@ -789,9 +789,9 @@ const AVISO_POR_DESTINO: Readonly<Record<string, AffiliationNoticeKind>> = {
 
 /** Lo que se lee en la campana sin abrir nada. */
 const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
-  AFFILIATION_APPROVED: 'Te aceptaron como profesional',
-  AFFILIATION_REJECTED: 'No aceptaron tu vínculo',
-  AFFILIATION_REVOKED: 'Dieron de baja tu vínculo',
+  AFFILIATION_APPROVED: 'Le aceptaron como profesional',
+  AFFILIATION_REJECTED: 'No aceptaron su vínculo',
+  AFFILIATION_REVOKED: 'Dieron de baja su vínculo',
   AFFILIATION_REQUESTED: 'Un profesional quiere vincularse',
 };
 
@@ -804,11 +804,11 @@ const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
  */
 const CUERPO: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED:
-    'La organización te aceptó como profesional suyo. Ya podés publicar tu agenda ahí.',
+    'La organización le aceptó como profesional suyo. Ya puede publicar su agenda ahí.',
   AFFILIATION_REJECTED:
-    'La organización no aceptó el vínculo que pediste. Si creés que es un error, hablá con ellos.',
+    'La organización no aceptó el vínculo que pidió. Si cree que es un error, hable con ellos.',
   AFFILIATION_REVOKED:
-    'La organización dio de baja tu vínculo. Las citas que ya confirmaste siguen en pie, pero no vas a poder aceptar turnos nuevos ni publicar más agenda ahí.',
+    'La organización dio de baja su vínculo. Las citas que ya confirmó siguen en pie, pero no va a poder aceptar turnos nuevos ni publicar más agenda ahí.',
   AFFILIATION_REQUESTED:
-    'Un profesional pidió vincularse a tu organización. Podés aceptarlo o rechazarlo desde la bandeja de solicitudes.',
+    'Un profesional pidió vincularse a su organización. Puede aceptarlo o rechazarlo desde la bandeja de solicitudes.',
 };

@@ -211,7 +211,7 @@ export class VisitAgendaService {
   ): Promise<CreatedResourceDto> {
     if (!dto.pharmaLabId && !dto.medicalVisitorId) {
       throw new PreconditionFailedException(
-        'Indicá el laboratorio o el visitador a bloquear',
+        'Indique el laboratorio o el visitador a bloquear',
         {},
         PharmaLabErrorReason.VISIT_BLOCK_TARGET_MISSING,
       );
