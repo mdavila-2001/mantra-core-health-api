@@ -341,7 +341,7 @@ export class ConditionsService {
         condition.clinicalCourseConceptId === CLIN.CONDITION_COURSE_CHRONIC
       ) {
         throw new PreconditionFailedException(
-          'Una condición de curso crónico no pasa a resuelta; marcala inactiva o en remisión',
+          'Una condición de curso crónico no pasa a resuelta; márquela inactiva o en remisión',
           { conditionId },
         );
       }
@@ -481,7 +481,7 @@ export class ConditionsService {
       const reasonText = dto.reasonText?.trim() || undefined;
       if (reasonText === undefined && dto.basedOn === undefined) {
         throw new PreconditionFailedException(
-          'Escribí el motivo o elegí una evidencia: al menos uno de los dos.',
+          'Escriba el motivo o elija una evidencia: al menos uno de los dos.',
           { conditionId, field: 'reasonText' },
         );
       }
@@ -569,7 +569,7 @@ export class ConditionsService {
     const onsetAt = dto.onsetAt ? new Date(dto.onsetAt) : condition.onsetAt;
     if (!onsetAt) {
       throw new PreconditionFailedException(
-        'Indicá desde cuándo la persona presenta la condición.',
+        'Indique desde cuándo la persona presenta la condición.',
         { conditionId: condition.id, field: 'onsetAt' },
       );
     }
@@ -602,7 +602,7 @@ export class ConditionsService {
         : condition.expectedResolutionAt;
       if (!expectedResolutionAt) {
         throw new PreconditionFailedException(
-          'Indicá hasta cuándo se espera la condición, o marcala como crónica.',
+          'Indique hasta cuándo se espera la condición, o márquela como crónica.',
           { conditionId: condition.id, field: 'expectedResolutionAt' },
         );
       }

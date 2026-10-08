@@ -425,7 +425,7 @@ export class IamPractitionerSelfRegistrationService {
       dto.credentials.length > 0
     ) {
       throw new PreconditionFailedException(
-        'Declará los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos',
+        'Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos',
       );
     }
 
@@ -1060,9 +1060,9 @@ export class IamPractitionerSelfRegistrationService {
           recipientUserId: userId,
           recipientAddress: email,
           payloadJson: {
-            subject: 'Verificá tu correo profesional',
+            subject: 'Verifique su correo profesional',
             bodyText:
-              'Para verificar tu correo, usá este código: ' +
+              'Para verificar su correo, use este código: ' +
               `${token}\n\nTu matrícula quedó registrada y está pendiente de ` +
               'verificación por parte de la plataforma.',
           },

@@ -170,9 +170,9 @@ export class IamEmailVerificationService {
           recipientUserId: userId,
           recipientAddress: email,
           payloadJson: {
-            subject: 'Verificá tu correo',
+            subject: 'Verifique su correo',
             bodyText:
-              'Para verificar tu correo, usá este código: ' +
+              'Para verificar su correo, use este código: ' +
               `${token}\n\nEl enlace caduca en 24 horas.`,
           },
         },

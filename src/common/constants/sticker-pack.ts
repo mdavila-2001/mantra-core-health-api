@@ -54,7 +54,7 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0006-4a00-9000-5713ca110006',
     clave: 'te-espero',
-    nombre: 'Te espero en la consulta',
+    nombre: 'Le espero en la consulta',
   },
   {
     id: 'a7c1f0e2-0007-4a00-9000-5713ca110007',
@@ -64,7 +64,7 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0008-4a00-9000-5713ca110008',
     clave: 'tomar-remedio',
-    nombre: 'Acordate del remedio',
+    nombre: 'Recuerde su medicamento',
   },
   {
     id: 'a7c1f0e2-0009-4a00-9000-5713ca110009',
@@ -74,12 +74,12 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0010-4a00-9000-5713ca110010',
     clave: 'ayunas',
-    nombre: 'Vení en ayunas',
+    nombre: 'Venga en ayunas',
   },
   {
     id: 'a7c1f0e2-0011-4a00-9000-5713ca110011',
     clave: 'mejorate',
-    nombre: 'Recuperate pronto',
+    nombre: 'Que se recupere pronto',
   },
   {
     id: 'a7c1f0e2-0012-4a00-9000-5713ca110012',
@@ -89,17 +89,17 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0013-4a00-9000-5713ca110013',
     clave: 'cuidate',
-    nombre: 'Cuidate mucho',
+    nombre: 'Cuídese mucho',
   },
   {
     id: 'a7c1f0e2-0014-4a00-9000-5713ca110014',
     clave: 'descansa',
-    nombre: 'Descansá',
+    nombre: 'Descanse',
   },
   {
     id: 'a7c1f0e2-0015-4a00-9000-5713ca110015',
     clave: 'agua',
-    nombre: 'Tomá agua',
+    nombre: 'Tome agua',
   },
   {
     id: 'a7c1f0e2-0016-4a00-9000-5713ca110016',
@@ -129,7 +129,7 @@ export const STICKER_PACK: readonly StickerPackEntry[] = [
   {
     id: 'a7c1f0e2-0021-4a00-9000-5713ca110021',
     clave: 'estudios',
-    nombre: 'Traé tus estudios',
+    nombre: 'Traiga sus estudios',
   },
   {
     id: 'a7c1f0e2-0022-4a00-9000-5713ca110022',

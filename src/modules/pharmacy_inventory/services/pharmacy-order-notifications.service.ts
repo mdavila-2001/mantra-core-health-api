@@ -44,8 +44,8 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu pedido está en revisión',
-      bodyText: 'La farmacia está revisando tu pedido.',
+      subject: 'Su pedido está en revisión',
+      bodyText: 'La farmacia está revisando su pedido.',
       orderId,
       statusCode: 'PINV_ORDER_EN_REVISION',
       actorUserId,
@@ -59,8 +59,8 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu pedido fue confirmado',
-      bodyText: 'La farmacia confirmó tu pedido y lo está preparando.',
+      subject: 'Su pedido fue confirmado',
+      bodyText: 'La farmacia confirmó su pedido y lo está preparando.',
       orderId,
       statusCode: 'PINV_ORDER_CONFIRMADO',
       actorUserId,
@@ -81,10 +81,10 @@ export class PharmacyOrderNotificationsService {
     pickupCode?: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu pedido está listo para retirar',
+      subject: 'Su pedido está listo para retirar',
       bodyText: pickupCode
-        ? `Podés pasar a retirarlo por la sede con el código ${pickupCode}. La reserva se renovó por 48 horas.`
-        : 'Podés pasar a retirarlo por la sede. La reserva se renovó por 48 horas.',
+        ? `Puede pasar a retirarlo por la sede con el código ${pickupCode}. La reserva se renovó por 48 horas.`
+        : 'Puede pasar a retirarlo por la sede. La reserva se renovó por 48 horas.',
       orderId,
       statusCode: 'PINV_ORDER_LISTO_PARA_RETIRO',
       actorUserId,
@@ -99,11 +99,11 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'La farmacia te propone una alternativa',
+      subject: 'La farmacia le propone una alternativa',
       bodyText:
         proposalCount === 1
-          ? 'La farmacia propone un genérico para un medicamento de tu pedido. Podés aceptarlo o preferir el original.'
-          : `La farmacia propone genéricos para ${proposalCount} medicamentos de tu pedido. Podés aceptarlos o preferir los originales.`,
+          ? 'La farmacia propone un genérico para un medicamento de su pedido. Puede aceptarlo o preferir el original.'
+          : `La farmacia propone genéricos para ${proposalCount} medicamentos de su pedido. Puede aceptarlos o preferir los originales.`,
       orderId,
       statusCode: 'PINV_ORDER_ACEPTACION_PENDIENTE',
       actorUserId,
@@ -117,9 +117,9 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu pedido venció',
+      subject: 'Su pedido venció',
       bodyText:
-        'Pasaron 48 horas sin retiro y la reserva se liberó. Podés volver a pedirlo cuando quieras.',
+        'Pasaron 48 horas sin retiro y la reserva se liberó. Puede volver a pedirlo cuando quiera.',
       orderId,
       statusCode: 'PINV_ORDER_VENCIDO',
       actorUserId,
@@ -138,7 +138,7 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPerson(prescriberProfileId, {
-      subject: 'Una receta tuya fue dispensada',
+      subject: 'Una receta suya fue dispensada',
       bodyText:
         'El paciente retiró en farmacia la medicación que recetaste. El pedido quedó completo.',
       destination: { type: 'PRESCRIPTION', id: medicationRequestId },
@@ -160,7 +160,7 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPerson(prescriberProfileId, {
-      subject: 'Tu paciente no retiró la medicación',
+      subject: 'Su paciente no retiró la medicación',
       bodyText:
         'El pedido de farmacia venció sin retiro y la reserva se liberó. La receta sigue sin dispensarse.',
       destination: { type: 'PRESCRIPTION', id: medicationRequestId },
@@ -183,8 +183,8 @@ export class PharmacyOrderNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu pedido fue rechazado',
-      bodyText: `La farmacia rechazó tu pedido: ${reason}`,
+      subject: 'Su pedido fue rechazado',
+      bodyText: `La farmacia rechazó su pedido: ${reason}`,
       orderId,
       statusCode: 'PINV_ORDER_RECHAZADO',
       actorUserId,

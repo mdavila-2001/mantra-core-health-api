@@ -127,7 +127,7 @@ describe('SchedulingServiceOfferingsService', () => {
       d.repo.findOfferingOf.mockResolvedValue({ id: 'ya-existe' });
 
       await expect(d.service.create(dto, medico)).rejects.toThrow(
-        /Ya ofrecés ese servicio/,
+        /Ya ofrece ese servicio/,
       );
     });
 
@@ -152,7 +152,7 @@ describe('SchedulingServiceOfferingsService', () => {
           { ...dto, practitionerProfileId: OTRO_MEDICO },
           medico,
         ),
-      ).rejects.toThrow(/para vos/);
+      ).rejects.toThrow(/para usted/);
     });
 
     it('quien atiende Y administra agendas crea la suya sin repetir su propio id', async () => {

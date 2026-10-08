@@ -255,13 +255,11 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.rechazar(
         TENANT,
         'af-1',
-        { reason: '  No figurás en nuestro plantel  ' } as never,
+        { reason: '  No figura en nuestro plantel  ' } as never,
         orgAdmin,
       );
 
-      expect(solicitud.decisionReasonText).toBe(
-        'No figurás en nuestro plantel',
-      );
+      expect(solicitud.decisionReasonText).toBe('No figura en nuestro plantel');
     });
 
     it('un motivo en blanco no ensucia la columna', async () => {
@@ -316,7 +314,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const [aviso] = d.avisos.emit.mock.calls[0];
       expect(aviso.kind).toBe('AFFILIATION_APPROVED');
       expect(aviso.recipientUserId).toBe('user-med');
-      expect(aviso.bodyText).toMatch(/publicar tu agenda/);
+      expect(aviso.bodyText).toMatch(/publicar su agenda/);
     });
 
     it('el aviso del rechazo LLEVA el motivo', async () => {
@@ -326,13 +324,13 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.rechazar(
         TENANT,
         'af-1',
-        { reason: 'No figurás en nuestro plantel' } as never,
+        { reason: 'No figura en nuestro plantel' } as never,
         orgAdmin,
       );
 
       const [aviso] = d.avisos.emit.mock.calls[0];
       expect(aviso.kind).toBe('AFFILIATION_REJECTED');
-      expect(aviso.bodyText).toContain('No figurás en nuestro plantel');
+      expect(aviso.bodyText).toContain('No figura en nuestro plantel');
     });
 
     it('el aviso de la revocación aclara que las citas siguen', async () => {
@@ -343,7 +341,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.revocar(TENANT, 'af-1', {} as never, orgAdmin);
 
       const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.bodyText).toMatch(/ya confirmaste siguen en pie/);
+      expect(aviso.bodyText).toMatch(/ya confirmó siguen en pie/);
     });
 
     it('un profesional sin cuenta no rompe la decisión', async () => {

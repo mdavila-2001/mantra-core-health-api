@@ -154,7 +154,7 @@ describe('CommunityPollsReadService', () => {
   const poll = {
     id: 'poll-1',
     postId: 'post-1',
-    question: '¿Cuál preferís?',
+    question: '¿Cuál prefiere?',
     allowsMultiple: true,
     statusConceptId: 'abierta',
   };

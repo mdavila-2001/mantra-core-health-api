@@ -537,7 +537,7 @@ describe('DependentLinkRequestsService', () => {
 
       expect(notifications.emitInApp).toHaveBeenCalledWith(
         expect.objectContaining({
-          bodyText: expect.stringContaining(`${esperado} pide registrarte`),
+          bodyText: expect.stringContaining(`${esperado} pide registrarse`),
         }),
       );
     });
@@ -632,7 +632,7 @@ describe('DependentLinkRequestsService', () => {
       expect(notifications.emitInApp).toHaveBeenCalledWith(
         expect.objectContaining({
           recipientUserId: 'user-madre',
-          subject: 'Luis Pérez aceptó ser tu dependiente',
+          subject: 'Luis Pérez aceptó ser su dependiente',
         }),
       );
     });
@@ -734,7 +734,7 @@ describe('DependentLinkRequestsService', () => {
       expect(notifications.emitInApp).toHaveBeenCalledWith(
         expect.objectContaining({
           recipientUserId: 'user-madre',
-          subject: 'Luis Pérez rechazó ser tu dependiente',
+          subject: 'Luis Pérez rechazó ser su dependiente',
         }),
       );
     });

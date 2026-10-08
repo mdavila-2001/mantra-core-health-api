@@ -328,11 +328,11 @@ export class IamPasswordResetService {
           recipientUserId: userId,
           recipientAddress: email,
           payloadJson: {
-            subject: 'Restablecé tu contraseña',
+            subject: 'Restablezca su contraseña',
             bodyText:
-              'Para elegir una contraseña nueva, usá este código: ' +
-              `${token}\n\nVence en una hora. Si no pediste este cambio, ` +
-              'ignorá este mensaje: tu contraseña actual sigue funcionando.',
+              'Para elegir una contraseña nueva, use este código: ' +
+              `${token}\n\nVence en una hora. Si no pidió este cambio, ` +
+              'ignore este mensaje: su contraseña actual sigue funcionando.',
           },
         },
         actor,

@@ -116,7 +116,7 @@ const ESTADOS_QUE_HABILITAN: readonly string[] = [
  * distinguir un paciente ajeno de un uuid inventado.
  */
 const SIN_ACCESO_A_LA_HISTORIA =
-  'Sólo podés consultar tu propia historia clínica.';
+  'Sólo puede consultar su propia historia clínica.';
 
 /** Ventana que se mira alrededor de ahora; el día exacto lo decide la zona de la sede. */
 const VENTANA_MS = 48 * 60 * 60 * 1000;
