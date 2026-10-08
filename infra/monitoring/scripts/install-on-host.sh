@@ -2,6 +2,7 @@
 # Instala (o actualiza) el monitoreo DIRECTO en un servidor, sin pasar por Coolify.
 #
 #   bash infra/monitoring/scripts/install-on-host.sh 62.169.18.132
+#   TELEGRAM_BOT_TOKEN='…' HEALTHCHECKS_PING_URL='' bash infra/monitoring/scripts/install-on-host.sh 62.169.18.132
 #
 # Por qué fuera de Coolify: el monitoreo tiene que seguir vivo y avisando
 # cuando Coolify o las apps fallan. Corre como un proyecto de Docker Compose
@@ -40,7 +41,12 @@ fi
 git -C $REMOTE_DIR log -1 --format='   commit %h · %s'"
 
 # --- 2. Token del bot (se lee de la terminal, no se ve) ----------------------
-read -r -s -p "Pegá el token del bot de Telegram (no se va a ver) y Enter: " BOT_TOKEN </dev/tty; echo
+# El token puede venir en la variable TELEGRAM_BOT_TOKEN (una sola línea, sin
+# preguntas) o se pide por la terminal sin mostrarlo.
+BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+if [ -z "$BOT_TOKEN" ]; then
+  read -r -s -p "Pegá el token del bot de Telegram (no se va a ver) y Enter: " BOT_TOKEN </dev/tty; echo
+fi
 BOT_USERNAME="$(curl -fsS "https://api.telegram.org/bot${BOT_TOKEN}/getMe" | json 'print(d["result"]["username"])')" \
   || { echo "✖ Telegram rechazó ese token. ¿Lo copiaste completo?" >&2; exit 1; }
 echo "✔ Token válido: @${BOT_USERNAME}"
@@ -72,7 +78,11 @@ CHAT_LINE="$(printf '%s\n' "$CHATS" | awk -F'\t' '$2 ~ /group/ {print; exit}')"
 CHAT_ID="$(printf '%s' "$CHAT_LINE" | cut -f1)"
 echo "✔ Los avisos van a: $(printf '%s' "$CHAT_LINE" | cut -f3) ($(printf '%s' "$CHAT_LINE" | cut -f2))"
 
-read -r -p "URL de ping de Healthchecks.io (Enter para saltear): " HC_URL </dev/tty
+if [ -n "${HEALTHCHECKS_PING_URL+x}" ]; then
+  HC_URL="$HEALTHCHECKS_PING_URL"
+else
+  read -r -p "URL de ping de Healthchecks.io (Enter para saltear): " HC_URL </dev/tty
+fi
 GRAFANA_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(18))')"
 
 # --- 3. .env en el servidor (por stdin: nada viaja en la línea de comandos) ---
