@@ -1,6 +1,6 @@
 # Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica
 
-Implementa los 14 casos de uso del módulo 20 más 4 endpoints de soporte (altas de
+Implementa los 14 casos de uso del módulo 20 más 4 endpoints de soporte (cifra original; al 2026-10-08 el código declara 31 rutas, ver «Rutas HTTP y alcance (medido)») (altas de
 padres que el módulo no expone como UC pero que los flujos necesitan). Sigue el
 patrón de capas de `iam`: controladores finos → servicios con la unidad de trabajo
 (`em.transactional`) → repositorios stateless (reciben el `EntityManager`).

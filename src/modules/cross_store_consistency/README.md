@@ -71,7 +71,7 @@ grafo y objetos son proyecciones. De ahí sale todo lo demás:
 | UC-62-13 | `POST /admin/data-movement-jobs` | Movimiento entre zonas |
 | UC-62-14 | `POST /admin/archive-jobs` | Archivado por retención |
 
-14 endpoints para 14 casos de uso: UC-62-03 y UC-62-06 no tienen ruta propia —el caso de uso los
+14 endpoints para 14 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 16 rutas, ver «Rutas HTTP y alcance (medido)»): UC-62-03 y UC-62-06 no tienen ruta propia —el caso de uso los
 declara *internos*, parte de UC-62-02 y UC-62-05— y UC-62-04 y UC-62-11 tienen dos cada uno.
 
 ## Estados en `varchar`, en MAYÚSCULAS
