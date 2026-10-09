@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { jest } from '@jest/globals';
 
 /**
@@ -18,9 +19,14 @@ function build() {
   const execute = mockFn().mockResolvedValue([]);
   const connection = { execute };
   const em = { fork: mockFn(), getConnection: mockFn(() => connection) };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
   const service = new PublicProjectionsService(em as any, logger as any);
-  return { service, execute };
+  return { service, execute, logger };
 }
 
 describe('PublicProjectionsService (UC-30-10)', () => {
@@ -42,15 +48,23 @@ describe('PublicProjectionsService (UC-30-10)', () => {
     expect(params).toEqual(['dr-ada-lovelace']);
   });
 
-  it('degrades to empty records (no faked success) when the MV is missing', async () => {
+  it('P-12: if the MV cannot be read it answers 503, never an empty 200', async () => {
+    const { service, execute, logger } = build();
+    execute.mockRejectedValueOnce(new Error('relation does not exist'));
+
+    await expect(service.getBySlug('dr-missing')).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('P-12: the directory search also answers 503 instead of «no doctors»', async () => {
     const { service, execute } = build();
     execute.mockRejectedValueOnce(new Error('relation does not exist'));
 
-    const res = await service.getBySlug('dr-missing');
-
-    expect(res.records).toEqual([]);
-    expect(res.refreshedAt).toBeNull();
-    expect(res.generatedAt).toBeInstanceOf(Date);
+    await expect(service.searchDirectory({ city: 'Lima' })).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
   });
 
   it('serves the public directory filtered by city and specialty', async () => {
