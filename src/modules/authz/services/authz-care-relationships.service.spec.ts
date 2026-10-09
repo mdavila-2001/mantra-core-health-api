@@ -277,14 +277,14 @@ describe('AuthzCareRelationshipsService', () => {
           validFrom: future,
         },
       ]);
-      const paciente = {
+      const patient = {
         id: 'u-pat-1',
         roles: ['PATIENT'],
         patientProfileId: 'pat-1',
       } as any;
 
       const res =
-        await d.service.listMyPendingCareRelationshipRequests(paciente);
+        await d.service.listMyPendingCareRelationshipRequests(patient);
 
       expect(d.careRepo.findPendingByPatient).toHaveBeenCalledWith(
         expect.anything(),
@@ -301,10 +301,10 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('sin perfil de paciente devuelve vacío sin consultar la base', async () => {
       const d = build();
-      const cuentaSinPerfil = { id: 'u-x', roles: ['PATIENT'] } as any;
+      const accountWithoutProfile = { id: 'u-x', roles: ['PATIENT'] } as any;
 
       const res =
-        await d.service.listMyPendingCareRelationshipRequests(cuentaSinPerfil);
+        await d.service.listMyPendingCareRelationshipRequests(accountWithoutProfile);
 
       expect(res).toEqual([]);
       expect(d.careRepo.findPendingByPatient).not.toHaveBeenCalled();
