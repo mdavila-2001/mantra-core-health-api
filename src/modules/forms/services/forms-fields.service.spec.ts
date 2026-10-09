@@ -296,11 +296,11 @@ describe('FormsFieldsService', () => {
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       d.valuesRepo.findCodesInUseByField.mockResolvedValue([]);
 
-      const res = await enTenantA(() =>
+      const res = await inTenantA(() =>
         d.service.updateFieldDefinition(
           'f1',
           { options: ['Nunca', 'Ex fumador', 'Fumador'] } as any,
-          doctora,
+          doctor,
         ),
       );
 
@@ -320,11 +320,11 @@ describe('FormsFieldsService', () => {
       d.valuesRepo.findCodesInUseByField.mockResolvedValue(['Ex fumador']);
 
       await expect(
-        enTenantA(() =>
+        inTenantA(() =>
           d.service.updateFieldDefinition(
             'f1',
             { options: ['Nunca', 'Fumador'] } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -337,18 +337,18 @@ describe('FormsFieldsService', () => {
       const field: any = { id: 'f1', dataType: 'string', description: 'vieja' };
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
 
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.updateFieldDefinition(
           'f1',
           { description: null } as any,
-          doctora,
+          doctor,
         ),
       );
       expect(field.description).toBeUndefined();
 
       field.description = 'vieja';
-      await enTenantA(() =>
-        d.service.updateFieldDefinition('f1', {} as any, doctora),
+      await inTenantA(() =>
+        d.service.updateFieldDefinition('f1', {} as any, doctor),
       );
       expect(field.description).toBe('vieja');
     });

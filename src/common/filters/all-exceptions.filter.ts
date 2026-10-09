@@ -686,7 +686,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message:
             'La petición trae un valor ausente o inválido para el modelo',
           reason:
-            causa.sqlstate === '22P02'
+            cause.sqlstate === '22P02'
               ? SystemErrorReason.MALFORMED_VALUE
               : SystemErrorReason.REQUIRED_FIELD_VIOLATION,
           internals,
@@ -703,9 +703,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message:
             'La operación entró en conflicto con otra concurrente; reintente',
           reason:
-            causa.sqlstate === '40P01'
+            cause.sqlstate === '40P01'
               ? SystemErrorReason.DEADLOCK_DETECTED
-              : causa.sqlstate === '55P03'
+              : cause.sqlstate === '55P03'
                 ? SystemErrorReason.ROW_LOCKED
                 : SystemErrorReason.SERIALIZATION_FAILURE,
         };
