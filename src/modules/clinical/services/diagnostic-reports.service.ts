@@ -130,7 +130,7 @@ export class DiagnosticReportsService {
     // MCH-007: la ruta sólo trae el id; el paciente sale de la fila. Se
     // mantiene la verificación de permiso aunque la ruta esté obsoleta: no
     // hay que revelar el estado de un reporte a quien no puede leerlo.
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       report.patientProfileId,
       actor,
     );

@@ -38,7 +38,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   // BR-14 (CL-07): por defecto no rechaza nada.
   const encounterSealGuard = {
@@ -317,14 +317,14 @@ describe('ChartCarePlansService · MCH-007, actividad por id', () => {
     });
     const activity = { id: 'a1', carePlanId: 'cp1', detailText: 'antes' };
     d.carePlansRepo.findActivityById.mockResolvedValue(activity);
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
     await expect(
       d.service.updateActivity('cp1', 'a1', { detailText: 'después' }, actor),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );

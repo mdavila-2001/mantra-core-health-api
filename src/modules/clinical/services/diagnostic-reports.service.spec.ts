@@ -31,7 +31,7 @@ function build() {
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new DiagnosticReportsService(
     em as any,
@@ -148,14 +148,14 @@ describe('DiagnosticReportsService · MCH-007, liberación por id', () => {
     const dr = { ...report(), patientProfileId: 'paciente-ajeno' };
     const estadoAntes = dr.lifecycleStatusConceptId;
     d.reportsRepo.findById.mockResolvedValue(dr);
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
     await expect(
       d.service.release('dr1', {} as any, actor),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );

@@ -54,7 +54,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new ChartNotesService(
     em as any,
@@ -629,7 +629,7 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     const d = build();
     d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
     d.notesRepo.findVersionById.mockResolvedValue(version());
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
     return d;
@@ -665,7 +665,7 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     async (_nombre, operar) => {
       const d = sinPermiso();
       await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'paciente-ajeno',
         actor,
       );

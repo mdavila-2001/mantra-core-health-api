@@ -188,7 +188,7 @@ export class ChartCarePlansService {
           planId,
         });
       // MCH-007: la ruta sólo trae ids; el paciente sale del plan.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         plan.patientProfileId,
         actor,
       );

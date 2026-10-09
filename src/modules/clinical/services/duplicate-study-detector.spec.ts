@@ -82,7 +82,7 @@ function build(data: {
 }
 
 /** Un informe con los campos que el detector proyecta. */
-function informe(over: Partial<any> = {}) {
+function report(over: Partial<any> = {}) {
   return {
     id: 'report-1',
     patientProfileId: PATIENT,
@@ -138,7 +138,7 @@ describe('DuplicateStudyDetector', () => {
 
     it('MCH-029 · sin fila en la ventana no hidrata ningún informe', async () => {
       const { detector, em, find, findOne } = build({
-        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
+        reports: [report({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
       expect(match).toBeNull();
@@ -148,7 +148,7 @@ describe('DuplicateStudyDetector', () => {
 
     it('finds a report released via diagnostics (current_released_version_id present)', async () => {
       const { detector, em } = build({
-        reports: [informe({ currentReleasedVersionId: 'version-1' })],
+        reports: [report({ currentReleasedVersionId: 'version-1' })],
         versions: [version({ issuedAt: daysAgo(3) })],
         duplicateRows: [{ id: 'report-1' }],
       });
@@ -159,7 +159,7 @@ describe('DuplicateStudyDetector', () => {
 
     it('finds a report released via clinical (lifecycle FINAL, no version)', async () => {
       const { detector, em } = build({
-        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
+        reports: [report({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
         duplicateRows: [{ id: 'report-1' }],
       });
       const match = await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
@@ -171,7 +171,7 @@ describe('DuplicateStudyDetector', () => {
       const createdAt = daysAgo(5);
       const { detector, em } = build({
         reports: [
-          informe({
+          report({
             lifecycleStatusConceptId: CLIN.REPORT_FINAL,
             createdAt,
             updatedAt: NOW,
@@ -186,7 +186,7 @@ describe('DuplicateStudyDetector', () => {
     it('MCH-029 · un informe leído de la base con la versión liberada en null no cuenta como liberado', async () => {
       const { detector, em } = build({
         reports: [
-          informe({
+          report({
             lifecycleStatusConceptId: CLIN.REPORT_FINAL,
             currentReleasedVersionId: null,
             resultReleaseStatusConceptId: null,
@@ -206,7 +206,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe(),
+        report: report(),
         version: null,
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -226,7 +226,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe({ custodianTenantId: TENANT_A }),
+        report: report({ custodianTenantId: TENANT_A }),
         version: version(),
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -247,7 +247,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe({ custodianTenantId: TENANT_A }),
+        report: report({ custodianTenantId: TENANT_A }),
         version: version({ conclusionText: 'Riñones normales.' }),
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -267,7 +267,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe({ custodianTenantId: TENANT_A }),
+        report: report({ custodianTenantId: TENANT_A }),
         version: version({ conclusionText: 'Riñones normales.' }),
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -289,7 +289,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe(),
+        report: report(),
         version: null,
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -309,7 +309,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'Abdominal ultrasound' }],
       });
       const match = {
-        report: informe(),
+        report: report(),
         version: null,
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -330,7 +330,7 @@ describe('DuplicateStudyDetector', () => {
         tenants: [{ id: TENANT_A, legalName: 'Laboratorio Central AloVida' }],
       });
       const match = {
-        report: informe({ custodianTenantId: TENANT_A }),
+        report: report({ custodianTenantId: TENANT_A }),
         version: null,
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -350,7 +350,7 @@ describe('DuplicateStudyDetector', () => {
         concepts: [{ id: CODE, display: 'x' }],
       });
       const match = {
-        report: informe(),
+        report: report(),
         version: null,
         performedAt: daysAgo(14),
         resultsAvailable: true,
@@ -369,7 +369,7 @@ describe('DuplicateStudyDetector', () => {
   describe('findPendingReport', () => {
     it('returns true when there is an unreleased report of the same study within the window', async () => {
       const { detector, em } = build({
-        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_PARTIAL })],
+        reports: [report({ lifecycleStatusConceptId: CLIN.REPORT_PARTIAL })],
       });
       const pending = await detector.findPendingReport(
         em,
@@ -384,7 +384,7 @@ describe('DuplicateStudyDetector', () => {
     it('MCH-029 · cuenta como pendiente un parcial leído de la base (versión liberada en null)', async () => {
       const { detector, em } = build({
         reports: [
-          informe({
+          report({
             lifecycleStatusConceptId: CLIN.REPORT_PARTIAL,
             currentReleasedVersionId: null,
             resultReleaseStatusConceptId: null,
@@ -408,7 +408,7 @@ describe('DuplicateStudyDetector', () => {
 
     it('returns false when the report is already final', async () => {
       const { detector, em } = build({
-        reports: [informe({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
+        reports: [report({ lifecycleStatusConceptId: CLIN.REPORT_FINAL })],
       });
       const pending = await detector.findPendingReport(
         em,

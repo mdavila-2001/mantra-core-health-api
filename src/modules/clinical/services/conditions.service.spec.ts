@@ -39,7 +39,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const filesService = { createLink: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   // BR-14 (CL-07): por defecto el encuentro no está sellado, así que la
   // guarda no rechaza nada salvo que el test la sobreescriba.
@@ -103,14 +103,14 @@ describe('ConditionsService (UC-08-08)', () => {
   });
 
   describe('alta como presuntivo (Hito 4 §B)', () => {
-    const cuerpo = {
+    const body = {
       custodianTenantId: 't1',
       patientProfileId: 'p1',
       codeConceptId: 'code1',
     };
 
     /** Una condición recién creada con el estado de verificación dado. */
-    function creada(verificationStatusConceptId: string) {
+    function created(verificationStatusConceptId: string) {
       return {
         id: 'cond1',
         patientProfileId: 'p1',
@@ -125,12 +125,12 @@ describe('ConditionsService (UC-08-08)', () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
       d.conditionsRepo.create.mockReturnValue(
-        creada(CLIN.CONDITION_PROVISIONAL),
+        created(CLIN.CONDITION_PROVISIONAL),
       );
 
       const res = await d.service.create(
         {
-          ...cuerpo,
+          ...body,
           verificationStatusConceptId: CLIN.CONDITION_PROVISIONAL,
         },
         actor,
@@ -146,9 +146,9 @@ describe('ConditionsService (UC-08-08)', () => {
     it('sin el campo sigue naciendo confirmado: el contrato anterior no cambia', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(creada(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
 
-      await d.service.create(cuerpo, actor);
+      await d.service.create(body, actor);
 
       expect(d.conditionsRepo.create.mock.calls[0][1]).toMatchObject({
         verificationStatusConceptId: CLIN.CONDITION_CONFIRMED,
@@ -158,10 +158,10 @@ describe('ConditionsService (UC-08-08)', () => {
     it('confirmado explícito equivale a omitirlo', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(creada(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
 
       await d.service.create(
-        { ...cuerpo, verificationStatusConceptId: CLIN.CONDITION_CONFIRMED },
+        { ...body, verificationStatusConceptId: CLIN.CONDITION_CONFIRMED },
         actor,
       );
 
@@ -182,7 +182,7 @@ describe('ConditionsService (UC-08-08)', () => {
 
       await expect(
         d.service.create(
-          { ...cuerpo, verificationStatusConceptId: valor },
+          { ...body, verificationStatusConceptId: valor },
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -418,7 +418,7 @@ describe('ConditionsService · attachFile (ALV-033)', () => {
       createdAt: new Date('2026-01-01'),
     });
 
-    const resultado = await d.service.attachFile(
+    const result = await d.service.attachFile(
       'cond1',
       { fileId: 'file1' },
       actor,
@@ -429,7 +429,7 @@ describe('ConditionsService · attachFile (ALV-033)', () => {
       { ownerType: 'CONDITION', ownerId: 'cond1' },
       actor,
     );
-    expect(resultado.ownerId).toBe('cond1');
+    expect(result.ownerId).toBe('cond1');
   });
 
   it('rechaza adjuntar a una condición que no existe', async () => {
@@ -444,27 +444,27 @@ describe('ConditionsService · attachFile (ALV-033)', () => {
 });
 
 describe('ConditionsService · MCH-007, mutaciones por id', () => {
-  const ajena = {
+  const foreign = {
     id: 'cond-ajena',
     patientProfileId: 'paciente-ajeno',
     custodianTenantId: 't1',
     clinicalStatusConceptId: CLIN.CONDITION_ACTIVE,
   };
 
-  function sinPermiso() {
+  function withoutPermission() {
     const d = build();
-    d.conditionsRepo.findById.mockResolvedValue({ ...ajena });
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.conditionsRepo.findById.mockResolvedValue({ ...foreign });
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
     return d;
   }
 
   it('cambiar el estado pregunta por el paciente de la condición y, sin permiso, no escribe', async () => {
-    const d = sinPermiso();
+    const d = withoutPermission();
     await expect(
       d.service.changeClinicalStatus(
-        ajena.id,
+        foreign.id,
         {
           newClinicalStatusConceptId: CLIN.CONDITION_INACTIVE,
           reasonText: 'x',
@@ -472,7 +472,7 @@ describe('ConditionsService · MCH-007, mutaciones por id', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );
@@ -482,9 +482,9 @@ describe('ConditionsService · MCH-007, mutaciones por id', () => {
   });
 
   it('adjuntar un archivo sin permiso no crea el vínculo', async () => {
-    const d = sinPermiso();
+    const d = withoutPermission();
     await expect(
-      d.service.attachFile(ajena.id, { fileId: 'f1' } as any, actor),
+      d.service.attachFile(foreign.id, { fileId: 'f1' } as any, actor),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
@@ -574,16 +574,16 @@ describe('ConditionsService · MCH-008.2, coherencia del encuentro', () => {
 });
 
 describe('ConditionsService.verify (C3 / P41)', () => {
-  const medica = {
+  const medical = {
     id: 'user-1',
     roles: ['PRACTITIONER'],
     practitionerProfileId: 'prac-1',
   } as any;
-  const AYER = new Date(Date.now() - 86_400_000).toISOString();
-  const EN_UN_MES = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  const YESTERDAY = new Date(Date.now() - 86_400_000).toISOString();
+  const IN_ONE_MONTH = new Date(Date.now() + 30 * 86_400_000).toISOString();
 
   /** Un presuntivo del paciente p1, activo y en estudio. */
-  function presuntivo(over: Record<string, unknown> = {}) {
+  function presumptive(over: Record<string, unknown> = {}) {
     return {
       id: 'cond-1',
       patientProfileId: 'p1',
@@ -596,7 +596,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
     };
   }
 
-  function armar(condicion = presuntivo()) {
+  function armar(condition = presumptive()) {
     const d = build();
     // Toda evidencia pedida existe y es del paciente, salvo que el test diga
     // otra cosa; un informe nombra su orden y una nota, su consulta.
@@ -606,8 +606,8 @@ describe('ConditionsService.verify (C3 / P41)', () => {
       serviceRequestId: 'sr-1',
       encounterId: 'enc-1',
     }));
-    d.conditionsRepo.findById.mockResolvedValue(condicion);
-    return { ...d, condicion };
+    d.conditionsRepo.findById.mockResolvedValue(condition);
+    return { ...d, condicion: condition };
   }
 
   describe('correcto', () => {
@@ -618,14 +618,14 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         {
           outcome: 'CONFIRMED',
           reasonText: '  Cuadro compatible  ',
-          onsetAt: AYER,
-          expectedResolutionAt: EN_UN_MES,
+          onsetAt: YESTERDAY,
+          expectedResolutionAt: IN_ONE_MONTH,
         },
-        medica,
+        medical,
       );
       expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_CONFIRMED);
       expect(res.clinicalStatusConceptId).toBe(CLIN.CONDITION_ACTIVE);
-      expect(res.onsetAt).toEqual(new Date(AYER));
+      expect(res.onsetAt).toEqual(new Date(YESTERDAY));
       expect(res.verification).toEqual(
         expect.objectContaining({
           outcome: 'CONFIRMED',
@@ -634,15 +634,15 @@ describe('ConditionsService.verify (C3 / P41)', () => {
           basedOn: null,
         }),
       );
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'p1',
-        medica,
+        medical,
       );
       const revision = d.historyRepo.append.mock.calls[0][3];
       expect(revision.dataSnapshot.verification.outcome).toBe('CONFIRMED');
       expect(d.auditTrail.record).toHaveBeenCalledWith(
         d.tx,
-        medica,
+        medical,
         expect.objectContaining({ action: 'CONDITION_CONFIRMED' }),
       );
     });
@@ -655,7 +655,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
           outcome: 'REFUTED',
           basedOn: { kind: 'ANALYSIS', diagnosticReportId: 'dr-1' },
         },
-        medica,
+        medical,
       );
       expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_REFUTED);
       expect(res.clinicalStatusConceptId).toBe(CLIN.CONDITION_INACTIVE);
@@ -675,10 +675,10 @@ describe('ConditionsService.verify (C3 / P41)', () => {
 
   describe('límite', () => {
     it('confirma una crónica sin fin esperado y usa el inicio que ya tenía', async () => {
-      const inicio = new Date('2026-08-01T00:00:00Z');
+      const start = new Date('2026-08-01T00:00:00Z');
       const d = armar(
-        presuntivo({
-          onsetAt: inicio,
+        presumptive({
+          onsetAt: start,
           expectedResolutionAt: new Date('2026-12-01T00:00:00Z'),
         }),
       );
@@ -689,9 +689,9 @@ describe('ConditionsService.verify (C3 / P41)', () => {
           reasonText: 'HbA1c 8,1 %',
           clinicalCourseConceptId: CLIN.CONDITION_COURSE_CHRONIC,
         },
-        medica,
+        medical,
       );
-      expect(res.onsetAt).toEqual(inicio);
+      expect(res.onsetAt).toEqual(start);
       expect(res.expectedResolutionAt).toBeUndefined();
       expect(res.clinicalCourseConceptId).toBe(CLIN.CONDITION_COURSE_CHRONIC);
     });
@@ -703,11 +703,11 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         {
           outcome: 'CONFIRMED',
           basedOn: { kind: 'NOTE', noteId: 'n-1' },
-          onsetAt: AYER,
-          expectedResolutionAt: EN_UN_MES,
+          onsetAt: YESTERDAY,
+          expectedResolutionAt: IN_ONE_MONTH,
           clinicalCourseConceptId: CLIN.CONDITION_COURSE_CHRONIC,
         },
-        medica,
+        medical,
       );
       expect(res.expectedResolutionAt).toBeUndefined();
       expect(res.verification?.basedOn).toEqual({
@@ -724,10 +724,10 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         {
           outcome: 'CONFIRMED',
           reasonText: 'x',
-          onsetAt: AYER,
-          expectedResolutionAt: AYER,
+          onsetAt: YESTERDAY,
+          expectedResolutionAt: YESTERDAY,
         },
-        medica,
+        medical,
       );
       expect(res.verificationStatusConceptId).toBe(CLIN.CONDITION_CONFIRMED);
     });
@@ -738,7 +738,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         d.service.verify(
           'cond-1',
           { outcome: 'REFUTED', reasonText: '   ' },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -747,13 +747,13 @@ describe('ConditionsService.verify (C3 / P41)', () => {
   describe('inválido / no autorizado', () => {
     it('409 si el diagnóstico ya estaba confirmado, sin tocar nada', async () => {
       const d = armar(
-        presuntivo({ verificationStatusConceptId: CLIN.CONDITION_CONFIRMED }),
+        presumptive({ verificationStatusConceptId: CLIN.CONDITION_CONFIRMED }),
       );
       await expect(
         d.service.verify(
           'cond-1',
           { outcome: 'REFUTED', reasonText: 'x' },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
@@ -764,8 +764,8 @@ describe('ConditionsService.verify (C3 / P41)', () => {
       await expect(
         d.service.verify(
           'cond-1',
-          { outcome: 'CONFIRMED', reasonText: 'x', onsetAt: AYER },
-          medica,
+          { outcome: 'CONFIRMED', reasonText: 'x', onsetAt: YESTERDAY },
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -778,9 +778,9 @@ describe('ConditionsService.verify (C3 / P41)', () => {
           {
             outcome: 'CONFIRMED',
             reasonText: 'x',
-            expectedResolutionAt: EN_UN_MES,
+            expectedResolutionAt: IN_ONE_MONTH,
           },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -796,7 +796,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
             onsetAt: '2026-01-02T00:00:00Z',
             expectedResolutionAt: '2026-01-01T00:00:00Z',
           },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -808,7 +808,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         d.service.verify(
           'cond-1',
           { outcome: 'REFUTED', basedOn: { kind: 'NOTE', noteId: 'n-ajena' } },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
@@ -824,7 +824,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
             outcome: 'REFUTED',
             basedOn: { kind: 'ANALYSIS', diagnosticReportId: 'dr-1' },
           },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -837,11 +837,11 @@ describe('ConditionsService.verify (C3 / P41)', () => {
           {
             outcome: 'CONFIRMED',
             reasonText: 'x',
-            onsetAt: AYER,
-            expectedResolutionAt: EN_UN_MES,
+            onsetAt: YESTERDAY,
+            expectedResolutionAt: IN_ONE_MONTH,
             clinicalCourseConceptId: '99999999-9999-4999-8999-999999999999',
           },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -852,7 +852,7 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         d.service.verify(
           'cond-1',
           { outcome: 'REFUTED', basedOn: { kind: 'NOTE' } },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -864,21 +864,21 @@ describe('ConditionsService.verify (C3 / P41)', () => {
         d.service.verify(
           'nada',
           { outcome: 'REFUTED', reasonText: 'x' },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('403 si no puede escribir en la historia del paciente', async () => {
       const d = armar();
-      d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
         new ForbiddenException('sin vínculo'),
       );
       await expect(
         d.service.verify(
           'cond-1',
           { outcome: 'REFUTED', reasonText: 'x' },
-          medica,
+          medical,
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.historyRepo.append).not.toHaveBeenCalled();

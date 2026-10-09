@@ -19,10 +19,10 @@ function build(opts: { encounter?: any; allowed?: boolean } = {}) {
   const em: any = { fork: () => em, find: mockFn().mockResolvedValue([]) };
   const encounters = { findById: mockFn().mockResolvedValue(encounter) };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn(async () => {
+    assertCanWriteHistory: mockFn(async () => {
       if (!allowed) throw new ForbiddenException('sin acceso');
     }),
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const treatment = {
     sign: mockFn().mockResolvedValue({ id: 'tic1', status: 'signed' }),
@@ -40,7 +40,7 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
   it('aceptado: toma paciente y tenant del encuentro y firma', async () => {
     const d = build();
     await d.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'p1',
       ACTOR,
     );
@@ -91,7 +91,7 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
   it('la lectura exige poder leer la historia del paciente del encuentro', async () => {
     const d = build();
     await d.service.listForEncounter('e1', ACTOR);
-    expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
       'p1',
       ACTOR,
     );

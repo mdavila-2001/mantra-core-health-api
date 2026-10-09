@@ -973,7 +973,7 @@ export class ObjectStorageService {
    *    privilegiado: un objeto de otro tenant no es «otro alcance», es de otra
    *    organización.
    * 3. **Relación con el paciente.** Si el objeto cuelga de una historia, decide
-   *    {@link ClinicalReadService.assertPuedeLeerHistoria} — la misma política
+   *    {@link ClinicalReadService.assertCanReadHistory} — la misma política
    *    que guarda el expediente (turno de hoy, relación asistencial vigente,
    *    acceso clínico autorizado, titularidad). Se reusa en vez de escribir una
    *    segunda: dos políticas para la misma pregunta terminan discrepando, y la
@@ -1017,7 +1017,7 @@ export class ObjectStorageService {
     if (!manifest.patientProfileId) return;
 
     try {
-      await this.clinicalAccess.assertPuedeLeerHistoria(
+      await this.clinicalAccess.assertCanReadHistory(
         manifest.patientProfileId,
         actor,
       );

@@ -321,7 +321,7 @@ export class EncounterPdfService {
     // El orden importa: 404 primero (el recurso no existe), 403 después (no
     // se puede leer la historia), 422 al final (existe, se puede leer, pero
     // todavía no tiene sello).
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       encounter.patientProfileId,
       actor,
     );

@@ -46,7 +46,7 @@ const encounterFinished = () => ({
 function build() {
   const em = { fork: mockFn(() => em) };
   const encountersRepo = { findById: mockFn() };
-  const clinicalRead = { assertPuedeLeerHistoria: mockFn() };
+  const clinicalRead = { assertCanReadHistory: mockFn() };
   const notesRepo = {
     findHeadersByEncounter: mockFn().mockResolvedValue([]),
     findVersionsByIds: mockFn().mockResolvedValue(new Map()),
@@ -110,7 +110,7 @@ describe('EncounterPdfService', () => {
     await expect(d.service.render('missing', actor)).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
-    expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+    expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
   });
 
   it('403 si el actor no puede leer la historia (delegado, se comprueba antes que el 422)', async () => {
@@ -119,7 +119,7 @@ describe('EncounterPdfService', () => {
       ...encounterFinished(),
       statusConceptId: 'en-curso', // ni siquiera finalizado: el 403 igual va primero
     });
-    d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
       new ForbiddenException('nope'),
     );
 

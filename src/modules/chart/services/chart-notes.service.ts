@@ -145,7 +145,7 @@ export class ChartNotesService {
           noteId,
         });
       // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         header.patientProfileId,
         actor,
       );
@@ -203,7 +203,7 @@ export class ChartNotesService {
         versionId,
       );
       // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         header.patientProfileId,
         actor,
       );
@@ -259,7 +259,7 @@ export class ChartNotesService {
         versionId,
       );
       // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         header.patientProfileId,
         actor,
       );
@@ -329,7 +329,7 @@ export class ChartNotesService {
           noteId,
         });
       // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         header.patientProfileId,
         actor,
       );
@@ -462,7 +462,7 @@ export class ChartNotesService {
           versionId,
         });
       // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         header.patientProfileId,
         actor,
       );
@@ -619,7 +619,7 @@ export class ChartNotesService {
       throw new ResourceNotFoundException('Nota clínica no encontrada', {
         noteId,
       });
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       header.patientProfileId,
       actor,
     );
