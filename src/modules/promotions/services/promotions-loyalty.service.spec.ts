@@ -1046,7 +1046,7 @@ describe('PromotionsLoyaltyService', () => {
     } as any;
 
     /** Prepara una membresía propia encontrable. */
-    function conMembresia(d: any): void {
+    function withMembership(d: any): void {
       d.loyaltyRepo.findActivePrograms.mockResolvedValue([program()]);
       d.loyaltyRepo.findMembershipsByMemberRef.mockResolvedValue([
         membership({
@@ -1072,7 +1072,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('lee sólo el ledger de la membresía propia y nunca sin tope', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerPageByMembership.mockResolvedValue([
         entry('e-1', '2026-09-14T10:00:00Z'),
       ]);
@@ -1093,7 +1093,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('con más filas que el tope devuelve cursor y recorta la página', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerPageByMembership.mockResolvedValue([
         entry('e-1', '2026-09-14T10:00:00Z'),
         entry('e-2', '2026-09-13T10:00:00Z'),
@@ -1108,19 +1108,19 @@ describe('PromotionsLoyaltyService', () => {
 
     it('el cursor devuelto continúa por la última fila entregada: orden estable', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerPageByMembership.mockResolvedValue([
         entry('e-1', '2026-09-14T10:00:00Z'),
         entry('e-2', '2026-09-13T10:00:00Z'),
       ]);
-      const primera = await d.service.myPointsLedger(patient, TENANT, {
+      const first = await d.service.myPointsLedger(patient, TENANT, {
         limit: 1,
       });
 
       d.loyaltyRepo.findLedgerPageByMembership.mockResolvedValue([]);
       await d.service.myPointsLedger(patient, TENANT, {
         limit: 1,
-        cursor: primera.nextCursor,
+        cursor: first.nextCursor,
       });
 
       expect(d.loyaltyRepo.findLedgerPageByMembership).toHaveBeenLastCalledWith(
@@ -1133,7 +1133,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('un cursor que no trae las claves de orden se rechaza', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
 
       await expect(
         d.service.myPointsLedger(patient, TENANT, {
@@ -1162,7 +1162,7 @@ describe('PromotionsLoyaltyService', () => {
     } as any;
     const dto = { points: '100', idempotencyKey: 'k-propia' } as any;
 
-    function conMembresia(d: any): void {
+    function withMembership(d: any): void {
       d.loyaltyRepo.findActivePrograms.mockResolvedValue([program()]);
       d.loyaltyRepo.findMembershipsByMemberRef.mockResolvedValue([
         membership({
@@ -1175,7 +1175,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('canjea sobre la membresía derivada del token', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerEntryByKey.mockResolvedValue(null);
       d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(
         membership({ pointsBalance: '440.00' }),
@@ -1198,7 +1198,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('OWNERSHIP: una clave de idempotencia de otra membresía se rechaza, no devuelve datos ajenos', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerEntryByKey.mockResolvedValue({
         id: 'entry-ajena',
         loyaltyMembershipId: 'membresia-de-otro',
@@ -1223,7 +1223,7 @@ describe('PromotionsLoyaltyService', () => {
 
     it('conserva la regla de negocio: saldo insuficiente sigue fallando', async () => {
       const d = build();
-      conMembresia(d);
+      withMembership(d);
       d.loyaltyRepo.findLedgerEntryByKey.mockResolvedValue(null);
       d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(
         membership({ pointsBalance: '10.00' }),

@@ -100,10 +100,10 @@ const QUALIFYING_EVENT_CONCEPT: Readonly<Record<QualifyingEvent, string>> = {
  * Cuantos programas activos del tenant se consideran al buscar la membresia del
  * paciente. El portal no conoce ids de programa: se busca entre los activos.
  */
-const PROGRAMAS_DEL_PORTAL = 20;
+const PROGRAMS_PORTAL = 20;
 
 /** Movimientos por pagina cuando el cliente no pide un tope. */
-const MOVIMIENTOS_POR_PAGINA = 20;
+const MOVEMENTS_PER_PAGE = 20;
 
 /**
  * Codigo legible de los conceptos del ledger de puntos.
@@ -112,7 +112,7 @@ const MOVIMIENTOS_POR_PAGINA = 20;
  * solo para los conceptos que el dominio de puntos declara. Un concepto ajeno
  * no se traduce: se omite, que es mas honesto que inventarle un nombre.
  */
-const CODIGO_DE_CONCEPTO: Readonly<Record<string, string>> = Object.freeze(
+const CONCEPT_CODE: Readonly<Record<string, string>> = Object.freeze(
   Object.fromEntries(
     (
       [
@@ -1372,27 +1372,27 @@ export class PromotionsLoyaltyService {
       'Leyendo la membresía de lealtad del titular',
     );
 
-    const propia = await this.findOwnMembership(this.em, tenantId, memberRefId);
-    if (!propia) {
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
       return { enrolled: false };
     }
 
     const tiers = await this.loyaltyRepo.findTiersByProgram(
       this.em,
-      propia.membership.loyaltyProgramId,
+      own.membership.loyaltyProgramId,
     );
     const tier = tiers.find(
-      (candidato) => candidato.id === propia.membership.currentTierId,
+      (candidate) => candidate.id === own.membership.currentTierId,
     );
 
     const membership: MyLoyaltyMembershipDto = {
-      membershipId: propia.membership.id,
-      programName: propia.programName,
-      ...(propia.pointsCurrencyName
-        ? { pointsCurrencyName: propia.pointsCurrencyName }
+      membershipId: own.membership.id,
+      programName: own.programName,
+      ...(own.pointsCurrencyName
+        ? { pointsCurrencyName: own.pointsCurrencyName }
         : {}),
-      pointsBalance: propia.membership.pointsBalance ?? '0',
-      lifetimePoints: propia.membership.lifetimePoints ?? '0',
+      pointsBalance: own.membership.pointsBalance ?? '0',
+      lifetimePoints: own.membership.lifetimePoints ?? '0',
       ...(tier
         ? {
             tier: {
@@ -1403,10 +1403,10 @@ export class PromotionsLoyaltyService {
             },
           }
         : {}),
-      ...(propia.membership.enrolledAt
-        ? { enrolledAt: propia.membership.enrolledAt }
+      ...(own.membership.enrolledAt
+        ? { enrolledAt: own.membership.enrolledAt }
         : {}),
-      active: propia.membership.statusConceptId === CONCEPTS.MEMBERSHIP_ACTIVE,
+      active: own.membership.statusConceptId === CONCEPTS.MEMBERSHIP_ACTIVE,
     };
 
     return { enrolled: true, membership };
@@ -1425,14 +1425,14 @@ export class PromotionsLoyaltyService {
     query: MyPointsLedgerQueryDto,
   ): Promise<MyPointsLedgerPageResponseDto> {
     const memberRefId = this.requireOwnPatientProfileId(actor);
-    const limit = query.limit ?? MOVIMIENTOS_POR_PAGINA;
+    const limit = query.limit ?? MOVEMENTS_PER_PAGE;
     this.logger.info(
       { operation: 'promotions.loyalty.me.ledger', tenantId, limit },
       'Leyendo los movimientos de puntos del titular',
     );
 
-    const propia = await this.findOwnMembership(this.em, tenantId, memberRefId);
-    if (!propia) {
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
       // Sin membresía no hay movimientos. Es el mismo vacío honesto del saldo.
       return { entries: [] };
     }
@@ -1443,19 +1443,19 @@ export class PromotionsLoyaltyService {
 
     // Una fila de más para saber si hay página siguiente sin pagar un `count`,
     // igual que el resto de las lecturas del producto.
-    const filas = await this.loyaltyRepo.findLedgerPageByMembership(
+    const rows = await this.loyaltyRepo.findLedgerPageByMembership(
       this.em,
-      propia.membership.id,
+      own.membership.id,
       limit + 1,
       after,
     );
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const hasMore = rows.length > limit;
+    const pagina = hasMore ? rows.slice(0, limit) : rows;
     const ultima = pagina.at(-1);
 
     return {
-      entries: pagina.map((entrada) => this.myLedgerEntry(entrada)),
-      ...(hayMas && ultima
+      entries: pagina.map((entry) => this.myLedgerEntry(entry)),
+      ...(hasMore && ultima
         ? {
             nextCursor: encodeKeysetCursor({
               recordedAt: ultima.recordedAt.toISOString(),
@@ -1484,25 +1484,25 @@ export class PromotionsLoyaltyService {
     dto: RedeemPointsDto,
   ): Promise<PointsLedgerResponseDto> {
     const memberRefId = this.requireOwnPatientProfileId(actor);
-    const propia = await this.findOwnMembership(this.em, tenantId, memberRefId);
-    if (!propia) {
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
       throw new PreconditionFailedException(
         'No tiene una membresía de lealtad en este programa',
       );
     }
 
-    const previa = await this.loyaltyRepo.findLedgerEntryByKey(
+    const previous = await this.loyaltyRepo.findLedgerEntryByKey(
       this.em,
       dto.idempotencyKey,
     );
-    if (previa && previa.loyaltyMembershipId !== propia.membership.id) {
+    if (previous && previous.loyaltyMembershipId !== own.membership.id) {
       throw new ConflictException(
         'La clave de idempotencia pertenece a otro canje',
         { idempotencyKey: dto.idempotencyKey },
       );
     }
 
-    return this.redeemPoints(propia.membership.id, dto, actor);
+    return this.redeemPoints(own.membership.id, dto, actor);
   }
 
   /**
@@ -1539,51 +1539,51 @@ export class PromotionsLoyaltyService {
     programName: string;
     pointsCurrencyName?: string;
   } | null> {
-    const programas = await this.loyaltyRepo.findActivePrograms(
+    const programs = await this.loyaltyRepo.findActivePrograms(
       em,
       CONCEPTS.LOYALTY_ACTIVE,
-      PROGRAMAS_DEL_PORTAL,
+      PROGRAMS_PORTAL,
       tenantId,
     );
-    if (programas.length === 0) {
+    if (programs.length === 0) {
       return null;
     }
 
-    const membresias = await this.loyaltyRepo.findMembershipsByMemberRef(
+    const memberships = await this.loyaltyRepo.findMembershipsByMemberRef(
       em,
-      programas.map((programa) => programa.id),
+      programs.map((program) => program.id),
       CONCEPTS.REWARD_MEMBER_PATIENT,
       memberRefId,
     );
-    const membership = membresias[0];
+    const membership = memberships[0];
     if (!membership) {
       return null;
     }
 
-    const programa = programas.find(
-      (candidato) => candidato.id === membership.loyaltyProgramId,
+    const program = programs.find(
+      (candidate) => candidate.id === membership.loyaltyProgramId,
     );
     return {
       membership,
-      programName: programa?.name ?? '',
-      ...(programa?.pointsCurrencyName
-        ? { pointsCurrencyName: programa.pointsCurrencyName }
+      programName: program?.name ?? '',
+      ...(program?.pointsCurrencyName
+        ? { pointsCurrencyName: program.pointsCurrencyName }
         : {}),
     };
   }
 
   /** Una entrada del ledger, con los conceptos dichos por su código. */
-  private myLedgerEntry(entrada: PointsLedgerEntries) {
-    const direction = CODIGO_DE_CONCEPTO[entrada.directionConceptId];
-    const reason = CODIGO_DE_CONCEPTO[entrada.reasonConceptId];
+  private myLedgerEntry(entry: PointsLedgerEntries) {
+    const direction = CONCEPT_CODE[entry.directionConceptId];
+    const reason = CONCEPT_CODE[entry.reasonConceptId];
     return {
-      entryId: entrada.id,
+      entryId: entry.id,
       ...(direction ? { direction } : {}),
-      points: entrada.points,
+      points: entry.points,
       ...(reason ? { reason } : {}),
-      ...(entrada.balanceAfter ? { balanceAfter: entrada.balanceAfter } : {}),
-      ...(entrada.expiresAt ? { expiresAt: entrada.expiresAt } : {}),
-      occurredAt: entrada.occurredAt ?? entrada.recordedAt,
+      ...(entry.balanceAfter ? { balanceAfter: entry.balanceAfter } : {}),
+      ...(entry.expiresAt ? { expiresAt: entry.expiresAt } : {}),
+      occurredAt: entry.occurredAt ?? entry.recordedAt,
     };
   }
 
@@ -1601,11 +1601,11 @@ export class PromotionsLoyaltyService {
     if (typeof recordedAt !== 'string' || typeof id !== 'string') {
       throw new PreconditionFailedException('Cursor de movimientos inválido');
     }
-    const fecha = new Date(recordedAt);
-    if (Number.isNaN(fecha.getTime())) {
+    const date = new Date(recordedAt);
+    if (Number.isNaN(date.getTime())) {
       throw new PreconditionFailedException('Cursor de movimientos inválido');
     }
-    return { recordedAt: fecha, id };
+    return { recordedAt: date, id };
   }
 
   private round(value: number): string {
