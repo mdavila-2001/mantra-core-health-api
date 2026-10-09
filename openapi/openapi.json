@@ -93198,6 +93198,27 @@
           "createdAt"
         ]
       },
+      "PractitionerLanguageInputDto": {
+        "type": "object",
+        "properties": {
+          "languageConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proficiencyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clinicalInterpretationAllowed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "languageConceptId",
+          "clinicalInterpretationAllowed"
+        ],
+        "additionalProperties": false
+      },
       "UpdateOwnPractitionerProfileDto": {
         "type": "object",
         "properties": {
@@ -93347,6 +93368,14 @@
             "type": "string",
             "maxLength": 200,
             "description": "Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto."
+          },
+          "languages": {
+            "maxItems": 20,
+            "description": "Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PractitionerLanguageInputDto"
+            }
           }
         },
         "additionalProperties": false
@@ -106676,7 +106705,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Organización del documento. Si se omite, es la de la práctica; si viene, debe coincidir."
           },
           "clearingNumber": {
             "type": "string",
@@ -106710,7 +106740,6 @@
           }
         },
         "required": [
-          "tenantId",
           "practiceId",
           "bankAccountId",
           "clearingDate",
@@ -111526,7 +111555,7 @@
           "signerProfileId": {
             "type": "string",
             "format": "uuid",
-            "description": "Perfil del firmante (autor o delegado)"
+            "description": "Perfil del firmante. Si se omite, es el perfil profesional de la sesión."
           },
           "certificateThumbprint": {
             "type": "string",
@@ -111537,9 +111566,6 @@
             "description": "Valor de firma cifrado (opaco al backend)"
           }
         },
-        "required": [
-          "signerProfileId"
-        ],
         "additionalProperties": false
       },
       "CosignVersionDto": {
@@ -111548,7 +111574,7 @@
           "signerProfileId": {
             "type": "string",
             "format": "uuid",
-            "description": "Perfil del cofirmante / supervisor"
+            "description": "Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión."
           },
           "certificateThumbprint": {
             "type": "string"
@@ -111557,9 +111583,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "signerProfileId"
-        ],
         "additionalProperties": false
       },
       "AmendNoteDto": {
