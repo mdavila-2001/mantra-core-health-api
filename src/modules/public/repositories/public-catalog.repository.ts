@@ -71,7 +71,7 @@ export class PublicCatalogRepository {
     em: EntityManager,
     slug: string,
   ): Promise<PublicProfileRef | null> {
-    const filas: PublicProfileRef[] = await em.getConnection().execute(
+    const rows: PublicProfileRef[] = await em.getConnection().execute(
       `SELECT prof.id,
               prof.tenant_id              AS "tenantId",
               prof.target_type_concept_id AS "targetTypeConceptId"
@@ -83,7 +83,7 @@ export class PublicCatalogRepository {
       [slug, COMM.PROFILE_VISIBILITY_PUBLIC, CONCEPTS.STATE_ACTIVE],
       'all',
     );
-    return filas[0] ?? null;
+    return rows[0] ?? null;
   }
 
   /**
