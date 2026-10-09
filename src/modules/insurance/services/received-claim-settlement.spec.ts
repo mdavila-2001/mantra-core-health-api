@@ -5,8 +5,8 @@ import {
   type SettlementInputLine,
 } from './received-claim-settlement';
 
-const lineas = (...importes: Array<string | null>): SettlementInputLine[] =>
-  importes.map((billedAmount, i) => ({ id: `l${i + 1}`, billedAmount }));
+const lineas = (...amounts: Array<string | null>): SettlementInputLine[] =>
+  amounts.map((billedAmount, i) => ({ id: `l${i + 1}`, billedAmount }));
 
 describe('toCents / fromCents', () => {
   it.each([
@@ -17,8 +17,8 @@ describe('toCents / fromCents', () => {
     ['400.25', 40025n],
     ['400.2500', 40025n],
     ['12345678901234.56', 1234567890123456n],
-  ])('%s son %s centavos', (texto, centavos) => {
-    expect(toCents(texto)).toBe(centavos);
+  ])('%s son %s centavos', (text, centavos) => {
+    expect(toCents(text)).toBe(centavos);
   });
 
   it.each([
@@ -26,20 +26,20 @@ describe('toCents / fromCents', () => {
     [5n, '0.05'],
     [100n, '1.00'],
     [40025n, '400.25'],
-  ])('%s centavos se escriben %s', (centavos, texto) => {
-    expect(fromCents(centavos)).toBe(texto);
+  ])('%s centavos se escriben %s', (centavos, text) => {
+    expect(fromCents(centavos)).toBe(text);
   });
 
   it('ida y vuelta conserva el importe a dos decimales', () => {
-    for (const texto of ['0.00', '0.01', '9.99', '1000.10', '250.00']) {
-      expect(fromCents(toCents(texto))).toBe(texto);
+    for (const text of ['0.00', '0.01', '9.99', '1000.10', '250.00']) {
+      expect(fromCents(toCents(text))).toBe(text);
     }
   });
 
   it.each(['', 'abc', '-1', '1,5', '1.2.3', '.5', '5.', '1e3', '+1'])(
     'rechaza %j: no es un decimal no negativo',
-    (texto) => {
-      expect(() => toCents(texto)).toThrow(RangeError);
+    (text) => {
+      expect(() => toCents(text)).toThrow(RangeError);
     },
   );
 
@@ -165,8 +165,8 @@ describe('splitApproval', () => {
 
   describe('invariantes sobre muchos casos', () => {
     /** Generador congruencial: los mismos casos en cada corrida. */
-    function azar(semilla: number): () => number {
-      let estado = semilla >>> 0;
+    function random(seed: number): () => number {
+      let estado = seed >>> 0;
       return () => {
         estado = (Math.imul(estado, 1_664_525) + 1_013_904_223) >>> 0;
         return estado / 0x1_0000_0000;
@@ -174,34 +174,34 @@ describe('splitApproval', () => {
     }
 
     it('la suma es exactamente lo aprobado y ninguna línea aprueba más de lo que facturó', () => {
-      const r = azar(20_261_001);
-      for (let caso = 0; caso < 300; caso++) {
-        const cantidad = 1 + Math.floor(r() * 6);
-        const importes = Array.from({ length: cantidad }, () =>
+      const r = random(20_261_001);
+      for (let caseItem = 0; caseItem < 300; caseItem++) {
+        const quantity = 1 + Math.floor(r() * 6);
+        const amounts = Array.from({ length: quantity }, () =>
           r() < 0.1 ? null : fromCents(BigInt(Math.floor(r() * 500_000))),
         );
-        const facturado = importes.reduce<bigint>(
+        const billed = amounts.reduce<bigint>(
           (s, i) => s + (i === null ? 0n : toCents(i)),
           0n,
         );
-        const aprobado =
-          facturado === 0n
+        const approved =
+          billed === 0n
             ? 0n
-            : BigInt(Math.floor(r() * Number(facturado + 1n)));
+            : BigInt(Math.floor(r() * Number(billed + 1n)));
 
-        const resultado = splitApproval(lineas(...importes), aprobado);
+        const result = splitApproval(lineas(...amounts), approved);
 
-        expect(resultado).toHaveLength(cantidad);
-        let suma = 0n;
-        for (const linea of resultado) {
+        expect(result).toHaveLength(quantity);
+        let sum = 0n;
+        for (const linea of result) {
           const a = toCents(linea.approvedAmount);
           const d = toCents(linea.deniedAmount);
           const f = toCents(linea.billedAmount);
           expect(a + d).toBe(f);
           expect(a).toBeLessThanOrEqual(f);
-          suma += a;
+          sum += a;
         }
-        expect(suma).toBe(aprobado);
+        expect(sum).toBe(approved);
       }
     });
   });

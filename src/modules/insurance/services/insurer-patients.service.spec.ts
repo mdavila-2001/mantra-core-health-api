@@ -27,7 +27,7 @@ function persona(id: string, extra: Record<string, unknown> = {}) {
   };
 }
 
-function cobertura(id: string, extra: Record<string, unknown> = {}) {
+function coverage(id: string, extra: Record<string, unknown> = {}) {
   return {
     patient_profile_id: id,
     carrier_id: CARRIER,
@@ -42,14 +42,14 @@ function cobertura(id: string, extra: Record<string, unknown> = {}) {
   };
 }
 
-function build(respuestas: unknown[][]) {
+function build(responses: unknown[][]) {
   const execute = mockFn();
-  for (const respuesta of respuestas) execute.mockResolvedValueOnce(respuesta);
+  for (const response of responses) execute.mockResolvedValueOnce(response);
   const dbExecute = mockFn((sql: string, params: unknown[]) => {
     if (sql.includes('directory.tenant_memberships'))
       return Promise.resolve([{ id: 'membership' }]);
     if (sql.startsWith('select count(*)'))
-      return Promise.resolve([{ total: respuestas[0]?.length ?? 0 }]);
+      return Promise.resolve([{ total: responses[0]?.length ?? 0 }]);
     return execute(sql, params);
   });
   const flush = mockFn().mockResolvedValue(undefined);
@@ -116,7 +116,7 @@ describe('InsurerPatientsService', () => {
     const d = build([
       [{ patient_profile_id: 'p1', sort_value: 'paciente p1' }],
       [persona('p1', { community_profile_id: 'ana-perez' })],
-      [cobertura('p1')],
+      [coverage('p1')],
     ]);
 
     const page = await d.service.list({}, actor, AHORA);
@@ -145,7 +145,7 @@ describe('InsurerPatientsService', () => {
         { patient_profile_id: 'reclamo', sort_value: 'b' },
       ],
       [persona('vencida'), persona('reclamo')],
-      [cobertura('vencida', { effective_to: '2026-06-30' })],
+      [coverage('vencida', { effective_to: '2026-06-30' })],
     ]);
 
     const page = await d.service.list(
@@ -189,13 +189,13 @@ describe('InsurerPatientsService', () => {
   });
 
   it('devuelve cursor sólo cuando hay una fila de más', async () => {
-    const filas = Array.from({ length: 11 }, (_, i) => ({
+    const rows = Array.from({ length: 11 }, (_, i) => ({
       patient_profile_id: `p${i}`,
       sort_value: `paciente ${String(i).padStart(2, '0')}`,
     }));
     const d = build([
-      filas,
-      filas.slice(0, 10).map((f) => persona(f.patient_profile_id)),
+      rows,
+      rows.slice(0, 10).map((f) => persona(f.patient_profile_id)),
       [],
     ]);
 
@@ -273,7 +273,7 @@ describe('directory authorization, options and conversations', () => {
     const d = build([
       [{ patient_profile_id: 'p1', sort_value: 'a' }],
       [persona('p1')],
-      [cobertura('p1'), cobertura('p1')],
+      [coverage('p1'), coverage('p1')],
     ]);
     const result = await d.service.list({}, actor, AHORA);
     expect(result.items[0].insurers).toEqual([

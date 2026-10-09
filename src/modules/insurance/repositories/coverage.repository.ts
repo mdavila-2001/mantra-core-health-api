@@ -146,17 +146,17 @@ export class CoverageRepository {
     em: EntityManager,
     patientProfileIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const porPaciente = new Map<string, string>();
-    if (patientProfileIds.length === 0) return porPaciente;
+    const byPatient = new Map<string, string>();
+    if (patientProfileIds.length === 0) return byPatient;
 
-    const coberturas = await em.find(PatientCoverages, {
+    const coverages = await em.find(PatientCoverages, {
       patientProfileId: { $in: [...patientProfileIds] },
       coverageOrder: 1,
       statusConceptId: INS.COVERAGE_ACTIVE,
     });
-    if (coberturas.length === 0) return porPaciente;
+    if (coverages.length === 0) return byPatient;
 
-    const planIds = [...new Set(coberturas.map((c) => c.insurancePlanId))];
+    const planIds = [...new Set(coverages.map((c) => c.insurancePlanId))];
     const planes = await em.find(InsurancePlans, { id: { $in: planIds } });
     const planById = new Map(planes.map((p) => [p.id, p]));
 
@@ -174,16 +174,16 @@ export class CoverageRepository {
     });
     const nameByCarrierId = new Map(carriers.map((c) => [c.id, c.legalName]));
 
-    for (const cobertura of coberturas) {
-      const plan = planById.get(cobertura.insurancePlanId);
+    for (const coverage of coverages) {
+      const plan = planById.get(coverage.insurancePlanId);
       if (!plan) continue;
       const carrierId = carrierIdByProductId.get(plan.insuranceProductId);
       if (!carrierId) continue;
       const nombre = nameByCarrierId.get(carrierId);
       if (!nombre) continue;
-      porPaciente.set(cobertura.patientProfileId, nombre);
+      byPatient.set(coverage.patientProfileId, nombre);
     }
-    return porPaciente;
+    return byPatient;
   }
 
   /**

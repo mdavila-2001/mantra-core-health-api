@@ -113,22 +113,22 @@ describe('buildInsurerPatientPageQuery', () => {
       asc,
     );
 
-    const adelante = buildInsurerPatientPageQuery({ ...asc, cursor });
-    expect(adelante.sql).toContain(') > (?, ?)');
-    expect(adelante.params).toEqual(
+    const forward = buildInsurerPatientPageQuery({ ...asc, cursor });
+    expect(forward.sql).toContain(') > (?, ?)');
+    expect(forward.params).toEqual(
       expect.arrayContaining(['perez ana', 'pp-9']),
     );
 
     const desc = criteria({ sortDirection: 'desc' });
-    const atras = buildInsurerPatientPageQuery({
+    const backward = buildInsurerPatientPageQuery({
       ...desc,
       cursor: nextCursorAfter(
         { patient_profile_id: 'pp-9', sort_value: 'perez ana' },
         desc,
       ),
     });
-    expect(atras.sql).toContain(') < (?, ?)');
-    expect(atras.sql).toContain('order by sort_value desc');
+    expect(backward.sql).toContain(') < (?, ?)');
+    expect(backward.sql).toContain('order by sort_value desc');
   });
 
   it('rechaza un cursor emitido para otro orden', () => {

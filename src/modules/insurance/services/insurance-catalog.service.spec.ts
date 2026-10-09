@@ -20,20 +20,20 @@ const CNS = 'BO_PUB_CNS';
 /**
  * Arma el servicio con un `EntityManager` que responde por tipo de entidad.
  *
- * @param filas - Aseguradoras, productos y planes que la base «tiene».
+ * @param rows - Aseguradoras, productos y planes que la base «tiene».
  * @returns El servicio y el espía del `find`.
  */
-function build(filas: {
+function build(rows: {
   carriers: unknown[];
   products: unknown[];
   plans: unknown[];
 }) {
-  const find = mockFn((entidad: { name: string }) => {
-    if (entidad.name === 'InsuranceCarriers')
-      return Promise.resolve(filas.carriers);
-    if (entidad.name === 'InsuranceProducts')
-      return Promise.resolve(filas.products);
-    return Promise.resolve(filas.plans);
+  const find = mockFn((entity: { name: string }) => {
+    if (entity.name === 'InsuranceCarriers')
+      return Promise.resolve(rows.carriers);
+    if (entity.name === 'InsuranceProducts')
+      return Promise.resolve(rows.products);
+    return Promise.resolve(rows.plans);
   });
   const service = new InsuranceCatalogService({ find } as never);
   return { service, find };
@@ -97,14 +97,14 @@ describe('InsuranceCatalogService', () => {
 
     await d.service.listHealthCatalog();
 
-    const filtro = d.find.mock.calls[0][1] as {
+    const filter = d.find.mock.calls[0][1] as {
       id: { $in: string[] };
       statusConceptId: string;
     };
-    expect(filtro.id.$in).toHaveLength(
+    expect(filter.id.$in).toHaveLength(
       BOLIVIA_CARRIERS.length + BOLIVIA_PUBLIC_INSURERS.length,
     );
-    expect(filtro.statusConceptId).toBe(INS.CARRIER_ACTIVE);
+    expect(filter.statusConceptId).toBe(INS.CARRIER_ACTIVE);
   });
 
   it('no consulta productos ni planes si no hay aseguradoras', async () => {
@@ -127,14 +127,14 @@ describe('catálogo de planes sembrado', () => {
 
   it('clasifica cada plan con nombre en el sector de su aseguradora', () => {
     for (const plan of BOLIVIA_HEALTH_PLANS) {
-      const esperado = BOLIVIA_PUBLIC_INSURERS.some(
+      const expected = BOLIVIA_PUBLIC_INSURERS.some(
         (i) => i.code === plan.carrierCode,
       )
         ? 'public'
         : 'private';
       expect(
         declaredPlanSector(carrierPlanId(plan.carrierCode, plan.code)),
-      ).toBe(esperado);
+      ).toBe(expected);
     }
   });
 
@@ -145,24 +145,24 @@ describe('catálogo de planes sembrado', () => {
   });
 
   it('sólo siembra productos con componente de salud', () => {
-    const codigos = BOLIVIA_HEALTH_PLANS.map((p) => p.code);
+    const codes = BOLIVIA_HEALTH_PLANS.map((p) => p.code);
     // Vida pura, desgravamen, sepelio, SOAT y rentas vitalicias quedan fuera:
     // acá se le pregunta al paciente por su cobertura médica.
-    for (const prohibido of [
+    for (const forbidden of [
       'SOAT',
       'DESGRAVAMEN',
       'SEPELIO',
       'RENTA_VITALICIA',
     ]) {
-      expect(codigos).not.toContain(prohibido);
+      expect(codes).not.toContain(forbidden);
     }
   });
 
   it('nombra los cinco planes de salud de BISA', () => {
-    const deBisa = BOLIVIA_HEALTH_PLANS.filter(
+    const ofBisa = BOLIVIA_HEALTH_PLANS.filter(
       (p) => p.carrierCode === BISA,
     ).map((p) => p.code);
-    expect(deBisa).toEqual([
+    expect(ofBisa).toEqual([
       'ADVANCE',
       'RED_MAX',
       'INFINITY_GREEN',

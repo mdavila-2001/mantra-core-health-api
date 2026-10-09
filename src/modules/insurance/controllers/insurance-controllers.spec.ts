@@ -264,20 +264,20 @@ describe('Insurance controllers (delegación)', () => {
 
   /** Las membresías se resuelven por origen; las disputas conservan su política. */
   it('delega las seis escrituras en la autorización de servicio y conserva disputas', () => {
-    const metodo = (nombre: string): string[] | undefined =>
+    const method = (nombre: string): string[] | undefined =>
       Reflect.getMetadata(
         'requiredRoles',
         (ClaimsController.prototype as never as Record<string, object>)[nombre],
       );
 
-    expect(metodo('openDispute')).toEqual([
+    expect(method('openDispute')).toEqual([
       'BILLING_OPERATOR',
       'SECURITY_ADMIN',
     ]);
 
     // Los servicios distinguen OWNER/ADMIN por tenant de los roles genéricos históricos.
-    for (const escritura of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
-      expect(metodo(escritura)).toEqual([]);
+    for (const write of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
+      expect(method(write)).toEqual([]);
     }
     for (const operation of ['submit', 'determine', 'inbox', 'getById']) {
       expect(
@@ -307,7 +307,7 @@ describe('Insurance controllers (delegación)', () => {
    * nunca con una mutación in situ.
    */
   it('ClaimsController sólo expone POST: ninguna ruta muta una adjudicación existente', () => {
-    const metodosHttp = Object.getOwnPropertyNames(
+    const methodsHttp = Object.getOwnPropertyNames(
       ClaimsController.prototype,
     ).filter(
       (nombre) =>
@@ -319,15 +319,15 @@ describe('Insurance controllers (delegación)', () => {
           ],
         ),
     );
-    expect(metodosHttp.length).toBeGreaterThan(0);
-    for (const nombre of metodosHttp) {
-      const metodo = Reflect.getMetadata(
+    expect(methodsHttp.length).toBeGreaterThan(0);
+    for (const nombre of methodsHttp) {
+      const method = Reflect.getMetadata(
         METHOD_METADATA,
         (ClaimsController.prototype as unknown as Record<string, object>)[
           nombre
         ],
       );
-      expect(metodo).toBe(RequestMethod.POST);
+      expect(method).toBe(RequestMethod.POST);
     }
   });
 
@@ -385,7 +385,7 @@ describe('Insurance controllers (delegación)', () => {
     await c.list(query, actor);
     expect(service.list).toHaveBeenCalledWith(query, actor);
 
-    for (const metodo of ['generate', 'getById', 'list']) {
+    for (const method of ['generate', 'getById', 'list']) {
       expect(
         Reflect.getMetadata(
           'requiredRoles',
@@ -394,7 +394,7 @@ describe('Insurance controllers (delegación)', () => {
               string,
               object
             >
-          )[metodo],
+          )[method],
         ),
       ).toEqual([]);
     }
@@ -449,7 +449,7 @@ describe('Insurance controllers (delegación)', () => {
       string,
       object
     >;
-    for (const metodo of [
+    for (const method of [
       'create',
       'list',
       'myBenefits',
@@ -458,7 +458,7 @@ describe('Insurance controllers (delegación)', () => {
       'changeStatus',
       'update',
     ]) {
-      expect(Reflect.getMetadata('requiredRoles', proto[metodo])).toEqual([]);
+      expect(Reflect.getMetadata('requiredRoles', proto[method])).toEqual([]);
     }
     // `active` es pública: sin `@Roles`, con `isPublic`.
     expect(Reflect.getMetadata('isPublic', proto['listActive'])).toBe(true);
@@ -475,9 +475,9 @@ describe('Insurance controllers (delegación)', () => {
       string,
       object
     >;
-    const ruta = (metodo: string) => ({
-      path: Reflect.getMetadata(PATH_METADATA, proto[metodo]),
-      method: Reflect.getMetadata(METHOD_METADATA, proto[metodo]),
+    const ruta = (method: string) => ({
+      path: Reflect.getMetadata(PATH_METADATA, proto[method]),
+      method: Reflect.getMetadata(METHOD_METADATA, proto[method]),
     });
 
     expect(ruta('create')).toEqual({ path: '/', method: RequestMethod.POST });
@@ -506,24 +506,24 @@ describe('Insurance controllers (delegación)', () => {
 
     // Nest registra las rutas en el orden en que se declaran los métodos: si
     // `:id` fuera primero, las estáticas se leerían como un identificador.
-    const orden = Object.getOwnPropertyNames(
+    const order = Object.getOwnPropertyNames(
       InsuranceCampaignsController.prototype,
     );
-    expect(orden.indexOf('listActive')).toBeLessThan(orden.indexOf('getById'));
-    expect(orden.indexOf('myBenefits')).toBeLessThan(orden.indexOf('getById'));
-    expect(orden.indexOf('listForPatient')).toBeLessThan(
-      orden.indexOf('getById'),
+    expect(order.indexOf('listActive')).toBeLessThan(order.indexOf('getById'));
+    expect(order.indexOf('myBenefits')).toBeLessThan(order.indexOf('getById'));
+    expect(order.indexOf('listForPatient')).toBeLessThan(
+      order.indexOf('getById'),
     );
   });
 
   it('el DTO de la campaña del afiliado no expone ningún identificador interno', () => {
-    const permitidas = (dto: { prototype: object }): string[] =>
+    const allowed = (dto: { prototype: object }): string[] =>
       (
         Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
         []
       ).map((clave: string) => clave.replace(/^:/, ''));
 
-    expect(permitidas(PatientCampaignDto).sort()).toEqual(
+    expect(allowed(PatientCampaignDto).sort()).toEqual(
       [
         'campaignType',
         'carrierName',
@@ -538,7 +538,7 @@ describe('Insurance controllers (delegación)', () => {
         'validTo',
       ].sort(),
     );
-    expect(permitidas(PatientCampaignPartnerDto).sort()).toEqual([
+    expect(allowed(PatientCampaignPartnerDto).sort()).toEqual([
       'name',
       'role',
       'type',
@@ -553,14 +553,14 @@ describe('Insurance controllers (delegación)', () => {
       PractitionerSettlementBatchExcludedClaimDto,
       PractitionerSettlementBatchReversalAdjustmentDto,
     ];
-    const prohibido = /paid|payment|receipt|voucher|qr/i;
+    const forbidden = /paid|payment|receipt|voucher|qr/i;
     for (const dto of dtos) {
       const propiedades: string[] =
         Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
         [];
       expect(propiedades.length).toBeGreaterThan(0);
-      for (const propiedad of propiedades) {
-        expect(propiedad.replace(/^:/, '')).not.toMatch(prohibido);
+      for (const property of propiedades) {
+        expect(property.replace(/^:/, '')).not.toMatch(forbidden);
       }
     }
   });
