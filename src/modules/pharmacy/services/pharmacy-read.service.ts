@@ -623,10 +623,10 @@ export function toProductReadDto(
 
 /** La dirección en una línea, o null si no tiene ninguna parte con texto. */
 export function addressText(address: Addresses): string | null {
-  const partes = [address.lines, address.city, address.postalCode]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines, address.city, address.postalCode]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }
 
 /** Una coordenada `numeric` (string de BD) como número, o null. */
@@ -659,11 +659,11 @@ export function haversineKm(a: GeoPoint, b: GeoPoint): number {
   const toRad = (degrees: number): number => (degrees * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLng = toRad(b.lng - a.lng);
-  const sinLat = Math.sin(dLat / 2);
-  const sinLng = Math.sin(dLng / 2);
+  const withoutLat = Math.sin(dLat / 2);
+  const withoutLng = Math.sin(dLng / 2);
   const h =
-    sinLat * sinLat +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinLng * sinLng;
+    withoutLat * withoutLat +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * withoutLng * withoutLng;
   const distance = 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
   return Math.round(distance * 10) / 10;
 }
