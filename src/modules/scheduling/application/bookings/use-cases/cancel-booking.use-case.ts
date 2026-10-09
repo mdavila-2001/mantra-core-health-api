@@ -15,7 +15,6 @@ import {
   CancelBookingResponseDto,
 } from '../../../presentation/dto';
 import type { CancellationPolicySnapshot } from '../../../entities';
-import { DEFAULT_CANCELLATION_WINDOW_MINUTES } from '../../../domain/booking/booking-defaults';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
 import {
@@ -29,9 +28,14 @@ import {
 } from '../../../infrastructure/repositories';
 import { SchedulingWaitlistService } from '../../waitlist/scheduling-waitlist.service';
 import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
-import { cancellationWindowMinutes } from '../../../domain/booking/cancellation-policy';
 import { isPatientActor } from '../../../domain/booking/agenda-actors';
 import { requireReason } from '../support/require-reason';
+import {
+  blocksHolderCancellation,
+  cancellationWindowMinutes,
+  isChargeableCancellation,
+  isWithinCancellationWindow,
+} from '../../../domain/booking/cancellation-policy';
 
 /** UC-41-09: cancela la cita y libera el cupo (también lo usa el rechazo). */
 @Injectable()
@@ -123,9 +127,7 @@ export class CancelBookingUseCase {
       // en appointment_bookings.types.ts y quien escribió el snapshot lo honró.
       const snapshot = booking.cancellationPolicySnapshot as
         CancellationPolicySnapshot | undefined;
-      const windowMinutes =
-        snapshot?.cancellationWindowMinutes ??
-        DEFAULT_CANCELLATION_WINDOW_MINUTES;
+      const windowMinutes = cancellationWindowMinutes(snapshot);
 
       // El cargo también se congela en el snapshot. Solo para reservas antiguas sin
       // snapshot se consulta la política actual como último recurso (compatibilidad).
@@ -148,9 +150,11 @@ export class CancelBookingUseCase {
       // CAN-TIME-001: el plazo se mide sobre instantes absolutos (`start_at` es
       // timestamptz en UTC), por lo que es independiente de la zona horaria; la tz
       // congelada del snapshot queda solo como dato de auditoría.
-      const withinWindow =
-        slot != null &&
-        Date.now() >= slot.startAt.getTime() - windowMinutes * 60_000;
+      const withinWindow = isWithinCancellationWindow(
+        slot?.startAt,
+        Date.now(),
+        windowMinutes,
+      );
 
       // TJ-2 · el paciente no cancela fuera de plazo; quien atiende, sí.
       //
@@ -179,7 +183,7 @@ export class CancelBookingUseCase {
             tx,
           )));
 
-      if (isHolderPatient && withinWindow && !isNoShow) {
+      if (blocksHolderCancellation(isHolderPatient, withinWindow, isNoShow)) {
         throw new PreconditionFailedException(
           `Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio.`,
           {
@@ -196,7 +200,7 @@ export class CancelBookingUseCase {
       // Tras la regla de arriba, la cancelación tardía sólo puede venir de quien
       // atiende o de una inasistencia: al paciente ya no se le cobra por algo
       // que no puede hacer.
-      const chargeable = isNoShow || withinWindow;
+      const chargeable = isChargeableCancellation(isNoShow, withinWindow);
       const feeAmount = chargeable ? (feeSource ?? undefined) : undefined;
 
       this.bookingsRepo.createCancellation(tx, {

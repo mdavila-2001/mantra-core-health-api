@@ -9,7 +9,7 @@ import { touch } from '../../../../common';
 import { AppointmentReminders, WaitlistEntries } from '../../entities';
 import { SchedulingBookingsRepository } from '../repositories';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
-import { SCHEDULING_MODULE } from '../persistence/scheduling.tokens';
+import { SCHEDULING_MODULE } from '../../scheduling.tokens';
 import type {
   BookingScheduleSnapshot,
   DueReminderSnapshot,

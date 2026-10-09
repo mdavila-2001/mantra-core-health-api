@@ -12,7 +12,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { cancellationWindowMinutes } from '../../../domain/booking/cancellation-policy';
 
 /** UC-41-01: define una política de reserva. */
 @Injectable()

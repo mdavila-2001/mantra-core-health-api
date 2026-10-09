@@ -9,7 +9,7 @@ import {
   persistenceSessionToken,
   type PersistenceSession,
 } from '../../../../persistence';
-import { SCHEDULING_MODULE } from '../../infrastructure/persistence/scheduling.tokens';
+import { SCHEDULING_MODULE } from '../../scheduling.tokens';
 import { SchedulingAgendaNoticesService } from '../notices/scheduling-agenda-notices.service';
 import {
   PATIENT_REPRESENTATION_PORT,

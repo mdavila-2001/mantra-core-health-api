@@ -47,7 +47,6 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
-import { cancellationWindowMinutes } from '../../../domain/booking/cancellation-policy';
 import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
 
 /** AG-2 · La cita puntual: el doctor asigna, el paciente se entera. */

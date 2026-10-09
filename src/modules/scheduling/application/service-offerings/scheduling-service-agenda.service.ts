@@ -5,7 +5,7 @@ import type {
   BookableSlots,
   PractitionerServiceOfferings,
 } from '../../entities';
-import type { ServiceCatalog } from '../../../billing/entities';
+import type { ServiceCatalogItem } from '../ports/service-catalog-item';
 import {
   SchedulingCatalogRepository,
   SchedulingOfferingsRepository,
@@ -311,7 +311,7 @@ export class SchedulingServiceAgendaService {
     offeringId: string,
   ): Promise<{
     offering: PractitionerServiceOfferings;
-    catalog: ServiceCatalog | null;
+    catalog: ServiceCatalogItem | null;
   } | null> {
     const offering = await this.offeringsRepo.findOfferingById(em, offeringId);
     if (offering === null) return null;

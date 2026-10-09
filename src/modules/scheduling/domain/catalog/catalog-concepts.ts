@@ -5,7 +5,7 @@ import type {
   RuleBookingMode,
 } from './catalog-types';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import { SCHED } from '../scheduling.concepts';
 
 /** Constantes y mapas de terminología del catálogo de agenda. */

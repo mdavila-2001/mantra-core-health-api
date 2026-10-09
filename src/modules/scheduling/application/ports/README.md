@@ -1,15 +1,19 @@
 # Puertos de scheduling
 
-Contratos de acceso a datos del módulo, con nombres de negocio y modelos de lectura propios.
-Ningún tipo de esta carpeta procede de MikroORM: el servicio no manipula entidades gestionadas y
-por tanto no puede provocar una escritura asignando un campo.
+Interfaz + token Nest (`*_PORT`) por cada dependencia de otro contexto o de un motor concreto. El
+adaptador vive en `infrastructure/adapters/`; el caso de uso sólo conoce el token.
 
-Son el módulo piloto de la migración descrita en
-[ADR-0023](../../../../docs/adr/ADR-0023-puertos-persistencia-read-write.md).
+`UnitOfWork` nombra en un único archivo la transacción que cruza los puertos (hoy el `EntityManager`).
 
-| Puerto              | Ruta      | Por qué                                                                |
-| ------------------- | --------- | ---------------------------------------------------------------------- |
-| `WaitlistReadPort`  | lectura   | Descubrimiento de trabajo para un worker; tolera consistencia eventual |
-| `WaitlistWritePort` | escritura | Altas, promoción de candidatos y recordatorios; siempre en transacción |
-
-Los implementa `adapters/postgres-waitlist.adapter.ts`.
+| Puerto | Contexto |
+| --- | --- |
+| `BookingHistoryPort` | audit |
+| `PatientRepresentationPort` | profiles |
+| `ClinicalAppointmentsPort`, `ClinicalEncountersPort` | clinical |
+| `InsuranceReadPort` | insurance |
+| `FormOriginPort` | forms |
+| `PractitionerAffiliationsPort`, `PractitionerDirectoryPort` | profiles / practice |
+| `TenantDirectoryPort` | directory / profiles |
+| `WalkInPatientRegistryPort` | profiles / common |
+| `AgendaNoticePort` | messaging |
+| `WaitlistReadPort`, `WaitlistWritePort` | persistencia ([ADR-0023](../../../../../docs/adr/ADR-0023-puertos-persistencia-read-write.md)) |

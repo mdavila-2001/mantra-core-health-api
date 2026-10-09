@@ -23,7 +23,7 @@ import type {
   ServiceOfferingListDto,
   UpdateServiceOfferingDto,
 } from '../../presentation/dto/scheduling-service-offerings.dto';
-import type { ServiceCatalog } from '../../../billing/entities';
+import type { ServiceCatalogItem } from '../ports/service-catalog-item';
 
 /** Quién administra las agendas de otros por oficio. */
 const AGENDA_ADMIN_ROLES: readonly string[] = [
@@ -135,7 +135,7 @@ export class SchedulingServiceOfferingsService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return aDto(offering, service);
+      return offeringToDto(offering, service);
     });
   }
 
@@ -180,7 +180,7 @@ export class SchedulingServiceOfferingsService {
         tx,
         offering.serviceCatalogId,
       );
-      return aDto(offering, service);
+      return offeringToDto(offering, service);
     });
   }
 
@@ -220,7 +220,10 @@ export class SchedulingServiceOfferingsService {
       return {
         items: offerings
           .map((offering) =>
-            aDto(offering, byId.get(offering.serviceCatalogId) ?? null),
+            offeringToDto(
+              offering,
+              byId.get(offering.serviceCatalogId) ?? null,
+            ),
           )
           // Un servicio que el catálogo apagó no se ofrece aunque la oferta siga viva.
           .filter((offering) => seesAll || offering.isActive),
@@ -283,7 +286,7 @@ export class SchedulingServiceOfferingsService {
 
   /** El servicio tiene que existir y ser de una práctica donde el profesional atiende. */
   private async assertServiceReachable(
-    service: ServiceCatalog | null,
+    service: ServiceCatalogItem | null,
     practitionerProfileId: string,
     serviceCatalogId: string,
   ): Promise<void> {
@@ -307,9 +310,9 @@ function validateDurations(min: number, max: number): void {
   }
 }
 
-function aDto(
+function offeringToDto(
   offering: PractitionerServiceOfferings,
-  service: ServiceCatalog | null,
+  service: ServiceCatalogItem | null,
 ): ServiceOfferingDto {
   return {
     id: offering.id,
@@ -334,5 +337,3 @@ function aDto(
       (service?.isActive ?? true),
   };
 }
-
-export { aDto as offeringToDto };

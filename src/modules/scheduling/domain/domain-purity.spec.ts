@@ -9,7 +9,13 @@ import { join } from 'node:path';
  * **texto** de los imports (no se importa el módulo) para que el fallo señale
  * el archivo exacto que cruzó la frontera.
  */
-const DOMAIN_DIR = join(process.cwd(), 'src', 'modules', 'scheduling', 'domain');
+const DOMAIN_DIR = join(
+  process.cwd(),
+  'src',
+  'modules',
+  'scheduling',
+  'domain',
+);
 
 /** Paquetes y capas que `domain/` no puede importar. */
 const FORBIDDEN: readonly RegExp[] = [

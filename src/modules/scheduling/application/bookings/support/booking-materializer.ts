@@ -27,7 +27,6 @@ import {
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import { SchedulingServiceAgendaService } from '../../service-offerings/scheduling-service-agenda.service';
 import { SlotPolicyResolver } from './slot-policy-resolver';
-import { cancellationWindowMinutes } from '../../../domain/booking/cancellation-policy';
 import {
   freezeService,
   planForService,

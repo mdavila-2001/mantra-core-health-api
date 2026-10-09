@@ -42,3 +42,4 @@ recordatorios.
 
 `scheduling.controller.spec.ts` cubre los tres controladores con servicios mockeados: delegación,
 argumentos (incluido el actor y el límite de lote) y propagación de errores.
+Lista completa de rutas y roles: ver [README del módulo](../../README.md).
