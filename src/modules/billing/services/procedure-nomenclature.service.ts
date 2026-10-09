@@ -8,7 +8,7 @@ import type {
 } from '../dto';
 
 /** Prefijo del código de concepto de un procedimiento del arancel boliviano. */
-const PREFIJO = 'procedure:';
+const PREFIX = 'procedure:';
 
 /** Las propiedades que el arancel escribe por procedimiento. */
 const PROP = {
@@ -27,7 +27,7 @@ const PROP = {
 } as const;
 
 /** Entradas por página cuando el cliente no pide otra cosa. */
-const LIMITE_POR_DEFECTO = 25;
+const DEFAULT_LIMIT = 25;
 
 /**
  * Lectura del nomenclador de procedimientos (`VS_BO_MEDICAL_PROCEDURE`).
@@ -74,7 +74,7 @@ export class ProcedureNomenclatureService {
    * @returns Las especialidades, ordenadas en español.
    */
   async listSpecialties(): Promise<ProcedureSpecialtiesResponseDto> {
-    const filas = await this.em
+    const rows = await this.em
       .getConnection()
       .execute<{ especialidad: string; total: string }[]>(
         `SELECT p.value_json #>> '{}' AS especialidad, COUNT(*)::text AS total
@@ -86,11 +86,11 @@ export class ProcedureNomenclatureService {
       );
 
     return {
-      items: filas
-        .filter((fila) => fila.especialidad !== null)
-        .map((fila) => ({
-          specialty: fila.especialidad,
-          count: Number(fila.total),
+      items: rows
+        .filter((row) => row.especialidad !== null)
+        .map((row) => ({
+          specialty: row.especialidad,
+          count: Number(row.total),
         })),
     };
   }
@@ -115,20 +115,20 @@ export class ProcedureNomenclatureService {
     /** Entradas por página. */
     limit?: number;
   }): Promise<ProcedureNomenclatureResponseDto> {
-    const limite = options.limit ?? LIMITE_POR_DEFECTO;
+    const limit = options.limit ?? DEFAULT_LIMIT;
     const cursor = options.cursor
       ? decodeKeysetCursor(options.cursor)
       : undefined;
-    const desdeCode =
+    const fromCode =
       typeof cursor?.code === 'string' ? cursor.code : undefined;
 
-    const condiciones: string[] = ['c.code LIKE ?'];
-    const params: unknown[] = [`${PREFIJO}%`];
+    const conditions: string[] = ['c.code LIKE ?'];
+    const params: unknown[] = [`${PREFIX}%`];
 
     if (options.specialty !== undefined && options.specialty !== '') {
       // La especialidad se compara contra la propiedad, no contra el código:
       // el código del arancel no la contiene de forma fiable.
-      condiciones.push(
+      conditions.push(
         `EXISTS (SELECT 1 FROM terminology.concept_properties sp
                   WHERE sp.concept_id = c.id
                     AND sp.property_code = ?
@@ -138,55 +138,55 @@ export class ProcedureNomenclatureService {
     }
 
     if (options.query !== undefined && options.query.trim() !== '') {
-      condiciones.push('c.display ILIKE ?');
+      conditions.push('c.display ILIKE ?');
       params.push(`%${options.query.trim()}%`);
     }
 
-    if (desdeCode !== undefined) {
-      condiciones.push('c.code > ?');
-      params.push(desdeCode);
+    if (fromCode !== undefined) {
+      conditions.push('c.code > ?');
+      params.push(fromCode);
     }
 
     // Una fila de más para saber si hay página siguiente, sin pagar un COUNT
     // sobre las 4408 entradas en cada página.
-    params.push(limite + 1);
+    params.push(limit + 1);
 
-    const filas = await this.em
+    const rows = await this.em
       .getConnection()
       .execute<{ id: string; code: string; display: string }[]>(
         `SELECT c.id, c.code, c.display
          FROM terminology.catalog_concepts c
-        WHERE ${condiciones.join(' AND ')}
+        WHERE ${conditions.join(' AND ')}
         ORDER BY c.code
         LIMIT ?`,
         params,
       );
 
-    const hayMas = filas.length > limite;
-    const pagina = hayMas ? filas.slice(0, limite) : filas;
+    const hasMore = rows.length > limit;
+    const pagina = hasMore ? rows.slice(0, limit) : rows;
     if (pagina.length === 0) return { items: [], nextCursor: null };
 
-    const propiedades = await this.propiedadesDe(pagina.map((f) => f.id));
+    const propiedades = await this.properties(pagina.map((f) => f.id));
 
-    const items: ProcedureNomenclatureItemDto[] = pagina.map((fila) => {
-      const suyas = propiedades.get(fila.id) ?? new Map<string, string>();
+    const items: ProcedureNomenclatureItemDto[] = pagina.map((row) => {
+      const their = propiedades.get(row.id) ?? new Map<string, string>();
       return {
-        conceptId: fila.id,
-        code: fila.code,
-        display: fila.display,
-        specialty: suyas.get(PROP.especialidad) ?? null,
-        group: suyas.get(PROP.grupo) ?? null,
-        referencePrice: suyas.get(PROP.precio) ?? null,
-        priceUnit: suyas.get(PROP.unidad) ?? null,
+        conceptId: row.id,
+        code: row.code,
+        display: row.display,
+        specialty: their.get(PROP.especialidad) ?? null,
+        group: their.get(PROP.grupo) ?? null,
+        referencePrice: their.get(PROP.precio) ?? null,
+        priceUnit: their.get(PROP.unidad) ?? null,
         // Ausente vale `false`: la marca se escribe sólo cuando hay daño.
-        ocrSuspect: (suyas.get(PROP.revision) ?? 'false') === 'true',
+        ocrSuspect: (their.get(PROP.revision) ?? 'false') === 'true',
       };
     });
 
     const ultima = pagina[pagina.length - 1];
     return {
       items,
-      nextCursor: hayMas ? encodeKeysetCursor({ code: ultima.code }) : null,
+      nextCursor: hasMore ? encodeKeysetCursor({ code: ultima.code }) : null,
     };
   }
 
@@ -199,30 +199,30 @@ export class ProcedureNomenclatureService {
    * @param conceptIds - Conceptos de la página.
    * @returns Mapa de concepto a (código de propiedad → valor).
    */
-  private async propiedadesDe(
+  private async properties(
     conceptIds: readonly string[],
   ): Promise<Map<string, Map<string, string>>> {
     if (conceptIds.length === 0) return new Map();
 
-    const marcadores = conceptIds.map(() => '?').join(', ');
-    const filas = await this.em
+    const markers = conceptIds.map(() => '?').join(', ');
+    const rows = await this.em
       .getConnection()
       .execute<
         { concept_id: string; property_code: string; valor: string | null }[]
       >(
         `SELECT p.concept_id, p.property_code, p.value_json #>> '{}' AS valor
          FROM terminology.concept_properties p
-        WHERE p.concept_id IN (${marcadores})`,
+        WHERE p.concept_id IN (${markers})`,
         [...conceptIds],
       );
 
-    const mapa = new Map<string, Map<string, string>>();
-    for (const fila of filas) {
-      if (fila.valor === null) continue;
-      const suyas = mapa.get(fila.concept_id) ?? new Map<string, string>();
-      suyas.set(fila.property_code, fila.valor);
-      mapa.set(fila.concept_id, suyas);
+    const map = new Map<string, Map<string, string>>();
+    for (const row of rows) {
+      if (row.valor === null) continue;
+      const their = map.get(row.concept_id) ?? new Map<string, string>();
+      their.set(row.property_code, row.valor);
+      map.set(row.concept_id, their);
     }
-    return mapa;
+    return map;
   }
 }
