@@ -20,6 +20,50 @@ políticas (escritura, retención, anonimización, residencia, backup), transfer
 transfronterizas, legal holds, barridos de retención, frameworks/evaluaciones/
 remediación y publicación de drafts genéricos.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/system_ops -name '*.controller.ts' | wc -l
+  find src/modules/system_ops -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/system_ops -name '*.entity.ts' | wc -l
+  find src/modules/system_ops -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **8 controllers, 24 rutas HTTP, 30 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`, `IdentityEvidenceLifecycleModule`).
+
+Entidades (`tableName`, 30 de 30 archivos `*.entity.ts`): `accepted_risks`, `anonymization_rules`, `assessment_control_results`, `assessment_findings`, `backup_policies`, `breach_notifications`, `cross_border_transfer_events`, `data_classifications`, `data_domains`, `data_residency_policies`, `draft_records`, `encryption_keys`, `entity_registry`, `field_registry`, `governance_change_log`, `key_rotation_events`, `legal_holds`, `operational_framework_controls`, `operational_frameworks`, `partition_specs`, `record_revisions`, `remediation_actions`, `remediation_plans`, `restore_test_runs`, `retention_executions`, `retention_policies`, `security_incidents`, `tenant_residency_bindings`, `workload_assessments`, `write_policies`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /admin/governance/operational-frameworks` | SECURITY_ADMIN | `assessment` |
+| `POST /admin/governance/workload-assessments` | SECURITY_ADMIN | `assessment` |
+| `PUT /admin/governance/workload-assessments/:id/control-results` | SECURITY_ADMIN | `assessment` |
+| `POST /admin/governance/assessments/:id/findings` | SECURITY_ADMIN | `assessment` |
+| `POST /admin/governance/assessments/:id/remediation-plans` | SECURITY_ADMIN | `assessment` |
+| `POST /admin/governance/remediation-actions/:id/verify` | SECURITY_ADMIN | `assessment` |
+| `PATCH /admin/governance/findings/:id` | SECURITY_ADMIN | `assessment` |
+| `POST /admin/ops/backup-policies` | SECURITY_ADMIN | `backup` |
+| `POST /admin/governance/drafts` | SECURITY_ADMIN | `draft` |
+| `POST /admin/governance/drafts/:id/publish` | SECURITY_ADMIN | `draft` |
+| `POST /admin/governance/entity-registry` | SECURITY_ADMIN | `governance-catalog` |
+| `POST /admin/governance/write-policies` | SECURITY_ADMIN | `governance-catalog` |
+| `PATCH /admin/governance/entity-registry/:id/write-policy` | SECURITY_ADMIN | `governance-catalog` |
+| `POST /admin/governance/retention-policies` | SECURITY_ADMIN | `governance-catalog` |
+| `PATCH /admin/governance/entity-registry/:id/retention` | SECURITY_ADMIN | `governance-catalog` |
+| `POST /admin/governance/anonymization-rules` | SECURITY_ADMIN | `governance-catalog` |
+| `PATCH /admin/governance/field-registry/:id` | SECURITY_ADMIN | `governance-catalog` |
+| `POST /admin/governance/legal-holds` | SECURITY_ADMIN | `legal-hold` |
+| `POST /admin/governance/legal-holds/:id/release` | SECURITY_ADMIN | `legal-hold` |
+| `POST /admin/governance/residency-policies` | SECURITY_ADMIN | `residency` |
+| `POST /admin/governance/tenant-residency-bindings` | SECURITY_ADMIN | `residency` |
+| `POST /admin/governance/cross-border-transfers` | SECURITY_ADMIN | `residency` |
+| `POST /internal/ops/restore-test-runs` | SECURITY_ADMIN | `restore-test` |
+| `POST /internal/governance/retention-executions/run` | SECURITY_ADMIN | `retention-execution` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Descripción |

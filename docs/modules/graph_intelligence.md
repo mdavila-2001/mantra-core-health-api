@@ -19,6 +19,50 @@ Proyección del grafo de relaciones desde los eventos canónicos, recorrido con 
 aplicado **dentro** del propio recorrido, analítica de comunidades y riesgo, reglas de fraude con
 triage, y derecho al olvido propagado.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/graph_intelligence -name '*.controller.ts' | wc -l
+  find src/modules/graph_intelligence -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/graph_intelligence -name '*.entity.ts' | wc -l
+  find src/modules/graph_intelligence -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 15 rutas HTTP, 13 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `graph_access_scopes`, `graph_communities`, `graph_deletion_jobs`, `graph_edge_evidence`, `graph_edges`, `graph_node_identifiers`, `graph_nodes`, `graph_path_cache`, `graph_projection_definitions`, `graph_projection_runs`, `graph_risk_scores`, `graph_rule_definitions`, `graph_rule_hits`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /graph/projections/nodes/upsert` | SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/projections/edges/upsert` | SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/projections/reconcile` | SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/projection-definitions/:id/runs` | SYSTEM, GRAPH_ANALYST, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/projection-runs/:id/advance` | SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/edges/:id/expire` | SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `graph-projection` |
+| `POST /graph/access-scopes` | DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `graph-query` |
+| `PATCH /graph/access-scopes/:id` | DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `graph-query` |
+| `POST /graph/traverse` | GRAPH_ANALYST,
+    API_CONSUMER,
+    COMPLIANCE_OFFICER,
+    PLATFORM_ADMIN, | `graph-query` |
+| `POST /graph/paths` | GRAPH_ANALYST,
+    API_CONSUMER,
+    COMPLIANCE_OFFICER,
+    PLATFORM_ADMIN, | `graph-query` |
+| `POST /graph/analytics/community-detection` | SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `graph-query` |
+| `POST /graph/analytics/risk-scoring` | SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `graph-query` |
+| `POST /graph/rules/:id/evaluate` | SYSTEM,
+    GRAPH_ANALYTICS_WORKER,
+    COMPLIANCE_OFFICER,
+    PLATFORM_ADMIN, | `graph-query` |
+| `PATCH /graph/rule-hits/:id` | COMPLIANCE_OFFICER, GRAPH_ANALYST, PLATFORM_ADMIN | `graph-query` |
+| `POST /graph/deletion-jobs` | DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `graph-query` |
+
 ## La idea que gobierna el módulo entero
 
 **El grafo es una proyección derivada, no la fuente de verdad.** Postgres lo es. De ahí salen todas

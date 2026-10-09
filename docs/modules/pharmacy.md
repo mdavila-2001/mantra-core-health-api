@@ -19,6 +19,48 @@ Identidad de farmacia con licencias, sedes dispensadoras, catálogo de productos
 identificadores, listas de precios y precios versionados, integración externa con
 mapeo de productos, retiro de catálogo y proyección al read-model.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/pharmacy -name '*.controller.ts' | wc -l
+  find src/modules/pharmacy -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/pharmacy -name '*.entity.ts' | wc -l
+  find src/modules/pharmacy -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 22 rutas HTTP, 9 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`DirectoryModule`).
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_external_product_mappings`, `pharmacy_integration_connections`, `pharmacy_licenses`, `pharmacy_price_lists`, `pharmacy_product_identifiers`, `pharmacy_product_prices`, `pharmacy_products`, `pharmacy_sites`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /public/medications` | pública | `pharmacy-public` |
+| `GET /public/medications/:conceptId/availability` | pública | `pharmacy-public` |
+| `GET /pharmacy/pharmacies` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/licenses` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/contacts` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites` | sesión | `pharmacy-read` |
+| `GET /pharmacy/catalog-products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites/:siteId/prices` | sesión | `pharmacy-read` |
+| `POST /pharmacies` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/licenses/:licenseId/verify` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/sites` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/products` | SECURITY_ADMIN | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `DELETE /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/prices` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/close` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections/:connId/product-mappings` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/projections` | SECURITY_ADMIN | `pharmacy` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Resumen |

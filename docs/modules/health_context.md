@@ -20,7 +20,44 @@ su nivel de confianza, programaciones, corridas idempotentes, observaciones inmu
 de país versionados con hechos trazables a la evidencia que los respalda, revisión de calidad,
 publicación y resolución para consumo.
 
+<<<<<<< HEAD
 ## Casos de uso cubiertos (12)
+=======
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/health_context -name '*.controller.ts' | wc -l
+  find src/modules/health_context -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/health_context -name '*.entity.ts' | wc -l
+  find src/modules/health_context -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 13 rutas HTTP, 10 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `context_agents`, `context_collection_runs`, `context_fact_evidence`, `context_quality_reviews`, `context_source_observations`, `country_context_schedules`, `country_health_context_versions`, `country_health_contexts`, `health_context_facts`, `health_context_sources`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /health-context/agents` | SOURCE_ADMIN, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/sources` | SOURCE_ADMIN, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/schedules` | CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/internal/schedules/run-due` | SYSTEM | `health-context` |
+| `POST /health-context/contexts` | CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/collection-runs` | SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/collection-runs/:id/observations` | SYSTEM, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/contexts/:id/versions` | SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/versions/:id/quality-reviews` | QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/versions/:id/publish` | CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/collection-runs/:id/finish` | SYSTEM, PLATFORM_ADMIN | `health-context` |
+| `POST /health-context/versions/:id/supersede` | CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
+| `GET /health-context/contexts/resolve` | CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN | `health-context` |
+
+## API y permisos
+>>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
 
 | UC | Endpoint | Descripción |
 | --- | --- | --- |

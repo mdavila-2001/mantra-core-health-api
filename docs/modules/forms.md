@@ -20,6 +20,51 @@ inmutables, campos con reglas y dependencias, localizaciones i18n, asignaciones
 gobernadas por política, instancias de formulario, captura/curación de valores
 (value[x] exclusivo, supersede, procedencia) y migración de esquema.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/forms -name '*.controller.ts' | wc -l
+  find src/modules/forms -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/forms -name '*.entity.ts' | wc -l
+  find src/modules/forms -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 25 rutas HTTP, 16 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `dynamic_field_definitions`, `dynamic_field_sections`, `extension_target_policies`, `field_assignments`, `field_definition_localizations`, `field_definition_set_versions`, `field_definition_sets`, `field_dependencies`, `field_schema_migrations`, `field_set_members`, `field_validation_rules`, `field_value_access_rules`, `field_value_audit`, `field_value_provenance`, `field_values`, `form_instances`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /forms/assignments` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `GET /forms/assignments/budget` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `POST /forms/assignments` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `PUT /forms/assignments/order` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `PATCH /forms/assignments/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `DELETE /forms/assignments/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `GET /forms/definition-sets` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-definition-sets` |
+| `GET /forms/definition-sets/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets/:id/versions/:ver/publish` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets/:id/migrations/:migrationId/run` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/field-definitions` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `PATCH /forms/field-definitions/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `POST /forms/fields/:id/dependencies` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `PUT /forms/fields/:id/localizations/:lang` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `POST /forms/fields/:id/access-rules` | SECURITY_ADMIN | `forms-fields` |
+| `GET /forms/instances` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `GET /forms/instances/:id` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances/:id/values` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances/:id/close` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `GET /forms/me/instances` | sesión | `forms-me` |
+| `GET /forms/me/instances/:id` | sesión | `forms-me` |
+| `POST /forms/values/import` | CLINICIAN, PRACTITIONER | `forms-values` |
+| `PATCH /forms/values/:id` | CLINICIAN, PRACTITIONER | `forms-values` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Permiso | Descripción |

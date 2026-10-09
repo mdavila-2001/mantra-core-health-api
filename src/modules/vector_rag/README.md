@@ -4,6 +4,42 @@ Modelos de embedding aprobados uno a uno, colecciones que sólo aceptan lo que s
 políticas de acceso que se publican tras revisión de privacidad, y un retrieval en el que **cada
 candidato recibe una decisión de autorización y todas se guardan** — también las denegadas.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/vector_rag -name '*.controller.ts' | wc -l
+  find src/modules/vector_rag -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/vector_rag -name '*.entity.ts' | wc -l
+  find src/modules/vector_rag -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 16 rutas HTTP, 14 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `embedding_jobs`, `embedding_model_versions`, `rag_access_policies`, `retrieval_candidates`, `retrieval_evidence`, `retrieval_feedback_events`, `retrieval_sessions`, `vector_chunks`, `vector_collections`, `vector_deletion_jobs`, `vector_documents`, `vector_embeddings`, `vector_reconciliation_runs`, `vector_tenant_bindings`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /vector-rag/embedding-model-versions` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/embedding-model-versions/:id/retire` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections` | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/rag-access-policies` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `vector-governance` |
+| `PUT /vector-rag/rag-access-policies/:id/publish` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections/:id/embedding-jobs` | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections/:id/re-embed` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `PUT /vector-rag/collections/:id/lifecycle` | AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `GET /vector-rag/embedding-jobs/pending` | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/embedding-jobs/:id/run` | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions` | CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/search` | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/evidence` | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/feedback` | CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/deletion-jobs` | PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/collections/:id/reconciliation` | SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |

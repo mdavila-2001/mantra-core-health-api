@@ -17,6 +17,49 @@
 
 Agrupa los componentes relacionados con **chart** y mantiene cohesionada esta responsabilidad del sistema.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/chart -name '*.controller.ts' | wc -l
+  find src/modules/chart -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/chart -name '*.entity.ts' | wc -l
+  find src/modules/chart -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **7 controllers, 23 rutas HTTP, 11 entidad y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`ClinicalModule`, `CommonModule`, `TerminologyModule`).
+
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`, `care_plans`, `chart_template_assignments`, `clinical_note_headers`, `clinical_note_signatures`, `clinical_note_versions`, `document_record_files`, `document_records`, `note_release_events`, `physical_exam_findings`, `specialty_chart_templates`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /charts/care-plans` | CLINICIAN, PRACTITIONER | `chart-care-plans` |
+| `PATCH /charts/care-plans/:planId/activities/:activityId` | CLINICIAN, PRACTITIONER | `chart-care-plans` |
+| `POST /charts/documents` | CLINICIAN, PRACTITIONER | `chart-documents` |
+| `GET /charts/documents/:documentId/files/:fileId/content` | CLINICIAN, PRACTITIONER | `chart-documents` |
+| `GET /charts/encounters/:id/pdf` | CLINICIAN, PRACTITIONER | `chart-encounters` |
+| `GET /charts/me/notes` | sesión | `chart-me` |
+| `GET /charts/me/documents` | sesión | `chart-me` |
+| `GET /charts/me/documents/:documentId/files/:fileId/content` | sesión | `chart-me` |
+| `GET /charts/me/encounters/:id/pdf` | sesión | `chart-me` |
+| `GET /charts/notes` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `PUT /charts/notes/:noteId/versions` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/:noteId/versions/:versionId/sign` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/:noteId/versions/:versionId/cosign` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/:noteId/amendments` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/versions/:versionId/release` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/versions/:versionId/withhold` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `POST /charts/notes/versions/:versionId/exam-findings` | CLINICIAN, PRACTITIONER | `chart-notes` |
+| `GET /charts/patients/:patientProfileId/chart` | CLINICIAN, PRACTITIONER | `chart-read` |
+| `POST /charts/templates/:templateId/assignments` | SECURITY_ADMIN | `chart-templates` |
+| `POST /charts/templates` | SECURITY_ADMIN | `chart-templates` |
+| `GET /charts/templates` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
+| `GET /charts/templates/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `chart-templates` |
+
 ## Contenido
 
 ### Subcarpetas

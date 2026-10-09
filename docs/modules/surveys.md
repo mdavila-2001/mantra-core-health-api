@@ -24,6 +24,43 @@ Cubre el carril 10 y las nueve reglas `DOC-ENC-001` … `DOC-ENC-009` del actor
 doctor, más `PAC-CAL-008` y `PAC-DIAG-014` del actor paciente, que el
 diagnóstico ALOVIDA marcaba **todas `AUSENTE`**.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/surveys -name '*.controller.ts' | wc -l
+  find src/modules/surveys -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/surveys -name '*.entity.ts' | wc -l
+  find src/modules/surveys -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 17 rutas HTTP, 7 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `survey_answers`, `survey_assignments`, `survey_invitations`, `survey_questions`, `survey_responses`, `survey_templates`, `survey_versions`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /surveys/assignments` | PRACTITIONER, CLINICIAN | `surveys-assignments` |
+| `POST /surveys/invitations` | PRACTITIONER, CLINICIAN | `surveys-assignments` |
+| `GET /surveys/me/invitations` | sesión | `surveys-patient` |
+| `GET /surveys/me/invitations/:id` | sesión | `surveys-patient` |
+| `POST /surveys/me/invitations/:id/responses` | sesión | `surveys-patient` |
+| `POST /surveys/templates` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `GET /surveys/templates` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `GET /surveys/templates/:id` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `PATCH /surveys/templates/:id` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `POST /surveys/templates/:id/questions` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `PUT /surveys/templates/:id/questions/order` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `PATCH /surveys/templates/:id/questions/:questionId` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `DELETE /surveys/templates/:id/questions/:questionId` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `POST /surveys/templates/:id/versions` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `POST /surveys/templates/:id/versions/:versionNumber/publish` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `POST /surveys/templates/:id/deactivate` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+| `GET /surveys/templates/:id/responses` | PRACTITIONER, CLINICIAN | `surveys-templates` |
+
 ## Por qué es un módulo nuevo y no `forms` ni `community.polls`
 
 `alovida-gap-map` registra esto como decisión de arquitectura abierta; se resolvió

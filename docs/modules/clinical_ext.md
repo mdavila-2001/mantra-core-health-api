@@ -23,7 +23,58 @@ inmunizaciones y telesalud. Sigue la forma de los módulos de referencia
 como columnas uuid planas (flush del padre antes de los hijos), auditoría con
 `createdBy`/`touch`, y `*_concept_id` tomados de `clinical_ext.concepts.ts`.
 
+<<<<<<< HEAD
 ## Endpoints (UC → ruta)
+=======
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/clinical_ext -name '*.controller.ts' | wc -l
+  find src/modules/clinical_ext -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/clinical_ext -name '*.entity.ts' | wc -l
+  find src/modules/clinical_ext -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **8 controllers, 27 rutas HTTP, 13 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`ClinicalModule`).
+
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_team_members`, `care_teams`, `cds_rules`, `clinical_alerts`, `drug_interactions`, `immunization_schedules`, `order_set_items`, `order_sets`, `prescription_favorites`, `reference_ranges`, `referrals`, `virtual_encounters`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /care-gaps/recompute` | sesión | `care-gaps` |
+| `PATCH /care-gaps/:id/close` | sesión | `care-gaps` |
+| `POST /patients/:id/immunization-plan/project` | sesión | `care-gaps` |
+| `POST /immunization-schedules` | SECURITY_ADMIN | `care-gaps` |
+| `POST /care-teams` | CLINICIAN, PRACTITIONER | `care-teams` |
+| `PATCH /care-teams/:id/members/:memberId/set-responsible` | CLINICIAN, PRACTITIONER | `care-teams` |
+| `GET /care-teams` | CLINICIAN, PRACTITIONER | `care-teams` |
+| `POST /cds-rules` | SECURITY_ADMIN | `cds` |
+| `POST /cds-rules/:id/versions/publish` | SECURITY_ADMIN | `cds` |
+| `POST /cds-rules/:id/versions/rollback` | SECURITY_ADMIN | `cds` |
+| `POST /cds/evaluate` | CLINICIAN, PRACTITIONER | `cds` |
+| `POST /cds/check-interactions` | CLINICIAN, PRACTITIONER | `cds` |
+| `POST /drug-interactions` | SECURITY_ADMIN | `cds` |
+| `PATCH /clinical-alerts/:id/acknowledge` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
+| `PATCH /clinical-alerts/:id/override` | CLINICIAN, PRACTITIONER | `clinical-alerts` |
+| `POST /order-sets` | SECURITY_ADMIN | `order-sets` |
+| `POST /order-sets/:id/apply` | sesión | `order-sets` |
+| `GET /prescription-favorites` | sesión | `prescription-favorites` |
+| `POST /prescription-favorites` | sesión | `prescription-favorites` |
+| `DELETE /prescription-favorites/:id` | sesión | `prescription-favorites` |
+| `POST /referrals` | CLINICIAN, PRACTITIONER | `referrals` |
+| `PATCH /referrals/:id/respond` | CLINICIAN, PRACTITIONER | `referrals` |
+| `GET /referrals` | CLINICIAN, PRACTITIONER | `referrals` |
+| `GET /referrals/me` | PATIENT | `referrals` |
+| `POST /virtual-encounters` | CLINICIAN, PRACTITIONER | `virtual-encounters` |
+| `PATCH /virtual-encounters/:id/join` | CLINICIAN, PRACTITIONER, PATIENT | `virtual-encounters` |
+| `PATCH /virtual-encounters/:id/end` | CLINICIAN, PRACTITIONER | `virtual-encounters` |
+
+## Autenticación y autorización actuales
+>>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
 
 | UC | Método y ruta | Descripción | Permiso |
 | --- | --- | --- | --- |

@@ -19,6 +19,48 @@ Gestiona el directorio organizacional de la plataforma: aprovisionamiento y cicl
 de vida de tenants, jerarquía de sub-tenants, sedes físicas (branches) y las
 membresías de usuarios a tenant y a branch.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/directory -name '*.controller.ts' | wc -l
+  find src/modules/directory -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/directory -name '*.entity.ts' | wc -l
+  find src/modules/directory -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 22 rutas HTTP, 7 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`CommunityModule`, `InsuranceModule`, `TerminologyModule`, `DiagnosticUnitsModule`, `CommonModule`, `DirectoryAuthorizationModule`).
+
+Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `branch_memberships`, `branches`, `tenant_affiliation_documents`, `tenant_legal_representatives`, `tenant_memberships`, `tenant_web_configs`, `tenants`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /admin/tenants` | SUPERADMIN, SECURITY_ADMIN | `admin-tenants` |
+| `POST /admin/tenants` | SUPERADMIN | `admin-tenants` |
+| `POST /admin/tenants/:tenantId/verification` | SECURITY_ADMIN | `admin-tenants` |
+| `PUT /admin/tenants/:tenantId/public-profile` | SUPERADMIN, SECURITY_ADMIN | `admin-tenants` |
+| `POST /admin/tenants/:tenantId/suspend` | SUPERADMIN | `admin-tenants` |
+| `GET /tenants/:tenantId/logo` | sesión | `organization-logo` |
+| `PUT /tenants/:tenantId/logo` | sesión | `organization-logo` |
+| `GET /tenants/:tenantId/logo/content` | sesión | `organization-logo` |
+| `GET /tenants/me` | sesión | `tenants` |
+| `PATCH /tenants/:tenantId` | sesión | `tenants` |
+| `GET /tenants/:tenantId` | sesión | `tenants` |
+| `GET /tenants/:tenantId/child-tenants` | sesión | `tenants` |
+| `GET /tenants/:tenantId/branches` | sesión | `tenants` |
+| `GET /tenants/:tenantId/memberships` | sesión | `tenants` |
+| `GET /tenants/:tenantId/memberships/:membershipId/branch-assignments` | sesión | `tenants` |
+| `POST /tenants/:tenantId/child-tenants` | SECURITY_ADMIN | `tenants` |
+| `POST /tenants/:tenantId/branches` | sesión | `tenants` |
+| `POST /tenants/:tenantId/memberships` | sesión | `tenants` |
+| `POST /tenants/:tenantId/memberships/:membershipId/branch-assignments` | sesión | `tenants` |
+| `POST /tenants/:tenantId/memberships/:membershipId/transfer` | sesión | `tenants` |
+| `PATCH /tenants/:tenantId/memberships/:membershipId/role` | sesión | `tenants` |
+| `POST /tenants/:tenantId/memberships/:membershipId/offboard` | sesión | `tenants` |
+
 ## Endpoints (UC-04-01..10)
 
 | UC    | Método y ruta                                                            | Rol              | Descripción                                                                   |

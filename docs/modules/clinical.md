@@ -29,6 +29,8 @@ La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@
 
 El módulo tiene **9 controllers, 39 rutas HTTP, 23 entidades y 17 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
 Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`, `AuthzModule`, `TerminologyModule`.
 
 | Método y ruta | Acceso | Controller |

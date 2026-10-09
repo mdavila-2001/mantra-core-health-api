@@ -23,6 +23,90 @@ jerárquica (`clinical_units`, `care_spaces`), el catálogo de servicios
 ajustes (`practice_settings`) e inventario (`inventory_items`,
 `inventory_movements`).
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/practice -name '*.controller.ts' | wc -l
+  find src/modules/practice -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/practice -name '*.entity.ts' | wc -l
+  find src/modules/practice -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 29 rutas HTTP, 11 entidad y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinical_units`, `healthcare_services`, `inventory_items`, `inventory_movements`, `practice_accreditations`, `practice_settings`, `practice_sites`, `practices`, `practitioner_role_assignments`, `practitioner_support_assignments`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /accreditations/:id/verify` | SECURITY_ADMIN | `accreditations` |
+| `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN | `inventory-items` |
+| `GET /practices` | SECURITY_ADMIN,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN,
+    SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SCHEDULING_ADMIN,
+
+
+
+    PRACTITIONER,
+    CLINICIAN,
+    ACCOUNTING_APPROVER, | `practices` |
+| `GET /practices/:practiceId/organization` | SECURITY_ADMIN,
+    PERIOP_ADMIN,
+    SURGERY_SCHEDULER,
+    SCHEDULING_ADMIN,
+    PRACTITIONER,
+    CLINICIAN,
+    ACCOUNTING_APPROVER, | `practices` |
+| `GET /practices/:practiceId/sites` | SECURITY_ADMIN,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN,
+    SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SCHEDULING_ADMIN, | `practices` |
+| `GET /practices/:practiceId/role-assignments` | SECURITY_ADMIN | `practices` |
+| `POST /practices` | SECURITY_ADMIN | `practices` |
+| `POST /practices/:practiceId/sites` | SECURITY_ADMIN | `practices` |
+| `DELETE /practices/:practiceId/sites/:siteId` | SECURITY_ADMIN | `practices` |
+| `POST /practices/:practiceId/accreditations` | SECURITY_ADMIN | `practices` |
+| `POST /practices/:practiceId/healthcare-services` | SECURITY_ADMIN | `practices` |
+| `PUT /practices/:practiceId/settings/:settingKey` | SECURITY_ADMIN | `practices` |
+| `POST /practices/:practiceId/role-assignments` | SECURITY_ADMIN | `practices` |
+| `POST /practices/:practiceId/role-assignments/self-request` | PRACTITIONER | `practices` |
+| `POST /practices/:practiceId/inventory-items` | SECURITY_ADMIN | `practices` |
+| `GET /practitioners/me/role-assignments` | PRACTITIONER | `practitioner-sites` |
+| `GET /practitioners/:profileId/sites` | SECURITY_ADMIN,
+    SCHEDULING_ADMIN,
+    SCHEDULING_AGENT,
+    PRACTITIONER,
+    CLINICIAN,
+    PATIENT, | `practitioner-sites` |
+| `POST /practitioners/me/sites` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
+| `PATCH /practitioners/me/sites/:siteId` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
+| `PUT /practitioners/me/sites/:siteId/bank-qr` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
+| `DELETE /practitioners/me/sites/:siteId` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
+| `POST /role-assignments/:roleId/support-assignments` | SECURITY_ADMIN | `role-assignments` |
+| `POST /role-assignments/:roleId/approve` | SECURITY_ADMIN | `role-assignments` |
+| `POST /role-assignments/:roleId/reject` | SECURITY_ADMIN | `role-assignments` |
+| `POST /role-assignments/:roleId/suspend` | SECURITY_ADMIN | `role-assignments` |
+| `POST /role-assignments/:roleId/end` | SECURITY_ADMIN | `role-assignments` |
+| `POST /sites/:siteId/clinical-units` | SECURITY_ADMIN | `sites` |
+| `GET /sites/:siteId/care-spaces` | SECURITY_ADMIN,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN,
+    SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SCHEDULING_ADMIN, | `sites` |
+| `POST /sites/:siteId/care-spaces` | SECURITY_ADMIN | `sites` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Descripción |

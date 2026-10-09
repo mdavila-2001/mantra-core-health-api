@@ -21,6 +21,41 @@ usuario y proyecciones públicas. Los endpoints son contratos de lectura y de
 materialización: no exponen SQL crudo al cliente (allow-lists de campos, filtros,
 orden y acciones), aplican masking heredado y derivan las acciones en servidor.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/read_models -name '*.controller.ts' | wc -l
+  find src/modules/read_models -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/read_models -name '*.entity.ts' | wc -l
+  find src/modules/read_models -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 15 rutas HTTP, 13 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `frontend_page_views`, `frontend_routes`, `frontend_view_actions`, `frontend_view_fields`, `frontend_view_filters`, `frontend_view_kpis`, `frontend_view_sort_options`, `frontend_view_states`, `portal_surfaces`, `read_model_definitions`, `read_model_dependencies`, `read_model_refresh_runs`, `user_view_preferences`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /portals/:portalCode/routes/:routeCode/views` | SECURITY_ADMIN | `frontend-views` |
+| `GET /portals/:portalCode/routes/:routeCode/views/:viewCode/data` | sesión | `frontend-views` |
+| `GET /portals/:portalCode/routes/:routeCode/views/:viewCode/actions` | sesión | `frontend-views` |
+| `PUT /views/:frontendPageViewId/preferences` | sesión | `frontend-views` |
+| `GET /public/directory` | pública | `public-projections` |
+| `GET /public/:slug` | pública | `public-projections` |
+| `POST /read-models/definitions` | SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/definitions/:schema/:object/versions` | SECURITY_ADMIN | `read-model-definitions` |
+| `GET /read-models/health` | SYSTEM, SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/:definitionId/refresh` | SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/:definitionId/backfill` | SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/:definitionId/invalidate` | SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/:definitionId/reconcile` | SYSTEM, SECURITY_ADMIN | `read-model-definitions` |
+| `POST /read-models/definitions/:id/deprecate` | SECURITY_ADMIN | `read-model-definitions` |
+| `DELETE /read-models/definitions/:id` | SECURITY_ADMIN | `read-model-definitions` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Permiso | Descripción |

@@ -22,6 +22,50 @@ política de catálogo de cada tenant. El esquema es *concept-driven*: estados y
 tipos no son enums de columna sino filas de `terminology.catalog_concepts`
 referenciadas por FK (`*_concept_id`), resueltas desde `CONCEPTS` (`src/common`).
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/terminology -name '*.controller.ts' | wc -l
+  find src/modules/terminology -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/terminology -name '*.entity.ts' | wc -l
+  find src/modules/terminology -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **7 controllers, 24 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `catalog_concepts`, `catalog_import_batches`, `code_system_versions`, `code_systems`, `concept_designations`, `concept_maps`, `concept_properties`, `concept_relationships`, `tenant_catalog_policies`, `tenant_concept_config`, `terminology_sources`, `value_set_members`, `value_set_rules`, `value_set_versions`, `value_sets`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /terminology/code-systems` | SECURITY_ADMIN | `terminology-code-systems` |
+| `GET /terminology/code-systems/:id/versions` | SECURITY_ADMIN | `terminology-code-systems` |
+| `POST /terminology/code-systems` | SECURITY_ADMIN | `terminology-code-systems` |
+| `POST /terminology/code-systems/:id/versions` | SECURITY_ADMIN | `terminology-code-systems` |
+| `GET /terminology/concepts` | sesión | `terminology-concepts` |
+| `GET /terminology/concepts/glossary-graph` | sesión | `terminology-concepts` |
+| `GET /terminology/concepts/:conceptId/glossary-neighborhood` | sesión | `terminology-concepts` |
+| `GET /terminology/concepts/:conceptId` | sesión | `terminology-concepts` |
+| `POST /terminology/concepts/:conceptId/designations` | SECURITY_ADMIN | `terminology-concepts` |
+| `POST /terminology/concepts/:conceptId/relationships` | SECURITY_ADMIN | `terminology-concepts` |
+| `POST /terminology/concepts/:conceptId/properties` | SECURITY_ADMIN | `terminology-concepts` |
+| `POST /terminology/concepts/:conceptId/$deprecate` | SECURITY_ADMIN | `terminology-concepts` |
+| `POST /terminology/ValueSet/:id/$expand` | SECURITY_ADMIN | `terminology-fhir` |
+| `POST /terminology/ConceptMap/$translate` | sesión | `terminology-fhir` |
+| `GET /terminology/CodeSystem/$lookup` | sesión | `terminology-fhir` |
+| `GET /terminology/import-template` | SECURITY_ADMIN | `terminology-import-template` |
+| `PUT /terminology/tenants/:tenantId/catalog-policies` | SECURITY_ADMIN | `terminology-tenant-catalog` |
+| `POST /terminology/value-sets` | SECURITY_ADMIN | `terminology-value-sets` |
+| `GET /terminology/value-sets` | pública | `terminology-value-sets` |
+| `GET /terminology/value-sets/$glossary-facets` | pública | `terminology-value-sets` |
+| `GET /terminology/value-sets/:id/$expand` | pública | `terminology-value-sets` |
+| `POST /terminology/versions/:versionId/import` | SECURITY_ADMIN | `terminology-versions` |
+| `POST /terminology/versions/:versionId/import-file` | SECURITY_ADMIN | `terminology-versions` |
+| `POST /terminology/versions/:versionId/publish` | SECURITY_ADMIN | `terminology-versions` |
+
 ## Endpoints
 
 | UC | Método y ruta | Rol | Éxito | Descripción |

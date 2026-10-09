@@ -4,6 +4,78 @@ Ciclo completo del caso quirúrgico: programación con reserva de quirófano, va
 preoperatorio, checklist de seguridad de la OMS, anestesia, intervención con trazabilidad de
 implantes e insumos, reporte operatorio firmado, recuperación, cancelación y cargos.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/procedures_perioperative -name '*.controller.ts' | wc -l
+  find src/modules/procedures_perioperative -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/procedures_perioperative -name '*.entity.ts' | wc -l
+  find src/modules/procedures_perioperative -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 32 rutas HTTP, 37 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`AuditModule`, `MessagingModule`, `ClinicalModule`).
+
+Entidades (`tableName`, 37 de 37 archivos `*.entity.ts`): `anesthesia_airway_assessments`, `anesthesia_events`, `anesthesia_plans`, `implant_identifiers`, `instrument_sets`, `operating_room_utilization_events`, `operative_findings`, `operative_reports`, `operative_steps`, `pacu_assessments`, `pacu_stays`, `postoperative_followups`, `postoperative_orders`, `preoperative_assessments`, `preoperative_orders`, `preoperative_risk_scores`, `procedure_body_sites`, `procedure_cancellations`, `procedure_case_diagnoses`, `procedure_case_locations`, `procedure_case_milestones`, `procedure_case_status_history`, `procedure_case_team_members`, `procedure_cases`, `procedure_charge_items`, `procedure_complications`, `procedure_devices`, `procedure_implants`, `procedure_medication_uses`, `procedure_outcomes`, `procedure_performers`, `procedure_specimens`, `sterility_verification_checks`, `sterilization_loads`, `surgical_safety_checklists`, `surgical_safety_items`, `surgical_safety_responses`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /dental-procedures/catalog` | CLINICIAN, PRACTITIONER | `dental` |
+| `GET /dental-procedures` | CLINICIAN, PRACTITIONER | `dental` |
+| `POST /dental-procedures` | CLINICIAN, PRACTITIONER | `dental` |
+| `GET /procedure-cases` | SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN, | `periop` |
+| `GET /procedure-cases/:id` | SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN, | `periop` |
+| `POST /procedure-cases` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
+| `PATCH /procedure-cases/:id` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/confirm` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/diagnoses` | SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/team-members` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/preoperative-assessments` | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/preoperative-orders` | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `periop` |
+| `GET /procedure-cases/:id/team-members` | SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN, | `periop` |
+| `POST /procedure-cases/:id/team-members/:memberId/accept` | SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN, | `periop` |
+| `POST /procedure-cases/:id/team-members/:memberId/respond` | SURGEON,
+    ANESTHESIOLOGIST,
+    PERIOP_NURSE,
+    SURGERY_SCHEDULER,
+    PERIOP_ADMIN, | `periop` |
+| `POST /procedure-cases/:id/preoperative-orders/verify` | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/safety-checklists/:checklistId/responses` | PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/anesthesia-plans` | ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/anesthesia-plans/:planId/approve` | ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/anesthesia-events` | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/operative-steps` | SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/findings` | SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/implants` | SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/medication-uses` | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/specimens` | SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/operative-reports` | SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/operative-reports/:reportId/sign` | SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/pacu-stays` | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /pacu-stays/:stayId/assessments` | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /pacu-stays/:stayId/discharge` | ANESTHESIOLOGIST, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/cancel` | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `periop` |
+| `POST /procedure-cases/:id/charge-items/post` | PERIOP_ADMIN, BILLING | `periop` |
+
 ## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |

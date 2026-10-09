@@ -8,6 +8,43 @@ conciliación de acuses del proveedor.
 > eventos en el "Pendiente" de su README porque no había dónde publicarlos. `OutboxService` es esa
 > API: ver *Cómo lo usa un módulo de negocio*, más abajo.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/messaging -name '*.controller.ts' | wc -l
+  find src/modules/messaging -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/messaging -name '*.entity.ts' | wc -l
+  find src/modules/messaging -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 17 rutas HTTP, 22 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `adapter_event_mappings`, `adapter_inbound_events`, `adapter_tracking_capabilities`, `dead_letter_jobs`, `delivery_receipts`, `delivery_reconciliation_runs`, `delivery_status_transitions`, `delivery_tracking_events`, `domain_events`, `event_deliveries`, `event_subscriptions`, `in_app_notifications`, `message_channels`, `message_queues`, `message_templates`, `messaging_providers`, `notification_deliveries`, `notification_requests`, `outbox_messages`, `provider_channel_configs`, `queued_jobs`, `recipient_preferences`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /internal/outbox/relay/run` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/events/:domainEventId/dispatch` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/event-deliveries/:id/ack` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/queues/:code/claim` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/complete` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/fail` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `GET /internal/notifications/pending` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/notifications/:requestId/deliver` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /queues/:code/jobs` | SYSTEM, MESSAGING_ADMIN | `messaging` |
+| `POST /queues/dead-letter/:deadLetterJobId/redrive` | MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/requests` | SYSTEM, MESSAGING_ADMIN | `messaging` |
+| `GET /notifications/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/in-app/read-all` | USER, MESSAGING_ADMIN | `messaging` |
+| `GET /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `PUT /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/in-app/:id/read` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /webhooks/providers/:providerCode/receipts` | pública | `provider-webhooks` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |
