@@ -78,26 +78,26 @@ export class VerifiedBadgesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param data - Sujeto, tipo, método y vigencia.
-   * @param existente - El sello vigente, si lo había.
+   * @param existing - El sello vigente, si lo había.
    * @returns El sello resultante y si fue alta o actualización.
    */
   grant(
     em: EntityManager,
     data: GrantBadgeData,
-    existente: VerifiedBadges | null,
+    existing: VerifiedBadges | null,
   ): { badge: VerifiedBadges; created: boolean } {
     const now = new Date();
 
-    if (existente) {
+    if (existing) {
       // Re-verificación: se conserva `validFrom` —el sello no «nace» de nuevo
       // cada vez que la autoridad confirma— y se corre el vencimiento.
-      existente.verificationMethodConceptId = data.verificationMethodConceptId;
-      existente.verifiedByUserId = data.actorUserId;
-      existente.evidenceRef = data.evidenceRef;
-      existente.validTo = data.validTo;
-      existente.statusConceptId = CONCEPTS.STATE_ACTIVE;
-      touch(existente, data.actorUserId);
-      return { badge: existente, created: false };
+      existing.verificationMethodConceptId = data.verificationMethodConceptId;
+      existing.verifiedByUserId = data.actorUserId;
+      existing.evidenceRef = data.evidenceRef;
+      existing.validTo = data.validTo;
+      existing.statusConceptId = CONCEPTS.STATE_ACTIVE;
+      touch(existing, data.actorUserId);
+      return { badge: existing, created: false };
     }
 
     const badge = em.create(
@@ -132,16 +132,16 @@ export class VerifiedBadgesRepository {
   revoke(
     badge: VerifiedBadges,
     actorUserId: string,
-    motivo: 'REVOKED' | 'EXPIRED',
+    reason: 'REVOKED' | 'EXPIRED',
   ): void {
     // Se distingue revocado de vencido porque no significan lo mismo: uno dice
     // «la autoridad retiró el respaldo», el otro «hay que renovar». La pantalla
     // los muestra distinto y quien audita necesita poder separarlos.
     badge.statusConceptId =
-      motivo === 'REVOKED' ? CONCEPTS.STATE_REVOKED : CONCEPTS.STATE_EXPIRED;
+      reason === 'REVOKED' ? CONCEPTS.STATE_REVOKED : CONCEPTS.STATE_EXPIRED;
     // Un vencido ya tiene su `validTo` en el pasado y no se pisa: la fecha en
     // que dejó de valer es la que decía el sello, no la del barrido que lo notó.
-    if (motivo === 'REVOKED' || !badge.validTo) {
+    if (reason === 'REVOKED' || !badge.validTo) {
       badge.validTo = new Date();
     }
     touch(badge, actorUserId);

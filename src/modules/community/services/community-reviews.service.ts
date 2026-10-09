@@ -104,7 +104,7 @@ export class CommunityReviewsService {
    * @param targetSubjectId - Sujeto de la vitrina calificada.
    * @throws PreconditionFailedException si la atención no habilita la reseña.
    */
-  private async assertAtencionElegible(
+  private async assertEligibleCare(
     em: EntityManager,
     encounterId: string,
     patientProfileId: string,
@@ -141,14 +141,14 @@ export class CommunityReviewsService {
     // estado**: en un encuentro terminado los participantes quedan en
     // `PART_COMPLETED`, así que el listado de «participantes activos» del módulo
     // clínico devolvería vacío justo en el único caso que habilita una reseña.
-    const participo =
+    const participated =
       (await em.findOne(EncounterParticipants, {
         encounterId,
         practitionerProfileId: targetSubjectId,
       })) !== null;
-    const atendio =
-      encuentro.primaryPractitionerId === targetSubjectId || participo;
-    if (!atendio) {
+    const attended =
+      encuentro.primaryPractitionerId === targetSubjectId || participated;
+    if (!attended) {
       throw new PreconditionFailedException(
         'La atención declarada no fue con este profesional',
         { encounterId },
@@ -263,7 +263,7 @@ export class CommunityReviewsService {
 
       // La elegibilidad: la atención tiene que existir, ser de este paciente,
       // haber sido con este profesional y estar terminada.
-      await this.assertAtencionElegible(
+      await this.assertEligibleCare(
         tx,
         dto.verifiedEncounterId,
         reviewerPatientProfileId,
@@ -398,12 +398,12 @@ export class CommunityReviewsService {
         );
       }
 
-      const previa = await this.reviewsRepo.findResponseByResponder(
+      const previous = await this.reviewsRepo.findResponseByResponder(
         tx,
         reviewId,
         profileId,
       );
-      if (previa) {
+      if (previous) {
         throw new ConflictException(
           'Ya respondiste esta reseña',
           { reviewId },
@@ -411,7 +411,7 @@ export class CommunityReviewsService {
         );
       }
 
-      const respuesta = this.reviewsRepo.createResponse(tx, {
+      const response = this.reviewsRepo.createResponse(tx, {
         reviewId,
         responderPublicProfileId: profileId,
         responseText: dto.responseText,
@@ -420,7 +420,7 @@ export class CommunityReviewsService {
       });
       await tx.flush();
 
-      return { id: respuesta.id };
+      return { id: response.id };
     });
   }
 }

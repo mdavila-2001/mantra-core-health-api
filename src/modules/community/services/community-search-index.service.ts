@@ -231,12 +231,12 @@ export class CommunitySearchIndexService {
     const em = this.em.fork();
     const profile = await em.findOne(PublicProfiles, { id: profileId });
 
-    const publicable =
+    const publishable =
       profile !== null &&
       profile.visibilityConceptId === COMM.PROFILE_VISIBILITY_PUBLIC &&
       profile.statusConceptId === CONCEPTS.STATE_ACTIVE;
 
-    if (!publicable) {
+    if (!publishable) {
       await this.removeProfile(profileId);
       return { action: 'removed' };
     }

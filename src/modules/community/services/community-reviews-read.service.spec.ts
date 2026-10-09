@@ -67,11 +67,11 @@ describe('CommunityReviewsReadService', () => {
 
     const res = await d.service.listProfileReviews('p-1', { limit: 10 });
 
-    const serializado = JSON.stringify(res);
-    expect(serializado).not.toContain('encuentro-secreto');
-    expect(serializado).not.toContain('paciente-secreto');
-    expect(serializado).not.toContain('verifiedEncounterId');
-    expect(serializado).not.toContain('reviewerPatientProfileId');
+    const serialized = JSON.stringify(res);
+    expect(serialized).not.toContain('encuentro-secreto');
+    expect(serialized).not.toContain('paciente-secreto');
+    expect(serialized).not.toContain('verifiedEncounterId');
+    expect(serialized).not.toContain('reviewerPatientProfileId');
     // Lo que sí viaja es el estado de verificación, que es lo que la pantalla
     // necesita para el sello de «paciente verificado».
     expect(res.items[0].verificationStatusConceptId).toBe('verificada');
@@ -118,7 +118,7 @@ describe('CommunityReviewsReadService', () => {
 });
 
 describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)', () => {
-  const perfil = {
+  const profile = {
     id: 'p-1',
     targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
   };
@@ -136,7 +136,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
     // JSON-LD de la página, que declara `Physician`.
     const d = build();
     d.searchRepo.findPublicBySlug.mockResolvedValue({
-      ...perfil,
+      ...profile,
       targetTypeConceptId: 'otro-tipo',
     });
     await expect(
@@ -152,7 +152,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
 
   it('el promedio es el del perfil, no el de la página', async () => {
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
     // Una sola reseña de 5 en la página; el perfil promedia 4,6 sobre 12.
     d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
     d.searchRepo.ratingsByProfile.mockResolvedValue(
@@ -176,7 +176,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
     // Cero estrellas es una calificación pésima; «todavía nadie calificó» no
     // lo es, y decirlo con un 0 sería contar otra cosa.
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
     d.searchRepo.ratingsByProfile.mockResolvedValue(new Map());
 
     const res = await d.service.listPublicReviewsBySlug(
@@ -194,7 +194,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
 
   it('descarta las reseñas removidas por moderación, igual que el promedio', async () => {
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
 
     await d.service.listPublicReviewsBySlug('dra-perez', undefined, {
       limit: 10,
@@ -212,7 +212,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
 
   it('firma con el nombre sólo si el autor eligió mostrarlo', async () => {
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
     d.reviewsRepo.listByTargetPage.mockResolvedValue([
       {
         ...review,
@@ -251,7 +251,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
     // Traerlo y descartarlo después dejaría el nombre del autor anónimo en la
     // memoria del proceso, que es lo que la reseña anónima promete que no pasa.
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
     d.reviewsRepo.listByTargetPage.mockResolvedValue([
       {
         ...review,
@@ -272,7 +272,7 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
 
   it('nunca expone el encuentro ni el paciente, tampoco en la superficie pública', async () => {
     const d = build();
-    d.searchRepo.findPublicBySlug.mockResolvedValue(perfil);
+    d.searchRepo.findPublicBySlug.mockResolvedValue(profile);
     d.reviewsRepo.listByTargetPage.mockResolvedValue([review]);
 
     const res = await d.service.listPublicReviewsBySlug(
@@ -283,8 +283,8 @@ describe('CommunityReviewsReadService — opiniones de la ficha pública (P31)',
       },
     );
 
-    const serializado = JSON.stringify(res);
-    expect(serializado).not.toContain('encuentro-secreto');
-    expect(serializado).not.toContain('paciente-secreto');
+    const serialized = JSON.stringify(res);
+    expect(serialized).not.toContain('encuentro-secreto');
+    expect(serialized).not.toContain('paciente-secreto');
   });
 });

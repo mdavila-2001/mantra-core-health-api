@@ -210,22 +210,22 @@ export class CommunityMessagingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     res.setHeader('Cache-Control', 'private, no-store');
-    const contenido = await this.readService.getAttachmentContent(
+    const content = await this.readService.getAttachmentContent(
       conversationId,
       fileId,
       profileId,
       actor,
     );
-    res.setHeader('Content-Type', contenido.mimeType);
-    if (contenido.originalName) {
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
       // Codificado, igual que en `CommonFilesController`: un nombre de archivo
       // con comillas o saltos de línea podría inyectar cabeceras.
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(contenido.originalName)}`,
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
       );
     }
-    res.send(contenido.buffer);
+    res.send(content.buffer);
   }
 
   /**

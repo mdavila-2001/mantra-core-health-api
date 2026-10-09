@@ -50,7 +50,7 @@ function build() {
   };
   // F4.2: la presencia se dobla; por defecto nadie está en línea.
   const presence = {
-    presenciaDe: mockFn((ids: string[]) =>
+    presence: mockFn((ids: string[]) =>
       Promise.resolve(
         ids.map((profileId) => ({
           profileId,
@@ -89,7 +89,7 @@ function build() {
 }
 
 /** Una bandeja de tres conversaciones, para las pruebas de F4.3/F4.4. */
-function conTresConversaciones(d: ReturnType<typeof build>) {
+function withThreeConversations(d: ReturnType<typeof build>) {
   d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
     {
       conversationId: 'c-1',
@@ -168,7 +168,7 @@ describe('CommunityMessagingReadService', () => {
         },
       ]);
 
-      const resultado = await d.service.searchContacts(
+      const result = await d.service.searchContacts(
         'p-propio',
         actor,
         '  María  ',
@@ -184,7 +184,7 @@ describe('CommunityMessagingReadService', () => {
         expect.anything(),
         { ownProfileId: 'p-propio', q: 'María', limit: 10 },
       );
-      expect(resultado).toEqual({
+      expect(result).toEqual({
         items: [
           {
             profileId: 'p-paciente',
@@ -278,10 +278,10 @@ describe('CommunityMessagingReadService', () => {
       ['inexistente', []],
       ['huérfano', []],
       ['mensaje removido', []],
-    ])('uniforma el 404 para %s', async (_caso, mensajes) => {
+    ])('uniforma el 404 para %s', async (_caso, messages) => {
       const d = build();
       d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue(
-        mensajes,
+        messages,
       );
 
       await expect(
@@ -416,7 +416,7 @@ describe('CommunityMessagingReadService', () => {
 
     it('las fijadas van primero y cada fila trae lo que el actor marcó', async () => {
       const d = build();
-      conTresConversaciones(d);
+      withThreeConversations(d);
 
       const res = await d.service.listConversations('p-1', actor, {
         limit: 20,
@@ -437,7 +437,7 @@ describe('CommunityMessagingReadService', () => {
 
     it('la vista previa dice de qué tipo era el último mensaje', async () => {
       const d = build();
-      conTresConversaciones(d);
+      withThreeConversations(d);
       d.conversationsRepo.findLastMessage.mockResolvedValue({
         id: 'm-9',
         senderProfileId: 'peer-c-1',
@@ -458,52 +458,52 @@ describe('CommunityMessagingReadService', () => {
 
     it('dice si el otro leyó el último mensaje sólo cuando es propio y directo', async () => {
       const d = build();
-      conTresConversaciones(d);
+      withThreeConversations(d);
 
       const res = await d.service.listConversations('p-1', actor, {
         limit: 20,
       });
-      const porId = new Map(res.items.map((item) => [item.id, item]));
+      const byId = new Map(res.items.map((item) => [item.id, item]));
 
       // c-1: último propio y el peer tiene lastReadMessageId = m-1 → leído.
-      expect(porId.get('c-1')?.lastMessageReadByPeer).toBe(true);
+      expect(byId.get('c-1')?.lastMessageReadByPeer).toBe(true);
       // c-2: último ajeno → no aplica.
-      expect(porId.get('c-2')?.lastMessageReadByPeer).toBeNull();
+      expect(byId.get('c-2')?.lastMessageReadByPeer).toBeNull();
     });
 
     it('recorta por nombre del otro lado o por texto del último mensaje, sin acentos', async () => {
       const d = build();
-      conTresConversaciones(d);
+      withThreeConversations(d);
 
-      const porNombre = await d.service.listConversations('p-1', actor, {
+      const byName = await d.service.listConversations('p-1', actor, {
         limit: 20,
         q: 'PENA',
       });
-      expect(porNombre.items.map((item) => item.id)).toEqual(['c-1']);
+      expect(byName.items.map((item) => item.id)).toEqual(['c-1']);
 
-      const porTexto = await d.service.listConversations('p-1', actor, {
+      const byText = await d.service.listConversations('p-1', actor, {
         limit: 20,
         q: 'receta',
       });
-      expect(porTexto.items.map((item) => item.id)).toEqual(['c-2']);
+      expect(byText.items.map((item) => item.id)).toEqual(['c-2']);
     });
 
     it('pagina con cursor dentro del mismo recorte', async () => {
       const d = build();
-      conTresConversaciones(d);
+      withThreeConversations(d);
 
-      const primera = await d.service.listConversations('p-1', actor, {
+      const first = await d.service.listConversations('p-1', actor, {
         limit: 2,
       });
-      expect(primera.items.map((item) => item.id)).toEqual(['c-2', 'c-1']);
-      expect(primera.nextCursor).not.toBeNull();
+      expect(first.items.map((item) => item.id)).toEqual(['c-2', 'c-1']);
+      expect(first.nextCursor).not.toBeNull();
 
-      const segunda = await d.service.listConversations('p-1', actor, {
+      const second = await d.service.listConversations('p-1', actor, {
         limit: 2,
-        cursor: primera.nextCursor!,
+        cursor: first.nextCursor!,
       });
-      expect(segunda.items.map((item) => item.id)).toEqual(['c-3']);
-      expect(segunda.nextCursor).toBeNull();
+      expect(second.items.map((item) => item.id)).toEqual(['c-3']);
+      expect(second.nextCursor).toBeNull();
     });
   });
 
@@ -514,13 +514,13 @@ describe('CommunityMessagingReadService', () => {
         { participantProfileId: 'p-1' },
         { participantProfileId: 'p-2' },
       ]);
-      d.presence.presenciaDe.mockResolvedValue([
+      d.presence.presence.mockResolvedValue([
         { profileId: 'p-2', online: true, lastSeenAt: null },
       ]);
 
       const res = await d.service.conversationPresence('c-1', 'p-1', actor);
 
-      expect(d.presence.presenciaDe).toHaveBeenCalledWith(['p-2']);
+      expect(d.presence.presence).toHaveBeenCalledWith(['p-2']);
       expect(res.peers[0].online).toBe(true);
     });
 
@@ -576,17 +576,17 @@ describe('CommunityMessagingReadService', () => {
         bodyText: 'Turno: martes 10:00',
       });
 
-      const primera = await d.service.listMessages('c-1', 'p-1', actor, {
+      const first = await d.service.listMessages('c-1', 'p-1', actor, {
         limit: 10,
       });
-      expect(primera.pinnedMessage?.bodyText).toBe('Turno: martes 10:00');
+      expect(first.pinnedMessage?.bodyText).toBe('Turno: martes 10:00');
 
-      const siguiente = await d.service.listMessages('c-1', 'p-1', actor, {
+      const next = await d.service.listMessages('c-1', 'p-1', actor, {
         limit: 10,
         cursor:
           'eyJzZW50QXQiOiIyMDI2LTA5LTA5VDA5OjAwOjAwLjAwMFoiLCJpZCI6Im0tMSJ9',
       });
-      expect(siguiente.pinnedMessage).toBeUndefined();
+      expect(next.pinnedMessage).toBeUndefined();
     });
   });
 
@@ -655,17 +655,17 @@ describe('CommunityMessagingReadService', () => {
         { participantProfileId: 'p-1' },
         { participantProfileId: 'p-2', lastReadMessageId: 'm-5' },
       ]);
-      const leidoHasta = new Date('2026-08-01T12:00:00Z');
+      const readUntil = new Date('2026-08-01T12:00:00Z');
       d.conversationsRepo.findMessageById.mockResolvedValue({
         id: 'm-5',
-        sentAt: leidoHasta,
+        sentAt: readUntil,
       });
 
       const res = await d.service.listMessages('c-1', 'p-1', actor, {
         limit: 10,
       });
 
-      expect(res.peerReadUpTo).toEqual(leidoHasta);
+      expect(res.peerReadUpTo).toEqual(readUntil);
     });
 
     it('peerReadUpTo es null en un grupo (no hay "el otro lado")', async () => {
