@@ -93,6 +93,7 @@ function build() {
   };
   const languagesRepo = {
     create: mockFn(),
+    remove: mockFn(),
     findByPractitioner: mockFn().mockResolvedValue([]),
   };
   const affiliationsRepo = {
@@ -1940,6 +1941,115 @@ describe('ProfilesPractitionersService', () => {
       expect(practitioner.telehealthAvailable).toBe(true);
       // Se relee entero: la respuesta es la misma forma que `getOwnPractitionerProfile`.
       expect(updated.professionalTitle).toBe('Médica cardióloga');
+    });
+
+    describe('idiomas (informe B, C13)', () => {
+      const QUECHUA = '11111111-1111-4111-8111-111111111111';
+      const ESPANOL = '22222222-2222-4222-8222-222222222222';
+      const AYMARA = '33333333-3333-4333-8333-333333333333';
+      const FLUIDO = '44444444-4444-4444-8444-444444444444';
+
+      it('reemplaza la lista: actualiza el que sigue, quita el que no vino y agrega el nuevo', async () => {
+        const d = build();
+        prepareForEdit(d, practitionerBase());
+        const espanol: any = {
+          languageConceptId: ESPANOL,
+          clinicalInterpretationAllowed: true,
+        };
+        const aymara: any = {
+          languageConceptId: AYMARA,
+          clinicalInterpretationAllowed: false,
+        };
+        d.languagesRepo.findByPractitioner.mockResolvedValueOnce([
+          espanol,
+          aymara,
+        ]);
+
+        await d.service.updateOwnPractitionerProfile(
+          {
+            languages: [
+              {
+                languageConceptId: ESPANOL,
+                proficiencyConceptId: FLUIDO,
+                clinicalInterpretationAllowed: false,
+              },
+              {
+                languageConceptId: QUECHUA,
+                clinicalInterpretationAllowed: true,
+              },
+            ],
+          },
+          { id: 'u-1' } as any,
+        );
+
+        expect(d.languagesRepo.findByPractitioner).toHaveBeenCalledWith(
+          d.tx,
+          'per-1',
+        );
+        expect(espanol.proficiencyConceptId).toBe(FLUIDO);
+        expect(espanol.clinicalInterpretationAllowed).toBe(false);
+        expect(d.languagesRepo.remove).toHaveBeenCalledWith(d.tx, aymara);
+        expect(d.languagesRepo.remove).toHaveBeenCalledTimes(1);
+        expect(d.languagesRepo.create).toHaveBeenCalledWith(d.tx, {
+          practitionerProfileId: 'per-1',
+          languageConceptId: QUECHUA,
+          proficiencyConceptId: undefined,
+          clinicalInterpretationAllowed: true,
+          actorUserId: 'u-1',
+        });
+        expect(d.tx.flush).toHaveBeenCalled();
+      });
+
+      it('una lista vacía quita todos los idiomas', async () => {
+        const d = build();
+        prepareForEdit(d, practitionerBase());
+        const espanol: any = { languageConceptId: ESPANOL };
+        d.languagesRepo.findByPractitioner.mockResolvedValueOnce([espanol]);
+
+        await d.service.updateOwnPractitionerProfile({ languages: [] }, {
+          id: 'u-1',
+        } as any);
+
+        expect(d.languagesRepo.remove).toHaveBeenCalledWith(d.tx, espanol);
+        expect(d.languagesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('sin `languages` en el cuerpo no toca los idiomas', async () => {
+        const d = build();
+        prepareForEdit(d, practitionerBase());
+
+        await d.service.updateOwnPractitionerProfile({ professionalBio: 'x' }, {
+          id: 'u-1',
+        } as any);
+
+        expect(d.languagesRepo.remove).not.toHaveBeenCalled();
+        expect(d.languagesRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('un idioma repetido es 422 y no escribe nada', async () => {
+        const d = build();
+        prepareForEdit(d, practitionerBase());
+
+        await expect(
+          d.service.updateOwnPractitionerProfile(
+            {
+              languages: [
+                {
+                  languageConceptId: ESPANOL,
+                  clinicalInterpretationAllowed: true,
+                },
+                {
+                  languageConceptId: ESPANOL,
+                  clinicalInterpretationAllowed: false,
+                },
+              ],
+            },
+            { id: 'u-1' } as any,
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.languagesRepo.create).not.toHaveBeenCalled();
+        expect(d.languagesRepo.remove).not.toHaveBeenCalled();
+      });
     });
 
     it('cambia sólo la razón social y conserva el NIT vigente', async () => {

@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SubledgerService } from './subledger.service';
 import { ACCT } from '../accounting.concepts';
+import { ForbiddenException } from '@nestjs/common';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -22,7 +23,10 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue({ id: 'p1', tenantId: 't' }),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const subledgerRepo = {
     findSubledgerById: mockFn(),
@@ -145,6 +149,65 @@ describe('SubledgerService', () => {
       expect(res.clearedItems).toBe(1);
       expect(res.transactionId).toBe('tx1');
       expect(openItem.statusConceptId).toBe(ACCT.OPEN_ITEM_CLEARED);
+    });
+
+    describe('organización del documento (informe B, C9)', () => {
+      const { tenantId: _omitido, ...sinTenant } = dto;
+
+      /** Deja una partida y su subledger listos para compensar. */
+      function listo(d: ReturnType<typeof build>) {
+        d.subledgerRepo.findOpenItemById.mockResolvedValue({
+          id: 'oi1',
+          statusConceptId: ACCT.OPEN_ITEM_OPEN,
+          subledgerAccountId: 's',
+          outstandingAmount: '100.00',
+          updatedAt: new Date(),
+        });
+        d.subledgerRepo.findSubledgerById.mockResolvedValue({
+          id: 's',
+          reconciliationAccountId: 'rec',
+        });
+      }
+
+      it('sin tenantId en el cuerpo, la deriva de la práctica', async () => {
+        const d = build();
+        listo(d);
+        d.tx.findOne.mockResolvedValue({ id: 'p1', tenantId: 't-practica' });
+
+        await d.service.clearOpenItems(sinTenant, actor);
+
+        expect(d.subledgerRepo.findClearingByNumber).toHaveBeenCalledWith(
+          d.tx,
+          't-practica',
+          'CLR-1',
+        );
+        expect(d.subledgerRepo.createClearingDocument).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ tenantId: 't-practica' }),
+        );
+      });
+
+      it('un tenantId declarado distinto del de la práctica es 403 y no asienta', async () => {
+        const d = build();
+        listo(d);
+        d.tx.findOne.mockResolvedValue({ id: 'p1', tenantId: 't-practica' });
+
+        await expect(
+          d.service.clearOpenItems({ ...dto, tenantId: 't-ajeno' }, actor),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.posting.post).not.toHaveBeenCalled();
+      });
+
+      it('una práctica inexistente es 404 y no asienta', async () => {
+        const d = build();
+        listo(d);
+        d.tx.findOne.mockResolvedValue(null);
+
+        await expect(
+          d.service.clearOpenItems(sinTenant, actor),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.posting.post).not.toHaveBeenCalled();
+      });
     });
   });
 });
