@@ -185,7 +185,7 @@ export {
   CONCEPT_DEFS,
   SEED,
   deterministicId,
-  SALUD_UUID_NAMESPACE,
+  HEALTH_UUID_NAMESPACE as SALUD_UUID_NAMESPACE,
 } from './constants/concepts';
 export type { ConceptName } from './constants/concepts';
 
