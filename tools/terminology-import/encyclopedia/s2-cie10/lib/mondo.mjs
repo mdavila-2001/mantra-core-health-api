@@ -17,6 +17,9 @@ const EXACT_PATTERNS = [
   ['mesh', /^http:\/\/identifiers\.org\/mesh\/([A-Z]\d+)$/],
   ['doid', /^http:\/\/purl\.obolibrary\.org\/obo\/DOID_(\d+)$/],
   ['umls', /^http:\/\/linkedlifedata\.com\/resource\/umls\/id\/(C\d+)$/],
+  ['ncit', /^http:\/\/purl\.obolibrary\.org\/obo\/NCIT_(C\d+)$/],
+  ['medgen', /^http:\/\/identifiers\.org\/medgen\/(\d+)$/],
+  ['icd11foundation', /^http:\/\/id\.who\.int\/icd\/entity\/(\d+)$/],
 ];
 
 /** Un nodo de mondo.json → concepto normalizado; null si no es una clase MONDO vigente. */
@@ -37,6 +40,7 @@ export function toMondoConcept(node) {
     label: node.lbl ?? null,
     definition: meta.definition?.val?.trim() || null,
     definitionXrefs: meta.definition?.xrefs ?? [],
+    synonyms: [...new Set((meta.synonyms ?? []).filter((s) => s.pred === 'hasExactSynonym' && s.val).map((s) => s.val.trim()))],
     exact,
   };
 }
