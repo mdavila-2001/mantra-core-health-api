@@ -1,5 +1,5 @@
 import {
-  requiereCriterioDeBusqueda,
+  searchRequiresCriterion,
   resolvePatientSearchScope,
 } from './patient-search-scope';
 
@@ -14,8 +14,8 @@ describe('resolvePatientSearchScope', () => {
   // atendió.
   it.each(['SECURITY_ADMIN', 'SUPERADMIN', 'PRACTITIONER', 'CLINICIAN'])(
     '%s ve el padrón sin acotar',
-    (rol) => {
-      expect(resolvePatientSearchScope(actor([rol]))).toEqual({
+    (role) => {
+      expect(resolvePatientSearchScope(actor([role]))).toEqual({
         kind: 'unrestricted',
       });
     },
@@ -25,15 +25,15 @@ describe('resolvePatientSearchScope', () => {
 describe('requiereCriterioDeBusqueda', () => {
   it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
     '%s administra el padrón: no necesita criterio',
-    (rol) => {
-      expect(requiereCriterioDeBusqueda(actor([rol]))).toBe(false);
+    (role) => {
+      expect(searchRequiresCriterion(actor([role]))).toBe(false);
     },
   );
 
   it.each(['PRACTITIONER', 'CLINICIAN'])(
     '%s es un rol clínico: necesita al menos un criterio',
-    (rol) => {
-      expect(requiereCriterioDeBusqueda(actor([rol]))).toBe(true);
+    (role) => {
+      expect(searchRequiresCriterion(actor([role]))).toBe(true);
     },
   );
 });

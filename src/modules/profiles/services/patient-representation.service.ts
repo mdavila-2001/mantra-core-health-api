@@ -89,10 +89,10 @@ export class PatientRepresentationService {
     actor: AuthenticatedUser,
     em?: EntityManager,
   ): Promise<boolean> {
-    const contexto = em ?? this.em.fork();
-    if (await this.isOwnPatient(contexto, patientProfileId, actor)) return true;
+    const context = em ?? this.em.fork();
+    if (await this.isOwnPatient(context, patientProfileId, actor)) return true;
     const proxy = await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
-      contexto,
+      context,
       actor.id,
       patientProfileId,
       new Date(),
@@ -115,9 +115,9 @@ export class PatientRepresentationService {
     userId: string,
     em?: EntityManager,
   ): Promise<Set<string>> {
-    const contexto = em ?? this.em.fork();
+    const context = em ?? this.em.fork();
     const proxies = await this.portalProxiesRepo.findActiveByProxyUser(
-      contexto,
+      context,
       userId,
       new Date(),
     );

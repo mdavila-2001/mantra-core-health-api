@@ -47,8 +47,8 @@ export class AdministrativeAreaCatalogService {
     em: EntityManager,
     conceptId: string,
   ): Promise<void> {
-    const miembros = await this.listMemberIds(em);
-    if (!miembros.has(conceptId)) {
+    const members = await this.listMemberIds(em);
+    if (!members.has(conceptId)) {
       throw new PreconditionFailedException(
         'El departamento no pertenece al catálogo de departamentos de Bolivia',
         { conceptId, valueSet: ADMINISTRATIVE_AREA_VALUE_SET },
@@ -65,24 +65,24 @@ export class AdministrativeAreaCatalogService {
    * documento. Se dice que el catálogo no está disponible, que es lo que pasa.
    */
   private async listMemberIds(em: EntityManager): Promise<ReadonlySet<string>> {
-    const conjunto = await this.valueSets.findByInternalCode(
+    const set = await this.valueSets.findByInternalCode(
       em,
       ADMINISTRATIVE_AREA_VALUE_SET,
     );
-    const miembros =
-      conjunto === null
+    const members =
+      set === null
         ? null
         : await this.valueSets.findIncludedConceptIdsByValueSet(
             em,
-            conjunto.id,
+            set.id,
           );
-    if (miembros === null) {
+    if (members === null) {
       throw new PreconditionFailedException(
         'El catálogo de departamentos no está disponible',
         { valueSet: ADMINISTRATIVE_AREA_VALUE_SET },
         ProfilesErrorReason.ADMINISTRATIVE_AREA_CATALOG_UNAVAILABLE,
       );
     }
-    return new Set(miembros);
+    return new Set(members);
   }
 }

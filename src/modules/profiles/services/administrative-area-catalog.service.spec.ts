@@ -18,7 +18,7 @@ const LA_PAZ = boDepartmentConceptId('LP');
  * Un concepto real del sistema que NO es un departamento: sirve de
  * contraejemplo, igual que en `medical-specialty-catalog.service.spec.ts`.
  */
-const NO_ES_DEPARTAMENTO = '211c3fe3-88de-5d17-8974-ed4744e2fa03';
+const NOT_A_DEPARTMENT = '211c3fe3-88de-5d17-8974-ed4744e2fa03';
 
 function build(
   overrides: {
@@ -62,7 +62,7 @@ describe('AdministrativeAreaCatalogService', () => {
   it('rechaza con 422 un concepto que existe pero no es un departamento', async () => {
     const d = build();
     await expect(
-      d.service.assertIsAdministrativeArea(d.em, NO_ES_DEPARTAMENTO),
+      d.service.assertIsAdministrativeArea(d.em, NOT_A_DEPARTMENT),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 

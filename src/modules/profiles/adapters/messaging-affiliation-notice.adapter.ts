@@ -12,7 +12,7 @@ import type {
 } from '../ports/affiliation-notice.port';
 
 /** Categoría de catálogo de cada aviso, para que la preferencia pueda nombrarla. */
-const CATEGORIA: Readonly<Record<AffiliationNoticeKind, string>> = {
+const CATEGORY: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED: PROF.NOTICE_AFFILIATION_APPROVED,
   AFFILIATION_REJECTED: PROF.NOTICE_AFFILIATION_REJECTED,
   AFFILIATION_REVOKED: PROF.NOTICE_AFFILIATION_REVOKED,
@@ -27,7 +27,7 @@ const CATEGORIA: Readonly<Record<AffiliationNoticeKind, string>> = {
  * lo descubre chocando contra un error en medio de la jornada. Aprobar y
  * rechazar cierran un trámite que él inició y que está esperando.
  */
-const PRIORIDAD: Readonly<Record<AffiliationNoticeKind, number>> = {
+const PRIORITY: Readonly<Record<AffiliationNoticeKind, number>> = {
   AFFILIATION_REVOKED: 2,
   AFFILIATION_APPROVED: 4,
   AFFILIATION_REJECTED: 4,
@@ -71,7 +71,7 @@ export class MessagingAffiliationNoticeAdapter implements AffiliationNoticePort 
    */
   async emit(notice: AffiliationNotice): Promise<AffiliationNoticeResult> {
     try {
-      return await this.emitir(notice);
+      return await this.issue(notice);
     } catch (error) {
       this.logger.warn(
         {
@@ -92,7 +92,7 @@ export class MessagingAffiliationNoticeAdapter implements AffiliationNoticePort 
    * @param notice - El aviso a emitir.
    * @returns Resultado de la entrega.
    */
-  private async emitir(
+  private async issue(
     notice: AffiliationNotice,
   ): Promise<AffiliationNoticeResult> {
     const actor = this.actor(SEED.systemWorkerUserId);
@@ -102,8 +102,8 @@ export class MessagingAffiliationNoticeAdapter implements AffiliationNoticePort 
         channelId: MESSAGING_SEED.inAppChannelId,
         recipientUserId: notice.recipientUserId,
         tenantId: notice.tenantId,
-        categoryConceptId: CATEGORIA[notice.kind],
-        priority: PRIORIDAD[notice.kind],
+        categoryConceptId: CATEGORY[notice.kind],
+        priority: PRIORITY[notice.kind],
         payloadJson: {
           kind: notice.kind,
           subject: notice.subject,

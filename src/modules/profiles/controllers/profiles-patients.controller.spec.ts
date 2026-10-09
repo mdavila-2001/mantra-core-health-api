@@ -204,16 +204,16 @@ describe('ProfilesPatientsController', () => {
   });
 
   describe('POST patients/search: la búsqueda con los filtros en el cuerpo (UC-05-13)', () => {
-    const clinico = { id: 'med-1', roles: ['PRACTITIONER'] } as any;
+    const clinical = { id: 'med-1', roles: ['PRACTITIONER'] } as any;
 
     /**
      * Los errores de validación del cuerpo, como los vería el `ValidationPipe`.
      *
-     * @param cuerpo - Lo que mandaría el cliente.
+     * @param body - Lo que mandaría el cliente.
      * @returns Las propiedades que no pasaron.
      */
-    async function erroresDe(cuerpo: unknown): Promise<string[]> {
-      const dto = plainToInstance(SearchPatientsQueryDto, cuerpo);
+    async function errors(body: unknown): Promise<string[]> {
+      const dto = plainToInstance(SearchPatientsQueryDto, body);
       const errores = await validate(dto, {
         whitelist: true,
         forbidNonWhitelisted: true,
@@ -239,7 +239,7 @@ describe('ProfilesPatientsController', () => {
             cursor: 'c-2',
             limit: 20,
           },
-          clinico,
+          clinical,
         ),
       ).resolves.toMatchObject({ count: 0 });
       expect(d.patientsService.searchPatients).toHaveBeenCalledWith(
@@ -250,7 +250,7 @@ describe('ProfilesPatientsController', () => {
           cursor: 'c-2',
           limit: 20,
         },
-        clinico,
+        clinical,
       );
     });
 
@@ -259,7 +259,7 @@ describe('ProfilesPatientsController', () => {
 
       await d.controller.searchPatientsByBody(
         { nationalId: '7654321' },
-        clinico,
+        clinical,
       );
 
       expect(d.patientsService.searchPatients.mock.calls[0][0].limit).toBe(50);
@@ -272,7 +272,7 @@ describe('ProfilesPatientsController', () => {
       );
 
       await expect(
-        d.controller.searchPatientsByBody({}, clinico),
+        d.controller.searchPatientsByBody({}, clinical),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -298,20 +298,20 @@ describe('ProfilesPatientsController', () => {
     });
 
     it('se declara antes que `patients/:profileId`', () => {
-      const fuente = readFileSync(
+      const source = readFileSync(
         'src/modules/profiles/controllers/profiles-patients.controller.ts',
         'utf8',
       );
-      const busqueda = fuente.indexOf("@Post('patients/search')");
-      const porId = fuente.indexOf("@Get('patients/:profileId')");
+      const search = source.indexOf("@Post('patients/search')");
+      const byId = source.indexOf("@Get('patients/:profileId')");
 
-      expect(busqueda).toBeGreaterThan(-1);
-      expect(busqueda).toBeLessThan(porId);
+      expect(search).toBeGreaterThan(-1);
+      expect(search).toBeLessThan(byId);
     });
 
     it('acepta los cinco filtros del GET y ninguno más', async () => {
       expect(
-        await erroresDe({
+        await errors({
           q: 'ana',
           nationalId: '7654321',
           issuerAdministrativeAreaConceptId: ID,
@@ -319,20 +319,20 @@ describe('ProfilesPatientsController', () => {
           limit: 20,
         }),
       ).toEqual([]);
-      expect(await erroresDe({})).toEqual([]);
+      expect(await errors({})).toEqual([]);
     });
 
     it('rechaza un filtro que el contrato no declara, en vez de ignorarlo en silencio', async () => {
-      expect(await erroresDe({ q: 'ana', aboGroupConceptId: ID })).toEqual([
+      expect(await errors({ q: 'ana', aboGroupConceptId: ID })).toEqual([
         'aboGroupConceptId',
       ]);
     });
 
     it('rechaza un tope fuera de 1..500 y un departamento que no es uuid', async () => {
-      expect(await erroresDe({ limit: 0 })).toEqual(['limit']);
-      expect(await erroresDe({ limit: 501 })).toEqual(['limit']);
+      expect(await errors({ limit: 0 })).toEqual(['limit']);
+      expect(await errors({ limit: 501 })).toEqual(['limit']);
       expect(
-        await erroresDe({
+        await errors({
           nationalId: '7654321',
           issuerAdministrativeAreaConceptId: 'LP',
         }),
@@ -346,18 +346,18 @@ describe('ProfilesPatientsController', () => {
     // mal formado en vez de la lista. Lo mismo que ya vale para `me/summary`.
     // Ruta desde la raíz del repo: jest corre desde ahí, y `import.meta` no
     // está disponible bajo el tsconfig raíz (compila a CommonJS).
-    const fuente = readFileSync(
+    const source = readFileSync(
       'src/modules/profiles/controllers/profiles-patients.controller.ts',
       'utf8',
     );
-    const dependientes = fuente.indexOf("@Get('patients/me/dependents')");
-    const alta = fuente.indexOf("@Post('patients/me/dependents')");
-    const porId = fuente.indexOf("@Get('patients/:profileId')");
+    const dependents = source.indexOf("@Get('patients/me/dependents')");
+    const registration = source.indexOf("@Post('patients/me/dependents')");
+    const byId = source.indexOf("@Get('patients/:profileId')");
 
-    expect(dependientes).toBeGreaterThan(-1);
-    expect(alta).toBeGreaterThan(-1);
-    expect(porId).toBeGreaterThan(-1);
-    expect(dependientes).toBeLessThan(porId);
-    expect(alta).toBeLessThan(porId);
+    expect(dependents).toBeGreaterThan(-1);
+    expect(registration).toBeGreaterThan(-1);
+    expect(byId).toBeGreaterThan(-1);
+    expect(dependents).toBeLessThan(byId);
+    expect(registration).toBeLessThan(byId);
   });
 });

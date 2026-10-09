@@ -19,8 +19,8 @@ import {
 } from '../../../common';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
-const OTRO_TENANT = '22222222-2222-2222-2222-222222222222';
-const SEDE = '33333333-3333-3333-3333-333333333333';
+const OTHER_TENANT = '22222222-2222-2222-2222-222222222222';
+const SITE = '33333333-3333-3333-3333-333333333333';
 
 /** Quien administra la organización de arriba. */
 const orgAdmin = {
@@ -118,16 +118,16 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
 
       await expect(
-        d.service.estadoInicial(d.em, undefined, medico),
+        d.service.initialState(d.em, undefined, medico),
       ).resolves.toBe(ESTADO_DEL_VINCULO.DECLARADO);
     });
 
     it('con una sede de una organización QUE TIENE dueño nace pendiente', async () => {
       const d = build();
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
       d.tenantAdmin.hasAdministrators.mockResolvedValue(true);
 
-      await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
+      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
         ESTADO_DEL_VINCULO.PENDIENTE,
       );
     });
@@ -137,10 +137,10 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // así que no tienen a quién apruebe. Dejar el pedido pendiente condenaría
       // a sus médicos a esperar para siempre.
       const d = build();
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
       d.tenantAdmin.hasAdministrators.mockResolvedValue(false);
 
-      await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
+      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
         ESTADO_DEL_VINCULO.DECLARADO,
       );
     });
@@ -151,18 +151,18 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
      */
     it('con una sede de su propia organización nace aprobado', async () => {
       const d = build();
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
 
-      await expect(d.service.estadoInicial(d.em, SEDE, orgAdmin)).resolves.toBe(
+      await expect(d.service.initialState(d.em, SITE, orgAdmin)).resolves.toBe(
         ESTADO_DEL_VINCULO.APROBADO,
       );
     });
 
     it('una sede sin organización a cargo nace declarado', async () => {
       const d = build();
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: undefined });
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: undefined });
 
-      await expect(d.service.estadoInicial(d.em, SEDE, medico)).resolves.toBe(
+      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
         ESTADO_DEL_VINCULO.DECLARADO,
       );
     });
@@ -172,7 +172,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue(null);
 
       await expect(
-        d.service.estadoInicial(d.em, SEDE, medico),
+        d.service.initialState(d.em, SITE, medico),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -181,7 +181,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
     it('a un tercero sólo se le muestran los vínculos aprobados', async () => {
       const d = build();
 
-      await d.service.visiblesDeTerceros(d.em, 'pp-1');
+      await d.service.visiblesThird(d.em, 'pp-1');
 
       expect(
         d.affiliationsRepo.findByPractitionerInStatus,
@@ -197,7 +197,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       );
 
       await expect(
-        d.service.listarSolicitudes(TENANT, orgAdmin),
+        d.service.listSolicitudes(TENANT, orgAdmin),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -209,15 +209,15 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
      */
     it('busca las sedes acotadas al tenant y las solicitudes sobre esas sedes', async () => {
       const d = build();
-      d.em.find.mockResolvedValue([{ id: SEDE }]);
+      d.em.find.mockResolvedValue([{ id: SITE }]);
 
-      await d.service.listarSolicitudes(TENANT, orgAdmin);
+      await d.service.listSolicitudes(TENANT, orgAdmin);
 
       const [, criterio] = d.em.find.mock.calls[0] as [unknown, any];
       expect(criterio).toEqual({ managingTenantId: TENANT });
       expect(d.affiliationsRepo.findBySites).toHaveBeenCalledWith(
         d.em,
-        [SEDE],
+        [SITE],
         [ESTADO_DEL_VINCULO.PENDIENTE],
       );
     });
@@ -227,79 +227,79 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.find.mockResolvedValue([]);
 
       await expect(
-        d.service.listarSolicitudes(TENANT, orgAdmin),
+        d.service.listSolicitudes(TENANT, orgAdmin),
       ).resolves.toEqual({ items: [] });
     });
   });
 
   describe('aprobar y rechazar', () => {
     /** Una solicitud pendiente sobre una sede de esta organización. */
-    function conSolicitud(d: ReturnType<typeof build>): any {
-      const solicitud = {
+    function withRequest(d: ReturnType<typeof build>): any {
+      const request = {
         id: 'af-1',
         practitionerProfileId: 'pp-1',
-        practiceSiteId: SEDE,
+        practiceSiteId: SITE,
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
       };
-      d.affiliationsRepo.findById.mockResolvedValue(solicitud);
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
-      return solicitud;
+      d.affiliationsRepo.findById.mockResolvedValue(request);
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
+      return request;
     }
 
     it('el motivo del rechazo SE GUARDA, no sólo se registra', async () => {
       // La columna existe desde v4.1.9 y nadie la escribía: el motivo viajaba
       // sólo al log, así que un rechazo era mudo para quien lo recibe.
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
 
-      await d.service.rechazar(
+      await d.service.reject(
         TENANT,
         'af-1',
         { reason: '  No figura en nuestro plantel  ' } as never,
         orgAdmin,
       );
 
-      expect(solicitud.decisionReasonText).toBe('No figura en nuestro plantel');
+      expect(request.decisionReasonText).toBe('No figura en nuestro plantel');
     });
 
     it('un motivo en blanco no ensucia la columna', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
 
-      await d.service.rechazar(
+      await d.service.reject(
         TENANT,
         'af-1',
         { reason: '   ' } as never,
         orgAdmin,
       );
 
-      expect(solicitud.decisionReasonText).toBeUndefined();
+      expect(request.decisionReasonText).toBeUndefined();
     });
 
     it('revocar da de baja un vínculo YA APROBADO', async () => {
       // El concepto existía desde v4.1.9 y nada lo escribía: aprobar era
       // irreversible por omisión, no por decisión.
       const d = build();
-      const solicitud = conSolicitud(d);
-      solicitud.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      const request = withRequest(d);
+      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
 
-      await d.service.revocar(
+      await d.service.revoke(
         TENANT,
         'af-1',
         { reason: 'Terminó su contrato' } as never,
         orgAdmin,
       );
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.REVOCADO);
-      expect(solicitud.decisionReasonText).toBe('Terminó su contrato');
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.REVOCADO);
+      expect(request.decisionReasonText).toBe('Terminó su contrato');
     });
 
     it('no se puede revocar lo que todavía está pendiente', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
       await expect(
-        d.service.revocar(TENANT, 'af-1', {} as never, orgAdmin),
+        d.service.revoke(TENANT, 'af-1', {} as never, orgAdmin),
       ).rejects.toThrow(/aprobado/);
     });
 
@@ -307,9 +307,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // Enterarse de que lo aprobaron sin saber que ya puede publicar agenda
       // deja el aviso a mitad de camino.
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       const [aviso] = d.avisos.emit.mock.calls[0];
       expect(aviso.kind).toBe('AFFILIATION_APPROVED');
@@ -319,9 +319,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
     it('el aviso del rechazo LLEVA el motivo', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.rechazar(
+      await d.service.reject(
         TENANT,
         'af-1',
         { reason: 'No figura en nuestro plantel' } as never,
@@ -335,10 +335,10 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
     it('el aviso de la revocación aclara que las citas siguen', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
-      solicitud.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      const request = withRequest(d);
+      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
 
-      await d.service.revocar(TENANT, 'af-1', {} as never, orgAdmin);
+      await d.service.revoke(TENANT, 'af-1', {} as never, orgAdmin);
 
       const [aviso] = d.avisos.emit.mock.calls[0];
       expect(aviso.bodyText).toMatch(/ya confirmó siguen en pie/);
@@ -348,12 +348,12 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // Existe —lo cargó una organización— y no hay a dónde mandarle el aviso.
       // No es un error: la decisión se toma igual.
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
       d.em.execute.mockResolvedValue([]);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
       expect(d.avisos.emit).not.toHaveBeenCalled();
     });
 
@@ -361,38 +361,38 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // Emitir va después de la transacción a propósito: un fallo de mensajería
       // no puede revertir una aprobación que la organización ya decidió.
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
       d.avisos.emit.mockResolvedValue({
         delivered: false,
         skippedReason: 'canal caído',
       });
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
     });
 
     it('aprobar deja el vínculo activo', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
     });
 
     it('rechazar deja el vínculo fuera de pie', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
 
-      await d.service.rechazar(
+      await d.service.reject(
         TENANT,
         'af-1',
         { reason: 'No trabaja acá' } as any,
         orgAdmin,
       );
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.RECHAZADO);
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.RECHAZADO);
     });
 
     /**
@@ -406,34 +406,34 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
       d.affiliationsRepo.findById.mockResolvedValue({
         id: 'af-1',
-        practiceSiteId: SEDE,
+        practiceSiteId: SITE,
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
       });
       // La sede no aparece cuando se la busca acotada a ESTE tenant.
       d.em.findOne.mockResolvedValue(null);
 
       await expect(
-        d.service.aprobar(OTRO_TENANT, 'af-1', orgAdmin),
+        d.service.approve(OTHER_TENANT, 'af-1', orgAdmin),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('la sede se busca siempre acotada a la organización que decide', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       const [, criterio] = d.em.findOne.mock.calls.at(-1) as [unknown, any];
-      expect(criterio).toEqual({ id: SEDE, managingTenantId: TENANT });
+      expect(criterio).toEqual({ id: SITE, managingTenantId: TENANT });
     });
 
     it('una solicitud ya resuelta no se vuelve a decidir', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
-      solicitud.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      const request = withRequest(d);
+      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
 
       await expect(
-        d.service.aprobar(TENANT, 'af-1', orgAdmin),
+        d.service.approve(TENANT, 'af-1', orgAdmin),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -442,19 +442,19 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.affiliationsRepo.findById.mockResolvedValue(null);
 
       await expect(
-        d.service.aprobar(TENANT, 'af-x', orgAdmin),
+        d.service.approve(TENANT, 'af-x', orgAdmin),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('decidir exige administrar la organización', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
       d.tenantAdmin.assertCanAdminister.mockRejectedValue(
         new ForbiddenException('no'),
       );
 
       await expect(
-        d.service.aprobar(TENANT, 'af-1', orgAdmin),
+        d.service.approve(TENANT, 'af-1', orgAdmin),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
@@ -470,23 +470,23 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
    */
   describe('la aprobación concede membresía', () => {
     /** Una solicitud pendiente sobre una sede de esta organización. */
-    function conSolicitud(d: ReturnType<typeof build>): any {
-      const solicitud = {
+    function withRequest(d: ReturnType<typeof build>): any {
+      const request = {
         id: 'af-1',
         practitionerProfileId: 'pp-1',
-        practiceSiteId: SEDE,
+        practiceSiteId: SITE,
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
       };
-      d.affiliationsRepo.findById.mockResolvedValue(solicitud);
-      d.em.findOne.mockResolvedValue({ id: SEDE, managingTenantId: TENANT });
-      return solicitud;
+      d.affiliationsRepo.findById.mockResolvedValue(request);
+      d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
+      return request;
     }
 
     it('aprobar le da al profesional la llave de esa organización', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       expect(d.accountLinksRepo.findActiveByPerson).toHaveBeenCalledWith(
         d.tx,
@@ -505,9 +505,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
      */
     it('la membresía viaja en la transacción de la decisión', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       const [tx] = d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
       expect(tx).toBe(d.tx);
@@ -520,12 +520,12 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
      */
     it('un profesional sin cuenta se aprueba igual, y queda avisado', async () => {
       const d = build();
-      const solicitud = conSolicitud(d);
+      const request = withRequest(d);
       d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(solicitud.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
       expect(d.memberships.ensureMembresiaAsistencial).not.toHaveBeenCalled();
       expect(d.logger.warn).toHaveBeenCalled();
     });
@@ -533,9 +533,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
     /** Rechazar no abre ninguna puerta: es la mitad del sentido de rechazar. */
     it('rechazar no concede nada', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.rechazar(
+      await d.service.reject(
         TENANT,
         'af-1',
         { reason: 'No trabaja acá' } as any,
@@ -552,9 +552,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
      */
     it('la membresía es de la organización que aprueba', async () => {
       const d = build();
-      conSolicitud(d);
+      withRequest(d);
 
-      await d.service.aprobar(TENANT, 'af-1', orgAdmin);
+      await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       const [, params] =
         d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
@@ -564,10 +564,10 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
   describe('avisarDelPedido · la bandeja deja de depender de que alguien mire', () => {
     /** Deja al tenant con los administradores indicados. */
-    function conAdmins(d: ReturnType<typeof build>, cuantos: number): void {
+    function withAdmins(d: ReturnType<typeof build>, howMany: number): void {
       d.em.execute.mockImplementation(async (sql: string) =>
         sql.includes('tenant_memberships')
-          ? Array.from({ length: cuantos }, (_, i) => ({
+          ? Array.from({ length: howMany }, (_, i) => ({
               user_id: `admin-${i}`,
             }))
           : [{ user_id: 'user-med' }],
@@ -578,9 +578,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // Son exactamente quienes pueden decidir. Mandárselo a todo el personal
       // sería avisarle a gente que sólo puede mirar.
       const d = build();
-      conAdmins(d, 3);
+      withAdmins(d, 3);
 
-      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+      await d.service.orderNotify(TENANT, 'af-1', 'pp-1');
 
       expect(d.avisos.emit).toHaveBeenCalledTimes(3);
       const [aviso] = d.avisos.emit.mock.calls[0];
@@ -592,9 +592,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // Es el hospital público del padrón: no hay quién decida, y por eso el
       // vínculo nace declarado en vez de pendiente.
       const d = build();
-      conAdmins(d, 0);
+      withAdmins(d, 0);
 
-      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+      await d.service.orderNotify(TENANT, 'af-1', 'pp-1');
 
       expect(d.avisos.emit).not.toHaveBeenCalled();
     });
@@ -604,14 +604,14 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.execute.mockImplementation(async (sql: string) =>
         sql.includes('tenant_memberships') ? [{ user_id: 'admin-0' }] : [],
       );
-      d.em.find.mockImplementation(async (entidad: any) => {
-        const nombre = entidad?.name ?? String(entidad);
+      d.em.find.mockImplementation(async (entity: any) => {
+        const nombre = entity?.name ?? String(entity);
         return nombre.includes('Persons')
           ? [{ id: 'pp-1', displayName: 'Ana Rossell' }]
           : [];
       });
 
-      await d.service.avisarDelPedido(TENANT, 'af-1', 'pp-1');
+      await d.service.orderNotify(TENANT, 'af-1', 'pp-1');
 
       const [aviso] = d.avisos.emit.mock.calls[0];
       expect(aviso.bodyText).toContain('Ana Rossell');

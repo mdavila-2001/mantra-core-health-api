@@ -9,20 +9,20 @@ import { UpdateOwnPractitionerProfileDto } from './update-practitioner-profile.d
  * opciones que el `ValidationPipe` de `main.ts` y devuelve las propiedades con
  * error.
  *
- * @param cuerpo - El cuerpo del PATCH, tal como llegaría del cliente.
+ * @param body - El cuerpo del PATCH, tal como llegaría del cliente.
  * @returns Las propiedades con error, ordenadas.
  */
-async function propiedadesConError(
-  cuerpo: Record<string, unknown>,
+async function propertiesWithError(
+  body: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(UpdateOwnPractitionerProfileDto, cuerpo, {
+  const dto = plainToInstance(UpdateOwnPractitionerProfileDto, body, {
     enableImplicitConversion: true,
   });
-  const errores = await validate(dto, {
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return errores.map((e) => e.property).sort();
+  return errors.map((e) => e.property).sort();
 }
 
 /**
@@ -31,19 +31,19 @@ async function propiedadesConError(
  */
 describe('UpdateOwnPractitionerProfileDto — workEmail', () => {
   it('acepta un correo válido', async () => {
-    expect(await propiedadesConError({ workEmail: 'dra@clinica.bo' })).toEqual(
+    expect(await propertiesWithError({ workEmail: 'dra@clinica.bo' })).toEqual(
       [],
     );
   });
 
   it('omitirlo no es un error: es un PATCH', async () => {
-    expect(await propiedadesConError({ professionalTitle: 'X' })).toEqual([]);
+    expect(await propertiesWithError({ professionalTitle: 'X' })).toEqual([]);
   });
 
   it.each([[''], ['no-es-un-correo'], ['a@'], [42]])(
     'rechaza %p',
     async (valor) => {
-      expect(await propiedadesConError({ workEmail: valor })).toEqual([
+      expect(await propertiesWithError({ workEmail: valor })).toEqual([
         'workEmail',
       ]);
     },
