@@ -22,16 +22,16 @@ import { ACCT } from '../accounting.concepts';
  */
 
 /** Resultado posible de evaluar el juego de reglas. */
-export type DecisionClasificacion = 'CLASIFICADA' | 'SIN_REGLA' | 'AMBIGUA';
+export type DecisionClassification = 'CLASIFICADA' | 'SIN_REGLA' | 'AMBIGUA';
 
 /** Datos del asiento sobre los que deciden las reglas. */
-export interface EntradaClasificacion {
+export interface ClassificationEntry {
   /** Tipo de documento origen del asiento, si el borrador lo declaró. */
   sourceDocumentType?: string;
 }
 
 /** Regla de imputación: qué documento origen determina qué tipo de asiento. */
-export interface ReglaClasificacion {
+export interface ClassificationRule {
   /** Identificador estable de la regla; se registra con la decisión. */
   id: string;
   /** Menor gana. El empate con tipos distintos es ambigüedad. */
@@ -45,17 +45,17 @@ export interface ReglaClasificacion {
 }
 
 /** Juego de reglas con su versión. */
-export interface JuegoReglas {
+export interface RuleSet {
   /** Versión del juego; identifica la decisión en el tiempo. */
   version: string;
   /** Reglas que lo componen. */
-  reglas: readonly ReglaClasificacion[];
+  reglas: readonly ClassificationRule[];
 }
 
 /** Decisión del motor, con su evidencia. */
-export interface ResultadoClasificacion {
+export interface ClassificationResult {
   /** Qué concluyó el motor. */
-  decision: DecisionClasificacion;
+  decision: DecisionClassification;
   /** Versión del juego de reglas evaluado. */
   rulesetVersion: string;
   /** Regla que decidió, si hubo una sola con la máxima prioridad. */
@@ -67,7 +67,7 @@ export interface ResultadoClasificacion {
 }
 
 /** Juego vigente. Cambiarlo obliga a subir la versión, no a editar en sitio. */
-export const JUEGO_REGLAS_VIGENTE: JuegoReglas = {
+export const CURRENT_RULE_SET: RuleSet = {
   version: 'acct-classif-v1',
   reglas: [
     {
@@ -144,57 +144,57 @@ export const JUEGO_REGLAS_VIGENTE: JuegoReglas = {
 /**
  * Evalúa el juego de reglas sobre un asiento.
  *
- * @param entrada - Datos del asiento a clasificar.
- * @param juego - Juego de reglas; por defecto el vigente. Pasar el juego
+ * @param entry - Datos del asiento a clasificar.
+ * @param ruleSet - Juego de reglas; por defecto el vigente. Pasar el juego
  *   histórico reproduce una clasificación anterior.
  * @returns La decisión con su evidencia.
  */
-export function clasificar(
-  entrada: EntradaClasificacion,
-  juego: JuegoReglas = JUEGO_REGLAS_VIGENTE,
-): ResultadoClasificacion {
-  const origen = entrada.sourceDocumentType?.trim().toUpperCase();
+export function classify(
+  entry: ClassificationEntry,
+  ruleSet: RuleSet = CURRENT_RULE_SET,
+): ClassificationResult {
+  const origen = entry.sourceDocumentType?.trim().toUpperCase();
   if (!origen) {
     return {
       decision: 'SIN_REGLA',
-      rulesetVersion: juego.version,
+      rulesetVersion: ruleSet.version,
       reason:
         'El asiento no declara documento origen: no hay regla que evaluar',
     };
   }
 
-  const candidatas = juego.reglas
+  const candidates = ruleSet.reglas
     .filter((r) => r.sourceDocumentType.toUpperCase() === origen)
     .sort((a, b) => a.prioridad - b.prioridad);
 
-  if (candidatas.length === 0) {
+  if (candidates.length === 0) {
     return {
       decision: 'SIN_REGLA',
-      rulesetVersion: juego.version,
-      reason: `Ninguna regla del juego ${juego.version} cubre el origen ${origen}`,
+      rulesetVersion: ruleSet.version,
+      reason: `Ninguna regla del juego ${ruleSet.version} cubre el origen ${origen}`,
     };
   }
 
-  const mejores = candidatas.filter(
-    (r) => r.prioridad === candidatas[0].prioridad,
+  const best = candidates.filter(
+    (r) => r.prioridad === candidates[0].prioridad,
   );
-  const tipos = new Set(mejores.map((r) => r.transactionTypeConceptId));
-  if (tipos.size > 1) {
+  const types = new Set(best.map((r) => r.transactionTypeConceptId));
+  if (types.size > 1) {
     return {
       decision: 'AMBIGUA',
-      rulesetVersion: juego.version,
-      reason: `Reglas en conflicto para el origen ${origen}: ${mejores
+      rulesetVersion: ruleSet.version,
+      reason: `Reglas en conflicto para el origen ${origen}: ${best
         .map((r) => r.id)
         .join(', ')}`,
     };
   }
 
-  const elegida = mejores[0];
+  const chosen = best[0];
   return {
     decision: 'CLASIFICADA',
-    rulesetVersion: juego.version,
-    ruleId: elegida.id,
-    transactionTypeConceptId: elegida.transactionTypeConceptId,
-    reason: elegida.explicacion,
+    rulesetVersion: ruleSet.version,
+    ruleId: chosen.id,
+    transactionTypeConceptId: chosen.transactionTypeConceptId,
+    reason: chosen.explicacion,
   };
 }

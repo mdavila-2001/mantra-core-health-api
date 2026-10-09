@@ -31,12 +31,12 @@ function build() {
   };
   const controller = new AccountingLedgerController(
     ledgerService as any,
-    ledgerReadDoble as never,
+    ledgerReadDouble as never,
   );
   return { controller, ledgerService };
 }
 
-const ledgerReadDoble = {
+const ledgerReadDouble = {
   chartOfAccounts: (() =>
     Promise.resolve({ items: [], count: 0, limit: 100 })) as never,
   listJournal: (() =>
