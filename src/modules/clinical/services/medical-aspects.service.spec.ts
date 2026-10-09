@@ -24,37 +24,37 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
   };
   /** Declaraciones por titular, como la tabla real. */
-  const filas = new Map<string, any>();
+  const rows = new Map<string, any>();
   const statementsRepo = {
     findByPatient: mockFn((_em: unknown, patientProfileId: string) =>
-      Promise.resolve(filas.get(patientProfileId) ?? null),
+      Promise.resolve(rows.get(patientProfileId) ?? null),
     ),
     create: mockFn((_em: unknown, data: { patientProfileId: string }) => {
-      const fila = {
+      const row = {
         id: `st-${data.patientProfileId}`,
         patientProfileId: data.patientProfileId,
         updatedAt: new Date(0),
       };
-      filas.set(data.patientProfileId, fila);
-      return fila;
+      rows.set(data.patientProfileId, row);
+      return row;
     }),
   };
   /** Cuenta → persona, como `person_account_links`. */
-  const vinculos = new Map<string, { personId: string }>([
+  const links = new Map<string, { personId: string }>([
     ['user-1', { personId: 'per-1' }],
   ]);
   const accountLinksRepo = {
     findActiveByUser: mockFn((_em: unknown, userId: string) =>
-      Promise.resolve(vinculos.get(userId) ?? null),
+      Promise.resolve(links.get(userId) ?? null),
     ),
   };
   /** Persona → perfil de paciente, indexado por `profile_id`. */
-  const perfiles = new Map<string, { profileId: string }>([
+  const profiles = new Map<string, { profileId: string }>([
     ['per-1', { profileId: 'per-1' }],
   ]);
   const patientProfilesRepo = {
     findById: mockFn((_em: unknown, profileId: string) =>
-      Promise.resolve(perfiles.get(profileId) ?? null),
+      Promise.resolve(profiles.get(profileId) ?? null),
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -65,7 +65,7 @@ function build() {
     patientProfilesRepo as any,
     logger as any,
   );
-  return { service, tx, filas, vinculos, perfiles, statementsRepo, logger };
+  return { service, tx, filas: rows, vinculos: links, perfiles: profiles, statementsRepo, logger };
 }
 
 describe('MedicalAspectsService (FT-22 / D-B)', () => {
@@ -182,9 +182,9 @@ describe('MedicalAspectsService (FT-22 / D-B)', () => {
     it('no loguea el contenido declarado, sólo las claves tocadas (PHI)', async () => {
       const d = build();
       await d.service.updateOwn({ chronicConditionsText: 'diabetes' }, titular);
-      const logueado = JSON.stringify(d.logger.info.mock.calls);
-      expect(logueado).not.toContain('diabetes');
-      expect(logueado).toContain('chronicConditionsText');
+      const loggedIn = JSON.stringify(d.logger.info.mock.calls);
+      expect(loggedIn).not.toContain('diabetes');
+      expect(loggedIn).toContain('chronicConditionsText');
     });
   });
 });

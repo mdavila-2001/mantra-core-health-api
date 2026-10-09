@@ -137,7 +137,7 @@ function build() {
   // MCH-010: la política del expediente. Por defecto autoriza; las pruebas de
   // acceso la hacen negar para comprobar que el objeto deja de alcanzarse.
   const clinicalAccess = {
-    assertPuedeLeerHistoria: mockFn(() => Promise.resolve()),
+    assertCanReadHistory: mockFn(() => Promise.resolve()),
   };
   // MCH-020: cadena WORM donde queda todo acceso, con el resultado que tuvo.
   const auditTrail = { record: mockFn(() => Promise.resolve()) };
@@ -682,14 +682,14 @@ describe('ObjectStorageService', () => {
       it('does not serve the object of a patient the actor cannot read', async () => {
         const d = build();
         wire(d);
-        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+        d.clinicalAccess.assertCanReadHistory.mockRejectedValue(
           new Error('403'),
         );
 
         await expect(
           d.service.issueSignedUrl(VERSION, dto, actor),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+        expect(d.clinicalAccess.assertCanReadHistory).toHaveBeenCalledWith(
           'pat-1',
           actor,
         );
@@ -707,7 +707,7 @@ describe('ObjectStorageService', () => {
             actor,
           ),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+        expect(d.clinicalAccess.assertCanReadHistory).not.toHaveBeenCalled();
       });
 
       it('answers a foreign object exactly like a missing one', async () => {
@@ -738,7 +738,7 @@ describe('ObjectStorageService', () => {
         await d.service.issueSignedUrl(VERSION, dto, actor);
 
         // Sin historia no hay política clínica que preguntar; queda la custodia.
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+        expect(d.clinicalAccess.assertCanReadHistory).not.toHaveBeenCalled();
       });
 
       it('re-checks the patient policy when the link is redeemed', async () => {
@@ -747,7 +747,7 @@ describe('ObjectStorageService', () => {
         d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
         const { token } = await emitir(d);
         // El permiso se retira entre la emisión y el canje.
-        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+        d.clinicalAccess.assertCanReadHistory.mockRejectedValue(
           new Error('403'),
         );
 

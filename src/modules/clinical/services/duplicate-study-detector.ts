@@ -99,7 +99,7 @@ export class DuplicateStudyDetector {
     // `RELEASE_RELEASED`, el mismo criterio que `isReleased`. La fecha es la
     // de `performedAtOf`, escrita en SQL: emisión de la versión liberada, su
     // registro, o la creación del informe.
-    const filas = await em.getConnection().execute<{ id: string }[]>(
+    const rows = await em.getConnection().execute<{ id: string }[]>(
       `SELECT r.id
          FROM clinical.diagnostic_reports r
          LEFT JOIN diagnostics.diagnostic_report_versions v
@@ -125,9 +125,9 @@ export class DuplicateStudyDetector {
       ],
       'all',
     );
-    if (filas.length === 0) return null;
+    if (rows.length === 0) return null;
 
-    const report = await em.findOne(DiagnosticReports, { id: filas[0].id });
+    const report = await em.findOne(DiagnosticReports, { id: rows[0].id });
     if (!report) return null;
     const version = await this.releasedVersionOf(em, report);
     return {

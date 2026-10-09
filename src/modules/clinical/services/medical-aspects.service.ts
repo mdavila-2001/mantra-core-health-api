@@ -11,7 +11,7 @@ import type { PatientReportedHealthStatements } from '../entities';
 import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';
 
 /** Mismo texto para «sin perfil» y «sin vínculo»: no se distingue por qué. */
-const SIN_PERFIL_DE_PACIENTE =
+const WITHOUT_PATIENT_PROFILE =
   'La sesión no tiene un perfil de paciente sobre el que declarar.';
 
 /**
@@ -128,17 +128,17 @@ export class MedicalAspectsService {
     actor: AuthenticatedUser,
   ): Promise<string> {
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const perfil = link
+    const profile = link
       ? await this.patientProfilesRepo.findById(em, link.personId)
       : null;
-    if (!link || !perfil) {
+    if (!link || !profile) {
       this.logger.warn(
         { operation: 'clinical.medicalAspects.denied', userId: actor.id },
         'Sesión sin perfil de paciente intentó declarar aspectos médicos',
       );
-      throw new ForbiddenException(SIN_PERFIL_DE_PACIENTE);
+      throw new ForbiddenException(WITHOUT_PATIENT_PROFILE);
     }
-    return perfil.profileId;
+    return profile.profileId;
   }
 
   /** Proyecta la fila al contrato, omitiendo lo que nunca se declaró. */

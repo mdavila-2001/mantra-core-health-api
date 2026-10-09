@@ -12,38 +12,38 @@ import QRCode from 'qrcode';
  * rasterizado en el proceso del servidor.
  *
  * @param doc - El documento en construcción.
- * @param texto - Lo que el QR codifica (la URL de verificación).
+ * @param text - Lo que el QR codifica (la URL de verificación).
  * @param x - Borde izquierdo del QR, en puntos.
  * @param y - Borde superior del QR, en puntos.
- * @param lado - Lado del QR completo (con su margen), en puntos.
+ * @param side - Lado del QR completo (con su margen), en puntos.
  */
-export function dibujarQr(
+export function drawQr(
   doc: PDFKit.PDFDocument,
-  texto: string,
+  text: string,
   x: number,
   y: number,
-  lado: number,
+  side: number,
 ): void {
   // Corrección de errores 'M' (15 %): suficiente para un documento impreso
   // sin exigir una matriz enorme para un texto tan corto como la URL.
-  const codigo = QRCode.create(texto, { errorCorrectionLevel: 'M' });
-  const { modules } = codigo;
-  const tamano = modules.size;
+  const code = QRCode.create(text, { errorCorrectionLevel: 'M' });
+  const { modules } = code;
+  const size = modules.size;
   // Margen en "módulos" (celdas), no en puntos: el estándar QR pide un
   // margen en blanco de al menos 4 módulos alrededor de la matriz para que
   // los lectores lo reconozcan.
-  const margenModulos = 4;
-  const totalModulos = tamano + margenModulos * 2;
-  const puntosPorModulo = lado / totalModulos;
+  const moduleMargin = 4;
+  const totalModulos = size + moduleMargin * 2;
+  const pointsPerModule = side / totalModulos;
 
   doc.save();
   doc.fillColor('#000000');
-  for (let fila = 0; fila < tamano; fila += 1) {
-    for (let columna = 0; columna < tamano; columna += 1) {
-      if (modules.get(fila, columna) === 0) continue;
-      const px = x + (columna + margenModulos) * puntosPorModulo;
-      const py = y + (fila + margenModulos) * puntosPorModulo;
-      doc.rect(px, py, puntosPorModulo, puntosPorModulo).fill();
+  for (let row = 0; row < size; row += 1) {
+    for (let column = 0; column < size; column += 1) {
+      if (modules.get(row, column) === 0) continue;
+      const px = x + (column + moduleMargin) * pointsPerModule;
+      const py = y + (row + moduleMargin) * pointsPerModule;
+      doc.rect(px, py, pointsPerModule, pointsPerModule).fill();
     }
   }
   doc.restore();

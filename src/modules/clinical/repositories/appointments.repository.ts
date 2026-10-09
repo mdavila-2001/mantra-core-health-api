@@ -126,14 +126,14 @@ export class AppointmentsRepository {
     em: EntityManager,
     ids: readonly string[],
   ): Promise<Map<string, string>> {
-    const mapa = new Map<string, string>();
-    if (ids.length === 0) return mapa;
-    const citas = await em.find(Appointments, { id: { $in: [...ids] } });
-    for (const cita of citas) {
-      if (cita.typeConceptId != null) {
-        mapa.set(cita.id, cita.typeConceptId);
+    const map = new Map<string, string>();
+    if (ids.length === 0) return map;
+    const appointments = await em.find(Appointments, { id: { $in: [...ids] } });
+    for (const appointment of appointments) {
+      if (appointment.typeConceptId != null) {
+        map.set(appointment.id, appointment.typeConceptId);
       }
     }
-    return mapa;
+    return map;
   }
 }

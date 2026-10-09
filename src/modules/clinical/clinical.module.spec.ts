@@ -10,7 +10,7 @@ import {
  *
  * @returns Las clases registradas en `controllers`.
  */
-function controladoresDe(modulo: unknown): readonly unknown[] {
+function controllers(modulo: unknown): readonly unknown[] {
   return (Reflect.getMetadata('controllers', modulo as object) ??
     []) as readonly unknown[];
 }
@@ -22,13 +22,13 @@ function controladoresDe(modulo: unknown): readonly unknown[] {
  */
 describe('ClinicalModule', () => {
   it('publica ClinicalMedicalAspectsController (GET|PUT /clinical/me/medical-aspects, D-B)', () => {
-    expect(controladoresDe(ClinicalModule)).toContain(
+    expect(controllers(ClinicalModule)).toContain(
       ClinicalMedicalAspectsController,
     );
   });
 
   it('publica los controladores que reciben los adjuntos clínicos (P25)', () => {
-    const controladores = controladoresDe(ClinicalModule);
+    const controladores = controllers(ClinicalModule);
     expect(controladores).toContain(ClinicalRecordsController);
     expect(controladores).toContain(ClinicalEncountersController);
   });

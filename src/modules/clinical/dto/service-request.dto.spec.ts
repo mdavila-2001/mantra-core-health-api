@@ -6,11 +6,11 @@ import { CheckDuplicateStudyDto } from './duplicate-study.dto';
 /**
  * Aplana los errores de `class-validator` a los nombres de propiedad con error.
  *
- * @param errores - Errores devueltos por `validate`.
+ * @param errors - Errores devueltos por `validate`.
  * @returns Las propiedades con error, sin repetidos.
  */
-function propiedadesConError(errores: readonly ValidationError[]): string[] {
-  return [...new Set(errores.map((e) => e.property))].sort();
+function propertiesWithError(errors: readonly ValidationError[]): string[] {
+  return [...new Set(errors.map((e) => e.property))].sort();
 }
 
 const TENANT = '11111111-1111-4111-8111-111111111111';
@@ -28,40 +28,40 @@ function dtoBase(over: Record<string, unknown> = {}) {
   };
 }
 
-async function validarCreacion(
-  alta: Record<string, unknown>,
+async function validateCreation(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(CreateServiceRequestDto, alta);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(CreateServiceRequestDto, registration);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return propiedadesConError(errores);
+  return propertiesWithError(errors);
 }
 
 describe('CreateServiceRequestDto — antiduplicación (subtarea 3.2)', () => {
   it('accepts the base DTO with no duplicate-study fields', async () => {
-    expect(await validarCreacion(dtoBase())).toEqual([]);
+    expect(await validateCreation(dtoBase())).toEqual([]);
   });
 
   it('rejects a justification shorter than 20 characters', async () => {
-    const errores = await validarCreacion(
+    const errors = await validateCreation(
       dtoBase({
         previousDiagnosticReportId: REPORT,
         duplicateOverrideReason: 'corto',
       }),
     );
-    expect(errores).toContain('duplicateOverrideReason');
+    expect(errors).toContain('duplicateOverrideReason');
   });
 
   it('accepts a justification of 20 characters or more', async () => {
-    const errores = await validarCreacion(
+    const errors = await validateCreation(
       dtoBase({
         previousDiagnosticReportId: REPORT,
         duplicateOverrideReason: 'Justificación clínica suficiente',
       }),
     );
-    expect(errores).not.toContain('duplicateOverrideReason');
+    expect(errors).not.toContain('duplicateOverrideReason');
   });
 
   it('rejects reusePreviousReport without previousDiagnosticReportId (only reusePreviousReport is present, but the field itself is not required by ValidateIf — the service enforces the pairing)', async () => {
@@ -69,15 +69,15 @@ describe('CreateServiceRequestDto — antiduplicación (subtarea 3.2)', () => {
     // presente; el cruce «reusePreviousReport exige previousDiagnosticReportId»
     // es una regla de negocio, no de forma — la aplica el servicio (422
     // DUPLICATE_STUDY_NOT_FOUND / MISMATCH), no el DTO.
-    const errores = await validarCreacion(
+    const errors = await validateCreation(
       dtoBase({ reusePreviousReport: true }),
     );
-    expect(errores).toEqual([]);
+    expect(errors).toEqual([]);
   });
 
   it('rejects an unknown property (whitelist + forbidNonWhitelisted)', async () => {
-    const errores = await validarCreacion(dtoBase({ somethingElse: 'x' }));
-    expect(errores.length).toBeGreaterThan(0);
+    const errors = await validateCreation(dtoBase({ somethingElse: 'x' }));
+    expect(errors.length).toBeGreaterThan(0);
   });
 });
 
@@ -91,53 +91,53 @@ function checkBase(over: Record<string, unknown> = {}) {
   };
 }
 
-async function validarChequeo(
-  alta: Record<string, unknown>,
+async function validateCheck(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(CheckDuplicateStudyDto, alta);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(CheckDuplicateStudyDto, registration);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return propiedadesConError(errores);
+  return propertiesWithError(errors);
 }
 
 describe('CheckDuplicateStudyDto', () => {
   it('accepts the base DTO', async () => {
-    expect(await validarChequeo(checkBase())).toEqual([]);
+    expect(await validateCheck(checkBase())).toEqual([]);
   });
 
   it('rejects windowDays below 1', async () => {
-    expect(await validarChequeo(checkBase({ windowDays: 0 }))).toContain(
+    expect(await validateCheck(checkBase({ windowDays: 0 }))).toContain(
       'windowDays',
     );
   });
 
   it('rejects windowDays above the maximum', async () => {
-    expect(await validarChequeo(checkBase({ windowDays: 366 }))).toContain(
+    expect(await validateCheck(checkBase({ windowDays: 366 }))).toContain(
       'windowDays',
     );
   });
 
   it('accepts windowDays within range', async () => {
-    expect(await validarChequeo(checkBase({ windowDays: 45 }))).toEqual([]);
+    expect(await validateCheck(checkBase({ windowDays: 45 }))).toEqual([]);
   });
 
   it('rejects a body without codeConceptId nor diagnosticStudyOfferingId', async () => {
-    const errores = await validarChequeo({
+    const errors = await validateCheck({
       patientProfileId: PATIENT,
       encounterId: '55555555-5555-4555-8555-555555555555',
     });
-    expect(errores).toContain('codeConceptId');
+    expect(errors).toContain('codeConceptId');
   });
 
   it('accepts diagnosticStudyOfferingId instead of codeConceptId', async () => {
-    const errores = await validarChequeo({
+    const errors = await validateCheck({
       patientProfileId: PATIENT,
       diagnosticStudyOfferingId: CODE,
       encounterId: '55555555-5555-4555-8555-555555555555',
     });
-    expect(errores).toEqual([]);
+    expect(errors).toEqual([]);
   });
 });
 
@@ -145,14 +145,14 @@ describe('CreateServiceRequestDto — formInstanceId (P43)', () => {
   const FORM = '66666666-6666-4666-8666-666666666666';
 
   it('acepta formInstanceId uuid (ya no es 400 por forbidNonWhitelisted)', async () => {
-    expect(await validarCreacion(dtoBase({ formInstanceId: FORM }))).toEqual(
+    expect(await validateCreation(dtoBase({ formInstanceId: FORM }))).toEqual(
       [],
     );
   });
 
   it('rechaza un formInstanceId que no es uuid', async () => {
     expect(
-      await validarCreacion(dtoBase({ formInstanceId: 'no-es-uuid' })),
+      await validateCreation(dtoBase({ formInstanceId: 'no-es-uuid' })),
     ).toEqual(['formInstanceId']);
   });
 });
