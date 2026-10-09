@@ -50,9 +50,17 @@ export function resolveWikidata(terms, bridge, identities) {
     const contradicts = (f) =>
       (identity?.orpha && f.P1550?.length && !f.P1550.includes(identity.orpha.orpha)) ||
       (identity?.mondo && f.P5270?.length && !f.P5270.some((v) => normalizeMondo(v) === normalizeMondo(identity.mondo.id)));
+    const mondoExact = identity?.mondo?.exact;
+    const orphaMesh = (identity?.orpha?.xrefs ?? []).filter((x) => x.exact && x.source === 'MeSH').map((x) => x.reference);
+    const orphaOmim = (identity?.orpha?.xrefs ?? []).filter((x) => x.exact && x.source === 'OMIM').map((x) => x.reference);
+    const sharesAny = (values, known) => (values ?? []).some((v) => known.includes(String(v).replace(/^DOID:/, '')));
+    // Evidencia independiente de que el ítem es la enfermedad que Orphanet/MONDO ya identificaron.
     const confirms = (f) =>
       (identity?.orpha && f.P1550?.includes(identity.orpha.orpha)) ||
-      (identity?.mondo && f.P5270?.some((v) => normalizeMondo(v) === normalizeMondo(identity.mondo.id)));
+      (identity?.mondo && f.P5270?.some((v) => normalizeMondo(v) === normalizeMondo(identity.mondo.id))) ||
+      sharesAny(f.P486, [...(mondoExact?.mesh ?? []), ...orphaMesh]) ||
+      sharesAny(f.P699, mondoExact?.doid ?? []) ||
+      sharesAny(f.P492, [...(mondoExact?.omim ?? []), ...orphaOmim]);
     let qids = [...(qidsByCode.get(code) ?? [])].sort();
     if (qids.length === 0) {
       out.set(code, none);

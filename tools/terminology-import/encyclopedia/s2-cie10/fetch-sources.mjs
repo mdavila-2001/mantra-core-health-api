@@ -12,7 +12,8 @@
 // =============================================================================
 
 import { createHash } from 'node:crypto';
-import { createReadStream, existsSync, statSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createReadStream, existsSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HttpClient, ensureDir } from '../../lib/glossary-es/common.mjs';
@@ -26,6 +27,12 @@ export const SOURCE_FILES = Object.freeze({
   'hpo-annotations': { file: 'phenotype.hpoa', url: 'https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa' },
   'hpo-es': { file: 'hp-es.babelon.tsv', url: 'https://raw.githubusercontent.com/obophenotype/hpo-translations/main/babelon/hp-es.babelon.tsv' },
   mondo: { file: 'mondo.json', url: 'https://github.com/monarch-initiative/mondo/releases/latest/download/mondo.json' },
+  // ICD-10-CM FY2025 (la CIE-10-ES 6.ª ed. incorpora los addenda hasta FY2025). Un zip: se extrae solo el tabular.
+  'icd10cm-tabular': {
+    file: 'icd-10-cm-tabular-2025.xml',
+    url: 'https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD10CM/2025/icd10cm-table-index-2025.zip',
+    zipMember: 'icd-10-cm-tabular-2025.xml',
+  },
   'disease-ontology': { file: 'doid.obo', url: 'https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/main/src/ontology/doid.obo' },
 });
 
@@ -40,11 +47,18 @@ export async function fetchSources(cacheDir) {
   const dir = ensureDir(join(cacheDir, 'files'));
   const http = new HttpClient({ concurrency: 1, minDelayMs: 1000 });
   const manifest = {};
-  for (const [name, { file, url }] of Object.entries(SOURCE_FILES)) {
+  for (const [name, { file, url, zipMember }] of Object.entries(SOURCE_FILES)) {
     const path = join(dir, file);
     if (!existsSync(path)) {
       console.log(`[fetch] ${name}: ${url}`);
-      await http.getFileCached(url, path);
+      if (zipMember) {
+        const zip = join(dir, `${file}.zip`);
+        await http.getFileCached(url, zip);
+        writeFileSync(path, execFileSync('unzip', ['-p', zip, zipMember], { maxBuffer: 1 << 30 }));
+        rmSync(zip);
+      } else {
+        await http.getFileCached(url, path);
+      }
     } else {
       console.log(`[fetch] ${name}: ya en caché`);
     }

@@ -58,22 +58,47 @@ function rawOrphanetDefinition(xml, orpha) {
 
 const first = (s, n = 160) => (s.length > n ? `${s.slice(0, n)}…` : s);
 
-export async function checkSamples({ articlesPath, hpoArticlesPath, cacheDir, count = 25 }) {
+export async function checkSamples({ articlesPath, hpoArticlesPath, cacheDir, count = 25, round = 1 }) {
   const http = new HttpClient({ concurrency: 1, minDelayMs: 1000 });
   const articles = readNdjson(articlesPath);
   const orphanetXml = readFileSync(join(cacheDir, 'files', 'es_product1.xml'), 'utf8');
   const secs = (source) => articles.flatMap((a) => a.sections.filter((s) => s.source === source).map((s) => ({ a, s })));
-  const plan = [
-    ...pickDeterministic(secs('orphanet-es'), 5, ({ a }) => `o${a.conceptRef.code}`).map((x) => ({ ...x, via: 'orphanet' })),
-    ...pickDeterministic(secs('mondo'), 6, ({ a }) => `m${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mondo' })),
-    ...pickDeterministic(secs('disease-ontology'), 5, ({ a }) => `d${a.conceptRef.code}`).map((x) => ({ ...x, via: 'doid' })),
-    ...pickDeterministic(secs('nlm-mesh'), 5, ({ a }) => `s${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mesh' })),
-  ];
+  const k = round === 1 ? '' : `r${round}`;
+  const bridged = (source) => secs(source).filter(({ s }) => /vía puente Wikidata/.test(s.locator));
+  const direct = (source) => secs(source).filter(({ s }) => !/vía puente Wikidata/.test(s.locator));
+  const plan = round === 1
+    ? [
+        ...pickDeterministic(secs('orphanet-es'), 5, ({ a }) => `o${a.conceptRef.code}`).map((x) => ({ ...x, via: 'orphanet' })),
+        ...pickDeterministic(secs('mondo'), 6, ({ a }) => `m${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mondo' })),
+        ...pickDeterministic(secs('disease-ontology'), 5, ({ a }) => `d${a.conceptRef.code}`).map((x) => ({ ...x, via: 'doid' })),
+        ...pickDeterministic(secs('nlm-mesh'), 5, ({ a }) => `s${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mesh' })),
+      ]
+    : [
+        ...pickDeterministic(secs('icd10cm-tabular'), 7, ({ a }) => `${k}c${a.conceptRef.code}`).map((x) => ({ ...x, via: 'icd10cm' })),
+        ...pickDeterministic(direct('orphanet-es'), 3, ({ a }) => `${k}o${a.conceptRef.code}`).map((x) => ({ ...x, via: 'orphanet' })),
+        ...pickDeterministic(direct('mondo'), 3, ({ a }) => `${k}m${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mondo' })),
+        ...pickDeterministic(direct('disease-ontology'), 2, ({ a }) => `${k}d${a.conceptRef.code}`).map((x) => ({ ...x, via: 'doid' })),
+        ...pickDeterministic(direct('nlm-mesh'), 2, ({ a }) => `${k}s${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mesh' })),
+        ...pickDeterministic(bridged('mondo'), 3, ({ a }) => `${k}bm${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mondo' })),
+        ...pickDeterministic(bridged('nlm-mesh'), 2, ({ a }) => `${k}bs${a.conceptRef.code}`).map((x) => ({ ...x, via: 'mesh' })),
+        ...pickDeterministic(bridged('orphanet-es'), 1, ({ a }) => `${k}bo${a.conceptRef.code}`).map((x) => ({ ...x, via: 'orphanet' })),
+      ];
+  const tabularXml = round === 1 ? '' : readFileSync(join(cacheDir, 'files', 'icd-10-cm-tabular-2025.xml'), 'utf8');
   const results = [];
   for (const { a, s, via } of plan) {
     const code = a.conceptRef.code;
     let live = null;
     let url = s.sourceUrl;
+    if (via === 'icd10cm') {
+      // Texto crudo del XML del tabular (sin el parser): cada ítem debe aparecer literal en el bloque del código.
+      const at = tabularXml.indexOf(`<name>${code}</name>`);
+      const rest = tabularXml.slice(at);
+      const end = rest.search(/<diag>|<\/diag>/g) === -1 ? rest.length : Math.min(...[rest.indexOf('<diag>', 5), rest.indexOf('</diag>')].filter((i) => i > 0));
+      const raw = squash(decodeEntities(rest.slice(0, end).replace(/<[^>]+>/g, ' ')));
+      const missing = s.items.filter((it) => !raw.includes(squash(it.slice(it.indexOf(': ') + 2))));
+      results.push({ code, name: a.conceptRef.slug, kind: s.kind, source: s.source, sentence: first(squash(s.items.join(' · '))), link: s.sourceUrl, checkedAgainst: `${s.sourceUrl}#${code}`, ok: s.items.length > 0 && missing.length === 0, note: 'XML crudo del tabular' });
+      continue;
+    }
     if (via === 'orphanet') {
       const orpha = s.sourceUrl.match(/Expert=(\d+)/)[1];
       live = [rawOrphanetDefinition(orphanetXml, orpha)];
@@ -94,7 +119,7 @@ export async function checkSamples({ articlesPath, hpoArticlesPath, cacheDir, co
   // HPO: conteo de fenotipos por clase de frecuencia contra la API de ontology.jax.org.
   const hpoArticles = hpoArticlesPath ? readNdjson(hpoArticlesPath) : [];
   const hpoSecs = hpoArticles.flatMap((a) => a.sections.filter((s) => s.source === 'hpo').map((s) => ({ a, s })));
-  for (const { a, s } of pickDeterministic(hpoSecs, 2, ({ a }) => `h${a.conceptRef.code}`)) {
+  for (const { a, s } of pickDeterministic(hpoSecs, round === 1 ? 2 : 0, ({ a }) => `${k}h${a.conceptRef.code}`)) {
     const key = s.sourceUrl.split('/browse/disease/')[1];
     const url = `https://ontology.jax.org/api/network/annotation/${key}`;
     const api = JSON.parse((await http.get(url, { accept: 'application/json' })).body.toString('utf8'));
@@ -107,7 +132,7 @@ export async function checkSamples({ articlesPath, hpoArticlesPath, cacheDir, co
   }
   // Imágenes: licencia y autor en el HTML de la página del archivo en Commons.
   const imgs = articles.flatMap((a) => a.images.map((i) => ({ a, i })));
-  for (const { a, i } of pickDeterministic(imgs, count - results.length, ({ a, i }) => `i${a.conceptRef.code}${i.url}`)) {
+  for (const { a, i } of pickDeterministic(imgs, count - results.length, ({ a, i }) => `${k}i${a.conceptRef.code}${i.url}`)) {
     const html = (await http.get(i.sourcePage)).body.toString('utf8');
     const license = i.license.replace('Public domain', 'Public domain');
     const firstAuthorToken = (i.author ?? '').split(/\s+/).slice(0, 2).join(' ');
@@ -126,7 +151,7 @@ export function renderSamples(results) {
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = parseArgs(process.argv.slice(2));
-  const results = await checkSamples({ articlesPath: args.articles, hpoArticlesPath: args['hpo-articles'], cacheDir: args['cache-dir'] });
+  const results = await checkSamples({ articlesPath: args.articles, hpoArticlesPath: args['hpo-articles'], cacheDir: args['cache-dir'], round: Number(args.round ?? 1) });
   const md = renderSamples(results);
   if (args.out) writeFileSync(args.out, md);
   else console.log(md);

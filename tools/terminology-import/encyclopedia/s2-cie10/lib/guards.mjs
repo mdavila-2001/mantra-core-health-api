@@ -13,7 +13,7 @@ import {
  * conservadora: ante la duda el texto se rechaza (y se cuenta en `rejected.ndjson`).
  */
 const DOSE_QUANTITY = /\b\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|μg|ug|g|kg|ml|mL|UI|IU|gotas|comprimidos|tabletas|cápsulas)(?![A-Za-zÀ-ÿ])/;
-const DOSE_WORDS = /\b(?:dosis|posolog[ií]a|dosage|dose|doses|dosing)\b/i;
+const DOSE_WORDS = /\b(?:dosis|posolog|dosage|dose|dosing)/i;
 
 export function dosePattern(text) {
   if (!text) return null;
