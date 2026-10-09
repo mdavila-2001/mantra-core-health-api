@@ -89,11 +89,11 @@ export class MedicalGroupsService {
         });
       }
 
-      const propias =
+      const own =
         await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
           requestingPractitionerId,
         );
-      if (!propias.includes(service.practiceId)) {
+      if (!own.includes(service.practiceId)) {
         // Mismo criterio que `BillingServiceCatalogService.assertPuedeEditar`:
         // un servicio de otra práctica responde 404, nunca 403.
         throw new ResourceNotFoundException('Servicio médico no encontrado', {
@@ -579,11 +579,11 @@ export class MedicalGroupsService {
     actor: AuthenticatedUser,
   ): void {
     const practitionerProfileId = actor.practitionerProfileId;
-    const puede =
+    const can =
       practitionerProfileId !== undefined &&
       (group.requestingPractitionerId === practitionerProfileId ||
         members.some((m) => m.practitionerProfileId === practitionerProfileId));
-    if (!puede) {
+    if (!can) {
       throw new ResourceNotFoundException('Grupo médico no encontrado', {
         id: group.id,
       });
@@ -596,14 +596,14 @@ export class MedicalGroupsService {
     members: MedicalGroupMembers[],
     practitionerProfileId: string,
   ): void {
-    const puede =
+    const can =
       group.requestingPractitionerId === practitionerProfileId ||
       members.some(
         (m) =>
           m.practitionerProfileId === practitionerProfileId &&
           m.invitationStatus === 'ACCEPTED',
       );
-    if (!puede) {
+    if (!can) {
       throw new ResourceNotFoundException('Grupo médico no encontrado', {
         id: group.id,
       });
