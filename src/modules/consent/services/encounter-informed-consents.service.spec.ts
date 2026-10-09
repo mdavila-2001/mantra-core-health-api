@@ -66,26 +66,26 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
       } as any,
       ACTOR,
     );
-    const firmado = d.treatment.sign.mock.calls[0][0];
-    expect(firmado.patientProfileId).toBe('p1');
-    expect(firmado.tenantId).toBe('t1');
+    const signed = d.treatment.sign.mock.calls[0][0];
+    expect(signed.patientProfileId).toBe('p1');
+    expect(signed.tenantId).toBe('t1');
   });
 
   it('inválido: encuentro inexistente es 404; sin acceso a la historia es 403 y no firma', async () => {
-    const sinEncuentro = build({ encounter: null });
+    const withoutEncounter = build({ encounter: null });
     await expect(
-      sinEncuentro.service.register(
+      withoutEncounter.service.register(
         'e1',
         { decision: 'ACCEPTED' } as any,
         ACTOR,
       ),
     ).rejects.toMatchObject({ status: 404 });
 
-    const sinAcceso = build({ allowed: false });
+    const withoutAccess = build({ allowed: false });
     await expect(
-      sinAcceso.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR),
+      withoutAccess.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(sinAcceso.treatment.sign).not.toHaveBeenCalled();
+    expect(withoutAccess.treatment.sign).not.toHaveBeenCalled();
   });
 
   it('la lectura exige poder leer la historia del paciente del encuentro', async () => {
