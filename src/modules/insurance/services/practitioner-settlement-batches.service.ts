@@ -368,8 +368,11 @@ export class PractitionerSettlementBatchesService {
         batch.insuranceCarrierId,
       );
       return;
-    } catch {
-      // No es la aseguradora dueña: probar del lado del prestador.
+    } catch (error) {
+      // Sólo «no es la aseguradora dueña» habilita probar del lado del
+      // prestador. Cualquier otro fallo (la base, por ejemplo) se propaga: si
+      // no, un error de infraestructura terminaba como un 403 engañoso.
+      if (!(error instanceof ForbiddenException)) throw error;
     }
     const tenantId = requireTenantId();
     const providerEntityIds = await this.providerEntityIdsForTenant(
