@@ -9,6 +9,7 @@ import {
   ParseOptionalLimitPipe,
   Roles,
   requireTenantId,
+  AccessLogged,
 } from '../../../common';
 import { DiagnosticsOrdersService } from '../services';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
@@ -39,6 +40,10 @@ export class DiagnosticsOrdersController {
    * @returns Órdenes e informes diagnósticos.
    */
   @Get(':patientProfileId/orders')
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_ORDERS',
+    patient: 'param:patientProfileId',
+  })
   @ApiOperation({
     summary:
       'Órdenes de laboratorio e imagenología del paciente, con sus informes',

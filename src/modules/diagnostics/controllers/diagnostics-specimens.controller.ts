@@ -14,6 +14,7 @@ import {
   CurrentUser,
   requireTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { LabStaffGuard } from '../guards';
 import { DiagnosticsSpecimensService } from '../services';
@@ -69,6 +70,7 @@ export class DiagnosticsSpecimensController {
    * no tenía dónde ir.
    */
   @Get('accessions/:id')
+  @AccessLogged({ resourceType: 'ACCESSION', resourceId: 'param:id' })
   @ApiOperation({
     summary: 'Detalle de una acesión (especímenes, contenedores y custodia)',
     description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
@@ -81,6 +83,7 @@ export class DiagnosticsSpecimensController {
 
   /** Lectura (CL-47): detalle de un espécimen con su cadena de custodia. */
   @Get('specimens/:id')
+  @AccessLogged({ resourceType: 'SPECIMEN', resourceId: 'param:id' })
   @ApiOperation({
     summary: 'Detalle de un espécimen (con su cadena de custodia)',
     description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',

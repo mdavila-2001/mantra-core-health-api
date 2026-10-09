@@ -120,7 +120,10 @@ for (const file of controllers) {
   const lines = text.split(/\r?\n/);
   const domain = file.match(/modules\/([^/]+)\//)?.[1] ?? '';
   const classHasRoles = /@Roles\(/.test(text);
-  const isImmutableCtrl = IMMUTABLE_RESOURCE.test(file);
+  // Contra la ruta RELATIVA: con la absoluta, un checkout cuya carpeta contenga
+  // «audit» o «journal» (p. ej. `wt-audit-trail-api`) volvía «inmutable» a
+  // todo controlador y el chequeo local no se parecía al de CI.
+  const isImmutableCtrl = IMMUTABLE_RESOURCE.test(rel(file));
 
   // Bloque por método: acumula decoradores hasta el nombre del handler.
   let pendingDecorators = [];

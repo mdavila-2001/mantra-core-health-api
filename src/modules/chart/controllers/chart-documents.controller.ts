@@ -21,7 +21,12 @@ import {
   ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartDocumentsService } from '../services';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
@@ -66,6 +71,10 @@ export class ChartDocumentsController {
    * después de cerrar sesión.
    */
   @Get(':documentId/files/:fileId/content')
+  @AccessLogged({
+    resourceType: 'DOCUMENT_FILE_CONTENT',
+    resourceId: 'param:fileId',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el archivo de un documento del expediente',

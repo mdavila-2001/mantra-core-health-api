@@ -38,6 +38,9 @@ export {
 } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
+
+// Bitácora transversal (informe C §8.4): decoradores y contexto por request.
+export * from './audit-trail';
 export {
   TenantAgnostic,
   IS_TENANT_AGNOSTIC_KEY,

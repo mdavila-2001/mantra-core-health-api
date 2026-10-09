@@ -21,7 +21,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { DependentLinkRequestsService } from '../services/dependent-link-requests.service';
 import {
   AcceptDependentLinkRequestDto,
@@ -105,6 +109,7 @@ export class ProfilesDependentRequestsController {
    * @returns Las candidatas; vacío si el texto es corto o nadie coincide.
    */
   @Get('patients/me/dependent-candidates')
+  @AccessLogged({ resourceType: 'DEPENDENT_CANDIDATES', patient: 'actor' })
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiOperation({
     summary: 'Buscar por nombre a quién pedirle que deje representarla',
@@ -129,6 +134,7 @@ export class ProfilesDependentRequestsController {
    * @returns Las pendientes; vacío si no hay ninguna.
    */
   @Get('patients/me/dependent-requests/incoming')
+  @AccessLogged({ resourceType: 'DEPENDENT_REQUESTS', patient: 'actor' })
   @ApiOperation({ summary: 'Listar las solicitudes de dependiente recibidas' })
   @ApiOkResponse({ type: [IncomingDependentLinkRequestDto] })
   listIncomingDependentLinkRequests(

@@ -20,6 +20,7 @@ import {
   ParseOptionalLimitPipe,
   Roles,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import {
   FormsInstancesService,
@@ -66,6 +67,7 @@ export class FormsInstancesController {
 
   /** Fase 1 de lecturas: los formularios de un encuentro. */
   @Get()
+  @AccessLogged({ resourceType: 'FORM_INSTANCES' })
   @ApiOperation({
     summary: 'Listar las instancias de formulario de un encuentro',
   })
@@ -88,6 +90,7 @@ export class FormsInstancesController {
 
   /** Fase 1 de lecturas: la instancia con sus valores vigentes. */
   @Get(':id')
+  @AccessLogged({ resourceType: 'FORM_INSTANCE', resourceId: 'param:id' })
   @ApiOperation({
     summary: 'Leer una instancia con sus valores vigentes, por tipo resuelto',
   })

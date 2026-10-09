@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { createHash } from 'node:crypto';
+import { CONCEPTS } from '../../../common/constants/concepts';
+import {
+  getAuditRequestContext,
+  isUuid,
+  markAuditSealed,
+} from '../../../common/audit-trail';
 import { AuditLog } from '../entities';
 
 /** Datos de un evento de auditoría (provenance) a sellar en la cadena. */
@@ -160,7 +166,11 @@ export class AuditLogRepository {
    * controla la unidad de trabajo. Debe llamarse una sola vez por tx para no romper
    * el orden de la cadena (lee el tip antes de insertar).
    */
-  async append(em: EntityManager, data: AppendAuditData): Promise<AuditLog> {
+  async append(
+    em: EntityManager,
+    appendData: AppendAuditData,
+  ): Promise<AuditLog> {
+    const data = await this.withRequestOrigin(em, appendData);
     const recordedAt = new Date();
     // Serializa el append por tenant ANTES de leer el tip: leer el último eslabón
     // e insertar el nuevo pasa a ser atómico frente a otros appends del tenant.
@@ -173,7 +183,7 @@ export class AuditLogRepository {
       content,
       recordedAt,
     );
-    return em.create(
+    const row = em.create(
       AuditLog,
       {
         userId: data.userId,
@@ -192,6 +202,43 @@ export class AuditLogRepository {
       },
       { partial: true },
     );
+    markAuditSealed(data.outcomeConceptId !== CONCEPTS.OUTCOME_FAILURE);
+    return row;
+  }
+
+  /**
+   * Completa `ip` y `device_id` con el origen de la petición en curso cuando el
+   * llamador no los trae (defecto §1.4.1 del informe C: hasta acá ningún sello
+   * los llenaba). El dispositivo sale de `iam.sessions.device_id` de la sesión
+   * del token y se consulta una sola vez por request.
+   */
+  private async withRequestOrigin(
+    em: EntityManager,
+    data: AppendAuditData,
+  ): Promise<AppendAuditData> {
+    const context = getAuditRequestContext();
+    if (!context) return data;
+    return {
+      ...data,
+      ip: data.ip ?? context.ip,
+      deviceId: data.deviceId ?? (await this.sessionDeviceId(em)),
+    };
+  }
+
+  private async sessionDeviceId(
+    em: EntityManager,
+  ): Promise<string | undefined> {
+    const context = getAuditRequestContext();
+    if (!context?.sessionId) return undefined;
+    if (context.deviceId === undefined) {
+      const rows = await em.execute<{ device_id: string | null }[]>(
+        'SELECT device_id FROM iam.sessions WHERE token_id = ? LIMIT 1',
+        [context.sessionId],
+      );
+      const deviceId = rows[0]?.device_id;
+      context.deviceId = isUuid(deviceId) ? deviceId : null;
+    }
+    return context.deviceId ?? undefined;
   }
 
   /** Cadena ordenada (asc) de una partición para recomputar y cotejar (UC-10-06). */

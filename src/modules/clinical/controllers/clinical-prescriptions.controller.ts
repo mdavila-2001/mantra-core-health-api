@@ -15,7 +15,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { PrescriptionPdfService } from '../services';
 
 /**
@@ -45,6 +50,7 @@ export class ClinicalPrescriptionsController {
    * clínico después de cerrar sesión.
    */
   @Get(':id/pdf')
+  @AccessLogged({ resourceType: 'PRESCRIPTION_PDF', resourceId: 'param:id' })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el PDF oficial de una receta',

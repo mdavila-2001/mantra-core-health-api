@@ -22,6 +22,7 @@ import {
   Public,
   Roles,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { InsuranceCampaignsService } from '../services';
 import {
@@ -99,6 +100,7 @@ export class InsuranceCampaignsController {
 
   /** El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL. */
   @Get('my-benefits')
+  @AccessLogged({ resourceType: 'INSURANCE_BENEFITS', patient: 'actor' })
   @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -119,6 +121,11 @@ export class InsuranceCampaignsController {
    * de IDOR con un perfil ajeno explícito.
    */
   @Get('patient/:patientProfileId')
+  @AccessLogged({
+    resourceType: 'INSURANCE_BENEFITS',
+    patient: 'param:patientProfileId',
+    purpose: 'PAYMENT',
+  })
   @Roles()
   @ApiOperation({
     summary:

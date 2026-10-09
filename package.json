@@ -108,6 +108,8 @@
     "jaeger:logs": "docker compose -f docker-compose.jaeger.yml logs -f",
     "jaeger:verify": "bash scripts/verify-jaeger.sh",
     "alovida:guardrails": "node tools/alovida/guardrails.mjs",
+    "alovida:audit-trail": "node tools/alovida/audit-trail-coverage.mjs --summary",
+    "alovida:audit-trail:test": "node --test tools/alovida/audit-trail-coverage.test.mjs",
     "alovida:personas": "node tools/alovida/exercise-clinical-personas.mjs",
     "alovida:coverage": "node tools/alovida/coverage-report.mjs",
     "google:oauth:get-refresh-token": "node tools/google-oauth/get-refresh-token.mjs",
