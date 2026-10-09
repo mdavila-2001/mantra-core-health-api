@@ -23,7 +23,60 @@ Built on the shared foundation in `src/common`: `EntityManager` (MikroORM 7,
 PostgreSQL) with service-owned transactions, `CONCEPTS.*` for every `*_concept_id`
 FK, `TokenService` for JWT/refresh tokens, domain exceptions, and Pino logging.
 
-## Endpoints
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/iam -name '*.controller.ts' | wc -l
+  find src/modules/iam -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/iam -name '*.entity.ts' | wc -l
+  find src/modules/iam -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 35 rutas HTTP, 14 entidades y 15 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, `DirectoryModule`, `AuthzModule`, `InsuranceModule`, `TerminologyModule`, `PracticeModule`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /iam/auth/change-password` | sesión | `iam-account-security` |
+| `GET /iam/me/sessions` | sesión | `iam-account-security` |
+| `POST /iam/me/sessions/:id/revoke` | sesión | `iam-account-security` |
+| `POST /iam/auth/register-patient` | pública | `iam-auth` |
+| `POST /iam/auth/register-organization` | pública | `iam-auth` |
+| `POST /iam/auth/upload-registration-signature-image` | pública | `iam-auth` |
+| `POST /iam/auth/upload-registration-document` | pública | `iam-auth` |
+| `POST /iam/auth/register-practitioner` | pública | `iam-auth` |
+| `POST /iam/auth/resend-verification` | pública | `iam-auth` |
+| `POST /iam/auth/verify-email` | pública | `iam-auth` |
+| `POST /iam/auth/activate` | pública | `iam-auth` |
+| `POST /iam/auth/login` | pública | `iam-auth` |
+| `POST /iam/auth/forgot-password` | pública | `iam-auth` |
+| `POST /iam/auth/reset-password` | pública | `iam-auth` |
+| `POST /iam/auth/token/refresh` | pública | `iam-auth` |
+| `POST /iam/auth/logout` | sesión | `iam-auth` |
+| `POST /iam/auth/logout-all` | sesión | `iam-auth` |
+| `POST /iam/auth/sessions/purge` | SECURITY_ADMIN | `iam-auth` |
+| `GET /iam/users` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id/credentials` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id/devices` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id/mfa-factors` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id/sessions` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users/:id/global-roles` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/assisted-registration` | CLINICIAN, SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/assisted-practitioner-registration` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/:id/credentials/federated` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/:id/credentials/:cid/revoke` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/:id/mfa-factors` | sesión | `iam-users` |
+| `POST /iam/users/:id/devices` | sesión | `iam-users` |
+| `POST /iam/users/:id/lock` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/:id/global-roles` | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/:id/anonymize` | SECURITY_ADMIN | `iam-users` |
+
+## Endpoints por caso de uso (subconjunto)
+
+Los 14 casos de uso UC-01-xx originales. **No es la lista completa**: el módulo expone más rutas (registro de paciente, profesional y organización, verificación de correo, activación, cambio de contraseña, sesiones propias, listados administrativos); están todas en [Rutas HTTP](#rutas-http-y-alcance-medido).
 
 | # | Method + path | Use case | Auth | Code |
 | --- | --- | --- | --- | --- |
@@ -74,9 +127,11 @@ credentials (`method = FEDERATED`) keyed by `(user, identityProvider, externalSu
 
 ## Entities (schema `iam`)
 
-`users`, `authentication_credentials`, `sessions`, `refresh_tokens`, `mfa_factors`,
-`devices`, `user_global_roles`, `account_lockouts`, `security_events`
-(append-only: only `recorded_at`, no `row_version` / `updated_at`).
+14 entidades (`find src/modules/iam -name '*.entity.ts' | wc -l`): `users`,
+`authentication_credentials`, `sessions`, `refresh_tokens`, `mfa_factors`, `devices`,
+`user_global_roles`, `account_lockouts`, `security_events`, `account_activations`,
+`email_verifications`, `password_resets`, `api_keys`, `api_key_scopes`.
+`security_events` es append-only: sólo `recorded_at`, sin `row_version` ni `updated_at`.
 
 ## Key business rules
 
