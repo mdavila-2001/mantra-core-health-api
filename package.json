@@ -117,6 +117,7 @@
     "docs:openapi:lint": "redocly lint openapi/openapi.yaml",
     "docs:openapi:check-breaking": "node tools/openapi/check-breaking.mjs",
     "docs:openapi:check-breaking:test": "node --test tools/openapi/check-breaking.test.mjs",
+    "docs:openapi:request-bodies:test": "node --test tools/openapi/request-body-contract.test.mjs",
     "docs:openapi:bundle": "redocly bundle openapi/openapi.yaml -o dist-docs/openapi.yaml",
     "docs:endpoints:generate": "node tools/docs/generate-endpoint-markdown.mjs",
     "docs:modules:sync": "node tools/docs/sync-module-docs.mjs",

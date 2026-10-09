@@ -274,6 +274,12 @@ jobs:
       - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
         run: yarn test:cov
 
+      # Los cuerpos de request del contrato: homónimos desambiguados y
+      # `additionalProperties: false` desde `class-validator`. Va antes de
+      # generar: si el arreglo está roto, el contrato saldría mintiendo.
+      - name: Pruebas de los cuerpos de request del contrato OpenAPI
+        run: yarn docs:openapi:request-bodies:test
+
       - name: Generar contrato OpenAPI real desde el código
         env:
           DB_HOST: localhost
