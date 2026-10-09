@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboundMessages } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Datos para encolar un mensaje saliente (UC-12-05). */
 export interface CreateOutboundData {
@@ -133,20 +133,30 @@ export class OutboundMessagesRepository {
   }
 
   /**
-   * Circuit breaker (UC-12-12): retiene en lote los mensajes QUEUED de una
-   * conexión (QUEUED -> HELD). Devuelve el número de filas afectadas.
+   * Circuit breaker (UC-12-12): retiene los mensajes QUEUED de una conexión
+   * (QUEUED -> HELD). Devuelve cuántos retuvo.
+   *
+   * Pasa por la unidad de trabajo del ORM y no por un `nativeUpdate`: así cada
+   * fila lleva su `row_version` y el espejo sella su revisión en
+   * `outbound_messages_history`, que antes quedaba vacía para este cambio.
    */
-  holdQueuedForConnection(
+  async holdQueuedForConnection(
     em: EntityManager,
     connectionId: string,
     queuedStateConceptId: string,
     heldStateConceptId: string,
+    actorUserId: string,
   ): Promise<number> {
-    return em.nativeUpdate(
-      OutboundMessages,
-      { connectionId, statusConceptId: queuedStateConceptId },
-      { statusConceptId: heldStateConceptId },
-    );
+    const queued = await em.find(OutboundMessages, {
+      connectionId,
+      statusConceptId: queuedStateConceptId,
+    });
+    for (const message of queued) {
+      message.statusConceptId = heldStateConceptId;
+      touch(message, actorUserId);
+    }
+    await em.flush();
+    return queued.length;
   }
 
   /**
