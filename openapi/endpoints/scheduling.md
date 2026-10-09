@@ -79,7 +79,7 @@ Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada de
 - **Nombre:** Listar las tipologías de actividad de la agenda
 - **Operation ID:** `SchedulingController_listActivityTypes`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listActivityTypes](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listActivityTypes](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -192,7 +192,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Asignar una cita puntual a un paciente (nace confirmada)
 - **Operation ID:** `SchedulingController_createDirectAppointment`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createDirectAppointment](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createDirectAppointment](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -315,19 +315,19 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           clash.resourceName ? ` en «${clash.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -352,7 +352,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Turno de mostrador atómico (walk-in)
 - **Operation ID:** `SchedulingController_createWalkInAppointment`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createWalkInAppointment](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createWalkInAppointment](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -508,20 +508,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Un profesional solo puede asignar citas en su propia agenda. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 403 | `FORBIDDEN` | La reconsulta se agenda en su propia agenda, no en la de otro profesional. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 404 | `NOT_FOUND` | La cita de la que sale esta reconsulta no existe | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           choque.resourceName ? ` en «${choque.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           clash.resourceName ? ` en «${clash.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -546,7 +546,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Definir una política de reserva
 - **Operation ID:** `SchedulingController_createPolicy`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createPolicy](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createPolicy](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -664,8 +664,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 409 | `CONFLICT` | Ya existe una política con ese código | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 409 | `CONFLICT` | Ya existe una política con ese código | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-booking-policy.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -691,7 +691,7 @@ Ejemplo de error normalizado:
 - **Nombre:** UC-41-15: lista citas por paciente, recurso y/o ventana
 - **Operation ID:** `SchedulingBookingsController_searchBookings`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.searchBookings](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.searchBookings](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -902,9 +902,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 422 | `PRECONDITION_FAILED` | Indique al menos patientProfileId o resourceId para listar citas | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique al menos patientProfileId o resourceId para listar citas | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -929,7 +928,7 @@ Ejemplo de error normalizado:
 - **Nombre:** UC-41-15: consulta una cita
 - **Operation ID:** `SchedulingBookingsController_getBooking`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.getBooking](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.getBooking](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1126,9 +1125,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/get-booking.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/get-booking.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1153,7 +1151,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Aceptar la solicitud de cita
 - **Operation ID:** `SchedulingBookingsController_accept`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.accept](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.accept](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1261,12 +1259,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1291,7 +1289,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cancelar la cita y liberar el cupo
 - **Operation ID:** `SchedulingBookingsController_cancel`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.cancel](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.cancel](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1398,13 +1396,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
-| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1429,7 +1426,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar la llegada del paciente
 - **Operation ID:** `SchedulingBookingsController_checkIn`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.checkIn](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.checkIn](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1515,8 +1512,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/check-in-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1541,7 +1538,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Completar la atención
 - **Operation ID:** `SchedulingBookingsController_complete`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.complete](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.complete](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1634,9 +1631,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1661,7 +1658,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Informar una demora sobre una cita
 - **Operation ID:** `SchedulingBookingsController_delay`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.delay](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.delay](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1770,10 +1767,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1798,7 +1795,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Leer el estado de pago de una cita
 - **Operation ID:** `SchedulingBookingsController_getPaymentState`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.getPaymentState](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.getPaymentState](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -1891,8 +1888,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1917,7 +1914,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Marcar el estado de pago de una cita
 - **Operation ID:** `SchedulingBookingsController_setPaymentState`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.setPaymentState](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.setPaymentState](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2028,10 +2025,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/set-payment-state.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2056,7 +2053,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Proponer otro horario para la solicitud
 - **Operation ID:** `SchedulingBookingsController_proposeSchedule`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.proposeSchedule](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.proposeSchedule](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2164,15 +2161,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cupo propuesto no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | El cupo propuesto no tiene lugar | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cupo propuesto no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 409 | `CONFLICT` | El cupo propuesto no tiene lugar | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El horario propuesto es el que ya tiene la solicitud | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${accion} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El horario propuesto es el que ya tiene la solicitud | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2197,7 +2194,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Rechazar la solicitud de cita
 - **Operation ID:** `SchedulingBookingsController_reject`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.reject](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.reject](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2300,13 +2297,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
-| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2331,7 +2327,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Programar recordatorios para la cita
 - **Operation ID:** `SchedulingBookingsController_scheduleReminders`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.scheduleReminders](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.scheduleReminders](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2439,7 +2435,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2465,7 +2461,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Pedir documentación u orden médica antes de aceptar
 - **Operation ID:** `SchedulingBookingsController_requestInfo`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.requestInfo](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.requestInfo](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2575,11 +2571,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2604,7 +2600,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reprogramar la cita a otro slot
 - **Operation ID:** `SchedulingBookingsController_reschedule`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.reschedule](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.reschedule](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2709,16 +2705,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Slot destino no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | El slot destino no tiene cupos | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 404 | `NOT_FOUND` | Slot destino no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 409 | `CONFLICT` | El slot destino no tiene cupos | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Solo se reprograma una cita vigente | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${accion} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se reprograma una cita vigente | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2743,7 +2738,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Iniciar la atención
 - **Operation ID:** `SchedulingBookingsController_start`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingBookingsController.start](../../src/modules/scheduling/controllers/scheduling-bookings.controller.ts)
+- **Implementación:** [SchedulingBookingsController.start](../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts)
 
 ### Descripción de negocio
 
@@ -2836,9 +2831,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2863,7 +2858,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las reglas de un tenant
 - **Operation ID:** `SchedulingConfirmationController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingConfirmationController.list](../../src/modules/scheduling/controllers/scheduling-confirmation.controller.ts)
+- **Implementación:** [SchedulingConfirmationController.list](../../src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts)
 
 ### Descripción de negocio
 
@@ -2975,7 +2970,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear una regla de confirmación
 - **Operation ID:** `SchedulingConfirmationController_create`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingConfirmationController.create](../../src/modules/scheduling/controllers/scheduling-confirmation.controller.ts)
+- **Implementación:** [SchedulingConfirmationController.create](../../src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts)
 
 ### Descripción de negocio
 
@@ -3125,7 +3120,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reactivar una regla desactivada
 - **Operation ID:** `SchedulingConfirmationController_activate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingConfirmationController.activate](../../src/modules/scheduling/controllers/scheduling-confirmation.controller.ts)
+- **Implementación:** [SchedulingConfirmationController.activate](../../src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts)
 
 ### Descripción de negocio
 
@@ -3222,7 +3217,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Regla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-confirmation.service.ts |
+| 404 | `NOT_FOUND` | Regla no encontrada | Excepción explícita en src/modules/scheduling/application/confirmation/scheduling-confirmation.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3247,7 +3242,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Desactivar una regla (sin borrado duro)
 - **Operation ID:** `SchedulingConfirmationController_deactivate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingConfirmationController.deactivate](../../src/modules/scheduling/controllers/scheduling-confirmation.controller.ts)
+- **Implementación:** [SchedulingConfirmationController.deactivate](../../src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts)
 
 ### Descripción de negocio
 
@@ -3344,7 +3339,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Regla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-confirmation.service.ts |
+| 404 | `NOT_FOUND` | Regla no encontrada | Excepción explícita en src/modules/scheduling/application/confirmation/scheduling-confirmation.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3369,7 +3364,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Evaluar una solicitud de reserva contra las reglas vigentes
 - **Operation ID:** `SchedulingConfirmationController_evaluate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingConfirmationController.evaluate](../../src/modules/scheduling/controllers/scheduling-confirmation.controller.ts)
+- **Implementación:** [SchedulingConfirmationController.evaluate](../../src/modules/scheduling/presentation/controllers/scheduling-confirmation.controller.ts)
 
 ### Descripción de negocio
 
@@ -3517,7 +3512,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar los motivos de bloqueo de agenda
 - **Operation ID:** `SchedulingController_listExceptionTypes`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listExceptionTypes](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listExceptionTypes](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -3632,7 +3627,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Eliminar una excepción de disponibilidad
 - **Operation ID:** `SchedulingController_removeException`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.removeException](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.removeException](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -3705,8 +3700,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Excepción no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Excepción no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/remove-exception.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3731,7 +3726,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Editar una excepción de disponibilidad
 - **Operation ID:** `SchedulingController_updateException`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.updateException](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.updateException](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -3840,11 +3835,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Excepción no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Excepción no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-exception.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El bloqueo termina antes de empezar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El bloqueo termina antes de empezar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-exception.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3869,7 +3864,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Confirmar la cita a partir de la reserva temporal
 - **Operation ID:** `SchedulingController_confirmBooking`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.confirmBooking](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.confirmBooking](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -3986,15 +3981,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tiene una cita confirmada ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene una cita confirmada ese día a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4019,7 +4013,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Solicitar la cita a partir de la reserva temporal
 - **Operation ID:** `SchedulingController_requestBooking`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.requestBooking](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.requestBooking](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -4132,15 +4126,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Reserva temporal no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 409 | `CONFLICT` | La reserva temporal ya fue consumida o liberada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 409 | `CONFLICT` | La reserva temporal expiró | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tiene una cita confirmada ese día a esa hora${             choque.resourceName ? ` en «${choque.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${quien} de ${horaLocal(         primero.startAt,         primero.timeZone,       )} a ${horaLocal(         primero.endAt,         primero.timeZone,       )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/services/scheduling-professional-time.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene una cita confirmada ese día a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. Cancélelo primero si quiere cambiarlo por éste. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-materializer.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4165,7 +4158,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Despachar los recordatorios cuya hora ya llegó
 - **Operation ID:** `SchedulingInternalController_dispatchReminders`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingInternalController.dispatchReminders](../../src/modules/scheduling/controllers/scheduling-internal.controller.ts)
+- **Implementación:** [SchedulingInternalController.dispatchReminders](../../src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4284,7 +4277,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Liberar las reservas temporales vencidas
 - **Operation ID:** `SchedulingInternalController_expireHolds`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingInternalController.expireHolds](../../src/modules/scheduling/controllers/scheduling-internal.controller.ts)
+- **Implementación:** [SchedulingInternalController.expireHolds](../../src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4403,7 +4396,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Promover candidatos de la lista de espera a un slot con cupo
 - **Operation ID:** `SchedulingInternalController_promoteWaitlist`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingInternalController.promoteWaitlist](../../src/modules/scheduling/controllers/scheduling-internal.controller.ts)
+- **Implementación:** [SchedulingInternalController.promoteWaitlist](../../src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4501,7 +4494,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SYSTEM_WORKER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4527,7 +4520,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar slots con cupo libre y candidatos activos en espera
 - **Operation ID:** `SchedulingInternalController_listWaitlistCandidates`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingInternalController.listWaitlistCandidates](../../src/modules/scheduling/controllers/scheduling-internal.controller.ts)
+- **Implementación:** [SchedulingInternalController.listWaitlistCandidates](../../src/modules/scheduling/presentation/controllers/scheduling-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -4634,7 +4627,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar los recursos agendables de un tenant
 - **Operation ID:** `SchedulingAgendaController_listResources`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingAgendaController.listResources](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+- **Implementación:** [SchedulingAgendaController.listResources](../../src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts)
 
 ### Descripción de negocio
 
@@ -4780,7 +4773,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Dar de alta un recurso agendable
 - **Operation ID:** `SchedulingController_createResource`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createResource](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createResource](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -4896,10 +4889,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Un profesional solo puede publicar su propia agenda: el recurso debe ' +           'apuntar a su perfil profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Un profesional solo puede publicar su propia agenda: el recurso debe ' +           'apuntar a su perfil profesional. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación. Cuando la acepten va a poder publicar su agenda acá.'         : 'Su vínculo con esta organización no está vigente, así que no puede ' +             'publicar agenda acá. Hable con ellos para reactivarlo.' | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación. Cuando la acepten va a poder publicar su agenda acá.'         : 'Su vínculo con esta organización no está vigente, así que no puede ' +             'publicar agenda acá. Hable con ellos para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4924,7 +4917,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos
 - **Operation ID:** `SchedulingController_closeSlots`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.closeSlots](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.closeSlots](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5038,12 +5031,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5068,7 +5061,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Informar una demora que alcanza a toda la agenda del recurso
 - **Operation ID:** `SchedulingController_delayResource`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.delayResource](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.delayResource](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5181,11 +5174,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La ventana de la demora termina antes de empezar | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
-| 422 | `PRECONDITION_FAILED` | Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando | Excepción explícita en src/modules/scheduling/services/scheduling-delay.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana de la demora termina antes de empezar | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando | Excepción explícita en src/modules/scheduling/application/delay/scheduling-delay.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5210,7 +5203,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las excepciones de disponibilidad de un recurso
 - **Operation ID:** `SchedulingController_listExceptions`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listExceptions](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listExceptions](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5314,10 +5307,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No puede ver los bloqueos de esta agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | No puede ver los bloqueos de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5342,7 +5335,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar una excepción de disponibilidad
 - **Operation ID:** `SchedulingController_createException`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createException](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createException](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5458,11 +5451,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | La excepción debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${               primera.resourceName ? ` en «${primera.resourceName}»` : ''             }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La excepción debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${               first.resourceName ? ` en «${first.resourceName}»` : ''             }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5487,7 +5480,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Correr los cupos de una agenda N minutos
 - **Operation ID:** `SchedulingController_shiftSlots`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.shiftSlots](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.shiftSlots](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5600,11 +5593,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/shift-slots.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La ventana termina antes de empezar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Mover cero minutos no cambia nada: elija cuánto correr la agenda | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana termina antes de empezar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/shift-slots.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Mover cero minutos no cambia nada: elija cuánto correr la agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/shift-slots.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5629,7 +5622,7 @@ Ejemplo de error normalizado:
 - **Nombre:** UC-41-14: agenda publicada del recurso en una ventana
 - **Operation ID:** `SchedulingController_getResourceAgenda`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.getResourceAgenda](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.getResourceAgenda](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5751,8 +5744,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/get-resource-agenda.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/get-resource-agenda.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5777,7 +5770,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las plantillas de agenda de un recurso
 - **Operation ID:** `SchedulingController_listTemplates`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listTemplates](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listTemplates](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -5896,8 +5889,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-templates.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5922,7 +5915,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Publicar una plantilla de agenda con sus franjas
 - **Operation ID:** `SchedulingController_createTemplate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.createTemplate](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.createTemplate](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -6060,12 +6053,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-template.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Dos franjas de esta agenda se solapan entre sí | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ya tiene «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +             'horario. Cambie el horario o el día, o edite esa otra agenda. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-template.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Dos franjas de esta agenda se solapan entre sí | Excepción explícita en src/modules/scheduling/application/catalog/support/agenda-overlap-guard.ts |
+| 422 | `PRECONDITION_FAILED` | Ya tiene «${other.resourceName}» el ${existing.label}, que se cruza con este ` +             'horario. Cambie el horario o el día, o edite esa otra agenda. | Excepción explícita en src/modules/scheduling/application/catalog/support/agenda-overlap-guard.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6090,7 +6083,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar quiénes esperan turno en una agenda
 - **Operation ID:** `SchedulingController_listResourceWaitlist`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listResourceWaitlist](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listResourceWaitlist](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -6198,7 +6191,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo ve quién la espera quien atiende en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: sólo ve quién la espera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6223,7 +6216,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Horarios donde cabe un servicio
 - **Operation ID:** `SchedulingServiceOfferingsController_availability`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingServiceOfferingsController.availability](../../src/modules/scheduling/controllers/scheduling-service-offerings.controller.ts)
+- **Implementación:** [SchedulingServiceOfferingsController.availability](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
 
 ### Descripción de negocio
 
@@ -6323,8 +6316,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 422 | `PRECONDITION_FAILED` | Se pueden mirar hasta ${MAX_DIAS_DE_CONSULTA} días de una vez. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Se pueden mirar hasta ${MAX_QUERY_DAYS} días de una vez. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6349,7 +6342,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Los servicios que ofrece un profesional
 - **Operation ID:** `SchedulingServiceOfferingsController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingServiceOfferingsController.list](../../src/modules/scheduling/controllers/scheduling-service-offerings.controller.ts)
+- **Implementación:** [SchedulingServiceOfferingsController.list](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
 
 ### Descripción de negocio
 
@@ -6462,7 +6455,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | Indique de qué profesional quiere ver los servicios. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique de qué profesional quiere ver los servicios. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6487,7 +6480,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Declarar cómo ofrezco un servicio
 - **Operation ID:** `SchedulingServiceOfferingsController_create`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingServiceOfferingsController.create](../../src/modules/scheduling/controllers/scheduling-service-offerings.controller.ts)
+- **Implementación:** [SchedulingServiceOfferingsController.create](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
 
 ### Descripción de negocio
 
@@ -6627,12 +6620,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo puede crear ofertas para usted. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
-| 403 | `FORBIDDEN` | Sólo un profesional ofrece servicios. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
-| 409 | `CONFLICT` | Ya ofrece ese servicio. Edite la oferta que ya tiene. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
+| 403 | `FORBIDDEN` | Sólo puede crear ofertas para usted. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 403 | `FORBIDDEN` | Sólo un profesional ofrece servicios. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 409 | `CONFLICT` | Ya ofrece ese servicio. Edite la oferta que ya tiene. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Indique de qué profesional es la oferta. | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique de qué profesional es la oferta. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6657,7 +6650,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Editar o apagar la oferta de un servicio
 - **Operation ID:** `SchedulingServiceOfferingsController_update`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingServiceOfferingsController.update](../../src/modules/scheduling/controllers/scheduling-service-offerings.controller.ts)
+- **Implementación:** [SchedulingServiceOfferingsController.update](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
 
 ### Descripción de negocio
 
@@ -6795,7 +6788,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Oferta no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-service-offerings.service.ts |
+| 404 | `NOT_FOUND` | Oferta no encontrada | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6821,7 +6814,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Retener el turno de un servicio
 - **Operation ID:** `SchedulingServiceOfferingsController_placeHold`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingServiceOfferingsController.placeHold](../../src/modules/scheduling/controllers/scheduling-service-offerings.controller.ts)
+- **Implementación:** [SchedulingServiceOfferingsController.placeHold](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
 
 ### Descripción de negocio
 
@@ -6936,15 +6929,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Agenda no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 409 | `CONFLICT` | Ese horario ya no está disponible para este servicio. Elija otro. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 404 | `NOT_FOUND` | Agenda no encontrada | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 409 | `CONFLICT` | Ese horario ya no está disponible para este servicio. Elija otro. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 422 | `PRECONDITION_FAILED` | veredicto === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'         : 'Su vínculo con esta organización ya no está vigente.' | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa cita empieza demasiado pronto: hay que pedirla con al menos ${grupo.minNoticeMinutes} minutos de anticipación. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
-| 422 | `PRECONDITION_FAILED` | Sólo se puede pedir con hasta ${grupo.maxAdvanceDays} días de anticipación. | Excepción explícita en src/modules/scheduling/services/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'         : 'Su vínculo con esta organización ya no está vigente.' | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa cita empieza demasiado pronto: hay que pedirla con al menos ${group.minNoticeMinutes} minutos de anticipación. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se puede pedir con hasta ${group.maxAdvanceDays} días de anticipación. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6969,7 +6961,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar los cupos de una ventana
 - **Operation ID:** `SchedulingAgendaController_listSlots`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingAgendaController.listSlots](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+- **Implementación:** [SchedulingAgendaController.listSlots](../../src/modules/scheduling/presentation/controllers/scheduling-agenda.controller.ts)
 
 ### Descripción de negocio
 
@@ -7082,8 +7074,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana no puede superar ${MAX_WINDOW_DAYS} días | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/agenda/scheduling-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana no puede superar ${MAX_WINDOW_DAYS} días | Excepción explícita en src/modules/scheduling/application/agenda/scheduling-agenda.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7108,7 +7100,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reservar temporalmente un cupo del slot
 - **Operation ID:** `SchedulingController_placeHold`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.placeHold](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.placeHold](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7210,14 +7202,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No cuenta con autorización de tutoría sobre el paciente indicado | Excepción explícita en src/modules/profiles/services/patient-representation.service.ts |
-| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | El slot no tiene cupos disponibles | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 409 | `CONFLICT` | El paciente alcanzó el máximo de citas activas | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 404 | `NOT_FOUND` | Slot no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
+| 409 | `CONFLICT` | El slot no tiene cupos disponibles | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
+| 409 | `CONFLICT` | El paciente alcanzó el máximo de citas activas | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El slot está bloqueado | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ese horario ya no está disponible. | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
-| 422 | `PRECONDITION_FAILED` | yaPaso             ? 'Ese horario ya pasó.'             : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${minutosDeAviso} minutos de anticipación.` | Excepción explícita en src/modules/scheduling/services/scheduling-bookings.service.ts |
+| 422 | `PRECONDITION_FAILED` | El slot está bloqueado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya no está disponible. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | timing === 'ALREADY_PASSED'             ? 'Ese horario ya pasó.'             : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${noticeMinutes} minutos de anticipación.` | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7242,7 +7233,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Retirar una plantilla de agenda y soltar sus cupos libres
 - **Operation ID:** `SchedulingController_retireTemplate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.retireTemplate](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.retireTemplate](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7341,9 +7332,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
+| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7368,7 +7359,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Editar una plantilla de agenda ya publicada
 - **Operation ID:** `SchedulingController_updateTemplate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.updateTemplate](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.updateTemplate](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7498,11 +7489,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-template.use-case.ts |
+| 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-template.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/update-template.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7527,7 +7518,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Materializar los slots de la plantilla en una ventana
 - **Operation ID:** `SchedulingController_generateSlots`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.generateSlots](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.generateSlots](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7634,10 +7625,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/generate-slots.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/generate-slots.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7662,7 +7653,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reactivar un horario retirado
 - **Operation ID:** `SchedulingController_reactivateTemplate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.reactivateTemplate](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.reactivateTemplate](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7751,9 +7742,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
-| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/reactivate-template.use-case.ts |
+| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/reactivate-template.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7778,7 +7769,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las entradas de lista de espera de un paciente
 - **Operation ID:** `SchedulingController_listWaitlist`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.listWaitlist](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.listWaitlist](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -7884,7 +7875,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular y el personal de agenda pueden ver esta lista de espera. | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular y el personal de agenda pueden ver esta lista de espera. | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7909,7 +7900,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Inscribir a un paciente en la lista de espera
 - **Operation ID:** `SchedulingController_enrollWaitlist`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [SchedulingController.enrollWaitlist](../../src/modules/scheduling/controllers/scheduling.controller.ts)
+- **Implementación:** [SchedulingController.enrollWaitlist](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
 
 ### Descripción de negocio
 
@@ -8018,7 +8009,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular y el personal de agenda pueden ver esta lista de espera. | Excepción explícita en src/modules/scheduling/services/scheduling-waitlist.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular y el personal de agenda pueden ver esta lista de espera. | Excepción explícita en src/modules/scheduling/application/waitlist/scheduling-waitlist.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -8044,7 +8035,7 @@ Ejemplo de error normalizado:
 - **Nombre:** La agenda de la organización
 - **Operation ID:** `TenantAgendaController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TenantAgendaController.list](../../src/modules/scheduling/controllers/tenant-agenda.controller.ts)
+- **Implementación:** [TenantAgendaController.list](../../src/modules/scheduling/presentation/controllers/tenant-agenda.controller.ts)
 
 ### Descripción de negocio
 
@@ -8054,7 +8045,7 @@ Contexto declarado en el controlador: Las citas de la organización en una venta
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /tenants/{tenantId}/agenda` en `TenantAgendaController_list`. El controlador delega en `SchedulingTenantAgendaService.listar`. No recibe body. El tipo de retorno estático es `Promise<TenantAgendaResponseDto>`.
+NestJS resuelve `GET /tenants/{tenantId}/agenda` en `TenantAgendaController_list`. El controlador delega en `SchedulingTenantAgendaService.list`. No recibe body. El tipo de retorno estático es `Promise<TenantAgendaResponseDto>`.
 
 ### Parámetros
 
@@ -8153,10 +8144,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana no es una fecha válida | Excepción explícita en src/modules/scheduling/services/scheduling-tenant-agenda.service.ts |
-| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-tenant-agenda.service.ts |
-| 422 | `PRECONDITION_FAILED` | El rango no puede superar los ${MAX_RANGO_AGENDA_DIAS} días | Excepción explícita en src/modules/scheduling/services/scheduling-tenant-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana no es una fecha válida | Excepción explícita en src/modules/scheduling/application/agenda/scheduling-tenant-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/agenda/scheduling-tenant-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | El rango no puede superar los ${MAX_AGENDA_RANGE_DAYS} días | Excepción explícita en src/modules/scheduling/application/agenda/scheduling-tenant-agenda.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

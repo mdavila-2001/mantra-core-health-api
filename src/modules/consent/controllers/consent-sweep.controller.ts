@@ -1,6 +1,11 @@
 import { Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ConsentSweepService } from '../services';
 import { ExpirationSweepResultDto } from '../dto';
 
@@ -21,6 +26,11 @@ export class ConsentSweepController {
   constructor(private readonly sweepService: ConsentSweepService) {}
 
   /** UC-07-11. */
+  @Audited({
+    action: 'CONSENTS_EXPIRED',
+    entity: 'consent',
+    entityId: 'result.id',
+  })
   @Post('expiration-sweep')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

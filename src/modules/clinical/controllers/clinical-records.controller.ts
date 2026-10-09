@@ -12,10 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { ClinicalRecordAccessGuard } from '../guards';
@@ -88,6 +89,11 @@ export class ClinicalRecordsController {
   ) {}
 
   /** UC-08-08. */
+  @Audited({
+    action: 'CONDITION_RECORDED',
+    entity: 'condition',
+    entityId: 'result.id',
+  })
   @Post('conditions')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +106,11 @@ export class ClinicalRecordsController {
   }
 
   /** Patch v4.0.8: transiciona el estado clínico de un diagnóstico ya registrado. */
+  @Audited({
+    action: 'CONDITION_STATUS_CHANGED',
+    entity: 'condition',
+    entityId: 'param:id',
+  })
   @Post('conditions/:id/change-status')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar el estado clínico de una condición' })
@@ -120,6 +131,11 @@ export class ClinicalRecordsController {
    * MCH-007, ver la clase): el paciente sólo se conoce al cargar la condición,
    * y la política de escritura la aplica el servicio.
    */
+  @Audited({
+    action: 'CONDITION_VERIFIED',
+    entity: 'condition',
+    entityId: 'param:id',
+  })
   @Post('conditions/:id/verification')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -139,6 +155,11 @@ export class ClinicalRecordsController {
    * ALV-033 (reemplazo de ALV-032): liga un archivo ya subido a este
    * diagnóstico puntual. Subí el archivo antes con `POST /common/files`.
    */
+  @Audited({
+    action: 'CONDITION_FILE_ATTACHED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('conditions/:id/attachments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una condición' })
@@ -151,6 +172,11 @@ export class ClinicalRecordsController {
   }
 
   /** UC-08-09. */
+  @Audited({
+    action: 'ALLERGY_INTOLERANCE_RECORDED',
+    entity: 'allergy_intolerance',
+    entityId: 'result.id',
+  })
   @Post('allergy-intolerances')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -163,6 +189,11 @@ export class ClinicalRecordsController {
   }
 
   /** P25 (BR-11): liga un archivo ya subido a esta alergia puntual. */
+  @Audited({
+    action: 'ALLERGY_INTOLERANCE_FILE_ATTACHED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('allergy-intolerances/:id/attachments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una alergia' })
@@ -193,6 +224,11 @@ export class ClinicalRecordsController {
   }
 
   /** UC-08-10. */
+  @Audited({
+    action: 'MEDICATION_PRESCRIBED',
+    entity: 'medication_request',
+    entityId: 'result.id',
+  })
   @Post('medication-requests')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -208,6 +244,11 @@ export class ClinicalRecordsController {
    * P25 (BR-11): liga un archivo ya subido a esta receta puntual. Adjuntar no
    * reabre la inmutabilidad: el contenido sellado y su `content_hash` no cambian.
    */
+  @Audited({
+    action: 'MEDICATION_REQUEST_FILE_ATTACHED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('medication-requests/:id/attachments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un archivo ya subido a una receta' })
@@ -238,6 +279,11 @@ export class ClinicalRecordsController {
   }
 
   /** UC-08-11. */
+  @Audited({
+    action: 'MEDICATION_ADMINISTERED',
+    entity: 'medication_record',
+    entityId: 'result.id',
+  })
   @Post('medication-records')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -250,6 +296,11 @@ export class ClinicalRecordsController {
   }
 
   /** CAN-RX: edita ítems clínicos de un borrador (solo DRAFT; comando, no PATCH genérico). */
+  @Audited({
+    action: 'MEDICATION_DRAFT_EDITED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/edit')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Editar ítems de una receta en borrador (DRAFT)' })
@@ -262,6 +313,11 @@ export class ClinicalRecordsController {
   }
 
   /** ALOVIDA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
+  @Audited({
+    action: 'MEDICATION_SIGNED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/sign')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Firmar una receta en borrador (DRAFT)' })
@@ -273,6 +329,11 @@ export class ClinicalRecordsController {
   }
 
   /** CAN-RX: emite la receta (DRAFT → ISSUED) y sella su contenido. */
+  @Audited({
+    action: 'MEDICATION_ISSUED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/issue')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Emitir una receta (la vuelve inmutable)' })
@@ -285,6 +346,11 @@ export class ClinicalRecordsController {
   }
 
   /** CAN-RX: invalida una receta emitida (motivo obligatorio; se conserva). */
+  @Audited({
+    action: 'MEDICATION_INVALIDATED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/invalidate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Invalidar una receta emitida' })
@@ -297,6 +363,11 @@ export class ClinicalRecordsController {
   }
 
   /** CAN-RX: reemplaza una receta emitida y devuelve la nueva (DRAFT). */
+  @Audited({
+    action: 'MEDICATION_REPLACED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/replace')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -311,6 +382,11 @@ export class ClinicalRecordsController {
   }
 
   /** CAN-RX: renueva una receta copiando datos y devuelve la nueva (DRAFT). */
+  @Audited({
+    action: 'MEDICATION_RENEWED',
+    entity: 'medication_request',
+    entityId: 'param:id',
+  })
   @Post('medication-requests/:id/renew')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -325,6 +401,11 @@ export class ClinicalRecordsController {
   }
 
   /** UC-08-12. */
+  @Audited({
+    action: 'PROCEDURE_RECORDED',
+    entity: 'procedure',
+    entityId: 'result.id',
+  })
   @Post('procedures')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -342,6 +423,11 @@ export class ClinicalRecordsController {
    * `clinical.procedures` con categoría dental, ver `PeriopDentalService`—,
    * así que no hace falta un endpoint propio en ese módulo.
    */
+  @Audited({
+    action: 'PROCEDURE_FILE_ATTACHED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('procedures/:id/attachments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un archivo ya subido a un procedimiento' })
@@ -354,6 +440,11 @@ export class ClinicalRecordsController {
   }
 
   /** UC-08-13. */
+  @Audited({
+    action: 'IMMUNIZATION_RECORDED',
+    entity: 'immunization',
+    entityId: 'result.id',
+  })
   @Post('immunizations')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)

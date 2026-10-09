@@ -1,47 +1,144 @@
-# Módulo 41 — Scheduling
+# Módulo 41 — Scheduling (agenda)
 
-Agenda: recursos agendables, políticas de reserva, plantillas horarias, generación de slots,
-reservas con anti-double-booking, lista de espera y recordatorios.
+Agenda: recursos agendables, políticas de reserva, plantillas horarias, generación de cupos,
+reservas con anti-double-booking, lista de espera, recordatorios, avisos, servicios con duración
+dinámica y mostrador (alta de paciente + cita + encuentro en una transacción).
 
-## Casos de uso cubiertos (14)
+Es el **módulo piloto del molde DDD** (ADR-0026, `docs/architecture/module-layout.md`): sus capas
+y reglas de dependencia las hace cumplir `src/architecture/module-layering.spec.ts`.
 
-| UC       | Endpoint                                                           | Descripción                            |
-| -------- | ------------------------------------------------------------------ | -------------------------------------- |
-| UC-41-01 | `POST /scheduling/resources` · `POST /scheduling/booking-policies` | Definir recurso y política             |
-| UC-41-02 | `POST /scheduling/resources/:id/templates`                         | Publicar plantilla con franjas         |
-| UC-41-03 | `POST /scheduling/templates/:id/generate-slots`                    | Materializar slots                     |
-| UC-41-04 | `POST /scheduling/resources/:id/exceptions`                        | Excepción de disponibilidad            |
-| UC-41-05 | `POST /scheduling/slots/:id/holds`                                 | Reserva temporal (anti-double-booking) |
-| UC-41-06 | `POST /scheduling/holds/:holdToken/confirm`                        | Confirmar cita                         |
-| UC-41-07 | `POST /scheduling/internal/expire-holds`                           | Worker: liberar holds vencidos         |
-| UC-41-08 | `POST /scheduling/bookings/:id/reschedule`                         | Reprogramar                            |
-| UC-41-09 | `POST /scheduling/bookings/:id/cancel`                             | Cancelar (con cargo por no-show)       |
-| UC-41-10 | `POST /scheduling/bookings/:id/check-in`                           | Check-in                               |
-| UC-41-11 | `POST /scheduling/waitlist`                                        | Inscribir en lista de espera           |
-| UC-41-12 | `POST /scheduling/internal/promote-waitlist/:slotId`               | Worker: promover lista de espera       |
-| UC-41-13 | `POST /scheduling/bookings/:id/reminders`                          | Programar recordatorios                |
-| UC-41-14 | `POST /scheduling/internal/dispatch-reminders`                     | Worker: despachar recordatorios        |
+## Estructura
 
-## Entidades
-
-`schedulable_resources`, `booking_policies`, `schedule_templates`, `schedule_rules`,
-`bookable_slots`, `availability_exceptions`, `slot_holds`, `appointment_bookings`,
-`booking_reschedules`, `booking_cancellations`, `waitlist_entries`, `appointment_reminders`.
-
-## Flujo general
-
+```text
+scheduling/
+├── scheduling.module.ts        cableado Nest (providers, puertos → adaptadores)
+├── scheduling.tokens.ts        nombre del módulo ante la capa de persistencia
+├── entities/                   ENTIDADES ORM GENERADAS desde el .puml — no se editan a mano
+├── domain/                     reglas puras: sin Nest, sin MikroORM, sin otras capas
+│   ├── scheduling.concepts.ts  conceptos de terminología (SCHED)
+│   ├── booking/                máquina de estados, estados agrupados, roles/actores, canales,
+│   │                           estado de pago, ventana de cancelación, admisión de retención,
+│   │                           plan de servicio, lectura del historial, visibilidad del motivo
+│   ├── catalog/                tipos y constantes del catálogo, geometría de franjas semanales
+│   ├── notices/                redacción de avisos (funciones puras), catálogo de razones
+│   ├── resource/               tablas que identifican a un perfil profesional
+│   └── time/                   hora local ↔ UTC, propuesta de horarios de servicios
+├── application/                casos de uso; dependen de puertos, no de adaptadores
+│   ├── ports/                  contratos hacia otros contextos y hacia mensajería/listas de espera
+│   ├── bookings/               fachada + support/ (colaboradores) + use-cases/ (18)
+│   ├── catalog/                fachada + support/ + use-cases/ (16)
+│   ├── agenda/ confirmation/ delay/ notices/ professional-time/ affiliation/ walk-in/
+│   ├── waitlist/ service-offerings/
+├── infrastructure/
+│   ├── repositories/           acceso a datos propio (clases sin estado, reciben el EntityManager)
+│   ├── adapters/               puertos implementados: audit, profiles, clinical, insurance,
+│   │                           forms, practice, directory, mensajería, SupportAdmin, Postgres
+│   ├── persistence/            proveedores de sesión/puertos de lista de espera
+│   ├── config/ seed/
+└── presentation/
+    ├── controllers/            HTTP: sólo orquesta, sin reglas
+    └── dto/                    contrato HTTP (no se renombra nada de aquí)
 ```
-recurso + política
-  └─ plantilla (franjas semanales)
-       └─ generate-slots  -> bookable_slots (open, capacity/remaining)
-            └─ hold  (FOR UPDATE, remaining--)   ── expira ──> worker devuelve el cupo
-                 └─ confirm -> appointment_bookings (confirmed) + recordatorios
-                      ├─ reschedule -> libera cupo origen, toma destino
-                      ├─ cancel     -> libera cupo (+ cargo si no-show)
-                      └─ check-in   -> checked_in
-excepción de disponibilidad -> bloquea slots libres solapados
-lista de espera -> worker promueve candidatos cuando hay cupo
-```
+
+### Reservas: de un servicio de 3 865 líneas a un caso de uso por operación
+
+`SchedulingBookingsService` es ahora una **fachada de 256 líneas** que conserva la API pública
+(controllers y `SchedulingWalkInService` no cambian) y delega en `application/bookings/use-cases/`:
+`PlaceHold`, `ConfirmBooking`, `RequestBooking`, `CreateDirectAppointment`, `ExpireHolds`,
+`RescheduleBooking`, `CancelBooking`, `RejectBooking`, `SetPaymentState`, `GetPaymentState`,
+`AcceptBooking`, `RequestBookingInfo`, `ProposeSchedule`, `StartAppointment`,
+`CompleteAppointment`, `CheckInBooking`, `SearchBookings`, `GetBooking`. Una operación = una
+clase = una transacción. Lo compartido vive en `bookings/support/` (`BookingAccess`,
+`BookingTransitionRecorder`, `BookingChangeNotifier`, `ServiceSlotLifecycle`,
+`ClinicalAppointmentSync`, `SlotPolicyResolver`, `BookingMaterializer`,
+`DisplacedRequestsCanceller`, `BookingItemAssembler`). El catálogo (`SchedulingCatalogService`,
+antes 2 319 líneas) sigue el mismo patrón con 16 casos de uso.
+
+## Puertos hacia otros contextos
+
+Los casos de uso dependen de un token Nest + interfaz propia (`application/ports/`); el adaptador
+(`infrastructure/adapters/`) es lo único que conoce al otro módulo.
+
+| Puerto | Contexto | Adaptador |
+| --- | --- | --- |
+| `BookingHistoryPort` | audit | `AuditBookingHistoryAdapter` |
+| `PatientRepresentationPort` | profiles | `ProfilesPatientRepresentationAdapter` |
+| `ClinicalAppointmentsPort` | clinical | `ClinicalAppointmentsAdapter` |
+| `ClinicalEncountersPort` | clinical | `ClinicalEncountersAdapter` |
+| `InsuranceReadPort` | insurance | `InsuranceReadAdapter` |
+| `FormOriginPort` | forms | `FormsOriginAdapter` |
+| `PractitionerAffiliationsPort` | profiles + practice | `ProfilesAffiliationsAdapter` |
+| `PractitionerDirectoryPort` | profiles + practice | `PracticeProfilesDirectoryAdapter` |
+| `TenantDirectoryPort` | directory + profiles | `DirectoryTenantDirectoryAdapter` |
+| `WalkInPatientRegistryPort` | profiles + common | `ProfilesWalkInPatientAdapter` |
+| `AgendaNoticePort` | messaging | `MessagingAgendaNoticeAdapter` |
+| `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter` |
+
+## Rutas (leídas de los controllers)
+
+| Método | Ruta | Controller | Handler | Roles |
+|---|---|---|---|---|
+| GET | `/scheduling/activity-types` | Scheduling | `listActivityTypes` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/appointments/direct` | Scheduling | `createDirectAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/appointments/walk-in` | Scheduling | `createWalkInAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/booking-policies` | Scheduling | `createPolicy` | SCHEDULING_ADMIN, PRACTITIONER |
+| GET | `/scheduling/bookings` | Bookings | `searchBookings` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| GET | `/scheduling/bookings/:id` | Bookings | `getBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/bookings/:id/accept` | Bookings | `accept` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/cancel` | Bookings | `cancel` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/bookings/:id/check-in` | Bookings | `checkIn` | SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| POST | `/scheduling/bookings/:id/complete` | Bookings | `complete` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/delay` | Bookings | `delay` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| GET | `/scheduling/bookings/:id/payment-state` | Bookings | `getPaymentState` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| PUT | `/scheduling/bookings/:id/payment-state` | Bookings | `setPaymentState` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/propose-schedule` | Bookings | `proposeSchedule` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/reject` | Bookings | `reject` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/reminders` | Bookings | `scheduleReminders` | SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| POST | `/scheduling/bookings/:id/request-info` | Bookings | `requestInfo` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| POST | `/scheduling/bookings/:id/reschedule` | Bookings | `reschedule` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/bookings/:id/start` | Bookings | `start` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| GET | `/scheduling/confirmation-rules` | Confirmation | `list` | SCHEDULING_ADMIN |
+| POST | `/scheduling/confirmation-rules` | Confirmation | `create` | SCHEDULING_ADMIN |
+| POST | `/scheduling/confirmation-rules/:id/activate` | Confirmation | `activate` | SCHEDULING_ADMIN |
+| POST | `/scheduling/confirmation-rules/:id/deactivate` | Confirmation | `deactivate` | SCHEDULING_ADMIN |
+| POST | `/scheduling/confirmation-rules/evaluate` | Confirmation | `evaluate` | SCHEDULING_ADMIN |
+| GET | `/scheduling/exception-types` | Scheduling | `listExceptionTypes` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| DELETE | `/scheduling/exceptions/:id` | Scheduling | `removeException` | SCHEDULING_ADMIN, PRACTITIONER |
+| PATCH | `/scheduling/exceptions/:id` | Scheduling | `updateException` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/holds/:holdToken/confirm` | Scheduling | `confirmBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| POST | `/scheduling/holds/:holdToken/request` | Scheduling | `requestBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| POST | `/scheduling/internal/dispatch-reminders` | Internal | `dispatchReminders` | SYSTEM, SYSTEM_WORKER |
+| POST | `/scheduling/internal/expire-holds` | Internal | `expireHolds` | SYSTEM, SYSTEM_WORKER |
+| POST | `/scheduling/internal/promote-waitlist/:slotId` | Internal | `promoteWaitlist` | SYSTEM, SYSTEM_WORKER |
+| GET | `/scheduling/internal/waitlist-candidates` | Internal | `listWaitlistCandidates` | SYSTEM, SYSTEM_WORKER |
+| GET | `/scheduling/resources` | Agenda | `listResources` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/resources` | Scheduling | `createResource` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/resources/:id/close-slots` | Scheduling | `closeSlots` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/resources/:id/delay` | Scheduling | `delayResource` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| GET | `/scheduling/resources/:id/exceptions` | Scheduling | `listExceptions` | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
+| POST | `/scheduling/resources/:id/exceptions` | Scheduling | `createException` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/resources/:id/shift-slots` | Scheduling | `shiftSlots` | SCHEDULING_ADMIN, PRACTITIONER |
+| GET | `/scheduling/resources/:id/slots` | Scheduling | `getResourceAgenda` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| GET | `/scheduling/resources/:id/templates` | Scheduling | `listTemplates` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/resources/:id/templates` | Scheduling | `createTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
+| GET | `/scheduling/resources/:resourceId/waitlist` | Scheduling | `listResourceWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
+| GET | `/scheduling/service-availability` | ServiceOfferings | `availability` | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| GET | `/scheduling/service-offerings` | ServiceOfferings | `list` | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| POST | `/scheduling/service-offerings` | ServiceOfferings | `create` | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
+| PATCH | `/scheduling/service-offerings/:id` | ServiceOfferings | `update` | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
+| POST | `/scheduling/service-offerings/:id/holds` | ServiceOfferings | `placeHold` | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| GET | `/scheduling/slots` | Agenda | `listSlots` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/slots/:id/holds` | Scheduling | `placeHold` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| DELETE | `/scheduling/templates/:id` | Scheduling | `retireTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
+| PATCH | `/scheduling/templates/:id` | Scheduling | `updateTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/templates/:id/generate-slots` | Scheduling | `generateSlots` | SCHEDULING_ADMIN, PRACTITIONER |
+| POST | `/scheduling/templates/:id/reactivate` | Scheduling | `reactivateTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
+| GET | `/scheduling/waitlist` | Scheduling | `listWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
+| POST | `/scheduling/waitlist` | Scheduling | `enrollWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
+| GET | `/tenants/:tenantId/agenda` | TenantAgenda | `list` | (guard del servicio) |
+
+Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
+no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
 
 ## Reglas de negocio
 
@@ -61,44 +158,46 @@ lista de espera -> worker promueve candidatos cuando hay cupo
 
 ## Permisos
 
-`SCHEDULING_ADMIN` en configuración; `SCHEDULING_AGENT` y `PATIENT` en holds, confirmación,
-reprogramación, cancelación y lista de espera; `PRACTITIONER` puede registrar sus excepciones;
-`SYSTEM_WORKER` en los endpoints internos.
+Cada handler declara sus `@Roles` (tabla de rutas). Además, el servicio comprueba **quién** es el
+actor sobre **qué** cita (`BookingAccess`): el titular o su representante, quien opera cualquier
+agenda (`SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `SUPERADMIN`) o el profesional del recurso.
 
 ## Concurrencia
 
-`FOR UPDATE` sobre slot, hold y cita antes de mutarlos. El worker de expiración usa
-`FOR UPDATE SKIP LOCKED` para repartirse el lote entre instancias sin bloquearse. `row_version` da
-bloqueo optimista automático.
+`FOR UPDATE` sobre cupo, retención y cita antes de mutarlos. El worker de expiración usa
+`FOR UPDATE SKIP LOCKED`. `row_version` da bloqueo optimista automático.
 
 ## Logs
 
 `operation: 'scheduling.<área>.<acción>'`. Se registran ids y contadores, nunca el `holdToken`
-(se entrega una sola vez al cliente) ni datos personales del paciente.
+ni datos personales del paciente. El contexto del logger es ahora el de cada caso de uso.
 
 ## Pruebas
 
 ```bash
-corepack yarn test src/modules/scheduling --runInBand --silent
+corepack yarn test --maxWorkers=1 --testPathPatterns 'src/modules/scheduling' 'src/architecture'
 ```
 
-La corrida dirigida de la revisión (2026-10-05) pasó 30 suites y 621 tests. Gran parte usa
-repositorios simulados; no demuestra aislamiento entre tenants ni una política de autorización
-en una base real.
+Las pruebas arman la fachada con `createBookingsService` / `createCatalogService`
+(`*.testing.ts`, excluidos del build): usan los **adaptadores reales** sobre dobles de los
+repositorios ajenos. Son unitarias con el `EntityManager` simulado; no demuestran aislamiento entre
+tenants ni nada contra una base real.
 
-## Revisión backend 2026-10-05
+## Qué no cambió a propósito
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/scheduling.md)
-identifica que el listado por `resourceId` permite a un `PATIENT` obtener reservas ajenas sin
-validar actor, titularidad de agenda ni tenant. También quedan por acotar los lotes de reglas,
-slots y recordatorios. No se debe considerar el listado apto para datos clínicos hasta aplicar
-esa política y probarla con dos tenants.
+- Contrato HTTP: rutas, DTO, códigos y mensajes. Las claves de `details` de errores en castellano
+  (`minutosDeAviso`, `vinculo`, `nueva`/`existente`/`siguiente`) y `desplazadas` en la respuesta
+  de aceptar **siguen así**: son contrato.
+- Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
+  `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
 ## Pendiente
 
-La proyección vía `messaging.outbox_events` (disponibilidad en read models, notificación real de
-recordatorios) depende del módulo 35, aún no implementado. `dispatchReminders` mueve el estado a
-`sent` pero **no envía**: el envío real será responsabilidad de messaging.
+- Separar el modelo de dominio de la entidad ORM (A3): `application/` aún usa las entidades
+  generadas y los repositorios propios (única excepción de capas, declarada en el spec de
+  arquitectura).
+- `dto/` sigue en archivos de 1 100+ líneas por área.
+- La proyección vía `messaging.outbox_events` (recordatorios reales) depende del módulo 35.
 
 ### `generateSlots` respeta la zona horaria del recurso
 

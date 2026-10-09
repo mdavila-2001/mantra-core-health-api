@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../guards';
 import { DiagnosticReportsService, ServiceRequestsService } from '../services';
 import {
@@ -55,6 +60,11 @@ export class ClinicalOrdersController {
    * (este controller no tiene ninguno), pero el orden documenta la relación
    * — es la pre-validación del alta de abajo.
    */
+  @Audited({
+    action: 'SERVICE_REQUEST_DUPLICATE_CHECKED',
+    entity: 'service_request',
+    entityId: 'result.id',
+  })
   @Post('service-requests/duplicate-check')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -69,6 +79,11 @@ export class ClinicalOrdersController {
   }
 
   /** UC-08-05. */
+  @Audited({
+    action: 'SERVICE_REQUEST_CREATED',
+    entity: 'service_request',
+    entityId: 'result.id',
+  })
   @Post('service-requests')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -81,6 +96,11 @@ export class ClinicalOrdersController {
   }
 
   /** UC-08-06. */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_CREATED',
+    entity: 'diagnostic_report',
+    entityId: 'result.id',
+  })
   @Post('diagnostic-reports')
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -99,6 +119,11 @@ export class ClinicalOrdersController {
    * `DiagnosticReportsService.release`. Usar
    * `POST /diagnostics/reports/:reportId/versions/:versionId/release`.
    */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_RELEASED',
+    entity: 'diagnostic_report',
+    entityId: 'param:id',
+  })
   @Post('diagnostic-reports/:id/release')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PaymentsTransactionsService } from '../services';
 import {
   StatusInquiryResponseDto,
@@ -33,6 +38,11 @@ export class PaymentsTransactionsController {
   ) {}
 
   /** UC-42-07. */
+  @Audited({
+    action: 'PAYMENT_STATUS_INQUIRED',
+    entity: 'payment_transaction',
+    entityId: 'param:id',
+  })
   @Post(':id/status-inquiry')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -49,6 +59,11 @@ export class PaymentsTransactionsController {
   }
 
   /** UC-42-08. */
+  @Audited({
+    action: 'PAYMENT_REFUNDED',
+    entity: 'payment_transaction',
+    entityId: 'param:id',
+  })
   @Post(':id/refunds')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -62,6 +77,11 @@ export class PaymentsTransactionsController {
   }
 
   /** UC-42-09. */
+  @Audited({
+    action: 'PAYMENT_CANCELLATION_REQUESTED',
+    entity: 'payment_transaction',
+    entityId: 'param:id',
+  })
   @Post(':id/cancellation-requests')
   @Roles('PAYMENTS_ADMIN', 'CASHIER')
   @HttpCode(HttpStatus.CREATED)

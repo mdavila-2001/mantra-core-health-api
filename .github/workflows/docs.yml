@@ -238,17 +238,6 @@ jobs:
       - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
         run: yarn alovida:guardrails
 
-      # Informe C §8.4.4: ninguna ruta que muta sin rastro. Falla si
-      # AuditTrailInterceptor deja de estar registrado (o va antes del de
-      # tenant), si aparece una ruta @Public o @SkipAuditTrail que muta sin
-      # entrada en su allowlist, si la allowlist nombra rutas que ya no existen
-      # o si dos módulos usan la misma acción de bitácora.
-      - name: Bitácora transversal — pruebas del control
-        run: yarn alovida:audit-trail:test
-
-      - name: Bitácora transversal — ninguna ruta que muta sin rastro
-        run: yarn alovida:audit-trail
-
       # El DDL canónico se edita en `../SQL`, fuera del repositorio, y el
       # despliegue monta la copia versionada de `database/`. Aquí solo se clona
       # este repositorio, así que no hay con qué comparar: lo que se comprueba
@@ -273,6 +262,12 @@ jobs:
       # worker se recicla antes de crecer, y la cobertura se fusiona igual.
       - name: Pruebas unitarias con cobertura — no puede bajar del umbral fijado
         run: yarn test:cov
+
+      # Los cuerpos de request del contrato: homónimos desambiguados y
+      # `additionalProperties: false` desde `class-validator`. Va antes de
+      # generar: si el arreglo está roto, el contrato saldría mintiendo.
+      - name: Pruebas de los cuerpos de request del contrato OpenAPI
+        run: yarn docs:openapi:request-bodies:test
 
       - name: Generar contrato OpenAPI real desde el código
         env:

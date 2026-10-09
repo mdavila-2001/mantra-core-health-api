@@ -3,7 +3,7 @@ import { AgendaNoticeCapabilityLab } from '../lab/agenda-notice-capability.lab';
 import type {
   AgendaNotice,
   AgendaNoticeKind,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * H6 (carril de Pablo) · regresión del área de avisos de agenda, ejercitada

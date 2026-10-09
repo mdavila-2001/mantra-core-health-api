@@ -4,7 +4,7 @@ import {
   PortOnlyNoticeAdapter,
   type Emisor,
 } from '../lab/port-only-notice.adapter';
-import type { AgendaNotice } from '../../src/modules/scheduling/ports/agenda-notice.port';
+import type { AgendaNotice } from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * H4 (carril de Pablo) · la corrección de las dependencias residuales,
@@ -44,7 +44,7 @@ describe('H4 · adaptador que sólo depende del puerto (corrección de la residu
     expect(imports.some((l) => l.includes('modules/community'))).toBe(false);
     // Lo único que importa del producto es el contrato, y sólo como tipo.
     expect(fuente).toContain(
-      "from '../../src/modules/scheduling/ports/agenda-notice.port'",
+      "from '../../src/modules/scheduling/application/ports/agenda-notice.port'",
     );
   });
 

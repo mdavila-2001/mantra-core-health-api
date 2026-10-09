@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzGrantsService } from '../services';
 import {
   CreateRoleAssignmentDto,
@@ -30,6 +35,11 @@ export class AuthzGrantsController {
   constructor(private readonly grantsService: AuthzGrantsService) {}
 
   /** UC-06-04. */
+  @Audited({
+    action: 'ROLE_ASSIGNED',
+    entity: 'user_role_assignment',
+    entityId: 'result.id',
+  })
   @Post('users/:userId/role-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -45,6 +55,11 @@ export class AuthzGrantsController {
   }
 
   /** UC-06-05. */
+  @Audited({
+    action: 'PERMISSION_GRANTED',
+    entity: 'user_permission_grant',
+    entityId: 'result.id',
+  })
   @Post('users/:userId/permission-grants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -58,6 +73,11 @@ export class AuthzGrantsController {
   }
 
   /** UC-06-09. */
+  @Audited({
+    action: 'RESOURCE_SCOPE_GRANTED',
+    entity: 'resource_scope_grant',
+    entityId: 'result.id',
+  })
   @Post('resource-scope-grants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

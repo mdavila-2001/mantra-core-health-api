@@ -10,7 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartCarePlansService } from '../services';
 import {
@@ -40,6 +45,11 @@ export class ChartCarePlansController {
   constructor(private readonly carePlansService: ChartCarePlansService) {}
 
   /** UC-15-10. */
+  @Audited({
+    action: 'CARE_PLAN_CREATED',
+    entity: 'care_plan',
+    entityId: 'result.id',
+  })
   @Post()
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -52,6 +62,11 @@ export class ChartCarePlansController {
   }
 
   /** UC-15-11. */
+  @Audited({
+    action: 'CARE_PLAN_ACTIVITY_UPDATED',
+    entity: 'care_plan_activity',
+    entityId: 'param:activityId',
+  })
   @Patch(':planId/activities/:activityId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Actualizar una actividad del plan de cuidado' })

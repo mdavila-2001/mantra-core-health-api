@@ -1,8 +1,5 @@
 import { isIP } from 'node:net';
-import type {
-  AuditIdSource,
-  AuditTrailOptions,
-} from './audit-trail.decorators';
+import type { AuditIdSource, AuditedOptions } from './audit-trail.decorators';
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -51,7 +48,8 @@ export interface RouteAuditInput {
   readonly routeTemplate: string;
   readonly params: Readonly<Record<string, unknown>>;
   readonly result?: unknown;
-  readonly options?: AuditTrailOptions;
+  readonly body?: unknown;
+  readonly options?: AuditedOptions;
 }
 
 const PARAM_SEGMENT = /^:(\w+)/;
@@ -61,13 +59,24 @@ function fieldOf(value: unknown, field: string): unknown {
   return (value as Record<string, unknown>)[field];
 }
 
+/** Lo que cada fuente de `AuditIdSource` puede leer. */
+interface IdSources {
+  readonly params: Readonly<Record<string, unknown>>;
+  readonly result?: unknown;
+  readonly body?: unknown;
+}
+
+const ID_SOURCE = /^(param):(\w+)$|^(result|body)\.(\w+)$/;
+
 function readIdSource(
   source: AuditIdSource,
-  params: Readonly<Record<string, unknown>>,
-  result: unknown,
+  sources: IdSources,
 ): string | undefined {
-  const [kind, name] = source.split(':') as ['param' | 'result', string];
-  const value = kind === 'param' ? params[name] : fieldOf(result, name);
+  const match = ID_SOURCE.exec(source);
+  if (!match) return undefined;
+  const value = match[1]
+    ? sources.params[match[2]]
+    : fieldOf(match[3] === 'result' ? sources.result : sources.body, match[4]);
   return isUuid(value) ? value : undefined;
 }
 
@@ -102,7 +111,7 @@ function staticSegmentBefore(
 }
 
 /**
- * Identidad del sello de una ruta que muta. Con `@AuditTrail()` manda el nombre
+ * Identidad del sello de una ruta que muta. Con `@Audited()` manda el nombre
  * de negocio; sin él se deriva de la ruta, que es única por construcción (Nest
  * no admite dos handlers con el mismo verbo y plantilla), así que dos módulos no
  * pueden colisionar en una acción derivada.
@@ -119,7 +128,7 @@ export function deriveRouteAuditIdentity(
 
   const derivedEntityId = paramName
     ? (input.params[paramName] as string)
-    : readIdSource('result:id', input.params, input.result);
+    : readIdSource('result.id', input);
   const derivedEntity =
     staticSegmentBefore(
       segments,
@@ -133,7 +142,7 @@ export function deriveRouteAuditIdentity(
       `${ROUTE_ACTION_PREFIX} ${verb} ${input.routeTemplate}`,
     entity: options?.entity ?? derivedEntity,
     entityId: options?.entityId
-      ? readIdSource(options.entityId, input.params, input.result)
+      ? readIdSource(options.entityId, input)
       : derivedEntityId,
   };
 }
@@ -143,5 +152,5 @@ export function readUuidParam(
   source: `param:${string}`,
   params: Readonly<Record<string, unknown>>,
 ): string | undefined {
-  return readIdSource(source, params, undefined);
+  return readIdSource(source, { params });
 }

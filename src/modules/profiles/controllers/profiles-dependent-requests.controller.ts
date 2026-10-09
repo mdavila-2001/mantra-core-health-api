@@ -22,9 +22,10 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  Audited,
   CurrentUser,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { DependentLinkRequestsService } from '../services/dependent-link-requests.service';
 import {
@@ -69,6 +70,11 @@ export class ProfilesDependentRequestsController {
    * @param actor - Usuario autenticado, que pide representar.
    * @returns La solicitud, pendiente.
    */
+  @Audited({
+    action: 'DEPENDENT_LINK_REQUESTED',
+    entity: 'related_person',
+    entityId: 'result.id',
+  })
   @Post('patients/me/dependent-requests')
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -150,6 +156,11 @@ export class ProfilesDependentRequestsController {
    * @param actor - Usuario autenticado, al que se lo pidieron.
    * @returns La solicitud, aceptada.
    */
+  @Audited({
+    action: 'DEPENDENT_LINK_REQUEST_ACCEPTED',
+    entity: 'related_person',
+    entityId: 'param:id',
+  })
   @Post('patients/me/dependent-requests/:id/accept')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aceptar una solicitud de dependiente' })
@@ -172,6 +183,11 @@ export class ProfilesDependentRequestsController {
    * @param actor - Usuario autenticado, al que se lo pidieron.
    * @returns La solicitud, rechazada.
    */
+  @Audited({
+    action: 'DEPENDENT_LINK_REQUEST_REJECTED',
+    entity: 'related_person',
+    entityId: 'param:id',
+  })
   @Post('patients/me/dependent-requests/:id/reject')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rechazar una solicitud de dependiente' })

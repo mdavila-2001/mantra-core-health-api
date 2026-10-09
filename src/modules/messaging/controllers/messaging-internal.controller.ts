@@ -12,9 +12,9 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
+  NotAudited,
   ParseOptionalLimitPipe,
   Roles,
-  SkipAuditTrail,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -76,7 +76,7 @@ export class MessagingInternalController {
 
   /** UC-35-02. */
   @Post('outbox/relay/run')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -89,7 +89,7 @@ export class MessagingInternalController {
 
   /** UC-35-03. */
   @Post('events/:domainEventId/dispatch')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -107,7 +107,7 @@ export class MessagingInternalController {
 
   /** UC-35-04. */
   @Post('event-deliveries/:id/ack')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -122,7 +122,7 @@ export class MessagingInternalController {
 
   /** UC-35-06. */
   @Post('queues/:code/claim')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -139,7 +139,7 @@ export class MessagingInternalController {
 
   /** UC-35-07. */
   @Post('jobs/:id/complete')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -155,7 +155,7 @@ export class MessagingInternalController {
 
   /** UC-35-08. */
   @Post('jobs/:id/fail')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -189,7 +189,7 @@ export class MessagingInternalController {
 
   /** UC-35-11. */
   @Post('notifications/:requestId/deliver')
-  @SkipAuditTrail(QUEUE_PLUMBING)
+  @NotAudited(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

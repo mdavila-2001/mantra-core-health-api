@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -122,6 +123,11 @@ export class BillingServiceCatalogController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Servicio recién creado.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_CREATED',
+    entity: 'service_catalog',
+    entityId: 'result.id',
+  })
   @Post()
   // El alta es de la administración de la organización. Un profesional entra también,
   // pero sólo sobre su consultorio propio: el servicio lo comprueba y responde 404 en
@@ -154,6 +160,11 @@ export class BillingServiceCatalogController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns El servicio ya corregido.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_UPDATED',
+    entity: 'service_catalog',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

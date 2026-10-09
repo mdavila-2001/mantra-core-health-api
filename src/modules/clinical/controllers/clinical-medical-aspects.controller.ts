@@ -8,9 +8,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { MedicalAspectsService } from '../services';
 import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';
@@ -49,6 +50,11 @@ export class ClinicalMedicalAspectsController {
    * Guarda lo declarado. Campo ausente = no tocar; `''` = borrar. Responde el
    * estado completo resultante.
    */
+  @Audited({
+    action: 'PATIENT_MEDICAL_ASPECTS_UPDATED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Put()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Guardar mis aspectos médicos declarados' })

@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { Practices } from '../../practice/entities';
 import { ACCT } from '../accounting.concepts';
 import { SubledgerRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
@@ -102,6 +104,11 @@ export class SubledgerService {
       'Clearing open items',
     );
     return this.em.transactional(async (tx) => {
+      const tenantId = await this.resolveClearingTenant(
+        tx,
+        dto.practiceId,
+        dto.tenantId,
+      );
       // Cargar y validar cada partida; todas deben pertenecer al mismo subledger.
       const loaded = [];
       let subledgerAccountId: string | null = null;
@@ -160,7 +167,7 @@ export class SubledgerService {
       const number = dto.clearingNumber ?? this.posting.generateNumber('CLR');
       const clash = await this.subledgerRepo.findClearingByNumber(
         tx,
-        dto.tenantId,
+        tenantId,
         number,
       );
       if (clash) {
@@ -197,7 +204,7 @@ export class SubledgerService {
       });
 
       const clearingDoc = this.subledgerRepo.createClearingDocument(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         clearingNumber: number,
         transactionId: posted.transactionId,
         statusConceptId: ACCT.CLEARING_COMPLETED,
@@ -231,5 +238,45 @@ export class SubledgerService {
         clearedItems: loaded.length,
       };
     });
+  }
+
+  /**
+   * La organización del documento de compensación es la de la práctica que
+   * asienta (informe B, C9). Mismo criterio que la lectura del cockpit
+   * (`AccountingReadService`): 404 si la práctica no existe y 403 si es de
+   * otra organización que la de la sesión. Un `tenantId` declarado se
+   * confirma, nunca se usa para estampar otra organización.
+   *
+   * @param tx - Transacción de la compensación.
+   * @param practiceId - Práctica del asiento.
+   * @param declared - El `tenantId` del cuerpo, si vino.
+   * @returns La organización dueña de la práctica.
+   */
+  private async resolveClearingTenant(
+    tx: EntityManager,
+    practiceId: string,
+    declared: string | undefined,
+  ): Promise<string> {
+    const practice = await tx.findOne(
+      Practices,
+      { id: practiceId },
+      { fields: ['id', 'tenantId'] },
+    );
+    if (practice === null) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
+    const sessionTenantId = getCurrentTenantId();
+    const otherSessionTenant =
+      sessionTenantId !== undefined && practice.tenantId !== sessionTenantId;
+    const otherDeclaredTenant =
+      declared !== undefined && practice.tenantId !== declared;
+    if (otherSessionTenant || otherDeclaredTenant) {
+      throw new ForbiddenException(
+        'La práctica de la compensación pertenece a otra organización',
+      );
+    }
+    return practice.tenantId;
   }
 }

@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { SubledgerService } from '../services';
 import {
   CreateOpenItemDto,
@@ -22,6 +27,11 @@ export class AccountingSubledgerController {
   constructor(private readonly subledgerService: SubledgerService) {}
 
   /** UC-16-08. */
+  @Audited({
+    action: 'OPEN_ITEM_CREATED',
+    entity: 'open_item',
+    entityId: 'result.id',
+  })
   @Post('open-items')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -34,6 +44,11 @@ export class AccountingSubledgerController {
   }
 
   /** UC-16-09. */
+  @Audited({
+    action: 'OPEN_ITEMS_CLEARED',
+    entity: 'clearing_document',
+    entityId: 'result.id',
+  })
   @Post('clearing-documents')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

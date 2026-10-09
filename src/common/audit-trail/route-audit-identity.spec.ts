@@ -78,7 +78,7 @@ describe('route-audit-identity', () => {
     ).toMatchObject({ entity: 'allergy_intolerances', entityId: A });
   });
 
-  it('el nombre de negocio de @AuditTrail manda sobre lo derivado', () => {
+  it('el nombre de negocio de @Audited manda sobre lo derivado', () => {
     expect(
       deriveRouteAuditIdentity({
         method: 'POST',
@@ -88,7 +88,7 @@ describe('route-audit-identity', () => {
         options: {
           action: 'PERMISSION_SET_VERSION_PUBLISHED',
           entity: 'delegated_permission_set_version',
-          entityId: 'result:id',
+          entityId: 'result.id',
         },
       }),
     ).toEqual({
@@ -96,5 +96,38 @@ describe('route-audit-identity', () => {
       entity: 'delegated_permission_set_version',
       entityId: B,
     });
+  });
+
+  it('con body.<campo> el id sale del cuerpo de la petición', () => {
+    expect(
+      deriveRouteAuditIdentity({
+        method: 'POST',
+        routeTemplate: '/consent/consent-evidence',
+        params: {},
+        result: { recorded: true },
+        body: { consentId: A },
+        options: {
+          action: 'CONSENT_EVIDENCE_RECORDED',
+          entity: 'consent_evidence',
+          entityId: 'body.consentId',
+        },
+      }),
+    ).toMatchObject({ entityId: A });
+  });
+
+  it('un id del cuerpo que no es UUID no se sella', () => {
+    expect(
+      deriveRouteAuditIdentity({
+        method: 'POST',
+        routeTemplate: '/consent/consent-evidence',
+        params: {},
+        body: { consentId: 'not-a-uuid' },
+        options: {
+          action: 'CONSENT_EVIDENCE_RECORDED',
+          entity: 'consent_evidence',
+          entityId: 'body.consentId',
+        },
+      }),
+    ).toMatchObject({ entityId: undefined });
   });
 });

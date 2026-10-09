@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityPoliciesService } from '../services';
 import { CreatePolicyDto, PolicyResponseDto } from '../dto';
 
@@ -23,6 +28,11 @@ export class IdentityPoliciesController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create conforme al contrato `Promise<PolicyResponseDto>`.
    */
+  @Audited({
+    action: 'VERIFICATION_POLICY_CREATED',
+    entity: 'identity_verification_policy',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

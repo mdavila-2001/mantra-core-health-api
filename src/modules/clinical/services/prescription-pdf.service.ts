@@ -25,7 +25,7 @@ import type { Persons } from '../../profiles/entities';
 import { composePersonDisplayName } from '../../profiles/person-name';
 import { DeclaredCoveragesReader } from '../../insurance/services/declared-coverages-reader';
 import type { OwnCoverageDto } from '../../profiles/dto/read-patients.dto';
-import { loadAgendaNoticesEnv } from '../../scheduling/notices/agenda-notices.env';
+import { loadAgendaNoticesEnv } from '../../scheduling/infrastructure/config/agenda-notices.env';
 import { drawBrandAlovida, brandHeight } from './alovida-mark';
 import { drawQr } from './prescription-qr';
 import { computePrescriptionHash } from './prescription-seal';

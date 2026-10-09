@@ -361,9 +361,73 @@ describe('ChartNotesService', () => {
       );
       expect(version.statusConceptId).toBe(CHART.VERSION_SIGNED);
     });
+    it('C5: sin signerProfileId en el cuerpo, firma con el perfil de la sesión', async () => {
+      const d = build();
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_DRAFT,
+      };
+      const header: any = {
+        id: 'h1',
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+        updatedAt: new Date(),
+      };
+      d.notesRepo.findVersionById.mockResolvedValue(version);
+      d.notesRepo.findHeaderById.mockResolvedValue(header);
+
+      await d.service.signVersion('h1', 'v1', {}, actor);
+
+      expect(version.signedByProfileId).toBe('s1');
+      expect(d.notesRepo.createSignature).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ signerProfileId: 's1' }),
+      );
+    });
+
+    it('C5: sin perfil profesional en la sesión y sin cuerpo, 403 y no firma', async () => {
+      const d = build();
+      const sinPerfil = { id: 'u-9', roles: [] } as any;
+      await expect(
+        d.service.signVersion('h1', 'v1', {}, sinPerfil),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
+    });
   });
 
   describe('cosignVersion (UC-15-04)', () => {
+    it('C5: sin signerProfileId en el cuerpo, cofirma con el perfil de la sesión', async () => {
+      const d = build();
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_SIGNED,
+        contentHash: 'h',
+      };
+      d.notesRepo.findVersionById.mockResolvedValue(version);
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        id: 'h1',
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
+        updatedAt: new Date(),
+      });
+      d.notesRepo.findSignatures.mockResolvedValue([
+        {
+          signatureTypeConceptId: CHART.SIGNATURE_AUTHOR,
+          signerProfileId: 's1',
+        },
+      ]);
+
+      await d.service.cosignVersion('h1', 'v1', {}, actor2);
+
+      expect(d.notesRepo.createSignature).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          signerProfileId: 's2',
+          signatureTypeConceptId: CHART.SIGNATURE_COSIGN,
+        }),
+      );
+    });
+
     it('rejects a duplicate cosignature from the same signer', async () => {
       const d = build();
       d.notesRepo.findVersionById.mockResolvedValue({

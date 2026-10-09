@@ -27,7 +27,7 @@ import { TELEMETRY_CONCEPT_SEEDS } from '../../modules/telemetry/telemetry.conce
 import { DELEGATED_ACCESS_CONCEPT_SEEDS } from '../../modules/delegated_access/delegated_access.concepts';
 import { READ_MODELS_CONCEPT_SEEDS } from '../../modules/read_models/read_models.concepts';
 import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_contracts/integration_contracts.concepts';
-import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/scheduling.concepts';
+import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/domain/scheduling.concepts';
 import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures_perioperative/procedures_perioperative.concepts';
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
 
