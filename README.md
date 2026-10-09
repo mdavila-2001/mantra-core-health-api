@@ -1,6 +1,6 @@
 # Backend de ALOVIDA
 
-API de salud en NestJS, TypeScript, MikroORM y PostgreSQL. Expone rutas HTTP desde `src/main.ts` y ejecuta trabajos programados en **24 procesos worker** independientes. Los dominios viven en `src/modules/`; el catálogo ORM y la verificación del esquema están en `src/orm/`. Redis, MongoDB, OpenSearch, TimescaleDB, pgvector y MinIO sirven funciones específicas según el módulo y el despliegue.
+API de salud de ALOVIDA (Mantra Core Technologies): historia clínica, agenda, identidad y acceso, perfiles, farmacia, seguros, contabilidad y comunidad, entre otros dominios. Se escribe en **NestJS 11, TypeScript 5 y MikroORM 7 sobre PostgreSQL**; expone rutas HTTP desde `src/main.ts` y ejecuta trabajos programados en **24 procesos worker** independientes (`src/worker-*.ts`). Los dominios viven en `src/modules/` (70 directorios); el catálogo ORM y la verificación del esquema están en `src/orm/`. Redis, MongoDB, OpenSearch, TimescaleDB, pgvector y MinIO sirven funciones específicas según el módulo y el despliegue. Node 24 y Yarn 4 (Corepack).
 
 Este README describe el código de la rama. La [revisión del backend del 2026-10-05](docs/revision-backend-2026-10-04/README.md) registra hallazgos, cobertura real y planes; no implica que todas las rutas hayan sido verificadas.
 
@@ -13,7 +13,7 @@ Este README describe el código de la rama. La [revisión del backend del 2026-1
 | Autenticación, errores, tenant y utilidades | `src/common/` | [Common](src/common/README.md) |
 | ORM y catálogo de entidades, índices y FK | `src/orm/` | [ORM](src/orm/README.md) |
 | Workers y jobs | `src/worker/`, `src/worker-*.ts` | [Mapa de 24 workers](src/worker/README.md) |
-| DDL, migraciones y patches | `database/SQL/`, `database/NoSQL/` | [Operaciones](docs/operations/deployment.md) |
+| DDL versionado (copia del modelo; **no se edita aquí**, no hay migraciones en este repo) | `database/SQL/`, `database/NoSQL/` | [`database/README.md`](database/README.md), [ADR-0021](docs/adr/ADR-0021-fuente-unica-de-ddl.md), [Operaciones](docs/operations/deployment.md) |
 | Contratos externos | `openapi/`, `asyncapi/` | [OpenAPI](openapi/CONTRATO-PUBLICO.md), [AsyncAPI](asyncapi/asyncapi.yaml) |
 
 ### Procesos worker
@@ -27,11 +27,30 @@ Este README describe el código de la rama. La [revisión del backend del 2026-1
 
 Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. El [mapa de workers](src/worker/README.md) contiene jobs, scripts y límites. `docker-compose.yml` declara 24 servicios worker, algunos bajo perfiles; `docker-compose.coolify.yml` declara cuatro de forma explícita. El número de entrypoints no describe qué está activo en cada ambiente.
 
+### Carpetas de la raíz
+
+| Carpeta | Contenido |
+|---|---|
+| `src/` | Código de la API y los workers (mapa arriba y en [`src/README.md`](src/README.md)). |
+| `test/` | Integración, smoke, e2e, dobles y fixtures; ver [`test/README.md`](test/README.md). |
+| `database/` | Copia versionada del DDL canónico (`SQL/`, `NoSQL/`). |
+| `docker/db-init/` | Scripts de los init jobs de Compose. |
+| `infra/` | Configuración de monitoreo y del collector OpenTelemetry. |
+| `scripts/` | Utilidades de operación (poda de Docker, DDL, Postgres, benchmark de telemetría). |
+| `tools/` | Generadores y verificadores en Node/Python: catálogo ORM, documentación, OpenAPI, seeds, Postman. |
+| `openapi/`, `asyncapi/` | Contratos HTTP y de eventos generados. |
+| `docs/` | Documentación técnica (fuente del sitio MkDocs); los informes de proceso históricos están en [`docs/progress/archive/`](docs/progress/archive/). |
+| `mock-provider-server/` | Emulador de proveedores externos para desarrollo; ver su [README](mock-provider-server/README.md). |
+| `structurizr/` | Modelo de arquitectura (`workspace.dsl`). |
+| `evidencias/` | Evidencia de merges y pruebas de ciclos anteriores. |
+
+En la raíz sólo quedan `README.md` y `AGENTS.md` (instrucciones para agentes) además de la configuración. El estado y los pendientes están en [`docs/progress/ESTADO-Y-PENDIENTES.md`](docs/progress/ESTADO-Y-PENDIENTES.md), el registro de defectos en [`docs/progress/REGISTRO-DEFECTOS.md`](docs/progress/REGISTRO-DEFECTOS.md), la trazabilidad en [`docs/governance/ALOVIDA-TRAZABILIDAD.md`](docs/governance/ALOVIDA-TRAZABILIDAD.md) y el informe de cobertura en [`docs/reports/ALOVIDA-COBERTURA.md`](docs/reports/ALOVIDA-COBERTURA.md) (lo regenera `corepack yarn alovida:coverage`).
+
 ## Requisitos y configuración local
 
 - Node.js según el `Dockerfile` (`node:24-bookworm-slim` para la imagen), Corepack y Yarn 4.14.1 (`packageManager` en `package.json`).
 - Servicios de datos que exige el flujo que se vaya a ejecutar. [`docker-compose.yml`](docker-compose.yml) y [variables de entorno](docs/getting-started/environment-variables.md) describen la configuración; no copies credenciales de producción a una base local.
-- DDL versionado en [`database/SQL`](database/SQL) y extensiones NoSQL en [`database/NoSQL`](database/NoSQL). Para un arranque con Compose, los init jobs materializan el esquema antes de iniciar la API; [guía de despliegue](docs/operations/deployment.md).
+- DDL versionado en [`database/SQL`](database/SQL) y extensiones NoSQL en [`database/NoSQL`](database/NoSQL). Con el perfil `local-db`, los init jobs (`postgres-init`, `mongo-init`) materializan el esquema desde esas carpetas antes de iniciar la API; [guía de despliegue](docs/operations/deployment.md).
 
 ```bash
 corepack yarn install --immutable
@@ -40,7 +59,7 @@ corepack yarn build
 corepack yarn start:dev
 ```
 
-Para levantar el stack local según Compose: `docker compose up -d`. Para Coolify, seguí [su guía específica](docs/operations/coolify.md); tiene configuración, migración y secretos distintos. El arranque de seeds se controla mediante `corepack yarn seed:boot`; `corepack yarn seed:datasets` ejecuta el extractor de catálogos bolivianos. Verificá el ambiente y los efectos del comando antes de usarlo en una base persistente.
+Para levantar el stack local según Compose, el arranque recomendado es `corepack yarn docker:up` (purga la caché de build vieja y hace `docker compose up -d`). **Ojo:** Postgres, MongoDB y sus init jobs pertenecen al perfil `local-db`, así que un `docker compose up -d` a secas no los levanta (el compose está pensado también para bases gestionadas). Para un stack con bases locales: `docker compose --profile local-db up -d`; para sólo la infraestructura de datos y desarrollar la API con `start:dev`: `docker compose up -d postgres mongodb redis opensearch minio` (nombrarlos activa el perfil). Con `clamav` y `worker-files` rige el perfil `malware-scan`. Los comandos de Compose de este párrafo están leídos de `docker-compose.yml` y `package.json`; no se ejecutaron al escribirlo. Para Coolify, seguí [su guía específica](docs/operations/coolify.md); tiene configuración, migración y secretos distintos. El arranque de seeds se controla mediante `corepack yarn seed:boot`; `corepack yarn seed:datasets` ejecuta el extractor de catálogos bolivianos. Verificá el ambiente y los efectos del comando antes de usarlo en una base persistente.
 
 ## Comandos de verificación
 

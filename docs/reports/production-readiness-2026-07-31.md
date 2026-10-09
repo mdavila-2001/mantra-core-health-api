@@ -121,7 +121,7 @@ probada de producción.
    en lugar de etiquetarse erróneamente como `INTERNAL`.
 9. El workflow documental ahora regenera el catálogo de endpoints y falla si
    OpenAPI o la documentación generada difieren de lo versionado.
-10. Se actualizó `ALOVIDA-COBERTURA.md` con los conteos estáticos actuales.
+10. Se actualizó `docs/reports/ALOVIDA-COBERTURA.md` con los conteos estáticos actuales.
 
 Estas correcciones reducen riesgo, pero no convierten por sí solas el sistema en
 apto para producción.

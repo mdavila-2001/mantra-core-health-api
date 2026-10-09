@@ -3,7 +3,7 @@
   Fuente real: src/modules/erp/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `erp`
@@ -17,6 +17,43 @@
 
 Back-office: socios de negocio, ciclo de vida contractual, recursos humanos, compras y recepción,
 conciliación de facturas, ventas y arrendamientos.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/erp -name '*.controller.ts' | wc -l
+  find src/modules/erp -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/erp -name '*.entity.ts' | wc -l
+  find src/modules/erp -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 17 rutas HTTP, 51 entidad y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 51 de 51 archivos `*.entity.ts`): `business_partner_bank_accounts`, `business_partner_relationships`, `business_partner_roles`, `business_partner_tax_registrations`, `business_partners`, `contract_accounting_terms`, `contract_amendments`, `contract_approval_requests`, `contract_approval_steps`, `contract_clause_instances`, `contract_clauses`, `contract_documents`, `contract_line_items`, `contract_milestones`, `contract_object_assignments`, `contract_obligation_events`, `contract_obligations`, `contract_parties`, `contract_payment_schedules`, `contract_renewals`, `contract_team_members`, `contract_terminations`, `contract_versions`, `contracts`, `departments`, `employee_assignments`, `employees`, `employment_records`, `enterprise_document_flow`, `goods_receipt_items`, `goods_receipts`, `invoice_match_items`, `invoice_match_runs`, `lease_accounting_links`, `lease_cash_flows`, `lease_contracts`, `lease_objects`, `lease_valuations`, `performance_reviews`, `positions`, `projects`, `purchase_order_items`, `purchase_orders`, `purchase_requisition_items`, `purchase_requisitions`, `sales_order_items`, `sales_orders`, `service_entry_items`, `service_entry_sheets`, `time_off_requests`, `wbs_elements`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /erp/business-partners` | ERP_ADMIN | `erp` |
+| `POST /erp/business-partners/:id/bank-accounts/:accId/verify` | ERP_ADMIN | `erp` |
+| `POST /erp/contracts` | ERP_ADMIN, CONTRACT_MANAGER | `erp` |
+| `POST /erp/contracts/:id/approval-requests` | ERP_ADMIN, CONTRACT_MANAGER | `erp` |
+| `POST /erp/contracts/:id/amendments` | ERP_ADMIN, CONTRACT_MANAGER | `erp` |
+| `POST /erp/contracts/:id/renewals` | ERP_ADMIN, CONTRACT_MANAGER | `erp` |
+| `POST /erp/contracts/:id/terminations` | ERP_ADMIN, CONTRACT_MANAGER | `erp` |
+| `POST /erp/contracts/:id/payment-schedules/generate` | ERP_ADMIN, SYSTEM_WORKER | `erp` |
+| `POST /erp/employees/onboard` | ERP_ADMIN, HR_ADMIN | `erp` |
+| `POST /erp/employees/:id/time-off` | ERP_ADMIN, HR_ADMIN, EMPLOYEE | `erp` |
+| `POST /erp/employees/:id/time-off/:reqId/approve` | ERP_ADMIN, HR_ADMIN | `erp` |
+| `POST /erp/purchase-orders` | ERP_ADMIN, BUYER | `erp` |
+| `POST /erp/purchase-orders/:id/goods-receipts` | ERP_ADMIN, BUYER, WAREHOUSE | `erp` |
+| `POST /erp/purchase-orders/:id/service-entry-sheets` | ERP_ADMIN, BUYER | `erp` |
+| `POST /erp/bills/:billId/invoice-match-runs` | ERP_ADMIN, ACCOUNTS_PAYABLE | `erp` |
+| `POST /erp/sales-orders` | ERP_ADMIN, SALES | `erp` |
+| `POST /erp/lease-contracts/:id/valuations` | ERP_ADMIN, ACCOUNTANT | `erp` |
 
 ## Casos de uso cubiertos (16)
 

@@ -22,7 +22,7 @@ interface MockComputeResponse {
  * embedding debería indexar (`EmbeddingPipelineService` "no calcula
  * embeddings, los recibe ya calculados del worker" — pero de dónde saca el
  * worker el TEXTO fuente es una integración que no existe todavía en este
- * repo, ver `ESTADO-Y-PENDIENTES.md`). Este adapter arma un único documento
+ * repo, ver `docs/progress/ESTADO-Y-PENDIENTES.md`). Este adapter arma un único documento
  * SINTÉTICO por job (texto de prueba, no contenido real) sólo para probar
  * que el cableado de punta a punta funciona: descubrir → pedir el vector →
  * persistirlo vía `run`. No indexa nada real — sustituir por un adapter que

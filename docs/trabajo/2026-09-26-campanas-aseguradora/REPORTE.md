@@ -21,7 +21,7 @@
 | H2.S3 · edición y vencimiento | `PATCH :id` en DRAFT/PAUSED, `effectiveStatus` derivado por fecha sin cron |
 | H2.S4.M1 · ValidationPipe | `insurance-campaigns.controller.spec.ts` nuevo, 20 casos |
 | H2.S4.M4 · regresión | `yarn typecheck` exit 0 (repetido tres veces); `yarn test src/modules/insurance src/common/seed`: 48 suites / 628 tests, exit 0 |
-| H2.S5.M2 · defectos | `REGISTRO-DEFECTOS.md`: B-10 cerrado (cita `b660a187`), B-16 y B-17 nuevas |
+| H2.S5.M2 · defectos | `docs/progress/REGISTRO-DEFECTOS.md`: B-10 cerrado (cita `b660a187`), B-16 y B-17 nuevas |
 
 ## A medias
 
@@ -33,7 +33,7 @@
   la que este mismo trabajo agregó. No se investigó la causa exacta (`TsMorphMetadataProvider`
   fallando al analizar `insurance_campaign_partners.entity.ts`, orden de descubrimiento, o algo
   más) ni se intentó arreglar: **no correspondía tocar más código de verificación en este cierre**.
-  Evidencia completa en `evidencia/02-api-h2/int-spec-repro.txt`. `REGISTRO-DEFECTOS.md` (B-16)
+  Evidencia completa en `evidencia/02-api-h2/int-spec-repro.txt`. `docs/progress/REGISTRO-DEFECTOS.md` (B-16)
   queda con la causa vieja; hay que actualizarlo con este hallazgo más preciso antes de intentar
   correr el int-spec de campañas.
 - **H2.S4.M3 — `test/integration/insurance-campaigns.int-spec.ts`.** Escrito completo (8 casos:
@@ -80,7 +80,7 @@ En [`evidencia/`](evidencia/index.md):
 2. **`fix_vault_fk.py` destapó 285 notas FK ajenas** (pharma_lab, audit, authz, iam,
    data_catalog, scheduling, qa_execution, clinical, community, profiles, accounting) al
    regenerar la bóveda para las 12 de campañas. Quedaron en un `git stash` local del repo de la
-   bóveda, fuera de cualquier PR; declarado en B-10/REGISTRO-DEFECTOS.md.
+   bóveda, fuera de cualquier PR; declarado en B-10/docs/progress/REGISTRO-DEFECTOS.md.
 3. **`xlsx-parser.ts`/`.spec.ts` se reformatearon solos** con `yarn lint --fix` sin haber sido
    pedidos (archivo ajeno, pre-existente, fuera de esta tarea) y se revirtieron antes de commitear.
 4. **No se regeneraron los artefactos OpenAPI/Postman** (H2.S5.M1): exige Neon arriba y compilar

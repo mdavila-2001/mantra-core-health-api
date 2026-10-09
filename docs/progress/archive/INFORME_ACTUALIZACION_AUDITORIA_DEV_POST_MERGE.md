@@ -8,7 +8,7 @@
 > **Snapshot histórico (11/09/2026) — MCH-033.** Este informe es una foto de esa fecha y no se actualiza. Su titular decía «100% Tests Unitarios
 > Pasando», pero lo que se corrió fueron las dos suites listadas en §1, punto 2: el denominador son esas 62
 > pruebas, no la API. El inventario vigente (módulos, entidades, endpoints declarados y registrados,
-> con commit y método) está en [`ALOVIDA-COBERTURA.md`](ALOVIDA-COBERTURA.md) y se regenera con
+> con commit y método) está en `docs/reports/ALOVIDA-COBERTURA.md` y se regenera con
 > `node tools/alovida/coverage-report.mjs`.
 
 ---

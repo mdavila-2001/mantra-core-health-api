@@ -3,7 +3,7 @@
   Fuente real: src/modules/ads/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `ads`
@@ -18,6 +18,44 @@
 Estructura de cuentas publicitarias y socios, conexión con plataformas externas, jerarquía de
 campaña, cortafuegos de datos de evento, ingesta de entrega, conversiones, catálogo de productos,
 experimentos, reglas automatizadas, moderación, facturación y captura de leads.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/ads -name '*.controller.ts' | wc -l
+  find src/modules/ads -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/ads -name '*.entity.ts' | wc -l
+  find src/modules/ads -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 18 rutas HTTP, 73 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 73 de 73 archivos `*.entity.ts`): `ad_account_users`, `ad_accounts`, `ad_billing_events`, `ad_creatives`, `ad_event_data_policies`, `ad_event_field_rules`, `ad_experiments`, `ad_identity_asset_assignments`, `ad_identity_assets`, `ad_invoice_lines`, `ad_invoices`, `ad_partners`, `ad_placements`, `ad_platform_connections`, `ad_policy_appeals`, `ad_policy_violations`, `ad_review_events`, `ad_sets`, `ad_sync_checkpoints`, `ad_sync_runs`, `ads`, `adset_learning_snapshots`, `attribution_settings`, `automated_rules`, `blocked_ad_events`, `brand_lift_studies`, `budget_schedules`, `business_managers`, `campaigns`, `catalog_feeds`, `catalog_products`, `collection_ads`, `conversion_attributions`, `conversion_datasets`, `conversion_event_custom_data`, `conversion_event_deduplication`, `conversion_event_delivery_attempts`, `conversion_event_user_data`, `creative_assets`, `custom_audiences`, `custom_conversions`, `dataset_connections`, `dataset_quality_snapshots`, `delivery_status_snapshots`, `dynamic_ad_templates`, `experiment_variants`, `external_ad_object_snapshots`, `feed_run_logs`, `frequency_caps`, `insight_breakdown_definitions`, `insight_fact_rows`, `insight_metric_definitions`, `insight_query_runs`, `insights_daily`, `lead_answers`, `lead_delivery_events`, `lead_form_questions`, `lead_forms`, `lead_submissions`, `lookalike_specs`, `offline_conversion_events`, `offline_conversion_sets`, `partner_relationships`, `pixel_events`, `product_catalogs`, `product_localizations`, `product_set_members`, `product_sets`, `rule_executions`, `saved_audiences`, `server_conversion_events`, `targeting_specs`, `tracking_pixels`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /ads/business-managers/:bmId/ad-accounts` | ADS_ADMIN, BUSINESS_ADMIN | `ads` |
+| `POST /ads/business-managers/:bmId/partners` | ADS_ADMIN, BUSINESS_ADMIN | `ads` |
+| `POST /ads/platform-connections` | ADS_ADMIN, BUSINESS_ADMIN | `ads` |
+| `POST /ads/ad-accounts/:id/campaigns/launch` | AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/ad-accounts/:id/targeting` | AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/ad-sets/:id/identity` | AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/event-data-policies` | DATA_PRIVACY_OFFICER, ADS_ADMIN | `ads` |
+| `POST /ads/ingest/insights` | SYSTEM | `ads` |
+| `POST /ads/datasets/:id/events` | SYSTEM, ADS_ADMIN | `ads` |
+| `POST /ads/offline-conversion-sets/upload` | AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/ad-accounts/:id/experiments` | AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/automated-rules/:id/evaluate` | SYSTEM, ADS_ADMIN | `ads` |
+| `POST /ads/ads/:id/review-events` | POLICY_REVIEWER, SYSTEM, ADS_ADMIN | `ads` |
+| `POST /ads/policy-violations/:id/appeals` | POLICY_REVIEWER, AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/catalogs/:id/feeds/:feedId/run` | SYSTEM, ADS_ADMIN | `ads` |
+| `POST /ads/ad-accounts/:id/invoices/issue` | FINANCE, ADS_ADMIN | `ads` |
+| `POST /ads/lead-forms/:id/submissions` | SYSTEM, AD_OPS, ADS_ADMIN | `ads` |
+| `POST /ads/ad-sets/:id/budget-schedules` | AD_OPS, ADS_ADMIN | `ads` |
 
 ## Casos de uso cubiertos (16)
 
@@ -42,7 +80,7 @@ experimentos, reglas automatizadas, moderación, facturación y captura de leads
 
 ## Entidades
 
-El módulo abarca 74 tablas de `ads.*`. Las que se escriben desde aquí:
+El módulo abarca `ads.*` (74 tablas según este README; al 2026-10-08 hay 73 archivos `*.entity.ts`, ver «Rutas HTTP y alcance (medido)»). Las que se escriben desde aquí:
 
 - **Estructura**: `business_managers`, `ad_accounts`, `ad_account_users`, `ad_partners`,
   `partner_relationships`, `ad_platform_connections`, `ad_identity_assets`,

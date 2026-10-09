@@ -3,7 +3,7 @@
   Fuente real: src/modules/consent/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `consent`
@@ -19,6 +19,48 @@ Directivas de privacidad, bases legales de procesamiento y evidencia de
 consentimiento. Implementa los 12 casos de uso UC-07-01..12 como endpoints REST,
 siguiendo el stack de referencia (IAM): controladores finos, servicios dueños de
 la transacción, repositorios stateless y conceptos de dominio versionados.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/consent -name '*.controller.ts' | wc -l
+  find src/modules/consent -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/consent -name '*.entity.ts' | wc -l
+  find src/modules/consent -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **11 controllers, 22 rutas HTTP, 10 entidades y 11 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`AuditModule`, `MessagingModule`, `ClinicalModule`).
+
+Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `consent_events`, `consent_evidence`, `consent_provisions`, `consents`, `hipaa_authorizations`, `patient_objections`, `privacy_restrictions`, `processing_legal_bases`, `processing_purposes`, `treatment_informed_consents`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /consent/consent-evidence` | SECURITY_ADMIN | `consent-evidence` |
+| `GET /consent/me/consents` | PATIENT | `consent-me` |
+| `GET /consent/me/hipaa-authorizations` | PATIENT | `consent-me` |
+| `GET /consent/me/objections` | PATIENT | `consent-me` |
+| `GET /consent/me/treatment-informed-consents` | PATIENT | `consent-me` |
+| `POST /consent/me/consents/:id/withdraw` | PATIENT | `consent-me` |
+| `POST /consent/internal/expiration-sweep` | SYSTEM, SECURITY_ADMIN | `consent-sweep` |
+| `POST /consent/consents` | SECURITY_ADMIN | `consents` |
+| `POST /consent/consents/:id/withdraw` | SECURITY_ADMIN | `consents` |
+| `PATCH /consent/consents/:id/provisions` | SECURITY_ADMIN | `consents` |
+| `POST /consent/encounters/:encounterId/informed-consent` | CLINICIAN, PRACTITIONER | `encounter-informed-consents` |
+| `GET /consent/encounters/:encounterId/informed-consent` | CLINICIAN, PRACTITIONER | `encounter-informed-consents` |
+| `POST /consent/hipaa-authorizations` | SECURITY_ADMIN | `hipaa-authorizations` |
+| `POST /consent/hipaa-authorizations/:id/revoke` | SECURITY_ADMIN | `hipaa-authorizations` |
+| `POST /consent/patient-objections` | SECURITY_ADMIN | `patient-objections` |
+| `POST /consent/patient-objections/:id/resolve` | SECURITY_ADMIN | `patient-objections` |
+| `POST /consent/practitioner-access-requests` | PRACTITIONER, CLINICIAN | `practitioner-access-requests` |
+| `GET /consent/practitioner-access-requests/mine` | PATIENT | `practitioner-access-requests` |
+| `POST /consent/practitioner-access-requests/:id/decision` | PATIENT | `practitioner-access-requests` |
+| `POST /consent/privacy-restrictions` | SECURITY_ADMIN | `privacy-restrictions` |
+| `POST /consent/processing-legal-bases` | SECURITY_ADMIN | `processing-legal-bases` |
+| `POST /consent/treatment-informed-consents` | SECURITY_ADMIN | `treatment-informed-consents` |
 
 ## Endpoints (UC → ruta)
 

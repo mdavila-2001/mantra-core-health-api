@@ -3,7 +3,7 @@
   Fuente real: src/modules/system_context/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `system_context`
@@ -19,6 +19,39 @@ Enumeraciones gobernadas por filas versionadas —sin tipos `ENUM` nativos de Po
 snapshot inmutable de opciones, publicación que invalida caché, binding a campos y validación en
 escritura; y contextos de sistema versionados con refresco idempotente, procedencia, promoción,
 binding a consumidores y vuelta atrás.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/system_context -name '*.controller.ts' | wc -l
+  find src/modules/system_context -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/system_context -name '*.entity.ts' | wc -l
+  find src/modules/system_context -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 13 rutas HTTP, 9 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `dynamic_enum_bindings`, `dynamic_enum_definitions`, `dynamic_enum_options`, `dynamic_enum_versions`, `system_context_bindings`, `system_context_inputs`, `system_context_refresh_runs`, `system_context_versions`, `system_contexts`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /system-context/dynamic-enums/bindings` | sesión | `system-context` |
+| `GET /system-context/dynamic-enums` | pública | `system-context` |
+| `POST /system-context/dynamic-enums/definitions` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/versions` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/versions/:version/publish` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/bindings` | MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/resolve` | WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/retire` | PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts` | PLATFORM_ADMIN, GOVERNANCE | `system-context` |
+| `POST /system-context/contexts/:id/refresh` | SYSTEM, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/versions/:version/activate` | PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/bindings` | MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/rollback` | PLATFORM_ADMIN | `system-context` |
 
 ## Casos de uso cubiertos (12)
 

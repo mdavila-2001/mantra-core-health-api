@@ -3,7 +3,7 @@
   Fuente real: src/modules/tracking/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `tracking`
@@ -18,6 +18,37 @@
 Sujetos rastreables con número opaco, envíos, catálogo de hitos esperados, timeline append-only,
 webhooks de transportista, traspasos, estimaciones de llegada, prueba de entrega, excepciones y
 barrido de compromisos de servicio.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/tracking -name '*.controller.ts' | wc -l
+  find src/modules/tracking -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/tracking -name '*.entity.ts' | wc -l
+  find src/modules/tracking -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 11 rutas HTTP, 8 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `delivery_proofs`, `eta_estimates`, `milestone_definitions`, `shipment_handoffs`, `shipments`, `trackable_subjects`, `tracking_carriers`, `tracking_events`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /tracking/trackable-subjects` | TRACKING_ADMIN, LOGISTICS_OPERATOR | `tracking` |
+| `POST /tracking/milestone-definitions` | TRACKING_ADMIN | `tracking` |
+| `POST /tracking/shipments/:id/dispatch` | LOGISTICS_OPERATOR, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/trackable-subjects/:id/events` | LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/webhooks/carriers/:carrierCode` | pública | `tracking` |
+| `POST /tracking/shipments/:id/handoffs` | LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/shipments/:id/eta/recompute` | SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/shipments/:id/delivery-proof` | COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/shipments/:id/exception` | COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/shipments/:id/cancel` | LOGISTICS_OPERATOR, TRACKING_ADMIN | `tracking` |
+| `POST /tracking/sla/scan` | SYSTEM | `tracking` |
 
 ## Casos de uso cubiertos (11)
 

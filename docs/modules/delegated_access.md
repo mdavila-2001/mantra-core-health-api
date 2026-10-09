@@ -3,7 +3,7 @@
   Fuente real: src/modules/delegated_access/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `delegated_access`
@@ -20,6 +20,38 @@ de permisos delegados versionados, delegaciones de practitioner, solicitudes con
 aprobación previa, grants temporales por propósito, revocación en cascada, barrido
 de expiración y evaluación del actor efectivo (con step-up). Sin impersonación:
 delegante y delegado quedan siempre auditados en `delegation_events`.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/delegated_access -name '*.controller.ts' | wc -l
+  find src/modules/delegated_access -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/delegated_access -name '*.entity.ts' | wc -l
+  find src/modules/delegated_access -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **5 controllers, 12 rutas HTTP, 7 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `delegated_access_approval_requests`, `delegated_access_grants`, `delegated_permission_set_items`, `delegated_permission_sets`, `delegation_events`, `organization_user_assignments`, `practitioner_delegate_assignments`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /access-requests/:id/decision` | SECURITY_ADMIN | `access-requests` |
+| `POST /delegated-access/expiry-sweep` | SYSTEM, SECURITY_ADMIN | `delegated-access-authz` |
+| `POST /authz/effective-actor/evaluate` | SECURITY_ADMIN | `delegated-access-authz` |
+| `GET /delegated-permission-sets` | SECURITY_ADMIN | `delegated-permission-sets` |
+| `POST /delegated-permission-sets` | SECURITY_ADMIN | `delegated-permission-sets` |
+| `POST /delegated-permission-sets/:id/versions` | SECURITY_ADMIN | `delegated-permission-sets` |
+| `POST /org/:tenantMembershipId/user-assignments` | SECURITY_ADMIN | `org-user-assignments` |
+| `PATCH /org/user-assignments/:id` | SECURITY_ADMIN | `org-user-assignments` |
+| `POST /practitioner-delegates` | SECURITY_ADMIN | `practitioner-delegates` |
+| `POST /practitioner-delegates/:id/access-requests` | SECURITY_ADMIN | `practitioner-delegates` |
+| `POST /practitioner-delegates/:id/grants` | SECURITY_ADMIN | `practitioner-delegates` |
+| `POST /practitioner-delegates/:id/revoke` | SECURITY_ADMIN | `practitioner-delegates` |
 
 ## Endpoints (UC → ruta)
 

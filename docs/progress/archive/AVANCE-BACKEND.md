@@ -4,8 +4,8 @@
 > verificado en `mantra-core-health-redesa-api`, explicado en prosa, no sólo enumerado.
 >
 > Lo que **falta** no se cubre aquí a propósito: eso vive en
-> [`ESTADO-Y-PENDIENTES.md`](ESTADO-Y-PENDIENTES.md) y en
-> [`docs/reports/production-readiness-2026-07-31.md`](docs/reports/production-readiness-2026-07-31.md).
+> `docs/progress/ESTADO-Y-PENDIENTES.md` y en
+> [`docs/reports/production-readiness-2026-07-31.md`](../../reports/production-readiness-2026-07-31.md).
 > Cada cifra de este documento sale de un comando reproducible; al final hay una sección con
 > exactamente cuáles.
 
@@ -521,7 +521,7 @@ Nada de lo anterior pide fe. Los comandos:
 
 ```bash
 # Inventario y límites de dominio (entidades, endpoints, huérfanos, cross-domain)
-yarn alovida:coverage        # → ALOVIDA-COBERTURA.md
+yarn alovida:coverage        # → docs/reports/ALOVIDA-COBERTURA.md
 
 # Antipatrones prohibidos (borrado duro, CRUD sobre inmutables, tenant sin acotar…)
 yarn alovida:guardrails
@@ -562,6 +562,6 @@ páginas de documentación que CI obliga a mantener sincronizadas.
 Lo que queda para producción es de otra naturaleza: infraestructura HA privada, KMS/IAM/WAF/TLS,
 proveedores externos certificados, pruebas de carga y pentest, y aceptación formal de RPO/RTO —
 cosas que no se cierran editando este repositorio. Ese detalle está en
-[`docs/reports/production-readiness-2026-07-31.md`](docs/reports/production-readiness-2026-07-31.md).
+[`docs/reports/production-readiness-2026-07-31.md`](../../reports/production-readiness-2026-07-31.md).
 
 La base sobre la que se apoyará todo eso ya está construida.

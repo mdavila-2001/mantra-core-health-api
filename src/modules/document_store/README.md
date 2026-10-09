@@ -5,6 +5,29 @@ snapshots, payloads FHIR crudos, plantillas y cualquier estructura que no encaje
 relacional. Persiste en MongoDB real (contenedor `mantra-redesa-mongodb-1`) leyendo `MONGODB_URI` y
 `MONGO_DB` del entorno.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/document_store -name '*.controller.ts' | wc -l
+  find src/modules/document_store -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/document_store -name '*.entity.ts' | wc -l
+  find src/modules/document_store -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 5 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /document-store/collections/:collection/documents` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
+| `GET /document-store/collections/:collection/documents/:id` | sesión | `document-store` |
+| `GET /document-store/collections/:collection/documents` | sesión | `document-store` |
+| `PATCH /document-store/collections/:collection/documents/:id` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
+| `DELETE /document-store/collections/:collection/documents/:id` | STORAGE_ADMIN, PLATFORM_ADMIN | `document-store` |
+
 ## Endpoints (CRUD gobernado por tenant)
 
 | Método | Endpoint | Descripción |

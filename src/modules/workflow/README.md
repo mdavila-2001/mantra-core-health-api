@@ -4,6 +4,37 @@ Un solo sitio donde se declara qué estados puede tener un agregado, qué comand
 otro, qué hay que cumplir para moverlo y qué pasa después de moverlo. Y un solo sitio donde eso se
 ejecuta, con idempotencia, compensación, reintento y vencimiento.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/workflow -name '*.controller.ts' | wc -l
+  find src/modules/workflow -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/workflow -name '*.entity.ts' | wc -l
+  find src/modules/workflow -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 11 rutas HTTP, 8 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `state_definitions`, `state_machine_definitions`, `state_transition_definitions`, `state_transition_events`, `transition_guards`, `transition_side_effects`, `workflow_instances`, `workflow_tasks`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /workflow/state-machines` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/states` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/transitions` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/publish` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/instances/sweep-timeouts` | SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/instances` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/tasks/:id/complete` | CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `workflow-instances` |
+| `GET /workflow/aggregates/:aggregateId/transitions` | AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:commandCode` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/compensate` | SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/retry` | SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |
