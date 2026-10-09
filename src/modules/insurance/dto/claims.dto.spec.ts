@@ -6,20 +6,20 @@ import { CreateAdjudicationDto } from './claims.dto';
  * Aplana los errores de `class-validator`, incluidos los de un `@ValidateNested`
  * (como `lineAdjudications`), a las rutas con punto (`lineAdjudications[0].policyClauseReference`).
  *
- * @param errores - Errores devueltos por `validate`.
- * @param prefijo - Ruta acumulada de las llamadas recursivas.
+ * @param errors - Errores devueltos por `validate`.
+ * @param prefix - Ruta acumulada de las llamadas recursivas.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasConError(
-  errores: readonly ValidationError[],
-  prefijo = '',
+function rutasWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
 ): string[] {
   const rutas: string[] = [];
-  for (const error of errores) {
-    const ruta = prefijo ? `${prefijo}.${error.property}` : error.property;
+  for (const error of errors) {
+    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasConError(error.children, ruta));
+      rutas.push(...rutasWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -28,22 +28,22 @@ function rutasConError(
 const LINEA_ID = '11111111-1111-4111-8111-111111111111';
 
 /** Un `CreateAdjudicationDto` mínimo, con una sola línea. */
-function dtoDe(linea: Record<string, unknown>): Record<string, unknown> {
+function dto(linea: Record<string, unknown>): Record<string, unknown> {
   return {
     outcome: 'DENIED',
     lineAdjudications: [{ insuranceClaimLineId: LINEA_ID, ...linea }],
   };
 }
 
-async function propiedadesConError(
-  alta: Record<string, unknown>,
+async function propertiesWithError(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(CreateAdjudicationDto, alta);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(CreateAdjudicationDto, registration);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasConError(errores);
+  return rutasWithError(errors);
 }
 
 /**
@@ -55,23 +55,23 @@ async function propiedadesConError(
  */
 describe('LineAdjudicationDto · cláusula y justificación del rechazo', () => {
   it('DENIED sin cláusula: 400 en policyClauseReference (Escenario 2)', async () => {
-    expect(await propiedadesConError(dtoDe({ decision: 'DENIED' }))).toEqual([
+    expect(await propertiesWithError(dto({ decision: 'DENIED' }))).toEqual([
       'lineAdjudications.0.policyClauseReference',
     ]);
   });
 
   it('DENIED con cláusula vacía: también rechazada', async () => {
     expect(
-      await propiedadesConError(
-        dtoDe({ decision: 'DENIED', policyClauseReference: '' }),
+      await propertiesWithError(
+        dto({ decision: 'DENIED', policyClauseReference: '' }),
       ),
     ).toEqual(['lineAdjudications.0.policyClauseReference']);
   });
 
   it('DENIED con cláusula: sin errores', async () => {
     expect(
-      await propiedadesConError(
-        dtoDe({
+      await propertiesWithError(
+        dto({
           decision: 'DENIED',
           policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
         }),
@@ -80,23 +80,23 @@ describe('LineAdjudicationDto · cláusula y justificación del rechazo', () => 
   });
 
   it('APPROVED sin cláusula: sin errores — no es obligatoria al aprobar', async () => {
-    expect(await propiedadesConError(dtoDe({ decision: 'APPROVED' }))).toEqual(
+    expect(await propertiesWithError(dto({ decision: 'APPROVED' }))).toEqual(
       [],
     );
   });
 
   it('APPROVED con cláusula demasiado larga: sí se valida (maxLength)', async () => {
     expect(
-      await propiedadesConError(
-        dtoDe({ decision: 'APPROVED', policyClauseReference: 'x'.repeat(256) }),
+      await propertiesWithError(
+        dto({ decision: 'APPROVED', policyClauseReference: 'x'.repeat(256) }),
       ),
     ).toEqual(['lineAdjudications.0.policyClauseReference']);
   });
 
   it('denialRationale demasiado larga: rechazada', async () => {
     expect(
-      await propiedadesConError(
-        dtoDe({
+      await propertiesWithError(
+        dto({
           decision: 'DENIED',
           policyClauseReference: 'Cláusula 4.1',
           denialRationale: 'x'.repeat(4001),
@@ -107,8 +107,8 @@ describe('LineAdjudicationDto · cláusula y justificación del rechazo', () => 
 
   it('denialRationale es opcional incluso al denegar', async () => {
     expect(
-      await propiedadesConError(
-        dtoDe({ decision: 'DENIED', policyClauseReference: 'Cláusula 4.1' }),
+      await propertiesWithError(
+        dto({ decision: 'DENIED', policyClauseReference: 'Cláusula 4.1' }),
       ),
     ).toEqual([]);
   });

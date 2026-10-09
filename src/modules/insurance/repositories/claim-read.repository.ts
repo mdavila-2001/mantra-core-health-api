@@ -435,28 +435,28 @@ export class ClaimReadRepository {
     );
     if (solicitudes.length === 0) return [];
 
-    const conceptos = await em.find(CatalogConcepts, {
+    const concepts = await em.find(CatalogConcepts, {
       id: { $in: [...new Set(solicitudes.map((s) => s.statusConceptId))] },
     });
-    const conceptoPorId = new Map(conceptos.map((c) => [c.id, c]));
+    const conceptById = new Map(concepts.map((c) => [c.id, c]));
 
-    const resumenes: EncounterClaimSummary[] = [];
-    for (const solicitud of solicitudes) {
-      if (solicitud.encounterId == null) continue;
-      const estado = conceptoPorId.get(solicitud.statusConceptId);
-      resumenes.push({
-        id: solicitud.id,
-        encounterId: solicitud.encounterId,
-        claimIdentifier: solicitud.claimIdentifier,
+    const summaries: EncounterClaimSummary[] = [];
+    for (const request of solicitudes) {
+      if (request.encounterId == null) continue;
+      const estado = conceptById.get(request.statusConceptId);
+      summaries.push({
+        id: request.id,
+        encounterId: request.encounterId,
+        claimIdentifier: request.claimIdentifier,
         // La columna es FK a `catalog_concepts`, así que el concepto existe;
         // el `?? ''` es sólo para no romper la página entera si una siembra
         // quedara a medias.
         statusCode: estado?.code ?? '',
         statusDisplay: estado?.display ?? '',
-        submittedAt: solicitud.submittedAt ?? null,
-        createdAt: solicitud.createdAt,
+        submittedAt: request.submittedAt ?? null,
+        createdAt: request.createdAt,
       });
     }
-    return resumenes;
+    return summaries;
   }
 }

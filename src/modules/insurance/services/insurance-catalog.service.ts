@@ -27,8 +27,8 @@ import type { CarrierCatalogEntryDto, CarrierCatalogResponseDto } from '../dto';
  * @returns El nombre completo, seguido de la sigla cuando corresponde.
  */
 function publicCarrierLabel(legalName: string, sigla?: string | null): string {
-  const esSigla = sigla != null && /^[A-Z]{2,}$/.test(sigla);
-  return esSigla && sigla !== legalName ? `${legalName} - ${sigla}` : legalName;
+  const isAcronym = sigla != null && /^[A-Z]{2,}$/.test(sigla);
+  return isAcronym && sigla !== legalName ? `${legalName} - ${sigla}` : legalName;
 }
 
 /**
