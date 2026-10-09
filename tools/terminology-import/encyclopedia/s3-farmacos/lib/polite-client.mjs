@@ -89,6 +89,20 @@ export class PoliteClient {
     }
   }
 
+  /** Escritura de caché que aguanta un disco lleno pasajero (la Mac mini lo comparte con otras sesiones). */
+  async #writeCache(cachePath, text) {
+    mkdirSync(dirname(cachePath), { recursive: true });
+    for (let attempt = 1; ; attempt++) {
+      try {
+        writeFileSync(cachePath, text);
+        return;
+      } catch (err) {
+        if (err.code !== 'ENOSPC' || attempt >= 10) throw err;
+        await this.sleepImpl(30_000);
+      }
+    }
+  }
+
   /**
    * GET JSON con caché. Un 404 o un cuerpo vacío se guarda como `null` (CIMA
    * responde así cuando la ficha no tiene esa sección).
@@ -105,8 +119,7 @@ export class PoliteClient {
     }
     const text = body.toString('utf8').trim();
     const value = status === 404 || text === '' ? null : JSON.parse(text);
-    mkdirSync(dirname(cachePath), { recursive: true });
-    writeFileSync(cachePath, JSON.stringify(value));
+    await this.#writeCache(cachePath, JSON.stringify(value));
     return value;
   }
 }
