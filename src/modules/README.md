@@ -6,7 +6,7 @@ La API los compone en `src/app.module.ts`. El catálogo de entidades, índices y
 
 ## Cifras medidas
 
-Medido el 2026-10-08 sobre `origin/dev` (`dae4fd68`). Los números envejecen: repetí los comandos desde la raíz del repo antes de citarlos.
+Medido el 2026-10-09 sobre `origin/dev` (`886a1471`). Los números envejecen: repetí los comandos desde la raíz del repo antes de citarlos.
 
 <!--
   find src/modules -mindepth 1 -maxdepth 1 -type d | wc -l      -> 70
@@ -14,7 +14,7 @@ Medido el 2026-10-08 sobre `origin/dev` (`dae4fd68`). Los números envejecen: re
   ls src/modules/*/README.md | wc -l                            -> 70
   ls src/worker-*.ts | wc -l                                    -> 24
   find src/worker/jobs -name '*.job.ts' | wc -l                 -> 38
-  find src -name '*.spec.ts' | wc -l                            -> 810
+  find src -name '*.spec.ts' | wc -l                            -> 813
 -->
 
 | Qué | Cantidad |
@@ -24,7 +24,7 @@ Medido el 2026-10-08 sobre `origin/dev` (`dae4fd68`). Los números envejecen: re
 | `README.md` de módulo | 70 |
 | Entry points de worker (`src/worker-*.ts`) | 24 |
 | Archivos de job (`src/worker/jobs/**/*.job.ts`) | 38 |
-| Archivos de spec unitario bajo `src/` | 810 |
+| Archivos de spec unitario bajo `src/` | 813 |
 
 La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) puede diferir; la que cuenta es el número de `src/worker-*.ts`, y que un entry point exista no implica que esté activo en un despliegue (véase [workers](../worker/README.md)).
 
