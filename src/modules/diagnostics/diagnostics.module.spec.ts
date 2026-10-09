@@ -10,11 +10,11 @@ import {
  */
 describe('DiagnosticsModule', () => {
   it('publica DiagnosticsPatientResultsController (incluye la descarga del resultado propio)', () => {
-    const controladores = (Reflect.getMetadata(
+    const controllers = (Reflect.getMetadata(
       'controllers',
       DiagnosticsModule,
     ) ?? []) as readonly unknown[];
-    expect(controladores).toContain(DiagnosticsPatientResultsController);
+    expect(controllers).toContain(DiagnosticsPatientResultsController);
   });
 
   it('la ruta de contenido del resultado propio está declarada', () => {

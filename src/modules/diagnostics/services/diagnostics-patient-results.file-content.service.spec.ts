@@ -4,10 +4,10 @@ import { DIAG } from '../diagnostics.concepts';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const USUARIO = { id: 'u1' } as any;
-const PACIENTE = 'p1';
-const INFORME = 'r1';
-const ARCHIVO = 'f-lab';
+const USER = { id: 'u1' } as any;
+const PATIENT = 'p1';
+const REPORT = 'r1';
+const FILE = 'f-lab';
 const BYTES = Buffer.from('%PDF-1.4');
 
 /**
@@ -21,11 +21,11 @@ function build(
     fileId?: string;
   } = {},
 ) {
-  const { reportPatient = PACIENTE, released = true, fileId = ARCHIVO } = opts;
+  const { reportPatient = PATIENT, released = true, fileId = FILE } = opts;
   const em = { fork: mockFn().mockReturnValue({}) };
   const ordersRepo = {
     findReportById: mockFn().mockResolvedValue({
-      id: INFORME,
+      id: REPORT,
       patientProfileId: reportPatient,
       codeConceptId: 'c',
       custodianTenantId: 't',
@@ -35,7 +35,7 @@ function build(
     findVersionsByReports: mockFn().mockResolvedValue([
       {
         id: 'v1',
-        diagnosticReportId: INFORME,
+        diagnosticReportId: REPORT,
         versionNumber: 1,
         recordedAt: new Date(),
       },
@@ -77,7 +77,7 @@ function build(
     {
       findActiveByUser: mockFn().mockResolvedValue({ personId: 'per' }),
     } as any,
-    { findById: mockFn().mockResolvedValue({ profileId: PACIENTE }) } as any,
+    { findById: mockFn().mockResolvedValue({ profileId: PATIENT }) } as any,
     {} as any,
     {} as any,
     logger as any,
@@ -91,14 +91,14 @@ describe('DiagnosticsPatientResultsService.getOwnResultFileContent (CL-40)', () 
   it('titular + liberado + archivo del informe: entrega los bytes', async () => {
     const d = build();
     const out = await d.service.getOwnResultFileContent(
-      USUARIO,
-      INFORME,
-      ARCHIVO,
+      USER,
+      REPORT,
+      FILE,
     );
     expect(out.buffer).toBe(BYTES);
     expect(out.mimeType).toBe('application/pdf');
     expect(d.fileUpload.downloadForAuthorizedContext).toHaveBeenCalledWith(
-      ARCHIVO,
+      FILE,
       'diagnostics.patient-result.file.content',
     );
   });
@@ -106,7 +106,7 @@ describe('DiagnosticsPatientResultsService.getOwnResultFileContent (CL-40)', () 
   it('informe no liberado: 404 y no pide bytes', async () => {
     const d = build({ released: false });
     await expect(
-      d.service.getOwnResultFileContent(USUARIO, INFORME, ARCHIVO),
+      d.service.getOwnResultFileContent(USER, REPORT, FILE),
     ).rejects.toMatchObject({ status: 404 });
     expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
   });
@@ -114,7 +114,7 @@ describe('DiagnosticsPatientResultsService.getOwnResultFileContent (CL-40)', () 
   it('informe de otro paciente: 404, no 401 ni 403', async () => {
     const d = build({ reportPatient: 'otro' });
     await expect(
-      d.service.getOwnResultFileContent(USUARIO, INFORME, ARCHIVO),
+      d.service.getOwnResultFileContent(USER, REPORT, FILE),
     ).rejects.toMatchObject({ status: 404 });
     expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
   });
@@ -122,7 +122,7 @@ describe('DiagnosticsPatientResultsService.getOwnResultFileContent (CL-40)', () 
   it('fileId que no cuelga del informe: 404', async () => {
     const d = build({ fileId: 'otro-archivo' });
     await expect(
-      d.service.getOwnResultFileContent(USUARIO, INFORME, ARCHIVO),
+      d.service.getOwnResultFileContent(USER, REPORT, FILE),
     ).rejects.toMatchObject({ status: 404 });
     expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
   });

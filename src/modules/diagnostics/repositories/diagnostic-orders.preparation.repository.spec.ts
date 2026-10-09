@@ -28,7 +28,7 @@ import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
  *    distintos entre dos peticiones idénticas.
  */
 describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
-  const CONCEPTO = 'concept-hemograma';
+  const CONCEPT = 'concept-hemograma';
 
   function build() {
     const em = { find: mockFn().mockResolvedValue([]) };
@@ -38,7 +38,7 @@ describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
   it('sólo pide ofertas ACTIVAS: un borrador o una retirada no dictan la preparación', async () => {
     const { repo, em } = build();
 
-    await repo.findPreparationByStudyConcepts(em as any, [CONCEPTO]);
+    await repo.findPreparationByStudyConcepts(em as any, [CONCEPT]);
 
     const [, where] = em.find.mock.calls[0];
     expect(where.statusConceptId).toBe(DUNIT.OFFERING_ACTIVE);
@@ -47,7 +47,7 @@ describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
   it('ordena explícitamente, para que «la primera» sea siempre la misma', async () => {
     const { repo, em } = build();
 
-    await repo.findPreparationByStudyConcepts(em as any, [CONCEPTO]);
+    await repo.findPreparationByStudyConcepts(em as any, [CONCEPT]);
 
     const [, , opciones] = em.find.mock.calls[0];
     expect(opciones?.orderBy).toBeDefined();
@@ -56,7 +56,7 @@ describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
   it('sigue exigiendo que haya texto', async () => {
     const { repo, em } = build();
 
-    await repo.findPreparationByStudyConcepts(em as any, [CONCEPTO]);
+    await repo.findPreparationByStudyConcepts(em as any, [CONCEPT]);
 
     const [, where] = em.find.mock.calls[0];
     expect(where.preparationInstructions).toEqual({ $ne: null });
@@ -65,9 +65,9 @@ describe('DiagnosticOrdersRepository · findPreparationByStudyConcepts', () => {
   it('sin conceptos no consulta la base', async () => {
     const { repo, em } = build();
 
-    const salida = await repo.findPreparationByStudyConcepts(em as any, []);
+    const output = await repo.findPreparationByStudyConcepts(em as any, []);
 
-    expect(salida).toEqual([]);
+    expect(output).toEqual([]);
     expect(em.find).not.toHaveBeenCalled();
   });
 });

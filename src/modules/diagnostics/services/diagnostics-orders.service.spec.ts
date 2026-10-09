@@ -12,7 +12,7 @@ import { DIAG } from '../diagnostics.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
 
 const TENANT = 't1';
-const PACIENTE = 'p1';
+const PATIENT = 'p1';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -40,10 +40,10 @@ function build() {
  * @param id - Identificador de la orden.
  * @returns La fila simulada.
  */
-function orden(id: string) {
+function order(id: string) {
   return {
     id,
-    patientProfileId: PACIENTE,
+    patientProfileId: PATIENT,
     encounterId: 'e1',
     codeConceptId: 'code-1',
     categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
@@ -60,10 +60,10 @@ function orden(id: string) {
  * @param id - Identificador del informe.
  * @returns La fila simulada.
  */
-function informe(id: string) {
+function report(id: string) {
   return {
     id,
-    patientProfileId: PACIENTE,
+    patientProfileId: PATIENT,
     serviceRequestId: 'sr-1',
     encounterId: 'e1',
     codeConceptId: 'code-1',
@@ -81,19 +81,19 @@ describe('DiagnosticsOrdersService', () => {
     it('acota la lectura al tenant y al paciente', async () => {
       const d = build();
 
-      await d.service.getPatientOrders(TENANT, PACIENTE, 50);
+      await d.service.getPatientOrders(TENANT, PATIENT, 50);
 
       expect(d.repo.findOrdersByPatient).toHaveBeenCalledWith(
         d.fork,
         TENANT,
-        PACIENTE,
+        PATIENT,
         expect.any(Array),
         51,
       );
       expect(d.repo.findReportsByPatient).toHaveBeenCalledWith(
         d.fork,
         TENANT,
-        PACIENTE,
+        PATIENT,
         51,
       );
     });
@@ -101,10 +101,10 @@ describe('DiagnosticsOrdersService', () => {
     it('pide exactamente las dos categorías diagnósticas', async () => {
       const d = build();
 
-      await d.service.getPatientOrders(TENANT, PACIENTE, 50);
+      await d.service.getPatientOrders(TENANT, PATIENT, 50);
 
-      const categorias = d.repo.findOrdersByPatient.mock.calls[0][3];
-      expect(categorias).toEqual([
+      const categories = d.repo.findOrdersByPatient.mock.calls[0][3];
+      expect(categories).toEqual([
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
       ]);
@@ -112,12 +112,12 @@ describe('DiagnosticsOrdersService', () => {
 
     it('proyecta órdenes e informes con el tope aplicado', async () => {
       const d = build();
-      d.repo.findOrdersByPatient.mockResolvedValue([orden('o1')]);
-      d.repo.findReportsByPatient.mockResolvedValue([informe('r1')]);
+      d.repo.findOrdersByPatient.mockResolvedValue([order('o1')]);
+      d.repo.findReportsByPatient.mockResolvedValue([report('r1')]);
 
-      const out = await d.service.getPatientOrders(TENANT, PACIENTE, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
 
-      expect(out.patientProfileId).toBe(PACIENTE);
+      expect(out.patientProfileId).toBe(PATIENT);
       expect(out.orders).toHaveLength(1);
       expect(out.orders[0].id).toBe('o1');
       expect(out.reports).toHaveLength(1);
@@ -129,10 +129,10 @@ describe('DiagnosticsOrdersService', () => {
     it('recorta al tope y anota el bloque que sobraba', async () => {
       const d = build();
       // Dos filas con tope 1: la de más es la señal de que hay más.
-      d.repo.findOrdersByPatient.mockResolvedValue([orden('o1'), orden('o2')]);
-      d.repo.findReportsByPatient.mockResolvedValue([informe('r1')]);
+      d.repo.findOrdersByPatient.mockResolvedValue([order('o1'), order('o2')]);
+      d.repo.findReportsByPatient.mockResolvedValue([report('r1')]);
 
-      const out = await d.service.getPatientOrders(TENANT, PACIENTE, 1);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1);
 
       expect(out.orders).toHaveLength(1);
       expect(out.orders[0].id).toBe('o1');
@@ -141,13 +141,13 @@ describe('DiagnosticsOrdersService', () => {
 
     it('anota cada bloque recortado por separado', async () => {
       const d = build();
-      d.repo.findOrdersByPatient.mockResolvedValue([orden('o1'), orden('o2')]);
+      d.repo.findOrdersByPatient.mockResolvedValue([order('o1'), order('o2')]);
       d.repo.findReportsByPatient.mockResolvedValue([
-        informe('r1'),
-        informe('r2'),
+        report('r1'),
+        report('r2'),
       ]);
 
-      const out = await d.service.getPatientOrders(TENANT, PACIENTE, 1);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 1);
 
       expect(out.truncated).toEqual(['orders', 'reports']);
     });
@@ -155,7 +155,7 @@ describe('DiagnosticsOrdersService', () => {
     it('devuelve bloques vacíos sin inventar nada cuando no hay filas', async () => {
       const d = build();
 
-      const out = await d.service.getPatientOrders(TENANT, PACIENTE, 50);
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
 
       expect(out.orders).toEqual([]);
       expect(out.reports).toEqual([]);
