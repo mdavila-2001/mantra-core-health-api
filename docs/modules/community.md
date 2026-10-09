@@ -20,7 +20,117 @@ seguridad), reviews verificadas, encuestas, grupos y fan-out de feed. Implementa
 los 15 casos de uso `UC-19-01..15` más endpoints de bootstrap para los recursos
 padre que ningún UC crea (perfil público, conversación, encuesta, grupo).
 
-## Endpoints
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/community -name '*.controller.ts' | wc -l
+  find src/modules/community -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/community -name '*.entity.ts' | wc -l
+  find src/modules/community -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **13 controllers, 92 rutas HTTP, 40 entidades y 29 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Importa (`community.module.ts`): `CommonModule`, `ClinicalModule`, `SearchPlatformModule`, `RedisRuntimeModule`, `MessagingModule`, `TerminologyModule`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /internal/community/feed/rebuild` | SYSTEM, SECURITY_ADMIN | `community-feed` |
+| `GET /internal/community/feed/pending` | SYSTEM, SECURITY_ADMIN | `community-feed` |
+| `POST /community/groups` | sesión | `community-groups` |
+| `POST /community/groups/:groupId/members` | sesión | `community-groups` |
+| `PATCH /community/groups/:groupId/members/:member` | sesión | `community-groups` |
+| `DELETE /community/groups/:groupId/members/:member` | sesión | `community-groups` |
+| `POST /community/groups/:groupId/posts` | sesión | `community-groups` |
+| `GET /community/groups` | sesión | `community-groups` |
+| `GET /community/groups/:groupId` | sesión | `community-groups` |
+| `GET /community/groups/:groupId/members` | sesión | `community-groups` |
+| `GET /community/groups/:groupId/posts` | sesión | `community-groups` |
+| `POST /community/conversations` | sesión | `community-messaging` |
+| `POST /community/conversations/:conversationId/messages` | sesión | `community-messaging` |
+| `PATCH /community/conversations/:conversationId/messages/:messageId` | sesión | `community-messaging` |
+| `DELETE /community/conversations/:conversationId/messages/:messageId` | sesión | `community-messaging` |
+| `POST /community/conversations/:conversationId/read` | sesión | `community-messaging` |
+| `PATCH /community/conversations/:conversationId/participant` | sesión | `community-messaging` |
+| `POST /community/conversations/:conversationId/pin` | sesión | `community-messaging` |
+| `DELETE /community/conversations/:conversationId/pin` | sesión | `community-messaging` |
+| `POST /community/conversations/contacts/search` | sesión | `community-messaging` |
+| `GET /community/conversations/:conversationId/attachments/:fileId/content` | sesión | `community-messaging` |
+| `GET /community/conversations` | sesión | `community-messaging` |
+| `GET /community/conversations/:conversationId/messages` | sesión | `community-messaging` |
+| `GET /community/conversations/:conversationId/presence` | sesión | `community-messaging` |
+| `POST /community/reports` | sesión | `community-moderation` |
+| `POST /community/moderation/queue/:queueId/decision` | SECURITY_ADMIN | `community-moderation` |
+| `POST /community/moderation/decisions/:decisionId/appeal` | sesión | `community-moderation` |
+| `POST /community/moderation/appeals/:appealId/resolve` | SECURITY_ADMIN | `community-moderation` |
+| `GET /community/moderation/queue` | SECURITY_ADMIN | `community-moderation` |
+| `GET /community/moderation/decisions/mine` | sesión | `community-moderation` |
+| `GET /community/moderation/decisions` | SECURITY_ADMIN | `community-moderation` |
+| `GET /community/moderation/appeals` | SECURITY_ADMIN | `community-moderation` |
+| `POST /community/posts/:postId/polls` | sesión | `community-polls` |
+| `POST /community/polls/:pollId/votes` | sesión | `community-polls` |
+| `GET /community/polls/:pollId` | sesión | `community-polls` |
+| `GET /public/posts` | pública | `community-public` |
+| `GET /public/posts/:postId/reactions` | pública | `community-public` |
+| `GET /public/posts/:postId/comments` | pública | `community-public` |
+| `GET /public/comments/:commentId/replies` | pública | `community-public` |
+| `GET /public/search` | pública | `community-public` |
+| `GET /public/search/practitioners` | pública | `community-public` |
+| `GET /public/search/organizations` | pública | `community-public` |
+| `GET /public/search/diagnostic-units` | pública | `community-public` |
+| `GET /public/search/insurers` | pública | `community-public` |
+| `GET /public/search/pharmacies` | pública | `community-public` |
+| `GET /public/search/medications` | pública | `community-public` |
+| `GET /public/nearby` | pública | `community-public` |
+| `GET /public/profiles/:prefijo/:slug` | pública | `community-public` |
+| `GET /public/profiles/:prefijo/:slug/reviews` | pública | `community-public` |
+| `GET /public/media/:id` | pública | `community-public` |
+| `GET /p/:slug` | pública | `community-public` |
+| `GET /o/:slug` | pública | `community-public` |
+| `GET /f/:slug` | pública | `community-public` |
+| `GET /l/:slug` | pública | `community-public` |
+| `GET /s/:slug` | pública | `community-public` |
+| `POST /community/profiles/:profileId/reviews` | sesión | `community-reviews` |
+| `GET /community/profiles/:profileId/reviews` | sesión | `community-reviews` |
+| `POST /community/profiles/:profileId/reviews/:reviewId/responses` | sesión | `community-reviews` |
+| `POST /internal/community/search/reindex` | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
+| `GET /internal/community/search/health` | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
+| `POST /community/public-profiles` | SECURITY_ADMIN | `community-social` |
+| `GET /community/profiles/me` | sesión | `community-social` |
+| `PUT /community/profiles/me` | sesión | `community-social` |
+| `GET /community/profiles/me/stats` | sesión | `community-social` |
+| `POST /community/profiles/:profileId/posts` | sesión | `community-social` |
+| `POST /community/comments` | sesión | `community-social` |
+| `PUT /community/reactions` | sesión | `community-social` |
+| `POST /community/bookmarks` | sesión | `community-social` |
+| `POST /community/follows` | sesión | `community-social` |
+| `POST /community/blocks` | sesión | `community-social` |
+| `DELETE /community/follows` | sesión | `community-social` |
+| `DELETE /community/bookmarks` | sesión | `community-social` |
+| `DELETE /community/blocks` | sesión | `community-social` |
+| `GET /community/profiles/by-slug/:slug` | sesión | `community-social` |
+| `GET /community/profiles/:profileId/auto-reply` | sesión | `community-social` |
+| `PUT /community/profiles/:profileId/auto-reply` | sesión | `community-social` |
+| `GET /community/profiles/:profileId` | sesión | `community-social` |
+| `GET /community/profiles/:profileId/posts` | sesión | `community-social` |
+| `GET /community/posts/:postId` | sesión | `community-social` |
+| `GET /community/posts/:postId/comments` | sesión | `community-social` |
+| `GET /community/comments/media/:fileId/content` | sesión | `community-social` |
+| `GET /community/posts/:postId/reactions` | sesión | `community-social` |
+| `GET /community/follows` | sesión | `community-social` |
+| `GET /community/bookmarks` | sesión | `community-social` |
+| `GET /community/blocks` | sesión | `community-social` |
+| `GET /community/feed` | sesión | `community-timeline` |
+| `GET /community/notifications` | sesión | `community-timeline` |
+| `GET /community/topics` | sesión | `community-topics` |
+| `POST /internal/community/verification/badges` | SECURITY_ADMIN | `community-verification` |
+| `POST /internal/community/verification/badges/:targetId/revoke` | SECURITY_ADMIN | `community-verification` |
+| `POST /internal/community/verification/badges/expire-sweep` | SYSTEM, SECURITY_ADMIN | `community-verification` |
+| `POST /patients/me/reviews` | PATIENT | `patient-reviews` |
+
+## Endpoints por caso de uso (subconjunto)
+
+Los UC-19-01..15 y las altas de bootstrap. El módulo tiene más rutas (lecturas de timeline, grupos, encuestas, moderación, reseñas, verificación y estadísticas de perfil, entre otras); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
 
 | UC        | Método y ruta                                              | Permiso                    | Descripción                                                                  |
 | --------- | ---------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
@@ -85,6 +195,10 @@ y su `nextCursor` es siempre `null`.
 `service_reviews` + `review_dimension_scores`, `polls` + `poll_options`/`poll_votes`,
 `groups` + `group_members`, `feed_items`.
 
+El módulo mapea **40 entidades** (`find src/modules/community -name '*.entity.ts' | wc -l`); las 12 no listadas arriba son `chat_auto_replies`, `comment_media`, `feedback_tickets` (+ `feedback_ticket_comments`, `feedback_ticket_events`), `post_shares`, `prestige_awards`, `prestige_scores`, `review_responses`, `social_notifications`, `topics` y `verified_badges`.
+
+**Tiempo real:** `gateways/community-messaging.gateway.ts` es un gateway socket.io (`@WebSocketGateway()`) con los mensajes `join:inbox`, `join:conversation`, `leave:conversation`, `typing` y `presence:ping`; el CORS lo impone `CorsIoAdapter` en `main.ts`.
+
 ## Reglas de negocio
 
 - Toda FK `*_profile_id` referencia `community.public_profiles`; el bootstrap de
@@ -133,7 +247,7 @@ un 403 ya confirmaría que ese perfil publicó algo.
 ## Worker
 
 `worker-community` (`src/worker-community.ts` → `src/worker/jobs/community/`)
-corre el job `feed-fanout` cada 60 s: `GET /internal/community/feed/pending`
+corre tres jobs (`ls src/worker/jobs/community`): `badge-expiry` (cada hora, `EXPIRY_INTERVAL_MS = 3_600_000`: barre sellos vencidos por su propia fecha), `search-indexer` (cada 60 s) y `feed-fanout` (cada 60 s). Lo que sigue describe `feed-fanout`: `GET /internal/community/feed/pending`
 descubre el lote y `POST …/rebuild` reparte cada publicación. El reparto es
 idempotente en el servidor, así que un tick solapado o un reintento no duplican
 entradas.

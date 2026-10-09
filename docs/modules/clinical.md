@@ -16,9 +16,64 @@
 # Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics
 
 Registro clínico nuclear del paciente, órdenes y logística del encuentro. Cubre
-los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`.
+los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`; además el módulo expone lecturas, sellado de encuentros, recetas en PDF y políticas de firma (todas las rutas en [Rutas HTTP](#rutas-http-y-alcance-medido)).
 
-## Endpoints (UC → ruta)
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/clinical -name '*.controller.ts' | wc -l
+  find src/modules/clinical -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/clinical -name '*.entity.ts' | wc -l
+  find src/modules/clinical -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **9 controllers, 39 rutas HTTP, 23 entidades y 17 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`, `AuthzModule`, `TerminologyModule`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /clinical/care-episodes` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/check-in` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/:id/close` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `GET /clinical/encounters/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-encounters` |
+| `GET /clinical/me/medical-aspects` | sesión | `clinical-medical-aspects` |
+| `PUT /clinical/me/medical-aspects` | sesión | `clinical-medical-aspects` |
+| `POST /clinical/observations` | CLINICIAN, PRACTITIONER | `clinical-observations` |
+| `PATCH /clinical/observations/:id/amend` | CLINICIAN, PRACTITIONER | `clinical-observations` |
+| `POST /clinical/service-requests/duplicate-check` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/service-requests` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/diagnostic-reports` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/diagnostic-reports/:id/release` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/prescription-signature-policies` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `GET /clinical/prescription-signature-policies` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `POST /clinical/prescription-signature-policies/:id/deactivate` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `GET /public/prescriptions/:id/verify` | pública | `clinical-prescriptions-public` |
+| `GET /clinical/prescriptions/:id/pdf` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-prescriptions` |
+| `GET /clinical/patients/:patientProfileId/summary` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
+| `POST /clinical/conditions` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/change-status` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/verification` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/allergy-intolerances` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/allergy-intolerances/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `GET /clinical/allergy-intolerances/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records` |
+| `POST /clinical/medication-requests` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `GET /clinical/medication-requests/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records` |
+| `POST /clinical/medication-records` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/edit` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/sign` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/issue` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/invalidate` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/replace` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/renew` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/procedures` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/procedures/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/immunizations` | CLINICIAN, PRACTITIONER | `clinical-records` |
+
+## Endpoints por caso de uso (subconjunto: UC-08-01..14 y adiciones puntuales)
 
 | UC | Endpoint | Método | Descripción |
 |----|----------|--------|-------------|
@@ -47,12 +102,15 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
 
 ## Entidades (schema `clinical`)
 
+23 entidades (`find src/modules/clinical -name '*.entity.ts' | wc -l`):
 `care_episodes`, `encounters` (+ `encounter_participants`, `encounter_locations`),
 `observations` (+ `observation_components`, `observation_reference_ranges`,
 `observation_performers`, `observation_notes`), `service_requests`,
 `diagnostic_reports`, `conditions`, `allergy_intolerances` (+ `allergy_reactions`),
 `medication_requests`, `medication_records`, `procedures`, `immunizations`,
-`appointments` (solo referenciada por el check-in).
+`family_member_history`, `social_history`, `patient_reported_health_statements`,
+`prescription_signature_policies` y `appointments` (solo referenciada por el
+check-in).
 
 ## Reglas de negocio
 
@@ -94,7 +152,7 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
 
 ## Permisos y auth
 
-Guard JWT global: todos los endpoints exigen bearer token (401 sin auth). Son
+Guard JWT global: todos los endpoints exigen bearer token (401 sin auth) **salvo** `GET /public/prescriptions/:id/verify` (`@Public()`, verificación pública de recetas). Son
 operaciones de actores clínicos (clínico, enfermería, recepción); no se restringen
 a `SECURITY_ADMIN`. Parámetros de ruta validados con `ParseUUIDPipe` (400 si el id
 es malformado). El actor (`@CurrentUser()`) alimenta `created_by`/`recorded_by`.
