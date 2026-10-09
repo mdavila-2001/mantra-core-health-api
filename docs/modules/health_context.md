@@ -20,9 +20,6 @@ su nivel de confianza, programaciones, corridas idempotentes, observaciones inmu
 de país versionados con hechos trazables a la evidencia que los respalda, revisión de calidad,
 publicación y resolución para consumo.
 
-<<<<<<< HEAD
-## Casos de uso cubiertos (12)
-=======
 ## Rutas HTTP y alcance (medido)
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
@@ -56,8 +53,8 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `context_agents`, `con
 | `POST /health-context/versions/:id/supersede` | CONTEXT_CURATOR, PLATFORM_ADMIN | `health-context` |
 | `GET /health-context/contexts/resolve` | CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN | `health-context` |
 
-## API y permisos
->>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
+
+## Casos de uso cubiertos (12)
 
 | UC | Endpoint | Descripción |
 | --- | --- | --- |

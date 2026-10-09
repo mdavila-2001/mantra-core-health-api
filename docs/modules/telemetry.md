@@ -17,9 +17,6 @@
 
 Agrupa los componentes relacionados con **telemetry** y mantiene cohesionada esta responsabilidad del sistema.
 
-<<<<<<< HEAD
-## Contenido
-=======
 ## Rutas HTTP y alcance (medido)
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
@@ -61,8 +58,8 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `activity_event_schema
 | `POST /telemetry/disclosure-versions` | SECURITY_ADMIN | `telemetry-governance` |
 | `POST /telemetry/funnels` | SECURITY_ADMIN | `telemetry-governance` |
 
-## Estructura
->>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
+
+## Contenido
 
 ### Subcarpetas
 

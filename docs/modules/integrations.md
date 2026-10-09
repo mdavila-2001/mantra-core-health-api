@@ -17,9 +17,6 @@
 
 Agrupa los componentes relacionados con **integrations** y mantiene cohesionada esta responsabilidad del sistema.
 
-<<<<<<< HEAD
-## Contenido
-=======
 ## Rutas HTTP y alcance (medido)
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
@@ -55,8 +52,8 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `external_providers`, 
 | `POST /integrations/providers/:id/webhook-subscriptions` | SECURITY_ADMIN | `integrations-providers` |
 | `POST /integrations/webhooks/inbound` | pública | `integrations-webhooks` |
 
-## Rutas
->>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
+
+## Contenido
 
 ### Subcarpetas
 

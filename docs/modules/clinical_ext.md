@@ -23,9 +23,6 @@ inmunizaciones y telesalud. Sigue la forma de los módulos de referencia
 como columnas uuid planas (flush del padre antes de los hijos), auditoría con
 `createdBy`/`touch`, y `*_concept_id` tomados de `clinical_ext.concepts.ts`.
 
-<<<<<<< HEAD
-## Endpoints (UC → ruta)
-=======
 ## Rutas HTTP y alcance (medido)
 
 <!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
@@ -73,8 +70,8 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `care_gaps`, `care_tea
 | `PATCH /virtual-encounters/:id/join` | CLINICIAN, PRACTITIONER, PATIENT | `virtual-encounters` |
 | `PATCH /virtual-encounters/:id/end` | CLINICIAN, PRACTITIONER | `virtual-encounters` |
 
-## Autenticación y autorización actuales
->>>>>>> 8a44a3cc (docs(modules): rutas HTTP, entidades e imports medidos en los 62 READMEs restantes)
+
+## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Descripción | Permiso |
 | --- | --- | --- | --- |

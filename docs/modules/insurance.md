@@ -28,7 +28,7 @@ Entidades (31, `find src/modules/insurance -name '*.entity.ts' | wc -l`): `insur
   find src/modules/insurance -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **19 controllers, 61 rutas HTTP, 31 entidad y 24 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **18 controllers, 60 rutas HTTP, 31 entidades y 23 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -86,7 +86,6 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `POST /insurance/patients/conversation` | sesión | `insurer-patients` |
 | `GET /insurance/received-claims` | sesión | `insurer-received-claims` |
 | `POST /insurance/received-claims/:id/decision` | sesión | `insurer-received-claims` |
-| `GET /insurance/my-claims` | sesión | `my-claims` |
 | `GET /practitioners/:profileId/insurance-networks` | SECURITY_ADMIN,
     SCHEDULING_ADMIN,
     SCHEDULING_AGENT,

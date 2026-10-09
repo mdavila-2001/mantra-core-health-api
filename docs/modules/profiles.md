@@ -35,7 +35,7 @@ and Pino logging.
   find src/modules/profiles -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **5 controllers, 57 rutas HTTP, 19 entidades y 11 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **4 controllers, 55 rutas HTTP, 19 entidades y 10 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -43,8 +43,6 @@ Importa (`profiles.module.ts`): `AuthzModule`, `CommonModule`, `TerminologyModul
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
-| `GET /profiles/practitioners/me/signature-assets` | sesión | `practitioner-signature-assets` |
-| `PUT /profiles/practitioners/me/signature-assets` | sesión | `practitioner-signature-assets` |
 | `POST /profiles/patients/me/dependent-requests` | sesión | `profiles-dependent-requests` |
 | `GET /profiles/patients/me/dependent-candidates` | sesión | `profiles-dependent-requests` |
 | `GET /profiles/patients/me/dependent-requests/incoming` | sesión | `profiles-dependent-requests` |
