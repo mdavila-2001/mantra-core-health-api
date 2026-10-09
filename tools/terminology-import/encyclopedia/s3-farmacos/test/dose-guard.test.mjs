@@ -27,6 +27,8 @@ const DOSE_SAMPLES = [
   'Puede ser necesario ajustar (ver sección 4.2).',
   'Sobredosis accidental.',
   '250mg/5ml suspensión.',
+  'Producto fosfocálcico (Ca x P) superior a 70 mg2 /dl2',
+  'Bupropion\n150\n100 cada 12h\n150\n600 cada 12h',
 ];
 
 const CLEAN_SAMPLES = [
@@ -94,4 +96,15 @@ test('sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y e
 
 test('splitSentences no corta abreviaturas en minúscula ni números de sección', () => {
   assert.deepEqual(splitSentences('Antecedentes (p. ej. anafilaxia) a otro agente (ver secciones 4.4 y 5.1). Segunda.'), ['Antecedentes (p. ej. anafilaxia) a otro agente (ver secciones 4.4 y 5.1).', 'Segunda.']);
+});
+
+test('cleanLines retira una referencia a la 4.2 partida entre dos párrafos', () => {
+  // Frases SINTÉTICAS: reproducen la forma de las fichas convertidas desde PDF.
+  const lines = htmlToLines(
+    '<p>Evitar el uso en insuficiencia renal grave (ver sección</p><p>4.2).</p><p>Otra frase sin relación alguna.</p>',
+  );
+  const { lines: kept, dropped } = cleanLines(lines);
+  assert.deepEqual(kept, ['Otra frase sin relación alguna.']);
+  assert.equal(dropped.length, 2);
+  for (const line of kept) assert.equal(containsDose(line), false);
 });

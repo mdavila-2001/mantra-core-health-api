@@ -24,11 +24,11 @@ const UNIT_WORDS = [
 /** id → expresión. El id viaja a `rejected.ndjson` como motivo. */
 export const DOSE_PATTERNS = Object.freeze([
   // número + unidad: «500 mg», «0,5 mcg», «30 ml/min», «10 %», «1 comprimido»
-  ['quantity-unit', new RegExp(`(?<![\\p{L}\\d])\\d[\\d.,]*(?:\\s\\d{3})*\\s*(?:${UNIT_WORDS})(?![\\p{L}\\d])`, 'iu')],
+  ['quantity-unit', new RegExp(`(?<![\\p{L}\\d])\\d[\\d.,]*(?:\\s\\d{3})*\\s*(?:${UNIT_WORDS})(?![\\p{L}])`, 'iu')],
   // cantidad escrita con letras: «un comprimido», «dos gotas», «medio vial»
   ['spelled-quantity', /\b(?:un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|doce|medio|media)\s+(?:comprimidos?|c[aá]psulas?|ampollas?|viales?|sobres?|gotas?|cucharad\w+|inhalaciones?|puffs?|aplicaciones?|supositorios?|parches?|gramos?|miligramos?|microgramos?|mililitros?|litros?|unidades)(?![\p{L}])/iu],
   ['percent', /\d\s*%|\bpor\s+ciento\b/iu],
-  ['every-n-time', /\bcada\s+(?:\d+|una|un|dos|tres|cuatro|cinco|seis|ocho|doce|veinticuatro|cuarenta y ocho)\s+(?:horas?|h|d[ií]as?|semanas?|meses|minutos?)(?![\p{L}])/iu],
+  ['every-n-time', /\bcada\s+(?:\d+|una|un|dos|tres|cuatro|cinco|seis|ocho|doce|veinticuatro|cuarenta y ocho)\s*(?:horas?|h|d[ií]as?|semanas?|meses|minutos?)(?![\p{L}])/iu],
   ['every-period', /\bcada\s+(?:hora|d[ií]a|semana|ma[ñn]ana|noche|comida)(?![\p{L}])/iu],
   ['times-per-period', /\b(?:\d+|una|dos|tres|cuatro|cinco|seis)\s+veces\s+(?:al|por|a\s+la|cada)\s+(?:d[ií]a|semana|hora|noche)/iu],
   ['once-per-period', /\buna\s+vez\s+(?:al|por|a\s+la|cada)\s+(?:d[ií]a|semana|hora|noche)/iu],

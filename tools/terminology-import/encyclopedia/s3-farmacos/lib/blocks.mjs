@@ -63,20 +63,42 @@ export function splitSentences(line) {
  *   quedan vacías desaparecen). `dropped`: oraciones retiradas por la guardia de dosis.
  */
 export function cleanLines(htmlLines) {
+  const judged = htmlLines.map((line) =>
+    splitSentences(line).map((sentence) => ({ sentence, reason: doseMatch(sentence) })),
+  );
+  retireSentencesSplitAcrossParagraphs(judged);
   const lines = [];
   const dropped = [];
   let sentenceCount = 0;
-  for (const line of htmlLines) {
+  for (const sentences of judged) {
     const kept = [];
-    for (const sentence of splitSentences(line)) {
+    for (const { sentence, reason } of sentences) {
       sentenceCount++;
-      const reason = doseMatch(sentence);
       if (reason) dropped.push({ sentence, reason });
       else kept.push(sentence);
     }
     if (kept.length > 0) lines.push(kept.join(' '));
   }
   return { lines, dropped, sentenceCount };
+}
+
+/**
+ * Las fichas convertidas desde PDF parten una oración a media frase entre dos párrafos
+ * («… (ver sección» / «4.2).»): cada mitad pasa sola la guardia y juntas son una referencia a
+ * la posología. Si el último fragmento de un párrafo y el primero del siguiente suman un
+ * patrón de dosis que ninguno tiene por separado, se retiran los dos.
+ */
+function retireSentencesSplitAcrossParagraphs(judged) {
+  for (let i = 0; i + 1 < judged.length; i++) {
+    const tail = judged[i].at(-1);
+    const head = judged[i + 1][0];
+    if (!tail || !head || tail.reason || head.reason) continue;
+    const joined = doseMatch(`${tail.sentence} ${head.sentence}`);
+    if (joined) {
+      tail.reason = `${joined}:split-across-paragraphs`;
+      head.reason = tail.reason;
+    }
+  }
 }
 
 /**

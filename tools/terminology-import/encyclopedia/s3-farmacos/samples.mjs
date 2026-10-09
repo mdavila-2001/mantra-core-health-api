@@ -72,6 +72,9 @@ export async function pick(articlesPath) {
 
 const norm = (s) => squash(s.replace(/\s+/g, ' ')).normalize('NFC');
 
+// Las etiquetas de clase de Wikidata se unen con «; » en el artículo y en la página van separadas.
+const pieces = (c) => (c.kind === 'pharmacologic_class' && c.source === 'wikidata' ? c.sentence.split('; ') : [c.sentence]);
+
 async function verify(candidates) {
   const client = new PoliteClient({ minIntervalMs: 1000 });
   const results = [];
@@ -83,10 +86,12 @@ async function verify(candidates) {
       const { body } = await client.request(checkedUrl, { accept: 'text/plain' });
       pageText = body.toString('utf8');
     } else {
-      const { body } = await client.request(c.sourceUrl, { accept: 'text/html' });
+      // `uselang=es`: sin él Wikidata pinta descripción y etiquetas en inglés.
+      checkedUrl = `${c.sourceUrl}?uselang=es`;
+      const { body } = await client.request(checkedUrl, { accept: 'text/html' });
       pageText = body.toString('utf8').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&');
     }
-    results.push({ ...c, checkedUrl, verbatimInSource: norm(pageText).includes(norm(c.sentence)) });
+    results.push({ ...c, checkedUrl, verbatimInSource: pieces(c).every((piece) => norm(pageText).includes(norm(piece))) });
   }
   return { results, http: client.stats };
 }
