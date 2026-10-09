@@ -191,7 +191,7 @@ completa en `CARRIL_REPORT-marcelo.md`.
 - La API está organizada en 57 módulos NestJS y expone 852 endpoints detectados por el analizador
   ALOVIDA (cifra anterior a las 17 rutas de lectura de Community del 2026-08-13; el
   arranque real mapea **952**).
-- La trazabilidad canónica y las remediaciones verificadas viven en `ALOVIDA-TRAZABILIDAD.md`.
+- La trazabilidad canónica y las remediaciones verificadas viven en `docs/governance/ALOVIDA-TRAZABILIDAD.md`.
 - El informe estático actual registra 0 endpoints mutantes sin política explícita y 0 entidades
   huérfanas; queda 1 acceso directo entre repositorios de dominios distintos, justificado
   (`billing/repositories/practices-lookup.repository.ts` lee `practice.practices` de solo lectura
@@ -313,7 +313,7 @@ Las cifras anteriores son una fotografía. Regenerar `ALOVIDA-COBERTURA.md` con
   módulos 55/56/57 reconectados a `AppModule` — ver detalle arriba.
 
 El detalle comprobable de cada punto, con archivos y pruebas, está en
-`ALOVIDA-TRAZABILIDAD.md`; las reglas propias de cada dominio están en
+`docs/governance/ALOVIDA-TRAZABILIDAD.md`; las reglas propias de cada dominio están en
 `src/modules/<modulo>/README.md`.
 
 ## Pendientes priorizados
@@ -469,7 +469,7 @@ por producto**, y la anotación queda acá para que lo sea a la vista y no por o
 
 ### P2 · Cerrar decisiones funcionales parametrizadas
 
-Continúan abiertas las decisiones marcadas con 🔵 en `ALOVIDA-TRAZABILIDAD.md`, incluyendo crédito
+Continúan abiertas las decisiones marcadas con 🔵 en `docs/governance/ALOVIDA-TRAZABILIDAD.md`, incluyendo crédito
 publicitario y valores de negocio configurables. Confirmarlas con producto/compliance y convertir
 la decisión en configuración validada, prueba y documentación del módulo.
 
@@ -489,10 +489,10 @@ Una corrección se considera terminada cuando:
 | --- | --- | --- |
 | `README.md` | Arranque, arquitectura y operación | Manual, cuando cambia el proyecto |
 | `ESTADO-Y-PENDIENTES.md` | Foto vigente y backlog transversal | Manual; reemplaza planes fechados |
-| `ALOVIDA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
+| `docs/governance/ALOVIDA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
 | `ALOVIDA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn alovida:coverage` |
 | `docs/frontend/CATALOGO-FLUJOS-VERIFICADOS.md` | Cuerpos reales para el frontend | Generado con `exercise-front-flows.mjs` (token de administrador) |
-| Cobertura por actor clínico (en `ALOVIDA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn alovida:personas` (token de cada actor) |
+| Cobertura por actor clínico (en `docs/governance/ALOVIDA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn alovida:personas` (token de cada actor) |
 | `src/modules/*/README.md` | Contrato por dominio | Manual, junto al módulo |
 
 No crear documentos de sesión en la raíz. Si una investigación no se convierte en una decisión
