@@ -144,7 +144,7 @@ function build(
 
 const ACTOR_ADMIN: any = { id: 'u1', roles: ['SECURITY_ADMIN'] };
 
-function periodo(
+function period(
   id: string,
   code: string,
   startDate: Date,
@@ -167,20 +167,20 @@ describe('AccountingReadService', () => {
       const { service, fiscalRepo } = build();
       const hoy = new Date();
       hoy.setUTCHours(0, 0, 0, 0);
-      const viejo = {
+      const old = {
         id: 'fy-viejo',
         code: '2020',
         startDate: new Date('2020-01-01'),
         endDate: new Date('2020-12-31'),
       };
-      const vigente = {
+      const current = {
         id: 'fy-vigente',
         code: '2026',
         startDate: new Date(hoy.getFullYear(), 0, 1),
         endDate: new Date(hoy.getFullYear(), 11, 31),
       };
-      fiscalRepo.findYearsByPractice.mockResolvedValue([vigente, viejo]);
-      const abierto = periodo(
+      fiscalRepo.findYearsByPractice.mockResolvedValue([current, old]);
+      const abierto = period(
         'p1',
         '2026-01',
         new Date(hoy.getFullYear(), 0, 1),
@@ -200,22 +200,22 @@ describe('AccountingReadService', () => {
 
     it('sin período abierto, cae al último período por fecha', async () => {
       const { service, fiscalRepo } = build();
-      const anio = {
+      const year = {
         id: 'fy1',
         code: '2026',
         startDate: new Date('2026-01-01'),
         endDate: new Date('2026-12-31'),
       };
-      fiscalRepo.findYearsByPractice.mockResolvedValue([anio]);
+      fiscalRepo.findYearsByPractice.mockResolvedValue([year]);
       fiscalRepo.findPeriodsByYear.mockResolvedValue([
-        periodo(
+        period(
           'p1',
           '2026-01',
           new Date('2026-01-01'),
           new Date('2026-01-31'),
           ACCT.PERIOD_LOCKED,
         ),
-        periodo(
+        period(
           'p2',
           '2026-02',
           new Date('2026-02-01'),
@@ -241,7 +241,7 @@ describe('AccountingReadService', () => {
         },
       ]);
       fiscalRepo.findPeriodsByYear.mockResolvedValue([
-        periodo(
+        period(
           'p1',
           '2026-01',
           new Date('2026-01-01'),
@@ -276,16 +276,16 @@ describe('AccountingReadService', () => {
   describe('openItems (D-7)', () => {
     it('excluye partidas con saldo cero, filtra por lado, y arma los cinco tramos', async () => {
       const { service, accountsRepo, subledgerRepo } = build();
-      const cuenta = {
+      const account = {
         id: 'acc1',
         code: '1.1.01',
         name: 'Clientes',
         normalBalanceConceptId: ACCT.DIRECTION_DEBIT,
       };
-      accountsRepo.findByPractice.mockResolvedValue([cuenta]);
+      accountsRepo.findByPractice.mockResolvedValue([account]);
 
       const hoy = new Date();
-      const vencidaHace120 = new Date(hoy.getTime() - 120 * 86400000);
+      const overdue120DaysAgo = new Date(hoy.getTime() - 120 * 86400000);
 
       subledgerRepo.findOpenItemsByReconciliationAccounts.mockResolvedValue([
         {
@@ -311,7 +311,7 @@ describe('AccountingReadService', () => {
             documentTypeConceptId: ACCT.DOC_TYPE_INVOICE,
             originalAmount: '500.00',
             outstandingAmount: '500.00',
-            dueDate: vencidaHace120,
+            dueDate: overdue120DaysAgo,
             createdAt: hoy,
           },
           subledger: {
@@ -521,14 +521,14 @@ describe('AccountingReadService', () => {
 
       const result = await service.fixedAssets(PRACTICE, ACTOR_ADMIN);
 
-      const activo = result.items.find((i) => i.id === 'a1');
-      expect(activo?.monthlyDepreciation).toBe('100.00');
-      expect(activo?.depreciable).toBe(true);
+      const active = result.items.find((i) => i.id === 'a1');
+      expect(active?.monthlyDepreciation).toBe('100.00');
+      expect(active?.depreciable).toBe(true);
 
-      const retirado = result.items.find((i) => i.id === 'a2');
-      expect(retirado?.status).toBe('RETIRED');
-      expect(retirado?.depreciable).toBe(false);
-      expect(retirado?.monthlyDepreciation).toBe('0.00');
+      const withdrawn = result.items.find((i) => i.id === 'a2');
+      expect(withdrawn?.status).toBe('RETIRED');
+      expect(withdrawn?.depreciable).toBe(false);
+      expect(withdrawn?.monthlyDepreciation).toBe('0.00');
 
       expect(result.monthlyCharge).toBe('100.00');
     });
@@ -585,15 +585,15 @@ describe('AccountingReadService', () => {
       const result = await service.accrualObjects(PRACTICE, ACTOR_ADMIN);
 
       expect(result.items).toHaveLength(1);
-      const objeto = result.items[0];
-      expect(objeto.periods).toBe(3);
-      expect(objeto.postedPeriods).toBe(1);
-      expect(objeto.remainingPeriods).toBe(2);
-      expect(objeto.periodAmount).toBe('100.00');
-      expect(objeto.recognizedAmount).toBe('100.00');
-      expect(objeto.pendingAmount).toBe('200.00');
-      expect(objeto.completed).toBe(false);
-      expect(objeto.kind).toBe('EXPENSE');
+      const obj = result.items[0];
+      expect(obj.periods).toBe(3);
+      expect(obj.postedPeriods).toBe(1);
+      expect(obj.remainingPeriods).toBe(2);
+      expect(obj.periodAmount).toBe('100.00');
+      expect(obj.recognizedAmount).toBe('100.00');
+      expect(obj.pendingAmount).toBe('200.00');
+      expect(obj.completed).toBe(false);
+      expect(obj.kind).toBe('EXPENSE');
       expect(result.pendingTotal).toBe('200.00');
       expect(result.periodCharge).toBe('100.00');
     });
