@@ -13,7 +13,7 @@ import { PRAC } from '../practice.concepts';
 import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
 const TENANT = 'tenant-1';
-const OTRO_TENANT = 'tenant-2';
+const OTHER_TENANT = 'tenant-2';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -151,7 +151,7 @@ describe('PractitionerSitesService', () => {
       d.sitesRepo.findById.mockResolvedValue(sede());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
-        tenantId: OTRO_TENANT,
+        tenantId: OTHER_TENANT,
       });
 
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
@@ -240,7 +240,7 @@ describe('PractitionerSitesService', () => {
       d.sitesRepo.findById.mockResolvedValue(sede());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
-        tenantId: OTRO_TENANT,
+        tenantId: OTHER_TENANT,
       });
 
       await expect(d.service.getSite('site-1', TENANT)).rejects.toBeInstanceOf(
@@ -402,7 +402,7 @@ describe('PractitionerSitesService', () => {
   describe('updateOwnSite (P32-b)', () => {
     const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
 
-    function conConsultorioPropio(d: ReturnType<typeof build>, site: any) {
+    function withOwnOffice(d: ReturnType<typeof build>, site: any) {
       d.sitesRepo.findById.mockResolvedValue(site);
       d.practicesRepo.findOwnOffice.mockResolvedValue({ id: site.practiceId });
       d.practicesRepo.findById.mockResolvedValue({
@@ -416,7 +416,7 @@ describe('PractitionerSitesService', () => {
     it('changes only the fields present in the body', async () => {
       const d = build();
       const site = sede({ id: 'site-own-1', practiceId: 'pr-own-1' });
-      conConsultorioPropio(d, site);
+      withOwnOffice(d, site);
 
       const res = await runWithTenant(TENANT, () =>
         d.service.updateOwnSite(actor, 'site-own-1', {
@@ -448,9 +448,9 @@ describe('PractitionerSitesService', () => {
         practiceId: 'pr-own-1',
         addressId: 'addr-vieja',
       });
-      conConsultorioPropio(d, site);
-      const vigente = { id: 'addr-vieja' };
-      d.fork.findOne.mockResolvedValue(vigente);
+      withOwnOffice(d, site);
+      const current = { id: 'addr-vieja' };
+      d.fork.findOne.mockResolvedValue(current);
       d.addressesRepo.create.mockReturnValue({ id: 'addr-nueva' });
 
       await runWithTenant(TENANT, () =>
@@ -460,7 +460,7 @@ describe('PractitionerSitesService', () => {
       );
 
       expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
-        vigente,
+        current,
         expect.any(Date),
         actor.id,
       );
