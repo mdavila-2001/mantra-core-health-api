@@ -8,7 +8,7 @@ import {
   SEED,
   type AuthenticatedUser,
 } from '../../../common';
-import { sumarDecimales } from '../../../common/money/decimal-money';
+import { addDecimals } from '../../../common/money/decimal-money';
 import { CatalogRepository } from '../repositories';
 import { InsurancePortabilityRepository } from '../repositories/insurance-portability.repository';
 import type {
@@ -807,13 +807,13 @@ export class InsurancePortabilityService {
       deniedCount,
       pendingCount,
       billedAmount:
-        sumarDecimales(filtered.map((claim) => claim.billedTotal)) ?? '0.00',
+        addDecimals(filtered.map((claim) => claim.billedTotal)) ?? '0.00',
       coveredAmount:
-        sumarDecimales(filtered.map((claim) => claim.approvedTotal)) ?? '0.00',
+        addDecimals(filtered.map((claim) => claim.approvedTotal)) ?? '0.00',
       patientCopayAmount:
-        sumarDecimales(filtered.map((claim) => claim.patientTotal)) ?? '0.00',
+        addDecimals(filtered.map((claim) => claim.patientTotal)) ?? '0.00',
       deniedAmount:
-        sumarDecimales(filtered.map((claim) => claim.deniedTotal)) ?? '0.00',
+        addDecimals(filtered.map((claim) => claim.deniedTotal)) ?? '0.00',
       firstClaimAt: dates[0] ?? null,
       lastClaimAt: dates[dates.length - 1] ?? null,
       coveredMonths: this.coveredMonths(policies, sinceIso, now),
@@ -865,7 +865,7 @@ export class InsurancePortabilityService {
         (policy.currencyCode === currencyCode || currencyCode === null),
     );
     if (premiums.length === 0) return null;
-    const monthlyPremium = sumarDecimales(
+    const monthlyPremium = addDecimals(
       premiums.map((policy) => policy.monthlyPremiumAmount),
     );
     if (!monthlyPremium) return null;
@@ -894,10 +894,10 @@ export class InsurancePortabilityService {
         year,
         claimsCount: bucket.claims.length,
         billedAmount:
-          sumarDecimales(bucket.claims.map((claim) => claim.billedTotal)) ??
+          addDecimals(bucket.claims.map((claim) => claim.billedTotal)) ??
           '0.00',
         coveredAmount:
-          sumarDecimales(bucket.claims.map((claim) => claim.approvedTotal)) ??
+          addDecimals(bucket.claims.map((claim) => claim.approvedTotal)) ??
           '0.00',
       }));
   }
