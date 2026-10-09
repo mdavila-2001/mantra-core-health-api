@@ -9,31 +9,31 @@ import {
 } from '../dto';
 
 /** Rutas con error, aplanando `@ValidateNested` (p. ej. `partners[0].role`). */
-function rutasConError(
-  errores: readonly ValidationError[],
-  prefijo = '',
+function rutasWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
 ): string[] {
   const rutas: string[] = [];
-  for (const error of errores) {
-    const ruta = prefijo ? `${prefijo}.${error.property}` : error.property;
+  for (const error of errors) {
+    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasConError(error.children, ruta));
+      rutas.push(...rutasWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
 }
 
-async function erroresDe<T extends object>(
+async function errors<T extends object>(
   cls: new () => T,
-  alta: Record<string, unknown>,
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(cls, alta);
+  const dto = plainToInstance(cls, registration);
   const errores = await validate(dto as object, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasConError(errores);
+  return rutasWithError(errores);
 }
 
 const VALID_PARTNER = {
@@ -65,7 +65,7 @@ function validCreate(overrides: Record<string, unknown> = {}) {
  */
 describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () => {
   it('un alta válida no tiene errores', async () => {
-    expect(await erroresDe(CreateInsuranceCampaignDto, validCreate())).toEqual(
+    expect(await errors(CreateInsuranceCampaignDto, validCreate())).toEqual(
       [],
     );
   });
@@ -76,7 +76,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
     ['status', 'ACTIVE'],
     ['createdByUserId', 'user-x'],
   ])('rechaza el campo no autorizado `%s`', async (campo, valor) => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       [campo]: valor,
     });
@@ -84,7 +84,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza copayBonusPercentage mayor a 100', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       copayBonusPercentage: 101,
     });
@@ -92,7 +92,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza copayBonusPercentage con más de 2 decimales', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       copayBonusPercentage: 99.999,
     });
@@ -100,7 +100,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza el código en minúsculas', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       code: 'cmp-cardio-2026',
     });
@@ -108,7 +108,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza una fecha fuera de AAAA-MM-DD', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       validFrom: '25/09/2026',
     });
@@ -116,7 +116,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza cero aliados', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       partners: [],
     });
@@ -124,7 +124,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza más de 20 aliados', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       partners: Array.from({ length: 21 }, () => VALID_PARTNER),
     });
@@ -132,7 +132,7 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza un rol de aliado que no está en el catálogo', async () => {
-    const errores = await erroresDe(CreateInsuranceCampaignDto, {
+    const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
       partners: [{ ...VALID_PARTNER, role: 'INVESTOR' }],
     });
@@ -140,14 +140,14 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('rechaza `DRAFT` como destino del cambio de estado (no es un target válido)', async () => {
-    const errores = await erroresDe(UpdateInsuranceCampaignStatusDto, {
+    const errores = await errors(UpdateInsuranceCampaignStatusDto, {
       status: 'DRAFT',
     });
     expect(errores).toContain('status');
   });
 
   it('rechaza `code` en la edición: es inmutable, no está en el DTO', async () => {
-    const errores = await erroresDe(UpdateInsuranceCampaignDto, {
+    const errores = await errors(UpdateInsuranceCampaignDto, {
       code: 'CMP-NUEVO',
       title: 'Igual válido',
     });
@@ -155,28 +155,28 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('una edición vacía (sin ningún campo) no tiene errores: todo es opcional', async () => {
-    expect(await erroresDe(UpdateInsuranceCampaignDto, {})).toEqual([]);
+    expect(await errors(UpdateInsuranceCampaignDto, {})).toEqual([]);
   });
 
   it.each([0, 101])('rechaza limit=%i en el listado', async (limit) => {
-    const errores = await erroresDe(InsuranceCampaignListQueryDto, { limit });
+    const errores = await errors(InsuranceCampaignListQueryDto, { limit });
     expect(errores).toContain('limit');
   });
 
   it('acepta limit dentro de 1..100', async () => {
     expect(
-      await erroresDe(InsuranceCampaignListQueryDto, { limit: 50 }),
+      await errors(InsuranceCampaignListQueryDto, { limit: 50 }),
     ).toEqual([]);
   });
 
   it('rechaza un carrierId que no es uuid en la consulta pública', async () => {
-    const errores = await erroresDe(ActiveCampaignsQueryDto, {
+    const errores = await errors(ActiveCampaignsQueryDto, {
       carrierId: 'no-es-un-uuid',
     });
     expect(errores).toContain('carrierId');
   });
 
   it('la consulta pública sin filtro no tiene errores', async () => {
-    expect(await erroresDe(ActiveCampaignsQueryDto, {})).toEqual([]);
+    expect(await errors(ActiveCampaignsQueryDto, {})).toEqual([]);
   });
 });

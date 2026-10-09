@@ -4,7 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { decodeKeysetCursor, encodeKeysetCursor } from '../../../common';
 import type { ServiceRequests } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
-import { CATEGORIAS_CON_ESPECIMEN } from '../diagnostics.concepts';
+import { CATEGORIES_WITH_SPECIMEN } from '../diagnostics.concepts';
 import {
   LabReceptionRepository,
   SpecimensRepository,
@@ -109,7 +109,7 @@ export class DiagnosticsReceptionService {
       const batch = await this.receptionRepo.findInboxCandidates(
         em,
         tenantId,
-        CATEGORIAS_CON_ESPECIMEN,
+        CATEGORIES_WITH_SPECIMEN,
         CLIN.SERVICE_REQUEST_ACTIVE,
         after,
         chunkSize,

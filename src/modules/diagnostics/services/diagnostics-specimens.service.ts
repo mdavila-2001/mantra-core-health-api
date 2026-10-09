@@ -317,11 +317,11 @@ export class DiagnosticsSpecimensService {
       this.repo.findContainersBySpecimenIds(em, specimenIds),
       this.repo.findCustodyEventsBySpecimenIds(em, specimenIds),
     ]);
-    const specimenPorId = new Map(specimenes.map((s) => [s.id, s]));
+    const specimenById = new Map(specimenes.map((s) => [s.id, s]));
 
     const specimens: AccessionSpecimenDetailDto[] = [];
     for (const item of items) {
-      const specimen = specimenPorId.get(item.specimenId);
+      const specimen = specimenById.get(item.specimenId);
       if (!specimen) continue; // No debería pasar: FK íntegra, defensivo.
       specimens.push({
         accessionSpecimenId: item.id,

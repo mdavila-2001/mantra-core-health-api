@@ -62,11 +62,11 @@ describe('PracticeTenantLookupService', () => {
 
   describe('isOwnOffice (v4.2.40)', () => {
     /** Una práctica con el tipo y el administrador que se le indiquen. */
-    function conPractica(practica: Record<string, unknown> | null) {
+    function withPractice(practice: Record<string, unknown> | null) {
       const em = { fork: jest.fn().mockReturnValue({}) };
       const findById = jest
         .fn<(...args: unknown[]) => Promise<unknown>>()
-        .mockResolvedValue(practica);
+        .mockResolvedValue(practice);
       const service = new PracticeTenantLookupService(
         em as never,
         { findById } as never,
@@ -76,7 +76,7 @@ describe('PracticeTenantLookupService', () => {
     }
 
     it('es verdadero sólo para la práctica personal (OFFICE) que el usuario administra', async () => {
-      const { service } = conPractica({
+      const { service } = withPractice({
         adminUserId: 'u-1',
         typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
       });
@@ -85,7 +85,7 @@ describe('PracticeTenantLookupService', () => {
     });
 
     it('no lo es si la administra otro usuario', async () => {
-      const { service } = conPractica({
+      const { service } = withPractice({
         adminUserId: 'u-2',
         typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
       });
@@ -94,7 +94,7 @@ describe('PracticeTenantLookupService', () => {
     });
 
     it('no lo es si es una organización aunque el usuario figure como administrador', async () => {
-      const { service } = conPractica({
+      const { service } = withPractice({
         adminUserId: 'u-1',
         typeConceptId: 'otro-tipo-de-practica',
       });
@@ -103,7 +103,7 @@ describe('PracticeTenantLookupService', () => {
     });
 
     it('una práctica que no existe responde falso, igual que una ajena', async () => {
-      const { service } = conPractica(null);
+      const { service } = withPractice(null);
 
       await expect(service.isOwnOffice('inventada', 'u-1')).resolves.toBe(
         false,

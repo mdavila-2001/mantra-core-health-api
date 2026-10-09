@@ -11,10 +11,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 /** Cardiología y Pediatría del catálogo `VS_MEDICAL_SPECIALTY` (patch v4.0.11). */
 const CARDIO = '7218acbc-5098-56ae-980a-9345961ced89';
-const PEDIATRIA = 'bd0484b1-8959-5ba5-bb65-ca9305eedb30';
+const PEDIATRICS = 'bd0484b1-8959-5ba5-bb65-ca9305eedb30';
 
 /** Un concepto real del catálogo que NO es una especialidad: sirve de contraejemplo. */
-const NO_ES_ESPECIALIDAD = '211c3fe3-88de-5d17-8974-ed4744e2fa03';
+const NOT_A_SPECIALTY = '211c3fe3-88de-5d17-8974-ed4744e2fa03';
 
 function build(
   overrides: {
@@ -30,7 +30,7 @@ function build(
     ),
     findIncludedConceptIdsByValueSet: mockFn().mockResolvedValue(
       overrides.miembros === undefined
-        ? [CARDIO, PEDIATRIA]
+        ? [CARDIO, PEDIATRICS]
         : overrides.miembros,
     ),
   };
@@ -62,7 +62,7 @@ describe('MedicalSpecialtyCatalogService', () => {
     // `specialty_concept_id` es FK a TODO el catálogo: sin esta regla, un
     // concepto de otro dominio entraría y después aparecería en la Guía.
     await expect(
-      d.service.assertIsMedicalSpecialty(d.em, NO_ES_ESPECIALIDAD),
+      d.service.assertIsMedicalSpecialty(d.em, NOT_A_SPECIALTY),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 

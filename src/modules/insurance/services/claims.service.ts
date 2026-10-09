@@ -609,17 +609,17 @@ export class ClaimsService {
       // la misma versión del dictamen, se devuelve ésa. Reclamar dos veces con
       // el mismo cuerpo tiene que dar el mismo reclamo, no dos — la
       // aseguradora recibiría el caso duplicado y no hay forma de retirarlo.
-      const existente = await this.repo.findOpenDispute(
+      const existing = await this.repo.findOpenDispute(
         tx,
         claimId,
         dto.claimAdjudicationVersionId,
         INS.DISPUTE_OPEN,
       );
-      if (existente) {
+      if (existing) {
         return {
-          id: existente.id,
-          status: existente.statusConceptId,
-          createdAt: existente.createdAt,
+          id: existing.id,
+          status: existing.statusConceptId,
+          createdAt: existing.createdAt,
         };
       }
 

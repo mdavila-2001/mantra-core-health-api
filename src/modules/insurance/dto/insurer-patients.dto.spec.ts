@@ -7,14 +7,14 @@ import { InsurerPatientSearchQueryDto } from './insurer-patients.dto';
  * opciones del `ValidationPipe` global (`forbidNonWhitelisted`). Los query
  * params llegan como texto, por eso `limit` va en string.
  */
-async function propiedadesConError(
+async function propertiesWithError(
   query: Record<string, unknown>,
 ): Promise<string[]> {
-  const errores = await validate(
+  const errors = await validate(
     plainToInstance(InsurerPatientSearchQueryDto, query),
     { whitelist: true, forbidNonWhitelisted: true },
   );
-  return [...new Set(errores.map((e) => e.property))].sort();
+  return [...new Set(errors.map((e) => e.property))].sort();
 }
 
 const UUID = '22222222-2222-4222-8222-222222222222';
@@ -22,7 +22,7 @@ const UUID = '22222222-2222-4222-8222-222222222222';
 describe('InsurerPatientSearchQueryDto', () => {
   it('acepta la combinación completa de filtros', async () => {
     expect(
-      await propiedadesConError({
+      await propertiesWithError({
         limit: '25',
         search: 'Pérez',
         genderConceptId: UUID,
@@ -38,13 +38,13 @@ describe('InsurerPatientSearchQueryDto', () => {
   });
 
   it('sólo ofrece páginas de 10, 25 o 50', async () => {
-    expect(await propiedadesConError({ limit: '7' })).toEqual(['limit']);
-    expect(await propiedadesConError({ limit: '500' })).toEqual(['limit']);
+    expect(await propertiesWithError({ limit: '7' })).toEqual(['limit']);
+    expect(await propertiesWithError({ limit: '500' })).toEqual(['limit']);
   });
 
   it('rechaza conceptos que no son uuid, fechas inválidas y valores fuera de la lista', async () => {
     expect(
-      await propiedadesConError({
+      await propertiesWithError({
         genderConceptId: 'F',
         birthDateFrom: '01/01/1980',
         insuranceStatus: 'MAYBE',
@@ -61,7 +61,7 @@ describe('InsurerPatientSearchQueryDto', () => {
   });
 
   it('no deja elegir la aseguradora desde la petición', async () => {
-    expect(await propiedadesConError({ insuranceCompanyId: UUID })).toEqual([
+    expect(await propertiesWithError({ insuranceCompanyId: UUID })).toEqual([
       'insuranceCompanyId',
     ]);
   });

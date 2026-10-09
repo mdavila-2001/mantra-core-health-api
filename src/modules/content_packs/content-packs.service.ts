@@ -12,10 +12,10 @@ import { BoliviaInsuranceSeedService } from '../../common/seed/bolivia-insurance
 import { ClinicalFormsSeedService } from '../../common/seed/clinical-forms-seed.service';
 import { GlossarySeedService } from '../../common/seed/glossary-seed.service';
 import { ProviderAccountsSeedService } from '../../common/seed/provider-accounts-seed.service';
-import { contarInsertados } from '../../common/seed/seed-bootstrap.service';
+import { countInserted } from '../../common/seed/seed-bootstrap.service';
 import { VademecumSeedService } from '../../common/seed/vademecum-seed.service';
 import {
-  buscarPaquete,
+  searchPackage,
   CONTENT_PACKS,
   type ContentPackCode,
   type ContentPackDefinition,
@@ -82,7 +82,7 @@ export class ContentPacksService {
   }
 
   /** El catálogo completo, para que la pantalla ofrezca qué aplicar. */
-  listar(): readonly ContentPackDefinition[] {
+  list(): readonly ContentPackDefinition[] {
     return CONTENT_PACKS;
   }
 
@@ -97,12 +97,12 @@ export class ContentPacksService {
    * @throws PreconditionFailedException Si el paquete necesita una contraseña
    *   que no se declaró por ningún lado.
    */
-  async aplicar(
+  async apply(
     code: string,
     demoPassword?: string,
   ): Promise<ContentPackResult> {
-    const paquete = buscarPaquete(code);
-    if (paquete === undefined) {
+    const pkg = searchPackage(code);
+    if (pkg === undefined) {
       throw new ResourceNotFoundException(
         'Paquete de contenido no encontrado',
         {
@@ -111,20 +111,20 @@ export class ContentPacksService {
       );
     }
 
-    const desde = Date.now();
-    const counters = await this.correr(paquete.code, demoPassword);
-    const resultado: ContentPackResult = {
-      code: paquete.code,
-      inserted: contarInsertados(counters),
-      tookMs: Date.now() - desde,
+    const from = Date.now();
+    const counters = await this.run(pkg.code, demoPassword);
+    const result: ContentPackResult = {
+      code: pkg.code,
+      inserted: countInserted(counters),
+      tookMs: Date.now() - from,
       counters,
     };
 
     this.logger.info(
-      { event: 'content-pack.applied', ...resultado },
-      'Paquete aplicado: ' + paquete.name,
+      { event: 'content-pack.applied', ...result },
+      'Paquete aplicado: ' + pkg.name,
     );
-    return resultado;
+    return result;
   }
 
   /**
@@ -134,7 +134,7 @@ export class ContentPacksService {
    * @param demoPassword - Contraseña declarada en la petición, si vino.
    * @returns Los contadores crudos del seed.
    */
-  private async correr(
+  private async run(
     code: ContentPackCode,
     demoPassword?: string,
   ): Promise<unknown> {
@@ -157,14 +157,14 @@ export class ContentPacksService {
       case 'FORMULARIOS_CLINICOS':
         return this.clinicalForms.run();
       case 'CUENTAS_DEMO':
-        return this.correrCuentasDemo(demoPassword);
+        return this.runAccountsDemo(demoPassword);
       default:
         // El catálogo y este `switch` son dos listas que tienen que decir lo
         // mismo, y nada las ataba: agregar un paquete y olvidar su rama
         // devolvía `undefined`, que aguas abajo se cuenta como cero filas y se
         // anuncia como «ya estaba cargado». Este `never` lo vuelve un error de
         // compilación.
-        return paqueteSinRama(code);
+        return packageWithoutRama(code);
     }
   }
 
@@ -178,7 +178,7 @@ export class ContentPacksService {
    * @param demoPassword - Contraseña declarada en la petición, si vino.
    * @returns Los contadores del seed.
    */
-  private async correrCuentasDemo(demoPassword?: string): Promise<unknown> {
+  private async runAccountsDemo(demoPassword?: string): Promise<unknown> {
     const password = demoPassword ?? process.env.SEED_DEMO_PASSWORD;
     if (!password) {
       throw new PreconditionFailedException(
@@ -188,19 +188,19 @@ export class ContentPacksService {
       );
     }
 
-    const resultado = await this.providerAccounts.run(password);
+    const result = await this.providerAccounts.run(password);
     // El seed se planta solo en producción y devuelve cero creadas. Ese cero es
     // indistinguible de «ya estaban», así que la pantalla anunciaba «ya estaba
     // cargado» sobre algo que no se intentó siquiera. Decir que no se hizo, y
     // por qué, es lo único honesto.
-    if (resultado.skipped === 'production-not-allowed') {
+    if (result.skipped === 'production-not-allowed') {
       throw new PreconditionFailedException(
         'Las cuentas de demostración no se crean en producción. Si de verdad ' +
           'las quiere acá, hace falta habilitarlo explícitamente en el entorno.',
         { code: 'CUENTAS_DEMO' },
       );
     }
-    return resultado;
+    return result;
   }
 }
 
@@ -209,6 +209,6 @@ export class ContentPacksService {
  *
  * @param code - El código que no tiene rama; su tipo es `never` si están todas.
  */
-function paqueteSinRama(code: never): never {
+function packageWithoutRama(code: never): never {
   throw new Error(`Paquete de contenido sin implementación: ${String(code)}`);
 }

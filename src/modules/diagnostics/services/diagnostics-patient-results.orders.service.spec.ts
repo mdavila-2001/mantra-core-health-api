@@ -30,10 +30,10 @@ import { CLIN } from '../../clinical/clinical.concepts';
  *    ausencia — no como «no hay que prepararse».
  */
 
-const USUARIO = { id: 'u1' } as any;
+const USER = { id: 'u1' } as any;
 const PERSONA = 'per-1';
-const PACIENTE = 'p1';
-const CONCEPTO_HEMOGRAMA = 'code-hemograma';
+const PATIENT = 'p1';
+const CONCEPT_HEMOGRAMA = 'code-hemograma';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -58,7 +58,7 @@ function build() {
     findActiveByUser: mockFn().mockResolvedValue({ personId: PERSONA }),
   };
   const patientProfilesRepo = {
-    findById: mockFn().mockResolvedValue({ profileId: PACIENTE }),
+    findById: mockFn().mockResolvedValue({ profileId: PATIENT }),
   };
   const grantsRepo = {};
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -86,12 +86,12 @@ function build() {
  * @param id - Identificador de la orden.
  * @returns La fila simulada.
  */
-function orden(id: string) {
+function order(id: string) {
   return {
     id,
-    patientProfileId: PACIENTE,
+    patientProfileId: PATIENT,
     encounterId: 'e1',
-    codeConceptId: CONCEPTO_HEMOGRAMA,
+    codeConceptId: CONCEPT_HEMOGRAMA,
     categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
     statusConceptId: 'st-1',
     priorityConceptId: 'prio-1',
@@ -103,11 +103,11 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
   it('lee el portal sin acotar por tenant: las órdenes de la persona son una sola lista', async () => {
     const { service, ordersRepo, fork } = build();
 
-    await service.listOwnOrders(USUARIO, 50);
+    await service.listOwnOrders(USER, 50);
 
     expect(ordersRepo.findOrdersForPatientPortal).toHaveBeenCalledWith(
       fork,
-      PACIENTE,
+      PATIENT,
       expect.anything(),
       51,
     );
@@ -118,10 +118,10 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
   it('pide sólo laboratorio e imagenología, no toda orden de servicio', async () => {
     const { service, ordersRepo } = build();
 
-    await service.listOwnOrders(USUARIO, 50);
+    await service.listOwnOrders(USER, 50);
 
-    const categorias = ordersRepo.findOrdersForPatientPortal.mock.calls[0][2];
-    expect([...categorias].sort()).toEqual(
+    const categories = ordersRepo.findOrdersForPatientPortal.mock.calls[0][2];
+    expect([...categories].sort()).toEqual(
       [
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
@@ -132,46 +132,46 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
   it('pide una fila de más y avisa que la lista quedó recortada', async () => {
     const { service, ordersRepo } = build();
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
-      orden('o1'),
-      orden('o2'),
-      orden('o3'),
+      order('o1'),
+      order('o2'),
+      order('o3'),
     ]);
 
-    const salida = await service.listOwnOrders(USUARIO, 2);
+    const output = await service.listOwnOrders(USER, 2);
 
-    expect(salida.items).toHaveLength(2);
-    expect(salida.truncated).toBe(true);
-    expect(salida.limit).toBe(2);
+    expect(output.items).toHaveLength(2);
+    expect(output.truncated).toBe(true);
+    expect(output.limit).toBe(2);
   });
 
   it('un informe SIN liberar no es un resultado: no ofrece abrirlo', async () => {
     const { service, ordersRepo, reportsRepo } = build();
-    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
     // El informe existe y cuelga de la orden…
     ordersRepo.findReportsByServiceRequests.mockResolvedValue([
       {
         id: 'rep-1',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPTO_HEMOGRAMA,
+        codeConceptId: CONCEPT_HEMOGRAMA,
       },
     ]);
     // …pero no tiene ninguna versión liberada.
     reportsRepo.findVersionsByReports.mockResolvedValue([]);
 
-    const salida = await service.listOwnOrders(USUARIO, 50);
+    const output = await service.listOwnOrders(USER, 50);
 
-    expect(salida.items[0].hasReleasedResult).toBe(false);
-    expect(salida.items[0].reportId).toBeUndefined();
+    expect(output.items[0].hasReleasedResult).toBe(false);
+    expect(output.items[0].reportId).toBeUndefined();
   });
 
   it('con la liberación visible para el paciente, enlaza el informe', async () => {
     const { service, ordersRepo, reportsRepo } = build();
-    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
     ordersRepo.findReportsByServiceRequests.mockResolvedValue([
       {
         id: 'rep-1',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPTO_HEMOGRAMA,
+        codeConceptId: CONCEPT_HEMOGRAMA,
         custodianTenantId: 't1',
       },
     ]);
@@ -186,25 +186,25 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       },
     ]);
 
-    const salida = await service.listOwnOrders(USUARIO, 50);
+    const output = await service.listOwnOrders(USER, 50);
 
-    expect(salida.items[0].hasReleasedResult).toBe(true);
-    expect(salida.items[0].reportId).toBe('rep-1');
+    expect(output.items[0].hasReleasedResult).toBe(true);
+    expect(output.items[0].reportId).toBe('rep-1');
   });
 
   it('con dos informes visibles de la misma orden, enlaza el liberado más reciente', async () => {
     const { service, ordersRepo, reportsRepo } = build();
-    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
     ordersRepo.findReportsByServiceRequests.mockResolvedValue([
       {
         id: 'rep-viejo',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPTO_HEMOGRAMA,
+        codeConceptId: CONCEPT_HEMOGRAMA,
       },
       {
         id: 'rep-nuevo',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPTO_HEMOGRAMA,
+        codeConceptId: CONCEPT_HEMOGRAMA,
       },
     ]);
     reportsRepo.findVersionsByReports.mockResolvedValue([
@@ -224,41 +224,41 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       },
     ]);
 
-    const salida = await service.listOwnOrders(USUARIO, 50);
+    const output = await service.listOwnOrders(USER, 50);
 
     // Un estudio repetido por muestra insuficiente deja dos informes: gana el
     // que la persona vino a ver, no el que salió primero de la iteración.
-    expect(salida.items[0].reportId).toBe('rep-nuevo');
+    expect(output.items[0].reportId).toBe('rep-nuevo');
   });
 
   it('trae la preparación del catálogo emparejada por concepto', async () => {
     const { service, ordersRepo } = build();
-    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
     ordersRepo.findPreparationByStudyConcepts.mockResolvedValue([
       {
-        studyConceptId: CONCEPTO_HEMOGRAMA,
+        studyConceptId: CONCEPT_HEMOGRAMA,
         preparationInstructions: 'Ayuno de 8 horas.',
       },
     ]);
 
-    const salida = await service.listOwnOrders(USUARIO, 50);
+    const output = await service.listOwnOrders(USER, 50);
 
-    expect(salida.items[0].preparationInstructions).toBe('Ayuno de 8 horas.');
+    expect(output.items[0].preparationInstructions).toBe('Ayuno de 8 horas.');
   });
 
   it('sin preparación publicada la deja ausente, no inventa un texto tranquilizador', async () => {
     const { service, ordersRepo } = build();
-    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
 
-    const salida = await service.listOwnOrders(USUARIO, 50);
+    const output = await service.listOwnOrders(USER, 50);
 
-    expect(salida.items[0].preparationInstructions).toBeUndefined();
+    expect(output.items[0].preparationInstructions).toBeUndefined();
   });
 
   it('una cuenta sin persona vinculada no lee órdenes de nadie', async () => {
     const { service, accountLinksRepo } = build();
     accountLinksRepo.findActiveByUser.mockResolvedValue(null);
 
-    await expect(service.listOwnOrders(USUARIO, 50)).rejects.toThrow();
+    await expect(service.listOwnOrders(USER, 50)).rejects.toThrow();
   });
 });

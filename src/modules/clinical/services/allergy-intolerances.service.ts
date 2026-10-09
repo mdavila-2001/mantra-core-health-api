@@ -168,7 +168,7 @@ export class AllergyIntolerancesService {
         allergyId,
       });
     }
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       allergy.patientProfileId,
       actor,
     );
@@ -201,7 +201,7 @@ export class AllergyIntolerancesService {
         allergyId,
       });
     }
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       allergy.patientProfileId,
       actor,
     );

@@ -121,7 +121,7 @@ export class CommunityPublicController {
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicFeedPageDto> {
-    return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
+    return this.service.feedPublic({ cursor, limit: this.toInt(limit) });
   }
 
   /**
@@ -419,7 +419,7 @@ export class CommunityPublicController {
    * mismo servicio con el mismo concepto de sujeto, no una segunda
    * implementación que pueda separarse de la primera.
    *
-   * @param prefijo - `p` · `o` · `f` · `l` · `s`, el mismo que la ruta corta.
+   * @param prefix - `p` · `o` · `f` · `l` · `s`, el mismo que la ruta corta.
    * @param slug - Slug estable del perfil.
    * @throws ResourceNotFoundException si el prefijo no es uno de los cinco.
    */
@@ -427,17 +427,17 @@ export class CommunityPublicController {
   @Get('public/profiles/:prefijo/:slug')
   @ApiOperation({ summary: 'Ficha pública por prefijo de vertical' })
   getProfileByPrefix(
-    @Param('prefijo') prefijo: string,
+    @Param('prefijo') prefix: string,
     @Param('slug') slug: string,
   ): Promise<PublicDirectoryProfileDto> {
-    const concepto = TARGET_CONCEPT_BY_SLUG_PREFIX[prefijo];
+    const concept = TARGET_CONCEPT_BY_SLUG_PREFIX[prefix];
     // Un prefijo inventado da el **mismo** 404 que un slug que no existe: en
     // esta superficie nada distingue «no existe» de «no está publicado», y un
     // 400 acá abriría esa distinción por la puerta de al lado.
-    if (concepto === undefined)
+    if (concept === undefined)
       throw new ResourceNotFoundException('No encontrado', { slug });
 
-    return this.service.getBySlug(slug, concepto);
+    return this.service.getBySlug(slug, concept);
   }
 
   /**
@@ -453,7 +453,7 @@ export class CommunityPublicController {
    * opiniones y la lista se dibujan juntas: pedirlos por separado deja la
    * pantalla con «4,6 de 5» arriba y un hueco abajo.
    *
-   * @param prefijo - `p` · `o` · `f` · `l` · `s`, el mismo que la ficha.
+   * @param prefix - `p` · `o` · `f` · `l` · `s`, el mismo que la ficha.
    * @param slug - Slug estable del perfil.
    * @param cursor - Cursor opaco de la página anterior.
    * @param limit - Tope de filas.
@@ -463,18 +463,18 @@ export class CommunityPublicController {
   @Get('public/profiles/:prefijo/:slug/reviews')
   @ApiOperation({ summary: 'Opiniones publicadas de una ficha pública' })
   listPublicProfileReviews(
-    @Param('prefijo') prefijo: string,
+    @Param('prefijo') prefix: string,
     @Param('slug') slug: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PublicProfileReviewsDto> {
-    const concepto = TARGET_CONCEPT_BY_SLUG_PREFIX[prefijo];
+    const concept = TARGET_CONCEPT_BY_SLUG_PREFIX[prefix];
     // Mismo 404 que la ficha: un prefijo inventado no se distingue de un slug
     // que no existe.
-    if (concepto === undefined)
+    if (concept === undefined)
       throw new ResourceNotFoundException('No encontrado', { slug });
 
-    return this.reviews.listPublicReviewsBySlug(slug, concepto, {
+    return this.reviews.listPublicReviewsBySlug(slug, concept, {
       cursor,
       limit: limit ?? DEFAULT_REVIEW_PAGE_LIMIT,
     });
@@ -516,9 +516,9 @@ export class CommunityPublicController {
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ): Promise<void> {
-    const contenido = await this.service.getPublicMedia(id);
-    res.setHeader('Content-Type', contenido.mimeType);
-    res.send(contenido.buffer);
+    const content = await this.service.getPublicMedia(id);
+    res.setHeader('Content-Type', content.mimeType);
+    res.send(content.buffer);
   }
 
   /** Ficha pública de un profesional. */

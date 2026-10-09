@@ -8,18 +8,18 @@ import { PromotionsReadService } from './promotions-read.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const PACIENTE = {
+const PATIENT = {
   id: 'user-1',
   roles: ['PATIENT'],
   patientProfileId: 'pat-1',
 } as any;
 
-const PORCENTUAL = {
+const PERCENTAGE = {
   id: CONCEPTS.DISCOUNT_PERCENTAGE,
   code: 'DISC_PERCENT',
   display: 'Descuento porcentual',
 };
-const AUTOMATICA = {
+const AUTOMATIC = {
   id: CONCEPTS.PROMOTION_TYPE_AUTOMATIC,
   code: 'PROMO_AUTO',
   display: 'Promoción automática',
@@ -55,7 +55,7 @@ function build() {
 describe('PromotionsReadService.listMine (GET /promotions/me)', () => {
   it('requires the active tenant', async () => {
     const d = build();
-    await expect(d.service.listMine(PACIENTE)).rejects.toBeInstanceOf(
+    await expect(d.service.listMine(PATIENT)).rejects.toBeInstanceOf(
       PreconditionFailedException,
     );
   });
@@ -78,15 +78,15 @@ describe('PromotionsReadService.listMine (GET /promotions/me)', () => {
     d.repo.findRulesByPromotions.mockResolvedValue([
       {
         promotionId: '1',
-        discountTypeConceptId: PORCENTUAL.id,
+        discountTypeConceptId: PERCENTAGE.id,
         percentage: '15',
         minPurchaseAmount: '50.00',
       },
     ]);
-    d.repo.findConcepts.mockResolvedValue([PORCENTUAL, AUTOMATICA]);
+    d.repo.findConcepts.mockResolvedValue([PERCENTAGE, AUTOMATIC]);
 
     const result = await runWithTenant('tenant-a', () =>
-      d.service.listMine(PACIENTE),
+      d.service.listMine(PATIENT),
     );
 
     expect(d.repo.findCurrentPromotions).toHaveBeenCalledWith(
@@ -142,7 +142,7 @@ describe('PromotionsReadService.listMine (GET /promotions/me)', () => {
     ]);
 
     const result = await runWithTenant('tenant-a', () =>
-      d.service.listMine(PACIENTE),
+      d.service.listMine(PATIENT),
     );
 
     // La de cupón sin cupón suyo no es «para mí»: no se sirve.
@@ -159,7 +159,7 @@ describe('PromotionsReadService.listMine (GET /promotions/me)', () => {
     const d = build();
 
     const result = await runWithTenant('tenant-a', () =>
-      d.service.listMine(PACIENTE),
+      d.service.listMine(PATIENT),
     );
 
     expect(result).toEqual({ items: [], count: 0 });

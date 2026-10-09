@@ -19,8 +19,8 @@ import { PublicCatalogRepository } from './public-catalog.repository';
 describe('PublicCatalogRepository (M4 · H2)', () => {
   const TENANT = '0a0a0a0a-0000-4000-8000-000000000001';
 
-  function conConexion(filas: unknown[] = []) {
-    const execute = mockFn().mockResolvedValue(filas);
+  function withConnection(rows: unknown[] = []) {
+    const execute = mockFn().mockResolvedValue(rows);
     const em = { getConnection: mockFn(() => ({ execute })) };
     return { em, execute, repo: new PublicCatalogRepository() };
   }
@@ -29,14 +29,14 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     String(execute.mock.calls[0][0]).replace(/\s+/g, ' ');
 
   it('resuelve el slug sólo entre perfiles visibles y activos', async () => {
-    const { em, execute, repo } = conConexion([]);
+    const { em, execute, repo } = withConnection([]);
 
-    const perfil = await repo.findVisibleProfileBySlug(
+    const profile = await repo.findVisibleProfileBySlug(
       em as any,
       'clinica-norte',
     );
 
-    expect(perfil).toBeNull();
+    expect(profile).toBeNull();
     expect(sqlDe(execute)).toContain('FROM community.public_profiles prof');
     expect(execute.mock.calls[0][1]).toEqual([
       'clinica-norte',
@@ -47,7 +47,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
   describe('findOfferedServices', () => {
     it('proyecta sólo columnas publicables del catálogo de las prácticas activas de la organización', async () => {
-      const { em, execute, repo } = conConexion();
+      const { em, execute, repo } = withConnection();
 
       await repo.findOfferedServices(em as any, TENANT, null, 21);
 
@@ -68,7 +68,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     });
 
     it('con posición, continúa por keyset (código, id)', async () => {
-      const { em, execute, repo } = conConexion();
+      const { em, execute, repo } = withConnection();
 
       await repo.findOfferedServices(
         em as any,
@@ -91,7 +91,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
   describe('findPharmacyProducts', () => {
     it('exige farmacia activa y verificada, producto activo, y lista de precios pública, vigente y sin aseguradora', async () => {
-      const { em, execute, repo } = conConexion();
+      const { em, execute, repo } = withConnection();
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 
@@ -113,7 +113,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     });
 
     it('el stock informa, no filtra: se une con LEFT JOIN y cae a 0', async () => {
-      const { em, execute, repo } = conConexion();
+      const { em, execute, repo } = withConnection();
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 
@@ -127,7 +127,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     });
 
     it('el precio se lee como texto, sin pasar por number', async () => {
-      const { em, execute, repo } = conConexion();
+      const { em, execute, repo } = withConnection();
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 

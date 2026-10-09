@@ -1,4 +1,4 @@
-import type { PerfilDeImportacion } from './row-contract';
+import type { ImportProfile } from './row-contract';
 
 /**
  * Largo máximo de un código y de un rótulo de concepto.
@@ -8,7 +8,7 @@ import type { PerfilDeImportacion } from './row-contract';
  * columna y no del servicio: cada perfil declara los suyos y el validador los
  * lee del perfil, sin saber qué se está cargando.
  */
-const MAX_LARGO_DE_TEXTO_CORTO = 255;
+const MAX_SHORT_TEXT_LENGTH = 255;
 
 /**
  * Prefijo reservado para datos de ejemplo.
@@ -18,7 +18,7 @@ const MAX_LARGO_DE_TEXTO_CORTO = 255;
  * la hace reconocible de un vistazo y la deja fuera de cualquier catálogo que
  * se tome en serio.
  */
-const PREFIJO_SINTETICO = 'ZZ-';
+const SYNTHETIC_PREFIX = 'ZZ-';
 
 /**
  * Qué columnas se esperan para cargar conceptos.
@@ -28,20 +28,20 @@ const PREFIJO_SINTETICO = 'ZZ-';
  * importador. Rechazar «Código» por no decir `code` sería pedirle a esa persona
  * que hable el idioma de la base.
  */
-const CONCEPTOS: PerfilDeImportacion = {
+const CONCEPTS: ImportProfile = {
   id: 'conceptos',
   columnas: [
     {
       nombre: 'code',
       alias: ['código', 'codigo', 'clave'],
       obligatoria: true,
-      maxLargo: MAX_LARGO_DE_TEXTO_CORTO,
+      maxLargo: MAX_SHORT_TEXT_LENGTH,
     },
     {
       nombre: 'display',
       alias: ['nombre', 'término', 'termino', 'etiqueta'],
       obligatoria: true,
-      maxLargo: MAX_LARGO_DE_TEXTO_CORTO,
+      maxLargo: MAX_SHORT_TEXT_LENGTH,
     },
     {
       nombre: 'definition',
@@ -50,7 +50,7 @@ const CONCEPTOS: PerfilDeImportacion = {
     },
   ],
   ejemplo: {
-    code: `${PREFIJO_SINTETICO}000`,
+    code: `${SYNTHETIC_PREFIX}000`,
     display: 'Ejemplo sintético',
     definition: 'Fila de ejemplo de la plantilla',
   },
@@ -62,15 +62,15 @@ const CONCEPTOS: PerfilDeImportacion = {
  * Es una lista cerrada a propósito: un perfil desconocido es un error del
  * contrato y no algo que se resuelva adivinando columnas.
  */
-export const PERFILES_DE_IMPORTACION: Record<
-  PerfilDeImportacion['id'],
-  PerfilDeImportacion
+export const IMPORT_PROFILES: Record<
+  ImportProfile['id'],
+  ImportProfile
 > = {
-  conceptos: CONCEPTOS,
+  conceptos: CONCEPTS,
   // El perfil de designaciones se suma cuando se confirme que su entidad, su
   // DTO y su repositorio existen; hasta entonces declararlo sería prometer una
   // carga que no tiene dónde escribir.
-} as Record<PerfilDeImportacion['id'], PerfilDeImportacion>;
+} as Record<ImportProfile['id'], ImportProfile>;
 
 /**
  * Normaliza un encabezado para compararlo con el nombre y los alias.
@@ -80,29 +80,29 @@ export const PERFILES_DE_IMPORTACION: Record<
  * si «definicion» y «definición» son la misma columna cuando el perfil ya
  * declara las dos.
  *
- * @param encabezado - El texto tal como vino en el archivo.
+ * @param header - El texto tal como vino en el archivo.
  * @returns El texto comparable.
  */
-export function normalizarEncabezado(encabezado: string): string {
-  return encabezado.trim().toLowerCase();
+export function normalizeHeader(header: string): string {
+  return header.trim().toLowerCase();
 }
 
 /**
  * Resuelve a qué columna del perfil corresponde un encabezado del archivo.
  *
- * @param perfil - El perfil con el que se está cargando.
- * @param encabezado - El encabezado leído del archivo.
+ * @param profile - El perfil con el que se está cargando.
+ * @param header - El encabezado leído del archivo.
  * @returns El nombre canónico de la columna, o `undefined` si no se reconoce.
  */
-export function resolverColumna(
-  perfil: PerfilDeImportacion,
-  encabezado: string,
+export function resolverColumn(
+  profile: ImportProfile,
+  header: string,
 ): string | undefined {
-  const buscado = normalizarEncabezado(encabezado);
-  const columna = perfil.columnas.find(
-    (candidata) =>
-      normalizarEncabezado(candidata.nombre) === buscado ||
-      candidata.alias.some((alias) => normalizarEncabezado(alias) === buscado),
+  const searched = normalizeHeader(header);
+  const column = profile.columnas.find(
+    (candidate) =>
+      normalizeHeader(candidate.nombre) === searched ||
+      candidate.alias.some((alias) => normalizeHeader(alias) === searched),
   );
-  return columna?.nombre;
+  return column?.nombre;
 }

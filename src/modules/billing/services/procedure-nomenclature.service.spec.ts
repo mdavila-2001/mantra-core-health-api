@@ -12,19 +12,19 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  * justamente **qué se le pide a la base**: el filtro por especialidad, el
  * `LIMIT` de una fila de más y el orden por código.
  *
- * @param respuestas - Resultados en el orden en que se van a pedir.
+ * @param responses - Resultados en el orden en que se van a pedir.
  * @returns El doble y el registro de llamadas.
  */
-function em(respuestas: unknown[][]) {
-  const llamadas: { sql: string; params: unknown[] }[] = [];
+function em(responses: unknown[][]) {
+  const calls: { sql: string; params: unknown[] }[] = [];
   let i = 0;
   const execute = mockFn((sql: string, params: unknown[]) => {
-    llamadas.push({ sql, params });
-    return Promise.resolve(respuestas[i++] ?? []);
+    calls.push({ sql, params });
+    return Promise.resolve(responses[i++] ?? []);
   });
   return {
     doble: { getConnection: () => ({ execute }) } as never,
-    llamadas,
+    llamadas: calls,
   };
 }
 
@@ -37,11 +37,11 @@ describe('ProcedureNomenclatureService', () => {
           { especialidad: 'Cirugía General', total: '319' },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const resultado = await servicio.listSpecialties();
+      const result = await service.listSpecialties();
 
-      expect(resultado.items).toEqual([
+      expect(result.items).toEqual([
         { specialty: 'Cardiología', count: 98 },
         { specialty: 'Cirugía General', count: 319 },
       ]);
@@ -54,15 +54,15 @@ describe('ProcedureNomenclatureService', () => {
 
   describe('search', () => {
     it('pide una fila de más y no la devuelve', async () => {
-      const filas = Array.from({ length: 3 }, (_, n) => ({
+      const rows = Array.from({ length: 3 }, (_, n) => ({
         id: `c${n}`,
         code: `procedure:bo:X${n}`,
         display: `Procedimiento ${n}`,
       }));
-      const { doble, llamadas } = em([filas, []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const { doble, llamadas } = em([rows, []]);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const pagina = await servicio.search({ limit: 2 });
+      const pagina = await service.search({ limit: 2 });
 
       expect(pagina.items).toHaveLength(2);
       expect(pagina.nextCursor).not.toBeNull();
@@ -75,18 +75,18 @@ describe('ProcedureNomenclatureService', () => {
         [{ id: 'c1', code: 'procedure:bo:A', display: 'Uno' }],
         [],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const pagina = await servicio.search({ limit: 25 });
+      const pagina = await service.search({ limit: 25 });
 
       expect(pagina.nextCursor).toBeNull();
     });
 
     it('filtra por especialidad contra la propiedad, no contra el código', async () => {
       const { doble, llamadas } = em([[], []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      await servicio.search({ specialty: 'Cardiología' });
+      await service.search({ specialty: 'Cardiología' });
 
       // El código del arancel no contiene la especialidad de forma fiable, así
       // que el filtro tiene que ir contra `concept_properties`.
@@ -96,9 +96,9 @@ describe('ProcedureNomenclatureService', () => {
 
     it('ordena por código, que es único, y no por nombre', async () => {
       const { doble, llamadas } = em([[], []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      await servicio.search({});
+      await service.search({});
 
       // Hay decenas de procedimientos llamados «General»: un cursor sobre el
       // nombre dejaría filas fuera al paginar.
@@ -134,9 +134,9 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const pagina = await servicio.search({});
+      const pagina = await service.search({});
 
       // Dos consultas en total: la página y sus propiedades. Pedirlas concepto
       // por concepto sería el N+1 que este servicio existe para evitar.
@@ -166,9 +166,9 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const pagina = await servicio.search({});
+      const pagina = await service.search({});
 
       // El catálogo escribe la marca **sólo** donde hay daño de reconocimiento
       // óptico: la ausencia es el «no», no un dato faltante.
@@ -192,9 +192,9 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(doble);
 
-      const pagina = await servicio.search({});
+      const pagina = await service.search({});
 
       // La UMA es la unidad de cuenta del arancel, no una moneda, y su factor
       // de conversión no está declarado en ninguna parte del producto.

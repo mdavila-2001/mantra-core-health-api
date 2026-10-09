@@ -151,7 +151,7 @@ export class ProceduresService {
       });
     }
     // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       procedure.patientProfileId,
       actor,
     );

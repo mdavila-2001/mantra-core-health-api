@@ -25,13 +25,13 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  */
 const TENANT = '0a0a0a0a-0000-4000-8000-000000000001';
 
-type Perfil = { id: string; tenantId: string; targetTypeConceptId: string };
+type Profile = { id: string; tenantId: string; targetTypeConceptId: string };
 
-function baseDoble(perfiles: Record<string, Perfil>) {
+function doubleBase(profiles: Record<string, Profile>) {
   const execute = mockFn(async (sql: string, params: unknown[]) => {
     if (sql.includes('FROM community.public_profiles')) {
-      const perfil = perfiles[params[0] as string];
-      return perfil ? [perfil] : [];
+      const profile = profiles[params[0] as string];
+      return profile ? [profile] : [];
     }
     if (sql.includes('FROM billing.service_catalog')) {
       return [
@@ -73,7 +73,7 @@ describe('Fichas públicas por HTTP (M4 · H2)', () => {
   let execute: any;
 
   beforeAll(async () => {
-    const doble = baseDoble({
+    const double = doubleBase({
       'clinica-norte': {
         id: 'prof-org',
         tenantId: TENANT,
@@ -85,17 +85,17 @@ describe('Fichas públicas por HTTP (M4 · H2)', () => {
         targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
       },
     });
-    execute = doble.execute;
+    execute = double.execute;
 
     @Global()
     @Module({
-      providers: [{ provide: EntityManager, useValue: doble.em }],
+      providers: [{ provide: EntityManager, useValue: double.em }],
       exports: [EntityManager],
     })
-    class BaseDobleModule {}
+    class DoubleBaseModule {}
 
     const moduleRef = await Test.createTestingModule({
-      imports: [BaseDobleModule, PublicCatalogModule],
+      imports: [DoubleBaseModule, PublicCatalogModule],
     }).compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(
@@ -162,20 +162,20 @@ describe('Fichas públicas por HTTP (M4 · H2)', () => {
   });
 
   it('un slug inexistente y uno de otro tipo responden el mismo 404', async () => {
-    const inexistente = await request(app.getHttpServer())
+    const nonexistent = await request(app.getHttpServer())
       .get('/public/profiles/o/no-existe/services')
       .expect(404);
-    const otroTipo = await request(app.getHttpServer())
+    const otherType = await request(app.getHttpServer())
       .get('/public/profiles/o/farmacia-central/services')
       .expect(404);
 
     // Misma forma, mismo código y mismo mensaje: lo único que cambia es el
     // slug que cada respuesta repite. Nada delata que detrás del segundo hay
     // una farmacia.
-    const sinSlug = (body: any) => ({ ...body, details: undefined });
-    expect(sinSlug(otroTipo.body)).toEqual(sinSlug(inexistente.body));
-    expect(inexistente.body.details).toEqual({ slug: 'no-existe' });
-    expect(otroTipo.body.details).toEqual({ slug: 'farmacia-central' });
+    const withoutSlug = (body: any) => ({ ...body, details: undefined });
+    expect(withoutSlug(otherType.body)).toEqual(withoutSlug(nonexistent.body));
+    expect(nonexistent.body.details).toEqual({ slug: 'no-existe' });
+    expect(otherType.body.details).toEqual({ slug: 'farmacia-central' });
   });
 
   it('limit fuera de rango, un parámetro no declarado o un cursor corrupto → 400', async () => {

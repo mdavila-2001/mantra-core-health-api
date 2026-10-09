@@ -428,22 +428,22 @@ describe('IamPatientSelfRegistrationService', () => {
 
     it('records the declared private and public coverages in order', async () => {
       const d = build();
-      const privado = carrierPlanId(
+      const isPrivate = carrierPlanId(
         'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
         'RED_MAX',
       );
-      const publico = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
+      const isPublic = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
 
       await d.service.registerPatient({
         ...dto,
-        privateInsurancePlanId: privado,
-        publicInsurancePlanId: publico,
+        privateInsurancePlanId: isPrivate,
+        publicInsurancePlanId: isPublic,
       });
 
       expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
-          insurancePlanId: privado,
+          insurancePlanId: isPrivate,
           coverageOrder: 1,
           // Es lo que la persona declara, no lo que la aseguradora confirmó.
           verificationStatusConceptId: INS.VERIFY_PENDING,
@@ -452,7 +452,7 @@ describe('IamPatientSelfRegistrationService', () => {
       );
       expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ insurancePlanId: publico, coverageOrder: 2 }),
+        expect.objectContaining({ insurancePlanId: isPublic, coverageOrder: 2 }),
       );
     });
 

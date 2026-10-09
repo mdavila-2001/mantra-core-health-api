@@ -11,7 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
 import { LEGAL_ENTITY_TYPES } from '../../modules/directory/legal-entity-types';
 
-const CANTIDAD = LEGAL_ENTITY_TYPES.length;
+const QUANTITY = LEGAL_ENTITY_TYPES.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — mismo patrón
@@ -64,11 +64,11 @@ describe('LegalEntityTypesSeedService', () => {
 
     const result = await service.run();
 
-    expect(result.properties).toBe(CANTIDAD * 2);
+    expect(result.properties).toBe(QUANTITY * 2);
     const propiedades = created.filter(
       (row) => row.entity === 'ConceptProperties',
     );
-    expect(propiedades).toHaveLength(CANTIDAD * 2);
+    expect(propiedades).toHaveLength(QUANTITY * 2);
 
     const paisSrl = propiedades.find(
       (row) =>
@@ -89,15 +89,15 @@ describe('LegalEntityTypesSeedService', () => {
 
   it('no inserta nada en una segunda corrida: todo ya existe', async () => {
     // Primera corrida real, para conocer los ids deterministas que generó.
-    const primera = build();
-    await primera.service.run();
-    const idsGenerados = new Set(
-      primera.created.map((row) => row.data.id as string),
+    const first = build();
+    await first.service.run();
+    const idsGenerated = new Set(
+      first.created.map((row) => row.data.id as string),
     );
 
     const { service, created } = build(
       new Set(LEGAL_ENTITY_TYPES.map((e) => e.conceptId)),
-      idsGenerados,
+      idsGenerated,
     );
 
     const result = await service.run();
@@ -114,7 +114,7 @@ describe('LegalEntityTypesSeedService', () => {
     expect(result.properties).toBe(0);
     expect(created).toHaveLength(0);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.objectContaining({ count: CANTIDAD }),
+      expect.objectContaining({ count: QUANTITY }),
       expect.stringContaining('todavía no está en el catálogo'),
     );
   });

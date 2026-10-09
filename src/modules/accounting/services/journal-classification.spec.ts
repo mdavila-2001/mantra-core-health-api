@@ -1,25 +1,25 @@
 import { ACCT } from '../accounting.concepts';
 import {
-  JUEGO_REGLAS_VIGENTE,
-  clasificar,
-  type JuegoReglas,
+  CURRENT_RULE_SET,
+  classify,
+  type RuleSet,
 } from './journal-classification';
 
 describe('journal-classification (MCH-018)', () => {
   it('clasifica cuando una regla cubre el documento origen', () => {
-    const res = clasificar({ sourceDocumentType: 'PAYMENT_TRANSACTION' });
+    const res = classify({ sourceDocumentType: 'PAYMENT_TRANSACTION' });
     expect(res).toMatchObject({
       decision: 'CLASIFICADA',
       ruleId: 'PAYMENT_TRANSACTION',
       transactionTypeConceptId: ACCT.TXN_TYPE_LIABILITY_PAYMENT,
-      rulesetVersion: JUEGO_REGLAS_VIGENTE.version,
+      rulesetVersion: CURRENT_RULE_SET.version,
     });
     expect(res.reason).not.toHaveLength(0);
   });
 
   it('AC01 · sin documento origen o sin regla no hay clasificación ni tipo', () => {
     for (const sourceDocumentType of [undefined, '', '   ', 'DESCONOCIDO']) {
-      const res = clasificar({ sourceDocumentType });
+      const res = classify({ sourceDocumentType });
       expect(res.decision).toBe('SIN_REGLA');
       expect(res.ruleId).toBeUndefined();
       expect(res.transactionTypeConceptId).toBeUndefined();
@@ -27,7 +27,7 @@ describe('journal-classification (MCH-018)', () => {
   });
 
   it('AC02 · reglas en conflicto con la misma prioridad son ambiguas, no un desempate arbitrario', () => {
-    const conflictivo: JuegoReglas = {
+    const conflicting: RuleSet = {
       version: 'test-conflicto',
       reglas: [
         {
@@ -47,7 +47,7 @@ describe('journal-classification (MCH-018)', () => {
       ],
     };
 
-    const res = clasificar({ sourceDocumentType: 'MIXTO' }, conflictivo);
+    const res = classify({ sourceDocumentType: 'MIXTO' }, conflicting);
 
     expect(res.decision).toBe('AMBIGUA');
     expect(res.transactionTypeConceptId).toBeUndefined();
@@ -56,7 +56,7 @@ describe('journal-classification (MCH-018)', () => {
   });
 
   it('una regla más específica gana por prioridad sin volverse ambigua', () => {
-    const escalonado: JuegoReglas = {
+    const staggered: RuleSet = {
       version: 'test-prioridad',
       reglas: [
         {
@@ -77,12 +77,12 @@ describe('journal-classification (MCH-018)', () => {
     };
 
     expect(
-      clasificar({ sourceDocumentType: 'FACTURA' }, escalonado),
+      classify({ sourceDocumentType: 'FACTURA' }, staggered),
     ).toMatchObject({ decision: 'CLASIFICADA', ruleId: 'ESPECIFICA' });
   });
 
   it('AC03 · evaluar el juego histórico reproduce la clasificación anterior', () => {
-    const v1: JuegoReglas = {
+    const v1: RuleSet = {
       version: 'test-v1',
       reglas: [
         {
@@ -94,7 +94,7 @@ describe('journal-classification (MCH-018)', () => {
         },
       ],
     };
-    const v2: JuegoReglas = {
+    const v2: RuleSet = {
       version: 'test-v2',
       reglas: [
         {
@@ -105,21 +105,21 @@ describe('journal-classification (MCH-018)', () => {
       ],
     };
 
-    const historica = clasificar({ sourceDocumentType: 'DONACION' }, v1);
-    const actual = clasificar({ sourceDocumentType: 'DONACION' }, v2);
+    const historical = classify({ sourceDocumentType: 'DONACION' }, v1);
+    const actual = classify({ sourceDocumentType: 'DONACION' }, v2);
 
     expect(actual.transactionTypeConceptId).not.toBe(
-      historica.transactionTypeConceptId,
+      historical.transactionTypeConceptId,
     );
     // La decisión vieja se vuelve a obtener con su propia versión.
-    expect(clasificar({ sourceDocumentType: 'DONACION' }, v1)).toEqual(
-      historica,
+    expect(classify({ sourceDocumentType: 'DONACION' }, v1)).toEqual(
+      historical,
     );
-    expect(historica.rulesetVersion).toBe('test-v1');
+    expect(historical.rulesetVersion).toBe('test-v1');
   });
 
   it('no distingue mayúsculas ni espacios al alrededor', () => {
-    expect(clasificar({ sourceDocumentType: '  invoice  ' }).ruleId).toBe(
+    expect(classify({ sourceDocumentType: '  invoice  ' }).ruleId).toBe(
       'INVOICE',
     );
   });

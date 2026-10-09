@@ -79,20 +79,20 @@ export class CommunityVisibilityService {
    * El orden importa: el perfil profesional va primero porque es el sujeto que
    * el módulo escribe cuando existe.
    */
-  private sujetosDe(actor: AuthenticatedUser): string[] {
+  private subjects(actor: AuthenticatedUser): string[] {
     return actor.practitionerProfileId
       ? [actor.practitionerProfileId, actor.id]
       : [actor.id];
   }
 
   /** `true` si el perfil es de alguno de los sujetos que la sesión representa. */
-  private esTitular(
+  private isHolder(
     profile: { targetId: string; createdByUserId?: string | null } | null,
     actor: AuthenticatedUser,
   ): boolean {
     if (!profile) return false;
     return (
-      this.sujetosDe(actor).includes(profile.targetId) ||
+      this.subjects(actor).includes(profile.targetId) ||
       profile.createdByUserId === actor.id
     );
   }
@@ -112,7 +112,7 @@ export class CommunityVisibilityService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.esTitular(profile, actor)) return;
+    if (this.isHolder(profile, actor)) return;
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
     );
@@ -142,7 +142,7 @@ export class CommunityVisibilityService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.esTitular(profile, actor)) return;
+    if (this.isHolder(profile, actor)) return;
     throw new ForbiddenException(
       'No se puede escribir en el grafo social con un perfil ajeno',
     );
@@ -184,8 +184,8 @@ export class CommunityVisibilityService {
     }
     // Se prueban los sujetos en orden —perfil profesional antes que cuenta—
     // porque es el orden en que el módulo los escribe.
-    for (const sujeto of this.sujetosDe(actor)) {
-      const own = await this.profilesRepo.findByTarget(em, sujeto);
+    for (const subject of this.subjects(actor)) {
+      const own = await this.profilesRepo.findByTarget(em, subject);
       if (own) return own.id;
     }
     return undefined;

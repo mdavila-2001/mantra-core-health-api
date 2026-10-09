@@ -62,7 +62,7 @@ function build() {
 
 describe('DiagnosticsSpecimensService', () => {
   describe('catálogos de tipo de espécimen y de contenedor', () => {
-    const alta = (specimenTypeConceptId: string) => ({
+    const registration = (specimenTypeConceptId: string) => ({
       patientProfileId: 'p1',
       custodianTenantId: 't1',
       specimenTypeConceptId,
@@ -74,7 +74,7 @@ describe('DiagnosticsSpecimensService', () => {
         id: 's1',
         statusConceptId: DIAG.SPECIMEN_COLLECTED,
       });
-      await d.service.createSpecimen(alta(DIAG.SPECIMEN_TYPE_SERUM), actor);
+      await d.service.createSpecimen(registration(DIAG.SPECIMEN_TYPE_SERUM), actor);
       expect(d.repo.createSpecimen).toHaveBeenCalled();
     });
 
@@ -106,7 +106,7 @@ describe('DiagnosticsSpecimensService', () => {
         SPECIMEN_TYPE_CONCEPTS[SPECIMEN_TYPE_CONCEPTS.length - 1],
       ]) {
         await expect(
-          d.service.createSpecimen(alta(type), actor),
+          d.service.createSpecimen(registration(type), actor),
         ).resolves.toBeDefined();
       }
       for (const type of [
@@ -126,7 +126,7 @@ describe('DiagnosticsSpecimensService', () => {
     it('inválido: un concepto que existe pero no es un tipo de espécimen → 422 con motivo estable, sin abrir la transacción', async () => {
       const d = build();
       const error = await d.service
-        .createSpecimen(alta(DIAG.SPECIMEN_COLLECTED), actor)
+        .createSpecimen(registration(DIAG.SPECIMEN_COLLECTED), actor)
         .catch((e: unknown) => e);
       expect(error).toBeInstanceOf(PreconditionFailedException);
       const body = (error as PreconditionFailedException).getResponse();

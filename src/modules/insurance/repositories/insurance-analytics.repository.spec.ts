@@ -20,15 +20,15 @@ const BOB = 'concept-bob';
 
 /** Doble de `EntityManager`: sólo hace falta `getConnection().execute`, como el
  * resto de las agregaciones SQL del repo (`ProcedureNomenclatureService`). */
-function build(respuestas: unknown[][] = []) {
-  const llamadas: { sql: string; params: unknown[] }[] = [];
+function build(responses: unknown[][] = []) {
+  const calls: { sql: string; params: unknown[] }[] = [];
   let i = 0;
   const execute = mockFn((sql: string, params: unknown[]) => {
-    llamadas.push({ sql, params });
-    return Promise.resolve(respuestas[i++] ?? []);
+    calls.push({ sql, params });
+    return Promise.resolve(responses[i++] ?? []);
   });
   const em = { getConnection: () => ({ execute }) } as never;
-  return { em, llamadas, repo: new InsuranceAnalyticsRepository() };
+  return { em, llamadas: calls, repo: new InsuranceAnalyticsRepository() };
 }
 
 describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {

@@ -3,10 +3,10 @@ import { INS } from '../insurance.concepts';
 import { PRAC } from '../../practice/practice.concepts';
 import { PractitionerInsuranceNetworksService } from './practitioner-insurance-networks.service';
 
-function build(filas: unknown[]) {
+function build(rows: unknown[]) {
   const execute = jest
     .fn<(sql: string, params: unknown[]) => Promise<unknown[]>>()
-    .mockResolvedValue(filas);
+    .mockResolvedValue(rows);
   const em = { fork: () => ({ getConnection: () => ({ execute }) }) };
   return {
     service: new PractitionerInsuranceNetworksService(em as never),

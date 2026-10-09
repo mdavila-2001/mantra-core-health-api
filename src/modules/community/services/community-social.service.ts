@@ -155,7 +155,7 @@ export class CommunitySocialService {
    * resolver lo que el token ya dice ataría los dos módulos por una lectura que
    * no aporta nada.
    */
-  private sujetoDe(actor: AuthenticatedUser): {
+  private subject(actor: AuthenticatedUser): {
     targetId: string;
     targetType: 'USER' | 'PRACTITIONER';
   } {
@@ -184,18 +184,18 @@ export class CommunitySocialService {
    * El orden importa: primero el perfil profesional, que es el sujeto canónico
    * de quien ejerce, y sólo si no tiene vitrina se mira la cuenta.
    */
-  private sujetosDe(actor: AuthenticatedUser): string[] {
+  private subjects(actor: AuthenticatedUser): string[] {
     return actor.practitionerProfileId
       ? [actor.practitionerProfileId, actor.id]
       : [actor.id];
   }
 
   /** La vitrina de cualquiera de los sujetos del actor, o `null`. */
-  private async vitrinaDe(
+  private async showcaseOf(
     em: EntityManager,
     actor: AuthenticatedUser,
   ): Promise<Awaited<ReturnType<PublicProfilesRepository['findByTarget']>>> {
-    for (const targetId of this.sujetosDe(actor)) {
+    for (const targetId of this.subjects(actor)) {
       const profile = await this.profilesRepo.findByTarget(em, targetId);
       if (profile) return profile;
     }
@@ -225,7 +225,7 @@ export class CommunitySocialService {
    */
   async getOwnProfileStats(actor: AuthenticatedUser): Promise<ProfileStatsDto> {
     const em = this.em.fork();
-    const profile = await this.vitrinaDe(em, actor);
+    const profile = await this.showcaseOf(em, actor);
     if (!profile) {
       return { windowDays: 7, views: 0, searchAppearances: 0, daily: [] };
     }
@@ -236,7 +236,7 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<OwnPublicProfileDto | null> {
     const em = this.em.fork();
-    const profile = await this.vitrinaDe(em, actor);
+    const profile = await this.showcaseOf(em, actor);
     if (!profile) {
       return null;
     }
@@ -296,15 +296,15 @@ export class CommunitySocialService {
       'Upserting own public profile',
     );
 
-    const { targetId, targetType } = this.sujetoDe(actor);
+    const { targetId, targetType } = this.subject(actor);
 
     await this.em.transactional(async (tx) => {
       // El slug es la dirección pública: dos vitrinas con el mismo texto son dos
       // enlaces que llevan a personas distintas según cuál resuelva primero.
-      const ocupado = await this.profilesRepo.findBySlug(tx, dto.slug);
+      const busy = await this.profilesRepo.findBySlug(tx, dto.slug);
       // Contra todos los sujetos del actor, no sólo el preferido: si su vitrina
       // está a nombre de la cuenta, conservar su propio slug no es un conflicto.
-      if (ocupado && !this.sujetosDe(actor).includes(ocupado.targetId)) {
+      if (busy && !this.subjects(actor).includes(busy.targetId)) {
         throw new ConflictException('Ese enlace ya está en uso', {
           slug: dto.slug,
         });
@@ -348,29 +348,29 @@ export class CommunitySocialService {
 
       // Misma resolución que la lectura: si la vitrina existe a nombre de la
       // cuenta, editarla es editar la suya, no crear una segunda.
-      const existente = await this.vitrinaDe(tx, actor);
-      if (existente) {
-        existente.slug = dto.slug;
-        existente.displayName = dto.displayName;
-        existente.headline = dto.headline;
-        existente.biography = dto.biography;
+      const existing = await this.showcaseOf(tx, actor);
+      if (existing) {
+        existing.slug = dto.slug;
+        existing.displayName = dto.displayName;
+        existing.headline = dto.headline;
+        existing.biography = dto.biography;
         if (dto.acceptsReviews !== undefined) {
-          existente.acceptsReviews = dto.acceptsReviews;
+          existing.acceptsReviews = dto.acceptsReviews;
         }
         // Omitir `visibility` conserva la que tenga. Un `PUT` idempotente que
         // no menciona el campo no puede significar «publicame en internet», y
         // tampoco «despublicame»: significa que la pantalla no lo editó.
         if (dto.visibility !== undefined) {
-          existente.visibilityConceptId =
+          existing.visibilityConceptId =
             PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility];
         }
         if (dto.avatarFileId !== undefined) {
-          existente.avatarFileId = dto.avatarFileId ?? undefined;
+          existing.avatarFileId = dto.avatarFileId ?? undefined;
         }
         if (dto.coverFileId !== undefined) {
-          existente.coverFileId = dto.coverFileId ?? undefined;
+          existing.coverFileId = dto.coverFileId ?? undefined;
         }
-        touch(existente, actor.id);
+        touch(existing, actor.id);
       } else {
         this.profilesRepo.create(tx, {
           tenantId: dto.tenantId,
@@ -399,13 +399,13 @@ export class CommunitySocialService {
     // Se relee en vez de devolver lo que se acaba de escribir: así quien edita
     // ve lo mismo que va a ver al recargar, incluido el estado de verificación
     // que esta operación no toca.
-    const guardado = await this.getOwnProfile(actor);
-    if (!guardado) {
+    const saved = await this.getOwnProfile(actor);
+    if (!saved) {
       throw new PreconditionFailedException(
         'No se pudo recuperar el perfil público recién guardado',
       );
     }
-    return guardado;
+    return saved;
   }
 
   /** Bootstrap: proyecta un sujeto de otro módulo como perfil público. */
@@ -810,25 +810,25 @@ export class CommunitySocialService {
       // rastro de que ese bloqueo existió. Volver a bloquear reactiva esa misma
       // fila. Sin distinguir el estado, el 409 de duplicado convertía «bloqueé,
       // desbloqueé, quiero volver a bloquear» en un error permanente.
-      const previo = await this.blocksRepo.findByPair(
+      const previous = await this.blocksRepo.findByPair(
         tx,
         dto.blockerProfileId,
         dto.blockedProfileId,
       );
-      if (previo?.statusConceptId === CONCEPTS.STATE_ACTIVE)
+      if (previous?.statusConceptId === CONCEPTS.STATE_ACTIVE)
         throw new ConflictException('El usuario ya está bloqueado', {
           blockedProfileId: dto.blockedProfileId,
         });
 
-      if (previo) {
-        previo.statusConceptId = CONCEPTS.STATE_ACTIVE;
+      if (previous) {
+        previous.statusConceptId = CONCEPTS.STATE_ACTIVE;
         if (dto.reason) {
-          previo.reasonConceptId = BLOCK_REASON_BY_CODE[dto.reason];
+          previous.reasonConceptId = BLOCK_REASON_BY_CODE[dto.reason];
         }
-        touch(previo, actor.id);
+        touch(previous, actor.id);
       }
       const block =
-        previo ??
+        previous ??
         this.blocksRepo.create(tx, {
           blockerProfileId: dto.blockerProfileId,
           blockedProfileId: dto.blockedProfileId,

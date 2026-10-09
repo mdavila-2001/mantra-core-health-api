@@ -321,7 +321,7 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
  * tocar dos lugares y olvidarse de uno dejaba una pantalla mostrando menos que
  * la otra, en silencio.
  */
-export const CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
+export const DIAGNOSTIC_CATEGORIES: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_LAB,
   DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
 ];
@@ -332,7 +332,7 @@ export const CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
  * no trae tubo) y anatomía patológica entra, porque su pieza también se recibe,
  * se rotula y se custodia.
  */
-export const CATEGORIAS_CON_ESPECIMEN: readonly string[] = [
+export const CATEGORIES_WITH_SPECIMEN: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_LAB,
   CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
 ];

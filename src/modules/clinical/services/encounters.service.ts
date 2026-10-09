@@ -86,7 +86,7 @@ export class EncountersService {
         encounterId,
       });
     }
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       encounter.patientProfileId,
       actor,
     );
@@ -119,7 +119,7 @@ export class EncountersService {
         encounterId,
       });
     }
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       encounter.patientProfileId,
       actor,
     );
@@ -155,12 +155,12 @@ export class EncountersService {
       }
 
       if (dto.appointmentId) {
-        const encuentroDeLaCita = await this.resolverEncuentroDeLaCita(
+        const appointmentEncounter = await this.resolverAppointmentEncounter(
           tx,
           dto.appointmentId,
         );
-        if (encuentroDeLaCita) {
-          return encuentroDeLaCita;
+        if (appointmentEncounter) {
+          return appointmentEncounter;
         }
       }
 
@@ -216,7 +216,7 @@ export class EncountersService {
         { operation: 'clinical.encounter.check-in', encounterId: encounter.id },
         'Encounter opened',
       );
-      return this.aRespuesta(encounter, participantIds, locationIds);
+      return this.toResponse(encounter, participantIds, locationIds);
     });
   }
 
@@ -230,7 +230,7 @@ export class EncountersService {
    * @param appointmentId - Cita clínica referenciada por el check-in.
    * @returns La respuesta del encuentro reutilizado, o `null` si hay que crear uno.
    */
-  private async resolverEncuentroDeLaCita(
+  private async resolverAppointmentEncounter(
     tx: EntityManager,
     appointmentId: string,
   ): Promise<EncounterResponseDto | null> {
@@ -238,11 +238,11 @@ export class EncountersService {
     // no existe, se sigue igual: la FK plana produce el mismo 422 de hoy.
     await this.encountersRepo.findAppointmentForUpdate(tx, appointmentId);
 
-    const previos = await this.encountersRepo.findByAppointmentId(
+    const previous = await this.encountersRepo.findByAppointmentId(
       tx,
       appointmentId,
     );
-    const previo = previos[0];
+    const previo = previous[0];
     if (!previo) {
       return null;
     }
@@ -268,7 +268,7 @@ export class EncountersService {
         },
         'Encounter reused',
       );
-      return this.aRespuesta(
+      return this.toResponse(
         previo,
         participants.map((p) => p.id),
         locations.map((l) => l.id),
@@ -300,7 +300,7 @@ export class EncountersService {
    * @param locationIds - Identificadores de sus ubicaciones activas.
    * @returns El DTO de respuesta del módulo.
    */
-  private aRespuesta(
+  private toResponse(
     encounter: Encounters,
     participantIds: string[],
     locationIds: string[],
@@ -338,7 +338,7 @@ export class EncountersService {
         });
       }
       // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
-      await this.clinicalRead.assertPuedeEscribirHistoria(
+      await this.clinicalRead.assertCanWriteHistory(
         encounter.patientProfileId,
         actor,
       );
@@ -397,7 +397,7 @@ export class EncountersService {
         { operation: 'clinical.encounter.close', encounterId },
         'Encounter closed',
       );
-      return this.aRespuesta(
+      return this.toResponse(
         encounter,
         participants.map((p) => p.id),
         locations.map((l) => l.id),

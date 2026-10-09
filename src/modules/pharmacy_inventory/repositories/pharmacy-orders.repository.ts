@@ -364,9 +364,9 @@ export class PharmacyOrdersRepository {
 
 /** El nombre pintable de una persona: display, o nombre y apellido. */
 function personDisplayName(person: Persons): string | null {
-  const compuesto = [person.name, person.lastName]
-    .filter((parte): parte is string => typeof parte === 'string')
+  const composite = [person.name, person.lastName]
+    .filter((part): part is string => typeof part === 'string')
     .join(' ')
     .trim();
-  return person.displayName ?? (compuesto === '' ? null : compuesto);
+  return person.displayName ?? (composite === '' ? null : composite);
 }

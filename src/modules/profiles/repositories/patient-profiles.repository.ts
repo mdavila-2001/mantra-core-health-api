@@ -139,17 +139,17 @@ export class PatientProfilesRepository {
     criteria: PatientSearchCriteria,
     limit: number,
   ): Promise<PatientSearchRow[]> {
-    const condiciones: string[] = [];
+    const conditions: string[] = [];
     const params: unknown[] = [];
 
     if (criteria.afterPatientCode !== undefined) {
-      condiciones.push('pp.patient_code > ?');
+      conditions.push('pp.patient_code > ?');
       params.push(criteria.afterPatientCode);
     }
 
     if (criteria.query) {
       const patron = `%${criteria.query}%`;
-      condiciones.push(
+      conditions.push(
         `(pp.patient_code ilike ?
           or exists (select 1
                        from profiles.persons p
@@ -174,17 +174,17 @@ export class PatientProfilesRepository {
                                   and i.issuer_administrative_area_concept_id = ?`;
         params.push(criteria.issuerAdministrativeAreaConceptId);
       }
-      condiciones.push(`${documento})`);
+      conditions.push(`${documento})`);
     }
 
     // El separador es un salto real dentro de un template: las condiciones
     // quedan una por línea en el SQL, que es lo que hace legible el EXPLAIN.
-    const separador = `
+    const separator = `
       and `;
     const where =
-      condiciones.length > 0 ? `where ${condiciones.join(separador)}` : '';
+      conditions.length > 0 ? `where ${conditions.join(separator)}` : '';
 
-    const filas = await em
+    const rows = await em
       .getConnection()
       .execute<{ profile_id: string; patient_code: string }[]>(
         `select pp.profile_id, pp.patient_code
@@ -195,7 +195,7 @@ export class PatientProfilesRepository {
         [...params, limit],
       );
 
-    return filas.map((f) => ({
+    return rows.map((f) => ({
       profileId: f.profile_id,
       patientCode: f.patient_code,
     }));

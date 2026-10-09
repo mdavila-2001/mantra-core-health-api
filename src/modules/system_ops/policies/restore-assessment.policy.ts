@@ -27,7 +27,7 @@ export const RESTORE_OBJECTIVE_STATUSES = Object.values(
 ) as RestoreObjectiveStatus[];
 
 /** Objetivos que fija la política contra los que se contrasta la corrida. */
-export interface ObjetivosDePolitica {
+export interface PolicyTargets {
   /** RPO objetivo en segundos; `undefined` si la política no lo fija. */
   rpoSeconds?: number;
   /** RTO objetivo en segundos; `undefined` si la política no lo fija. */
@@ -35,7 +35,7 @@ export interface ObjetivosDePolitica {
 }
 
 /** Lo que aporta quien registra la corrida. */
-export interface MedicionesDeCorrida {
+export interface RunMeasurements {
   /** RPO medido en segundos. */
   measuredRpoSeconds?: number;
   /** RTO medido en segundos. */
@@ -47,7 +47,7 @@ export interface MedicionesDeCorrida {
 }
 
 /** Evaluación con el motivo, para el log y para el cuerpo de la respuesta. */
-export interface EvaluacionDeRestauracion {
+export interface RestoreEvaluation {
   /** Estado trivalente resultante. */
   status: RestoreObjectiveStatus;
   /** Por qué quedó en ese estado, en castellano. */
@@ -62,16 +62,16 @@ export interface EvaluacionDeRestauracion {
  * recién al final la aprobación. Así una restauración fallida no se convierte en
  * exitosa por omitir métricas.
  *
- * @param politica - Objetivos declarados en la política de backup.
- * @param corrida - Mediciones y resultado aportados al registrar la prueba.
+ * @param policy - Objetivos declarados en la política de backup.
+ * @param run - Mediciones y resultado aportados al registrar la prueba.
  * @returns El estado trivalente y el motivo que lo justifica.
  */
-export function evaluarRestauracion(
-  politica: ObjetivosDePolitica,
-  corrida: MedicionesDeCorrida,
-): EvaluacionDeRestauracion {
+export function evaluateRestore(
+  policy: PolicyTargets,
+  run: RunMeasurements,
+): RestoreEvaluation {
   // 1. Un fallo informado manda: ninguna omisión posterior lo revierte.
-  if (corrida.reportedFailure) {
+  if (run.reportedFailure) {
     return {
       status: RestoreObjectiveStatus.FAILED,
       motivo: 'La restauración se registró con resultado fallido',
@@ -79,7 +79,7 @@ export function evaluarRestauracion(
   }
 
   // 2. Integridad verificada y negativa: los datos volvieron mal.
-  if (corrida.integrityCheckPassed === false) {
+  if (run.integrityCheckPassed === false) {
     return {
       status: RestoreObjectiveStatus.FAILED,
       motivo: 'La verificación de integridad no pasó',
@@ -87,21 +87,21 @@ export function evaluarRestauracion(
   }
 
   // 3. Objetivo superado por una medición presente: incumplimiento demostrado.
-  const superados = objetivosSuperados(politica, corrida);
-  if (superados.length > 0) {
+  const exceeded = exceededTargets(policy, run);
+  if (exceeded.length > 0) {
     return {
       status: RestoreObjectiveStatus.FAILED,
-      motivo: `Objetivo superado: ${superados.join(', ')}`,
+      motivo: `Objetivo superado: ${exceeded.join(', ')}`,
     };
   }
 
   // 4. Falta evidencia. Cada objetivo que la política fija tiene que venir
   //    medido, y la integridad tiene que haberse verificado explícitamente.
-  const faltantes = evidenciaFaltante(politica, corrida);
-  if (faltantes.length > 0) {
+  const missing = missingEvidence(policy, run);
+  if (missing.length > 0) {
     return {
       status: RestoreObjectiveStatus.NOT_MEASURED,
-      motivo: `Sin evidencia suficiente para aprobar: falta ${faltantes.join(', ')}`,
+      motivo: `Sin evidencia suficiente para aprobar: falta ${missing.join(', ')}`,
     };
   }
 
@@ -115,34 +115,34 @@ export function evaluarRestauracion(
 /**
  * Objetivos que la corrida superó, contando sólo los que tienen medición.
  *
- * @param politica - Objetivos declarados en la política.
- * @param corrida - Mediciones aportadas.
+ * @param policy - Objetivos declarados en la política.
+ * @param run - Mediciones aportadas.
  * @returns Etiquetas de los objetivos superados.
  */
-function objetivosSuperados(
-  politica: ObjetivosDePolitica,
-  corrida: MedicionesDeCorrida,
+function exceededTargets(
+  policy: PolicyTargets,
+  run: RunMeasurements,
 ): string[] {
-  const superados: string[] = [];
+  const exceeded: string[] = [];
   if (
-    corrida.measuredRpoSeconds !== undefined &&
-    politica.rpoSeconds !== undefined &&
-    corrida.measuredRpoSeconds > politica.rpoSeconds
+    run.measuredRpoSeconds !== undefined &&
+    policy.rpoSeconds !== undefined &&
+    run.measuredRpoSeconds > policy.rpoSeconds
   ) {
-    superados.push(
-      `RPO medido ${corrida.measuredRpoSeconds}s sobre ${politica.rpoSeconds}s`,
+    exceeded.push(
+      `RPO medido ${run.measuredRpoSeconds}s sobre ${policy.rpoSeconds}s`,
     );
   }
   if (
-    corrida.measuredRtoSeconds !== undefined &&
-    politica.rtoSeconds !== undefined &&
-    corrida.measuredRtoSeconds > politica.rtoSeconds
+    run.measuredRtoSeconds !== undefined &&
+    policy.rtoSeconds !== undefined &&
+    run.measuredRtoSeconds > policy.rtoSeconds
   ) {
-    superados.push(
-      `RTO medido ${corrida.measuredRtoSeconds}s sobre ${politica.rtoSeconds}s`,
+    exceeded.push(
+      `RTO medido ${run.measuredRtoSeconds}s sobre ${policy.rtoSeconds}s`,
     );
   }
-  return superados;
+  return exceeded;
 }
 
 /**
@@ -151,29 +151,29 @@ function objetivosSuperados(
  * Si la política no fija un objetivo, no se reclama su medición: no hay umbral
  * contra el cual contrastarla.
  *
- * @param politica - Objetivos declarados en la política.
- * @param corrida - Mediciones aportadas.
+ * @param policy - Objetivos declarados en la política.
+ * @param run - Mediciones aportadas.
  * @returns Descripción de lo que falta.
  */
-function evidenciaFaltante(
-  politica: ObjetivosDePolitica,
-  corrida: MedicionesDeCorrida,
+function missingEvidence(
+  policy: PolicyTargets,
+  run: RunMeasurements,
 ): string[] {
-  const faltantes: string[] = [];
+  const missing: string[] = [];
   if (
-    politica.rpoSeconds !== undefined &&
-    corrida.measuredRpoSeconds === undefined
+    policy.rpoSeconds !== undefined &&
+    run.measuredRpoSeconds === undefined
   ) {
-    faltantes.push('el RPO medido');
+    missing.push('el RPO medido');
   }
   if (
-    politica.rtoSeconds !== undefined &&
-    corrida.measuredRtoSeconds === undefined
+    policy.rtoSeconds !== undefined &&
+    run.measuredRtoSeconds === undefined
   ) {
-    faltantes.push('el RTO medido');
+    missing.push('el RTO medido');
   }
-  if (corrida.integrityCheckPassed !== true) {
-    faltantes.push('la verificación de integridad');
+  if (run.integrityCheckPassed !== true) {
+    missing.push('la verificación de integridad');
   }
-  return faltantes;
+  return missing;
 }

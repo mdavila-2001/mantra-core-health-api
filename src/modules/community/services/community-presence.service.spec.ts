@@ -33,9 +33,9 @@ describe('CommunityPresenceService (F4.2)', () => {
     // `SET … GET` devuelve el valor anterior: `null` la primera vez.
     d.redis.set.mockResolvedValueOnce(null);
 
-    const novedad = await d.service.marcarEnLinea('p-1');
+    const news = await d.service.markInLine('p-1');
 
-    expect(novedad).toBe(true);
+    expect(news).toBe(true);
     expect(d.redis.set).toHaveBeenCalledWith(
       'community:presence:p-1',
       expect.any(String),
@@ -48,17 +48,17 @@ describe('CommunityPresenceService (F4.2)', () => {
   it('renovar una presencia que ya existía no es novedad', async () => {
     const d = build();
     d.redis.set.mockResolvedValueOnce('2026-09-09T10:00:00.000Z');
-    expect(await d.service.marcarEnLinea('p-1')).toBe(false);
+    expect(await d.service.markInLine('p-1')).toBe(false);
   });
 
   it('desconectar borra la presencia y deja la última vez', async () => {
     const d = build();
-    const cuando = await d.service.marcarDesconectado('p-1');
-    expect(cuando).toBeInstanceOf(Date);
+    const when = await d.service.markDisconnected('p-1');
+    expect(when).toBeInstanceOf(Date);
     expect(d.redis.del).toHaveBeenCalledWith('community:presence:p-1');
     expect(d.redis.set).toHaveBeenCalledWith(
       'community:lastseen:p-1',
-      cuando!.toISOString(),
+      when!.toISOString(),
       'EX',
       expect.any(Number),
     );
@@ -70,7 +70,7 @@ describe('CommunityPresenceService (F4.2)', () => {
       .mockResolvedValueOnce(['2026-09-09T10:00:00.000Z', null])
       .mockResolvedValueOnce([null, '2026-09-08T18:30:00.000Z']);
 
-    const res = await d.service.presenciaDe(['p-1', 'p-2']);
+    const res = await d.service.presence(['p-1', 'p-2']);
 
     expect(res).toEqual([
       { profileId: 'p-1', online: true, lastSeenAt: null },
@@ -88,16 +88,16 @@ describe('CommunityPresenceService (F4.2)', () => {
     d.redis.mget.mockRejectedValue(new Error('ECONNREFUSED'));
     d.redis.set.mockRejectedValue(new Error('ECONNREFUSED'));
 
-    expect(await d.service.presenciaDe(['p-1'])).toEqual([
+    expect(await d.service.presence(['p-1'])).toEqual([
       { profileId: 'p-1', online: false, lastSeenAt: null },
     ]);
-    expect(await d.service.marcarEnLinea('p-1')).toBe(false);
+    expect(await d.service.markInLine('p-1')).toBe(false);
     expect(d.logger.warn).toHaveBeenCalled();
   });
 
   it('sin perfiles no toca Redis', async () => {
     const d = build();
-    expect(await d.service.presenciaDe([])).toEqual([]);
+    expect(await d.service.presence([])).toEqual([]);
     expect(d.redis.mget).not.toHaveBeenCalled();
   });
 });

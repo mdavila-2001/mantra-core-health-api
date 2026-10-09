@@ -181,7 +181,7 @@ export class ChartDocumentsService {
       });
     }
 
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       record.patientProfileId,
       actor,
     );

@@ -14,9 +14,9 @@ import { resolveInsuranceCurrencyCode } from '../insurance-currency';
 import { INS } from '../insurance.concepts';
 
 /** El mismo objeto sin las claves `null`/`undefined` (patrón de `profiles-patients.service.ts`). */
-function sinCamposAusentes<T extends object>(respuesta: T): T {
+function withoutAbsentFields<T extends object>(response: T): T {
   return Object.fromEntries(
-    Object.entries(respuesta).filter(
+    Object.entries(response).filter(
       ([, valor]) => valor !== null && valor !== undefined,
     ),
   ) as T;
@@ -63,7 +63,7 @@ export class DeclaredCoveragesReader {
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
     const referenceDate = patientCoverageReferenceDate();
-    const filas = await em.getConnection().execute<
+    const rows = await em.getConnection().execute<
       {
         coverage_id: string;
         carrier_id: string;
@@ -111,10 +111,10 @@ export class DeclaredCoveragesReader {
         order by c.coverage_order nulls last, c.id`,
       [patientProfileId],
     );
-    if (filas.length === 0) return [];
+    if (rows.length === 0) return [];
 
-    const planIds = [...new Set(filas.map((fila) => fila.insurance_plan_id))];
-    const beneficios = await em.getConnection().execute<
+    const planIds = [...new Set(rows.map((row) => row.insurance_plan_id))];
+    const benefits = await em.getConnection().execute<
       {
         id: string;
         insurance_plan_id: string;
@@ -145,51 +145,51 @@ export class DeclaredCoveragesReader {
         order by b.insurance_plan_id, b.created_at, b.id`,
       planIds,
     );
-    const benefitsByPlan = new Map<string, typeof beneficios>();
-    for (const beneficio of beneficios) {
-      const current = benefitsByPlan.get(beneficio.insurance_plan_id) ?? [];
-      current.push(beneficio);
-      benefitsByPlan.set(beneficio.insurance_plan_id, current);
+    const benefitsByPlan = new Map<string, typeof benefits>();
+    for (const benefit of benefits) {
+      const current = benefitsByPlan.get(benefit.insurance_plan_id) ?? [];
+      current.push(benefit);
+      benefitsByPlan.set(benefit.insurance_plan_id, current);
     }
 
-    return filas.map((fila) => {
+    return rows.map((row) => {
       const periods = [
         {
-          statusConceptId: fila.status_concept_id,
+          statusConceptId: row.status_concept_id,
           activeConceptId: INS.COVERAGE_ACTIVE,
-          effectiveFrom: fila.effective_from,
-          effectiveTo: fila.effective_to,
+          effectiveFrom: row.effective_from,
+          effectiveTo: row.effective_to,
         },
         {
-          statusConceptId: fila.plan_status_concept_id,
+          statusConceptId: row.plan_status_concept_id,
           activeConceptId: INS.PLAN_ACTIVE,
-          effectiveFrom: fila.plan_effective_from,
-          effectiveTo: fila.plan_effective_to,
+          effectiveFrom: row.plan_effective_from,
+          effectiveTo: row.plan_effective_to,
         },
       ];
-      return sinCamposAusentes({
-        id: fila.coverage_id,
-        carrierName: fila.carrier_name,
-        planName: fila.plan_name,
-        isPublic: isPublicCarrierId(fila.carrier_id),
-        policyIdentifier: fila.policy_identifier,
-        memberIdentifier: fila.member_identifier,
-        verified: fila.verification_status_concept_id === INS.VERIFY_VERIFIED,
-        status: fila.status_display,
-        statusCode: fila.status_code,
+      return withoutAbsentFields({
+        id: row.coverage_id,
+        carrierName: row.carrier_name,
+        planName: row.plan_name,
+        isPublic: isPublicCarrierId(row.carrier_id),
+        policyIdentifier: row.policy_identifier,
+        memberIdentifier: row.member_identifier,
+        verified: row.verification_status_concept_id === INS.VERIFY_VERIFIED,
+        status: row.status_display,
+        statusCode: row.status_code,
         validityStatus: patientCoverageValidity(referenceDate, periods),
         referenceDate,
-        effectiveFrom: fila.effective_from,
-        effectiveTo: fila.effective_to,
+        effectiveFrom: row.effective_from,
+        effectiveTo: row.effective_to,
         currencyCode: resolveInsuranceCurrencyCode(
-          fila.currency_concept_id,
-          fila.currency_code,
+          row.currency_concept_id,
+          row.currency_code,
         ),
-        carrierWhatsappNumber: fila.whatsapp_number,
-        carrierCallCenterPhone: fila.call_center_phone,
-        benefits: (benefitsByPlan.get(fila.insurance_plan_id) ?? []).map(
+        carrierWhatsappNumber: row.whatsapp_number,
+        carrierCallCenterPhone: row.call_center_phone,
+        benefits: (benefitsByPlan.get(row.insurance_plan_id) ?? []).map(
           (benefit) =>
-            sinCamposAusentes({
+            withoutAbsentFields({
               id: benefit.id,
               statusCode: benefit.status_code,
               categoryCode: benefit.category_code,
@@ -212,8 +212,8 @@ export class DeclaredCoveragesReader {
               ]),
             }) as CoverageBenefitSummaryDto,
         ),
-        planId: fila.insurance_plan_id,
-        coverageOrder: fila.coverage_order ?? 0,
+        planId: row.insurance_plan_id,
+        coverageOrder: row.coverage_order ?? 0,
       }) as OwnCoverageDto;
     });
   }

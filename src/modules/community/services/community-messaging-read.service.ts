@@ -185,14 +185,14 @@ export class CommunityMessagingReadService {
       throw error;
     }
 
-    const mensajes =
+    const messages =
       await this.conversationsRepo.findLiveMessagesByAttachmentFileId(
         em,
         fileId,
       );
 
     if (
-      !mensajes.some((mensaje) => mensaje.conversationId === conversationId)
+      !messages.some((message) => message.conversationId === conversationId)
     ) {
       this.logger.warn(
         {
@@ -271,7 +271,7 @@ export class CommunityMessagingReadService {
       em,
       participations.map((participation) => participation.conversationId),
     );
-    const participacionPorConversacion = new Map(
+    const participationByConversation = new Map(
       participations.map((participation) => [
         participation.conversationId,
         participation,
@@ -281,56 +281,56 @@ export class CommunityMessagingReadService {
     // Los participantes de todas las conversaciones de la página, y sus
     // perfiles, en **dos** consultas: una por fila multiplicaría la bandeja de
     // alguien con cincuenta hilos por cincuenta.
-    const participantesPorConversacion = new Map<
+    const participantsByConversation = new Map<
       string,
       ConversationParticipants[]
     >();
     await Promise.all(
       conversations.map(async (conversation) => {
-        const participantes = await this.conversationsRepo.findParticipants(
+        const participants = await this.conversationsRepo.findParticipants(
           em,
           conversation.id,
         );
-        participantesPorConversacion.set(
+        participantsByConversation.set(
           conversation.id,
-          participantes.filter(
-            (participante) => participante.participantProfileId !== profileId,
+          participants.filter(
+            (participant) => participant.participantProfileId !== profileId,
           ),
         );
       }),
     );
-    const perfiles = await this.profilesRepo.listByIds(em, [
+    const profiles = await this.profilesRepo.listByIds(em, [
       ...new Set(
-        [...participantesPorConversacion.values()]
+        [...participantsByConversation.values()]
           .flat()
-          .map((participante) => participante.participantProfileId),
+          .map((participant) => participant.participantProfileId),
       ),
     ]);
-    const nombrePorPerfil = new Map(
-      perfiles.map((perfil) => [perfil.id, perfil.displayName]),
+    const nameByProfile = new Map(
+      profiles.map((profile) => [profile.id, profile.displayName]),
     );
-    const avatarPorPerfil = new Map(
-      perfiles.map((perfil) => [perfil.id, this.fileUrl(perfil.avatarFileId)]),
+    const avatarByProfile = new Map(
+      profiles.map((profile) => [profile.id, this.fileUrl(profile.avatarFileId)]),
     );
 
     const todas: ConversationListItemDto[] = await Promise.all(
       conversations.map(async (conversation) => {
-        const propia = participacionPorConversacion.get(conversation.id);
-        const otros = participantesPorConversacion.get(conversation.id) ?? [];
+        const own = participationByConversation.get(conversation.id);
+        const other = participantsByConversation.get(conversation.id) ?? [];
         const [lastMessage, unreadCount] = await Promise.all([
           this.conversationsRepo.findLastMessage(em, conversation.id),
           this.conversationsRepo.countUnread(
             em,
             conversation.id,
             profileId,
-            propia?.lastReadMessageId,
+            own?.lastReadMessageId,
           ),
         ]);
         return {
-          peers: otros.map((otro) => ({
+          peers: other.map((otro) => ({
             profileId: otro.participantProfileId,
-            displayName: nombrePorPerfil.get(otro.participantProfileId) ?? null,
-            avatarUrl: avatarPorPerfil.get(otro.participantProfileId) ?? null,
+            displayName: nameByProfile.get(otro.participantProfileId) ?? null,
+            avatarUrl: avatarByProfile.get(otro.participantProfileId) ?? null,
           })),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
@@ -353,15 +353,15 @@ export class CommunityMessagingReadService {
               }
             : null,
           unreadCount,
-          lastMessageReadByPeer: this.leidoPorElOtro(
+          lastMessageReadByPeer: this.readByOther(
             conversation,
             lastMessage,
             profileId,
-            otros,
+            other,
           ),
-          isFavorite: propia?.isFavorite ?? false,
-          isPinned: propia?.isPinned ?? false,
-          archivedAt: propia?.archivedAt ?? null,
+          isFavorite: own?.isFavorite ?? false,
+          isPinned: own?.isPinned ?? false,
+          archivedAt: own?.archivedAt ?? null,
           pinnedMessageId: conversation.pinnedMessageId ?? null,
         };
       }),
@@ -369,31 +369,31 @@ export class CommunityMessagingReadService {
 
     // Fijadas primero; dentro de cada grupo se conserva el orden por último
     // mensaje que ya trae `listConversationsByIds`.
-    const ordenadas = [
+    const sorted = [
       ...todas.filter((item) => item.isPinned),
       ...todas.filter((item) => !item.isPinned),
     ];
 
-    const q = normalizar(options.q ?? '');
-    const recortadas =
+    const q = normalize(options.q ?? '');
+    const trimmed =
       q === ''
-        ? ordenadas
-        : ordenadas.filter(
+        ? sorted
+        : sorted.filter(
             (item) =>
               item.peers.some((peer) =>
-                normalizar(peer.displayName ?? '').includes(q),
-              ) || normalizar(item.lastMessage?.bodyText ?? '').includes(q),
+                normalize(peer.displayName ?? '').includes(q),
+              ) || normalize(item.lastMessage?.bodyText ?? '').includes(q),
           );
 
-    const despuesDe = options.cursor
+    const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
       : undefined;
-    const desde =
-      typeof despuesDe?.id === 'string'
-        ? recortadas.findIndex((item) => item.id === despuesDe.id) + 1
+    const from =
+      typeof after?.id === 'string'
+        ? trimmed.findIndex((item) => item.id === after.id) + 1
         : 0;
-    const page = recortadas.slice(desde, desde + options.limit);
-    const hasMore = desde + options.limit < recortadas.length;
+    const page = trimmed.slice(from, from + options.limit);
+    const hasMore = from + options.limit < trimmed.length;
     const last = page.at(-1);
 
     return {
@@ -482,7 +482,7 @@ export class CommunityMessagingReadService {
         : null;
 
     return {
-      items: page.map((message) => this.aDto(message)),
+      items: page.map((message) => this.toDto(message)),
       count: page.length,
       limit: options.limit,
       nextCursor:
@@ -498,7 +498,7 @@ export class CommunityMessagingReadService {
         : {
             pinnedMessage:
               pinnedMessage && !pinnedMessage.deletedAt
-                ? this.aDto(pinnedMessage)
+                ? this.toDto(pinnedMessage)
                 : null,
           }),
     };
@@ -537,13 +537,13 @@ export class CommunityMessagingReadService {
       em,
       conversationId,
     );
-    const otros = participants
+    const other = participants
       .map((participante) => participante.participantProfileId)
       .filter((otro) => otro !== profileId);
 
     return {
       conversationId,
-      peers: await this.presence.presenciaDe(otros),
+      peers: await this.presence.presence(other),
     };
   }
 
@@ -552,8 +552,8 @@ export class CommunityMessagingReadService {
    * adjunto pero con su lugar: el hilo pinta «Se eliminó este mensaje» y las
    * citas que apuntaban a él siguen sabiendo a qué apuntaban.
    */
-  private aDto(message: DirectMessages): DirectMessageDto {
-    const eliminado =
+  private toDto(message: DirectMessages): DirectMessageDto {
+    const deleted =
       message.deletedAt !== undefined && message.deletedAt !== null;
     return {
       id: message.id,
@@ -561,8 +561,8 @@ export class CommunityMessagingReadService {
       senderProfileId: message.senderProfileId,
       replyToMessageId: message.replyToMessageId ?? null,
       contentTypeConceptId: message.contentTypeConceptId,
-      bodyText: eliminado ? null : (message.bodyText ?? null),
-      attachmentFileId: eliminado ? null : (message.attachmentFileId ?? null),
+      bodyText: deleted ? null : (message.bodyText ?? null),
+      attachmentFileId: deleted ? null : (message.attachmentFileId ?? null),
       isEdited: message.isEdited ?? null,
       deletedAt: message.deletedAt ?? null,
       sentAt: message.sentAt ?? null,
@@ -579,21 +579,21 @@ export class CommunityMessagingReadService {
    * cada fila: `markRead` sin `upToMessageId` deja `lastReadMessageId` en el
    * último, que es lo que pasa cada vez que alguien abre el hilo.
    */
-  private leidoPorElOtro(
+  private readByOther(
     conversation: Conversations,
     lastMessage: DirectMessages | null,
     profileId: string,
-    otros: ConversationParticipants[],
+    other: ConversationParticipants[],
   ): boolean | null {
     if (
       conversation.conversationTypeConceptId !== COMM.CONVERSATION_DIRECT ||
       !lastMessage ||
       lastMessage.senderProfileId !== profileId ||
-      otros.length !== 1
+      other.length !== 1
     ) {
       return null;
     }
-    return otros[0].lastReadMessageId === lastMessage.id;
+    return other[0].lastReadMessageId === lastMessage.id;
   }
 
   /**
@@ -675,8 +675,8 @@ export class CommunityMessagingReadService {
 }
 
 /** Minúsculas y sin acentos, para que «Quispe» encuentre a «quíspe». */
-function normalizar(texto: string): string {
-  return texto
+function normalize(text: string): string {
+  return text
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()

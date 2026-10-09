@@ -304,7 +304,7 @@ describe('ChartTemplatesService', () => {
     });
 
     /** Una plantilla del catálogo con «¿tiene alergias?» → «¿a qué?». */
-    function conPresentacion(d: ReturnType<typeof build>) {
+    function withPresentation(d: ReturnType<typeof build>) {
       d.templatesRepo.findTemplateById.mockResolvedValue({
         id: 'tpl1',
         specialtyConceptId: 'sp1',
@@ -373,12 +373,12 @@ describe('ChartTemplatesService', () => {
 
     it('pega a cada campo del catálogo su lista, su sección y su condición', async () => {
       const d = build();
-      conPresentacion(d);
+      withPresentation(d);
 
       const res = await d.service.getTemplate('tpl1');
 
-      const cual = res.fields.find((f) => f.fieldId === 'f-cual')!;
-      expect(cual).toMatchObject({
+      const which = res.fields.find((f) => f.fieldId === 'f-cual')!;
+      expect(which).toMatchObject({
         section: 'Antecedentes',
         options: ['Medicamentos', 'Alimentos'],
         multiple: true,
@@ -395,7 +395,7 @@ describe('ChartTemplatesService', () => {
 
     it('no sirve los campos que una versión nueva del catálogo retiró', async () => {
       const d = build();
-      conPresentacion(d);
+      withPresentation(d);
 
       const res = await d.service.getTemplate('tpl1');
 

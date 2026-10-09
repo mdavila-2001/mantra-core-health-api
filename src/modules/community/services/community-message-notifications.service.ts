@@ -59,14 +59,14 @@ export class CommunityMessageNotificationsService {
    * Avisa a los demás participantes de un mensaje nuevo.
    *
    * @param conversationId - Hilo donde se envió.
-   * @param remitenteProfileId - Quién escribió; a ése no se le avisa.
-   * @param destinatarioProfileIds - Los demás participantes activos.
+   * @param senderProfileId - Quién escribió; a ése no se le avisa.
+   * @param recipientProfileIds - Los demás participantes activos.
    * @param actorUserId - Cuenta que envió.
    */
-  async mensajeNuevo(
+  async newMessage(
     conversationId: string,
-    remitenteProfileId: string,
-    destinatarioProfileIds: readonly string[],
+    senderProfileId: string,
+    recipientProfileIds: readonly string[],
     // Opcional desde F4.7: la respuesta automática la manda el sistema en
     // nombre de alguien que no tiene sesión abierta, así que no hay usuario
     // que anotar como autor.
@@ -74,22 +74,22 @@ export class CommunityMessageNotificationsService {
   ): Promise<void> {
     try {
       const em = this.em.fork();
-      const remitente = await this.profilesRepo.findById(
+      const sender = await this.profilesRepo.findById(
         em,
-        remitenteProfileId,
+        senderProfileId,
       );
       // El nombre de quien escribe es lo único que hace útil el aviso: «Mensaje
       // nuevo» a secas obliga a abrir el hilo para saber si vale la pena.
-      const deQuien = remitente?.displayName ?? 'Alguien';
+      const ofWhom = sender?.displayName ?? 'Alguien';
 
-      for (const destinatario of destinatarioProfileIds) {
-        const recipientUserId = await this.cuentaDe(em, destinatario);
+      for (const recipient of recipientProfileIds) {
+        const recipientUserId = await this.account(em, recipient);
         if (!recipientUserId) continue;
 
         await this.notifications.emitInApp({
           recipientUserId,
           category: 'MESSAGES',
-          subject: `${deQuien} le escribió`,
+          subject: `${ofWhom} le escribió`,
           bodyText: 'Tiene un mensaje nuevo.',
           destination: { type: 'CONVERSATION', id: conversationId },
           // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
@@ -114,7 +114,7 @@ export class CommunityMessageNotificationsService {
    * @param profileId - Perfil público destinatario.
    * @returns El id de usuario, o `null`.
    */
-  private async cuentaDe(
+  private async account(
     em: EntityManager,
     profileId: string,
   ): Promise<string | null> {

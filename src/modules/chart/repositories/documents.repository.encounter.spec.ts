@@ -7,13 +7,13 @@ import { DocumentRecords } from '../entities';
  * y los archivos de cada documento resueltos en lote (no N+1).
  */
 describe('DocumentsRepository.findByEncounter', () => {
-  function emQueRecuerda(files: unknown[] = []) {
-    const llamadas: unknown[] = [];
+  function rememberingEm(files: unknown[] = []) {
+    const calls: unknown[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
         find: (...args: unknown[]) => {
-          llamadas.push(args);
+          calls.push(args);
           const [entidad] = args;
           if (entidad === DocumentRecords) {
             return Promise.resolve([{ id: 'doc-1', createdAt: new Date() }]);
@@ -25,7 +25,7 @@ describe('DocumentsRepository.findByEncounter', () => {
   }
 
   it('filtra los documentos por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     await new DocumentsRepository().findByEncounter(em, 'enc-1');
 
@@ -37,14 +37,14 @@ describe('DocumentsRepository.findByEncounter', () => {
   });
 
   it('resuelve los archivos del documento en la misma llamada', async () => {
-    const archivo = { fileId: 'f-1', documentRecordId: 'doc-1' };
-    const { em } = emQueRecuerda([archivo]);
+    const file = { fileId: 'f-1', documentRecordId: 'doc-1' };
+    const { em } = rememberingEm([file]);
 
     const [documento] = await new DocumentsRepository().findByEncounter(
       em,
       'enc-1',
     );
 
-    expect(documento.files).toEqual([archivo]);
+    expect(documento.files).toEqual([file]);
   });
 });

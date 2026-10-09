@@ -198,7 +198,7 @@ describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => 
   it('persiste los tres canales y marca la aseguradora como tocada', async () => {
     const { service, repo } = build();
 
-    const resultado = await runWithTenant(TENANT_ID, () =>
+    const result = await runWithTenant(TENANT_ID, () =>
       service.updateContactChannels(
         'carrier-a',
         {
@@ -210,7 +210,7 @@ describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => 
       ),
     );
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       id: 'carrier-a',
       whatsappNumber: '+59171548278',
       callCenterPhone: '800-10-6060',
@@ -267,7 +267,7 @@ describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => 
       supportEmail: 'siniestros@aseguradora.com.bo',
     });
 
-    const resultado = await runWithTenant(TENANT_ID, () =>
+    const result = await runWithTenant(TENANT_ID, () =>
       service.updateContactChannels(
         'carrier-a',
         {
@@ -279,7 +279,7 @@ describe('InsuranceBackboneService.updateContactChannels (subtarea 2.3)', () => 
       ),
     );
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       id: 'carrier-a',
       whatsappNumber: null,
       callCenterPhone: null,
@@ -299,7 +299,7 @@ describe('InsuranceBackboneService.updatePlanPremium (subtarea 3.1, v4.2.14)', (
     };
     (repo.findPlanForCarrier as any).mockResolvedValue(plan);
 
-    const resultado = await runWithTenant(TENANT_ID, () =>
+    const result = await runWithTenant(TENANT_ID, () =>
       service.updatePlanPremium(
         'plan-a',
         { monthlyPremiumAmount: '350.00' } as never,
@@ -314,7 +314,7 @@ describe('InsuranceBackboneService.updatePlanPremium (subtarea 3.1, v4.2.14)', (
     );
     expect(plan.monthlyPremiumAmount).toBe('350.00');
     expect(plan.updatedByUserId).toBe('user-a');
-    expect(resultado).toEqual({ id: 'plan-a', monthlyPremiumAmount: '350.00' });
+    expect(result).toEqual({ id: 'plan-a', monthlyPremiumAmount: '350.00' });
   });
 
   it('null quita la prima declarada', async () => {
@@ -324,7 +324,7 @@ describe('InsuranceBackboneService.updatePlanPremium (subtarea 3.1, v4.2.14)', (
       monthlyPremiumAmount: '350.00',
     });
 
-    const resultado = await runWithTenant(TENANT_ID, () =>
+    const result = await runWithTenant(TENANT_ID, () =>
       service.updatePlanPremium(
         'plan-a',
         { monthlyPremiumAmount: null } as never,
@@ -332,7 +332,7 @@ describe('InsuranceBackboneService.updatePlanPremium (subtarea 3.1, v4.2.14)', (
       ),
     );
 
-    expect(resultado).toEqual({ id: 'plan-a', monthlyPremiumAmount: null });
+    expect(result).toEqual({ id: 'plan-a', monthlyPremiumAmount: null });
   });
 
   it('rechaza con 404 un plan ajeno al carrier del tenant activo', async () => {

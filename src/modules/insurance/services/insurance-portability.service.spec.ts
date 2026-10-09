@@ -394,7 +394,7 @@ describe('InsurancePortabilityService.verify', () => {
 
 describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () => {
   /** Una solicitud mínima: el resumen sólo lee el id, la fecha y los importes. */
-  const solicitud = (claimId: string) => ({
+  const request = (claimId: string) => ({
     claimId,
     submittedAt: '2026-09-01T10:00:00.000Z',
     billedTotal: '100.00',
@@ -405,14 +405,14 @@ describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () =
 
   it('cuenta una aprobación parcial como aprobada y no como pendiente', () => {
     const { service } = build();
-    const resultados = new Map<string, string | null>([
+    const results = new Map<string, string | null>([
       ['aprobada', INS.ADJ_OUTCOME_APPROVED],
       ['parcial', INS.ADJ_OUTCOME_PARTIAL],
       ['denegada', INS.ADJ_OUTCOME_DENIED],
       ['sin-dictamen', null],
     ]);
     const solicitudes = ['aprobada', 'parcial', 'denegada', 'sin-dictamen'].map(
-      solicitud,
+      request,
     );
 
     const stats = (service as any).periodStats(
@@ -420,7 +420,7 @@ describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () =
       null,
       [],
       new Date('2026-10-01T00:00:00.000Z'),
-      resultados,
+      results,
     );
 
     expect(stats).toMatchObject({
@@ -435,7 +435,7 @@ describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () =
     const { service } = build();
 
     const stats = (service as any).periodStats(
-      [solicitud('desconocida')],
+      [request('desconocida')],
       null,
       [],
       new Date('2026-10-01T00:00:00.000Z'),

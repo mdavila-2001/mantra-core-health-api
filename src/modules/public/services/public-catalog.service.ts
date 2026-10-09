@@ -60,25 +60,25 @@ export class PublicCatalogService {
     page: PublicCatalogPageQueryDto,
   ): Promise<PublicOfferedServicePageDto> {
     const em = this.em.fork();
-    const perfil = await this.perfilDeTipo(
+    const profile = await this.typeProfile(
       em,
       slug,
       COMM.PROFILE_TARGET_ORGANIZATION,
     );
     const limit = page.limit ?? PUBLIC_CATALOG_DEFAULT_LIMIT;
-    const filas = await this.repo.findOfferedServices(
+    const rows = await this.repo.findOfferedServices(
       em,
-      perfil.tenantId,
+      profile.tenantId,
       afterFromCursor(page.cursor),
       limit + 1,
     );
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const hasMore = rows.length > limit;
+    const pagina = hasMore ? rows.slice(0, limit) : rows;
     const ultima = pagina[pagina.length - 1];
     return {
       items: pagina.map(toServiceDto),
       nextCursor:
-        hayMas && ultima
+        hasMore && ultima
           ? encodeKeysetCursor({ k: ultima.code, i: ultima.id })
           : null,
       totalHint: null,
@@ -99,25 +99,25 @@ export class PublicCatalogService {
     page: PublicCatalogPageQueryDto,
   ): Promise<PublicPharmacyProductPageDto> {
     const em = this.em.fork();
-    const perfil = await this.perfilDeTipo(
+    const profile = await this.typeProfile(
       em,
       slug,
       COMM.PROFILE_TARGET_PHARMACY,
     );
     const limit = page.limit ?? PUBLIC_CATALOG_DEFAULT_LIMIT;
-    const filas = await this.repo.findPharmacyProducts(
+    const rows = await this.repo.findPharmacyProducts(
       em,
-      perfil.tenantId,
+      profile.tenantId,
       afterFromCursor(page.cursor),
       limit + 1,
     );
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const hasMore = rows.length > limit;
+    const pagina = hasMore ? rows.slice(0, limit) : rows;
     const ultima = pagina[pagina.length - 1];
     return {
       items: pagina.map(toProductDto),
       nextCursor:
-        hayMas && ultima
+        hasMore && ultima
           ? encodeKeysetCursor({ k: ultima.sortName, i: ultima.id })
           : null,
       totalHint: null,
@@ -130,21 +130,21 @@ export class PublicCatalogService {
    *
    * @param em - Contexto de persistencia.
    * @param slug - Slug de la ficha.
-   * @param tipo - Concepto de destino esperado (organización o farmacia).
+   * @param kind - Concepto de destino esperado (organización o farmacia).
    * @returns El perfil.
    * @throws ResourceNotFoundException con la misma forma en los tres casos:
    *   no existe, no es visible, o es de otro tipo.
    */
-  private async perfilDeTipo(
+  private async typeProfile(
     em: EntityManager,
     slug: string,
-    tipo: string,
+    kind: string,
   ): Promise<PublicProfileRef> {
-    const perfil = await this.repo.findVisibleProfileBySlug(em, slug);
-    if (perfil === null || perfil.targetTypeConceptId !== tipo) {
+    const profile = await this.repo.findVisibleProfileBySlug(em, slug);
+    if (profile === null || profile.targetTypeConceptId !== kind) {
       throw new ResourceNotFoundException('No encontrado', { slug });
     }
-    return perfil;
+    return profile;
   }
 }
 
@@ -171,34 +171,34 @@ function afterFromCursor(cursor: string | undefined): KeysetAfter | null {
 }
 
 /** Proyección pública de un servicio: campo por campo, nada interno. */
-function toServiceDto(fila: OfferedServiceRow): PublicOfferedServiceDto {
-  const sinPrecio = ZERO_AMOUNT.test(fila.price);
+function toServiceDto(row: OfferedServiceRow): PublicOfferedServiceDto {
+  const withoutPrice = ZERO_AMOUNT.test(row.price);
   return {
-    id: fila.id,
-    code: fila.code,
-    name: fila.name,
-    description: fila.descriptionText,
-    price: sinPrecio ? null : fila.price,
-    currency: sinPrecio ? null : fila.currency,
-    isActive: fila.isActive,
+    id: row.id,
+    code: row.code,
+    name: row.name,
+    description: row.descriptionText,
+    price: withoutPrice ? null : row.price,
+    currency: withoutPrice ? null : row.currency,
+    isActive: row.isActive,
   };
 }
 
 /** Proyección pública de un producto: campo por campo, nada interno. */
-function toProductDto(fila: PharmacyProductRow): PublicPharmacyProductDto {
-  const presentacion = [fila.strengthText, fila.packageSizeText]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte))
+function toProductDto(row: PharmacyProductRow): PublicPharmacyProductDto {
+  const presentation = [row.strengthText, row.packageSizeText]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part))
     .join(' · ');
   return {
-    id: fila.id,
-    genericName: fila.sortName,
-    brandName: fila.brandName,
-    presentation: presentacion === '' ? null : presentacion,
+    id: row.id,
+    genericName: row.sortName,
+    brandName: row.brandName,
+    presentation: presentation === '' ? null : presentation,
     therapeuticGroup: null,
-    price: fila.price,
-    currency: fila.price === null ? null : fila.currency,
-    inStock: Number(fila.availableQuantity) > 0,
-    requiresPrescription: fila.requiresPrescription === true,
+    price: row.price,
+    currency: row.price === null ? null : row.currency,
+    inStock: Number(row.availableQuantity) > 0,
+    requiresPrescription: row.requiresPrescription === true,
   };
 }

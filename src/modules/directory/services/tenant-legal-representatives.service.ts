@@ -143,7 +143,7 @@ export class TenantLegalRepresentativesService {
       // representante lo nombre: la FK es inmediata.
       await tx.flush();
 
-      const creado = this.legalRepo.createLegalRepresentative(tx, {
+      const created = this.legalRepo.createLegalRepresentative(tx, {
         tenantId: input.tenantId,
         personId: legalRepresentative.personId,
         representativeRoleConceptId: conceptIdOfRole('LEGAL_REPRESENTATIVE'),
@@ -153,7 +153,7 @@ export class TenantLegalRepresentativesService {
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: input.ownerUserId,
       });
-      legalRepresentativeId = creado.id;
+      legalRepresentativeId = created.id;
       count += 1;
     }
 

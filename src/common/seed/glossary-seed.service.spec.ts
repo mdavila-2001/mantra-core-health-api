@@ -214,7 +214,7 @@ describe('GlossarySeedService', () => {
     // `drugFacts`; las fuentes editoriales sólo para términos documentados.
     // Este test también fija que `glossary-image` nunca aparece.
     expect(propertyCodes.has('glossary-image')).toBe(false);
-    const esperados = new Set([
+    const expected = new Set([
       'glossary-slug',
       'glossary-clinical-definition',
       'glossary-plain-summary',
@@ -225,7 +225,7 @@ describe('GlossarySeedService', () => {
       'manufacturer',
     ]);
     for (const code of propertyCodes) {
-      expect(esperados.has(code)).toBe(true);
+      expect(expected.has(code)).toBe(true);
     }
 
     const sourceProperties = g
@@ -256,11 +256,11 @@ describe('GlossarySeedService', () => {
   it('re-sembrar sobre una base ya poblada no duplica ninguna fila (reseed idempotente)', async () => {
     // Se siembra una vez y se vuelve a correr sobre lo que quedó — mismo
     // patrón que `DynamicEnumSeedService`.
-    const segunda = build(await seeded());
-    const result = await segunda.service.run();
+    const second = build(await seeded());
+    const result = await second.service.run();
 
-    expect(segunda.created).toEqual([]);
-    expect(segunda.removed).toEqual([]);
+    expect(second.created).toEqual([]);
+    expect(second.removed).toEqual([]);
     expect(result).toEqual({
       valueSets: 0,
       terms: 0,
@@ -276,14 +276,14 @@ describe('GlossarySeedService', () => {
   });
 
   it('los identificadores deterministas de dos corridas independientes coinciden byte a byte', async () => {
-    const primera = build();
-    await primera.service.run();
-    const segunda = build();
-    await segunda.service.run();
+    const first = build();
+    await first.service.run();
+    const second = build();
+    await second.service.run();
 
-    const idsPrimera = primera.created.map((row) => row.data.id).sort();
-    const idsSegunda = segunda.created.map((row) => row.data.id).sort();
-    expect(idsPrimera).toEqual(idsSegunda);
+    const idsFirst = first.created.map((row) => row.data.id).sort();
+    const idsSecond = second.created.map((row) => row.data.id).sort();
+    expect(idsFirst).toEqual(idsSecond);
   });
 
   it('no deja advertencia por la relación de control de signos vitales, que ya tiene destino', async () => {
@@ -370,7 +370,7 @@ describe('GlossarySeedService', () => {
       const result = await g.service.run();
 
       const hemograma = glossaryTermConceptId(HEMOGRAMA);
-      const categorias = g
+      const categories = g
         .rowsIn('ValueSetMembers')
         .filter(
           (m) =>
@@ -381,19 +381,19 @@ describe('GlossarySeedService', () => {
             ].includes(m.valueSetVersionId),
         )
         .map((m) => m.valueSetVersionId);
-      expect(categorias).toEqual([
+      expect(categories).toEqual([
         glossaryValueSetVersionId('glossary-category-lab'),
       ]);
 
-      const designacion = (id: string) =>
+      const designation = (id: string) =>
         g.rowsIn('ConceptDesignations').find((d) => d.id === id);
       expect(
-        designacion(glossarySynonymDesignationId('fiebre', 1)),
+        designation(glossarySynonymDesignationId('fiebre', 1)),
       ).toBeUndefined();
-      expect(designacion(glossarySynonymDesignationId(PT, 0))?.value).toBe(
+      expect(designation(glossarySynonymDesignationId(PT, 0))?.value).toBe(
         'TP',
       );
-      expect(designacion(glossarySynonymDesignationId(PT, 1))).toBeUndefined();
+      expect(designation(glossarySynonymDesignationId(PT, 1))).toBeUndefined();
 
       expect(
         g
@@ -431,31 +431,31 @@ describe('GlossarySeedService', () => {
     });
 
     it('una segunda corrida sobre la base reconciliada no escribe nada', async () => {
-      const primera = build(await baseAnterior());
-      await primera.service.run();
+      const first = build(await baseAnterior());
+      await first.service.run();
 
-      const segunda = build(primera.store);
-      const result = await segunda.service.run();
+      const second = build(first.store);
+      const result = await second.service.run();
 
-      expect(segunda.created).toEqual([]);
-      expect(segunda.removed).toEqual([]);
+      expect(second.created).toEqual([]);
+      expect(second.removed).toEqual([]);
       expect(result.updated).toBe(0);
       expect(result.removed).toBe(0);
     });
 
     it('no toca filas ajenas colgadas de un término curado', async () => {
       const store = await seeded();
-      const fiebre = glossaryTermConceptId('fiebre');
-      const ajenas: [string, any][] = [
+      const fever = glossaryTermConceptId('fiebre');
+      const foreign: [string, any][] = [
         [
           'ConceptDesignations',
-          { id: 'designacion-ajena', conceptId: fiebre, value: 'Calentura' },
+          { id: 'designacion-ajena', conceptId: fever, value: 'Calentura' },
         ],
         [
           'ConceptProperties',
           {
             id: 'propiedad-ajena',
-            conceptId: fiebre,
+            conceptId: fever,
             propertyCode: 'nota-local',
             valueJson: { es: 'x' },
           },
@@ -464,7 +464,7 @@ describe('GlossarySeedService', () => {
           'ValueSetMembers',
           {
             id: 'membresia-ajena',
-            conceptId: fiebre,
+            conceptId: fever,
             valueSetVersionId: 'version-de-otro-value-set',
           },
         ],
@@ -472,7 +472,7 @@ describe('GlossarySeedService', () => {
           'ConceptRelationships',
           {
             id: 'relacion-ajena',
-            sourceConceptId: fiebre,
+            sourceConceptId: fever,
             targetConceptId: glossaryTermConceptId('corazon'),
             relationshipTypeConceptId:
               glossaryRelationTypeConceptId('RELATED_TERM'),
@@ -483,17 +483,17 @@ describe('GlossarySeedService', () => {
           {
             // Id fuera del espacio que este servicio genera para la preferida.
             id: `${glossaryPreferredDesignationId('fiebre')}-copia`,
-            conceptId: fiebre,
+            conceptId: fever,
             value: 'Fiebre (copia)',
           },
         ],
       ];
-      for (const [entity, row] of ajenas) store.get(entity)!.set(row.id, row);
+      for (const [entity, row] of foreign) store.get(entity)!.set(row.id, row);
 
       const g = build(store);
       const result = await g.service.run();
 
-      for (const [entity, row] of ajenas) {
+      for (const [entity, row] of foreign) {
         expect(g.rowsIn(entity).find((r) => r.id === row.id)).toEqual(row);
       }
       expect(result.updated).toBe(0);

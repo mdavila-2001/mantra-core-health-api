@@ -6,7 +6,7 @@ import { PHARM } from '../pharmacy.concepts';
 import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
 
 /** Una oferta publicada: un producto de una farmacia, con precio y stock. */
-export interface OfertaPublicada {
+export interface PublishedOffer {
   /** Concepto del vademécum al que responde. */
   conceptId: string;
   /** Código ATC. */
@@ -83,15 +83,15 @@ export class PharmacyMarketplaceRepository {
    * marcas y las presentaciones de cada tarjeta.
    *
    * @param em - Contexto de persistencia.
-   * @param filtro - Texto libre y/o concepto del vademécum.
+   * @param filter - Texto libre y/o concepto del vademécum.
    * @returns Las ofertas crudas, sin agrupar y sin distancias.
    */
   async findPublishedOffers(
     em: EntityManager,
-    filtro: { texto?: string; conceptId?: string },
-  ): Promise<OfertaPublicada[]> {
-    const texto = filtro.texto?.trim();
-    const filas = await em.getConnection().execute<
+    filter: { texto?: string; conceptId?: string },
+  ): Promise<PublishedOffer[]> {
+    const text = filter.texto?.trim();
+    const rows = await em.getConnection().execute<
       Array<{
         concept_id: string;
         atc_code: string;
@@ -203,37 +203,37 @@ export class PharmacyMarketplaceRepository {
         CONCEPTS.STATE_ACTIVE,
         PINV.LOCATION_ACTIVE,
         PHARM.PRODUCT_ACTIVE,
-        filtro.conceptId ?? null,
-        filtro.conceptId ?? null,
-        texto || null,
-        texto || null,
-        texto || null,
-        texto || null,
-        texto || null,
-        texto || null,
+        filter.conceptId ?? null,
+        filter.conceptId ?? null,
+        text || null,
+        text || null,
+        text || null,
+        text || null,
+        text || null,
+        text || null,
       ],
       'all',
     );
 
-    return filas.map((fila) => ({
-      conceptId: fila.concept_id,
-      atcCode: fila.atc_code,
-      genericName: fila.generic_name,
-      pharmacySlug: fila.pharmacy_slug,
-      pharmacyName: fila.pharmacy_name,
-      addressText: fila.address_text,
-      city: fila.city,
-      latitude: Number(fila.latitude),
-      longitude: Number(fila.longitude),
-      brandName: fila.brand_name,
-      strengthText: fila.strength_text,
-      packageSizeText: fila.package_size_text,
-      price: fila.price,
-      currency: fila.currency,
-      availableQuantity: Number(fila.available_quantity),
-      homeDelivery: fila.home_delivery === true,
-      pickup: fila.pickup === true,
-      requiresPrescription: fila.requires_prescription === true,
+    return rows.map((row) => ({
+      conceptId: row.concept_id,
+      atcCode: row.atc_code,
+      genericName: row.generic_name,
+      pharmacySlug: row.pharmacy_slug,
+      pharmacyName: row.pharmacy_name,
+      addressText: row.address_text,
+      city: row.city,
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+      brandName: row.brand_name,
+      strengthText: row.strength_text,
+      packageSizeText: row.package_size_text,
+      price: row.price,
+      currency: row.currency,
+      availableQuantity: Number(row.available_quantity),
+      homeDelivery: row.home_delivery === true,
+      pickup: row.pickup === true,
+      requiresPrescription: row.requires_prescription === true,
     }));
   }
 }

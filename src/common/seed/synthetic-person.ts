@@ -31,24 +31,24 @@ export function syntheticNationalId(key: string): string {
 
 /** Celular boliviano sintético: 8 dígitos, empieza con 6 o 7 (líneas móviles). */
 export function syntheticMobilePhone(key: string): string {
-  const prefijo =
+  const prefix =
     hexDigits(`seed:synthetic:phone-prefix:${key}`) % 2n === 0n ? '6' : '7';
-  return prefijo + digits(`seed:synthetic:phone:${key}`, 7);
+  return prefix + digits(`seed:synthetic:phone:${key}`, 7);
 }
 
 /** Fecha de nacimiento sintética de un adulto (entre 1955 y 2004). */
 export function syntheticBirthDate(key: string): string {
-  const inicio = Date.UTC(1955, 0, 1);
+  const start = Date.UTC(1955, 0, 1);
   const fin = Date.UTC(2004, 11, 31);
-  const rango = BigInt(Math.floor((fin - inicio) / 86_400_000));
-  const dia = Number(hexDigits(`seed:synthetic:birth:${key}`) % rango);
-  const fecha = new Date(inicio + dia * 86_400_000);
-  return fecha.toISOString().slice(0, 10);
+  const range = BigInt(Math.floor((fin - start) / 86_400_000));
+  const day = Number(hexDigits(`seed:synthetic:birth:${key}`) % range);
+  const date = new Date(start + day * 86_400_000);
+  return date.toISOString().slice(0, 10);
 }
 
 /** Normaliza un nombre para el correo `<nombre>.<apellido>@alovida.test`. */
-function slugNombre(texto: string): string {
-  return texto
+function slugName(text: string): string {
+  return text
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -64,11 +64,11 @@ function slugNombre(texto: string): string {
  */
 export function syntheticEmail(
   nombre: string,
-  apellido: string,
-  desambiguador?: string,
+  surname: string,
+  disambiguator?: string,
 ): string {
-  const n = slugNombre(nombre) || 'persona';
-  const a = slugNombre(apellido) || 'alovida';
-  const sufijo = desambiguador ? `.${desambiguador}` : '';
-  return `${n}.${a}${sufijo}@alovida.test`;
+  const n = slugName(nombre) || 'persona';
+  const a = slugName(surname) || 'alovida';
+  const suffix = disambiguator ? `.${disambiguator}` : '';
+  return `${n}.${a}${suffix}@alovida.test`;
 }
