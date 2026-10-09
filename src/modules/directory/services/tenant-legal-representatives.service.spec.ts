@@ -36,11 +36,11 @@ function conceptIdOf(
 function build(
   overrides: { representativeRoleResolved?: Map<string, string> } = {},
 ) {
-  const orden: string[] = [];
+  const order: string[] = [];
   const legalRepo = {
     createLegalRepresentative: fn(
       (_tx: unknown, data: { personId: string }) => {
-        orden.push('createLegalRepresentative');
+        order.push('createLegalRepresentative');
         return { id: `rep-${data.personId}` };
       },
     ),
@@ -57,14 +57,14 @@ function build(
   };
   const documents = {
     attachPowerOfAttorney: fn(async () => {
-      orden.push('attachPowerOfAttorney');
+      order.push('attachPowerOfAttorney');
       return 'doc-poder-1';
     }),
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const tx = {
     flush: fn(async () => {
-      orden.push('flush');
+      order.push('flush');
     }),
   };
 
@@ -74,20 +74,20 @@ function build(
     documents as never,
     logger as never,
   );
-  return { service, legalRepo, concepts, documents, tx: tx as never, orden };
+  return { service, legalRepo, concepts, documents, tx: tx as never, orden: order };
 }
 
 describe('TenantLegalRepresentativesService', () => {
   it('sin representante ni gerencias, no escribe nada', async () => {
     const d = build();
 
-    const resultado = await d.service.attachRegistrationRepresentatives(d.tx, {
+    const result = await d.service.attachRegistrationRepresentatives(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       alreadyDeclaredFileIds: [],
     });
 
-    expect(resultado).toEqual({ count: 0 });
+    expect(result).toEqual({ count: 0 });
     expect(d.concepts.resolve).not.toHaveBeenCalled();
     expect(d.documents.attachPowerOfAttorney).not.toHaveBeenCalled();
     expect(d.legalRepo.createLegalRepresentative).not.toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe('TenantLegalRepresentativesService', () => {
   it('con representante legal: vincula el poder, flushea, y crea la fila con isPrimary=true', async () => {
     const d = build();
 
-    const resultado = await d.service.attachRegistrationRepresentatives(d.tx, {
+    const result = await d.service.attachRegistrationRepresentatives(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       alreadyDeclaredFileIds: ['file-constitution'],
@@ -125,7 +125,7 @@ describe('TenantLegalRepresentativesService', () => {
       statusConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId: 'user-1',
     });
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       legalRepresentativeId: 'rep-person-rep',
       count: 1,
     });
@@ -173,7 +173,7 @@ describe('TenantLegalRepresentativesService', () => {
   it('con las tres gerencias: crea 3 filas SIN `isPrimary` en la llamada', async () => {
     const d = build();
 
-    const resultado = await d.service.attachRegistrationRepresentatives(d.tx, {
+    const result = await d.service.attachRegistrationRepresentatives(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       alreadyDeclaredFileIds: [],
@@ -197,14 +197,14 @@ describe('TenantLegalRepresentativesService', () => {
         data.representativeRoleConceptId,
     );
     expect(roles).toEqual(['ct-general', 'ct-comercial', 'ct-marketing']);
-    expect(resultado).toEqual({ legalRepresentativeId: undefined, count: 3 });
+    expect(result).toEqual({ legalRepresentativeId: undefined, count: 3 });
     expect(d.documents.attachPowerOfAttorney).not.toHaveBeenCalled();
   });
 
   it('representante y gerencias juntos: cuenta los 4 vínculos', async () => {
     const d = build();
 
-    const resultado = await d.service.attachRegistrationRepresentatives(d.tx, {
+    const result = await d.service.attachRegistrationRepresentatives(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       alreadyDeclaredFileIds: [],
@@ -219,7 +219,7 @@ describe('TenantLegalRepresentativesService', () => {
       ],
     });
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       legalRepresentativeId: 'rep-person-rep',
       count: 4,
     });
