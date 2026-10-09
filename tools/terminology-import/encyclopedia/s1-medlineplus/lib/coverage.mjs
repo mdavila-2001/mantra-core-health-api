@@ -30,7 +30,7 @@ export function measureCoverage({ terms, articles, rejected }) {
     row.withArticle += 1;
     row.sectionsTotal += article.sections.length;
     if (article.images.length) row.withImage += 1;
-    for (const s of article.sections) bump(row.kinds, s.kind);
+    for (const kind of new Set(article.sections.map((s) => s.kind))) bump(row.kinds, kind);
   }
 
   const reasons = new Map();

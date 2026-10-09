@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { readNdjson } from '../../lib/glossary-es/common.mjs';
 import { DEFAULTS } from './lib/config.mjs';
-import { KINDS_BY_FAMILY, familyOf } from './lib/kinds.mjs';
+import { KIND_ORDER } from './lib/kinds.mjs';
 
 const out = process.argv[2] ?? DEFAULTS.outDir;
 const articles = readNdjson(join(out, 'articles.ndjson'));
@@ -37,18 +37,18 @@ for (const c of order) {
 }
 md.push(`| **Total** | **${T}** | **${A}** | **${T - A}** | **${pct(A, T)}** | **${S}** | **${I}** |\n`);
 
-md.push('### Términos con cada tipo de sección (de los que sí tienen artículo)\n');
-for (const family of ['disease', 'symptom', 'test', 'procedure', 'other']) {
-  const catsOfFamily = order.filter((c) => cats[c] && familyOf(c) === family);
-  if (!catsOfFamily.length) continue;
-  md.push(`**Familia «${family}»** — categorías: ${catsOfFamily.map((c) => `${label[c]} (${cats[c].withArticle})`).join(' · ')}\n`);
-  md.push(`| Sección | ${catsOfFamily.map((c) => label[c]).join(' | ')} |`);
-  md.push(`|---|${catsOfFamily.map(() => '---:').join('|')}|`);
-  for (const kind of KINDS_BY_FAMILY[family]) {
-    md.push(`| \`${kind}\` | ${catsOfFamily.map((c) => `${cats[c].kinds[kind] ?? 0} (${pct(cats[c].kinds[kind] ?? 0, cats[c].withArticle)})`).join(' | ')} |`);
-  }
-  md.push('');
+md.push('### Secciones por tipo y categoría (términos con al menos una sección de ese `kind`)\n');
+const usedCats = order.filter((c) => cats[c]);
+md.push(`| \`kind\` | ${usedCats.map((c) => `${label[c]} (${cats[c].withArticle})`).join(' | ')} | Total términos |`);
+md.push(`|---|${usedCats.map(() => '---:').join('|')}|---:|`);
+for (const kind of KIND_ORDER) {
+  const per = usedCats.map((c) => cats[c].kinds[kind] ?? 0);
+  if (!per.some(Boolean)) continue;
+  md.push(`| \`${kind}\` | ${per.map((n, i) => `${n} (${pct(n, cats[usedCats[i]].withArticle)})`).join(' | ')} | ${per.reduce((a, b) => a + b, 0)} |`);
 }
+md.push('');
+const sections = articles.flatMap((a) => a.sections);
+md.push(`Secciones publicadas: **${sections.length}** (${sections.filter((s) => s.excerpt).length} como extracto, ${sections.filter((s) => s.table).length} con tabla). \`additional_information\` (encabezado sin regla más específica): **${sections.filter((s) => s.kind === 'additional_information').length}** (${pct(sections.filter((s) => s.kind === 'additional_information').length, sections.length)}).\n`);
 
 md.push('### Rechazos por alcance y motivo (todo lo que NO se publicó)\n');
 const reasons = new Map();
