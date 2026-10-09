@@ -717,7 +717,7 @@ export class ProfilesAffiliationsService {
     }
 
     const { membership, creada } =
-      await this.memberships.ensureMembresiaAsistencial(tx, {
+      await this.memberships.ensureCareMembership(tx, {
         userId: account.userId,
         tenantId,
         actorUserId: actor.id,

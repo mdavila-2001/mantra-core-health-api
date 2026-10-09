@@ -73,7 +73,7 @@ function build() {
     hasAdministrators: mockFn().mockResolvedValue(true),
   };
   const memberships = {
-    ensureMembresiaAsistencial: mockFn().mockResolvedValue({
+    ensureCareMembership: mockFn().mockResolvedValue({
       membership: { id: 'memb-1' },
       creada: true,
     }),
@@ -492,7 +492,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         d.tx,
         'pp-1',
       );
-      expect(d.memberships.ensureMembresiaAsistencial).toHaveBeenCalledWith(
+      expect(d.memberships.ensureCareMembership).toHaveBeenCalledWith(
         d.tx,
         { userId: 'user-med', tenantId: TENANT, actorUserId: orgAdmin.id },
       );
@@ -509,7 +509,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      const [tx] = d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
+      const [tx] = d.memberships.ensureCareMembership.mock.calls.at(-1);
       expect(tx).toBe(d.tx);
     });
 
@@ -526,7 +526,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
-      expect(d.memberships.ensureMembresiaAsistencial).not.toHaveBeenCalled();
+      expect(d.memberships.ensureCareMembership).not.toHaveBeenCalled();
       expect(d.logger.warn).toHaveBeenCalled();
     });
 
@@ -543,7 +543,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       );
 
       expect(d.accountLinksRepo.findActiveByPerson).not.toHaveBeenCalled();
-      expect(d.memberships.ensureMembresiaAsistencial).not.toHaveBeenCalled();
+      expect(d.memberships.ensureCareMembership).not.toHaveBeenCalled();
     });
 
     /**
@@ -557,7 +557,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
       const [, params] =
-        d.memberships.ensureMembresiaAsistencial.mock.calls.at(-1);
+        d.memberships.ensureCareMembership.mock.calls.at(-1);
       expect(params.tenantId).toBe(TENANT);
     });
   });
