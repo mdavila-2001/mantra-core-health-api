@@ -296,7 +296,7 @@ describe('LedgerService', () => {
     // MCH-018: `classify` sólo cambiaba el estado, así que el asiento quedaba
     // marcado como auto-clasificado sin que ninguna regla se hubiera evaluado.
     describe('MCH-018 · la auto-clasificación exige reglas', () => {
-      function borrador(d: ReturnType<typeof build>, origen?: string) {
+      function draft(d: ReturnType<typeof build>, origen?: string) {
         const txn: any = {
           id: 't1',
           transactionNumber: 'JT-1',
@@ -309,7 +309,7 @@ describe('LedgerService', () => {
 
       it('AC01 · sin regla aplicable no se marca auto-clasificado', async () => {
         const d = build();
-        const txn = borrador(d, 'ALGO_QUE_NINGUNA_REGLA_CUBRE');
+        const txn = draft(d, 'ALGO_QUE_NINGUNA_REGLA_CUBRE');
 
         const res = await d.service.classify('t1', {}, actor);
 
@@ -321,7 +321,7 @@ describe('LedgerService', () => {
 
       it('AC02 · un borrador sin documento origen va a revisión sin inventar tipo', async () => {
         const d = build();
-        const txn = borrador(d);
+        const txn = draft(d);
 
         const res = await d.service.classify('t1', {}, actor);
 
@@ -332,7 +332,7 @@ describe('LedgerService', () => {
 
       it('con regla aplicable clasifica, imputa el tipo y deja la evidencia', async () => {
         const d = build();
-        const txn = borrador(d, 'GATEWAY_SETTLEMENT');
+        const txn = draft(d, 'GATEWAY_SETTLEMENT');
 
         const res = await d.service.classify('t1', {}, actor);
 
@@ -346,19 +346,19 @@ describe('LedgerService', () => {
       });
 
       it('sella en la cadena WORM qué autoridad clasificó', async () => {
-        const clasificado = build();
-        borrador(clasificado, 'INVOICE');
-        await clasificado.service.classify('t1', {}, actor);
-        expect(clasificado.auditTrail.record).toHaveBeenCalledWith(
+        const classified = build();
+        draft(classified, 'INVOICE');
+        await classified.service.classify('t1', {}, actor);
+        expect(classified.auditTrail.record).toHaveBeenCalledWith(
           expect.anything(),
           actor,
           expect.objectContaining({ action: 'JOURNAL_AUTO_CLASSIFIED' }),
         );
 
-        const aRevision = build();
-        borrador(aRevision, undefined);
-        await aRevision.service.classify('t1', {}, actor);
-        expect(aRevision.auditTrail.record).toHaveBeenCalledWith(
+        const toRevision = build();
+        draft(toRevision, undefined);
+        await toRevision.service.classify('t1', {}, actor);
+        expect(toRevision.auditTrail.record).toHaveBeenCalledWith(
           expect.anything(),
           actor,
           expect.objectContaining({ action: 'JOURNAL_CLASSIFICATION_REVIEW' }),
@@ -367,7 +367,7 @@ describe('LedgerService', () => {
 
       it('no se puede saltar la clasificación enviando el borrador a revisión', async () => {
         const d = build();
-        borrador(d, 'INVOICE');
+        draft(d, 'INVOICE');
 
         await expect(
           d.service.submitForReview('t1', {}, actor),

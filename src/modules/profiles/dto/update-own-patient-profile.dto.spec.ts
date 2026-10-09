@@ -11,20 +11,20 @@ import { UpdateOwnPatientProfileDto } from './update-own-patient-profile.dto';
  * el alta: este DTO es su espejo de edición y merece la misma forma de
  * prueba, no una reinventada.
  *
- * @param errores - Los errores devueltos por `validate()`.
- * @param prefijo - La ruta acumulada hasta este nivel.
+ * @param errors - Los errores devueltos por `validate()`.
+ * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasConError(
-  errores: readonly ValidationError[],
-  prefijo = '',
+function rutasWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
 ): string[] {
   const rutas: string[] = [];
-  for (const error of errores) {
-    const ruta = prefijo ? `${prefijo}.${error.property}` : error.property;
+  for (const error of errors) {
+    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasConError(error.children, ruta));
+      rutas.push(...rutasWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -39,20 +39,20 @@ function rutasConError(
  * `"-17.78"` en un cuerpo JSON de verdad se comporta distinto que acá, y la
  * prueba estaría afirmando un pipe que no es el que corre en producción.
  *
- * @param cuerpo - El cuerpo del PATCH, tal como llegaría del cliente.
+ * @param body - El cuerpo del PATCH, tal como llegaría del cliente.
  * @returns Las rutas con error (`homeLatitude`, `workLongitude`…).
  */
-async function propiedadesConError(
-  cuerpo: Record<string, unknown>,
+async function propertiesWithError(
+  body: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(UpdateOwnPatientProfileDto, cuerpo, {
+  const dto = plainToInstance(UpdateOwnPatientProfileDto, body, {
     enableImplicitConversion: true,
   });
-  const errores = await validate(dto, {
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasConError(errores);
+  return rutasWithError(errors);
 }
 
 /**
@@ -67,28 +67,28 @@ async function propiedadesConError(
  */
 describe('UpdateOwnPatientProfileDto · coordenadas de domicilio y trabajo', () => {
   it('un cuerpo vacío es válido: es un PATCH, nada que tocar', async () => {
-    expect(await propiedadesConError({})).toEqual([]);
+    expect(await propertiesWithError({})).toEqual([]);
   });
 
   describe.each([
     ['home', 'homeLatitude', 'homeLongitude'],
     ['work', 'workLatitude', 'workLongitude'],
-  ] as const)('eje %s', (_eje, latKey, lngKey) => {
+  ] as const)('eje %s', (axis, latKey, lngKey) => {
     it('acepta un par válido', async () => {
       expect(
-        await propiedadesConError({ [latKey]: -17.7833, [lngKey]: -63.1821 }),
+        await propertiesWithError({ [latKey]: -17.7833, [lngKey]: -63.1821 }),
       ).toEqual([]);
     });
 
     it('rechaza una latitud fuera de [-90, 90]', async () => {
       expect(
-        await propiedadesConError({ [latKey]: 91, [lngKey]: -63.1821 }),
+        await propertiesWithError({ [latKey]: 91, [lngKey]: -63.1821 }),
       ).toEqual([latKey]);
     });
 
     it('rechaza una longitud fuera de [-180, 180]', async () => {
       expect(
-        await propiedadesConError({ [latKey]: -17.7833, [lngKey]: 181 }),
+        await propertiesWithError({ [latKey]: -17.7833, [lngKey]: 181 }),
       ).toEqual([lngKey]);
     });
 
@@ -99,25 +99,25 @@ describe('UpdateOwnPatientProfileDto · coordenadas de domicilio y trabajo', () 
      * aparece en la que falta, no en la que sí llegó con un valor válido.
      */
     it('sólo la latitud: la longitud ausente es el error, no la latitud', async () => {
-      expect(await propiedadesConError({ [latKey]: -17.7833 })).toEqual([
+      expect(await propertiesWithError({ [latKey]: -17.7833 })).toEqual([
         lngKey,
       ]);
     });
 
     it('sólo la longitud: la latitud ausente es el error, no la longitud', async () => {
-      expect(await propiedadesConError({ [lngKey]: -63.1821 })).toEqual([
+      expect(await propertiesWithError({ [lngKey]: -63.1821 })).toEqual([
         latKey,
       ]);
     });
 
     it('null en los dos extremos quita el punto: es válido', async () => {
       expect(
-        await propiedadesConError({ [latKey]: null, [lngKey]: null }),
+        await propertiesWithError({ [latKey]: null, [lngKey]: null }),
       ).toEqual([]);
     });
 
     it('null en uno solo es un par incoherente: rechazado', async () => {
-      const rutas = await propiedadesConError({
+      const rutas = await propertiesWithError({
         [latKey]: null,
         [lngKey]: -63.1821,
       });
@@ -127,7 +127,7 @@ describe('UpdateOwnPatientProfileDto · coordenadas de domicilio y trabajo', () 
 
   it('un eje inválido no contamina la validación del otro', async () => {
     expect(
-      await propiedadesConError({
+      await propertiesWithError({
         homeLatitude: 91,
         homeLongitude: -63.1821,
         workLatitude: -16.5,
@@ -138,7 +138,7 @@ describe('UpdateOwnPatientProfileDto · coordenadas de domicilio y trabajo', () 
 
   it('quitar un eje y declarar el otro conviven en el mismo cuerpo', async () => {
     expect(
-      await propiedadesConError({
+      await propertiesWithError({
         homeLatitude: null,
         homeLongitude: null,
         workLatitude: -16.5,

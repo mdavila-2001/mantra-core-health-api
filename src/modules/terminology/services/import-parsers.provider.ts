@@ -15,7 +15,7 @@ import {
  * no tiene por qué enterarse. Con el puerto, sumar un formato es cambiar esta
  * lista; sin él, sería tocar el servicio y volver a verificarlo entero.
  */
-export interface LectorDeArchivosDeImportacion {
+export interface LectorImportFiles {
   /** Decide el formato mirando el contenido del archivo. */
   readonly detectarFormato: (buffer: Buffer) => FormatoDeArchivo;
   /** Devuelve el parseador de un formato, si hay alguno registrado. */
@@ -35,11 +35,11 @@ export const IMPORT_PARSERS = Symbol('IMPORT_PARSERS');
  * Es un objeto y no una clase porque no tiene estado ni dependencias: es la
  * lista de lo que hay disponible, resuelta una vez al arrancar.
  */
-export const LECTOR_DE_IMPORTACION: LectorDeArchivosDeImportacion = {
+export const LECTOR_IMPORT: LectorImportFiles = {
   detectarFormato,
-  parseadorDe: (formato) =>
+  parseadorDe: (format) =>
     PARSEADORES_DE_IMPORTACION.find(
-      (parseador) => parseador.formato === formato,
+      (parser) => parser.formato === format,
     ),
   perfil: (id) =>
     Object.prototype.hasOwnProperty.call(PERFILES_DE_IMPORTACION, id)

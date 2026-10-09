@@ -18,7 +18,7 @@
  * valor ya no describe una política de continuidad, describe un error de carga
  * (típicamente milisegundos cargados como segundos).
  */
-export const MAX_OBJETIVO_SEGUNDOS = 31_536_000;
+export const MAX_TARGET_SECONDS = 31_536_000;
 
 /**
  * Rango admitido de cada objetivo, con el motivo de cada cota.
@@ -29,18 +29,18 @@ export const MAX_OBJETIVO_SEGUNDOS = 31_536_000;
  *   cero segundos no es un objetivo exigente, es uno inalcanzable, y firmarlo
  *   sólo garantiza incumplirlo siempre.
  */
-export const RANGO_OBJETIVOS = {
-  rpoSeconds: { min: 0, max: MAX_OBJETIVO_SEGUNDOS },
-  rtoSeconds: { min: 1, max: MAX_OBJETIVO_SEGUNDOS },
+export const TARGETS_RANGE = {
+  rpoSeconds: { min: 0, max: MAX_TARGET_SECONDS },
+  rtoSeconds: { min: 1, max: MAX_TARGET_SECONDS },
 } as const;
 
 /** Nombre de cada objetivo tal como se nombra en los mensajes al operador. */
-type NombreObjetivo = keyof typeof RANGO_OBJETIVOS;
+type TargetName = keyof typeof TARGETS_RANGE;
 
 /** Objetivo fuera de rango, con el dato suficiente para corregir la carga. */
-export interface ObjetivoFueraDeRango {
+export interface OutOfRangeTarget {
   /** Campo del DTO que no cumple. */
-  campo: NombreObjetivo;
+  campo: TargetName;
   /** Valor recibido. */
   valor: unknown;
   /** Mensaje propio de esa cota, en castellano y dirigido al operador. */
@@ -54,18 +54,18 @@ export interface ObjetivoFueraDeRango {
  * @param valor - Valor recibido del DTO.
  * @returns El incumplimiento, o `null` si el valor es admisible.
  */
-export function validarObjetivo(
-  campo: NombreObjetivo,
+export function validateTarget(
+  campo: TargetName,
   valor: unknown,
-): ObjetivoFueraDeRango | null {
-  const { min, max } = RANGO_OBJETIVOS[campo];
-  const etiqueta = campo === 'rpoSeconds' ? 'RPO' : 'RTO';
+): OutOfRangeTarget | null {
+  const { min, max } = TARGETS_RANGE[campo];
+  const label = campo === 'rpoSeconds' ? 'RPO' : 'RTO';
 
   if (typeof valor !== 'number' || !Number.isInteger(valor)) {
     return {
       campo,
       valor,
-      mensaje: `El ${etiqueta} se expresa en segundos enteros`,
+      mensaje: `El ${label} se expresa en segundos enteros`,
     };
   }
   if (valor < min) {
@@ -75,14 +75,14 @@ export function validarObjetivo(
       mensaje:
         campo === 'rtoSeconds' && valor === 0
           ? 'Un RTO de cero segundos no es alcanzable: indique el tiempo de indisponibilidad que el negocio tolera'
-          : `El ${etiqueta} no puede ser menor que ${min} segundos`,
+          : `El ${label} no puede ser menor que ${min} segundos`,
     };
   }
   if (valor > max) {
     return {
       campo,
       valor,
-      mensaje: `El ${etiqueta} no puede superar ${max} segundos (un año); revise si cargó milisegundos`,
+      mensaje: `El ${label} no puede superar ${max} segundos (un año); revise si cargó milisegundos`,
     };
   }
   return null;
@@ -91,19 +91,19 @@ export function validarObjetivo(
 /**
  * Valida los dos objetivos de una política de forma independiente.
  *
- * @param objetivos - RPO y RTO tal como llegan del DTO.
+ * @param targets - RPO y RTO tal como llegan del DTO.
  * @returns Los incumplimientos encontrados; vacío si la política es admisible.
  */
-export function validarObjetivosDeContinuidad(objetivos: {
+export function continuityValidateTargets(targets: {
   /** RPO objetivo en segundos. */
   rpoSeconds: unknown;
   /** RTO objetivo en segundos. */
   rtoSeconds: unknown;
-}): ObjetivoFueraDeRango[] {
+}): OutOfRangeTarget[] {
   return (
     [
-      validarObjetivo('rpoSeconds', objetivos.rpoSeconds),
-      validarObjetivo('rtoSeconds', objetivos.rtoSeconds),
+      validateTarget('rpoSeconds', targets.rpoSeconds),
+      validateTarget('rtoSeconds', targets.rtoSeconds),
     ] as const
-  ).filter((v): v is ObjetivoFueraDeRango => v !== null);
+  ).filter((v): v is OutOfRangeTarget => v !== null);
 }

@@ -49,16 +49,16 @@ describe('Catálogo curado del glosario médico', () => {
   });
 
   it('ninguna categoría queda vacía: mínimo 5 términos por categoría, como fija el spec', () => {
-    const porCategoria = new Map<string, number>();
+    const byCategory = new Map<string, number>();
     for (const term of GLOSSARY_TERMS) {
-      porCategoria.set(
+      byCategory.set(
         term.categoryKey,
-        (porCategoria.get(term.categoryKey) ?? 0) + 1,
+        (byCategory.get(term.categoryKey) ?? 0) + 1,
       );
     }
     for (const category of GLOSSARY_CATEGORIES) {
       if (category.key === 'diagnostic-test') continue;
-      expect(porCategoria.get(category.key) ?? 0).toBeGreaterThanOrEqual(5);
+      expect(byCategory.get(category.key) ?? 0).toBeGreaterThanOrEqual(5);
     }
   });
 
@@ -72,19 +72,19 @@ describe('Catálogo curado del glosario médico', () => {
     // (seis en total en la maqueta). Se fija la lista exacta
     // para que la excepción no crezca en silencio: cualquier otro término que
     // salga o entre acá tiene que cambiar esta prueba a la vista.
-    const pruebas = GLOSSARY_TERMS.filter(
+    const tests = GLOSSARY_TERMS.filter(
       (term) => term.categoryKey === 'diagnostic-test',
     ).map((term) => term.slug);
-    expect(pruebas).toEqual(['electrocardiograma', 'espirometria']);
+    expect(tests).toEqual(['electrocardiograma', 'espirometria']);
   });
 
   it('toda relación apunta a un slug conocido, salvo la única excepción documentada de la fuente', () => {
     const slugs = new Set(GLOSSARY_TERMS.map((term) => term.slug));
-    const huerfanas: string[] = [];
+    const orphaned: string[] = [];
     for (const term of GLOSSARY_TERMS) {
       for (const relation of term.relations) {
         if (!slugs.has(relation.targetSlug)) {
-          huerfanas.push(
+          orphaned.push(
             `${term.slug} ${relation.type}->${relation.targetSlug}`,
           );
         }
@@ -94,17 +94,17 @@ describe('Catálogo curado del glosario médico', () => {
     // declara una única relación huérfana (`hipertension-arterial
     // PROCEDURE->control-de-signos-vitales`). Cualquier otra relación huérfana
     // que aparezca acá es una regresión real, no la discrepancia conocida.
-    expect(huerfanas).toEqual([
+    expect(orphaned).toEqual([
       'hipertension-arterial PROCEDURE->control-de-signos-vitales',
     ]);
   });
 
   it('siete términos tienen contenido en inglés revisado, y coinciden entre definición clínica y resumen', () => {
-    const conIngles = GLOSSARY_TERMS.filter(
+    const withEnglish = GLOSSARY_TERMS.filter(
       (term) => term.clinicalDefinitionEn !== undefined,
     );
-    expect(conIngles).toHaveLength(7);
-    for (const term of conIngles) {
+    expect(withEnglish).toHaveLength(7);
+    for (const term of withEnglish) {
       // Donde hay inglés clínico, también hay resumen llano en inglés: la
       // fuente los autoriza siempre en pareja para este catálogo v1.
       expect(term.plainSummaryEn).toBeDefined();

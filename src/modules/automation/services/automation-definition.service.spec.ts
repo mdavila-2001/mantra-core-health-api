@@ -98,9 +98,9 @@ describe('AutomationDefinitionService', () => {
 
       await d.service.defineWorkflow(WORKFLOW_DTO, actor);
 
-      const clasificar =
+      const classify =
         d.governanceRepo.createWorkflowStep.mock.results[0].value;
-      expect(clasificar.onSuccessStepId).toBe('step-registrar');
+      expect(classify.onSuccessStepId).toBe('step-registrar');
     });
 
     it('rechaza un salto a un paso no declarado', async () => {

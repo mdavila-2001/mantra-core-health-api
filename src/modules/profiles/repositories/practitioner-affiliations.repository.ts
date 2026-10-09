@@ -70,8 +70,8 @@ export class PractitionerAffiliationsRepository {
       practitionerProfileId,
     });
     return rows.sort((a, b) => {
-      const porInicio = b.startDate.getTime() - a.startDate.getTime();
-      if (porInicio !== 0) return porInicio;
+      const byStart = b.startDate.getTime() - a.startDate.getTime();
+      if (byStart !== 0) return byStart;
       return Number(b.endDate === undefined) - Number(a.endDate === undefined);
     });
   }

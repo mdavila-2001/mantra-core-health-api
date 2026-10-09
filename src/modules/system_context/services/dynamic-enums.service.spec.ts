@@ -184,17 +184,17 @@ describe('DynamicEnumsService', () => {
     it('flushes the version before creating its options', async () => {
       const d = build();
       wire(d);
-      const orden: string[] = [];
+      const order: string[] = [];
       d.tx.flush.mockImplementation(() => {
-        orden.push('flush');
+        order.push('flush');
         return Promise.resolve();
       });
-      const crearOpcion =
+      const createOption =
         d.contextRepo.createEnumOption.getMockImplementation();
       d.contextRepo.createEnumOption.mockImplementation(
         (...args: unknown[]) => {
-          orden.push('option');
-          return crearOpcion?.(...args) ?? { id: 'o-1' };
+          order.push('option');
+          return createOption?.(...args) ?? { id: 'o-1' };
         },
       );
 
@@ -208,8 +208,8 @@ describe('DynamicEnumsService', () => {
         actor,
       );
 
-      expect(orden[0]).toBe('flush');
-      expect(orden).toContain('option');
+      expect(order[0]).toBe('flush');
+      expect(order).toContain('option');
     });
 
     it('continues the numbering from the latest version', async () => {

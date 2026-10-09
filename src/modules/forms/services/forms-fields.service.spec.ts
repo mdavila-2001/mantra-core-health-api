@@ -56,10 +56,10 @@ function build() {
 }
 
 /** Una doctora del tenant A: contrato estrictamente menor que el gobierno. */
-const doctora = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+const doctor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
 
 /** Ejecuta dentro del contexto de tenant que exige la propiedad del campo. */
-function enTenantA<T>(fn: () => Promise<T>): Promise<T> {
+function inTenantA<T>(fn: () => Promise<T>): Promise<T> {
   return runWithTenant('tenant-a', fn);
 }
 
@@ -80,8 +80,8 @@ describe('FormsFieldsService', () => {
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
       ]);
-      const res = await enTenantA(() =>
-        d.service.updateFieldDefinition('f1', { name: '¿Fuma?' }, doctora),
+      const res = await inTenantA(() =>
+        d.service.updateFieldDefinition('f1', { name: '¿Fuma?' }, doctor),
       );
       expect(res).toEqual({ ok: true });
       expect(field.name).toBe('¿Fuma?');
@@ -94,8 +94,8 @@ describe('FormsFieldsService', () => {
         { id: 'as-global', tenantId: undefined },
       ]);
       await expect(
-        enTenantA(() =>
-          d.service.updateFieldDefinition('f1', { name: 'x' }, doctora),
+        inTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctor),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
@@ -108,8 +108,8 @@ describe('FormsFieldsService', () => {
         { id: 'as2', tenantId: 'tenant-b' },
       ]);
       await expect(
-        enTenantA(() =>
-          d.service.updateFieldDefinition('f1', { name: 'x' }, doctora),
+        inTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctor),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
@@ -123,11 +123,11 @@ describe('FormsFieldsService', () => {
       ]);
       d.valuesRepo.countByField.mockResolvedValue(3);
       await expect(
-        enTenantA(() =>
+        inTenantA(() =>
           d.service.updateFieldDefinition(
             'f1',
             { dataType: 'integer' } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -141,11 +141,11 @@ describe('FormsFieldsService', () => {
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
       ]);
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.updateFieldDefinition(
           'f1',
           { dataType: 'integer' } as any,
-          doctora,
+          doctor,
         ),
       );
       expect(field.dataType).toBe('integer');
@@ -296,11 +296,11 @@ describe('FormsFieldsService', () => {
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       d.valuesRepo.findCodesInUseByField.mockResolvedValue([]);
 
-      const res = await enTenantA(() =>
+      const res = await inTenantA(() =>
         d.service.updateFieldDefinition(
           'f1',
           { options: ['Nunca', 'Ex fumador', 'Fumador'] } as any,
-          doctora,
+          doctor,
         ),
       );
 
@@ -320,11 +320,11 @@ describe('FormsFieldsService', () => {
       d.valuesRepo.findCodesInUseByField.mockResolvedValue(['Ex fumador']);
 
       await expect(
-        enTenantA(() =>
+        inTenantA(() =>
           d.service.updateFieldDefinition(
             'f1',
             { options: ['Nunca', 'Fumador'] } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -337,18 +337,18 @@ describe('FormsFieldsService', () => {
       const field: any = { id: 'f1', dataType: 'string', description: 'vieja' };
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
 
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.updateFieldDefinition(
           'f1',
           { description: null } as any,
-          doctora,
+          doctor,
         ),
       );
       expect(field.description).toBeUndefined();
 
       field.description = 'vieja';
-      await enTenantA(() =>
-        d.service.updateFieldDefinition('f1', {} as any, doctora),
+      await inTenantA(() =>
+        d.service.updateFieldDefinition('f1', {} as any, doctor),
       );
       expect(field.description).toBe('vieja');
     });

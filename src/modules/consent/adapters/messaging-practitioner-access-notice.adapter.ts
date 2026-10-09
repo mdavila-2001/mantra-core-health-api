@@ -11,7 +11,7 @@ import type {
   PractitionerAccessNoticeResult,
 } from '../ports/practitioner-access-notice.port';
 
-const CATEGORIA: Readonly<Record<PractitionerAccessNoticeKind, string>> = {
+const CATEGORY: Readonly<Record<PractitionerAccessNoticeKind, string>> = {
   ACCESS_REQUESTED: CONS.NOTICE_ACCESS_REQUESTED,
   ACCESS_ACCEPTED: CONS.NOTICE_ACCESS_DECIDED,
   ACCESS_DECLINED: CONS.NOTICE_ACCESS_DECIDED,
@@ -36,7 +36,7 @@ export class MessagingPractitionerAccessNoticeAdapter implements PractitionerAcc
     notice: PractitionerAccessNotice,
   ): Promise<PractitionerAccessNoticeResult> {
     try {
-      return await this.emitir(notice);
+      return await this.issue(notice);
     } catch (error) {
       this.logger.warn(
         {
@@ -51,7 +51,7 @@ export class MessagingPractitionerAccessNoticeAdapter implements PractitionerAcc
     }
   }
 
-  private async emitir(
+  private async issue(
     notice: PractitionerAccessNotice,
   ): Promise<PractitionerAccessNoticeResult> {
     const actor: AuthenticatedUser = {
@@ -64,7 +64,7 @@ export class MessagingPractitionerAccessNoticeAdapter implements PractitionerAcc
         channelId: MESSAGING_SEED.inAppChannelId,
         recipientUserId: notice.recipientUserId,
         tenantId: notice.tenantId ?? SEED.tenantId,
-        categoryConceptId: CATEGORIA[notice.kind],
+        categoryConceptId: CATEGORY[notice.kind],
         priority: notice.kind === 'ACCESS_REQUESTED' ? 4 : 5,
         payloadJson: {
           kind: notice.kind,

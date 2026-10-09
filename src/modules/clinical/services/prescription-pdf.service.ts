@@ -26,8 +26,8 @@ import { composePersonDisplayName } from '../../profiles/person-name';
 import { DeclaredCoveragesReader } from '../../insurance/services/declared-coverages-reader';
 import type { OwnCoverageDto } from '../../profiles/dto/read-patients.dto';
 import { loadAgendaNoticesEnv } from '../../scheduling/notices/agenda-notices.env';
-import { dibujarMarcaAlovida, altoDeMarca } from './alovida-mark';
-import { dibujarQr } from './prescription-qr';
+import { drawBrandAlovida, brandHeight } from './alovida-mark';
+import { drawQr } from './prescription-qr';
 import { computePrescriptionHash } from './prescription-seal';
 import type { MedicationRequests } from '../entities';
 
@@ -38,12 +38,12 @@ const SECTION_FONT_SIZE = 13;
 const BODY_FONT_SIZE = 10;
 const FOOTER_FONT_SIZE = 8;
 const LINE_GAP = 4;
-const SIN_DATOS = 'Sin datos registrados.';
-const SIN_IDENTIFICAR = 'Sin identificar';
-const SIN_DATO = '—';
+const WITHOUT_DATA = 'Sin datos registrados.';
+const UNIDENTIFIED = 'Sin identificar';
+const NO_DATA_POINT = '—';
 
 /** El color petróleo de marca, para el isotipo del membrete. */
-const COLOR_MARCA: readonly [number, number, number] = [0x0b, 0x3d, 0x4d];
+const COLOR_BRAND: readonly [number, number, number] = [0x0b, 0x3d, 0x4d];
 
 /** Resultado de renderizar el PDF: los bytes y el nombre sugerido de archivo. */
 export interface PrescriptionPdfResult {
@@ -52,7 +52,7 @@ export interface PrescriptionPdfResult {
 }
 
 /** Una sección del papel: un título y sus líneas ya formateadas para imprimir. */
-export interface SeccionDeLaReceta {
+export interface PrescriptionSection {
   readonly titulo: string;
   readonly lineas: readonly string[];
 }
@@ -63,10 +63,10 @@ export interface SeccionDeLaReceta {
  * línea exacta que termina impresa, no una estructura que hay que
  * reinterpretar.
  */
-export interface PapelDeReceta {
+export interface PrescriptionRole {
   readonly titulo: string;
   readonly encabezado: readonly string[];
-  readonly secciones: readonly SeccionDeLaReceta[];
+  readonly secciones: readonly PrescriptionSection[];
   readonly pie: string;
   readonly contentHash: string;
   readonly requestId: string;
@@ -78,52 +78,52 @@ export interface PapelDeReceta {
 }
 
 /** Fecha en formato es-BO, o un guion si no se conoce. */
-function formatearFecha(fecha: Date | null | undefined): string {
-  if (!fecha) return SIN_DATO;
+function formatDate(date: Date | null | undefined): string {
+  if (!date) return NO_DATA_POINT;
   return new Intl.DateTimeFormat('es-BO', { dateStyle: 'medium' }).format(
-    fecha,
+    date,
   );
 }
 
 /** Resuelve un `*_concept_id` a «CÓDIGO — display», o un guion si no está. */
-function etiqueta(
+function label(
   conceptsById: ReadonlyMap<string, CatalogConcepts>,
   conceptId: string | undefined | null,
 ): string {
-  if (!conceptId) return SIN_DATO;
-  const concepto = conceptsById.get(conceptId);
-  if (!concepto) return SIN_DATO;
-  return `${concepto.code} — ${concepto.display}`;
+  if (!conceptId) return NO_DATA_POINT;
+  const concept = conceptsById.get(conceptId);
+  if (!concept) return NO_DATA_POINT;
+  return `${concept.code} — ${concept.display}`;
 }
 
 /** Edad en años cumplidos, a partir de la fecha de nacimiento. */
-function edadEnAnios(nacimiento: Date | undefined, ahora: Date): string {
-  if (!nacimiento) return SIN_DATO;
-  let anios = ahora.getUTCFullYear() - nacimiento.getUTCFullYear();
-  const noCumplioAun =
-    ahora.getUTCMonth() < nacimiento.getUTCMonth() ||
-    (ahora.getUTCMonth() === nacimiento.getUTCMonth() &&
-      ahora.getUTCDate() < nacimiento.getUTCDate());
-  if (noCumplioAun) anios -= 1;
-  return `${anios} años`;
+function ageInYears(birth: Date | undefined, ahora: Date): string {
+  if (!birth) return NO_DATA_POINT;
+  let years = ahora.getUTCFullYear() - birth.getUTCFullYear();
+  const notYetFulfilled =
+    ahora.getUTCMonth() < birth.getUTCMonth() ||
+    (ahora.getUTCMonth() === birth.getUTCMonth() &&
+      ahora.getUTCDate() < birth.getUTCDate());
+  if (notYetFulfilled) years -= 1;
+  return `${years} años`;
 }
 
 /**
  * La sigla del departamento (LP, SC…), extraída de `catalog_concepts.code`
  * (`geo:bo:department:<sigla>`, ver `bo-geography.catalog.ts`).
  */
-function siglaDeDepartamento(
+function departmentAcronym(
   conceptsById: ReadonlyMap<string, CatalogConcepts>,
   conceptId: string | undefined,
 ): string | undefined {
   if (!conceptId) return undefined;
-  const codigo = conceptsById.get(conceptId)?.code;
-  if (!codigo) return undefined;
-  return codigo.split(':').pop();
+  const code = conceptsById.get(conceptId)?.code;
+  if (!code) return undefined;
+  return code.split(':').pop();
 }
 
 /** ¿Este estado es un documento oficial (sellado, sin marca de agua)? */
-function esEstadoOficial(statusConceptId: string): boolean {
+function isOfficialState(statusConceptId: string): boolean {
   return (
     statusConceptId === CLIN.MEDICATION_REQUEST_ISSUED ||
     statusConceptId === CLIN.MEDICATION_REQUEST_COMPLETED
@@ -131,7 +131,7 @@ function esEstadoOficial(statusConceptId: string): boolean {
 }
 
 /** Lo mínimo del estado de una receta que decide su marca de agua y asunto. */
-interface EstadoDeLaReceta {
+interface PrescriptionState {
   readonly statusConceptId: string;
   readonly statusReasonText?: string;
 }
@@ -148,7 +148,7 @@ export type PrescriptionStatusLabel =
  * `'ISSUED'` — el estado con más consecuencias equivocarse hacia "sí es
  * válida" sería DRAFT, y ninguno de los dos es ese.
  */
-function etiquetaDeEstado(statusConceptId: string): PrescriptionStatusLabel {
+function stateLabel(statusConceptId: string): PrescriptionStatusLabel {
   switch (statusConceptId) {
     case CLIN.MEDICATION_REQUEST_DRAFT:
       return 'DRAFT';
@@ -187,28 +187,28 @@ export interface PrescriptionVerificationResult {
  * INVALIDATED/REPLACED son inmutables pero dejaron de servir: «sin validez»,
  * con el motivo si el profesional lo declaró (`statusReasonText`).
  */
-function marcaDeAguaPara(estado: EstadoDeLaReceta): string | undefined {
+function watermarkFor(estado: PrescriptionState): string | undefined {
   if (estado.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
     return 'COPIA DE TRABAJO - SIN VALIDEZ FARMACÉUTICA';
   }
-  if (esEstadoOficial(estado.statusConceptId)) return undefined;
-  const motivo = estado.statusReasonText ? ` — ${estado.statusReasonText}` : '';
-  return `SIN VALIDEZ FARMACÉUTICA${motivo}`;
+  if (isOfficialState(estado.statusConceptId)) return undefined;
+  const reason = estado.statusReasonText ? ` — ${estado.statusReasonText}` : '';
+  return `SIN VALIDEZ FARMACÉUTICA${reason}`;
 }
 
 /** El asunto del documento: lo que un lector ve en las propiedades del PDF. */
-function subjectPara(estado: EstadoDeLaReceta): string {
+function subjectFor(estado: PrescriptionState): string {
   if (estado.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
     return 'Copia de trabajo — sin validez farmacéutica';
   }
-  if (esEstadoOficial(estado.statusConceptId)) {
+  if (isOfficialState(estado.statusConceptId)) {
     return 'Receta médica oficial';
   }
   return 'Receta sin validez farmacéutica';
 }
 
-/** Los datos ya resueltos que {@link armarReceta} necesita para armar el texto. */
-export interface DatosDeLaReceta {
+/** Los datos ya resueltos que {@link buildPrescription} necesita para armar el texto. */
+export interface PrescriptionData {
   readonly requestId: string;
   readonly status: string;
   readonly statusReasonText?: string;
@@ -249,122 +249,122 @@ export interface DatosDeLaReceta {
  * pueda asertar sobre texto exacto sin depender de si `pdfkit` comprime el
  * stream. Mismo patrón que `EncounterPdfService.armarPapel`.
  */
-export function armarReceta(datos: DatosDeLaReceta): PapelDeReceta {
-  const encabezado = [
-    `Folio: ${datos.requestId}`,
-    `Fecha: ${formatearFecha(datos.issuedAt ?? datos.createdAt)}`,
+export function buildPrescription(data: PrescriptionData): PrescriptionRole {
+  const header = [
+    `Folio: ${data.requestId}`,
+    `Fecha: ${formatDate(data.issuedAt ?? data.createdAt)}`,
   ];
 
-  const estadoMatricula = datos.hasLicense
-    ? datos.licenseVerified
+  const estadoMatricula = data.hasLicense
+    ? data.licenseVerified
       ? 'verificada'
       : 'declarada, pendiente de verificación'
     : undefined;
   const lineasMedico = [
-    `Nombre: ${datos.practitionerTitle ? `${datos.practitionerTitle} ` : ''}${datos.practitionerName}`,
-    `Especialidad: ${etiqueta(datos.conceptsById, datos.specialtyConceptId)}`,
-    datos.hasLicense
-      ? `Matrícula: ${datos.licenseNumber}${
-          datos.regulatoryAuthority ? ` · ${datos.regulatoryAuthority}` : ''
+    `Nombre: ${data.practitionerTitle ? `${data.practitionerTitle} ` : ''}${data.practitionerName}`,
+    `Especialidad: ${label(data.conceptsById, data.specialtyConceptId)}`,
+    data.hasLicense
+      ? `Matrícula: ${data.licenseNumber}${
+          data.regulatoryAuthority ? ` · ${data.regulatoryAuthority}` : ''
         } (${estadoMatricula})`
       : 'Matrícula: sin registrar',
-    ...(datos.signedAt ? [`Firmada el ${formatearFecha(datos.signedAt)}`] : []),
+    ...(data.signedAt ? [`Firmada el ${formatDate(data.signedAt)}`] : []),
   ];
 
-  const documento = datos.patientDocument
-    ? `${datos.patientDocument}${
-        datos.patientDocumentArea ? ` ${datos.patientDocumentArea}` : ''
+  const documento = data.patientDocument
+    ? `${data.patientDocument}${
+        data.patientDocumentArea ? ` ${data.patientDocumentArea}` : ''
       }`
-    : SIN_DATO;
-  const lineasPaciente = [
-    `Nombre: ${datos.patientName}`,
+    : NO_DATA_POINT;
+  const patientLines = [
+    `Nombre: ${data.patientName}`,
     `Documento: ${documento}`,
-    `Edad: ${edadEnAnios(datos.patientBirthDate, datos.ahora)}`,
-    `Fecha de nacimiento: ${formatearFecha(datos.patientBirthDate)}`,
+    `Edad: ${ageInYears(data.patientBirthDate, data.ahora)}`,
+    `Fecha de nacimiento: ${formatDate(data.patientBirthDate)}`,
   ];
 
-  const lineasMedicamento = [
-    `Medicamento: ${etiqueta(datos.conceptsById, datos.medicationConceptId)}`,
-    ...(datos.substanceAtcConceptId
+  const medicationLines = [
+    `Medicamento: ${label(data.conceptsById, data.medicationConceptId)}`,
+    ...(data.substanceAtcConceptId
       ? [
-          `Sustancia (ATC): ${etiqueta(datos.conceptsById, datos.substanceAtcConceptId)}`,
+          `Sustancia (ATC): ${label(data.conceptsById, data.substanceAtcConceptId)}`,
         ]
       : []),
-    `Vía: ${etiqueta(datos.conceptsById, datos.routeConceptId)}`,
-    `Dosis: ${datos.doseText ?? SIN_DATO}`,
-    `Frecuencia: ${datos.frequencyText ?? SIN_DATO}`,
+    `Vía: ${label(data.conceptsById, data.routeConceptId)}`,
+    `Dosis: ${data.doseText ?? NO_DATA_POINT}`,
+    `Frecuencia: ${data.frequencyText ?? NO_DATA_POINT}`,
     `Cantidad: ${
-      datos.quantityDecimal
-        ? `${datos.quantityDecimal} ${etiqueta(datos.conceptsById, datos.unitConceptId)}`
-        : SIN_DATO
+      data.quantityDecimal
+        ? `${data.quantityDecimal} ${label(data.conceptsById, data.unitConceptId)}`
+        : NO_DATA_POINT
     }`,
-    `Vigencia: ${formatearFecha(datos.validFrom)} — ${formatearFecha(datos.validTo)}`,
-    ...(datos.indicationCodeConceptId
+    `Vigencia: ${formatDate(data.validFrom)} — ${formatDate(data.validTo)}`,
+    ...(data.indicationCodeConceptId
       ? [
-          `Indicación: ${etiqueta(datos.conceptsById, datos.indicationCodeConceptId)}`,
+          `Indicación: ${label(data.conceptsById, data.indicationCodeConceptId)}`,
         ]
       : []),
-    `Instrucciones al paciente: ${datos.patientInstructionsText ?? SIN_DATOS}`,
+    `Instrucciones al paciente: ${data.patientInstructionsText ?? WITHOUT_DATA}`,
   ];
 
-  const coberturasVigentes = [...datos.coverages].sort((a, b) =>
+  const currentCoverages = [...data.coverages].sort((a, b) =>
     a.validityStatus === b.validityStatus
       ? 0
       : a.validityStatus === 'CURRENT'
         ? -1
         : 1,
   );
-  const lineasCobertura = coberturasVigentes.flatMap((cobertura) => {
-    const encabezadoCobertura = `${cobertura.carrierName}${
-      cobertura.planName ? ` · ${cobertura.planName}` : ''
-    } (${cobertura.verified ? 'verificada' : 'declarada'} · ${cobertura.validityStatus})`;
-    const beneficios = cobertura.benefits
-      .filter((beneficio) => beneficio.validityStatus === 'CURRENT')
-      .map((beneficio) => {
-        const partes = [
-          beneficio.categoryName ?? 'Beneficio',
-          beneficio.coveragePercent
-            ? `cobertura ${beneficio.coveragePercent} %`
+  const coverageLines = currentCoverages.flatMap((coverage) => {
+    const coverageHeader = `${coverage.carrierName}${
+      coverage.planName ? ` · ${coverage.planName}` : ''
+    } (${coverage.verified ? 'verificada' : 'declarada'} · ${coverage.validityStatus})`;
+    const benefits = coverage.benefits
+      .filter((benefit) => benefit.validityStatus === 'CURRENT')
+      .map((benefit) => {
+        const parts = [
+          benefit.categoryName ?? 'Beneficio',
+          benefit.coveragePercent
+            ? `cobertura ${benefit.coveragePercent} %`
             : undefined,
-          beneficio.copayAmount
-            ? `copago ${beneficio.copayAmount} ${cobertura.currencyCode ?? ''}`.trim()
+          benefit.copayAmount
+            ? `copago ${benefit.copayAmount} ${coverage.currencyCode ?? ''}`.trim()
             : undefined,
-        ].filter((parte): parte is string => Boolean(parte));
-        return `- ${partes.join(' · ')}`;
+        ].filter((part): part is string => Boolean(part));
+        return `- ${parts.join(' · ')}`;
       });
-    return [encabezadoCobertura, ...beneficios];
+    return [coverageHeader, ...benefits];
   });
 
-  const secciones: SeccionDeLaReceta[] = [
+  const sections: PrescriptionSection[] = [
     { titulo: 'Profesional', lineas: lineasMedico },
-    { titulo: 'Paciente', lineas: lineasPaciente },
-    { titulo: 'Detalle farmacológico', lineas: lineasMedicamento },
+    { titulo: 'Paciente', lineas: patientLines },
+    { titulo: 'Detalle farmacológico', lineas: medicationLines },
     {
       titulo: 'Cobertura de seguro',
       lineas:
-        lineasCobertura.length > 0
-          ? lineasCobertura
+        coverageLines.length > 0
+          ? coverageLines
           : ['Sin seguro vinculado en AloVida'],
     },
   ];
 
-  const pie = `Sello digital: SHA-256 ${datos.contentHash} · verificar en ${datos.qrUrl}`;
+  const pie = `Sello digital: SHA-256 ${data.contentHash} · verificar en ${data.qrUrl}`;
 
   return {
     titulo: 'Receta médica',
-    encabezado,
-    secciones,
+    encabezado: header,
+    secciones: sections,
     pie,
-    contentHash: datos.contentHash,
-    requestId: datos.requestId,
-    qrUrl: datos.qrUrl,
-    subject: subjectPara({
-      statusConceptId: datos.status,
-      statusReasonText: datos.statusReasonText,
+    contentHash: data.contentHash,
+    requestId: data.requestId,
+    qrUrl: data.qrUrl,
+    subject: subjectFor({
+      statusConceptId: data.status,
+      statusReasonText: data.statusReasonText,
     }),
-    marcaDeAgua: marcaDeAguaPara({
-      statusConceptId: datos.status,
-      statusReasonText: datos.statusReasonText,
+    marcaDeAgua: watermarkFor({
+      statusConceptId: data.status,
+      statusReasonText: data.statusReasonText,
     }),
   };
 }
@@ -373,15 +373,15 @@ export function armarReceta(datos: DatosDeLaReceta): PapelDeReceta {
  * Dibuja el papel con `pdfkit`. Lo único de este archivo que toca la
  * librería: todo el contenido ya llega resuelto a texto en `papel`.
  */
-export function dibujar(papel: PapelDeReceta): Promise<Buffer> {
+export function draw(role: PrescriptionRole): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
       margin: PAGE_MARGIN,
       info: {
-        Title: `Receta médica ${papel.requestId}`,
-        Subject: papel.subject,
-        Keywords: `sello:${papel.contentHash}`,
+        Title: `Receta médica ${role.requestId}`,
+        Subject: role.subject,
+        Keywords: `sello:${role.contentHash}`,
       },
     });
 
@@ -391,40 +391,40 @@ export function dibujar(papel: PapelDeReceta): Promise<Buffer> {
     doc.on('error', reject);
 
     // Membrete: isotipo + título, arriba a la izquierda.
-    const anchoMarca = 36;
-    dibujarMarcaAlovida(doc, {
+    const brandWidth = 36;
+    drawBrandAlovida(doc, {
       x: PAGE_MARGIN,
       y: PAGE_MARGIN,
-      ancho: anchoMarca,
-      color: COLOR_MARCA,
+      ancho: brandWidth,
+      color: COLOR_BRAND,
     });
     doc
       .fontSize(TITLE_FONT_SIZE)
-      .text(papel.titulo, PAGE_MARGIN + anchoMarca + 12, PAGE_MARGIN + 4);
+      .text(role.titulo, PAGE_MARGIN + brandWidth + 12, PAGE_MARGIN + 4);
     doc.moveDown(0.5);
     doc.y =
-      PAGE_MARGIN + Math.max(altoDeMarca(anchoMarca), TITLE_FONT_SIZE) + 12;
+      PAGE_MARGIN + Math.max(brandHeight(brandWidth), TITLE_FONT_SIZE) + 12;
 
     doc.fontSize(BODY_FONT_SIZE);
-    for (const linea of papel.encabezado) doc.text(linea);
+    for (const linea of role.encabezado) doc.text(linea);
 
-    for (const seccion of papel.secciones) {
+    for (const section of role.secciones) {
       doc.moveDown(1);
-      doc.fontSize(SECTION_FONT_SIZE).text(seccion.titulo);
+      doc.fontSize(SECTION_FONT_SIZE).text(section.titulo);
       doc.moveDown(0.3);
-      for (const linea of seccion.lineas) {
+      for (const linea of section.lineas) {
         doc.fontSize(BODY_FONT_SIZE).text(linea, { lineGap: LINE_GAP });
       }
     }
 
     // Marca de agua: una diagonal traslúcida, si el documento no es oficial.
-    if (papel.marcaDeAgua) {
+    if (role.marcaDeAgua) {
       doc.save();
       doc.opacity(0.18);
       doc.fillColor('#c0392b');
       doc.fontSize(36);
       doc.rotate(-35, { origin: [doc.page.width / 2, doc.page.height / 2] });
-      doc.text(papel.marcaDeAgua, 0, doc.page.height / 2 - 20, {
+      doc.text(role.marcaDeAgua, 0, doc.page.height / 2 - 20, {
         align: 'center',
         width: doc.page.width,
       });
@@ -432,16 +432,16 @@ export function dibujar(papel: PapelDeReceta): Promise<Buffer> {
     }
 
     // Sello y QR al pie de la última página.
-    const piePosY = doc.page.height - PAGE_MARGIN - 90;
+    const footerPosY = doc.page.height - PAGE_MARGIN - 90;
     doc.fontSize(FOOTER_FONT_SIZE).fillColor('#000000');
-    doc.text(papel.pie, PAGE_MARGIN, piePosY, {
+    doc.text(role.pie, PAGE_MARGIN, footerPosY, {
       width: doc.page.width - PAGE_MARGIN * 2 - 100,
     });
-    dibujarQr(
+    drawQr(
       doc,
-      papel.qrUrl,
+      role.qrUrl,
       doc.page.width - PAGE_MARGIN - 90,
-      piePosY - 10,
+      footerPosY - 10,
       90,
     );
 
@@ -496,7 +496,7 @@ export class PrescriptionPdfService {
       });
     }
 
-    await this.assertPuedeVerLaReceta(request, actor);
+    await this.assertPrescriptionCanSee(request, actor);
 
     const ahora = new Date();
     const [patientName, patientDoc, medico, coverages, indicationCondition] =
@@ -534,7 +534,7 @@ export class PrescriptionPdfService {
     const { webAppBaseUrl } = loadAgendaNoticesEnv();
     const qrUrl = `${webAppBaseUrl}/verify/rx/${request.id}`;
 
-    const papel = armarReceta({
+    const role = buildPrescription({
       requestId: request.id,
       status: request.statusConceptId,
       statusReasonText: request.statusReasonText,
@@ -543,12 +543,12 @@ export class PrescriptionPdfService {
       issuedAt: request.issuedAt,
       patientName,
       patientDocument: patientDoc?.value,
-      patientDocumentArea: siglaDeDepartamento(
+      patientDocumentArea: departmentAcronym(
         conceptsById,
         patientDoc?.issuerAdministrativeAreaConceptId,
       ),
       patientBirthDate,
-      practitionerName: medico?.name ?? SIN_IDENTIFICAR,
+      practitionerName: medico?.name ?? UNIDENTIFIED,
       practitionerTitle: medico?.professionalTitle,
       specialtyConceptId: medico?.specialtyConceptId,
       licenseNumber: medico?.licenseNumber,
@@ -573,7 +573,7 @@ export class PrescriptionPdfService {
       ahora,
     });
 
-    const buffer = await dibujar(papel);
+    const buffer = await draw(role);
     return { buffer, fileName: `receta-${request.id}.pdf` };
   }
 
@@ -599,19 +599,19 @@ export class PrescriptionPdfService {
       });
     }
 
-    const licencia = request.prescriberProfileId
+    const license = request.prescriberProfileId
       ? await this.resolvePrescriberLicense(em, request.prescriberProfileId)
       : null;
 
     return {
       id: request.id,
-      status: etiquetaDeEstado(request.statusConceptId),
+      status: stateLabel(request.statusConceptId),
       issuedAt: request.issuedAt ?? null,
       contentHash:
         request.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT
           ? null
           : computePrescriptionHash(request),
-      prescriberLicense: licencia,
+      prescriberLicense: license,
     };
   }
 
@@ -641,7 +641,7 @@ export class PrescriptionPdfService {
    * El prescriptor pasa siempre; el resto, por la misma puerta que el
    * expediente clínico.
    */
-  private async assertPuedeVerLaReceta(
+  private async assertPrescriptionCanSee(
     request: MedicationRequests,
     actor: AuthenticatedUser,
   ): Promise<void> {
@@ -651,7 +651,7 @@ export class PrescriptionPdfService {
     ) {
       return;
     }
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       request.patientProfileId,
       actor,
     );
@@ -665,12 +665,12 @@ export class PrescriptionPdfService {
       em,
       patientProfileId,
     );
-    if (!patientProfile) return SIN_IDENTIFICAR;
+    if (!patientProfile) return UNIDENTIFIED;
     const person = await this.personsRepo.findById(
       em,
       patientProfile.profileId,
     );
-    return this.displayNameOf(person) ?? SIN_IDENTIFICAR;
+    return this.displayNameOf(person) ?? UNIDENTIFIED;
   }
 
   private async resolvePatientBirthDate(
@@ -702,12 +702,12 @@ export class PrescriptionPdfService {
       patientProfileId,
     );
     if (!patientProfile) return null;
-    const identificadores = await this.identifiersRepo.findCurrentByOwner(
+    const identifiers = await this.identifiersRepo.findCurrentByOwner(
       em,
       patientProfile.profileId,
     );
-    const documento = identificadores.find(
-      (fila) => fila.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    const documento = identifiers.find(
+      (row) => row.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
     if (!documento) return null;
     return {
@@ -746,7 +746,7 @@ export class PrescriptionPdfService {
       (auth) => auth.jurisdictionConceptId === PROF.JURISDICTION_NATIONAL,
     );
     return {
-      name: this.displayNameOf(person) ?? SIN_IDENTIFICAR,
+      name: this.displayNameOf(person) ?? UNIDENTIFIED,
       professionalTitle: practitionerProfile.professionalTitle,
       specialtyConceptId: specialties[0]?.specialtyConceptId,
       licenseNumber: matricula?.licenseNumber,

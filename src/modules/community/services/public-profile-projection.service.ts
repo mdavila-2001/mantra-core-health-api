@@ -123,22 +123,22 @@ export class PublicProfileProjectionService {
     // vuelva a verificarlo. Sin esto, reverificar dejaba dos filas para el
     // mismo sujeto —dos enlaces públicos a lo mismo— y el slug, que es único,
     // hacía caer la segunda con un error de base que no nombraba el problema.
-    const existente = await this.profilesRepo.findByTarget(em, data.targetId);
-    if (existente) {
+    const existing = await this.profilesRepo.findByTarget(em, data.targetId);
+    if (existing) {
       // Completa exclusivamente el ancla pendiente creada para un logo interno.
       // Una vitrina con visibilidad privada explícita conserva su decisión.
       if (
-        existente.visibilityConceptId == null &&
-        existente.statusConceptId === CONCEPTS.STATE_PENDING
+        existing.visibilityConceptId == null &&
+        existing.statusConceptId === CONCEPTS.STATE_PENDING
       ) {
-        existente.visibilityConceptId = COMM.PROFILE_VISIBILITY_PUBLIC;
-        existente.statusConceptId = CONCEPTS.STATE_ACTIVE;
-        existente.targetTypeConceptId =
+        existing.visibilityConceptId = COMM.PROFILE_VISIBILITY_PUBLIC;
+        existing.statusConceptId = CONCEPTS.STATE_ACTIVE;
+        existing.targetTypeConceptId =
           data.targetTypeConceptId ?? COMM.PROFILE_TARGET_ORGANIZATION;
-        touch(existente, data.actorUserId);
+        touch(existing, data.actorUserId);
         await em.flush();
       }
-      return existente.id;
+      return existing.id;
     }
 
     const profile = this.profilesRepo.create(em, {

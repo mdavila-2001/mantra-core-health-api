@@ -24,7 +24,7 @@
  */
 
 /** Un importe partido en signo, entero escalado y cantidad de decimales. */
-interface EscalaDecimal {
+interface DecimalScale {
   /** Valor escalado a `decimales` posiciones, con su signo. */
   readonly valor: bigint;
   /** Cuántas posiciones decimales tenía la cadena original. */
@@ -34,20 +34,20 @@ interface EscalaDecimal {
 /**
  * Parte una cadena decimal en entero escalado + cantidad de decimales.
  *
- * @param texto - Importe tal cual lo devolvió la base.
+ * @param text - Importe tal cual lo devolvió la base.
  * @returns La representación escalada.
  * @throws RangeError si el texto no es un decimal.
  */
-function escalar(texto: string): EscalaDecimal {
-  const limpio = texto.trim();
-  if (!/^[+-]?\d+(\.\d+)?$/.test(limpio)) {
-    throw new RangeError(`Importe no decimal: ${texto}`);
+function escalate(text: string): DecimalScale {
+  const clean = text.trim();
+  if (!/^[+-]?\d+(\.\d+)?$/.test(clean)) {
+    throw new RangeError(`Importe no decimal: ${text}`);
   }
-  const negativo = limpio.startsWith('-');
-  const sinSigno = limpio.replace(/^[+-]/, '');
-  const [entera, fraccion = ''] = sinSigno.split('.');
+  const negative = clean.startsWith('-');
+  const withoutSign = clean.replace(/^[+-]/, '');
+  const [entera, fraccion = ''] = withoutSign.split('.');
   const valor = BigInt(`${entera}${fraccion}`);
-  return { valor: negativo ? -valor : valor, decimales: fraccion.length };
+  return { valor: negative ? -valor : valor, decimales: fraccion.length };
 }
 
 /**
@@ -59,28 +59,28 @@ function escalar(texto: string): EscalaDecimal {
  * es distinto de `'0.00'`: «todavía no hay dictamen» y «el dictamen aprobó
  * cero» no son lo mismo.
  *
- * @param importes - Importes como cadena; los nulos se ignoran.
+ * @param amounts - Importes como cadena; los nulos se ignoran.
  * @returns La suma como cadena decimal, o `null` si no había ninguno.
  */
-export function sumarDecimales(
-  importes: ReadonlyArray<string | null | undefined>,
+export function addDecimals(
+  amounts: ReadonlyArray<string | null | undefined>,
 ): string | null {
-  const presentes = importes.filter(
-    (importe): importe is string => importe != null && importe.trim() !== '',
+  const present = amounts.filter(
+    (amount): amount is string => amount != null && amount.trim() !== '',
   );
-  if (presentes.length === 0) return null;
+  if (present.length === 0) return null;
 
-  const escalados = presentes.map(escalar);
-  const decimales = escalados.reduce(
+  const escalados = present.map(escalate);
+  const decimals = escalados.reduce(
     (max, item) => Math.max(max, item.decimales),
     0,
   );
-  const total = escalados.reduce((acumulado, item) => {
-    const factor = 10n ** BigInt(decimales - item.decimales);
-    return acumulado + item.valor * factor;
+  const total = escalados.reduce((accumulated, item) => {
+    const factor = 10n ** BigInt(decimals - item.decimales);
+    return accumulated + item.valor * factor;
   }, 0n);
 
-  return formatearEscalado(total, decimales);
+  return formatEscalado(total, decimals);
 }
 
 /**
@@ -93,16 +93,16 @@ export function sumarDecimales(
  * @param b - Segundo importe.
  * @returns `true` si representan el mismo valor.
  */
-export function mismosDecimales(
+export function sameDecimals(
   a: string | null | undefined,
   b: string | null | undefined,
 ): boolean {
   if (a == null || b == null) return a == null && b == null;
-  const ea = escalar(a);
-  const eb = escalar(b);
-  const decimales = Math.max(ea.decimales, eb.decimales);
-  const va = ea.valor * 10n ** BigInt(decimales - ea.decimales);
-  const vb = eb.valor * 10n ** BigInt(decimales - eb.decimales);
+  const ea = escalate(a);
+  const eb = escalate(b);
+  const decimals = Math.max(ea.decimales, eb.decimales);
+  const va = ea.valor * 10n ** BigInt(decimals - ea.decimales);
+  const vb = eb.valor * 10n ** BigInt(decimals - eb.decimales);
   return va === vb;
 }
 
@@ -110,16 +110,16 @@ export function mismosDecimales(
  * Vuelve a poner el punto decimal en un entero escalado.
  *
  * @param valor - Entero escalado, con signo.
- * @param decimales - Posiciones decimales a restituir.
+ * @param decimals - Posiciones decimales a restituir.
  * @returns La cadena decimal.
  */
-function formatearEscalado(valor: bigint, decimales: number): string {
-  if (decimales === 0) return valor.toString();
-  const negativo = valor < 0n;
-  const digitos = (negativo ? -valor : valor)
+function formatEscalado(valor: bigint, decimals: number): string {
+  if (decimals === 0) return valor.toString();
+  const negative = valor < 0n;
+  const digits = (negative ? -valor : valor)
     .toString()
-    .padStart(decimales + 1, '0');
-  const corte = digitos.length - decimales;
-  const texto = `${digitos.slice(0, corte)}.${digitos.slice(corte)}`;
-  return negativo ? `-${texto}` : texto;
+    .padStart(decimals + 1, '0');
+  const cut = digits.length - decimals;
+  const text = `${digits.slice(0, cut)}.${digits.slice(cut)}`;
+  return negative ? `-${text}` : text;
 }

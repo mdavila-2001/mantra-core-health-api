@@ -58,12 +58,12 @@ function evidenceFrom(raw: unknown): ConditionVerificationEvidenceDto | null {
   if (typeof raw !== 'object' || raw === null) return null;
   const e = raw as Record<string, unknown>;
   if (e.kind !== 'NOTE' && e.kind !== 'ANALYSIS') return null;
-  const texto = (valor: unknown): string | undefined =>
+  const text = (valor: unknown): string | undefined =>
     typeof valor === 'string' ? valor : undefined;
-  const noteId = texto(e.noteId);
-  const encounterId = texto(e.encounterId);
-  const serviceRequestId = texto(e.serviceRequestId);
-  const diagnosticReportId = texto(e.diagnosticReportId);
+  const noteId = text(e.noteId);
+  const encounterId = text(e.encounterId);
+  const serviceRequestId = text(e.serviceRequestId);
+  const diagnosticReportId = text(e.diagnosticReportId);
   return {
     kind: e.kind,
     ...(noteId === undefined ? {} : { noteId }),

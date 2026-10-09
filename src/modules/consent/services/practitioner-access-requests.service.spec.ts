@@ -24,8 +24,8 @@ import { CONS } from '../consent.concepts';
  * quién), la clase de control que MCH-024-AC02 pide proteger.
  */
 
-const actorProfesional = { id: 'prof-1', roles: ['PRACTITIONER'] } as any;
-const actorPaciente = { id: 'pac-user-1', roles: ['PATIENT'] } as any;
+const actorProfessional = { id: 'prof-1', roles: ['PRACTITIONER'] } as any;
+const actorPatient = { id: 'pac-user-1', roles: ['PATIENT'] } as any;
 
 /** Construye el sistema bajo prueba con dependencias controladas. */
 function build() {
@@ -94,7 +94,7 @@ describe('PractitionerAccessRequestsService', () => {
       await expect(
         d.service.request(
           { patientProfileId: 'pac-1', specialtyConceptIds: ['esp-1'] } as any,
-          actorProfesional,
+          actorProfessional,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.consentsRepo.create).not.toHaveBeenCalled();
@@ -102,20 +102,20 @@ describe('PractitionerAccessRequestsService', () => {
 
     it('crea la solicitud y avisa al paciente cuando no hay nada pendiente', async () => {
       const d = build();
-      const creado = {
+      const created = {
         id: 'c-nuevo',
         patientProfileId: 'pac-1',
         createdAt: new Date(),
-        createdByUserId: actorProfesional.id,
+        createdByUserId: actorProfessional.id,
       };
-      d.consentsRepo.create.mockReturnValue(creado);
+      d.consentsRepo.create.mockReturnValue(created);
       d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
         userId: 'pac-user-1',
       });
 
       const res = await d.service.request(
         { patientProfileId: 'pac-1', specialtyConceptIds: ['esp-1'] } as any,
-        actorProfesional,
+        actorProfessional,
       );
 
       expect(res.id).toBe('c-nuevo');
@@ -129,7 +129,7 @@ describe('PractitionerAccessRequestsService', () => {
   });
 
   describe('decide (FT-07-R06/R07) — titularidad', () => {
-    const solicitud = {
+    const request = {
       id: 'c-1',
       categoryConceptId: CONS.CATEGORY_PRACTITIONER_ACCESS,
       patientProfileId: 'pac-titular',
@@ -142,7 +142,7 @@ describe('PractitionerAccessRequestsService', () => {
     // OTRO paciente con sólo adivinar/enumerar el id de la solicitud.
     it('quien no es el paciente titular no puede decidir — 404, no 403 (no revela existencia)', async () => {
       const d = build();
-      d.consentsRepo.findById.mockResolvedValue(solicitud);
+      d.consentsRepo.findById.mockResolvedValue(request);
       // Sesión válida, pero de OTRO paciente.
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'persona-intrusa',
@@ -152,24 +152,24 @@ describe('PractitionerAccessRequestsService', () => {
       });
 
       await expect(
-        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPaciente),
+        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPatient),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
 
     it('sin perfil de paciente vinculado a la sesión, tampoco decide', async () => {
       const d = build();
-      d.consentsRepo.findById.mockResolvedValue(solicitud);
+      d.consentsRepo.findById.mockResolvedValue(request);
       d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
 
       await expect(
-        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPaciente),
+        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPatient),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('el paciente titular sí puede rechazar su propia solicitud', async () => {
       const d = build();
-      d.consentsRepo.findById.mockResolvedValue({ ...solicitud });
+      d.consentsRepo.findById.mockResolvedValue({ ...request });
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'persona-titular',
       });
@@ -180,7 +180,7 @@ describe('PractitionerAccessRequestsService', () => {
       const res = await d.service.decide(
         'c-1',
         { decision: 'DECLINED' } as any,
-        actorPaciente,
+        actorPatient,
       );
 
       expect(res.status).toBe(CONS.ACCESS_REQUEST_DECLINED);
@@ -191,7 +191,7 @@ describe('PractitionerAccessRequestsService', () => {
   });
 
   describe('decide (FT-07-R06) — no todo-o-nada', () => {
-    const solicitud = {
+    const request = {
       id: 'c-1',
       categoryConceptId: CONS.CATEGORY_PRACTITIONER_ACCESS,
       patientProfileId: 'pac-titular',
@@ -200,8 +200,8 @@ describe('PractitionerAccessRequestsService', () => {
       tenantId: 'tenant-1',
     };
 
-    function comoTitular(d: ReturnType<typeof build>) {
-      d.consentsRepo.findById.mockResolvedValue({ ...solicitud });
+    function asHolder(d: ReturnType<typeof build>) {
+      d.consentsRepo.findById.mockResolvedValue({ ...request });
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'persona-titular',
       });
@@ -218,7 +218,7 @@ describe('PractitionerAccessRequestsService', () => {
     // pedido original sin que nadie lo haya solicitado.
     it('rechaza autorizar una especialidad que no estaba en lo pedido', async () => {
       const d = build();
-      comoTitular(d);
+      asHolder(d);
 
       await expect(
         d.service.decide(
@@ -227,27 +227,27 @@ describe('PractitionerAccessRequestsService', () => {
             decision: 'ACCEPTED',
             authorizedSpecialtyConceptIds: ['esp-NO-PEDIDA'],
           } as any,
-          actorPaciente,
+          actorPatient,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rechaza aceptar sin autorizar ninguna especialidad', async () => {
       const d = build();
-      comoTitular(d);
+      asHolder(d);
 
       await expect(
         d.service.decide(
           'c-1',
           { decision: 'ACCEPTED', authorizedSpecialtyConceptIds: [] } as any,
-          actorPaciente,
+          actorPatient,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('acepta un subconjunto válido y crea el grant clínico', async () => {
       const d = build();
-      comoTitular(d);
+      asHolder(d);
 
       const res = await d.service.decide(
         'c-1',
@@ -255,7 +255,7 @@ describe('PractitionerAccessRequestsService', () => {
           decision: 'ACCEPTED',
           authorizedSpecialtyConceptIds: ['esp-1'],
         } as any,
-        actorPaciente,
+        actorPatient,
       );
 
       expect(res.status).toBe(CONS.CONSENT_ACTIVE);
@@ -270,7 +270,7 @@ describe('PractitionerAccessRequestsService', () => {
 
     it('no duplica el grant clínico si ya hay uno activo', async () => {
       const d = build();
-      comoTitular(d);
+      asHolder(d);
       d.clinicalGrantsRepo.findActive.mockResolvedValue({ id: 'grant-ya' });
 
       await d.service.decide(
@@ -279,7 +279,7 @@ describe('PractitionerAccessRequestsService', () => {
           decision: 'ACCEPTED',
           authorizedSpecialtyConceptIds: ['esp-1'],
         } as any,
-        actorPaciente,
+        actorPatient,
       );
 
       expect(d.clinicalGrantsRepo.create).not.toHaveBeenCalled();
@@ -304,7 +304,7 @@ describe('PractitionerAccessRequestsService', () => {
       });
 
       await expect(
-        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPaciente),
+        d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPatient),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -316,7 +316,7 @@ describe('PractitionerAccessRequestsService', () => {
         d.service.decide(
           'c-inexistente',
           { decision: 'DECLINED' } as any,
-          actorPaciente,
+          actorPatient,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });

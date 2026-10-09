@@ -110,8 +110,8 @@ export class PharmacyPublicController {
       q,
       group,
       origin: origenDe(lat, lng),
-      radiusKm: aDecimal(radiusKm),
-      limit: aEntero(limit),
+      radiusKm: toDecimal(radiusKm),
+      limit: toInteger(limit),
     });
   }
 
@@ -141,7 +141,7 @@ export class PharmacyPublicController {
   ): Promise<PublicMedicationAvailabilityDto> {
     return this.service.getAvailability(conceptId, {
       origin: origenDe(lat, lng),
-      radiusKm: aDecimal(radiusKm),
+      radiusKm: toDecimal(radiusKm),
     });
   }
 }
@@ -157,21 +157,21 @@ function origenDe(
   lat?: string,
   lng?: string,
 ): { lat: number; lng: number } | undefined {
-  const latitud = aDecimal(lat);
-  const longitud = aDecimal(lng);
-  if (latitud === undefined || longitud === undefined) return undefined;
-  return { lat: latitud, lng: longitud };
+  const latitude = toDecimal(lat);
+  const longitud = toDecimal(lng);
+  if (latitude === undefined || longitud === undefined) return undefined;
+  return { lat: latitude, lng: longitud };
 }
 
 /** Decimal de un parámetro de consulta, o `undefined`. */
-function aDecimal(valor?: string): number | undefined {
+function toDecimal(valor?: string): number | undefined {
   if (valor === undefined) return undefined;
   const numero = Number.parseFloat(valor);
   return Number.isFinite(numero) ? numero : undefined;
 }
 
 /** Entero de un parámetro de consulta, o `undefined`. */
-function aEntero(valor?: string): number | undefined {
+function toInteger(valor?: string): number | undefined {
   if (valor === undefined) return undefined;
   const numero = Number.parseInt(valor, 10);
   return Number.isFinite(numero) ? numero : undefined;

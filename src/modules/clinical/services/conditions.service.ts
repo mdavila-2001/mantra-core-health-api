@@ -595,12 +595,12 @@ export class ConditionsService {
     }
     const course =
       dto.clinicalCourseConceptId ?? condition.clinicalCourseConceptId;
-    const cronica = course === CLIN.CONDITION_COURSE_CHRONIC;
+    const chronic = course === CLIN.CONDITION_COURSE_CHRONIC;
 
     // Una crónica no resuelve: el fin esperado se descarta aunque viniera en
     // el cuerpo o en el alta, igual que hace el diálogo al marcarla.
     let expectedResolutionAt: Date | undefined;
-    if (!cronica) {
+    if (!chronic) {
       expectedResolutionAt = dto.expectedResolutionAt
         ? new Date(dto.expectedResolutionAt)
         : condition.expectedResolutionAt;
@@ -649,46 +649,46 @@ export class ConditionsService {
     evidence: DiagnosisEvidenceDto,
     patientProfileId: string,
   ): Promise<ConditionVerificationEvidenceDto> {
-    const invalida = (motivo: string): PreconditionFailedException =>
-      new PreconditionFailedException(motivo, { field: 'basedOn' });
+    const invalid = (reason: string): PreconditionFailedException =>
+      new PreconditionFailedException(reason, { field: 'basedOn' });
 
     if (evidence.kind === 'NOTE') {
-      const nota = evidence.noteId
+      const note = evidence.noteId
         ? await tx.findOne(ClinicalNoteHeaders, {
             id: evidence.noteId,
             patientProfileId,
           })
         : null;
-      if (!nota) {
-        throw invalida('La nota indicada no existe o no es de esta persona.');
+      if (!note) {
+        throw invalid('La nota indicada no existe o no es de esta persona.');
       }
       return {
         kind: 'NOTE',
-        noteId: nota.id,
-        ...(nota.encounterId ? { encounterId: nota.encounterId } : {}),
+        noteId: note.id,
+        ...(note.encounterId ? { encounterId: note.encounterId } : {}),
       };
     }
 
-    const informe = evidence.diagnosticReportId
+    const report = evidence.diagnosticReportId
       ? await tx.findOne(DiagnosticReports, {
           id: evidence.diagnosticReportId,
           patientProfileId,
         })
       : null;
-    if (evidence.diagnosticReportId && !informe) {
-      throw invalida('El informe indicado no existe o no es de esta persona.');
+    if (evidence.diagnosticReportId && !report) {
+      throw invalid('El informe indicado no existe o no es de esta persona.');
     }
-    const ordenId = evidence.serviceRequestId ?? informe?.serviceRequestId;
-    const orden = ordenId
-      ? await tx.findOne(ServiceRequests, { id: ordenId, patientProfileId })
+    const orderId = evidence.serviceRequestId ?? report?.serviceRequestId;
+    const order = orderId
+      ? await tx.findOne(ServiceRequests, { id: orderId, patientProfileId })
       : null;
-    if (!orden) {
-      throw invalida('La orden indicada no existe o no es de esta persona.');
+    if (!order) {
+      throw invalid('La orden indicada no existe o no es de esta persona.');
     }
     return {
       kind: 'ANALYSIS',
-      serviceRequestId: orden.id,
-      ...(informe ? { diagnosticReportId: informe.id } : {}),
+      serviceRequestId: order.id,
+      ...(report ? { diagnosticReportId: report.id } : {}),
     };
   }
 
@@ -744,7 +744,7 @@ export class ConditionsService {
     actor: AuthenticatedUser,
   ): Promise<Conditions> {
     const condition = await this.loadConditionOrThrow(tx, conditionId);
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       condition.patientProfileId,
       actor,
     );

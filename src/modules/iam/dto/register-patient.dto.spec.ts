@@ -23,7 +23,7 @@ import { PROF } from '../../profiles/profiles.concepts';
  * un caso que llegara inválido por otro campo dejaría de decir nada sobre el
  * parentesco, que es lo único que estas pruebas afirman.
  */
-const ALTA_MINIMA = {
+const MINIMAL_REGISTRATION = {
   nationalId: '1234567',
   residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
   issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
@@ -39,26 +39,26 @@ const ALTA_MINIMA = {
 /**
  * Valida un alta y devuelve las propiedades que quedaron mal.
  *
- * @param alta - El cuerpo del alta, tal como llegaría del cliente.
+ * @param registration - El cuerpo del alta, tal como llegaría del cliente.
  * @returns Los nombres de las propiedades con error, sin el detalle.
  */
-async function propiedadesConError(
-  alta: Record<string, unknown>,
+async function propertiesWithError(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(RegisterPatientDto, alta);
-  const errores = await validate(dto);
-  return errores.map((error) => error.property);
+  const dto = plainToInstance(RegisterPatientDto, registration);
+  const errors = await validate(dto);
+  return errors.map((error) => error.property);
 }
 
 describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
   it('acepta el alta sin parentesco declarado: el campo es opcional', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('acepta un concepto del catálogo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         guardianName: 'Rosa Quispe',
         guardianRelationshipConceptId: PROF.RELATIONSHIP_MOTHER,
       }),
@@ -69,8 +69,8 @@ describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
     // El caso real es un cliente que manda el código del concepto —«MOTHER»— en
     // vez del identificador que la lectura del catálogo le dio.
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         guardianName: 'Rosa Quispe',
         guardianRelationshipConceptId: 'RELATIONSHIP_MOTHER',
       }),
@@ -79,8 +79,8 @@ describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
 
   it('rechaza la cadena vacía: ausente y vacío no son lo mismo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         guardianRelationshipConceptId: '',
       }),
     ).toEqual(['guardianRelationshipConceptId']);
@@ -97,16 +97,16 @@ describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
 describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => {
   it('rechaza el alta sin el campo: es obligatorio', async () => {
     const { issuerAdministrativeAreaConceptId: _omitido, ...sinDepartamento } =
-      ALTA_MINIMA;
-    expect(await propiedadesConError(sinDepartamento)).toEqual([
+      MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(sinDepartamento)).toEqual([
       'issuerAdministrativeAreaConceptId',
     ]);
   });
 
   it('rechaza null', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         issuerAdministrativeAreaConceptId: null,
       }),
     ).toEqual(['issuerAdministrativeAreaConceptId']);
@@ -114,8 +114,8 @@ describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => 
 
   it('rechaza la cadena vacía: ausente y vacío no son lo mismo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         issuerAdministrativeAreaConceptId: '',
       }),
     ).toEqual(['issuerAdministrativeAreaConceptId']);
@@ -123,14 +123,14 @@ describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => 
 
   it('rechaza lo que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         issuerAdministrativeAreaConceptId: 'geo:bo:department:SC',
       }),
     ).toEqual(['issuerAdministrativeAreaConceptId']);
   });
 
   it('acepta un uuid', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 });

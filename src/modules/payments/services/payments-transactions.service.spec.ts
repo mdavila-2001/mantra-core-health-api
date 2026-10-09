@@ -318,7 +318,7 @@ describe('PaymentsTransactionsService', () => {
     // el saldo, así que una captura parcial cerraba la intención completa y una
     // segunda podía cobrar de más.
     describe('MCH-036 · saldo acumulado de la intención', () => {
-      function intencion(d: ReturnType<typeof build>, amount: string) {
+      function intent(d: ReturnType<typeof build>, amount: string) {
         d.intentsRepo.findByIdForUpdate.mockResolvedValue({
           id: 'intent-1',
           gatewayId: 'gw-1',
@@ -335,7 +335,7 @@ describe('PaymentsTransactionsService', () => {
           ...data,
         }));
       }
-      const capturada = (amount: string) => ({
+      const captured = (amount: string) => ({
         id: `txn-${amount}`,
         amount,
         statusConceptId: CONCEPTS.TXN_CAPTURED,
@@ -389,7 +389,7 @@ describe('PaymentsTransactionsService', () => {
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
         d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
         d.transactionsRepo.findByIntent.mockResolvedValue([
-          capturada('40.00'),
+          captured('40.00'),
           transaction,
         ]);
 
@@ -407,8 +407,8 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC02 · una operación que excede el saldo se rechaza sin crear la fila', async () => {
         const d = build();
-        intencion(d, '100.00');
-        d.transactionsRepo.findByIntent.mockResolvedValue([capturada('40.00')]);
+        intent(d, '100.00');
+        d.transactionsRepo.findByIntent.mockResolvedValue([captured('40.00')]);
 
         await expect(
           d.service.processTransaction(
@@ -430,8 +430,8 @@ describe('PaymentsTransactionsService', () => {
 
       it('sin importe explícito se cobra el saldo pendiente, no el total', async () => {
         const d = build();
-        intencion(d, '100.00');
-        d.transactionsRepo.findByIntent.mockResolvedValue([capturada('40.00')]);
+        intent(d, '100.00');
+        d.transactionsRepo.findByIntent.mockResolvedValue([captured('40.00')]);
 
         const res = await d.service.processTransaction(
           'intent-1',
@@ -444,7 +444,7 @@ describe('PaymentsTransactionsService', () => {
 
       it('una captura no puede exceder el importe autorizado', async () => {
         const d = build();
-        intencion(d, '100.00');
+        intent(d, '100.00');
         d.transactionsRepo.findPendingByIntent.mockResolvedValue({
           id: 'txn-0',
           amount: '40.00',
@@ -509,7 +509,7 @@ describe('PaymentsTransactionsService', () => {
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
         d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
         d.transactionsRepo.findByIntent.mockResolvedValue([
-          capturada('40.00'),
+          captured('40.00'),
           transaction,
         ]);
 
@@ -621,7 +621,7 @@ describe('PaymentsTransactionsService', () => {
     // la coincidencia exacta contaba como duplicado y cualquier otro evento
     // sobreescribía el estado, así que una entrega atrasada revertía un cobro.
     describe('MCH-011 · orden de los eventos', () => {
-      function llegada(
+      function arrival(
         d: ReturnType<typeof build>,
         ref: string,
         outcome: 'AUTHORIZED' | 'CAPTURED' | 'FAILED',
@@ -632,7 +632,7 @@ describe('PaymentsTransactionsService', () => {
           signature: signCallback('gw-1', body),
         });
       }
-      function transaccion(statusConceptId: string) {
+      function transaction(statusConceptId: string) {
         return {
           id: 'txn-1',
           gatewayId: 'gw-1',
@@ -644,10 +644,10 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC01 · un AUTHORIZED atrasado no hace retroceder un cobro capturado', async () => {
         const d = build();
-        const txn = transaccion(CONCEPTS.TXN_CAPTURED);
+        const txn = transaction(CONCEPTS.TXN_CAPTURED);
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
 
-        const res = await llegada(d, 'ref-1', 'AUTHORIZED');
+        const res = await arrival(d, 'ref-1', 'AUTHORIZED');
 
         expect(res.applied).toBe(false);
         expect(res.decision).toBe('obsoleto');
@@ -659,10 +659,10 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC01 · un FAILED tardío sobre un cobro capturado no lo marca fallido', async () => {
         const d = build();
-        const txn = transaccion(CONCEPTS.TXN_CAPTURED);
+        const txn = transaction(CONCEPTS.TXN_CAPTURED);
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
 
-        const res = await llegada(d, 'ref-1', 'FAILED');
+        const res = await arrival(d, 'ref-1', 'FAILED');
 
         expect(res.applied).toBe(false);
         expect(res.decision).toBe('contradiccion');
@@ -672,27 +672,27 @@ describe('PaymentsTransactionsService', () => {
       });
 
       it('AC02 · las dos permutaciones de AUTHORIZED y CAPTURED terminan igual', async () => {
-        const enOrden = build();
-        const a = transaccion(CONCEPTS.TXN_PROCESSING);
-        enOrden.transactionsRepo.findByGatewayRef.mockResolvedValue(a);
-        enOrden.intentsRepo.findByIdForUpdate.mockResolvedValue({
+        const inOrder = build();
+        const a = transaction(CONCEPTS.TXN_PROCESSING);
+        inOrder.transactionsRepo.findByGatewayRef.mockResolvedValue(a);
+        inOrder.intentsRepo.findByIdForUpdate.mockResolvedValue({
           id: 'intent-1',
           amount: '150.00',
           statusConceptId: CONCEPTS.PI_PROCESSING,
         });
-        await llegada(enOrden, 'ref-1', 'AUTHORIZED');
-        await llegada(enOrden, 'ref-1', 'CAPTURED');
+        await arrival(inOrder, 'ref-1', 'AUTHORIZED');
+        await arrival(inOrder, 'ref-1', 'CAPTURED');
 
-        const permutado = build();
-        const b = transaccion(CONCEPTS.TXN_PROCESSING);
-        permutado.transactionsRepo.findByGatewayRef.mockResolvedValue(b);
-        permutado.intentsRepo.findByIdForUpdate.mockResolvedValue({
+        const permuted = build();
+        const b = transaction(CONCEPTS.TXN_PROCESSING);
+        permuted.transactionsRepo.findByGatewayRef.mockResolvedValue(b);
+        permuted.intentsRepo.findByIdForUpdate.mockResolvedValue({
           id: 'intent-1',
           amount: '150.00',
           statusConceptId: CONCEPTS.PI_PROCESSING,
         });
-        await llegada(permutado, 'ref-1', 'CAPTURED');
-        await llegada(permutado, 'ref-1', 'AUTHORIZED');
+        await arrival(permuted, 'ref-1', 'CAPTURED');
+        await arrival(permuted, 'ref-1', 'AUTHORIZED');
 
         expect(a.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
         expect(b.statusConceptId).toBe(a.statusConceptId);
@@ -701,10 +701,10 @@ describe('PaymentsTransactionsService', () => {
       it('AC03 · la contradicción se archiva sin procesar, no se oculta', async () => {
         const d = build();
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(
-          transaccion(CONCEPTS.TXN_CAPTURED),
+          transaction(CONCEPTS.TXN_CAPTURED),
         );
 
-        await llegada(d, 'ref-1', 'FAILED');
+        await arrival(d, 'ref-1', 'FAILED');
 
         expect(d.transactionsRepo.recordWebhookEvent).toHaveBeenCalledWith(
           d.tx,
@@ -720,13 +720,13 @@ describe('PaymentsTransactionsService', () => {
       it('no archiva dos veces la reentrega del mismo hecho', async () => {
         const d = build();
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(
-          transaccion(CONCEPTS.TXN_CAPTURED),
+          transaction(CONCEPTS.TXN_CAPTURED),
         );
         d.transactionsRepo.findWebhookEventByRef.mockResolvedValue({
           id: 'evt-1',
         });
 
-        const res = await llegada(d, 'ref-1', 'CAPTURED');
+        const res = await arrival(d, 'ref-1', 'CAPTURED');
 
         expect(res.duplicate).toBe(true);
         expect(d.transactionsRepo.recordWebhookEvent).not.toHaveBeenCalled();
@@ -734,7 +734,7 @@ describe('PaymentsTransactionsService', () => {
 
       it('sí aplica el avance legítimo PROCESSING → AUTHORIZED → CAPTURED', async () => {
         const d = build();
-        const txn = transaccion(CONCEPTS.TXN_PROCESSING);
+        const txn = transaction(CONCEPTS.TXN_PROCESSING);
         d.transactionsRepo.findByGatewayRef.mockResolvedValue(txn);
         const intent = {
           id: 'intent-1',
@@ -743,9 +743,9 @@ describe('PaymentsTransactionsService', () => {
         };
         d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
 
-        expect((await llegada(d, 'ref-1', 'AUTHORIZED')).applied).toBe(true);
+        expect((await arrival(d, 'ref-1', 'AUTHORIZED')).applied).toBe(true);
         expect(txn.statusConceptId).toBe(CONCEPTS.TXN_AUTHORIZED);
-        expect((await llegada(d, 'ref-1', 'CAPTURED')).applied).toBe(true);
+        expect((await arrival(d, 'ref-1', 'CAPTURED')).applied).toBe(true);
         expect(txn.statusConceptId).toBe(CONCEPTS.TXN_CAPTURED);
       });
     });
@@ -823,7 +823,7 @@ describe('PaymentsTransactionsService', () => {
     // MCH-017: el tope de reembolsos se compara con aritmética exacta. Con
     // `Number`, 0.10 + 0.20 da 0.30000000000000004 y rechazaba un reembolso válido.
     describe('MCH-017 · importes exactos', () => {
-      function capturada(d: ReturnType<typeof build>, amount: string) {
+      function captured(d: ReturnType<typeof build>, amount: string) {
         d.transactionsRepo.findByIdForUpdate.mockResolvedValue({
           id: 'txn-1',
           amount,
@@ -839,7 +839,7 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC01 · capturado 0.30, devuelto 0.10: acepta exactamente 0.20', async () => {
         const d = build();
-        capturada(d, '0.30');
+        captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
           pendiente('0.10'),
         ]);
@@ -852,7 +852,7 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC02 · rechaza un exceso real de una unidad menor, sin crear la fila', async () => {
         const d = build();
-        capturada(d, '0.30');
+        captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
           pendiente('0.10'),
         ]);
@@ -867,7 +867,7 @@ describe('PaymentsTransactionsService', () => {
 
       it('AC03 · la suma de muchas devoluciones cierra justo en el capturado', async () => {
         const d = build();
-        capturada(d, '2.00');
+        captured(d, '2.00');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue(
           Array.from({ length: 19 }, () => pendiente('0.10')),
         );
@@ -881,7 +881,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         // `numeric` sin escala fija puede volver '0.3'; una moneda sin
         // decimales llega como entero.
-        capturada(d, '0.3');
+        captured(d, '0.3');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
           pendiente('0.1'),
         ]);
@@ -890,7 +890,7 @@ describe('PaymentsTransactionsService', () => {
         ).resolves.toMatchObject({ statusConceptId: CONCEPTS.REFUND_PENDING });
 
         const e = build();
-        capturada(e, '300');
+        captured(e, '300');
         e.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
           pendiente('100'),
         ]);
@@ -902,7 +902,7 @@ describe('PaymentsTransactionsService', () => {
       it('rechaza importes cero o con signo aunque lleguen sin pasar por el DTO', async () => {
         for (const amount of ['0', '0.00', '-0.10']) {
           const d = build();
-          capturada(d, '0.30');
+          captured(d, '0.30');
           d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([]);
           await expect(
             d.service.refund('txn-1', { amount }, actor),

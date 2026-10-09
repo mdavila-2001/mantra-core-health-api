@@ -5,7 +5,7 @@ import { PRAC } from '../../practice/practice.concepts';
 import type { PractitionerInsuranceNetworkDto } from '../dto/practitioner-insurance-network.dto';
 
 /** Una fila de la consulta, tal como la devuelve Postgres. */
-interface FilaDeRed {
+interface NetworkRow {
   membership_id: string;
   carrier_id: string;
   carrier_name: string;
@@ -41,10 +41,10 @@ export class PractitionerInsuranceNetworksService {
   async listForPractitioner(
     practitionerProfileId: string,
   ): Promise<PractitionerInsuranceNetworkDto[]> {
-    const filas = await this.em
+    const rows = await this.em
       .fork()
       .getConnection()
-      .execute<FilaDeRed[]>(
+      .execute<NetworkRow[]>(
         `select distinct m.id as membership_id,
               ca.id as carrier_id,
               ca.legal_name as carrier_name,
@@ -71,19 +71,19 @@ export class PractitionerInsuranceNetworksService {
           INS.NETWORK_ACTIVE,
         ],
       );
-    return filas.map((fila) => ({
-      membershipId: fila.membership_id,
-      carrierId: fila.carrier_id,
-      carrierName: fila.carrier_name,
-      networkName: fila.network_name,
-      effectiveFrom: soloFecha(fila.effective_from),
-      effectiveTo: soloFecha(fila.effective_to),
+    return rows.map((row) => ({
+      membershipId: row.membership_id,
+      carrierId: row.carrier_id,
+      carrierName: row.carrier_name,
+      networkName: row.network_name,
+      effectiveFrom: soloDate(row.effective_from),
+      effectiveTo: soloDate(row.effective_to),
     }));
   }
 }
 
 /** `YYYY-MM-DD` de una columna `date`, o `null`. */
-function soloFecha(valor: Date | string | null): string | null {
+function soloDate(valor: Date | string | null): string | null {
   if (valor === null) return null;
   return typeof valor === 'string'
     ? valor.slice(0, 10)

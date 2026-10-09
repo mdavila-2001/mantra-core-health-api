@@ -10,13 +10,13 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const CLAIM = '33333333-3333-3333-3333-333333333333';
 const PRACTICE = '88888888-8888-8888-8888-888888888888';
-const OTRA_PRACTICE = '99999999-9999-9999-9999-999999999999';
+const OTHER_PRACTICE = '99999999-9999-9999-9999-999999999999';
 const VERSION = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 const actor = { id: 'user-1', roles: ['SUPERADMIN'] } as never;
 
 /** Un reclamo presentado por `PRACTICE`. */
-function reclamo(over: Record<string, unknown> = {}) {
+function claim(over: Record<string, unknown> = {}) {
   return {
     id: CLAIM,
     billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
@@ -39,7 +39,7 @@ function em() {
 
 function repo(over: Record<string, unknown> = {}) {
   return {
-    findClaimForUpdate: mockFn().mockResolvedValue(reclamo()),
+    findClaimForUpdate: mockFn().mockResolvedValue(claim()),
     findOpenDispute: mockFn().mockResolvedValue(null),
     createDispute: mockFn((_tx: unknown, data: Record<string, unknown>) => ({
       id: 'disputa-nueva',
@@ -58,38 +58,38 @@ function practiceLookup(practiceIds: string[] = [PRACTICE]) {
 
 const logger = { setContext: mockFn(), info: mockFn() } as never;
 
-function servicioCon(
+function serviceWith(
   r: Record<string, unknown>,
-  practicas: string[] = [PRACTICE],
+  practices: string[] = [PRACTICE],
 ) {
   return new ClaimsService(
     em(),
     r as never,
     {} as never,
     {} as never,
-    practiceLookup(practicas) as never,
+    practiceLookup(practices) as never,
     logger,
     {} as never,
     {} as never,
   );
 }
 
-function conTenant<T>(fn: () => Promise<T>): Promise<T> {
+function withTenant<T>(fn: () => Promise<T>): Promise<T> {
   return runWithTenant(TENANT, fn);
 }
 
 /** Captura el rechazo para poder comparar dos cuerpos entre sí (AC-16-14). */
-async function rechazoDe(
+async function rejection(
   fn: () => Promise<unknown>,
 ): Promise<ForbiddenException> {
-  let capturado: unknown;
+  let captured: unknown;
   try {
     await fn();
   } catch (error) {
-    capturado = error;
+    captured = error;
   }
-  expect(capturado).toBeInstanceOf(ForbiddenException);
-  return capturado as ForbiddenException;
+  expect(captured).toBeInstanceOf(ForbiddenException);
+  return captured as ForbiddenException;
 }
 
 const dto = {
@@ -106,11 +106,11 @@ describe('ClaimsService.openDispute', () => {
     it('abre la disputa cuando la solicitud la envió una práctica propia', async () => {
       const r = repo();
 
-      const resultado = await conTenant(() =>
-        servicioCon(r).openDispute(CLAIM, dto, actor),
+      const result = await withTenant(() =>
+        serviceWith(r).openDispute(CLAIM, dto, actor),
       );
 
-      expect(resultado.id).toBe('disputa-nueva');
+      expect(result.id).toBe('disputa-nueva');
       expect(r.createDispute).toHaveBeenCalledTimes(1);
       // La disputa la inicia el prestador, que es quien opera esta pantalla.
       expect(r.createDispute).toHaveBeenCalledWith(
@@ -126,46 +126,46 @@ describe('ClaimsService.openDispute', () => {
     it('rechaza con 403 la solicitud que envió otra organización', async () => {
       const r = repo({
         findClaimForUpdate: mockFn().mockResolvedValue(
-          reclamo({ billingProviderEntityId: OTRA_PRACTICE }),
+          claim({ billingProviderEntityId: OTHER_PRACTICE }),
         ),
       });
 
       await expect(
-        conTenant(() => servicioCon(r).openDispute(CLAIM, dto, actor)),
+        withTenant(() => serviceWith(r).openDispute(CLAIM, dto, actor)),
       ).rejects.toThrow(ForbiddenException);
       expect(r.createDispute).not.toHaveBeenCalled();
     });
 
     it('rechaza con 403 —y el mismo cuerpo— la solicitud inexistente', async () => {
-      const ajena = repo({
+      const foreign = repo({
         findClaimForUpdate: mockFn().mockResolvedValue(
-          reclamo({ billingProviderEntityId: OTRA_PRACTICE }),
+          claim({ billingProviderEntityId: OTHER_PRACTICE }),
         ),
       });
-      const inexistente = repo({
+      const nonexistent = repo({
         findClaimForUpdate: mockFn().mockResolvedValue(null),
       });
 
-      const unRechazo = await rechazoDe(() =>
-        conTenant(() => servicioCon(ajena).openDispute(CLAIM, dto, actor)),
+      const unRechazo = await rejection(() =>
+        withTenant(() => serviceWith(foreign).openDispute(CLAIM, dto, actor)),
       );
-      const otroRechazo = await rechazoDe(() =>
-        conTenant(() =>
-          servicioCon(inexistente).openDispute(CLAIM, dto, actor),
+      const otherRejection = await rejection(() =>
+        withTenant(() =>
+          serviceWith(nonexistent).openDispute(CLAIM, dto, actor),
         ),
       );
 
       // AC-16-14 también acá: reclamar no puede servir para averiguar qué
       // identificadores existen.
-      expect(unRechazo.getStatus()).toBe(otroRechazo.getStatus());
-      expect(unRechazo.getResponse()).toEqual(otroRechazo.getResponse());
+      expect(unRechazo.getStatus()).toBe(otherRejection.getStatus());
+      expect(unRechazo.getResponse()).toEqual(otherRejection.getResponse());
     });
 
     it('no consulta el reclamo si la organización no tiene prácticas', async () => {
       const r = repo();
 
       await expect(
-        conTenant(() => servicioCon(r, []).openDispute(CLAIM, dto, actor)),
+        withTenant(() => serviceWith(r, []).openDispute(CLAIM, dto, actor)),
       ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimForUpdate).not.toHaveBeenCalled();
     });
@@ -175,39 +175,39 @@ describe('ClaimsService.openDispute', () => {
       // no debe entrar por coincidencia de valor.
       const r = repo({
         findClaimForUpdate: mockFn().mockResolvedValue(
-          reclamo({ billingProviderTypeConceptId: 'otro-tipo' }),
+          claim({ billingProviderTypeConceptId: 'otro-tipo' }),
         ),
       });
 
       await expect(
-        conTenant(() => servicioCon(r).openDispute(CLAIM, dto, actor)),
+        withTenant(() => serviceWith(r).openDispute(CLAIM, dto, actor)),
       ).rejects.toThrow(ForbiddenException);
     });
   });
 
   describe('idempotencia (AC-16-13)', () => {
     it('reclamar dos veces devuelve la misma disputa y no crea otra', async () => {
-      const existente = {
+      const existing = {
         id: 'disputa-existente',
         statusConceptId: INS.DISPUTE_OPEN,
         createdAt: new Date('2026-09-01T00:00:00.000Z'),
       };
       const r = repo({
-        findOpenDispute: mockFn().mockResolvedValue(existente),
+        findOpenDispute: mockFn().mockResolvedValue(existing),
       });
 
-      const resultado = await conTenant(() =>
-        servicioCon(r).openDispute(CLAIM, dto, actor),
+      const result = await withTenant(() =>
+        serviceWith(r).openDispute(CLAIM, dto, actor),
       );
 
-      expect(resultado.id).toBe('disputa-existente');
+      expect(result.id).toBe('disputa-existente');
       expect(r.createDispute).not.toHaveBeenCalled();
     });
 
     it('bloquea la fila del reclamo antes de decidir si crea', async () => {
       const r = repo();
 
-      await conTenant(() => servicioCon(r).openDispute(CLAIM, dto, actor));
+      await withTenant(() => serviceWith(r).openDispute(CLAIM, dto, actor));
 
       // El `FOR UPDATE` es lo que hace idempotente al reclamo entre peticiones
       // concurrentes: `claim_disputes` no tiene índice único que lo impida, así
@@ -216,11 +216,11 @@ describe('ClaimsService.openDispute', () => {
         expect.anything(),
         CLAIM,
       );
-      const ordenLock = (r.findClaimForUpdate as any).mock
+      const orderLock = (r.findClaimForUpdate as any).mock
         .invocationCallOrder[0];
-      const ordenBusqueda = (r.findOpenDispute as any).mock
+      const searchOrder = (r.findOpenDispute as any).mock
         .invocationCallOrder[0];
-      expect(ordenLock).toBeLessThan(ordenBusqueda);
+      expect(orderLock).toBeLessThan(searchOrder);
     });
   });
 });
@@ -233,13 +233,13 @@ describe('ClaimsService.openDispute', () => {
 describe('ClaimsService.adjudicate', () => {
   const LINEA = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
-  function reclamoSubmitted(over: Record<string, unknown> = {}) {
-    return reclamo({ statusConceptId: INS.CLAIM_SUBMITTED, ...over });
+  function claimSubmitted(over: Record<string, unknown> = {}) {
+    return claim({ statusConceptId: INS.CLAIM_SUBMITTED, ...over });
   }
 
-  function repoDeAdjudicacion(over: Record<string, unknown> = {}) {
+  function repoAdjudication(over: Record<string, unknown> = {}) {
     return {
-      findClaim: mockFn().mockResolvedValue(reclamoSubmitted()),
+      findClaim: mockFn().mockResolvedValue(claimSubmitted()),
       findClaimForUpdate: mockFn().mockResolvedValue(null),
       findLine: mockFn().mockResolvedValue({
         id: LINEA,
@@ -253,7 +253,7 @@ describe('ClaimsService.adjudicate', () => {
   }
 
   it('persiste la cláusula y la justificación de una línea denegada, sin tocar los importes', async () => {
-    const r = repoDeAdjudicacion();
+    const r = repoAdjudication();
     const dto = {
       outcome: 'DENIED',
       lineAdjudications: [
@@ -269,7 +269,7 @@ describe('ClaimsService.adjudicate', () => {
       ],
     } as never;
 
-    await conTenant(() => servicioCon(r).adjudicate(CLAIM, dto, actor));
+    await withTenant(() => serviceWith(r).adjudicate(CLAIM, dto, actor));
 
     expect(r.createLineAdjudication).toHaveBeenCalledWith(
       expect.anything(),
@@ -286,7 +286,7 @@ describe('ClaimsService.adjudicate', () => {
   });
 
   it('una línea aprobada viaja sin cláusula ni justificación (quedan undefined, no vacías)', async () => {
-    const r = repoDeAdjudicacion();
+    const r = repoAdjudication();
     const dto = {
       outcome: 'APPROVED',
       lineAdjudications: [
@@ -300,16 +300,16 @@ describe('ClaimsService.adjudicate', () => {
       ],
     } as never;
 
-    await conTenant(() => servicioCon(r).adjudicate(CLAIM, dto, actor));
+    await withTenant(() => serviceWith(r).adjudicate(CLAIM, dto, actor));
 
-    const llamada = (r.createLineAdjudication as any).mock.calls[0][1];
-    expect(llamada.decisionConceptId).toBe(INS.LINE_DECISION_APPROVED);
-    expect(llamada.policyClauseReference).toBeUndefined();
-    expect(llamada.denialRationale).toBeUndefined();
+    const call = (r.createLineAdjudication as any).mock.calls[0][1];
+    expect(call.decisionConceptId).toBe(INS.LINE_DECISION_APPROVED);
+    expect(call.policyClauseReference).toBeUndefined();
+    expect(call.denialRationale).toBeUndefined();
   });
 
   it('el reclamo pasa a CLAIM_ADJUDICATED tras adjudicar', async () => {
-    const r = repoDeAdjudicacion();
+    const r = repoAdjudication();
     const dto = {
       outcome: 'APPROVED',
       lineAdjudications: [
@@ -321,12 +321,12 @@ describe('ClaimsService.adjudicate', () => {
       ],
     } as never;
 
-    const claim = reclamoSubmitted();
-    const r2 = repoDeAdjudicacion({
+    const claim = claimSubmitted();
+    const r2 = repoAdjudication({
       findClaim: mockFn().mockResolvedValue(claim),
     });
 
-    await conTenant(() => servicioCon(r2).adjudicate(CLAIM, dto, actor));
+    await withTenant(() => serviceWith(r2).adjudicate(CLAIM, dto, actor));
 
     expect((claim as any).statusConceptId).toBe(INS.CLAIM_ADJUDICATED);
   });

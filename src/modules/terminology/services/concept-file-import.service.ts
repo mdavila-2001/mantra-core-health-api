@@ -28,9 +28,9 @@ import {
 } from '../repositories';
 import {
   IMPORT_PARSERS,
-  type LectorDeArchivosDeImportacion,
+  type LectorImportFiles,
 } from './import-parsers.provider';
-import { validarFilas } from './row-validator';
+import { validateRows } from './row-validator';
 import type {
   ImportConceptsFileResponseDto,
   ImportFileIssueDto,
@@ -45,23 +45,23 @@ import type {
  * miles de entidades vivas en la unidad de trabajo, cada `flush` recorre todas
  * otra vez. Vaciarla cada tanda mantiene el costo plano.
  */
-const CONCEPTOS_POR_TANDA = 500;
+const CONCEPTS_PER_BATCH = 500;
 
 /** Cuántos errores se devuelven como muestra. */
-const MUESTRA_DE_ERRORES = 20;
+const ERRORS_SAMPLE = 20;
 
 /** Cuántas filas se muestran en la vista previa. */
-const FILAS_DE_VISTA_PREVIA = 20;
+const PREVIEW_ROWS = 20;
 
 /** Qué se carga cuando nadie lo dice. */
-const PERFIL_POR_OMISION = 'conceptos';
+const DEFAULT_PROFILE = 'conceptos';
 
 /**
  * La fila del encabezado en los formatos que lo tienen.
  *
  * En NDJSON no existe: ahí cada línea es una fila de datos.
  */
-const FILA_DEL_ENCABEZADO = 1;
+const HEADER_ROW = 1;
 
 /**
  * El archivo no se puede importar, y el motivo es del archivo entero.
@@ -153,7 +153,7 @@ export class ConceptFileImportService {
     private readonly codeSystemsRepo: CodeSystemsRepository,
     private readonly conceptsRepo: CatalogConceptsRepository,
     @Inject(IMPORT_PARSERS)
-    private readonly lector: LectorDeArchivosDeImportacion,
+    private readonly lector: LectorImportFiles,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConceptFileImportService.name);
@@ -165,22 +165,22 @@ export class ConceptFileImportService {
    * @param versionId - Versión en borrador que recibe las filas.
    * @param buffer - Contenido del archivo.
    * @param actor - Quien lo pide; queda en el lote y en cada concepto.
-   * @param opciones - Validar sin escribir, y qué se está cargando.
+   * @param options - Validar sin escribir, y qué se está cargando.
    * @returns El informe de la importación.
    */
   async importFromFile(
     versionId: string,
     buffer: Buffer,
     actor: AuthenticatedUser,
-    opciones: ImportFileOptions = {},
+    options: ImportFileOptions = {},
   ): Promise<ImportConceptsFileResponseDto> {
-    const dryRun = opciones.dryRun === true;
-    const perfil = this.exigirPerfil(opciones.profile ?? PERFIL_POR_OMISION);
+    const dryRun = options.dryRun === true;
+    const profile = this.requireProfile(options.profile ?? DEFAULT_PROFILE);
 
     // Antes de preguntar de qué formato es: un archivo en blanco no es un
     // formato que no sepamos leer, está vacío, y decirle a quien lo subió que
     // «no es un formato admitido» lo manda a buscar el problema donde no está.
-    if (sinContenido(buffer)) {
+    if (withoutContent(buffer)) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_EMPTY_FILE,
         'El archivo llegó vacío',
@@ -188,27 +188,27 @@ export class ConceptFileImportService {
       );
     }
 
-    const formato = this.exigirFormato(buffer, versionId);
-    const parseador = this.lector.parseadorDe(formato);
-    if (parseador === undefined) {
+    const format = this.requireFormat(buffer, versionId);
+    const parser = this.lector.parseadorDe(format);
+    if (parser === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_FORMAT_UNSUPPORTED,
-        `Todavía no se puede leer un archivo con formato «${formato}»`,
-        { versionId, formato },
+        `Todavía no se puede leer un archivo con formato «${format}»`,
+        { versionId, formato: format },
       );
     }
 
-    const { sourceId } = await this.exigirVersionEnBorrador(versionId);
+    const { sourceId } = await this.requireVersionInDraft(versionId);
 
-    const lectura = this.leerConElParseador(
-      parseador,
+    const reading = this.readWithParser(
+      parser,
       buffer,
-      perfil,
+      profile,
       versionId,
     );
-    const validacion = validarFilas(lectura.filas, perfil);
-    const problemas = [...lectura.problemas, ...validacion.problemas];
-    const totalRead = contarFilasLeidas(formato, lectura.filas, problemas);
+    const validation = validateRows(reading.filas, profile);
+    const problems = [...reading.problemas, ...validation.problemas];
+    const totalRead = countReadRows(format, reading.filas, problems);
 
     if (totalRead === 0) {
       throw new ImportFileRejectedException(
@@ -218,21 +218,21 @@ export class ConceptFileImportService {
       );
     }
 
-    const informe = {
-      format: formato,
-      profile: perfil.id,
+    const report = {
+      format: format,
+      profile: profile.id,
       dryRun,
       totalRead,
-      errors: problemas.length,
-      errorSamples: problemas.slice(0, MUESTRA_DE_ERRORES).map(aIssueDto),
+      errors: problems.length,
+      errorSamples: problems.slice(0, ERRORS_SAMPLE).map(toIssueDto),
     };
 
     // Todo o nada: con un solo problema no se escribe nada y no se abre lote.
     // El informe se devuelve igual, porque es lo que permite corregir el
     // archivo sin tener que adivinar qué filas estaban mal.
-    if (problemas.length > 0) {
-      return this.informar({
-        ...informe,
+    if (problems.length > 0) {
+      return this.report({
+        ...report,
         batchId: null,
         aborted: true,
         inserted: 0,
@@ -241,37 +241,37 @@ export class ConceptFileImportService {
     }
 
     if (dryRun) {
-      return this.informar({
-        ...informe,
+      return this.report({
+        ...report,
         batchId: null,
         aborted: false,
         inserted: 0,
         skipped: 0,
-        preview: validacion.validas
-          .slice(0, FILAS_DE_VISTA_PREVIA)
-          .map(aPreviewDto),
+        preview: validation.validas
+          .slice(0, PREVIEW_ROWS)
+          .map(toPreviewDto),
       });
     }
 
-    const iniciado = new Date();
-    const batchId = await this.abrirLote({
+    const started = new Date();
+    const batchId = await this.openBatch({
       sourceId,
       versionId,
       checksum: createHash('sha256').update(buffer).digest('hex'),
-      iniciado,
+      iniciado: started,
       actor,
     });
 
-    const { inserted, skipped } = await this.escribir(
+    const { inserted, skipped } = await this.write(
       versionId,
-      validacion.validas,
+      validation.validas,
       actor,
     );
 
-    await this.cerrarLote(batchId, { totalRead, inserted, errores: 0 });
+    await this.closeBatch(batchId, { totalRead, inserted, errores: 0 });
 
-    return this.informar({
-      ...informe,
+    return this.report({
+      ...report,
       batchId,
       aborted: false,
       inserted,
@@ -285,16 +285,16 @@ export class ConceptFileImportService {
    * @param id - Qué se dijo que se está cargando.
    * @returns El perfil con sus columnas.
    */
-  private exigirPerfil(id: string): PerfilDeImportacion {
-    const perfil = this.lector.perfil(id);
-    if (perfil === undefined) {
+  private requireProfile(id: string): PerfilDeImportacion {
+    const profile = this.lector.perfil(id);
+    if (profile === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_PROFILE_UNKNOWN,
         `No se puede importar «${id}»`,
         { profile: id },
       );
     }
-    return perfil;
+    return profile;
   }
 
   /**
@@ -308,7 +308,7 @@ export class ConceptFileImportService {
    * @param versionId - La versión, para el contexto del error.
    * @returns El formato reconocido.
    */
-  private exigirFormato(buffer: Buffer, versionId: string): FormatoDeArchivo {
+  private requireFormat(buffer: Buffer, versionId: string): FormatoDeArchivo {
     try {
       return this.lector.detectarFormato(buffer);
     } catch (error) {
@@ -334,35 +334,35 @@ export class ConceptFileImportService {
    * que si el formato no se hubiera reconocido, porque desde su lado el
    * resultado es idéntico: ese archivo no sirve.
    *
-   * @param parseador - El parseador del formato detectado.
+   * @param parser - El parseador del formato detectado.
    * @param buffer - Contenido del archivo.
-   * @param perfil - Qué columnas se esperan.
+   * @param profile - Qué columnas se esperan.
    * @param versionId - Versión contra la que se está importando.
    * @returns Las filas leídas y los problemas de lectura.
    */
-  private leerConElParseador(
-    parseador: ParseadorDeArchivo,
+  private readWithParser(
+    parser: ParseadorDeArchivo,
     buffer: Buffer,
-    perfil: PerfilDeImportacion,
+    profile: PerfilDeImportacion,
     versionId: string,
   ): ResultadoDeParseo {
     try {
-      return parseador.parsear(buffer, perfil);
+      return parser.parse(buffer, profile);
     } catch (error) {
       // El motivo de la biblioteca queda en el registro, no en la respuesta:
       // nombra su implementación y no le dice nada útil a quien cargó.
       this.logger.warn(
         {
           versionId,
-          formato: parseador.formato,
+          formato: parser.formato,
           motivo: error instanceof Error ? error.message : String(error),
         },
         'no se pudo leer el archivo con el parseador de su formato',
       );
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_FORMAT_UNSUPPORTED,
-        `El archivo se reconoció como «${parseador.formato}» pero no se pudo leer`,
-        { versionId, formato: parseador.formato },
+        `El archivo se reconoció como «${parser.formato}» pero no se pudo leer`,
+        { versionId, formato: parser.formato },
       );
     }
   }
@@ -374,28 +374,28 @@ export class ConceptFileImportService {
    * dentro viajan las muestras de error y la vista previa, que son contenido
    * del archivo y no tienen nada que hacer en un registro.
    *
-   * @param respuesta - El informe ya armado.
+   * @param response - El informe ya armado.
    * @returns El mismo informe.
    */
-  private informar(
-    respuesta: ImportConceptsFileResponseDto,
+  private report(
+    response: ImportConceptsFileResponseDto,
   ): ImportConceptsFileResponseDto {
     this.logger.info(
       {
         operation: 'terminology.import.file',
-        format: respuesta.format,
-        profile: respuesta.profile,
-        dryRun: respuesta.dryRun,
-        aborted: respuesta.aborted,
-        batchId: respuesta.batchId,
-        totalRead: respuesta.totalRead,
-        inserted: respuesta.inserted,
-        skipped: respuesta.skipped,
-        errors: respuesta.errors,
+        format: response.format,
+        profile: response.profile,
+        dryRun: response.dryRun,
+        aborted: response.aborted,
+        batchId: response.batchId,
+        totalRead: response.totalRead,
+        inserted: response.inserted,
+        skipped: response.skipped,
+        errors: response.errors,
       },
       'Importación por archivo terminada',
     );
-    return respuesta;
+    return response;
   }
 
   /**
@@ -407,7 +407,7 @@ export class ConceptFileImportService {
    * @param versionId - Versión a la que se importa.
    * @returns El identificador de la fuente.
    */
-  private async exigirVersionEnBorrador(
+  private async requireVersionInDraft(
     versionId: string,
   ): Promise<{ sourceId: string }> {
     const forked = this.em.fork();
@@ -448,31 +448,31 @@ export class ConceptFileImportService {
    * Escribe las filas que faltan, por tandas.
    *
    * @param versionId - Versión que las recibe.
-   * @param filas - Las filas ya validadas.
+   * @param rows - Las filas ya validadas.
    * @param actor - Quien importa.
    * @returns Cuántas entraron y cuántas ya estaban.
    */
-  private async escribir(
+  private async write(
     versionId: string,
-    filas: readonly FilaLeida[],
+    rows: readonly FilaLeida[],
     actor: AuthenticatedUser,
   ): Promise<{ inserted: number; skipped: number }> {
     let inserted = 0;
     let skipped = 0;
 
-    for (let desde = 0; desde < filas.length; desde += CONCEPTOS_POR_TANDA) {
-      const tanda = filas.slice(desde, desde + CONCEPTOS_POR_TANDA);
+    for (let from = 0; from < rows.length; from += CONCEPTS_PER_BATCH) {
+      const batch = rows.slice(from, from + CONCEPTS_PER_BATCH);
 
       await this.em.transactional(async (tx) => {
-        const existentes = await this.conceptsRepo.findExistingCodes(
+        const existing = await this.conceptsRepo.findExistingCodes(
           tx,
           versionId,
-          tanda.map((fila) => fila.valores.code),
+          batch.map((row) => row.valores.code),
         );
 
-        for (const fila of tanda) {
-          const { code, display, definition } = fila.valores;
-          if (existentes.has(code)) {
+        for (const row of batch) {
+          const { code, display, definition } = row.valores;
+          if (existing.has(code)) {
             skipped += 1;
             continue;
           }
@@ -511,10 +511,10 @@ export class ConceptFileImportService {
    * Va en su propio contexto porque la escritura de conceptos vacía la unidad
    * de trabajo entre tandas, y una entidad viva ahí no sobreviviría.
    *
-   * @param datos - Lo que identifica la importación.
+   * @param data - Lo que identifica la importación.
    * @returns El identificador del lote.
    */
-  private async abrirLote(datos: {
+  private async openBatch(data: {
     sourceId: string;
     versionId: string;
     checksum: string;
@@ -525,17 +525,17 @@ export class ConceptFileImportService {
     const lote = forked.create(
       CatalogImportBatches,
       {
-        sourceId: datos.sourceId,
-        codeSystemVersionId: datos.versionId,
+        sourceId: data.sourceId,
+        codeSystemVersionId: data.versionId,
         // Sin `fileId`: el archivo no se almacena, se convierte en filas y se
         // descarta. Lo que identifica qué contenido entró es el `checksum`.
-        checksum: datos.checksum,
-        startedAt: datos.iniciado,
+        checksum: data.checksum,
+        startedAt: data.iniciado,
         // La tabla no lleva columnas de auditoría genéricas: su rastro es
         // `recorded_at` / `recorded_by_user_id`, que dicen lo mismo con el
         // vocabulario del lote.
-        recordedAt: datos.iniciado,
-        recordedByUserId: datos.actor.id,
+        recordedAt: data.iniciado,
+        recordedByUserId: data.actor.id,
       },
       { partial: true },
     );
@@ -551,20 +551,20 @@ export class ConceptFileImportService {
    * puede sostener.
    *
    * @param batchId - El lote abierto.
-   * @param cifras - Lo que hay que registrar.
+   * @param figures - Lo que hay que registrar.
    */
-  private async cerrarLote(
+  private async closeBatch(
     batchId: string,
-    cifras: { totalRead: number; inserted: number; errores: number },
+    figures: { totalRead: number; inserted: number; errores: number },
   ): Promise<void> {
     const forked = this.em.fork();
     const lote = await forked.findOne(CatalogImportBatches, { id: batchId });
     if (!lote) return;
 
     forked.assign(lote, {
-      totalRead: String(cifras.totalRead),
-      totalInserted: String(cifras.inserted),
-      totalErrors: String(cifras.errores),
+      totalRead: String(figures.totalRead),
+      totalInserted: String(figures.inserted),
+      totalErrors: String(figures.errores),
       finishedAt: new Date(),
     });
     await forked.flush();
@@ -582,7 +582,7 @@ export class ConceptFileImportService {
  * @param buffer - El contenido del archivo.
  * @returns Si no hay nada que leer.
  */
-function sinContenido(buffer: Buffer): boolean {
+function withoutContent(buffer: Buffer): boolean {
   return buffer.every((byte) => byte <= 0x20);
 }
 
@@ -594,20 +594,20 @@ function sinContenido(buffer: Buffer): boolean {
  * cuenta es el encabezado, que en los formatos que lo tienen describe el
  * archivo en vez de llenarlo.
  *
- * @param formato - Con qué formato se leyó.
- * @param filas - Las filas que el parseador pudo armar.
- * @param problemas - Todos los problemas encontrados.
+ * @param format - Con qué formato se leyó.
+ * @param rows - Las filas que el parseador pudo armar.
+ * @param problems - Todos los problemas encontrados.
  * @returns Cuántas filas distintas tenían contenido.
  */
-function contarFilasLeidas(
-  formato: FormatoDeArchivo,
-  filas: readonly FilaLeida[],
-  problemas: readonly ProblemaDeFila[],
+function countReadRows(
+  format: FormatoDeArchivo,
+  rows: readonly FilaLeida[],
+  problems: readonly ProblemaDeFila[],
 ): number {
-  const numeros = new Set(filas.map((fila) => fila.numero));
-  for (const problema of problemas) {
-    if (formato !== 'ndjson' && problema.fila === FILA_DEL_ENCABEZADO) continue;
-    numeros.add(problema.fila);
+  const numeros = new Set(rows.map((row) => row.numero));
+  for (const problem of problems) {
+    if (format !== 'ndjson' && problem.fila === HEADER_ROW) continue;
+    numeros.add(problem.fila);
   }
   return numeros.size;
 }
@@ -615,23 +615,23 @@ function contarFilasLeidas(
 /**
  * Pasa un problema de fila al vocabulario de la respuesta.
  *
- * @param problema - El problema tal como lo dejó el lector o el validador.
+ * @param problem - El problema tal como lo dejó el lector o el validador.
  * @returns El mismo problema con los nombres del contrato HTTP.
  */
-function aIssueDto(problema: ProblemaDeFila): ImportFileIssueDto {
+function toIssueDto(problem: ProblemaDeFila): ImportFileIssueDto {
   return {
-    line: problema.fila,
-    message: problema.motivo,
-    ...(problema.columna === undefined ? {} : { column: problema.columna }),
+    line: problem.fila,
+    message: problem.motivo,
+    ...(problem.columna === undefined ? {} : { column: problem.columna }),
   };
 }
 
 /**
  * Pasa una fila válida al vocabulario de la vista previa.
  *
- * @param fila - La fila ya validada.
+ * @param row - La fila ya validada.
  * @returns La fila con su número y sus columnas.
  */
-function aPreviewDto(fila: FilaLeida): ImportPreviewRowDto {
-  return { line: fila.numero, ...fila.valores };
+function toPreviewDto(row: FilaLeida): ImportPreviewRowDto {
+  return { line: row.numero, ...row.valores };
 }

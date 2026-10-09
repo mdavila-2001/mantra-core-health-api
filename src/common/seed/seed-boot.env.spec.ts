@@ -44,9 +44,9 @@ describe('loadSeedBootEnv', () => {
   it('los dos interruptores son independientes', () => {
     // Apagar el contenido no apaga la cadena: es justo el modo que interesa,
     // una instalación operable sin catálogos de negocio heredados.
-    const soloNucleo = loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: 'false' });
-    expect(soloNucleo.enabled).toBe(true);
-    expect(soloNucleo.contentEnabled).toBe(false);
+    const soloCore = loadSeedBootEnv({ SEED_CONTENT_ON_BOOT: 'false' });
+    expect(soloCore.enabled).toBe(true);
+    expect(soloCore.contentEnabled).toBe(false);
   });
 });
 

@@ -27,19 +27,19 @@ import {
 } from './bo-geography.catalog';
 
 /** Id determinista de cada conjunto, por su clave natural. */
-const ID_POR_CODIGO: Record<string, string> = {
+const ID_BY_CODE: Record<string, string> = {
   [BO_DEPARTMENT_VALUE_SET]: boDepartmentValueSetId(),
   [BO_MUNICIPALITY_VALUE_SET]: boMunicipalityValueSetId(),
 };
 
 /** Id determinista de la versión de cada conjunto, por el id del conjunto. */
-const VERSION_POR_CONJUNTO: Record<string, string> = {
+const VERSION_BY_SET: Record<string, string> = {
   [boDepartmentValueSetId()]: boDepartmentVersionId(),
   [boMunicipalityValueSetId()]: boMunicipalityVersionId(),
 };
 
 /** Cuántos municipios declara el catálogo; el resto de las cuentas sale de acá. */
-const MUNICIPIOS = BO_MUNICIPALITIES.length;
+const MUNICIPALITIES = BO_MUNICIPALITIES.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
@@ -47,17 +47,17 @@ const MUNICIPIOS = BO_MUNICIPALITIES.length;
  * `find`/`create`/`flush` sin tocar una base real.
  *
  * @param existing - Identificadores que la base ya tiene.
- * @param valueSetsPorCodigo - Conjuntos que ya están, por `internal_code`, con
+ * @param valueSetsByCode - Conjuntos que ya están, por `internal_code`, con
  *   el id REAL que tienen en la base. Sirve para el caso en que el conjunto
  *   llegó antes desde el paquete de seeds del modelo con otro id.
- * @param versionesPorConjunto - Versiones que ya están, por el id del conjunto
+ * @param versionsBySet - Versiones que ya están, por el id del conjunto
  *   al que pertenecen, con el id REAL que tienen en la base.
  * @returns Servicio, filas creadas y utilidades de lectura.
  */
 function build(
   existing: Set<string> = new Set(),
-  valueSetsPorCodigo: Map<string, string> = new Map(),
-  versionesPorConjunto: Map<string, string> = new Map(),
+  valueSetsByCode: Map<string, string> = new Map(),
+  versionsBySet: Map<string, string> = new Map(),
 ) {
   const created: { entity: string; data: any }[] = [];
 
@@ -75,26 +75,26 @@ function build(
     // determinista sólo cuando `existing` dice que está.
     findOne: mockFn((entity: any, where: any) => {
       if (entity?.name === 'ValueSets') {
-        const codigo: string | undefined = where?.internalCode;
-        if (!codigo) return Promise.resolve(null);
-        const ajeno = valueSetsPorCodigo.get(codigo);
-        if (ajeno) return Promise.resolve({ id: ajeno });
-        const determinista = ID_POR_CODIGO[codigo];
+        const code: string | undefined = where?.internalCode;
+        if (!code) return Promise.resolve(null);
+        const foreign = valueSetsByCode.get(code);
+        if (foreign) return Promise.resolve({ id: foreign });
+        const deterministic = ID_BY_CODE[code];
         return Promise.resolve(
-          determinista && existing.has(determinista)
-            ? { id: determinista }
+          deterministic && existing.has(deterministic)
+            ? { id: deterministic }
             : null,
         );
       }
       if (entity?.name === 'ValueSetVersions') {
-        const conjunto: string | undefined = where?.valueSetId;
-        if (!conjunto) return Promise.resolve(null);
-        const ajena = versionesPorConjunto.get(conjunto);
-        if (ajena) return Promise.resolve({ id: ajena });
-        const determinista = VERSION_POR_CONJUNTO[conjunto];
+        const set: string | undefined = where?.valueSetId;
+        if (!set) return Promise.resolve(null);
+        const foreign = versionsBySet.get(set);
+        if (foreign) return Promise.resolve({ id: foreign });
+        const deterministic = VERSION_BY_SET[set];
         return Promise.resolve(
-          determinista && existing.has(determinista)
-            ? { id: determinista }
+          deterministic && existing.has(deterministic)
+            ? { id: deterministic }
             : null,
         );
       }
@@ -132,12 +132,12 @@ describe('BoGeographySeedService', () => {
         valueSets: 2,
         versions: 2,
         departments: 9,
-        municipalities: MUNICIPIOS,
+        municipalities: MUNICIPALITIES,
         // Una designación preferida por concepto, de los dos niveles.
-        designations: 9 + MUNICIPIOS,
+        designations: 9 + MUNICIPALITIES,
         // El ISO de cada departamento, más provincia y padre de cada municipio.
-        properties: 9 + MUNICIPIOS * 2,
-        memberships: 9 + MUNICIPIOS,
+        properties: 9 + MUNICIPALITIES * 2,
+        memberships: 9 + MUNICIPALITIES,
       });
 
       const [departamentos, municipios] = rowsOf('ValueSets');
@@ -173,10 +173,10 @@ describe('BoGeographySeedService', () => {
 
       // Los nueve primeros conceptos son los departamentos; detrás vienen los
       // municipios, que tienen su propia prueba.
-      const nombres = rowsOf('CatalogConcepts')
+      const names = rowsOf('CatalogConcepts')
         .slice(0, 9)
-        .map((fila) => fila.display);
-      expect(nombres).toEqual([
+        .map((row) => row.display);
+      expect(names).toEqual([
         'Chuquisaca',
         'La Paz',
         'Cochabamba',
@@ -190,7 +190,7 @@ describe('BoGeographySeedService', () => {
       // Todos seleccionables: la expansión filtra por `selectable` y un
       // departamento no seleccionable sería una opción que no se puede elegir.
       expect(
-        rowsOf('CatalogConcepts').every((fila) => fila.selectable === true),
+        rowsOf('CatalogConcepts').every((row) => row.selectable === true),
       ).toBe(true);
     });
 
@@ -199,11 +199,11 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const miembros = rowsOf('ValueSetMembers').slice(0, 9);
-      expect(miembros.map((fila) => fila.ordinal)).toEqual([
+      const members = rowsOf('ValueSetMembers').slice(0, 9);
+      expect(members.map((row) => row.ordinal)).toEqual([
         0, 1, 2, 3, 4, 5, 6, 7, 8,
       ]);
-      expect(miembros[0]).toMatchObject({
+      expect(members[0]).toMatchObject({
         id: boDepartmentMemberId('CH'),
         valueSetVersionId: boDepartmentVersionId(),
         conceptId: boDepartmentConceptId('CH'),
@@ -211,7 +211,7 @@ describe('BoGeographySeedService', () => {
       });
       // Santa Cruz es el séptimo por número de departamento, no el primero por
       // población: el orden es el del INE, el mismo de todo documento oficial.
-      expect(miembros[6]).toMatchObject({
+      expect(members[6]).toMatchObject({
         conceptId: boDepartmentConceptId('SC'),
       });
     });
@@ -223,7 +223,7 @@ describe('BoGeographySeedService', () => {
 
       const isos = rowsOf('ConceptProperties')
         .slice(0, 9)
-        .map((fila) => fila.valueJson);
+        .map((row) => row.valueJson);
       expect(isos).toEqual([
         'BO-H',
         'BO-L',
@@ -244,14 +244,14 @@ describe('BoGeographySeedService', () => {
       // que es exactamente lo que habría en disco tras el primer arranque. Se
       // toman los ids de ahí y no de una lista escrita a mano para que la
       // prueba no pueda quedar desincronizada del seed.
-      const primeraPasada = build();
-      await primeraPasada.service.run();
-      const yaSembrado = new Set<string>(
-        primeraPasada.created.map((fila) => fila.data.id),
+      const firstPass = build();
+      await firstPass.service.run();
+      const alreadySeeded = new Set<string>(
+        firstPass.created.map((row) => row.data.id),
       );
 
-      const segunda = build(yaSembrado);
-      const counters = await segunda.service.run();
+      const second = build(alreadySeeded);
+      const counters = await second.service.run();
 
       expect(counters).toEqual({
         valueSets: 0,
@@ -262,9 +262,9 @@ describe('BoGeographySeedService', () => {
         properties: 0,
         memberships: 0,
       });
-      expect(segunda.created).toHaveLength(0);
+      expect(second.created).toHaveLength(0);
       // Una corrida sin trabajo tampoco ensucia el log del arranque.
-      expect(segunda.logger.info).not.toHaveBeenCalled();
+      expect(second.logger.info).not.toHaveBeenCalled();
     });
 
     it('una siembra a medias completa sólo lo que falta', async () => {
@@ -279,8 +279,8 @@ describe('BoGeographySeedService', () => {
       expect(counters.valueSets).toBe(1);
       expect(counters.versions).toBe(1);
       expect(counters.departments).toBe(9);
-      expect(counters.municipalities).toBe(MUNICIPIOS);
-      expect(counters.memberships).toBe(9 + MUNICIPIOS);
+      expect(counters.municipalities).toBe(MUNICIPALITIES);
+      expect(counters.memberships).toBe(9 + MUNICIPALITIES);
       expect(rowsOf('ValueSets')).toHaveLength(1);
       expect(rowsOf('ValueSetVersions')).toHaveLength(1);
     });
@@ -291,38 +291,38 @@ describe('BoGeographySeedService', () => {
       // un id distinto del determinista. La comprobación por id decía «no
       // está», el insert chocaba con `uq_value_sets_internal_code` y el paso
       // entero quedaba omitido — sin departamentos ni municipios.
-      const idAjeno = '11111111-2222-5333-8444-555555555555';
+      const idForeign = '11111111-2222-5333-8444-555555555555';
       const { service, rowsOf } = build(
         new Set(),
-        new Map([[BO_MUNICIPALITY_VALUE_SET, idAjeno]]),
+        new Map([[BO_MUNICIPALITY_VALUE_SET, idForeign]]),
       );
 
       const counters = await service.run();
 
       // Se crea el de departamentos y NO el de municipios.
       expect(counters.valueSets).toBe(1);
-      const conjuntos = rowsOf('ValueSets');
-      expect(conjuntos).toHaveLength(1);
-      expect(conjuntos[0].internalCode).toBe(BO_DEPARTMENT_VALUE_SET);
+      const sets = rowsOf('ValueSets');
+      expect(sets).toHaveLength(1);
+      expect(sets[0].internalCode).toBe(BO_DEPARTMENT_VALUE_SET);
 
       // Y la versión de municipios cuelga del id que la base tiene de verdad,
       // no del determinista: si apuntara al otro, la FK no resolvería.
-      const versionMunicipios = rowsOf('ValueSetVersions').find(
-        (fila) => fila.id === boMunicipalityVersionId(),
+      const versionMunicipalities = rowsOf('ValueSetVersions').find(
+        (row) => row.id === boMunicipalityVersionId(),
       );
-      expect(versionMunicipios.valueSetId).toBe(idAjeno);
+      expect(versionMunicipalities.valueSetId).toBe(idForeign);
     });
 
     it('una versión que ya está con OTRO id tampoco se duplica', async () => {
       // El segundo choque, un nivel más abajo: resuelto el conjunto por su
       // clave natural, su versión «1.0.0» ya existía con otro id y el insert
       // moría contra `uq_value_set_versions_value_set_id_version`.
-      const conjuntoAjeno = '11111111-2222-5333-8444-555555555555';
-      const versionAjena = '66666666-7777-5888-8999-aaaaaaaaaaaa';
+      const foreignSet = '11111111-2222-5333-8444-555555555555';
+      const versionForeign = '66666666-7777-5888-8999-aaaaaaaaaaaa';
       const { service, rowsOf } = build(
         new Set(),
-        new Map([[BO_MUNICIPALITY_VALUE_SET, conjuntoAjeno]]),
-        new Map([[conjuntoAjeno, versionAjena]]),
+        new Map([[BO_MUNICIPALITY_VALUE_SET, foreignSet]]),
+        new Map([[foreignSet, versionForeign]]),
       );
 
       const counters = await service.run();
@@ -332,10 +332,10 @@ describe('BoGeographySeedService', () => {
       expect(rowsOf('ValueSetVersions')).toHaveLength(1);
 
       // Y los 340 municipios se afilian a la versión que existe de verdad.
-      const miembros = rowsOf('ValueSetMembers').slice(9);
-      expect(miembros).toHaveLength(MUNICIPIOS);
+      const members = rowsOf('ValueSetMembers').slice(9);
+      expect(members).toHaveLength(MUNICIPALITIES);
       expect(
-        miembros.every((fila) => fila.valueSetVersionId === versionAjena),
+        members.every((row) => row.valueSetVersionId === versionForeign),
       ).toBe(true);
     });
   });
@@ -346,9 +346,9 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const municipios = rowsOf('CatalogConcepts').slice(9);
-      expect(municipios).toHaveLength(MUNICIPIOS);
-      expect(municipios[0]).toMatchObject({
+      const municipalities = rowsOf('CatalogConcepts').slice(9);
+      expect(municipalities).toHaveLength(MUNICIPALITIES);
+      expect(municipalities[0]).toMatchObject({
         id: boMunicipalityConceptId('010101'),
         code: boMunicipalityConceptCode('010101'),
         display: 'Sucre',
@@ -363,7 +363,7 @@ describe('BoGeographySeedService', () => {
 
       const propiedades = rowsOf('ConceptProperties').slice(9);
       // Dos por municipio: provincia y departamento padre, en ese orden.
-      expect(propiedades).toHaveLength(MUNICIPIOS * 2);
+      expect(propiedades).toHaveLength(MUNICIPALITIES * 2);
       expect(propiedades[0]).toMatchObject({
         conceptId: boMunicipalityConceptId('010101'),
         propertyCode: 'geo:bo:province',
@@ -381,14 +381,14 @@ describe('BoGeographySeedService', () => {
 
       await service.run();
 
-      const miembros = rowsOf('ValueSetMembers').slice(9);
-      expect(miembros).toHaveLength(MUNICIPIOS);
-      expect(miembros[0]).toMatchObject({
+      const members = rowsOf('ValueSetMembers').slice(9);
+      expect(members).toHaveLength(MUNICIPALITIES);
+      expect(members[0]).toMatchObject({
         conceptId: boMunicipalityConceptId('010101'),
         valueSetVersionId: boMunicipalityVersionId(),
         ordinal: 0,
       });
-      expect(miembros[MUNICIPIOS - 1].ordinal).toBe(MUNICIPIOS - 1);
+      expect(members[MUNICIPALITIES - 1].ordinal).toBe(MUNICIPALITIES - 1);
     });
   });
 
@@ -414,12 +414,12 @@ describe('BoGeographySeedService', () => {
     });
 
     it('no repite códigos del INE, aunque sí repita nombres', () => {
-      const codigos = BO_MUNICIPALITIES.map((m) => m.ine);
-      expect(new Set(codigos).size).toBe(MUNICIPIOS);
+      const codes = BO_MUNICIPALITIES.map((m) => m.ine);
+      expect(new Set(codes).size).toBe(MUNICIPALITIES);
       // Y justamente por eso la clave es el código: hay nombres repetidos entre
       // departamentos, y sobre el nombre no se puede construir una identidad.
-      const nombres = new Set(BO_MUNICIPALITIES.map((m) => m.name));
-      expect(nombres.size).toBeLessThan(MUNICIPIOS);
+      const names = new Set(BO_MUNICIPALITIES.map((m) => m.name));
+      expect(names.size).toBeLessThan(MUNICIPALITIES);
     });
 
     it('el camino inverso resuelve el municipio desde el uuid de su concepto', () => {

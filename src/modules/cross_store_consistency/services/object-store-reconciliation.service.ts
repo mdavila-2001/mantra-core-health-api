@@ -13,7 +13,7 @@ import {
 import type { ItemResult } from '../constants';
 
 /** Una referencia del canónico a un objeto, tal como la guarda Postgres. */
-interface ReferenciaCanonica {
+interface CanonicalReference {
   /** `common.file_versions.id`. */
   fileVersionId: string;
   /** Clave del objeto dentro del bucket. */
@@ -23,15 +23,15 @@ interface ReferenciaCanonica {
 }
 
 /** Una entidad comparada, en la forma que consume `runReconciliation`. */
-export interface ItemComparado {
+export interface ComparedItem {
   canonicalEntityId: string;
   targetDocumentId?: string;
   result: ItemResult;
 }
 
 /** Lo que el escaneo encontró, con lo que no pudo mirar aparte. */
-export interface EscaneoDeObjetos {
-  items: ItemComparado[];
+export interface ObjectScan {
+  items: ComparedItem[];
   /** Referencias cuyo objeto no se pudo consultar: ni presentes ni ausentes. */
   noVerificadas: number;
   /**
@@ -103,10 +103,10 @@ export class ObjectStoreReconciliationService {
   /**
    * Recorre un bucket y lo compara contra las referencias del canónico.
    *
-   * @param alcance - Bucket, backend, prefijo y topes del escaneo.
+   * @param scope - Bucket, backend, prefijo y topes del escaneo.
    * @returns Los ítems comparados y lo que no se pudo concluir.
    */
-  async escanear(alcance: {
+  async scan(scope: {
     /** `object_namespaces.backend_code`. */
     backendCode: string;
     /** Bucket o contenedor a recorrer. */
@@ -115,35 +115,35 @@ export class ObjectStoreReconciliationService {
     prefix?: string;
     /** Tope de objetos a inventariar. */
     limit: number;
-  }): Promise<EscaneoDeObjetos> {
-    const referencias = await this.referenciasDelCanonico(
-      alcance.bucket,
-      alcance.prefix,
-      alcance.limit,
+  }): Promise<ObjectScan> {
+    const references = await this.canonicalReferences(
+      scope.bucket,
+      scope.prefix,
+      scope.limit,
     );
-    const porClave = new Map(referencias.map((r) => [r.objectKey, r]));
+    const byKey = new Map(references.map((r) => [r.objectKey, r]));
 
-    const items: ItemComparado[] = [];
-    let noVerificadas = 0;
+    const items: ComparedItem[] = [];
+    let unverified = 0;
 
     // --- Dirección 1: lo que el canónico dice tener, ¿está? ---
-    for (const referencia of referencias) {
-      let presente: boolean;
+    for (const reference of references) {
+      let present: boolean;
       try {
         const stat = await this.reader.stat({
-          backendCode: alcance.backendCode,
-          bucket: alcance.bucket,
-          key: referencia.objectKey,
-          providerVersionId: referencia.objectVersion,
+          backendCode: scope.backendCode,
+          bucket: scope.bucket,
+          key: reference.objectKey,
+          providerVersionId: reference.objectVersion,
         });
-        presente = stat !== null;
+        present = stat !== null;
       } catch (error) {
         // No se sabe. Ni presente ni ausente: se cuenta aparte.
-        noVerificadas += 1;
+        unverified += 1;
         this.logger.warn(
           {
             operation: 'crossstore.objects.scan',
-            fileVersionId: referencia.fileVersionId,
+            fileVersionId: reference.fileVersionId,
             motivo:
               error instanceof ObjectContentUnavailableError
                 ? error.reasonCode
@@ -155,30 +155,30 @@ export class ObjectStoreReconciliationService {
       }
 
       items.push({
-        canonicalEntityId: referencia.fileVersionId,
-        targetDocumentId: referencia.objectKey,
-        result: presente ? 'MATCH' : 'MISSING',
+        canonicalEntityId: reference.fileVersionId,
+        targetDocumentId: reference.objectKey,
+        result: present ? 'MATCH' : 'MISSING',
       });
     }
 
     // --- Dirección 2: lo que el almacén tiene, ¿lo conoce el canónico? ---
-    const inventario = await this.inventory.listar({
-      backendCode: alcance.backendCode,
-      bucket: alcance.bucket,
-      prefix: alcance.prefix,
-      limit: alcance.limit,
+    const inventory = await this.inventory.list({
+      backendCode: scope.backendCode,
+      bucket: scope.bucket,
+      prefix: scope.prefix,
+      limit: scope.limit,
     });
 
-    if (inventario.estado !== 'COMPLETO') {
-      const motivo =
-        inventario.estado === 'NO_DISPONIBLE'
-          ? inventario.motivo
+    if (inventory.estado !== 'COMPLETO') {
+      const reason =
+        inventory.estado === 'NO_DISPONIBLE'
+          ? inventory.motivo
           : 'INVENTARIO_TRUNCADO';
       this.logger.warn(
         {
           operation: 'crossstore.objects.scan',
-          bucket: alcance.bucket,
-          motivo,
+          bucket: scope.bucket,
+          motivo: reason,
         },
         'Orphan detection skipped: incomplete inventory',
       );
@@ -186,22 +186,22 @@ export class ObjectStoreReconciliationService {
       // objeto que simplemente no se llegó a listar sería peor que no mirar.
       return {
         items,
-        noVerificadas,
+        noVerificadas: unverified,
         inventarioIncompleto: true,
-        motivoInventario: motivo,
+        motivoInventario: reason,
       };
     }
 
-    for (const objeto of inventario.objetos) {
-      if (porClave.has(objeto.key)) continue;
+    for (const obj of inventory.objetos) {
+      if (byKey.has(obj.key)) continue;
       items.push({
-        canonicalEntityId: `orphan:${objeto.key}`,
-        targetDocumentId: objeto.key,
+        canonicalEntityId: `orphan:${obj.key}`,
+        targetDocumentId: obj.key,
         result: 'EXTRA',
       });
     }
 
-    return { items, noVerificadas, inventarioIncompleto: false };
+    return { items, noVerificadas: unverified, inventarioIncompleto: false };
   }
 
   /**
@@ -216,12 +216,12 @@ export class ObjectStoreReconciliationService {
    * @param limit - Tope de referencias.
    * @returns Las referencias encontradas.
    */
-  private async referenciasDelCanonico(
+  private async canonicalReferences(
     bucket: string,
     prefix: string | undefined,
     limit: number,
-  ): Promise<ReferenciaCanonica[]> {
-    const filas = await this.em
+  ): Promise<CanonicalReference[]> {
+    const rows = await this.em
       .fork()
       .getConnection()
       .execute<
@@ -245,10 +245,10 @@ export class ObjectStoreReconciliationService {
         [bucket, prefix ?? '', prefix ?? '', limit],
       );
 
-    return filas.map((fila) => ({
-      fileVersionId: fila.file_version_id,
-      objectKey: fila.object_key,
-      objectVersion: fila.object_version ?? undefined,
+    return rows.map((row) => ({
+      fileVersionId: row.file_version_id,
+      objectKey: row.object_key,
+      objectVersion: row.object_version ?? undefined,
     }));
   }
 }

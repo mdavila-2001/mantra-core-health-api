@@ -20,9 +20,9 @@ import {
   SubledgerRepository,
 } from '../repositories';
 import {
-  aCentimos,
-  aTexto,
-  importeEnBase,
+  toCentimos,
+  toText,
+  amountInBase,
   sumCents,
   toCents,
   fromCents,
@@ -67,7 +67,7 @@ const OPEN_ITEMS_MAX = 5_000;
 const DIMENSIONS_MAX_TRANSACTIONS = 10_000;
 
 /** Los cinco tramos de antigüedad de la cartera, siempre presentes y en orden. */
-const AGING_TRAMOS: ReadonlyArray<{ bucket: string; label: string }> = [
+const AGING_BRACKETS: ReadonlyArray<{ bucket: string; label: string }> = [
   { bucket: 'CORRIENTE', label: 'Por vencer' },
   { bucket: 'D1_30', label: '1 a 30 días' },
   { bucket: 'D31_60', label: '31 a 60 días' },
@@ -76,25 +76,25 @@ const AGING_TRAMOS: ReadonlyArray<{ bucket: string; label: string }> = [
 ];
 
 /** `YYYY-MM-DD` de una columna `date`, tal como la espera el front. */
-function formatDate(fecha: Date): string {
-  return fecha.toISOString().slice(0, 10);
+function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 /** Hoy, sin la hora, para comparar contra columnas `date`. */
-function hoyMedianoche(): Date {
+function todayMidnight(): Date {
   const hoy = new Date();
   hoy.setUTCHours(0, 0, 0, 0);
   return hoy;
 }
 
 /** Días de atraso sobre un vencimiento, nunca negativos. */
-function diasDeAtraso(dueDate: Date, hoy: Date): number {
-  const unDia = 24 * 60 * 60 * 1000;
-  return Math.max(0, Math.floor((hoy.getTime() - dueDate.getTime()) / unDia));
+function delayDays(dueDate: Date, hoy: Date): number {
+  const day = 24 * 60 * 60 * 1000;
+  return Math.max(0, Math.floor((hoy.getTime() - dueDate.getTime()) / day));
 }
 
 /** El tramo de antigüedad de una cantidad de días de atraso. */
-function tramoDe(overdueDays: number): string {
+function bracket(overdueDays: number): string {
   if (overdueDays <= 0) return 'CORRIENTE';
   if (overdueDays <= 30) return 'D1_30';
   if (overdueDays <= 60) return 'D31_60';
@@ -143,25 +143,25 @@ export class AccountingReadService {
    * la práctica completa porque su `tenantId` es lo que acota las cuatro
    * tablas por tenant (open items, subledgers, devengos, dimensiones).
    */
-  private async resolverPracticaDelTenant(
+  private async resolverPracticeTenant(
     practiceId: string,
   ): Promise<Pick<Practices, 'id' | 'tenantId'>> {
     const tenantId = getCurrentTenantId();
-    const practica = await this.em
+    const practice = await this.em
       .fork()
       .findOne(Practices, { id: practiceId }, { fields: ['id', 'tenantId'] });
 
-    if (practica === null) {
+    if (practice === null) {
       throw new ResourceNotFoundException('Práctica no encontrada', {
         practiceId,
       });
     }
-    if (tenantId !== undefined && practica.tenantId !== tenantId) {
+    if (tenantId !== undefined && practice.tenantId !== tenantId) {
       throw new ForbiddenException(
         'La práctica consultada pertenece a otra organización',
       );
     }
-    return practica;
+    return practice;
   }
 
   /**
@@ -226,55 +226,55 @@ export class AccountingReadService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<CockpitFiscalYearDto> {
-    await this.resolverPracticaDelTenant(practiceId);
+    await this.resolverPracticeTenant(practiceId);
     await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
-    const anios = await this.fiscalRepo.findYearsByPractice(em, practiceId);
-    if (anios.length === 0) {
+    const years = await this.fiscalRepo.findYearsByPractice(em, practiceId);
+    if (years.length === 0) {
       throw new ResourceNotFoundException(
         'La práctica no tiene ejercicios fiscales',
         { practiceId },
       );
     }
 
-    const hoy = hoyMedianoche();
-    const anio: FiscalYears =
-      anios.find((a) => a.startDate <= hoy && a.endDate >= hoy) ?? anios[0];
+    const hoy = todayMidnight();
+    const year: FiscalYears =
+      years.find((a) => a.startDate <= hoy && a.endDate >= hoy) ?? years[0];
 
-    const periodos = await this.fiscalRepo.findPeriodsByYear(em, anio.id);
-    const periodoDtos: CockpitFiscalPeriodDto[] = periodos.map(
-      (periodo: FiscalPeriods, indice: number) => ({
-        id: periodo.id,
-        periodNumber: indice + 1,
-        name: periodo.code,
-        startsOn: formatDate(periodo.startDate),
-        endsOn: formatDate(periodo.endDate),
-        status: this.mapPeriodStatus(periodo.statusConceptId),
+    const periods = await this.fiscalRepo.findPeriodsByYear(em, year.id);
+    const periodDtos: CockpitFiscalPeriodDto[] = periods.map(
+      (period: FiscalPeriods, index: number) => ({
+        id: period.id,
+        periodNumber: index + 1,
+        name: period.code,
+        startsOn: formatDate(period.startDate),
+        endsOn: formatDate(period.endDate),
+        status: this.mapPeriodStatus(period.statusConceptId),
       }),
     );
 
-    const abiertoVigente = periodos.find(
+    const openCurrent = periods.find(
       (p) =>
         p.statusConceptId === ACCT.PERIOD_OPEN &&
         p.startDate <= hoy &&
         p.endDate >= hoy,
     );
-    const currentPeriodId = abiertoVigente?.id ?? periodos.at(-1)?.id ?? '';
+    const currentPeriodId = openCurrent?.id ?? periods.at(-1)?.id ?? '';
 
     return {
-      fiscalYearId: anio.id,
-      name: anio.code,
-      startsOn: formatDate(anio.startDate),
-      endsOn: formatDate(anio.endDate),
+      fiscalYearId: year.id,
+      name: year.code,
+      startsOn: formatDate(year.startDate),
+      endsOn: formatDate(year.endDate),
       currentPeriodId,
-      periods: periodoDtos,
-      count: periodoDtos.length,
+      periods: periodDtos,
+      count: periodDtos.length,
     };
   }
 
   /** El lado de la cartera de una partida abierta (D-7, tres niveles de fallback). */
-  private ladoDe(
+  private side(
     subledger: SubledgerAccounts,
     openItem: OpenItems,
     normalBalanceConceptId: string | null,
@@ -305,112 +305,112 @@ export class AccountingReadService {
     query: CockpitOpenItemsQueryDto,
     actor: AuthenticatedUser,
   ): Promise<CockpitOpenItemsPageDto> {
-    const practica = await this.resolverPracticaDelTenant(query.practiceId);
+    const practice = await this.resolverPracticeTenant(query.practiceId);
     await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const em = this.em.fork();
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       query.practiceId,
       ACCOUNTS_MAX,
     );
-    const cuentaPorId = new Map(cuentas.map((c) => [c.id, c]));
+    const accountById = new Map(accounts.map((c) => [c.id, c]));
 
-    const filas =
+    const rows =
       await this.subledgerRepo.findOpenItemsByReconciliationAccounts(
         em,
-        practica.tenantId,
-        cuentas.map((c) => c.id),
+        practice.tenantId,
+        accounts.map((c) => c.id),
         ACCT.OPEN_ITEM_CLEARED,
         OPEN_ITEMS_MAX,
       );
 
     const businessPartnerIds = [
-      ...new Set(filas.map((f) => f.subledger.businessPartnerId)),
+      ...new Set(rows.map((f) => f.subledger.businessPartnerId)),
     ];
-    const socios =
+    const partners =
       businessPartnerIds.length === 0
         ? []
         : await em.find(BusinessPartners, {
             id: { $in: businessPartnerIds },
           });
-    const socioPorId = new Map(socios.map((s) => [s.id, s]));
+    const partnerById = new Map(partners.map((s) => [s.id, s]));
 
-    const hoy = hoyMedianoche();
+    const hoy = todayMidnight();
 
     const items: CockpitOpenItemDto[] = [];
-    for (const { openItem, subledger } of filas) {
-      const outstandingCents = aCentimos(openItem.outstandingAmount);
+    for (const { openItem, subledger } of rows) {
+      const outstandingCents = toCentimos(openItem.outstandingAmount);
       if (outstandingCents <= 0n) continue; // saldada de hecho, aunque el estado no lo diga
 
-      const cuenta = cuentaPorId.get(subledger.reconciliationAccountId);
+      const account = accountById.get(subledger.reconciliationAccountId);
       const documentDate = openItem.baselineDate ?? openItem.createdAt;
       const dueDate = openItem.dueDate ?? documentDate;
       const overdueDays = openItem.dueDate
-        ? diasDeAtraso(openItem.dueDate, hoy)
+        ? delayDays(openItem.dueDate, hoy)
         : 0;
 
       items.push({
         id: openItem.id,
         documentNumber: openItem.documentNumber ?? '',
-        accountCode: cuenta?.code ?? '',
-        accountName: cuenta?.name ?? '',
+        accountCode: account?.code ?? '',
+        accountName: account?.name ?? '',
         partnerName:
-          socioPorId.get(subledger.businessPartnerId)?.displayName ?? '',
-        side: this.ladoDe(
+          partnerById.get(subledger.businessPartnerId)?.displayName ?? '',
+        side: this.side(
           subledger,
           openItem,
-          cuenta?.normalBalanceConceptId ?? null,
+          account?.normalBalanceConceptId ?? null,
         ),
         documentDate: formatDate(documentDate),
         dueDate: formatDate(dueDate),
         amount: openItem.originalAmount ?? '0.00',
-        clearedAmount: aTexto(
-          aCentimos(openItem.originalAmount) - outstandingCents,
+        clearedAmount: toText(
+          toCentimos(openItem.originalAmount) - outstandingCents,
         ),
-        openAmount: aTexto(outstandingCents),
+        openAmount: toText(outstandingCents),
         overdueDays,
-        agingBucket: tramoDe(overdueDays),
+        agingBucket: bracket(overdueDays),
       });
     }
 
-    const filtrados = query.side
+    const filtered = query.side
       ? items.filter((i) => i.side === query.side)
       : items;
-    filtrados.sort((a, b) => b.overdueDays - a.overdueDays);
+    filtered.sort((a, b) => b.overdueDays - a.overdueDays);
 
-    const aging: CockpitAgingBucketDto[] = AGING_TRAMOS.map(
+    const aging: CockpitAgingBucketDto[] = AGING_BRACKETS.map(
       ({ bucket, label }) => {
-        const delTramo = filtrados.filter((i) => i.agingBucket === bucket);
-        const receivable = delTramo
+        const ofBracket = filtered.filter((i) => i.agingBucket === bucket);
+        const receivable = ofBracket
           .filter((i) => i.side === 'RECEIVABLE')
-          .reduce((acc, i) => acc + aCentimos(i.openAmount), 0n);
-        const payable = delTramo
+          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+        const payable = ofBracket
           .filter((i) => i.side === 'PAYABLE')
-          .reduce((acc, i) => acc + aCentimos(i.openAmount), 0n);
+          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
         return {
           bucket,
           label,
-          receivable: aTexto(receivable),
-          payable: aTexto(payable),
-          count: delTramo.length,
+          receivable: toText(receivable),
+          payable: toText(payable),
+          count: ofBracket.length,
         };
       },
     );
 
-    const totalReceivable = filtrados
+    const totalReceivable = filtered
       .filter((i) => i.side === 'RECEIVABLE')
-      .reduce((acc, i) => acc + aCentimos(i.openAmount), 0n);
-    const totalPayable = filtrados
+      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+    const totalPayable = filtered
       .filter((i) => i.side === 'PAYABLE')
-      .reduce((acc, i) => acc + aCentimos(i.openAmount), 0n);
+      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
 
     return {
-      items: filtrados,
+      items: filtered,
       aging,
-      totalReceivable: aTexto(totalReceivable),
-      totalPayable: aTexto(totalPayable),
-      count: filtrados.length,
+      totalReceivable: toText(totalReceivable),
+      totalPayable: toText(totalPayable),
+      count: filtered.length,
     };
   }
 
@@ -423,7 +423,7 @@ export class AccountingReadService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<CockpitDimensionsDto> {
-    const practica = await this.resolverPracticaDelTenant(practiceId);
+    const practice = await this.resolverPracticeTenant(practiceId);
     await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
@@ -434,84 +434,84 @@ export class AccountingReadService {
       DIMENSIONS_MAX_TRANSACTIONS,
     );
 
-    const acumular = (
-      mapa: Map<string, { debit: bigint; credit: bigint }>,
+    const accumulate = (
+      map: Map<string, { debit: bigint; credit: bigint }>,
       id: string | null,
-      direccion: string,
-      importe: string,
+      address: string,
+      amount: string,
     ): void => {
       if (!id) return;
-      const actual = mapa.get(id) ?? { debit: 0n, credit: 0n };
-      const centimos = aCentimos(importe);
-      if (direccion === ACCT.DIRECTION_DEBIT) {
+      const actual = map.get(id) ?? { debit: 0n, credit: 0n };
+      const centimos = toCentimos(amount);
+      if (address === ACCT.DIRECTION_DEBIT) {
         actual.debit += centimos;
       } else {
         actual.credit += centimos;
       }
-      mapa.set(id, actual);
+      map.set(id, actual);
     };
 
-    const porCostCenter = new Map<string, { debit: bigint; credit: bigint }>();
-    const porProfitCenter = new Map<
+    const byCostCenter = new Map<string, { debit: bigint; credit: bigint }>();
+    const byProfitCenter = new Map<
       string,
       { debit: bigint; credit: bigint }
     >();
-    const porSegment = new Map<string, { debit: bigint; credit: bigint }>();
+    const bySegment = new Map<string, { debit: bigint; credit: bigint }>();
 
     for (const linea of lineas) {
-      const importe = importeEnBase({
+      const amount = amountInBase({
         amount: linea.amount,
         amountBase: linea.amountBase,
       });
-      acumular(
-        porCostCenter,
+      accumulate(
+        byCostCenter,
         linea.costCenterId,
         linea.directionConceptId,
-        importe,
+        amount,
       );
-      acumular(
-        porProfitCenter,
+      accumulate(
+        byProfitCenter,
         linea.profitCenterId,
         linea.directionConceptId,
-        importe,
+        amount,
       );
-      acumular(porSegment, linea.segmentId, linea.directionConceptId, importe);
+      accumulate(bySegment, linea.segmentId, linea.directionConceptId, amount);
     }
 
     const [costCenters, profitCenters, segments] = await Promise.all([
       this.controllingRepo.listCostCentersByPractice(em, practiceId),
-      this.controllingRepo.listProfitCentersByTenant(em, practica.tenantId),
-      this.controllingRepo.listSegmentsByTenant(em, practica.tenantId),
+      this.controllingRepo.listProfitCentersByTenant(em, practice.tenantId),
+      this.controllingRepo.listSegmentsByTenant(em, practice.tenantId),
     ]);
 
-    const dimensionDe = (
+    const dimension = (
       id: string,
       code: string,
       name: string,
       kind: CockpitDimensionDto['kind'],
-      mapa: Map<string, { debit: bigint; credit: bigint }>,
+      map: Map<string, { debit: bigint; credit: bigint }>,
     ): CockpitDimensionDto => {
-      const saldo = mapa.get(id) ?? { debit: 0n, credit: 0n };
+      const balance = map.get(id) ?? { debit: 0n, credit: 0n };
       return {
         id,
         code,
         name,
         kind,
-        debit: aTexto(saldo.debit),
-        credit: aTexto(saldo.credit),
-        result: aTexto(saldo.credit - saldo.debit),
+        debit: toText(balance.debit),
+        credit: toText(balance.credit),
+        result: toText(balance.credit - balance.debit),
       };
     };
 
     const items: CockpitDimensionDto[] = [
       ...costCenters.map((c) =>
-        dimensionDe(c.id, c.code, c.name, 'COST_CENTER', porCostCenter),
+        dimension(c.id, c.code, c.name, 'COST_CENTER', byCostCenter),
       ),
       ...profitCenters.map((p) =>
-        dimensionDe(p.id, p.code, p.name, 'PROFIT_CENTER', porProfitCenter),
+        dimension(p.id, p.code, p.name, 'PROFIT_CENTER', byProfitCenter),
       ),
       ...segments.map((s) =>
-        dimensionDe(s.id, s.code, s.name, 'SEGMENT', porSegment),
+        dimension(s.id, s.code, s.name, 'SEGMENT', bySegment),
       ),
     ];
 
@@ -560,31 +560,31 @@ export class AccountingReadService {
         transactionId,
       });
     }
-    await this.resolverPracticaDelTenant(asiento.practiceId);
+    await this.resolverPracticeTenant(asiento.practiceId);
 
     const links = await this.journalRepo.findReversalLinksForTransaction(
       em,
       transactionId,
       ACCT.RELATION_REVERSES,
     );
-    const origenIds = links
+    const originIds = links
       .filter((l) => l.targetTransactionId === transactionId)
       .map((l) => l.sourceTransactionId);
     const reversionIds = links
       .filter((l) => l.sourceTransactionId === transactionId)
       .map((l) => l.targetTransactionId);
 
-    const relacionados = await this.journalRepo.findTransactionsByIds(em, [
-      ...origenIds,
+    const related = await this.journalRepo.findTransactionsByIds(em, [
+      ...originIds,
       ...reversionIds,
     ]);
-    const porId = new Map(relacionados.map((t) => [t.id, t]));
+    const byId = new Map(related.map((t) => [t.id, t]));
 
-    const aNodo = (
+    const toNode = (
       id: string,
       role: 'ORIGEN' | 'ACTUAL' | 'REVERSION',
     ): CockpitDocumentFlowNodeDto | null => {
-      const tx = id === asiento.id ? asiento : porId.get(id);
+      const tx = id === asiento.id ? asiento : byId.get(id);
       if (!tx) return null;
       return {
         id: tx.id,
@@ -597,9 +597,9 @@ export class AccountingReadService {
     };
 
     const items = [
-      ...origenIds.map((id) => aNodo(id, 'ORIGEN')),
-      aNodo(asiento.id, 'ACTUAL'),
-      ...reversionIds.map((id) => aNodo(id, 'REVERSION')),
+      ...originIds.map((id) => toNode(id, 'ORIGEN')),
+      toNode(asiento.id, 'ACTUAL'),
+      ...reversionIds.map((id) => toNode(id, 'REVERSION')),
     ].filter((n): n is CockpitDocumentFlowNodeDto => n !== null);
 
     return { items };
@@ -614,16 +614,16 @@ export class AccountingReadService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<CockpitFixedAssetsDto> {
-    await this.resolverPracticaDelTenant(practiceId);
+    await this.resolverPracticeTenant(practiceId);
     await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
-    const activos = await this.assetRepo.listByPractice(em, practiceId);
-    const ordenados = [...activos].sort((a, b) => a.code.localeCompare(b.code));
+    const active = await this.assetRepo.listByPractice(em, practiceId);
+    const sorted = [...active].sort((a, b) => a.code.localeCompare(b.code));
 
     const resolver = await ConceptCodeResolver.load(
       em,
-      ordenados.map((a) => a.assetTypeConceptId),
+      sorted.map((a) => a.assetTypeConceptId),
     );
 
     let totalAcquisition = 0;
@@ -631,7 +631,7 @@ export class AccountingReadService {
     let totalNetBookValue = 0;
     let monthlyCharge = 0;
 
-    const items: CockpitFixedAssetDto[] = ordenados.map((activo: Assets) => {
+    const items: CockpitFixedAssetDto[] = sorted.map((activo: Assets) => {
       const cost = toCents(activo.acquisitionCost ?? '0');
       const salvage = toCents(activo.salvageValue ?? '0');
       const bookValueCents = toCents(
@@ -642,7 +642,7 @@ export class AccountingReadService {
         activo.usefulLifeMonths && activo.usefulLifeMonths > 0
           ? Math.round((cost - salvage) / activo.usefulLifeMonths)
           : 0;
-      const cuota = Math.min(monthly, depreciableCents);
+      const installment = Math.min(monthly, depreciableCents);
 
       const activa = activo.statusConceptId === ACCT.ASSET_ACTIVE;
       const depreciable =
@@ -650,14 +650,14 @@ export class AccountingReadService {
         !!activo.usefulLifeMonths &&
         activo.usefulLifeMonths > 0 &&
         depreciableCents > 0 &&
-        cuota > 0;
+        installment > 0;
 
       const accumulatedCents = toCents(activo.accumulatedDepreciation ?? '0');
 
       totalAcquisition += cost;
       totalAccumulated += accumulatedCents;
       totalNetBookValue += bookValueCents;
-      if (depreciable) monthlyCharge += cuota;
+      if (depreciable) monthlyCharge += installment;
 
       return {
         id: activo.id,
@@ -669,7 +669,7 @@ export class AccountingReadService {
         acquisitionCost: fromCents(cost),
         accumulatedDepreciation: fromCents(accumulatedCents),
         netBookValue: fromCents(bookValueCents),
-        monthlyDepreciation: depreciable ? fromCents(cuota) : '0.00',
+        monthlyDepreciation: depreciable ? fromCents(installment) : '0.00',
         depreciable,
         status: activa ? 'ACTIVE' : 'RETIRED',
       };
@@ -693,112 +693,112 @@ export class AccountingReadService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<CockpitAccrualsDto> {
-    const practica = await this.resolverPracticaDelTenant(practiceId);
+    const practice = await this.resolverPracticeTenant(practiceId);
     await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
-    const cuentasPractica = await this.accountsRepo.findByPractice(
+    const practiceAccounts = await this.accountsRepo.findByPractice(
       em,
       practiceId,
       ACCOUNTS_MAX,
     );
-    const cuentaIds = cuentasPractica.map((c) => c.id);
+    const accountIds = practiceAccounts.map((c) => c.id);
 
     const objetos = await this.accrualRepo.findObjectsByPractice(
       em,
-      practica.tenantId,
-      cuentaIds,
+      practice.tenantId,
+      accountIds,
     );
-    const ordenados = [...objetos].sort((a, b) =>
+    const sorted = [...objetos].sort((a, b) =>
       a.objectNumber.localeCompare(b.objectNumber),
     );
 
     const lineas = await this.accrualRepo.findScheduleLinesByObjectIds(
       em,
-      ordenados.map((o) => o.id),
+      sorted.map((o) => o.id),
     );
-    const periodoIds = [...new Set(lineas.map((l) => l.fiscalPeriodId))];
-    const periodos = await this.fiscalRepo.findPeriodsByIds(em, periodoIds);
-    const periodoPorId = new Map(periodos.map((p) => [p.id, p]));
+    const periodIds = [...new Set(lineas.map((l) => l.fiscalPeriodId))];
+    const periods = await this.fiscalRepo.findPeriodsByIds(em, periodIds);
+    const periodById = new Map(periods.map((p) => [p.id, p]));
 
-    const cuentaGastoIds = ordenados
+    const expenseAccountIds = sorted
       .map((o) => o.expenseAccountId)
       .filter((id): id is string => !!id);
-    const cuentasGasto =
-      cuentaGastoIds.length === 0
+    const expenseAccounts =
+      expenseAccountIds.length === 0
         ? []
-        : await this.accountsRepo.findByIds(em, cuentaGastoIds);
-    const cuentaGastoPorId = new Map(cuentasGasto.map((c) => [c.id, c]));
+        : await this.accountsRepo.findByIds(em, expenseAccountIds);
+    const expenseAccountById = new Map(expenseAccounts.map((c) => [c.id, c]));
 
     let pendingTotal = 0;
     let periodCharge = 0;
 
-    const items: CockpitAccrualObjectDto[] = ordenados.map(
-      (objeto: AccrualObjects) => {
-        const propias = lineas.filter((l) => l.accrualObjectId === objeto.id);
-        const posteadas = propias.filter(
+    const items: CockpitAccrualObjectDto[] = sorted.map(
+      (obj: AccrualObjects) => {
+        const own = lineas.filter((l) => l.accrualObjectId === obj.id);
+        const posted = own.filter(
           (l) => l.statusConceptId === ACCT.SCHEDULE_POSTED,
         );
-        const pendientes = propias.filter(
+        const pendientes = own.filter(
           (l) => l.statusConceptId !== ACCT.SCHEDULE_POSTED,
         );
 
         const recognizedAmount = sumCents(
-          posteadas.map((l) => l.postedAmount ?? '0'),
+          posted.map((l) => l.postedAmount ?? '0'),
         );
         const pendingAmount = sumCents(
           pendientes.map((l) => l.plannedAmount ?? '0'),
         );
 
-        const proximaPendiente = [...pendientes].sort(
+        const nextPending = [...pendientes].sort(
           (a: AccrualScheduleLines, b: AccrualScheduleLines) => {
-            const periodoA = periodoPorId.get(a.fiscalPeriodId);
-            const periodoB = periodoPorId.get(b.fiscalPeriodId);
-            if (periodoA && periodoB) {
+            const periodA = periodById.get(a.fiscalPeriodId);
+            const periodB = periodById.get(b.fiscalPeriodId);
+            if (periodA && periodB) {
               const diff =
-                periodoA.startDate.getTime() - periodoB.startDate.getTime();
+                periodA.startDate.getTime() - periodB.startDate.getTime();
               if (diff !== 0) return diff;
             }
             return a.id.localeCompare(b.id);
           },
         )[0];
-        const periodAmount = proximaPendiente
-          ? toCents(proximaPendiente.plannedAmount ?? '0')
+        const periodAmount = nextPending
+          ? toCents(nextPending.plannedAmount ?? '0')
           : 0;
 
         const completed = pendientes.length === 0;
         pendingTotal += pendingAmount;
         if (!completed) periodCharge += periodAmount;
 
-        const primeraLinea = [...propias].sort((a, b) => {
-          const periodoA = periodoPorId.get(a.fiscalPeriodId);
-          const periodoB = periodoPorId.get(b.fiscalPeriodId);
-          if (!periodoA || !periodoB) return 0;
-          return periodoA.startDate.getTime() - periodoB.startDate.getTime();
+        const firstLine = [...own].sort((a, b) => {
+          const periodA = periodById.get(a.fiscalPeriodId);
+          const periodB = periodById.get(b.fiscalPeriodId);
+          if (!periodA || !periodB) return 0;
+          return periodA.startDate.getTime() - periodB.startDate.getTime();
         })[0];
         const startsOn =
-          objeto.startDate ??
-          (primeraLinea
-            ? periodoPorId.get(primeraLinea.fiscalPeriodId)?.startDate
+          obj.startDate ??
+          (firstLine
+            ? periodById.get(firstLine.fiscalPeriodId)?.startDate
             : undefined) ??
           new Date(0);
 
-        const cuentaGasto = objeto.expenseAccountId
-          ? cuentaGastoPorId.get(objeto.expenseAccountId)
+        const expenseAccount = obj.expenseAccountId
+          ? expenseAccountById.get(obj.expenseAccountId)
           : undefined;
         const kind: 'EXPENSE' | 'REVENUE' =
-          cuentaGasto?.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE
+          expenseAccount?.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE
             ? 'REVENUE'
             : 'EXPENSE';
 
         return {
-          id: objeto.id,
-          code: objeto.objectNumber,
-          name: objeto.objectNumber,
+          id: obj.id,
+          code: obj.objectNumber,
+          name: obj.objectNumber,
           kind,
-          totalAmount: objeto.totalAmount ?? '0.00',
-          periods: propias.length,
-          postedPeriods: posteadas.length,
+          totalAmount: obj.totalAmount ?? '0.00',
+          periods: own.length,
+          postedPeriods: posted.length,
           remainingPeriods: pendientes.length,
           periodAmount: fromCents(periodAmount),
           recognizedAmount: fromCents(recognizedAmount),

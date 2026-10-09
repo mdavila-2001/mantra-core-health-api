@@ -129,11 +129,11 @@ describe('IamUsersReadService.searchUsers', () => {
       userRow('u1', 'Ana'),
       userRow('u2', 'Ana'),
     ]);
-    const primera = await d.service.searchUsers({ limit: 1 });
+    const first = await d.service.searchUsers({ limit: 1 });
 
     d.usersRepo.searchPage.mockClear();
     d.usersRepo.searchPage.mockResolvedValue([]);
-    await d.service.searchUsers({ cursor: primera.nextCursor!, limit: 1 });
+    await d.service.searchUsers({ cursor: first.nextCursor!, limit: 1 });
 
     expect(d.usersRepo.searchPage).toHaveBeenCalledWith(
       expect.anything(),
@@ -291,12 +291,12 @@ describe('IamUsersReadService — sub-colecciones', () => {
     'listGlobalRoles',
   ])(
     '%s distingue "usuario inexistente" de "colección vacía"',
-    async (metodo) => {
+    async (method) => {
       // Sin esta comprobación la pantalla mostraría un estado vacío en vez de un 404.
       const d = build();
       d.usersRepo.findById.mockResolvedValue(null);
 
-      await expect((d.service as any)[metodo](USER)).rejects.toBeInstanceOf(
+      await expect((d.service as any)[method](USER)).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
     },

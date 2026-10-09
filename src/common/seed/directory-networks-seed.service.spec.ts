@@ -59,27 +59,27 @@ describe('DirectoryNetworksSeedService', () => {
 
   it('pliega las filas repetidas: una persona por nombre, no una por fila', () => {
     const { service } = build();
-    const fichas = (service as any).fichas() as {
+    const records = (service as any).records() as {
       key: string;
       sedes: unknown[];
     }[];
-    const filas = networksDataset.datos.redes.reduce(
+    const rows = networksDataset.datos.redes.reduce(
       (n, r) => n + r.profesionales.length,
       0,
     );
-    expect(fichas.length).toBeLessThan(filas);
-    expect(new Set(fichas.map((f) => f.key)).size).toBe(fichas.length);
+    expect(records.length).toBeLessThan(rows);
+    expect(new Set(records.map((f) => f.key)).size).toBe(records.length);
   });
 
   it('un médico habilitado por las dos redes queda con las dos y con todas sus sedes', () => {
     const { service } = build();
-    const fichas = (service as any).fichas() as {
+    const records = (service as any).records() as {
       carriers: string[];
       sedes: { direccion: string }[];
     }[];
-    const enLasDos = fichas.filter((f) => f.carriers.length === 2);
-    expect(enLasDos.length).toBeGreaterThan(0);
-    for (const f of fichas) {
+    const inDos = records.filter((f) => f.carriers.length === 2);
+    expect(inDos.length).toBeGreaterThan(0);
+    for (const f of records) {
       expect(new Set(f.sedes.map((s) => s.direccion)).size).toBe(
         f.sedes.length,
       );
@@ -88,18 +88,18 @@ describe('DirectoryNetworksSeedService', () => {
 
   it('el correo sintético es determinista y con el dominio reservado', () => {
     const { service } = build();
-    const ficha = {
+    const record = {
       key: 'abasto vega rosemary',
       nombre: 'Abasto Vega Rosemary',
     };
-    const a = (service as any).emailDe(ficha);
-    expect(a).toBe((service as any).emailDe(ficha));
+    const a = (service as any).email(record);
+    expect(a).toBe((service as any).email(record));
     expect(a).toMatch(/@alovida\.test$/);
   });
 
   it('los teléfonos de la sede viajan en la dirección', () => {
     const { service } = build();
-    const s = (service as any).sitioDe({
+    const s = (service as any).siteOf({
       direccion: 'AV. X 123',
       telefonos: ['76322931', '800101055'],
       source_file: 'a.md',

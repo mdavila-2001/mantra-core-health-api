@@ -347,12 +347,12 @@ export class PractitionerSitesService {
     );
     const sites = await this.loadSites(em, siteIds, tenantId, link?.userId);
 
-    const resueltas: PractitionerSiteDto[] = [];
+    const resolved: PractitionerSiteDto[] = [];
     for (const siteId of siteIds) {
       const site = sites.get(siteId);
-      if (site) resueltas.push(site);
+      if (site) resolved.push(site);
     }
-    return resueltas;
+    return resolved;
   }
 
   /**
@@ -366,8 +366,8 @@ export class PractitionerSitesService {
     refs: readonly ResourceSiteRef[],
     tenantId: string,
   ): Promise<Map<string, PractitionerSiteDto>> {
-    const resuelto = new Map<string, PractitionerSiteDto>();
-    if (refs.length === 0) return resuelto;
+    const resolved = new Map<string, PractitionerSiteDto>();
+    if (refs.length === 0) return resolved;
 
     const em = this.em.fork();
     const practitionerIds = unique(
@@ -378,7 +378,7 @@ export class PractitionerSitesService {
     );
 
     /** `refId` del recurso → sede que le corresponde. */
-    const sitePorRef = new Map<string, string>();
+    const siteByRef = new Map<string, string>();
 
     const assignments = await this.rolesRepo.findCurrentWithSite(
       em,
@@ -390,9 +390,9 @@ export class PractitionerSitesService {
       // profesional con dos consultorios tiene uno que es «el suyo».
       if (
         assignment.practiceSiteId &&
-        !sitePorRef.has(assignment.practitionerProfileId)
+        !siteByRef.has(assignment.practitionerProfileId)
       ) {
-        sitePorRef.set(
+        siteByRef.set(
           assignment.practitionerProfileId,
           assignment.practiceSiteId,
         );
@@ -401,19 +401,19 @@ export class PractitionerSitesService {
 
     for (const spaceId of spaceIds) {
       const space = await this.spacesRepo.findById(em, spaceId);
-      if (space) sitePorRef.set(spaceId, space.practiceSiteId);
+      if (space) siteByRef.set(spaceId, space.practiceSiteId);
     }
 
     const sites = await this.loadSites(
       em,
-      unique([...sitePorRef.values()]),
+      unique([...siteByRef.values()]),
       tenantId,
     );
-    for (const [refId, siteId] of sitePorRef) {
+    for (const [refId, siteId] of siteByRef) {
       const site = sites.get(siteId);
-      if (site) resuelto.set(refId, site);
+      if (site) resolved.set(refId, site);
     }
-    return resuelto;
+    return resolved;
   }
 
   /**
@@ -438,8 +438,8 @@ export class PractitionerSitesService {
     tenantId: string,
     ownerUserId?: string,
   ): Promise<Map<string, PractitionerSiteDto>> {
-    const resultado = new Map<string, PractitionerSiteDto>();
-    if (siteIds.length === 0) return resultado;
+    const result = new Map<string, PractitionerSiteDto>();
+    if (siteIds.length === 0) return result;
 
     for (const siteId of siteIds) {
       const site = await this.sitesRepo.findById(em, siteId);
@@ -456,9 +456,9 @@ export class PractitionerSitesService {
         ownerUserId !== undefined &&
         practice.typeConceptId === PRAC.PRACTICE_TYPE_OFFICE &&
         practice.adminUserId === ownerUserId;
-      resultado.set(site.id, await this.projectSite(em, site, isOwnSite));
+      result.set(site.id, await this.projectSite(em, site, isOwnSite));
     }
-    return resultado;
+    return result;
   }
 
   /**
@@ -518,10 +518,10 @@ export class PractitionerSitesService {
     tenantId: string,
   ): Promise<PracticeSites> {
     const site = await this.sitesRepo.findById(em, siteId);
-    const esPropia =
+    const isOwn =
       site !== null &&
       (await this.isOwnPractice(em, site.practiceId, actor.id, tenantId));
-    if (!site || !esPropia) {
+    if (!site || !isOwn) {
       throw new ResourceNotFoundException(
         'Esa sede no es un consultorio propio suyo',
         { siteId },
@@ -579,9 +579,9 @@ export class PractitionerSitesService {
     actorUserId: string,
   ): Promise<string> {
     if (site.addressId) {
-      const vigente = await em.findOne(Addresses, { id: site.addressId });
-      if (vigente) {
-        this.addressesRepo.closeVigente(vigente, new Date(), actorUserId);
+      const current = await em.findOne(Addresses, { id: site.addressId });
+      if (current) {
+        this.addressesRepo.closeVigente(current, new Date(), actorUserId);
       }
     }
 
@@ -590,7 +590,7 @@ export class PractitionerSitesService {
     const lines = address.lines
       .map((linea) => linea.trim())
       .filter((linea) => linea.length > 0);
-    const nueva = this.addressesRepo.create(em, {
+    const fresh = this.addressesRepo.create(em, {
       ownerTypeConceptId: CONCEPTS.OWNER_USER,
       ownerId: actorUserId,
       lines: lines.length > 0 ? lines.join('\n') : undefined,
@@ -607,7 +607,7 @@ export class PractitionerSitesService {
       actorUserId,
     });
     await em.flush();
-    return nueva.id;
+    return fresh.id;
   }
 
   /**
@@ -644,10 +644,10 @@ function unique(ids: readonly string[]): string[] {
  * no como una cadena de comas.
  */
 function addressText(address: Addresses): string | null {
-  const partes = [address.lines, address.city, address.postalCode]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines, address.city, address.postalCode]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }
 
 /**
@@ -662,8 +662,8 @@ function ownSiteAddressText(address: {
   lines: string[];
   city?: string;
 }): string | null {
-  const partes = [address.lines.join('\n'), address.city]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines.join('\n'), address.city]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }

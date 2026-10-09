@@ -17,7 +17,7 @@ import {
 import { AttachableFileService } from '../../common/services';
 import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
 import {
-  requiereCriterioDeBusqueda,
+  searchRequiresCriterion,
   resolvePatientSearchScope,
 } from './patient-search-scope';
 import { findCurrentIdentityAssertionForPerson } from '../../identity_assurance/repositories/identity-assertions.repository';
@@ -92,9 +92,9 @@ import { createGuardianRelatedPerson } from './guardian-related-person';
 import type { InsuranceSector } from '../../../common/seed/bolivia-insurance.catalog';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import {
-  textoOpcional,
-  aplicarOcupacion,
-  aplicarEmpresa,
+  optionalText,
+  applyOccupation,
+  applyCompany,
 } from '../person-work-fields';
 import { ProfilesErrorReason } from '../profiles.error-reasons';
 
@@ -108,12 +108,12 @@ import { ProfilesErrorReason } from '../profiles.error-reasons';
  * está vacío» y la ausencia como «esta persona no lo declaró», y un formulario
  * que los confunde pinta un campo borrado donde nunca hubo uno.
  *
- * @param respuesta - La respuesta armada, con sus huecos.
+ * @param response - La respuesta armada, con sus huecos.
  * @returns La misma respuesta sin las claves nulas ni indefinidas.
  */
-function sinCamposAusentes<T extends object>(respuesta: T): T {
+function withoutAbsentFields<T extends object>(response: T): T {
   return Object.fromEntries(
-    Object.entries(respuesta).filter(
+    Object.entries(response).filter(
       ([, valor]) => valor !== null && valor !== undefined,
     ),
   ) as T;
@@ -130,12 +130,12 @@ function sinCamposAusentes<T extends object>(respuesta: T): T {
  * @param valor - El texto de la columna, o `undefined` si no hay fila vigente.
  * @returns El número, o `undefined`.
  */
-function numeroDeColumna(valor: string | undefined): number | undefined {
+function numeroColumn(valor: string | undefined): number | undefined {
   return valor === undefined ? undefined : Number(valor);
 }
 
 /** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
-const PARTES_DEL_NOMBRE = [
+const NAME_PARTS = [
   'name',
   'middleName',
   'lastName',
@@ -145,15 +145,15 @@ const PARTES_DEL_NOMBRE = [
 /**
  * Los campos del cuerpo que se escriben en `profiles.persons`.
  *
- * Las partes del nombre salen de {@link PARTES_DEL_NOMBRE} en vez de repetirse:
+ * Las partes del nombre salen de {@link NAME_PARTS} en vez de repetirse:
  * dos listas de campos acaban divergiendo, y la que se olvide de una hará que
  * editar ese campo no marque la fila como modificada —o al revés—.
  *
  * El teléfono y el domicilio quedan **fuera** a propósito: no viven en esta
  * tabla, y sus filas llevan su propia auditoría al crearse o cerrarse.
  */
-const CAMPOS_DE_LA_PERSONA = [
-  ...PARTES_DEL_NOMBRE,
+const PERSON_FIELDS = [
+  ...NAME_PARTS,
   'birthDate',
   'sexAtBirth',
   'occupationConceptId',
@@ -173,7 +173,7 @@ const CAMPOS_DE_LA_PERSONA = [
  * @param campos - Los campos por los que se pregunta.
  * @returns `true` si el cuerpo trae al menos uno.
  */
-function declaraAlguno(
+function declaresAny(
   dto: UpdateOwnPatientProfileDto,
   campos: readonly (keyof UpdateOwnPatientProfileDto)[],
 ): boolean {
@@ -188,8 +188,8 @@ function declaraAlguno(
  * @param dto - Los campos que llegaron en el cuerpo.
  * @returns `true` si el cuerpo declara alguna parte del nombre.
  */
-function cambiaAlgunaParteDelNombre(dto: UpdateOwnPatientProfileDto): boolean {
-  return declaraAlguno(dto, PARTES_DEL_NOMBRE);
+function anyNamePartChanges(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaresAny(dto, NAME_PARTS);
 }
 
 /**
@@ -205,8 +205,8 @@ function cambiaAlgunaParteDelNombre(dto: UpdateOwnPatientProfileDto): boolean {
  * @param dto - Los campos que llegaron en el cuerpo.
  * @returns `true` si el cuerpo declara algún campo de la persona.
  */
-function cambiaLaPersona(dto: UpdateOwnPatientProfileDto): boolean {
-  return declaraAlguno(dto, CAMPOS_DE_LA_PERSONA);
+function personChanges(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaresAny(dto, PERSON_FIELDS);
 }
 
 /**
@@ -226,14 +226,14 @@ function cambiaLaPersona(dto: UpdateOwnPatientProfileDto): boolean {
  * pantalla distingue «no la declaró» de «la declaró sin datos», y un objeto con
  * todo ausente pintaría una tarjeta vacía.
  */
-function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
-  if (!fila) return undefined;
+function toAddress(row?: Addresses | null): OwnAddressDto | undefined {
+  if (!row) return undefined;
   return {
-    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
-    ...(fila.city === undefined ? {} : { city: fila.city }),
-    ...(fila.municipalityConceptId === undefined
+    ...(row.lines === undefined ? {} : { lines: row.lines }),
+    ...(row.city === undefined ? {} : { city: row.city }),
+    ...(row.municipalityConceptId === undefined
       ? {}
-      : { municipalityConceptId: fila.municipalityConceptId }),
+      : { municipalityConceptId: row.municipalityConceptId }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
     //
     // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
@@ -241,9 +241,9 @@ function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
     // estricta el ternario tomaba la rama de «sí hay coordenadas» y emitía
     // `Number(null)` — que es **0**. Una dirección sin ubicar salía en el mapa
     // en el golfo de Guinea. Se vio con una dirección de trabajo cargada sin GPS.
-    ...(fila.latitude == null || fila.longitude == null
+    ...(row.latitude == null || row.longitude == null
       ? {}
-      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
+      : { latitude: Number(row.latitude), longitude: Number(row.longitude) }),
   };
 }
 
@@ -257,20 +257,20 @@ function aDireccion(fila?: Addresses | null): OwnAddressDto | undefined {
  * Cuenta cumpleaños, no divide días: restar milisegundos y dividir por un año
  * medio se equivoca con quien cumple años esta semana y con todo bisiesto.
  *
- * @param fecha - Fecha de nacimiento en `YYYY-MM-DD`, o nada.
+ * @param date - Fecha de nacimiento en `YYYY-MM-DD`, o nada.
  * @returns Los años cumplidos, o `undefined` si no hay fecha o no es válida.
  */
-function edadEnAnios(fecha?: string | null): number | undefined {
-  if (!fecha) return undefined;
-  const nacimiento = new Date(fecha);
-  if (Number.isNaN(nacimiento.getTime())) return undefined;
+function ageInYears(date?: string | null): number | undefined {
+  if (!date) return undefined;
+  const birth = new Date(date);
+  if (Number.isNaN(birth.getTime())) return undefined;
   const hoy = new Date();
-  let anios = hoy.getUTCFullYear() - nacimiento.getUTCFullYear();
-  const mes = hoy.getUTCMonth() - nacimiento.getUTCMonth();
-  if (mes < 0 || (mes === 0 && hoy.getUTCDate() < nacimiento.getUTCDate())) {
-    anios -= 1;
+  let years = hoy.getUTCFullYear() - birth.getUTCFullYear();
+  const month = hoy.getUTCMonth() - birth.getUTCMonth();
+  if (month < 0 || (month === 0 && hoy.getUTCDate() < birth.getUTCDate())) {
+    years -= 1;
   }
-  return anios < 0 ? undefined : anios;
+  return years < 0 ? undefined : years;
 }
 
 @Injectable()
@@ -502,13 +502,13 @@ export class ProfilesPatientsService {
         person.id,
         CONCEPTS.CONTACT_EMAIL,
       ),
-      this.leerIdentificadores(em, person.id),
-      this.leerCoberturas(em, patient.profileId),
-      this.leerTutores(em, patient.profileId),
+      this.readIdentifiers(em, person.id),
+      this.readCoverages(em, patient.profileId),
+      this.readGuardians(em, patient.profileId),
     ]);
     const identityVerified = Boolean(assertion);
 
-    return sinCamposAusentes({
+    return withoutAbsentFields({
       personId: person.id,
       patientProfileId: patient.profileId,
       name: person.name,
@@ -544,8 +544,8 @@ export class ProfilesPatientsService {
       taxId: identificadores.taxId,
       taxHolderName: identificadores.taxHolderName,
       email: correo?.value,
-      homeAddress: aDireccion(domicilio),
-      workAddress: aDireccion(trabajo),
+      homeAddress: toAddress(domicilio),
+      workAddress: toAddress(trabajo),
       // Listas siempre presentes, aunque vengan vacías: quien las pinta
       // distingue «no declaró ninguna» de «esta respuesta no las trae».
       coverages: coberturas,
@@ -614,14 +614,14 @@ export class ProfilesPatientsService {
       // por {@link textoOpcional}, que traduce el blanco a `NULL`.
       if (dto.name !== undefined) person.name = dto.name;
       if (dto.middleName !== undefined) {
-        person.middleName = textoOpcional(dto.middleName);
+        person.middleName = optionalText(dto.middleName);
       }
       if (dto.lastName !== undefined) person.lastName = dto.lastName;
       if (dto.motherLastName !== undefined) {
-        person.motherLastName = textoOpcional(dto.motherLastName);
+        person.motherLastName = optionalText(dto.motherLastName);
       }
-      if (cambiaAlgunaParteDelNombre(dto)) {
-        this.recomponerDisplayName(person);
+      if (anyNamePartChanges(dto)) {
+        this.rebuildDisplayName(person);
       }
 
       if (dto.birthDate !== undefined) {
@@ -637,16 +637,16 @@ export class ProfilesPatientsService {
       }
       // Las dos columnas de la ocupación se deciden juntas: ver
       // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
-      aplicarOcupacion(person, dto);
+      applyOccupation(person, dto);
       // Misma regla, para la empresa: ver {@link aplicarEmpresa}.
-      aplicarEmpresa(person, dto);
+      applyCompany(person, dto);
       // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
-      if (cambiaLaPersona(dto)) {
+      if (personChanges(dto)) {
         touch(person, actor.id);
       }
 
       if (dto.phone !== undefined) {
-        await this.reemplazarTelefono(
+        await this.replacePhone(
           tx,
           person.id,
           dto.phone,
@@ -663,7 +663,7 @@ export class ProfilesPatientsService {
       // colgada de un NIT que ya no existe. Si sólo llega una de las dos, la
       // otra se conserva de la fila vigente.
       if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
-        await this.reemplazarNit(
+        await this.replaceNit(
           tx,
           person.id,
           dto.taxId,
@@ -683,7 +683,7 @@ export class ProfilesPatientsService {
         dto.homeLatitude !== undefined ||
         dto.homeLongitude !== undefined
       ) {
-        await this.reemplazarDireccion(
+        await this.replaceAddress(
           tx,
           person.id,
           CONCEPTS.ADDR_USE_HOME,
@@ -704,7 +704,7 @@ export class ProfilesPatientsService {
         dto.workLatitude !== undefined ||
         dto.workLongitude !== undefined
       ) {
-        await this.reemplazarDireccion(
+        await this.replaceAddress(
           tx,
           person.id,
           CONCEPTS.ADDR_USE_WORK,
@@ -723,7 +723,7 @@ export class ProfilesPatientsService {
       // `ID_TYPE_NATIONAL`, no del número en sí — ver el JSDoc del campo en el
       // DTO sobre por qué esto NO toca la identidad de login.
       if (dto.issuerAdministrativeAreaConceptId !== undefined) {
-        await this.reemplazarExpedicion(
+        await this.replaceIssuance(
           tx,
           person.id,
           dto.issuerAdministrativeAreaConceptId,
@@ -739,13 +739,13 @@ export class ProfilesPatientsService {
         dto.guardianPhone !== undefined ||
         dto.guardianRelationshipConceptId !== undefined
       ) {
-        await this.reemplazarTutor(tx, patient.profileId, dto, actor.id);
+        await this.replaceTutor(tx, patient.profileId, dto, actor.id);
       }
 
       // El seguro declarado: sólo agrega si el sector no tenía ninguno — ver
       // el JSDoc de `privateInsurancePlanId` en el DTO.
       if (dto.privateInsurancePlanId) {
-        await this.declararCobertura(
+        await this.declareCoverage(
           tx,
           patient.profileId,
           person.id,
@@ -756,7 +756,7 @@ export class ProfilesPatientsService {
         );
       }
       if (dto.publicInsurancePlanId) {
-        await this.declararCobertura(
+        await this.declareCoverage(
           tx,
           patient.profileId,
           person.id,
@@ -903,12 +903,12 @@ export class ProfilesPatientsService {
     actor: AuthenticatedUser,
   ): Promise<DependentSummaryDto[]> {
     const em = this.em.fork();
-    const filas = await this.portalProxiesRepo.listActiveDependentsOfUser(
+    const rows = await this.portalProxiesRepo.listActiveDependentsOfUser(
       em,
       actor.id,
       new Date(),
     );
-    return filas.map((fila) => this.aDependentSummary(fila));
+    return rows.map((row) => this.toDependentSummary(row));
   }
 
   /**
@@ -983,11 +983,11 @@ export class ProfilesPatientsService {
       }
 
       if (dto.nationalId !== undefined) {
-        const duplicado = await this.identifiersRepo.findActiveDuplicate(tx, {
+        const duplicate = await this.identifiersRepo.findActiveDuplicate(tx, {
           typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
           value: dto.nationalId,
         });
-        if (duplicado) {
+        if (duplicate) {
           this.logger.warn(
             {
               operation: 'profiles.dependent.create',
@@ -1002,7 +1002,7 @@ export class ProfilesPatientsService {
         }
       }
 
-      const dependiente = this.personsRepo.create(tx, {
+      const dependent = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
         name: dto.name,
@@ -1018,7 +1018,7 @@ export class ProfilesPatientsService {
       await tx.flush();
 
       this.personProfilesRepo.create(tx, {
-        personId: dependiente.id,
+        personId: dependent.id,
         profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
         statusConceptId: PROF.PROFILE_ACTIVE,
         actorUserId: actor.id,
@@ -1026,8 +1026,8 @@ export class ProfilesPatientsService {
       await tx.flush();
 
       // `patient_profiles.profile_id` ES `persons.id`, igual que en el alta.
-      const paciente = this.patientProfilesRepo.create(tx, {
-        profileId: dependiente.id,
+      const patient = this.patientProfilesRepo.create(tx, {
+        profileId: dependent.id,
         patientCode: `PAT-${randomUUID()}`,
         recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
         actorUserId: actor.id,
@@ -1037,7 +1037,7 @@ export class ProfilesPatientsService {
       if (dto.nationalId !== undefined) {
         this.identifiersRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-          ownerId: dependiente.id,
+          ownerId: dependent.id,
           typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
           value: dto.nationalId,
           useConceptId: CONCEPTS.USE_OFFICIAL,
@@ -1050,8 +1050,8 @@ export class ProfilesPatientsService {
 
       // La fila cuelga del DEPENDIENTE y nombra al TITULAR, como todas las de
       // esta tabla: «la persona relacionada con este paciente es su madre».
-      const parentesco = this.relatedPersonsRepo.create(tx, {
-        patientProfileId: paciente.profileId,
+      const kinship = this.relatedPersonsRepo.create(tx, {
+        patientProfileId: patient.profileId,
         personId: titular.id,
         relationshipConceptId: dto.relationshipConceptId,
         isEmergencyContact: true,
@@ -1062,10 +1062,10 @@ export class ProfilesPatientsService {
       await tx.flush();
 
       const ahora = new Date();
-      const apoderamiento = this.portalProxiesRepo.create(tx, {
-        patientProfileId: paciente.profileId,
+      const powerOfAttorney = this.portalProxiesRepo.create(tx, {
+        patientProfileId: patient.profileId,
         proxyUserId: actor.id,
-        relatedPersonId: parentesco.id,
+        relatedPersonId: kinship.id,
         // Las dos filas que el modelo exige y la plataforma siembra: sin ellas
         // estas dos FK NOT NULL no tendrían a qué apuntar.
         scopeValueSetId: SEED.patientPortalProxyScopeValueSetId,
@@ -1081,24 +1081,24 @@ export class ProfilesPatientsService {
       this.logger.info(
         {
           operation: 'profiles.dependent.create',
-          patientProfileId: paciente.profileId,
+          patientProfileId: patient.profileId,
         },
         'Dependent registered',
       );
 
-      const relacion = describeDependentRelationship(dto.relationshipConceptId);
+      const relation = describeDependentRelationship(dto.relationshipConceptId);
       return {
-        id: apoderamiento.id,
-        patientProfileId: paciente.profileId,
-        personId: dependiente.id,
-        fullName: dependiente.displayName ?? `${dto.name} ${dto.lastName}`,
+        id: powerOfAttorney.id,
+        patientProfileId: patient.profileId,
+        personId: dependent.id,
+        fullName: dependent.displayName ?? `${dto.name} ${dto.lastName}`,
         name: dto.name,
         lastName: dto.lastName,
         birthDate: dto.birthDate,
-        ageYears: edadEnAnios(dto.birthDate),
+        ageYears: ageInYears(dto.birthDate),
         ...(dto.nationalId === undefined ? {} : { nationalId: dto.nationalId }),
-        relationshipCode: relacion.code,
-        relationshipDisplay: relacion.display,
+        relationshipCode: relation.code,
+        relationshipDisplay: relation.display,
         isLegalGuardian: true,
       };
     });
@@ -1111,41 +1111,41 @@ export class ProfilesPatientsService {
    * mapeo del ORM—, y el contrato de cara al cliente omite lo que no hay en vez
    * de mandarlo vacío, como el resto de las lecturas propias.
    *
-   * @param fila - Lo que devolvió la consulta.
+   * @param row - Lo que devolvió la consulta.
    * @returns El dependiente tal como lo ve quien lo representa.
    */
-  private aDependentSummary(fila: DependentRow): DependentSummaryDto {
-    const relacion = describeDependentRelationship(
-      fila.relationship_concept_id ?? '',
+  private toDependentSummary(row: DependentRow): DependentSummaryDto {
+    const relation = describeDependentRelationship(
+      row.relationship_concept_id ?? '',
     );
-    const edad = edadEnAnios(fila.birth_date);
+    const age = ageInYears(row.birth_date);
     return {
-      id: fila.proxy_id,
-      patientProfileId: fila.patient_profile_id,
-      personId: fila.person_id,
+      id: row.proxy_id,
+      patientProfileId: row.patient_profile_id,
+      personId: row.person_id,
       // El nombre compuesto es derivado y la base lo tiene; si una fila vieja no
       // lo tuviera, se recompone antes que mostrar una tarjeta sin nombre.
       fullName:
-        fila.display_name ??
+        row.display_name ??
         composePersonDisplayName({
-          name: fila.name ?? undefined,
-          middleName: fila.middle_name ?? undefined,
-          lastName: fila.last_name ?? undefined,
-          motherLastName: fila.mother_last_name ?? undefined,
+          name: row.name ?? undefined,
+          middleName: row.middle_name ?? undefined,
+          lastName: row.last_name ?? undefined,
+          motherLastName: row.mother_last_name ?? undefined,
         }) ??
         '',
-      ...(fila.name === null ? {} : { name: fila.name }),
-      ...(fila.last_name === null ? {} : { lastName: fila.last_name }),
-      ...(fila.birth_date === null ? {} : { birthDate: fila.birth_date }),
-      ...(edad === undefined ? {} : { ageYears: edad }),
-      ...(fila.national_id === null ? {} : { nationalId: fila.national_id }),
-      relationshipCode: relacion.code,
-      relationshipDisplay: relacion.display,
-      isLegalGuardian: fila.is_legal_guardian ?? false,
+      ...(row.name === null ? {} : { name: row.name }),
+      ...(row.last_name === null ? {} : { lastName: row.last_name }),
+      ...(row.birth_date === null ? {} : { birthDate: row.birth_date }),
+      ...(age === undefined ? {} : { ageYears: age }),
+      ...(row.national_id === null ? {} : { nationalId: row.national_id }),
+      relationshipCode: relation.code,
+      relationshipDisplay: relation.display,
+      isLegalGuardian: row.is_legal_guardian ?? false,
     };
   }
 
-  private async leerIdentificadores(
+  private async readIdentifiers(
     em: EntityManager,
     personId: string,
   ): Promise<{
@@ -1154,14 +1154,14 @@ export class ProfilesPatientsService {
     taxId?: string;
     taxHolderName?: string;
   }> {
-    const filas = await em.find(Identifiers, {
+    const rows = await em.find(Identifiers, {
       ownerId: personId,
       validTo: null,
     });
-    const documento = filas.find(
+    const documento = rows.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
-    const fiscal = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    const fiscal = rows.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
     return {
       nationalId: documento?.value,
       issuerArea: documento?.issuerAdministrativeAreaConceptId,
@@ -1189,18 +1189,18 @@ export class ProfilesPatientsService {
    * subtarea B.3), y duplicarla en dos módulos es la clase de regla que
    * diverge el día que sólo se corrige en un lado.
    */
-  private async leerCoberturas(
+  private async readCoverages(
     em: EntityManager,
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
     return this.declaredCoverages.read(em, patientProfileId);
   }
   /** Tutores y personas autorizadas, con su nombre y su teléfono. */
-  private async leerTutores(
+  private async readGuardians(
     em: EntityManager,
     patientProfileId: string,
   ): Promise<OwnGuardianDto[]> {
-    const filas = await em.getConnection().execute<
+    const rows = await em.getConnection().execute<
       {
         display_name: string | null;
         relationship_concept_id: string | null;
@@ -1223,7 +1223,7 @@ export class ProfilesPatientsService {
         where r.patient_profile_id = ?`,
       [CONCEPTS.CONTACT_PHONE, patientProfileId],
     );
-    return filas.map((f) => ({
+    return rows.map((f) => ({
       ...(f.display_name === null ? {} : { displayName: f.display_name }),
       ...(f.relationship_concept_id === null
         ? {}
@@ -1296,10 +1296,10 @@ export class ProfilesPatientsService {
    *
    * @param person - La persona con las partes ya actualizadas.
    */
-  private recomponerDisplayName(person: Persons): void {
-    const recompuesto = composePersonDisplayName(person);
-    if (recompuesto !== undefined) {
-      person.displayName = recompuesto;
+  private rebuildDisplayName(person: Persons): void {
+    const rebuilt = composePersonDisplayName(person);
+    if (rebuilt !== undefined) {
+      person.displayName = rebuilt;
     }
   }
 
@@ -1316,34 +1316,34 @@ export class ProfilesPatientsService {
    *
    * @param tx - Transacción de la edición.
    * @param personId - Dueño del punto de contacto.
-   * @param telefono - El número nuevo, o en blanco para quedarse sin teléfono.
+   * @param phone - El número nuevo, o en blanco para quedarse sin teléfono.
    * @param actorUserId - Quién edita.
    * @param ahora - Instante de la edición, fin de vigencia del anterior.
    */
-  private async reemplazarTelefono(
+  private async replacePhone(
     tx: EntityManager,
     personId: string,
-    telefono: string,
+    phone: string,
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const nuevo = textoOpcional(telefono);
-    const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+    const fresh = optionalText(phone);
+    const current = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
       tx,
       personId,
       CONCEPTS.CONTACT_PHONE,
     );
 
-    if (nuevo === undefined) {
-      if (vigente) {
-        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    if (fresh === undefined) {
+      if (current) {
+        this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
       }
       return;
     }
-    if (vigente?.value === nuevo) return;
+    if (current?.value === fresh) return;
 
-    if (vigente) {
-      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    if (current) {
+      this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
     }
     // Mismo dueño, mismo sistema y mismo uso que escribe el alta: el número
     // cambió, no la clase de contacto que es.
@@ -1351,7 +1351,7 @@ export class ProfilesPatientsService {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       ownerId: personId,
       systemConceptId: CONCEPTS.CONTACT_PHONE,
-      value: nuevo,
+      value: fresh,
       useConceptId: CONCEPTS.CONTACT_USE_HOME,
       actorUserId,
     });
@@ -1407,8 +1407,8 @@ export class ProfilesPatientsService {
    *
    * @param tx - Transacción activa.
    * @param personId - Persona dueña de la dirección.
-   * @param usoConceptId - `ADDR_USE_HOME` o `ADDR_USE_WORK`.
-   * @param cambios - Lo que el cuerpo trae de esta dirección. `undefined` en
+   * @param usageConceptId - `ADDR_USE_HOME` o `ADDR_USE_WORK`.
+   * @param changes - Lo que el cuerpo trae de esta dirección. `undefined` en
    *   cualquiera de los tres es «no vino en este cuerpo», no «se borra»: acá se
    *   completa con lo que ya estaba vigente. Sólo `lines` tiene una forma
    *   explícita de vaciarse —cadena vacía—, porque es el único cuya ausencia
@@ -1417,11 +1417,11 @@ export class ProfilesPatientsService {
    * @param actorUserId - Quién edita.
    * @param ahora - Instante de la edición, fin de vigencia de la anterior.
    */
-  private async reemplazarDireccion(
+  private async replaceAddress(
     tx: EntityManager,
     personId: string,
-    usoConceptId: string,
-    cambios: {
+    usageConceptId: string,
+    changes: {
       municipio?: string;
       lines?: string;
       /**
@@ -1438,56 +1438,56 @@ export class ProfilesPatientsService {
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const vigente = await this.addressesRepo.findVigenteByOwnerAndUse(
+    const current = await this.addressesRepo.findVigenteByOwnerAndUse(
       tx,
       personId,
-      usoConceptId,
+      usageConceptId,
     );
 
-    const municipio = cambios.municipio ?? vigente?.municipalityConceptId;
+    const municipality = changes.municipio ?? current?.municipalityConceptId;
     const lines =
-      cambios.lines === undefined
-        ? vigente?.lines
-        : cambios.lines.trim() === ''
+      changes.lines === undefined
+        ? current?.lines
+        : changes.lines.trim() === ''
           ? undefined
-          : cambios.lines.trim();
+          : changes.lines.trim();
     // Quitar el punto: los dos extremos en `null`. `undefined` a undefined
     // porque la columna es nullable y es lo que la escritura espera para
     // «sin dato»; el DTO ya rechazó los `null` a medias.
-    const quitaGps = cambios.latitude === null && cambios.longitude === null;
-    const tieneGps =
-      !quitaGps &&
-      cambios.latitude !== undefined &&
-      cambios.longitude !== undefined;
-    const latitude = quitaGps
+    const removesGps = changes.latitude === null && changes.longitude === null;
+    const hasGps =
+      !removesGps &&
+      changes.latitude !== undefined &&
+      changes.longitude !== undefined;
+    const latitude = removesGps
       ? undefined
-      : tieneGps
-        ? (cambios.latitude ?? undefined)
-        : numeroDeColumna(vigente?.latitude);
-    const longitude = quitaGps
+      : hasGps
+        ? (changes.latitude ?? undefined)
+        : numeroColumn(current?.latitude);
+    const longitude = removesGps
       ? undefined
-      : tieneGps
-        ? (cambios.longitude ?? undefined)
-        : numeroDeColumna(vigente?.longitude);
+      : hasGps
+        ? (changes.longitude ?? undefined)
+        : numeroColumn(current?.longitude);
 
-    const sinCambios =
-      (vigente?.municipalityConceptId ?? undefined) === municipio &&
-      (vigente?.lines ?? undefined) === lines &&
-      numeroDeColumna(vigente?.latitude) === latitude &&
-      numeroDeColumna(vigente?.longitude) === longitude;
-    if (sinCambios) return;
+    const withoutChanges =
+      (current?.municipalityConceptId ?? undefined) === municipality &&
+      (current?.lines ?? undefined) === lines &&
+      numeroColumn(current?.latitude) === latitude &&
+      numeroColumn(current?.longitude) === longitude;
+    if (withoutChanges) return;
 
-    if (vigente) {
-      this.addressesRepo.closeVigente(vigente, ahora, actorUserId);
+    if (current) {
+      this.addressesRepo.closeVigente(current, ahora, actorUserId);
     }
 
-    const escribir =
-      usoConceptId === CONCEPTS.ADDR_USE_WORK
+    const write =
+      usageConceptId === CONCEPTS.ADDR_USE_WORK
         ? createWorkAddress
         : createResidenceAddress;
-    await escribir(this.addressesRepo, tx, this.catalogConceptsRepo, {
+    await write(this.addressesRepo, tx, this.catalogConceptsRepo, {
       personId,
-      municipalityConceptId: municipio,
+      municipalityConceptId: municipality,
       lines,
       latitude,
       longitude,
@@ -1502,7 +1502,7 @@ export class ProfilesPatientsService {
    * tabla lleva `valid_to`, y una factura emitida con el NIT anterior tiene que
    * seguir explicándose. Cadena vacía cierra sin abrir: es quedarse sin NIT.
    */
-  private async reemplazarNit(
+  private async replaceNit(
     tx: EntityManager,
     personId: string,
     nit: string | undefined,
@@ -1510,22 +1510,22 @@ export class ProfilesPatientsService {
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const filas = await tx.find(Identifiers, {
+    const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
     });
-    const vigente = filas.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    const current = rows.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
     // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
     // social no puede borrar el NIT, ni al revés.
-    const numero = (nit ?? vigente?.value ?? '').trim();
-    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
-    if (vigente?.value === numero && (vigente?.holderName ?? '') === titular) {
+    const numero = (nit ?? current?.value ?? '').trim();
+    const titular = (razonSocial ?? current?.holderName ?? '').trim();
+    if (current?.value === numero && (current?.holderName ?? '') === titular) {
       return;
     }
 
-    if (vigente) {
-      vigente.validTo = ahora;
-      touch(vigente, actorUserId);
+    if (current) {
+      current.validTo = ahora;
+      touch(current, actorUserId);
     }
     // Sin número no hay identificador que abrir: una razón social sola no es un
     // NIT, y guardarla suelta dejaría una fila fiscal sin valor.
@@ -1560,17 +1560,17 @@ export class ProfilesPatientsService {
    * @param issuerAdministrativeAreaConceptId - El departamento nuevo.
    * @param actorUserId - Quién edita.
    */
-  private async reemplazarExpedicion(
+  private async replaceIssuance(
     tx: EntityManager,
     personId: string,
     issuerAdministrativeAreaConceptId: string,
     actorUserId: string,
   ): Promise<void> {
-    const filas = await tx.find(Identifiers, {
+    const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
     });
-    const documento = filas.find(
+    const documento = rows.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
     if (!documento) return;
@@ -1610,18 +1610,18 @@ export class ProfilesPatientsService {
    * @param dto - Los campos del tutor que llegaron en el cuerpo.
    * @param actorUserId - Quién edita.
    */
-  private async reemplazarTutor(
+  private async replaceTutor(
     tx: EntityManager,
     patientProfileId: string,
     dto: UpdateOwnPatientProfileDto,
     actorUserId: string,
   ): Promise<void> {
-    const declarado = await this.relatedPersonsRepo.findActiveDeclaredGuardian(
+    const declared = await this.relatedPersonsRepo.findActiveDeclaredGuardian(
       tx,
       patientProfileId,
     );
 
-    if (!declarado) {
+    if (!declared) {
       // Nadie declarado todavía: se crea con el mismo helper del alta.
       await createGuardianRelatedPerson(
         {
@@ -1642,12 +1642,12 @@ export class ProfilesPatientsService {
     }
 
     if (dto.guardianRelationshipConceptId !== undefined) {
-      declarado.relationshipConceptId = dto.guardianRelationshipConceptId;
-      touch(declarado, actorUserId);
+      declared.relationshipConceptId = dto.guardianRelationshipConceptId;
+      touch(declared, actorUserId);
     }
 
     if (dto.guardianName) {
-      const persona = await this.personsRepo.findById(tx, declarado.personId);
+      const persona = await this.personsRepo.findById(tx, declared.personId);
       if (persona) {
         persona.displayName = dto.guardianName;
         touch(persona, actorUserId);
@@ -1655,18 +1655,18 @@ export class ProfilesPatientsService {
     }
 
     if (dto.guardianPhone) {
-      const vigente = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      const current = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
         tx,
-        declarado.personId,
+        declared.personId,
         CONCEPTS.CONTACT_PHONE,
       );
-      if (vigente?.value !== dto.guardianPhone) {
-        if (vigente) {
-          this.contactPointsRepo.closeVigente(vigente, new Date(), actorUserId);
+      if (current?.value !== dto.guardianPhone) {
+        if (current) {
+          this.contactPointsRepo.closeVigente(current, new Date(), actorUserId);
         }
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
-          ownerId: declarado.personId,
+          ownerId: declared.personId,
           systemConceptId: CONCEPTS.CONTACT_PHONE,
           value: dto.guardianPhone,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
@@ -1696,7 +1696,7 @@ export class ProfilesPatientsService {
    * @param coverageOrder - 1 para la privada, 2 para la pública.
    * @param actorUserId - Quién declara.
    */
-  private async declararCobertura(
+  private async declareCoverage(
     tx: EntityManager,
     patientProfileId: string,
     personId: string,
@@ -1705,14 +1705,14 @@ export class ProfilesPatientsService {
     coverageOrder: number,
     actorUserId: string,
   ): Promise<void> {
-    const yaDeclarada = await this.coverageRepo.findActiveByPatientAndOrder(
+    const alreadyDeclared = await this.coverageRepo.findActiveByPatientAndOrder(
       tx,
       patientProfileId,
       coverageOrder,
     );
-    if (yaDeclarada) return;
+    if (alreadyDeclared) return;
 
-    const { nationalId } = await this.leerIdentificadores(tx, personId);
+    const { nationalId } = await this.readIdentifiers(tx, personId);
     // No debería pasar —el alta exige documento—, pero sin él no hay número de
     // afiliado provisional que anotar, y declarar sin identificador dejaría
     // una fila que nadie puede buscar después.
@@ -1773,7 +1773,7 @@ export class ProfilesPatientsService {
     // enumeración, no búsqueda. `SECURITY_ADMIN`/`SUPERADMIN` administran el
     // padrón y siguen listando sin criterio, como siempre.
     if (
-      requiereCriterioDeBusqueda(actor) &&
+      searchRequiresCriterion(actor) &&
       !options.query &&
       !options.nationalId
     ) {

@@ -45,12 +45,12 @@ export class ContentPacksController {
   @ApiOperation({ summary: 'Paquetes de contenido disponibles' })
   listar(): ListContentPacksResponseDto {
     return {
-      items: CONTENT_PACKS.map((paquete) => ({
-        code: paquete.code,
-        name: paquete.name,
-        description: paquete.description,
-        approxRows: paquete.approxRows,
-        requiresDemoPassword: paquete.requiresDemoPassword === true,
+      items: CONTENT_PACKS.map((pkg) => ({
+        code: pkg.code,
+        name: pkg.name,
+        description: pkg.description,
+        approxRows: pkg.approxRows,
+        requiresDemoPassword: pkg.requiresDemoPassword === true,
       })),
     };
   }
@@ -74,6 +74,6 @@ export class ContentPacksController {
     @Param('code') code: string,
     @Body() dto: ApplyContentPackDto,
   ): Promise<ApplyContentPackResponseDto> {
-    return this.packs.aplicar(code, dto.demoPassword);
+    return this.packs.apply(code, dto.demoPassword);
   }
 }

@@ -29,7 +29,7 @@ import type {
 } from '../dto';
 
 /** Milisegundos de un día, para las cuentas de vencimiento y calibración. */
-const UN_DIA_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * La consola de administración del laboratorio médico (CARRIL 16).
@@ -88,9 +88,9 @@ export class DiagnosticUnitsAdminReadService {
       sites.map((site) => site.id),
     );
 
-    const conceptos = await this.readRepo.findConcepts(
+    const concepts = await this.readRepo.findConcepts(
       em,
-      unicos(
+      unique(
         units.flatMap((unit) => [
           unit.diagnosticUnitTypeConceptId,
           unit.statusConceptId,
@@ -98,27 +98,27 @@ export class DiagnosticUnitsAdminReadService {
         ]),
       ),
     );
-    const porId = new Map(conceptos.map((concepto) => [concepto.id, concepto]));
+    const byId = new Map(concepts.map((concept) => [concept.id, concept]));
 
-    const unidadPorSede = new Map(
+    const unitBySite = new Map(
       sites.map((site) => [site.id, site.diagnosticUnitId]),
     );
-    const sedesPorUnidad = contarPor(sites, (site) => site.diagnosticUnitId);
-    const estudiosPorUnidad = contarPor(
+    const sitesByUnit = countBy(sites, (site) => site.diagnosticUnitId);
+    const studiesByUnit = countBy(
       offerings,
       (offering) => offering.diagnosticUnitId,
     );
-    const equiposPorUnidad = contarPor(equipment, (item) =>
-      unidadPorSede.get(item.diagnosticUnitSiteId),
+    const teamsByUnit = countBy(equipment, (item) =>
+      unitBySite.get(item.diagnosticUnitSiteId),
     );
 
     const items = units.map((unit) =>
-      this.resumen(
+      this.summary(
         unit,
-        porId,
-        sedesPorUnidad.get(unit.id) ?? 0,
-        estudiosPorUnidad.get(unit.id) ?? 0,
-        equiposPorUnidad.get(unit.id) ?? 0,
+        byId,
+        sitesByUnit.get(unit.id) ?? 0,
+        studiesByUnit.get(unit.id) ?? 0,
+        teamsByUnit.get(unit.id) ?? 0,
       ),
     );
     return { items, count: items.length };
@@ -162,11 +162,11 @@ export class DiagnosticUnitsAdminReadService {
         ),
         this.readRepo.findPracticeSites(
           em,
-          unicos(sites.map((site) => site.practiceSiteId)),
+          unique(sites.map((site) => site.practiceSiteId)),
         ),
         this.readRepo.findRoleAssignments(
           em,
-          unicos(
+          unique(
             assignments.map(
               (assignment) => assignment.practitionerRoleAssignmentId,
             ),
@@ -174,17 +174,17 @@ export class DiagnosticUnitsAdminReadService {
         ),
       ]);
 
-    const perfilPorAsignacionDeRol = new Map(
+    const profileByRoleAssignment = new Map(
       roleAssignments.map((row) => [row.id, row.practitionerProfileId]),
     );
-    const nombres = await this.readRepo.findPractitionerNames(
+    const names = await this.readRepo.findPractitionerNames(
       em,
-      unicos([...perfilPorAsignacionDeRol.values()]),
+      unique([...profileByRoleAssignment.values()]),
     );
 
-    const conceptos = await this.readRepo.findConcepts(
+    const concepts = await this.readRepo.findConcepts(
       em,
-      conceptIdsDe({
+      conceptIds({
         unit,
         sites,
         equipment,
@@ -196,48 +196,48 @@ export class DiagnosticUnitsAdminReadService {
         roleAssignments: roleAssignments.map((row) => row.specialtyConceptId),
       }),
     );
-    const porId = new Map(conceptos.map((concepto) => [concepto.id, concepto]));
-    const sedePorId = new Map(practiceSites.map((site) => [site.id, site]));
-    const cronogramaPorId = new Map(
+    const byId = new Map(concepts.map((concept) => [concept.id, concept]));
+    const siteById = new Map(practiceSites.map((site) => [site.id, site]));
+    const scheduleById = new Map(
       schedules.map((schedule) => [schedule.id, schedule]),
     );
-    const preciosPorEstudio = this.preciosPorEstudio(
+    const pricesByStudy = this.pricesByStudy(
       prices,
-      cronogramaPorId,
-      porId,
+      scheduleById,
+      byId,
     );
     const ahora = new Date();
 
     return {
-      ...this.resumen(
+      ...this.summary(
         unit,
-        porId,
+        byId,
         sites.length,
         offerings.length,
         equipment.length,
       ),
-      sites: sites.map((site) => this.sede(site, sedePorId, porId)),
-      equipment: equipment.map((item) => this.equipo(item, porId, ahora)),
+      sites: sites.map((site) => this.site(site, siteById, byId)),
+      equipment: equipment.map((item) => this.team(item, byId, ahora)),
       studies: offerings.map((offering) =>
-        this.estudio(offering, porId, preciosPorEstudio.get(offering.id) ?? []),
+        this.study(offering, byId, pricesByStudy.get(offering.id) ?? []),
       ),
       accreditations: accreditations.map((doc) =>
-        this.acreditacion(doc, porId, ahora),
+        this.accreditation(doc, byId, ahora),
       ),
       staff: assignments.map((assignment) =>
-        this.integrante(
+        this.member(
           assignment,
-          porId,
-          perfilPorAsignacionDeRol.get(assignment.practitionerRoleAssignmentId),
-          nombres,
+          byId,
+          profileByRoleAssignment.get(assignment.practitionerRoleAssignmentId),
+          names,
         ),
       ),
     };
   }
 
-  private resumen(
+  private summary(
     unit: DiagnosticUnits,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     siteCount: number,
     studyCount: number,
     equipmentCount: number,
@@ -246,9 +246,9 @@ export class DiagnosticUnitsAdminReadService {
       id: unit.id,
       code: unit.code,
       name: unit.name,
-      type: concepto(conceptos, unit.diagnosticUnitTypeConceptId),
-      status: concepto(conceptos, unit.statusConceptId),
-      verificationStatus: concepto(conceptos, unit.verificationStatusConceptId),
+      type: concept(concepts, unit.diagnosticUnitTypeConceptId),
+      status: concept(concepts, unit.statusConceptId),
+      verificationStatus: concept(concepts, unit.verificationStatusConceptId),
       // La misma regla que `findVisibleByTenant`: activa y verificada. Se
       // informa en vez de filtrar, para que la consola pueda decir por qué una
       // unidad todavía no se ve.
@@ -264,10 +264,10 @@ export class DiagnosticUnitsAdminReadService {
     };
   }
 
-  private sede(
+  private site(
     site: DiagnosticUnitSites,
     practiceSites: ReadonlyMap<string, PracticeSites>,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): DiagnosticUnitAdminSiteDto {
     const legible = practiceSites.get(site.practiceSiteId);
     return {
@@ -275,37 +275,37 @@ export class DiagnosticUnitsAdminReadService {
       practiceSiteId: site.practiceSiteId,
       code: legible?.code ?? site.accessionPrefix ?? 'SEDE',
       name: legible?.name ?? 'Sede sin nombre registrado',
-      role: concepto(conceptos, site.siteRoleConceptId),
+      role: concept(concepts, site.siteRoleConceptId),
       accessionPrefix: site.accessionPrefix ?? null,
       sampleCollectionAvailable: site.sampleCollectionAvailable ?? null,
       imagingAvailable: site.imagingAvailable ?? null,
-      status: concepto(conceptos, site.statusConceptId),
+      status: concept(concepts, site.statusConceptId),
     };
   }
 
-  private equipo(
+  private team(
     item: DiagnosticEquipment,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     ahora: Date,
   ): DiagnosticUnitAdminEquipmentDto {
     return {
       id: item.id,
       siteId: item.diagnosticUnitSiteId,
-      type: concepto(conceptos, item.equipmentTypeConceptId),
+      type: concept(concepts, item.equipmentTypeConceptId),
       manufacturer: item.manufacturer ?? null,
       model: item.model ?? null,
       serialNumber: item.serialNumber ?? null,
-      modality: conceptoOpcional(conceptos, item.modalityConceptId),
-      operationalStatus: concepto(conceptos, item.operationalStatusConceptId),
+      modality: optionalConcept(concepts, item.modalityConceptId),
+      operationalStatus: concept(concepts, item.operationalStatusConceptId),
       lastCalibrationAt: item.lastCalibrationAt?.toISOString() ?? null,
       nextCalibrationDueAt: item.nextCalibrationDueAt?.toISOString() ?? null,
-      daysToCalibration: diasHasta(item.nextCalibrationDueAt, ahora),
+      daysToCalibration: daysUntil(item.nextCalibrationDueAt, ahora),
     };
   }
 
-  private estudio(
+  private study(
     offering: DiagnosticStudyOfferings,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     prices: DiagnosticUnitAdminPriceDto[],
   ): DiagnosticUnitAdminStudyDto {
     return {
@@ -314,42 +314,42 @@ export class DiagnosticUnitsAdminReadService {
       name: offering.displayName,
       description: offering.description ?? null,
       siteId: offering.diagnosticUnitSiteId ?? null,
-      modality: conceptoOpcional(conceptos, offering.modalityConceptId),
-      specimenType: conceptoOpcional(conceptos, offering.specimenTypeConceptId),
+      modality: optionalConcept(concepts, offering.modalityConceptId),
+      specimenType: optionalConcept(concepts, offering.specimenTypeConceptId),
       preparationInstructions: offering.preparationInstructions ?? null,
       expectedDurationMinutes: offering.expectedDurationMinutes ?? null,
       expectedTurnaroundMinutes: offering.expectedTurnaroundMinutes ?? null,
       requiresMedicalOrder: offering.requiresMedicalOrder ?? null,
       requiresPriorAuthorization: offering.requiresPriorAuthorization ?? null,
       homeCollectionEligible: offering.homeCollectionEligible ?? null,
-      status: concepto(conceptos, offering.statusConceptId),
+      status: concept(concepts, offering.statusConceptId),
       prices,
     };
   }
 
-  private acreditacion(
+  private accreditation(
     doc: DiagnosticUnitAccreditations,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     ahora: Date,
   ): DiagnosticUnitAdminAccreditationDto {
     return {
       id: doc.id,
       siteId: doc.diagnosticUnitSiteId ?? null,
-      type: concepto(conceptos, doc.accreditationConceptId),
+      type: concept(concepts, doc.accreditationConceptId),
       number: doc.accreditationNumber ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloFecha(doc.validFrom),
-      validTo: soloFecha(doc.validTo),
-      daysToExpiry: diasHasta(doc.validTo, ahora),
-      verificationStatus: concepto(conceptos, doc.verificationStatusConceptId),
+      validFrom: soloDate(doc.validFrom),
+      validTo: soloDate(doc.validTo),
+      daysToExpiry: daysUntil(doc.validTo, ahora),
+      verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
   }
 
-  private integrante(
+  private member(
     assignment: DiagnosticUnitPractitionerAssignments,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     practitionerProfileId: string | undefined,
-    nombres: ReadonlyMap<string, string>,
+    names: ReadonlyMap<string, string>,
   ): DiagnosticUnitAdminStaffDto {
     return {
       id: assignment.id,
@@ -358,18 +358,18 @@ export class DiagnosticUnitsAdminReadService {
       practitionerName:
         practitionerProfileId === undefined
           ? null
-          : (nombres.get(practitionerProfileId) ?? null),
+          : (names.get(practitionerProfileId) ?? null),
       siteId: assignment.diagnosticUnitSiteId ?? null,
-      assignmentRole: conceptoOpcional(
-        conceptos,
+      assignmentRole: optionalConcept(
+        concepts,
         assignment.assignmentRoleConceptId,
       ),
-      specialty: conceptoOpcional(conceptos, assignment.specialtyConceptId),
+      specialty: optionalConcept(concepts, assignment.specialtyConceptId),
       mayValidateResults: assignment.mayValidateResults ?? null,
       maySignReports: assignment.maySignReports ?? null,
-      validFrom: soloFecha(assignment.validFrom),
-      validTo: soloFecha(assignment.validTo),
-      status: concepto(conceptos, assignment.statusConceptId),
+      validFrom: soloDate(assignment.validFrom),
+      validTo: soloDate(assignment.validTo),
+      status: concept(concepts, assignment.statusConceptId),
     };
   }
 
@@ -380,17 +380,17 @@ export class DiagnosticUnitsAdminReadService {
    * un importe no significa nada: son varios cronogramas por unidad y el mismo
    * estudio tiene precio distinto en cada uno.
    */
-  private preciosPorEstudio(
+  private pricesByStudy(
     prices: readonly DiagnosticStudyPrices[],
     schedules: ReadonlyMap<string, DiagnosticPriceSchedules>,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): Map<string, DiagnosticUnitAdminPriceDto[]> {
-    const resultado = new Map<string, DiagnosticUnitAdminPriceDto[]>();
+    const result = new Map<string, DiagnosticUnitAdminPriceDto[]>();
     for (const price of prices) {
       const schedule = schedules.get(price.priceScheduleId);
       if (!schedule) continue;
-      const actuales = resultado.get(price.diagnosticStudyOfferingId) ?? [];
-      actuales.push({
+      const current = result.get(price.diagnosticStudyOfferingId) ?? [];
+      current.push({
         id: price.id,
         scheduleId: schedule.id,
         scheduleCode: schedule.code,
@@ -399,14 +399,14 @@ export class DiagnosticUnitsAdminReadService {
         baseAmount: price.baseAmount,
         patientAmount: price.patientAmount ?? null,
         insurerAmount: price.insurerAmount ?? null,
-        currency: conceptoOpcional(conceptos, schedule.currencyConceptId),
+        currency: optionalConcept(concepts, schedule.currencyConceptId),
         effectiveFrom: price.effectiveFrom.toISOString(),
         effectiveTo: price.effectiveTo?.toISOString() ?? null,
-        status: concepto(conceptos, price.statusConceptId),
+        status: concept(concepts, price.statusConceptId),
       });
-      resultado.set(price.diagnosticStudyOfferingId, actuales);
+      result.set(price.diagnosticStudyOfferingId, current);
     }
-    return resultado;
+    return result;
   }
 }
 
@@ -416,24 +416,24 @@ export class DiagnosticUnitsAdminReadService {
  * Mismo criterio que el directorio público del módulo: nunca el uuid crudo y
  * nunca esconder la fila.
  */
-function concepto(
-  conceptos: ReadonlyMap<string, CatalogConcepts>,
+function concept(
+  concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): DiagnosticConceptDto {
-  const valor = id === undefined ? undefined : conceptos.get(id);
+  const valor = id === undefined ? undefined : concepts.get(id);
   return valor
     ? { code: valor.code, display: valor.display }
     : { code: 'UNKNOWN', display: 'Sin registrar' };
 }
 
-function conceptoOpcional(
-  conceptos: ReadonlyMap<string, CatalogConcepts>,
+function optionalConcept(
+  concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): DiagnosticConceptDto | null {
-  return id === undefined ? null : concepto(conceptos, id);
+  return id === undefined ? null : concept(concepts, id);
 }
 
-function soloFecha(valor: Date | undefined): string | null {
+function soloDate(valor: Date | undefined): string | null {
   return valor?.toISOString().slice(0, 10) ?? null;
 }
 
@@ -444,43 +444,43 @@ function soloFecha(valor: Date | undefined): string | null {
  * `0` y no `-1` por unas horas: quien lee la alerta piensa en días, no en
  * milisegundos.
  */
-function diasHasta(valor: Date | undefined, ahora: Date): number | null {
+function daysUntil(valor: Date | undefined, ahora: Date): number | null {
   if (valor === undefined) return null;
-  const objetivo = Date.UTC(
+  const target = Date.UTC(
     valor.getUTCFullYear(),
     valor.getUTCMonth(),
     valor.getUTCDate(),
   );
-  const referencia = Date.UTC(
+  const reference = Date.UTC(
     ahora.getUTCFullYear(),
     ahora.getUTCMonth(),
     ahora.getUTCDate(),
   );
-  return Math.round((objetivo - referencia) / UN_DIA_MS);
+  return Math.round((target - reference) / ONE_DAY_MS);
 }
 
-function unicos(valores: readonly (string | undefined)[]): string[] {
+function unique(values: readonly (string | undefined)[]): string[] {
   return [
-    ...new Set(valores.filter((valor): valor is string => valor !== undefined)),
+    ...new Set(values.filter((valor): valor is string => valor !== undefined)),
   ];
 }
 
-function contarPor<T>(
-  filas: readonly T[],
-  claveDe: (fila: T) => string | undefined,
+function countBy<T>(
+  rows: readonly T[],
+  keyOf: (fila: T) => string | undefined,
 ): Map<string, number> {
-  const resultado = new Map<string, number>();
-  for (const fila of filas) {
-    const clave = claveDe(fila);
+  const result = new Map<string, number>();
+  for (const row of rows) {
+    const clave = keyOf(row);
     if (clave !== undefined) {
-      resultado.set(clave, (resultado.get(clave) ?? 0) + 1);
+      result.set(clave, (result.get(clave) ?? 0) + 1);
     }
   }
-  return resultado;
+  return result;
 }
 
 /** Todos los `*_concept_id` de la ficha, sin repetir, para una única lectura. */
-function conceptIdsDe(fuentes: {
+function conceptIds(sources: {
   readonly unit: DiagnosticUnits;
   readonly sites: readonly DiagnosticUnitSites[];
   readonly equipment: readonly DiagnosticEquipment[];
@@ -491,38 +491,38 @@ function conceptIdsDe(fuentes: {
   readonly assignments: readonly DiagnosticUnitPractitionerAssignments[];
   readonly roleAssignments: readonly (string | undefined)[];
 }): string[] {
-  return unicos([
-    fuentes.unit.diagnosticUnitTypeConceptId,
-    fuentes.unit.statusConceptId,
-    fuentes.unit.verificationStatusConceptId,
-    ...fuentes.sites.flatMap((site) => [
+  return unique([
+    sources.unit.diagnosticUnitTypeConceptId,
+    sources.unit.statusConceptId,
+    sources.unit.verificationStatusConceptId,
+    ...sources.sites.flatMap((site) => [
       site.siteRoleConceptId,
       site.statusConceptId,
     ]),
-    ...fuentes.equipment.flatMap((item) => [
+    ...sources.equipment.flatMap((item) => [
       item.equipmentTypeConceptId,
       item.operationalStatusConceptId,
       item.modalityConceptId,
     ]),
-    ...fuentes.offerings.flatMap((item) => [
+    ...sources.offerings.flatMap((item) => [
       item.modalityConceptId,
       item.specimenTypeConceptId,
       item.statusConceptId,
     ]),
-    ...fuentes.schedules.flatMap((item) => [
+    ...sources.schedules.flatMap((item) => [
       item.currencyConceptId,
       item.statusConceptId,
     ]),
-    ...fuentes.prices.map((item) => item.statusConceptId),
-    ...fuentes.accreditations.flatMap((item) => [
+    ...sources.prices.map((item) => item.statusConceptId),
+    ...sources.accreditations.flatMap((item) => [
       item.accreditationConceptId,
       item.verificationStatusConceptId,
     ]),
-    ...fuentes.assignments.flatMap((item) => [
+    ...sources.assignments.flatMap((item) => [
       item.assignmentRoleConceptId,
       item.specialtyConceptId,
       item.statusConceptId,
     ]),
-    ...fuentes.roleAssignments,
+    ...sources.roleAssignments,
   ]);
 }

@@ -94,7 +94,7 @@ export const ESTADO_DEL_VINCULO = {
  * el patch v4.1.9 corra en todas las bases, los viejos desaparecen solos y este
  * mapa se poda sin tocar nada más; hasta entonces, borrarlo rompe datos reales.
  */
-const IDS_ACEPTADOS: Readonly<Record<string, readonly string[]>> = {
+const IDS_ACCEPTED: Readonly<Record<string, readonly string[]>> = {
   PENDIENTE: [PROF.AFFILIATION_PENDING, CONCEPTS.STATE_PENDING],
   DECLARADO: [PROF.AFFILIATION_DECLARED],
   APROBADO: [PROF.AFFILIATION_APPROVED, PROF.AFFILIATION_ACTIVE],
@@ -116,11 +116,11 @@ export function esEstado(
   conceptId: string,
   estado: keyof typeof ESTADO_DEL_VINCULO,
 ): boolean {
-  return IDS_ACEPTADOS[estado].includes(conceptId);
+  return IDS_ACCEPTED[estado].includes(conceptId);
 }
 
 /** Todos los ids que significan «la organización todavía no decidió». */
-export const IDS_PENDIENTES: readonly string[] = IDS_ACEPTADOS.PENDIENTE;
+export const IDS_PENDING: readonly string[] = IDS_ACCEPTED.PENDIENTE;
 
 /**
  * El vínculo médico–organización, con aprobación (TP-2).
@@ -192,7 +192,7 @@ export class ProfilesAffiliationsService {
    * @param practitionerProfileId - Profesional consultado.
    * @returns Sus afiliaciones publicables.
    */
-  visiblesDeTerceros(
+  visiblesThird(
     em: EntityManager,
     practitionerProfileId: string,
   ): Promise<PractitionerAffiliations[]> {
@@ -216,7 +216,7 @@ export class ProfilesAffiliationsService {
    * @param actor - Quien declara el vínculo.
    * @returns El concepto de estado con el que se crea.
    */
-  async estadoInicial(
+  async initialState(
     em: EntityManager,
     practiceSiteId: string | undefined,
     actor: AuthenticatedUser,
@@ -250,11 +250,11 @@ export class ProfilesAffiliationsService {
     // Y si la organización no tiene a nadie que pueda decidir —los hospitales
     // públicos y las cajas del padrón, que nunca van a registrarse—, dejar el
     // pedido pendiente lo condenaría a esperar para siempre.
-    const hayQuienDecida = await this.tenantAdmin.hasAdministrators(
+    const hasDecider = await this.tenantAdmin.hasAdministrators(
       em,
       tenantId,
     );
-    return hayQuienDecida
+    return hasDecider
       ? ESTADO_DEL_VINCULO.PENDIENTE
       : ESTADO_DEL_VINCULO.DECLARADO;
   }
@@ -273,14 +273,14 @@ export class ProfilesAffiliationsService {
    * @param actor - Quien la mira; tiene que administrarla.
    * @returns Las solicitudes pendientes de sus sedes.
    */
-  async listarSolicitudes(
+  async listSolicitudes(
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<AffiliationRequestListDto> {
     const em = this.em.fork();
     await this.tenantAdmin.assertCanAdminister(em, tenantId, actor);
 
-    const sedes = await em.find(
+    const sites = await em.find(
       PracticeSites,
       { managingTenantId: tenantId },
       { fields: ['id'] },
@@ -288,29 +288,29 @@ export class ProfilesAffiliationsService {
 
     const solicitudes = await this.affiliationsRepo.findBySites(
       em,
-      sedes.map((sede) => sede.id),
+      sites.map((site) => site.id),
       [ESTADO_DEL_VINCULO.PENDIENTE],
     );
 
-    const quienes = await this.identidadDe(
+    const who = await this.identity(
       em,
-      solicitudes.map((fila) => fila.practitionerProfileId),
+      solicitudes.map((row) => row.practitionerProfileId),
     );
 
     return {
-      items: solicitudes.map((fila) => {
-        const quien = quienes.get(fila.practitionerProfileId);
+      items: solicitudes.map((row) => {
+        const quien = who.get(row.practitionerProfileId);
         return {
-          id: fila.id,
-          practitionerProfileId: fila.practitionerProfileId,
+          id: row.id,
+          practitionerProfileId: row.practitionerProfileId,
           practitionerName: quien?.nombre ?? null,
           practitionerLicense: quien?.matricula ?? null,
-          organizationName: fila.organizationName,
-          roleTitle: fila.roleTitle ?? null,
-          practiceSiteId: fila.practiceSiteId ?? null,
-          startDate: fila.startDate,
-          statusConceptId: fila.statusConceptId,
-          createdAt: fila.createdAt,
+          organizationName: row.organizationName,
+          roleTitle: row.roleTitle ?? null,
+          practiceSiteId: row.practiceSiteId ?? null,
+          startDate: row.startDate,
+          statusConceptId: row.statusConceptId,
+          createdAt: row.createdAt,
         };
       }),
     };
@@ -328,20 +328,20 @@ export class ProfilesAffiliationsService {
    * necesita es poder verificar que existe, no cuál de todas.
    *
    * @param em - Contexto de persistencia.
-   * @param perfiles - Los profesionales a identificar.
+   * @param profiles - Los profesionales a identificar.
    * @returns Nombre y matrícula por perfil.
    */
-  private async identidadDe(
+  private async identity(
     em: EntityManager,
-    perfiles: readonly string[],
+    profiles: readonly string[],
   ): Promise<Map<string, { nombre: string | null; matricula: string | null }>> {
-    const identidades = new Map<
+    const identities = new Map<
       string,
       { nombre: string | null; matricula: string | null }
     >();
-    if (perfiles.length === 0) return identidades;
+    if (profiles.length === 0) return identities;
 
-    const ids = [...new Set(perfiles)];
+    const ids = [...new Set(profiles)];
     const [personas, matriculas] = await Promise.all([
       em.find(Persons, { id: { $in: ids } }),
       em.find(JurisdictionAuthorizations, {
@@ -349,28 +349,28 @@ export class ProfilesAffiliationsService {
       }),
     ]);
 
-    const matriculaPorPerfil = new Map(
-      matriculas.map((fila) => [
-        fila.practitionerProfileId,
-        fila.licenseNumber,
+    const matriculaByProfile = new Map(
+      matriculas.map((row) => [
+        row.practitionerProfileId,
+        row.licenseNumber,
       ]),
     );
     for (const persona of personas) {
-      identidades.set(persona.id, {
-        nombre: nombreVisible(persona),
-        matricula: matriculaPorPerfil.get(persona.id) ?? null,
+      identities.set(persona.id, {
+        nombre: nameVisible(persona),
+        matricula: matriculaByProfile.get(persona.id) ?? null,
       });
     }
-    return identidades;
+    return identities;
   }
 
   /** La organización acepta el vínculo. */
-  async aprobar(
+  async approve(
     tenantId: string,
     affiliationId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.decidir(tenantId, affiliationId, actor, {
+    await this.decide(tenantId, affiliationId, actor, {
       destino: ESTADO_DEL_VINCULO.APROBADO,
       operacion: 'profiles.affiliation.approve',
       desde: 'PENDIENTE',
@@ -386,13 +386,13 @@ export class ProfilesAffiliationsService {
    * mudo para quien lo recibe. Ahora se persiste y el profesional lo lee en su
    * historial.
    */
-  async rechazar(
+  async reject(
     tenantId: string,
     affiliationId: string,
     dto: RejectAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.decidir(tenantId, affiliationId, actor, {
+    await this.decide(tenantId, affiliationId, actor, {
       destino: ESTADO_DEL_VINCULO.RECHAZADO,
       operacion: 'profiles.affiliation.reject',
       motivo: dto.reason,
@@ -423,13 +423,13 @@ export class ProfilesAffiliationsService {
    * @param dto - Motivo, que el profesional va a leer.
    * @param actor - Quien revoca; tiene que poder administrar la organización.
    */
-  async revocar(
+  async revoke(
     tenantId: string,
     affiliationId: string,
     dto: RejectAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    await this.decidir(tenantId, affiliationId, actor, {
+    await this.decide(tenantId, affiliationId, actor, {
       destino: ESTADO_DEL_VINCULO.REVOCADO,
       operacion: 'profiles.affiliation.revoke',
       motivo: dto.reason,
@@ -446,7 +446,7 @@ export class ProfilesAffiliationsService {
    * sedes, y que todavía esté pendiente. Escribirlas dos veces garantizaría que
    * una de las tres comprobaciones se caiga de una de las dos.
    */
-  private async decidir(
+  private async decide(
     tenantId: string,
     affiliationId: string,
     actor: AuthenticatedUser,
@@ -466,11 +466,11 @@ export class ProfilesAffiliationsService {
       readonly siNoEsta: string;
     },
   ): Promise<void> {
-    const perfil = await this.em.transactional(async (tx) => {
+    const profile = await this.em.transactional(async (tx) => {
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
 
-      const solicitud = await this.affiliationsRepo.findById(tx, affiliationId);
-      if (!solicitud) {
+      const request = await this.affiliationsRepo.findById(tx, affiliationId);
+      if (!request) {
         throw new ResourceNotFoundException(
           'Solicitud no encontrada',
           {
@@ -483,13 +483,13 @@ export class ProfilesAffiliationsService {
       // La solicitud tiene que ser de una sede de ESTA organización. Sin esto,
       // el administrador de A podría decidir sobre las de B con sólo conocer un
       // identificador — el criterio e2e del prompt.
-      const sede = solicitud.practiceSiteId
+      const site = request.practiceSiteId
         ? await tx.findOne(PracticeSites, {
-            id: solicitud.practiceSiteId,
+            id: request.practiceSiteId,
             managingTenantId: tenantId,
           })
         : null;
-      if (!sede) {
+      if (!site) {
         // 404 y no 403: para quien administra esta organización, una solicitud
         // de otra sencillamente no existe. Decir «prohibido» confirmaría que
         // existe, que es la mitad de lo que un sondeo busca.
@@ -502,12 +502,12 @@ export class ProfilesAffiliationsService {
         );
       }
 
-      if (!esEstado(solicitud.statusConceptId, decision.desde)) {
+      if (!esEstado(request.statusConceptId, decision.desde)) {
         throw new PreconditionFailedException(
           decision.siNoEsta,
           {
             affiliationId,
-            statusConceptId: solicitud.statusConceptId,
+            statusConceptId: request.statusConceptId,
           },
           decision.desde === 'APROBADO'
             ? ProfilesErrorReason.AFFILIATION_NOT_APPROVED
@@ -515,19 +515,19 @@ export class ProfilesAffiliationsService {
         );
       }
 
-      solicitud.statusConceptId = decision.destino;
+      request.statusConceptId = decision.destino;
       // El motivo se guarda, no sólo se registra: un rechazo que sólo vive en
       // el log es mudo para quien lo recibe. La columna existe desde v4.1.9 y
       // nadie la escribía.
       if (decision.motivo !== undefined && decision.motivo.trim() !== '') {
-        solicitud.decisionReasonText = decision.motivo.trim();
+        request.decisionReasonText = decision.motivo.trim();
       }
       // Quién y cuándo: `touch` escribe `updated_by_user_id` y `updated_at`,
       // que es el rastro que el prompt pide y el que la tabla ya sabe guardar.
-      touch(solicitud, actor.id);
+      touch(request, actor.id);
 
       if (decision.destino === ESTADO_DEL_VINCULO.APROBADO) {
-        await this.concederMembresia(tx, solicitud, tenantId, actor);
+        await this.grantMembership(tx, request, tenantId, actor);
       }
 
       this.logger.info(
@@ -541,14 +541,14 @@ export class ProfilesAffiliationsService {
         'Practitioner affiliation decided',
       );
 
-      return solicitud.practitionerProfileId;
+      return request.practitionerProfileId;
     });
 
     // El aviso va DESPUÉS de la transacción, y a propósito: la decisión ya está
     // escrita y confirmada. Emitir dentro dejaría la escritura esperando a un
     // canal de mensajería, y un fallo suyo revertiría una aprobación que la
     // organización ya tomó.
-    await this.avisar(perfil, tenantId, affiliationId, decision);
+    await this.notify(profile, tenantId, affiliationId, decision);
   }
 
   /**
@@ -564,17 +564,17 @@ export class ProfilesAffiliationsService {
    * @param affiliationId - El vínculo.
    * @param decision - Qué se decidió y con qué motivo.
    */
-  private async avisar(
+  private async notify(
     practitionerProfileId: string,
     tenantId: string,
     affiliationId: string,
     decision: { readonly destino: string; readonly motivo?: string },
   ): Promise<void> {
-    const kind = AVISO_POR_DESTINO[decision.destino];
+    const kind = NOTICE_BY_DESTINATION[decision.destino];
     if (kind === undefined) return;
 
-    const cuenta = await this.cuentaDelProfesional(practitionerProfileId);
-    if (cuenta === null) {
+    const account = await this.professionalAccount(practitionerProfileId);
+    if (account === null) {
       this.logger.info(
         { operation: 'profiles.affiliation.notice', affiliationId },
         'El profesional no tiene cuenta: no hay a quién avisarle',
@@ -582,17 +582,17 @@ export class ProfilesAffiliationsService {
       return;
     }
 
-    const motivo =
+    const reason =
       decision.motivo !== undefined && decision.motivo.trim() !== ''
         ? ` Motivo: ${decision.motivo.trim()}`
         : '';
 
     await this.avisos.emit({
       kind,
-      recipientUserId: cuenta,
+      recipientUserId: account,
       tenantId,
-      subject: ASUNTO[kind],
-      bodyText: `${CUERPO[kind]}${motivo}`,
+      subject: SUBJECT[kind],
+      bodyText: `${BODY[kind]}${reason}`,
       affiliationId,
     });
   }
@@ -619,7 +619,7 @@ export class ProfilesAffiliationsService {
    * @param affiliationId - El vínculo recién pedido.
    * @param practitionerProfileId - Quién pide; el nombre se resuelve acá.
    */
-  async avisarDelPedido(
+  async orderNotify(
     tenantId: string,
     affiliationId: string,
     practitionerProfileId: string,
@@ -638,18 +638,18 @@ export class ProfilesAffiliationsService {
 
     // El mismo resolutor que usa la bandeja: quien decide tiene que saber sobre
     // quién decide, tanto en el aviso como en la lista.
-    const identidades = await this.identidadDe(this.em, [
+    const identities = await this.identity(this.em, [
       practitionerProfileId,
     ]);
-    const quien =
-      identidades.get(practitionerProfileId)?.nombre ?? 'Un profesional';
+    const who =
+      identities.get(practitionerProfileId)?.nombre ?? 'Un profesional';
     for (const admin of admins) {
       await this.avisos.emit({
         kind: 'AFFILIATION_REQUESTED',
         recipientUserId: admin.user_id,
         tenantId,
-        subject: ASUNTO.AFFILIATION_REQUESTED,
-        bodyText: `${quien} pidió vincularse a su organización. Puede aceptarlo o rechazarlo desde la bandeja de solicitudes.`,
+        subject: SUBJECT.AFFILIATION_REQUESTED,
+        bodyText: `${who} pidió vincularse a su organización. Puede aceptarlo o rechazarlo desde la bandeja de solicitudes.`,
         affiliationId,
       });
     }
@@ -664,15 +664,15 @@ export class ProfilesAffiliationsService {
    * @param practitionerProfileId - El perfil profesional.
    * @returns El id de usuario, o `null`.
    */
-  private async cuentaDelProfesional(
+  private async professionalAccount(
     practitionerProfileId: string,
   ): Promise<string | null> {
-    const filas = await this.em.execute<{ user_id: string }[]>(
+    const rows = await this.em.execute<{ user_id: string }[]>(
       `SELECT user_id FROM profiles.person_account_links
         WHERE person_id = ? LIMIT 1`,
       [practitionerProfileId],
     );
-    return filas[0]?.user_id ?? null;
+    return rows[0]?.user_id ?? null;
   }
 
   /**
@@ -708,27 +708,27 @@ export class ProfilesAffiliationsService {
    * forma invisible.
    *
    * @param tx - Transacción de la decisión, ya validada.
-   * @param solicitud - El vínculo recién aprobado.
+   * @param request - El vínculo recién aprobado.
    * @param tenantId - Organización que aprueba.
    * @param actor - Quien aprueba.
    */
-  private async concederMembresia(
+  private async grantMembership(
     tx: EntityManager,
-    solicitud: PractitionerAffiliations,
+    request: PractitionerAffiliations,
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const cuenta = await this.accountLinksRepo.findActiveByPerson(
+    const account = await this.accountLinksRepo.findActiveByPerson(
       tx,
-      solicitud.practitionerProfileId,
+      request.practitionerProfileId,
     );
-    if (!cuenta) {
+    if (!account) {
       this.logger.warn(
         {
           operation: 'profiles.affiliation.approve.membership',
-          affiliationId: solicitud.id,
+          affiliationId: request.id,
           tenantId,
-          practitionerProfileId: solicitud.practitionerProfileId,
+          practitionerProfileId: request.practitionerProfileId,
         },
         'Vínculo aprobado sin cuenta activa: la membresía queda pendiente',
       );
@@ -736,8 +736,8 @@ export class ProfilesAffiliationsService {
     }
 
     const { membership, creada } =
-      await this.memberships.ensureMembresiaAsistencial(tx, {
-        userId: cuenta.userId,
+      await this.memberships.ensureCareMembership(tx, {
+        userId: account.userId,
         tenantId,
         actorUserId: actor.id,
       });
@@ -745,7 +745,7 @@ export class ProfilesAffiliationsService {
     this.logger.info(
       {
         operation: 'profiles.affiliation.approve.membership',
-        affiliationId: solicitud.id,
+        affiliationId: request.id,
         tenantId,
         membershipId: membership.id,
         outcome: creada ? 'creada' : 'ya-existia',
@@ -763,16 +763,16 @@ export class ProfilesAffiliationsService {
  * cuando no hay nada: la pantalla debe poder distinguir «sin nombre cargado» de
  * un nombre en blanco.
  */
-function nombreVisible(persona: Persons): string | null {
+function nameVisible(persona: Persons): string | null {
   if (persona.displayName !== undefined && persona.displayName !== null) {
-    const propio = persona.displayName.trim();
-    if (propio !== '') return propio;
+    const own = persona.displayName.trim();
+    if (own !== '') return own;
   }
-  const partes = [persona.name, persona.lastName, persona.motherLastName]
-    .filter((parte): parte is string => typeof parte === 'string')
-    .map((parte) => parte.trim())
-    .filter((parte) => parte !== '');
-  return partes.length === 0 ? null : partes.join(' ');
+  const parts = [persona.name, persona.lastName, persona.motherLastName]
+    .filter((part): part is string => typeof part === 'string')
+    .map((part) => part.trim())
+    .filter((part) => part !== '');
+  return parts.length === 0 ? null : parts.join(' ');
 }
 
 /**
@@ -781,14 +781,14 @@ function nombreVisible(persona: Persons): string | null {
  * Un estado que no está acá no avisa nada, y está bien: `DECLARADO` y
  * `PENDIENTE` no son decisiones de la organización, son cómo nace el vínculo.
  */
-const AVISO_POR_DESTINO: Readonly<Record<string, AffiliationNoticeKind>> = {
+const NOTICE_BY_DESTINATION: Readonly<Record<string, AffiliationNoticeKind>> = {
   [ESTADO_DEL_VINCULO.APROBADO]: 'AFFILIATION_APPROVED',
   [ESTADO_DEL_VINCULO.RECHAZADO]: 'AFFILIATION_REJECTED',
   [ESTADO_DEL_VINCULO.REVOCADO]: 'AFFILIATION_REVOKED',
 };
 
 /** Lo que se lee en la campana sin abrir nada. */
-const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
+const SUBJECT: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED: 'Le aceptaron como profesional',
   AFFILIATION_REJECTED: 'No aceptaron su vínculo',
   AFFILIATION_REVOKED: 'Dieron de baja su vínculo',
@@ -802,7 +802,7 @@ const ASUNTO: Readonly<Record<AffiliationNoticeKind, string>> = {
  * que lo aprobaron sin saber que ya puede publicar agenda deja el aviso a mitad
  * de camino.
  */
-const CUERPO: Readonly<Record<AffiliationNoticeKind, string>> = {
+const BODY: Readonly<Record<AffiliationNoticeKind, string>> = {
   AFFILIATION_APPROVED:
     'La organización le aceptó como profesional suyo. Ya puede publicar su agenda ahí.',
   AFFILIATION_REJECTED:

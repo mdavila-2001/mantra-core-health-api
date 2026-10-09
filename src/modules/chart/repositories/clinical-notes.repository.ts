@@ -302,51 +302,51 @@ export class ClinicalNotesRepository {
     em: EntityManager,
     filter: HeadersPageByAuthorFilter,
   ): Promise<ClinicalNoteHeaders[]> {
-    const parametros: unknown[] = [filter.authorProfileId];
-    let condiciones = '';
+    const params: unknown[] = [filter.authorProfileId];
+    let conditions = '';
 
     if (filter.patientProfileId) {
-      condiciones += ' AND h.patient_profile_id = ?';
-      parametros.push(filter.patientProfileId);
+      conditions += ' AND h.patient_profile_id = ?';
+      params.push(filter.patientProfileId);
     }
     if (filter.from) {
-      condiciones += ' AND h.created_at >= ?';
-      parametros.push(filter.from);
+      conditions += ' AND h.created_at >= ?';
+      params.push(filter.from);
     }
     if (filter.to) {
-      condiciones += ' AND h.created_at <= ?';
-      parametros.push(filter.to);
+      conditions += ' AND h.created_at <= ?';
+      params.push(filter.to);
     }
     // `(a, b) < (c, d)` es comparación de tuplas de Postgres: ordena por
     // `created_at` y desempata por `id` en una sola condición, el mismo orden
     // del `ORDER BY`.
     if (filter.cursor) {
-      condiciones += ' AND (h.created_at, h.id) < (?, ?)';
-      parametros.push(filter.cursor.createdAt, filter.cursor.id);
+      conditions += ' AND (h.created_at, h.id) < (?, ?)';
+      params.push(filter.cursor.createdAt, filter.cursor.id);
     }
-    parametros.push(filter.limit);
+    params.push(filter.limit);
 
-    const filas = await em.getConnection().execute<{ id: string }[]>(
+    const rows = await em.getConnection().execute<{ id: string }[]>(
       `SELECT h.id
          FROM chart.clinical_note_headers h
          JOIN chart.clinical_note_versions v ON v.id = h.current_version_id
         WHERE v.author_profile_id = ?
-          ${condiciones}
+          ${conditions}
         ORDER BY h.created_at DESC, h.id DESC
         LIMIT ?`,
-      parametros,
+      params,
       'all',
     );
 
-    if (filas.length === 0) return [];
+    if (rows.length === 0) return [];
 
-    const ids = filas.map((fila) => fila.id);
-    const cabeceras = await em.find(ClinicalNoteHeaders, { id: { $in: ids } });
-    const porId = new Map(cabeceras.map((header) => [header.id, header]));
+    const ids = rows.map((row) => row.id);
+    const headers = await em.find(ClinicalNoteHeaders, { id: { $in: ids } });
+    const byId = new Map(headers.map((header) => [header.id, header]));
     // El `IN` de MikroORM no preserva el orden del SQL: se reordena según la
     // secuencia que ya vino ordenada por `created_at DESC, id DESC`.
     return ids
-      .map((id) => porId.get(id))
+      .map((id) => byId.get(id))
       .filter((header): header is ClinicalNoteHeaders => Boolean(header));
   }
 

@@ -69,27 +69,27 @@ export class LegalEntityTypesSeedService {
     const now = new Date();
 
     const conceptIds = LEGAL_ENTITY_TYPES.map((entry) => entry.conceptId);
-    const sembrados = await this.existingIds(em, CatalogConcepts, conceptIds);
+    const seeded = await this.existingIds(em, CatalogConcepts, conceptIds);
 
-    const huerfanos = LEGAL_ENTITY_TYPES.filter(
-      (entry) => !sembrados.has(entry.conceptId),
+    const orphaned = LEGAL_ENTITY_TYPES.filter(
+      (entry) => !seeded.has(entry.conceptId),
     );
-    if (huerfanos.length > 0) {
+    if (orphaned.length > 0) {
       this.logger.warn(
         {
           operation: 'seed.legal-entity-types',
-          count: huerfanos.length,
-          codes: huerfanos.map((entry) => entry.code),
+          count: orphaned.length,
+          codes: orphaned.map((entry) => entry.code),
         },
         'Hay formas societarias declaradas cuyo concepto todavía no está en el catálogo: se omiten',
       );
     }
 
-    const vigentes = LEGAL_ENTITY_TYPES.filter((entry) =>
-      sembrados.has(entry.conceptId),
+    const current = LEGAL_ENTITY_TYPES.filter((entry) =>
+      seeded.has(entry.conceptId),
     );
 
-    const propertyIds = vigentes.flatMap((entry) => [
+    const propertyIds = current.flatMap((entry) => [
       countryPropertyId(entry.code),
       categoryPropertyId(entry.code),
     ]);
@@ -99,8 +99,8 @@ export class LegalEntityTypesSeedService {
       propertyIds,
     );
 
-    let creadas = 0;
-    for (const entry of vigentes) {
+    let created = 0;
+    for (const entry of current) {
       const countryId = countryPropertyId(entry.code);
       if (!existingProperties.has(countryId)) {
         em.create(
@@ -116,7 +116,7 @@ export class LegalEntityTypesSeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
 
       const categoryId = categoryPropertyId(entry.code);
@@ -134,20 +134,20 @@ export class LegalEntityTypesSeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
     }
 
     await em.flush();
 
-    if (creadas > 0) {
+    if (created > 0) {
       this.logger.info(
-        { operation: 'seed.legal-entity-types', inserted: creadas },
+        { operation: 'seed.legal-entity-types', inserted: created },
         'País y categoría canónica de las formas societarias materializados',
       );
     }
 
-    return { properties: creadas };
+    return { properties: created };
   }
 
   private async existingIds<T extends object>(

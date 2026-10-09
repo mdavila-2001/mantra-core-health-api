@@ -61,7 +61,7 @@ describe('ChartTemplatesController', () => {
   it('opens the reads to clinical roles and keeps the writes admin-only', () => {
     // Fase 3 del carril de consulta: quien atiende puede leer el esquema; las
     // altas y asignaciones siguen siendo del administrador.
-    const rolesDe = (handler: string): unknown =>
+    const roles = (handler: string): unknown =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(
@@ -69,10 +69,10 @@ describe('ChartTemplatesController', () => {
           handler,
         )!.value,
       );
-    const lectura = ['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN'];
-    expect(rolesDe('listTemplates')).toEqual(lectura);
-    expect(rolesDe('getTemplate')).toEqual(lectura);
-    expect(rolesDe('createTemplate')).toEqual(['SECURITY_ADMIN']);
-    expect(rolesDe('assignTemplate')).toEqual(['SECURITY_ADMIN']);
+    const reading = ['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN'];
+    expect(roles('listTemplates')).toEqual(reading);
+    expect(roles('getTemplate')).toEqual(reading);
+    expect(roles('createTemplate')).toEqual(['SECURITY_ADMIN']);
+    expect(roles('assignTemplate')).toEqual(['SECURITY_ADMIN']);
   });
 });

@@ -345,7 +345,7 @@ export class ValueSetsService {
       // Pertenencia exclusiva: cada término tiene exactamente una categoría,
       // así que la suma de las categorías es el total del glosario sin una
       // consulta más.
-      total: categories.reduce((suma, categoria) => suma + categoria.count, 0),
+      total: categories.reduce((sum, category) => sum + category.count, 0),
     };
   }
 

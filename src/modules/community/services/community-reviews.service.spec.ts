@@ -17,7 +17,7 @@ import {
 import { CLIN } from '../../clinical/clinical.concepts';
 
 /** Paciente con perfil clínico: es el único que puede calificar. */
-const paciente = { id: 'u1', roles: [], patientProfileId: 'pat-1' } as any;
+const patient = { id: 'u1', roles: [], patientProfileId: 'pat-1' } as any;
 
 /** El profesional dueño de la vitrina `p1`, para las respuestas. */
 const doctor = {
@@ -27,7 +27,7 @@ const doctor = {
 } as any;
 
 /** Una atención que sí habilita la reseña: del paciente, con hp-1, terminada. */
-const atencionValida = {
+const validCare = {
   id: 'enc1',
   patientProfileId: 'pat-1',
   primaryPractitionerId: 'hp-1',
@@ -43,7 +43,7 @@ const vitrina = {
 };
 
 /** Cuerpo mínimo válido de una reseña. */
-const cuerpo = { overallRating: 4, verifiedEncounterId: 'enc1' };
+const body = { overallRating: 4, verifiedEncounterId: 'enc1' };
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -75,7 +75,7 @@ function build() {
     createDimensionScore: mockFn(),
   };
   const encountersRepo = {
-    findById: mockFn().mockResolvedValue(atencionValida),
+    findById: mockFn().mockResolvedValue(validCare),
   };
   // La propiedad se concede por defecto; los casos de perfil ajeno la hacen
   // rechazar. La regla en sí tiene su propia prueba en el servicio compartido.
@@ -99,7 +99,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
     const d = build();
     d.profilesRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.publishReview('missing', cuerpo as any, paciente),
+      d.service.publishReview('missing', body as any, patient),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
@@ -110,7 +110,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       acceptsReviews: false,
     });
     await expect(
-      d.service.publishReview('p1', cuerpo as any, paciente),
+      d.service.publishReview('p1', body as any, patient),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
@@ -119,7 +119,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
     d.profilesRepo.findById.mockResolvedValue(vitrina);
     d.reviewsRepo.findByReviewerEncounter.mockResolvedValue({ id: 'rev0' });
     await expect(
-      d.service.publishReview('p1', cuerpo as any, paciente),
+      d.service.publishReview('p1', body as any, patient),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -131,10 +131,10 @@ describe('CommunityReviewsService (UC-19-11)', () => {
     const res = await d.service.publishReview(
       'p1',
       {
-        ...cuerpo,
+        ...body,
         dimensions: [{ dimension: 'COMMUNICATION', score: 5 }],
       } as any,
-      paciente,
+      patient,
     );
 
     expect(res).toEqual({
@@ -160,8 +160,8 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       await d.service.publishReview(
         'p1',
         // Aunque el cuerpo declare otro paciente, se usa el del token.
-        { ...cuerpo, reviewerPatientProfileId: 'pat-de-otro' } as any,
-        paciente,
+        { ...body, reviewerPatientProfileId: 'pat-de-otro' } as any,
+        patient,
       );
 
       expect(d.reviewsRepo.create).toHaveBeenCalledWith(
@@ -177,7 +177,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       await expect(
         d.service.publishReview(
           'p1',
-          cuerpo as any,
+          body as any,
           {
             id: 'u9',
             roles: [],
@@ -192,7 +192,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       d.encountersRepo.findById.mockResolvedValue(null);
 
       await expect(
-        d.service.publishReview('p1', cuerpo as any, paciente),
+        d.service.publishReview('p1', body as any, patient),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.reviewsRepo.create).not.toHaveBeenCalled();
     });
@@ -201,12 +201,12 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
       d.encountersRepo.findById.mockResolvedValue({
-        ...atencionValida,
+        ...validCare,
         patientProfileId: 'pat-de-otro',
       });
 
       await expect(
-        d.service.publishReview('p1', cuerpo as any, paciente),
+        d.service.publishReview('p1', body as any, patient),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -215,12 +215,12 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
       d.encountersRepo.findById.mockResolvedValue({
-        ...atencionValida,
+        ...validCare,
         statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
       });
 
       await expect(
-        d.service.publishReview('p1', cuerpo as any, paciente),
+        d.service.publishReview('p1', body as any, patient),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -228,12 +228,12 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
       d.encountersRepo.findById.mockResolvedValue({
-        ...atencionValida,
+        ...validCare,
         primaryPractitionerId: 'hp-de-otro',
       });
 
       await expect(
-        d.service.publishReview('p1', cuerpo as any, paciente),
+        d.service.publishReview('p1', body as any, patient),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -246,14 +246,14 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
       d.encountersRepo.findById.mockResolvedValue({
-        ...atencionValida,
+        ...validCare,
         primaryPractitionerId: 'hp-de-otro',
       });
       d.tx.findOne.mockResolvedValue({ id: 'part-1' });
       d.reviewsRepo.create.mockReturnValue({ id: 'rev1', overallRating: 4 });
 
       await expect(
-        d.service.publishReview('p1', cuerpo as any, paciente),
+        d.service.publishReview('p1', body as any, patient),
       ).resolves.toEqual(
         expect.objectContaining({ id: 'rev1', verified: true }),
       );
@@ -383,7 +383,7 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     d.profilesRepo.findById.mockResolvedValue(vitrina);
     d.reviewsRepo.create.mockReturnValue({ id: 'r1', overallRating: 4 });
 
-    const res = await d.service.publishOwnReview(cuerpo as any, paciente);
+    const res = await d.service.publishOwnReview(body as any, patient);
 
     expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(
       expect.anything(),
@@ -398,19 +398,19 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     d.encountersRepo.findById.mockResolvedValue(null);
 
     await expect(
-      d.service.publishOwnReview(cuerpo as any, paciente),
+      d.service.publishOwnReview(body as any, patient),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('un encuentro sin profesional a cargo tampoco habilita una reseña', async () => {
     const d = build();
     d.encountersRepo.findById.mockResolvedValue({
-      ...atencionValida,
+      ...validCare,
       primaryPractitionerId: undefined,
     });
 
     await expect(
-      d.service.publishOwnReview(cuerpo as any, paciente),
+      d.service.publishOwnReview(body as any, patient),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     // Ni siquiera se intenta buscar la vitrina de un profesional que no hay.
     expect(d.profilesRepo.findByTarget).not.toHaveBeenCalled();
@@ -421,7 +421,7 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     d.profilesRepo.findByTarget.mockResolvedValue(null);
 
     await expect(
-      d.service.publishOwnReview(cuerpo as any, paciente),
+      d.service.publishOwnReview(body as any, patient),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
@@ -432,12 +432,12 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
     d.profilesRepo.findById.mockResolvedValue(vitrina);
     d.encountersRepo.findById.mockResolvedValue({
-      ...atencionValida,
+      ...validCare,
       statusConceptId: 'en-curso',
     });
 
     await expect(
-      d.service.publishOwnReview(cuerpo as any, paciente),
+      d.service.publishOwnReview(body as any, patient),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     expect(d.reviewsRepo.create).not.toHaveBeenCalled();
   });
@@ -449,7 +449,7 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
 
     await expect(
       d.service.publishOwnReview(
-        cuerpo as any,
+        body as any,
         {
           id: 'u9',
           roles: [],

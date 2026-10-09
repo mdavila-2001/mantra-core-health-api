@@ -19,7 +19,7 @@ import { CommunitySearchIndexService } from './community-search-index.service';
 import { CommunityVerificationService } from './community-verification.service';
 
 /** Un perfil con TODOS sus campos poblados, internos incluidos. */
-const perfilCompleto: any = {
+const completeProfile: any = {
   id: 'perfil-1',
   tenantId: 'tenant-secreto',
   targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
@@ -45,10 +45,10 @@ const perfilCompleto: any = {
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  *
- * @param opciones - Perfiles del lote y datos auxiliares.
+ * @param options - Perfiles del lote y datos auxiliares.
  * @returns Resultado de build.
  */
-function build(opciones?: {
+function build(options?: {
   /** Perfiles que devuelve el primer lote. */
   rows?: any[];
   /** Sellos del perfil. */
@@ -60,7 +60,7 @@ function build(opciones?: {
   /** Especialidades del sujeto. */
   specialties?: string[];
 }) {
-  const rows = opciones?.rows ?? [perfilCompleto];
+  const rows = options?.rows ?? [completeProfile];
   const em = { fork: mockFn(() => ({})) };
   const repo = {
     countIndexable: mockFn().mockResolvedValue(rows.length),
@@ -69,19 +69,19 @@ function build(opciones?: {
       new Map([['perfil-1', { average: 4.5, count: 12 }]]),
     ),
     locationsByOwner: mockFn().mockResolvedValue(
-      opciones?.location
-        ? new Map([['sujeto-interno', opciones.location]])
+      options?.location
+        ? new Map([['sujeto-interno', options.location]])
         : new Map(),
     ),
     specialtiesByPractitioner: mockFn().mockResolvedValue(
-      new Map([['sujeto-interno', opciones?.specialties ?? ['Cardiología']]]),
+      new Map([['sujeto-interno', options?.specialties ?? ['Cardiología']]]),
     ),
     badgesByProfiles: mockFn().mockResolvedValue(
-      new Map([['perfil-1', opciones?.badges ?? []]]),
+      new Map([['perfil-1', options?.badges ?? []]]),
     ),
     agendaByPractitioner: mockFn().mockResolvedValue(
-      opciones?.agenda
-        ? new Map([['sujeto-interno', opciones.agenda]])
+      options?.agenda
+        ? new Map([['sujeto-interno', options.agenda]])
         : new Map(),
     ),
   };
@@ -117,7 +117,7 @@ function build(opciones?: {
 }
 
 /** El documento que el reindexado mandó a indexar. */
-async function documentoIndexado(d: ReturnType<typeof build>) {
+async function indexedDocument(d: ReturnType<typeof build>) {
   await d.service.reindexAll();
   const [[, , documentos]] = d.search.bulkIndex.mock.calls;
   return documentos[0].document;
@@ -126,7 +126,7 @@ async function documentoIndexado(d: ReturnType<typeof build>) {
 describe('CommunitySearchIndexService', () => {
   describe('la proyección no filtra campos internos (P10, tarea 40)', () => {
     it('el documento indexado no trae ningún identificador interno', async () => {
-      const documento = await documentoIndexado(build());
+      const documento = await indexedDocument(build());
 
       // Uno por uno y no «no contiene uuids»: si mañana se agrega otro campo
       // interno, la lista de abajo es la que hay que revisar a mano.
@@ -144,16 +144,16 @@ describe('CommunitySearchIndexService', () => {
     });
 
     it('sus claves son exactamente las que el índice declara', async () => {
-      const documento = await documentoIndexado(build());
-      const declaradas =
+      const documento = await indexedDocument(build());
+      const declared =
         SEARCH_INDEX_REGISTRY[COMMUNITY_PUBLIC_PROFILES_INDEX].documentKeys;
 
-      expect(declaradas).toBeDefined();
-      expect(Object.keys(documento).sort()).toEqual([...declaradas!].sort());
+      expect(declared).toBeDefined();
+      expect(Object.keys(documento).sort()).toEqual([...declared!].sort());
     });
 
     it('todo campo que el buscador público sirve existe en el documento', async () => {
-      const documento = await documentoIndexado(build());
+      const documento = await indexedDocument(build());
 
       // `verifiedBadge` es lo único que no viaja con su nombre: el sello va al
       // índice descompuesto en campos planos (OpenSearch no gana nada indexando
@@ -162,7 +162,7 @@ describe('CommunitySearchIndexService', () => {
       // DTO, la fila servida desde OpenSearch saldría con un hueco que la
       // servida desde SQL no tiene, y el mismo perfil se vería distinto según
       // quién respondió.
-      const APLANADOS: Record<string, string[]> = {
+      const FLATTENED: Record<string, string[]> = {
         verifiedBadge: [
           'verifiedBadgeStatus',
           'badgeTypeConceptId',
@@ -173,14 +173,14 @@ describe('CommunitySearchIndexService', () => {
       };
 
       for (const clave of PUBLIC_RESULT_KEYS) {
-        for (const real of APLANADOS[clave] ?? [clave]) {
+        for (const real of FLATTENED[clave] ?? [clave]) {
           expect(documento).toHaveProperty(real);
         }
       }
     });
 
     it('las fotos van como ruta servida por la API, nunca como id de archivo', async () => {
-      const documento = await documentoIndexado(build());
+      const documento = await indexedDocument(build());
 
       expect(documento.avatarUrl).toBe('/public/media/archivo-1');
       // La portada sale por la MISMA vía desde que la tarjeta del directorio la
@@ -195,7 +195,7 @@ describe('CommunitySearchIndexService', () => {
     });
 
     it('las especialidades van legibles, no como conceptos', async () => {
-      const documento = await documentoIndexado(
+      const documento = await indexedDocument(
         build({ specialties: ['Cardiología', 'Medicina interna'] }),
       );
 
@@ -208,7 +208,7 @@ describe('CommunitySearchIndexService', () => {
 
   describe('geo', () => {
     it('proyecta el punto como `geo_point` cuando la dirección lo tiene', async () => {
-      const documento = await documentoIndexado(
+      const documento = await indexedDocument(
         build({ location: { city: 'La Paz', lat: -16.5, lng: -68.15 } }),
       );
 
@@ -217,7 +217,7 @@ describe('CommunitySearchIndexService', () => {
     });
 
     it('una dirección sin coordenadas deja el punto en nulo, no en cero', async () => {
-      const documento = await documentoIndexado(
+      const documento = await indexedDocument(
         build({ location: { city: 'El Alto', lat: null, lng: null } }),
       );
 

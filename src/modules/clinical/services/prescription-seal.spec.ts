@@ -5,7 +5,7 @@ import {
 import type { MedicationRequests } from '../entities';
 
 /** Una receta emitida mínima, lista para sellar. */
-function receta(
+function prescription(
   overrides: Partial<MedicationRequests> = {},
 ): MedicationRequests {
   return {
@@ -31,7 +31,7 @@ function receta(
 describe('buildPrescriptionSealPayload', () => {
   it('serializa fechas como ISO y campos ausentes como null', () => {
     const payload = buildPrescriptionSealPayload(
-      receta({
+      prescription({
         substanceAtcConceptId: undefined,
         prescriberProfileId: undefined,
         validFrom: undefined,
@@ -49,36 +49,36 @@ describe('buildPrescriptionSealPayload', () => {
 
 describe('computePrescriptionHash', () => {
   it('el mismo contenido produce siempre el mismo hash', () => {
-    const a = computePrescriptionHash(receta());
-    const b = computePrescriptionHash(receta());
+    const a = computePrescriptionHash(prescription());
+    const b = computePrescriptionHash(prescription());
 
     expect(a).toBe(b);
     expect(a).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it('cambiar la dosis cambia el hash', () => {
-    const original = computePrescriptionHash(receta());
-    const modificada = computePrescriptionHash(receta({ doseText: '250 mg' }));
+    const original = computePrescriptionHash(prescription());
+    const modified = computePrescriptionHash(prescription({ doseText: '250 mg' }));
 
-    expect(modificada).not.toBe(original);
+    expect(modified).not.toBe(original);
   });
 
   it('el snapshot de auditoría y el sello son cosas distintas: cambiar `statusReasonText` no altera el hash', () => {
     // `statusReasonText` es parte del `snapshot()` de MedicationsService (auditoría)
     // pero NO del payload del sello: el sello identifica el contenido clínico, no
     // el evento que lo produjo.
-    const sinMotivo = computePrescriptionHash(receta());
-    const conMotivo = computePrescriptionHash(
-      receta({ statusReasonText: 'Corrección de dosis' }),
+    const withoutReason = computePrescriptionHash(prescription());
+    const withReason = computePrescriptionHash(
+      prescription({ statusReasonText: 'Corrección de dosis' }),
     );
 
-    expect(conMotivo).toBe(sinMotivo);
+    expect(withReason).toBe(withoutReason);
   });
 
   it('cambiar la cantidad (string numérico) cambia el hash', () => {
-    const uno = computePrescriptionHash(receta({ quantityDecimal: '21' }));
-    const otro = computePrescriptionHash(receta({ quantityDecimal: '30' }));
+    const one = computePrescriptionHash(prescription({ quantityDecimal: '21' }));
+    const other = computePrescriptionHash(prescription({ quantityDecimal: '30' }));
 
-    expect(otro).not.toBe(uno);
+    expect(other).not.toBe(one);
   });
 });

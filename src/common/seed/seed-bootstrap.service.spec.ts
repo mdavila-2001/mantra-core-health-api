@@ -10,7 +10,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
  * del orden: tenerla desalineada —`clinicalForms` figuraba al final cuando corre
  * antes del administrador de arranque— enseña un orden que no existe.
  */
-const PASOS = [
+const STEPS = [
   'terminology',
   'dynamicEnums',
   'patientPortalProxy',
@@ -39,10 +39,10 @@ const PASOS = [
   'practiceDefaultServices',
 ] as const;
 
-type Paso = (typeof PASOS)[number];
+type Step = (typeof STEPS)[number];
 
 /** Logger mínimo que registra lo que se le pidió escribir. */
-function loggerFalso() {
+function loggerFake() {
   return {
     setContext: jest.fn(),
     info: jest.fn(),
@@ -56,10 +56,10 @@ function loggerFalso() {
  *
  * @param fallan - Nombres de los seeds que deben lanzar en esta corrida.
  */
-function armar(fallan: Paso[] = []) {
-  const logger = loggerFalso();
-  const dobles = Object.fromEntries(
-    PASOS.map((nombre) => [
+function build(fallan: Step[] = []) {
+  const logger = loggerFake();
+  const double = Object.fromEntries(
+    STEPS.map((nombre) => [
       nombre,
       {
         run: fallan.includes(nombre)
@@ -71,43 +71,43 @@ function armar(fallan: Paso[] = []) {
               .mockResolvedValue({ inserted: 0 }),
       },
     ]),
-  ) as Record<Paso, { run: jest.Mock<() => Promise<unknown>> }>;
+  ) as Record<Step, { run: jest.Mock<() => Promise<unknown>> }>;
 
   const service = new SeedBootstrapService(
-    dobles.terminology as never,
-    dobles.dynamicEnums as never,
-    dobles.patientPortalProxy as never,
-    dobles.glossary as never,
-    dobles.boGeography as never,
-    dobles.legalEntityTypes as never,
-    dobles.affiliationCatalogs as never,
-    dobles.boOccupations as never,
-    dobles.boProfessions as never,
-    dobles.boEmployers as never,
-    dobles.boliviaFacilities as never,
-    dobles.boliviaInsurance as never,
-    dobles.boliviaFeeSchedule as never,
-    dobles.messaging as never,
-    dobles.audioAssets as never,
-    dobles.stickerPack as never,
-    dobles.vademecum as never,
-    dobles.identityVerification as never,
-    dobles.clinicalRoles as never,
-    dobles.platformPermissions as never,
-    dobles.bootstrapAdmin as never,
-    dobles.providerAccounts as never,
-    dobles.clinicalForms as never,
-    dobles.practiceDefaultServices as never,
-    dobles.people as never,
-    dobles.directoryNetworks as never,
+    double.terminology as never,
+    double.dynamicEnums as never,
+    double.patientPortalProxy as never,
+    double.glossary as never,
+    double.boGeography as never,
+    double.legalEntityTypes as never,
+    double.affiliationCatalogs as never,
+    double.boOccupations as never,
+    double.boProfessions as never,
+    double.boEmployers as never,
+    double.boliviaFacilities as never,
+    double.boliviaInsurance as never,
+    double.boliviaFeeSchedule as never,
+    double.messaging as never,
+    double.audioAssets as never,
+    double.stickerPack as never,
+    double.vademecum as never,
+    double.identityVerification as never,
+    double.clinicalRoles as never,
+    double.platformPermissions as never,
+    double.bootstrapAdmin as never,
+    double.providerAccounts as never,
+    double.clinicalForms as never,
+    double.practiceDefaultServices as never,
+    double.people as never,
+    double.directoryNetworks as never,
     logger as never,
   );
 
-  return { service, dobles, logger };
+  return { service, dobles: double, logger };
 }
 
 /** Los pasos de contenido, que `SEED_CONTENT_ON_BOOT=false` saltea. */
-const CONTENIDO: readonly Paso[] = [
+const CONTENT: readonly Step[] = [
   'glossary',
   'boliviaFacilities',
   'boliviaInsurance',
@@ -122,31 +122,31 @@ const CONTENIDO: readonly Paso[] = [
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
-const NUCLEO: readonly Paso[] = PASOS.filter(
-  (nombre) => !CONTENIDO.includes(nombre),
+const CORE: readonly Step[] = STEPS.filter(
+  (nombre) => !CONTENT.includes(nombre),
 );
 
 describe('SeedBootstrapService', () => {
-  const entornoOriginal = process.env.SEED_ON_BOOT;
-  const contenidoOriginal = process.env.SEED_CONTENT_ON_BOOT;
+  const environmentOriginal = process.env.SEED_ON_BOOT;
+  const contentOriginal = process.env.SEED_CONTENT_ON_BOOT;
 
   afterEach(() => {
-    if (entornoOriginal === undefined) delete process.env.SEED_ON_BOOT;
-    else process.env.SEED_ON_BOOT = entornoOriginal;
+    if (environmentOriginal === undefined) delete process.env.SEED_ON_BOOT;
+    else process.env.SEED_ON_BOOT = environmentOriginal;
 
-    if (contenidoOriginal === undefined)
+    if (contentOriginal === undefined)
       delete process.env.SEED_CONTENT_ON_BOOT;
-    else process.env.SEED_CONTENT_ON_BOOT = contenidoOriginal;
+    else process.env.SEED_CONTENT_ON_BOOT = contentOriginal;
   });
 
   describe('interruptor de arranque', () => {
     it('con SEED_ON_BOOT=false no toca la base, y lo dice', async () => {
       process.env.SEED_ON_BOOT = 'false';
-      const { service, dobles, logger } = armar();
+      const { service, dobles, logger } = build();
 
       await service.onApplicationBootstrap();
 
-      for (const nombre of PASOS) {
+      for (const nombre of STEPS) {
         expect(dobles[nombre].run).not.toHaveBeenCalled();
       }
       // El aviso importa tanto como no sembrar: una base sin catálogo deja la
@@ -159,7 +159,7 @@ describe('SeedBootstrapService', () => {
 
     it('sin la variable declarada siembra igual que antes del flag', async () => {
       delete process.env.SEED_ON_BOOT;
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
 
       await service.onApplicationBootstrap();
 
@@ -171,18 +171,18 @@ describe('SeedBootstrapService', () => {
   describe('interruptor de contenido', () => {
     it('con SEED_CONTENT_ON_BOOT=false corre el núcleo y saltea el contenido', async () => {
       process.env.SEED_CONTENT_ON_BOOT = 'false';
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
 
       const summary = await service.run();
 
-      for (const nombre of NUCLEO) {
+      for (const nombre of CORE) {
         expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
       }
-      for (const nombre of CONTENIDO) {
+      for (const nombre of CONTENT) {
         expect(dobles[nombre].run).not.toHaveBeenCalled();
       }
-      expect(summary.ok).toBe(NUCLEO.length);
-      expect(summary.steps).toHaveLength(NUCLEO.length);
+      expect(summary.ok).toBe(CORE.length);
+      expect(summary.steps).toHaveLength(CORE.length);
     });
 
     it('lo salteado se informa aparte y no cuenta como omitido', async () => {
@@ -190,12 +190,12 @@ describe('SeedBootstrapService', () => {
       // teñir de rojo un arranque que hizo exactamente lo que se le pidió
       // convierte el resumen en ruido que nadie mira.
       process.env.SEED_CONTENT_ON_BOOT = 'false';
-      const { service, logger } = armar();
+      const { service, logger } = build();
 
       const summary = await service.run();
 
       expect(summary.failed).toBe(0);
-      expect(summary.skippedContent).toBe(CONTENIDO.length);
+      expect(summary.skippedContent).toBe(CONTENT.length);
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(
         expect.objectContaining({ event: 'seed.step.skipped' }),
@@ -207,7 +207,7 @@ describe('SeedBootstrapService', () => {
       // Es el punto del modo: una instalación sin catálogos de negocio pero con
       // alguien que pueda entrar a cargarlos.
       process.env.SEED_CONTENT_ON_BOOT = 'false';
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
 
       await service.run();
 
@@ -216,11 +216,11 @@ describe('SeedBootstrapService', () => {
 
     it('sin la variable declarada corre la cadena entera', async () => {
       delete process.env.SEED_CONTENT_ON_BOOT;
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
 
       const summary = await service.run();
 
-      for (const nombre of PASOS) {
+      for (const nombre of STEPS) {
         expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
       }
       // Sin salteados el resumen conserva la forma que tenía antes del flag.
@@ -230,28 +230,28 @@ describe('SeedBootstrapService', () => {
 
   describe('run', () => {
     it('corre los diecisiete seeds y los resume', async () => {
-      const { service } = armar();
+      const { service } = build();
 
       const summary = await service.run();
 
-      expect(summary.ok).toBe(PASOS.length);
+      expect(summary.ok).toBe(STEPS.length);
       expect(summary.failed).toBe(0);
-      expect(summary.steps).toHaveLength(PASOS.length);
+      expect(summary.steps).toHaveLength(STEPS.length);
     });
 
     it('deja registro de cada paso aunque no haya insertado nada', async () => {
       // Este es el corazón del arreglo: antes los seeds sólo hablaban si
       // insertaban, así que un seed ausente de la imagen y uno que corrió sin
       // trabajo se veían exactamente igual — ninguno de los dos escribía.
-      const { service, logger } = armar();
+      const { service, logger } = build();
 
       await service.run();
 
-      const pasosLogueados = logger.info.mock.calls.filter(
+      const loggedInSteps = logger.info.mock.calls.filter(
         ([contexto]) => (contexto as { event?: string }).event === 'seed.step',
       );
-      expect(pasosLogueados).toHaveLength(PASOS.length);
-      for (const [contexto] of pasosLogueados) {
+      expect(loggedInSteps).toHaveLength(STEPS.length);
+      for (const [contexto] of loggedInSteps) {
         expect(contexto).toMatchObject({ inserted: 0, failed: false });
         expect((contexto as { tookMs: number }).tookMs).toBeGreaterThanOrEqual(
           0,
@@ -260,20 +260,20 @@ describe('SeedBootstrapService', () => {
     });
 
     it('un seed dependiente que falla no corta la cadena, pero se cuenta', async () => {
-      const { service, dobles } = armar(['glossary']);
+      const { service, dobles } = build(['glossary']);
 
       const summary = await service.run();
 
       expect(dobles.clinicalForms.run).toHaveBeenCalledTimes(1);
       expect(summary.failed).toBe(1);
-      expect(summary.ok).toBe(PASOS.length - 1);
-      expect(summary.steps.find((paso) => paso.failed)?.name).toBe(
+      expect(summary.ok).toBe(STEPS.length - 1);
+      expect(summary.steps.find((step) => step.failed)?.name).toBe(
         'glosario médico',
       );
     });
 
     it('si falla el catálogo de conceptos, los once dependientes ni se intentan', async () => {
-      const { service, dobles, logger } = armar(['terminology']);
+      const { service, dobles, logger } = build(['terminology']);
 
       const summary = await service.run();
 
@@ -287,7 +287,7 @@ describe('SeedBootstrapService', () => {
     });
 
     it('el resumen sube a error cuando quedó algo omitido', async () => {
-      const { service, logger } = armar(['messaging']);
+      const { service, logger } = build(['messaging']);
 
       await service.run();
 
@@ -300,7 +300,7 @@ describe('SeedBootstrapService', () => {
     it('suma las filas de seeds que reportan con formas distintas', async () => {
       // Cada servicio devuelve su propia forma: `{ inserted }`, `{ templates,
       // specialties }`, contadores por nivel. El resumen suma los numéricos.
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
       dobles.clinicalForms.run.mockResolvedValue({
         templates: 15,
         specialties: 10,
@@ -319,7 +319,7 @@ describe('SeedBootstrapService', () => {
       // Caso real: el glosario devuelve `orphanRelationships`, relaciones cuyo
       // destino no existe y que por eso NO se insertan. Sumarlas hacía que una
       // corrida sin trabajo informara «1 filas».
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
       dobles.glossary.run.mockResolvedValue({
         valueSets: 0,
         terms: 0,
@@ -329,24 +329,24 @@ describe('SeedBootstrapService', () => {
 
       const summary = await service.run();
 
-      const paso = summary.steps.find(
-        (candidato) => candidato.name === 'glosario médico',
+      const step = summary.steps.find(
+        (candidate) => candidate.name === 'glosario médico',
       );
-      expect(paso?.inserted).toBe(0);
+      expect(step?.inserted).toBe(0);
       expect(summary.inserted).toBe(0);
     });
 
     it('un seed que no devuelve contadores se registra sin inventar un número', async () => {
-      const { service, dobles } = armar();
+      const { service, dobles } = build();
       dobles.bootstrapAdmin.run.mockResolvedValue(undefined);
 
       const summary = await service.run();
 
-      const paso = summary.steps.find(
-        (candidato) => candidato.name === 'administrador de arranque',
+      const step = summary.steps.find(
+        (candidate) => candidate.name === 'administrador de arranque',
       );
-      expect(paso?.inserted).toBeNull();
-      expect(paso?.failed).toBe(false);
+      expect(step?.inserted).toBeNull();
+      expect(step?.failed).toBe(false);
     });
   });
 });

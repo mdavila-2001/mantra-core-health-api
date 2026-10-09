@@ -31,11 +31,11 @@ function build() {
 /**
  * Los errores de validación del cuerpo, como los vería el `ValidationPipe`.
  *
- * @param cuerpo - Lo que mandaría el cliente.
+ * @param body - Lo que mandaría el cliente.
  * @returns Las propiedades que no pasaron.
  */
-async function erroresDe(cuerpo: unknown): Promise<string[]> {
-  const dto = plainToInstance(RequestDependentLinkDto, cuerpo);
+async function errors(body: unknown): Promise<string[]> {
+  const dto = plainToInstance(RequestDependentLinkDto, body);
   const errores = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -74,7 +74,7 @@ describe('ProfilesDependentRequestsController', () => {
      * @param query - Lo que mandaría el cliente en la query string.
      * @returns Las propiedades que no pasaron.
      */
-    async function erroresDeQuery(query: unknown): Promise<string[]> {
+    async function errorsQuery(query: unknown): Promise<string[]> {
       const dto = plainToInstance(DependentCandidatesQueryDto, query);
       const errores = await validate(dto, {
         whitelist: true,
@@ -104,14 +104,14 @@ describe('ProfilesDependentRequestsController', () => {
     });
 
     it('acepta el texto y hasta 100 caracteres', async () => {
-      expect(await erroresDeQuery({ q: 'luis' })).toEqual([]);
-      expect(await erroresDeQuery({})).toEqual([]);
-      expect(await erroresDeQuery({ q: 'a'.repeat(100) })).toEqual([]);
+      expect(await errorsQuery({ q: 'luis' })).toEqual([]);
+      expect(await errorsQuery({})).toEqual([]);
+      expect(await errorsQuery({ q: 'a'.repeat(100) })).toEqual([]);
     });
 
     it('rechaza un texto de más de 100 caracteres y las claves que el contrato no declara', async () => {
-      expect(await erroresDeQuery({ q: 'a'.repeat(101) })).toEqual(['q']);
-      expect(await erroresDeQuery({ q: 'luis', limit: '500' })).toEqual([
+      expect(await errorsQuery({ q: 'a'.repeat(101) })).toEqual(['q']);
+      expect(await errorsQuery({ q: 'luis', limit: '500' })).toEqual([
         'limit',
       ]);
     });
@@ -121,9 +121,9 @@ describe('ProfilesDependentRequestsController', () => {
         ProfilesDependentRequestsController.prototype,
         'listDependentCandidates',
       )?.value as object;
-      const limite = Reflect.getMetadata('THROTTLER:LIMITdefault', handler);
+      const limit = Reflect.getMetadata('THROTTLER:LIMITdefault', handler);
 
-      expect(limite).toBe(30);
+      expect(limit).toBe(30);
     });
   });
 
@@ -138,56 +138,56 @@ describe('ProfilesDependentRequestsController', () => {
 
   describe('forma del cuerpo', () => {
     it('acepta un CI con espacios alrededor (el servicio los quita)', async () => {
-      expect(await erroresDe({ nationalId: ' 7654321 ' })).toEqual([]);
+      expect(await errors({ nationalId: ' 7654321 ' })).toEqual([]);
     });
 
     it('acepta el límite: 4 y 40 caracteres', async () => {
-      expect(await erroresDe({ nationalId: '1234' })).toEqual([]);
-      expect(await erroresDe({ nationalId: 'A'.repeat(40) })).toEqual([]);
+      expect(await errors({ nationalId: '1234' })).toEqual([]);
+      expect(await errors({ nationalId: 'A'.repeat(40) })).toEqual([]);
     });
 
     it('rechaza vacío, muy corto, muy largo o con caracteres fuera de forma', async () => {
-      expect(await erroresDe({ nationalId: '' })).toEqual(['nationalId']);
-      expect(await erroresDe({ nationalId: '123' })).toEqual(['nationalId']);
-      expect(await erroresDe({ nationalId: 'A'.repeat(41) })).toEqual([
+      expect(await errors({ nationalId: '' })).toEqual(['nationalId']);
+      expect(await errors({ nationalId: '123' })).toEqual(['nationalId']);
+      expect(await errors({ nationalId: 'A'.repeat(41) })).toEqual([
         'nationalId',
       ]);
-      expect(await erroresDe({ nationalId: "1'; drop" })).toEqual([
+      expect(await errors({ nationalId: "1'; drop" })).toEqual([
         'nationalId',
       ]);
-      expect(await erroresDe({})).toEqual(['nationalId']);
+      expect(await errors({})).toEqual(['nationalId']);
     });
 
     it('rechaza claves que el contrato no declara', async () => {
-      expect(await erroresDe({ nationalId: '7654321', role: 'ADMIN' })).toEqual(
+      expect(await errors({ nationalId: '7654321', role: 'ADMIN' })).toEqual(
         ['role'],
       );
-      expect(await erroresDe({ patientProfileId: ID, tenantId: ID })).toEqual([
+      expect(await errors({ patientProfileId: ID, tenantId: ID })).toEqual([
         'tenantId',
       ]);
     });
 
     it('acepta el perfil elegido de la búsqueda por nombre, solo', async () => {
-      expect(await erroresDe({ patientProfileId: ID })).toEqual([]);
+      expect(await errors({ patientProfileId: ID })).toEqual([]);
     });
 
     it('el perfil tiene que ser un uuid', async () => {
-      expect(await erroresDe({ patientProfileId: 'no-es-uuid' })).toEqual([
+      expect(await errors({ patientProfileId: 'no-es-uuid' })).toEqual([
         'patientProfileId',
       ]);
-      expect(await erroresDe({ patientProfileId: '' })).toEqual([
+      expect(await errors({ patientProfileId: '' })).toEqual([
         'patientProfileId',
       ]);
     });
 
     it('rechaza mandar el documento y el perfil juntos: una sola vía por pedido', async () => {
       expect(
-        await erroresDe({ nationalId: '7654321', patientProfileId: ID }),
+        await errors({ nationalId: '7654321', patientProfileId: ID }),
       ).toEqual(['patientProfileId']);
     });
 
     it('rechaza no mandar ninguno de los dos', async () => {
-      expect(await erroresDe({})).toEqual(['nationalId']);
+      expect(await errors({})).toEqual(['nationalId']);
     });
   });
 

@@ -71,7 +71,7 @@ export class VirtualEncountersService {
         );
       }
 
-      const venc = this.encountersRepo.create(tx, {
+      const due = this.encountersRepo.create(tx, {
         encounterId: dto.encounterId,
         platformConceptId: dto.platformConceptId,
         meetingUrl: dto.meetingUrl,
@@ -82,9 +82,9 @@ export class VirtualEncountersService {
       await tx.flush();
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
   }
@@ -99,26 +99,26 @@ export class VirtualEncountersService {
       'Joining virtual encounter',
     );
     return this.em.transactional(async (tx) => {
-      const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc)
+      const due = await this.encountersRepo.findById(tx, id);
+      if (!due)
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
-      await this.requireEncounterParticipant(tx, venc.encounterId, actor, true);
-      if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED) {
+      await this.requireEncounterParticipant(tx, due.encounterId, actor, true);
+      if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED) {
         throw new PreconditionFailedException('La sesión no está agendada', {
           id,
         });
       }
 
-      venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS;
-      venc.joinedAt = new Date();
-      touch(venc, actor.id);
+      due.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS;
+      due.joinedAt = new Date();
+      touch(due, actor.id);
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
   }
@@ -134,32 +134,32 @@ export class VirtualEncountersService {
       'Ending virtual encounter',
     );
     return this.em.transactional(async (tx) => {
-      const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc)
+      const due = await this.encountersRepo.findById(tx, id);
+      if (!due)
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
       await this.requireEncounterParticipant(
         tx,
-        venc.encounterId,
+        due.encounterId,
         actor,
         false,
       );
-      if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
+      if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('La sesión no está en progreso', {
           id,
         });
       }
 
-      venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_COMPLETED;
-      venc.endedAt = new Date();
-      venc.recordingFileId = dto.recordingFileId;
-      touch(venc, actor.id);
+      due.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_COMPLETED;
+      due.endedAt = new Date();
+      due.recordingFileId = dto.recordingFileId;
+      touch(due, actor.id);
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
   }

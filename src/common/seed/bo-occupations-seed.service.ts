@@ -199,7 +199,7 @@ export class BoOccupationsSeedService {
     counters.memberships += await this.seedMemberships(em, now);
 
     const total = Object.values(counters).reduce(
-      (suma, valor) => suma + valor,
+      (sum, valor) => sum + valor,
       0,
     );
     if (total > 0) {
@@ -243,7 +243,7 @@ export class BoOccupationsSeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const occupation of BO_OCCUPATIONS) {
       const id = boOccupationDesignationId(occupation.code);
       if (existing.has(id)) continue;
@@ -261,10 +261,10 @@ export class BoOccupationsSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -286,7 +286,7 @@ export class BoOccupationsSeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const occupation of BO_OCCUPATIONS) {
       const id = boOccupationGroupPropertyId(occupation.code);
       if (existing.has(id)) continue;
@@ -303,10 +303,10 @@ export class BoOccupationsSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión: un miembro por ocupación, con el ordinal del orden alfabético. */
@@ -320,7 +320,7 @@ export class BoOccupationsSeedService {
       BO_OCCUPATIONS.map((occupation) => boOccupationMemberId(occupation.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     const versionIdentifier = boOccupationVersionId();
     BO_OCCUPATIONS.forEach((occupation, ordinal) => {
       const id = boOccupationMemberId(occupation.code);
@@ -338,10 +338,10 @@ export class BoOccupationsSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Los ids que ya están en la base, de entre los que se van a sembrar. */

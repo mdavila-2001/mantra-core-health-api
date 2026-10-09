@@ -193,14 +193,14 @@ export class AssignmentsRepository {
    * desactivadas o históricas si algún flujo futuro las produce.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtro - Acotaciones opcionales por target, campo o sección.
+   * @param filter - Acotaciones opcionales por target, campo o sección.
    * @param tenantId - Tenant del actor, si el contexto lo fijó.
    * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
    * @returns Asignaciones activas en orden de presentación.
    */
   findAssignments(
     em: EntityManager,
-    filtro: {
+    filter: {
       /** Target al que se asignaron los campos. */
       targetResourceConceptId?: string;
       /** Campo asignado. */
@@ -215,11 +215,11 @@ export class AssignmentsRepository {
       FieldAssignments,
       {
         stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
-        ...(filtro.targetResourceConceptId
-          ? { targetResourceConceptId: filtro.targetResourceConceptId }
+        ...(filter.targetResourceConceptId
+          ? { targetResourceConceptId: filter.targetResourceConceptId }
           : {}),
-        ...(filtro.fieldId ? { fieldId: filtro.fieldId } : {}),
-        ...(filtro.sectionId ? { sectionId: filtro.sectionId } : {}),
+        ...(filter.fieldId ? { fieldId: filter.fieldId } : {}),
+        ...(filter.sectionId ? { sectionId: filter.sectionId } : {}),
         $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
       },
       { orderBy: { ordinal: 'ASC' }, limit },

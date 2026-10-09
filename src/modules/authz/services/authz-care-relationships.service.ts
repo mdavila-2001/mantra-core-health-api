@@ -111,12 +111,12 @@ export class AuthzCareRelationshipsService {
     );
 
     const { relId, tenantId } = await this.em.transactional(async (tx) => {
-      const activa = await this.careRepo.findActive(
+      const active = await this.careRepo.findActive(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
       );
-      if (activa) {
+      if (active) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa con ese paciente',
           { patientProfileId: dto.patientProfileId, practitionerProfileId },

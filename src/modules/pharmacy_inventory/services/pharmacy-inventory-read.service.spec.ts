@@ -22,7 +22,7 @@ const CURRENCY = {
   display: 'US Dollar',
 };
 
-const FARMACIA = {
+const PHARMACY = {
   id: 'ph-1',
   tenantId: 'tenant-a',
   code: 'PH-1',
@@ -31,7 +31,7 @@ const FARMACIA = {
 } as any;
 
 /** Un producto activo de la farmacia publicada. */
-function producto(id: string, extra: Record<string, unknown> = {}) {
+function product(id: string, extra: Record<string, unknown> = {}) {
   return {
     id,
     pharmacyId: 'ph-1',
@@ -90,7 +90,7 @@ describe('PharmacyInventoryReadService', () => {
         pharmacyId: 'ph-1',
         name: 'Sede Centro',
       });
-      d.pharmacyRepo.findVisibleById.mockResolvedValue(FARMACIA);
+      d.pharmacyRepo.findVisibleById.mockResolvedValue(PHARMACY);
       d.inventoryRepo.findActiveLocationsBySites.mockResolvedValue([
         { id: 'loc-1', pharmacySiteId: 'site-1' },
         { id: 'loc-2', pharmacySiteId: 'site-1' },
@@ -123,7 +123,7 @@ describe('PharmacyInventoryReadService', () => {
         },
       ]);
       d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue([
-        producto('prod-1'),
+        product('prod-1'),
       ]);
       d.pharmacyRepo.findConcepts.mockResolvedValue([MEDICATION]);
 
@@ -156,12 +156,12 @@ describe('PharmacyInventoryReadService', () => {
     });
 
     /** Dos sedes con stock y direcciones; la más lejana tiene TODO. */
-    function conDosSedes(d: ReturnType<typeof build>) {
-      d.pharmacyRepo.findVisibleByTenant.mockResolvedValue([FARMACIA]);
+    function withTwoSites(d: ReturnType<typeof build>) {
+      d.pharmacyRepo.findVisibleByTenant.mockResolvedValue([PHARMACY]);
       // Como el repo real: sólo devuelve los ids pedidos que existen activos.
       d.pharmacyRepo.findActiveProductsByIds.mockImplementation(
         async (_em: unknown, ids: readonly string[]) =>
-          [producto('prod-1'), producto('prod-2')].filter((row) =>
+          [product('prod-1'), product('prod-2')].filter((row) =>
             ids.includes(row.id),
           ),
       );
@@ -236,7 +236,7 @@ describe('PharmacyInventoryReadService', () => {
 
     it('puts the complete site first even when it is farther away', async () => {
       const d = build();
-      conDosSedes(d);
+      withTwoSites(d);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.availability(['prod-1', 'prod-2'], {
@@ -260,7 +260,7 @@ describe('PharmacyInventoryReadService', () => {
 
     it('a site with none of the requested products is not a candidate', async () => {
       const d = build();
-      conDosSedes(d);
+      withTwoSites(d);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.availability(['prod-2'], undefined),
@@ -275,7 +275,7 @@ describe('PharmacyInventoryReadService', () => {
 
     it('an unknown or retired product id counts as missing everywhere', async () => {
       const d = build();
-      conDosSedes(d);
+      withTwoSites(d);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.availability(['prod-1', 'prod-fantasma'], undefined),
@@ -292,7 +292,7 @@ describe('PharmacyInventoryReadService', () => {
 
     it('prefers the site-specific list, excludes insurer lists and totals only fully priced sites', async () => {
       const d = build();
-      conDosSedes(d);
+      withTwoSites(d);
       d.pharmacyRepo.findCurrentPublicPriceLists.mockResolvedValue([
         {
           id: 'list-pharm',
@@ -346,19 +346,19 @@ describe('PharmacyInventoryReadService', () => {
       expect(listIds).toEqual(['list-pharm', 'list-sede']);
 
       const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
-      const cerca = result.items.find((item) => item.siteId === 'site-cerca')!;
+      const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
 
       // En la sede con lista propia gana esa lista.
-      const prod1EnLejos = lejos.products.find(
+      const prod1Far = lejos.products.find(
         (product) => product.productId === 'prod-1',
       )!;
-      expect(prod1EnLejos.price?.priceListCode).toBe('SEDE-LEJOS');
-      expect(prod1EnLejos.price?.patientAmount).toBe('17.00');
+      expect(prod1Far.price?.priceListCode).toBe('SEDE-LEJOS');
+      expect(prod1Far.price?.patientAmount).toBe('17.00');
       // prod-2 no tiene precio → el total de la sede no se inventa.
       expect(lejos.totalAmount).toBeNull();
       // La cercana sólo tiene prod-1, con precio: su total sí existe.
-      expect(cerca.totalAmount).toBe('20.00');
-      expect(cerca.currency).toEqual({
+      expect(nearby.totalAmount).toBe('20.00');
+      expect(nearby.currency).toEqual({
         code: CURRENCY.code,
         display: CURRENCY.display,
       });
@@ -366,7 +366,7 @@ describe('PharmacyInventoryReadService', () => {
 
     it('sums money exactly instead of drifting in floating point', async () => {
       const d = build();
-      conDosSedes(d);
+      withTwoSites(d);
       d.pharmacyRepo.findCurrentPublicPriceLists.mockResolvedValue([
         {
           id: 'list-pharm',
@@ -395,11 +395,11 @@ describe('PharmacyInventoryReadService', () => {
       );
 
       const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
-      const cerca = result.items.find((item) => item.siteId === 'site-cerca')!;
+      const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
       // Suma exacta en decimal, redondeada half-up a los 2 decimales del
       // contrato: 3.015 → 3.02, no el 3.01 del punto flotante.
       expect(lejos.totalAmount).toBe('3.02');
-      expect(cerca.totalAmount).toBe('1.01');
+      expect(nearby.totalAmount).toBe('1.01');
     });
   });
 

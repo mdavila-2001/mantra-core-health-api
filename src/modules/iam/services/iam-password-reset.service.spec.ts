@@ -130,16 +130,16 @@ describe('IamPasswordResetService · requestReset', () => {
   it('responde IDÉNTICO cuando la cuenta no existe: no enumera cuentas', async () => {
     const d = build();
     d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue(null);
-    const conCuenta = build();
-    conCuenta.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+    const withAccount = build();
+    withAccount.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
       userId: 'u-1',
     });
-    conCuenta.usersRepo.findById.mockResolvedValue({ id: 'u-1' });
+    withAccount.usersRepo.findById.mockResolvedValue({ id: 'u-1' });
 
-    const sinCuenta = await d.service.requestReset(dto);
-    const existente = await conCuenta.service.requestReset(dto);
+    const withoutAccount = await d.service.requestReset(dto);
+    const existing = await withAccount.service.requestReset(dto);
 
-    expect(sinCuenta).toEqual(existente);
+    expect(withoutAccount).toEqual(existing);
     expect(d.resetsRepo.create).not.toHaveBeenCalled();
     expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
   });

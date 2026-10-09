@@ -40,7 +40,7 @@ const ORIGIN = 'clinical-forms';
  * (Patch v4.0.11). Es de donde salen los conceptos a los que se cuelgan las
  * plantillas: ver {@link ClinicalFormsSeedService.resolverEspecialidades}.
  */
-const VALUE_SET_ESPECIALIDADES = 'VS_MEDICAL_SPECIALTY';
+const VALUE_SET_SPECIALTIES = 'VS_MEDICAL_SPECIALTY';
 
 /**
  * La especialidad que NO es una especialidad.
@@ -50,7 +50,7 @@ const VALUE_SET_ESPECIALIDADES = 'VS_MEDICAL_SPECIALTY';
  * modelo. Conservan su concepto acuñado acá: no se autoseleccionan por
  * especialidad, y el selector del bloque clínico los deja siempre a mano.
  */
-export const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
+export const CODE_TRANSVERSAL = 'TRANSVERSAL';
 
 /**
  * Cuántos campos propios puede colgar una organización de una plantilla estándar.
@@ -64,7 +64,7 @@ export const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
  * Se puede subir por organización escribiendo una `extension_target_policies`
  * con su `tenant_id`: la escritura prefiere la del tenant sobre esta global.
  */
-export const MAX_CAMPOS_PROPIOS_POR_PLANTILLA = 12;
+export const MAX_OWN_FIELDS_PER_TEMPLATE = 12;
 
 /**
  * Siembra el **contenido** del catálogo de formularios clínicos: la versión
@@ -161,36 +161,36 @@ export class ClinicalFormsSeedService {
     const em = this.orm.em.fork();
     const now = new Date();
 
-    const delModelo = await this.resolverEspecialidades(em);
-    const specialties = await this.seedSpecialties(em, delModelo, now);
-    const reasignadas = await this.reapuntarAlModelo(em, delModelo);
-    const catalogo = await this.materializarValueSetDeEspecialidades(
+    const ofModel = await this.resolverSpecialties(em);
+    const specialties = await this.seedSpecialties(em, ofModel, now);
+    const reassigned = await this.repointToModel(em, ofModel);
+    const catalog = await this.specialtiesMaterializeValueSet(
       em,
-      delModelo,
+      ofModel,
       now,
     );
 
-    const politica = await this.seedExtensionPolicy(em, now);
+    const policy = await this.seedExtensionPolicy(em, now);
 
     let templates = 0;
     for (const form of STANDARD_FORMS) {
-      templates += await this.seedForm(em, form, delModelo, now);
+      templates += await this.seedForm(em, form, ofModel, now);
     }
 
-    if (politica) {
+    if (policy) {
       this.logger.info(
-        { maximumFields: MAX_CAMPOS_PROPIOS_POR_PLANTILLA },
+        { maximumFields: MAX_OWN_FIELDS_PER_TEMPLATE },
         'Política de extensión de plantillas de chart materializada',
       );
     }
 
-    if (templates > 0 || specialties > 0 || reasignadas > 0 || catalogo > 0) {
+    if (templates > 0 || specialties > 0 || reassigned > 0 || catalog > 0) {
       this.logger.info(
         {
           templates,
           specialties,
-          reasignadas,
-          especialidadesEnCatalogo: catalogo,
+          reasignadas: reassigned,
+          especialidadesEnCatalogo: catalog,
         },
         'Catálogo de formularios clínicos estándar materializado',
       );
@@ -210,18 +210,18 @@ export class ClinicalFormsSeedService {
    * Devuelve un mapa vacío si el value set no está —una base pelada, sin el
    * paquete del modelo cargado—: en ese caso se sigue acuñando, que es lo que
    * mantiene el arranque funcionando, y la próxima corrida con el value set
-   * presente repara lo sembrado ({@link reapuntarAlModelo}).
+   * presente repara lo sembrado ({@link repointToModel}).
    */
-  private async resolverEspecialidades(
+  private async resolverSpecialties(
     em: EntityManager,
   ): Promise<ReadonlyMap<string, string>> {
     const valueSet = await this.valueSets.findByInternalCode(
       em,
-      VALUE_SET_ESPECIALIDADES,
+      VALUE_SET_SPECIALTIES,
     );
     if (valueSet === null) {
       this.logger.warn(
-        { valueSet: VALUE_SET_ESPECIALIDADES },
+        { valueSet: VALUE_SET_SPECIALTIES },
         'El value set de especialidades no está: las plantillas se cuelgan de conceptos acuñados',
       );
       return new Map();
@@ -235,11 +235,11 @@ export class ClinicalFormsSeedService {
       return new Map();
     }
 
-    const conceptos = await em.find(CatalogConcepts, { id: { $in: ids } });
+    const concepts = await em.find(CatalogConcepts, { id: { $in: ids } });
     // El código del value set viene en mayúsculas (`ODONTOLOGIA`) y es el mismo
     // que declaran los JSON del catálogo: el match es por código, nunca por
     // display —que lleva tildes— ni por uuid, que es derivado.
-    return new Map(conceptos.map((concepto) => [concepto.code, concepto.id]));
+    return new Map(concepts.map((concept) => [concept.code, concept.id]));
   }
 
   /**
@@ -275,45 +275,45 @@ export class ClinicalFormsSeedService {
    *
    * @returns Cuántas filas de catálogo se crearon en esta corrida.
    */
-  private async materializarValueSetDeEspecialidades(
+  private async specialtiesMaterializeValueSet(
     em: EntityManager,
-    delModelo: ReadonlyMap<string, string>,
+    ofModel: ReadonlyMap<string, string>,
     now: Date,
   ): Promise<number> {
     // El modelo lo trajo: no hay nada que suplir.
-    if (delModelo.size > 0) return 0;
+    if (ofModel.size > 0) return 0;
 
-    const existente = await this.valueSets.findByInternalCode(
+    const existing = await this.valueSets.findByInternalCode(
       em,
-      VALUE_SET_ESPECIALIDADES,
+      VALUE_SET_SPECIALTIES,
     );
     // Existe pero vino vacío o sin versión vigente: tampoco se toca. Un value
     // set del modelo a medio cargar es un problema de datos que hay que ver, no
     // uno que este seed deba disimular llenándolo con lo suyo.
-    if (existente !== null) return 0;
+    if (existing !== null) return 0;
 
-    let creadas = 0;
+    let created = 0;
     const valueSetId = deterministicId(
-      `${ORIGIN}:value-set:${VALUE_SET_ESPECIALIDADES}`,
+      `${ORIGIN}:value-set:${VALUE_SET_SPECIALTIES}`,
     );
     const versionId = deterministicId(
-      `${ORIGIN}:value-set-version:${VALUE_SET_ESPECIALIDADES}:1.0.0`,
+      `${ORIGIN}:value-set-version:${VALUE_SET_SPECIALTIES}:1.0.0`,
     );
 
     em.create(
       ValueSets,
       {
         id: valueSetId,
-        internalCode: VALUE_SET_ESPECIALIDADES,
+        internalCode: VALUE_SET_SPECIALTIES,
         name: 'Especialidades médicas',
-        canonicalUrl: `urn:mantra:value-set:${VALUE_SET_ESPECIALIDADES}`,
+        canonicalUrl: `urn:mantra:value-set:${VALUE_SET_SPECIALTIES}`,
         stateConceptId: CONCEPTS.TERM_ACTIVE,
         createdAt: now,
         updatedAt: now,
       },
       { partial: true },
     );
-    creadas += 1;
+    created += 1;
     await em.flush();
 
     em.create(
@@ -333,7 +333,7 @@ export class ClinicalFormsSeedService {
       },
       { partial: true },
     );
-    creadas += 1;
+    created += 1;
     await em.flush();
 
     // Los miembros: los conceptos de este mismo seed, en el orden del catálogo
@@ -342,7 +342,7 @@ export class ClinicalFormsSeedService {
     let ordinal = 0;
     for (const form of STANDARD_FORMS) {
       const specialty = form.specialty;
-      if (specialty.code === CODIGO_TRANSVERSAL) continue;
+      if (specialty.code === CODE_TRANSVERSAL) continue;
       const conceptId = this.specialtyConceptIdAcunado(specialty);
       if (vistas.has(conceptId)) continue;
       vistas.add(conceptId);
@@ -360,15 +360,15 @@ export class ClinicalFormsSeedService {
         { partial: true },
       );
       ordinal += 1;
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
 
     this.logger.info(
-      { valueSet: VALUE_SET_ESPECIALIDADES, especialidades: vistas.size },
+      { valueSet: VALUE_SET_SPECIALTIES, especialidades: vistas.size },
       'El paquete del modelo no trajo el catálogo de especialidades: se publicó el de este seed',
     );
-    return creadas;
+    return created;
   }
 
   /**
@@ -378,10 +378,10 @@ export class ClinicalFormsSeedService {
    */
   private specialtyConceptId(
     specialty: StandardFormSpecialty,
-    delModelo: ReadonlyMap<string, string>,
+    ofModel: ReadonlyMap<string, string>,
   ): string {
     return (
-      delModelo.get(specialty.code) ?? this.specialtyConceptIdAcunado(specialty)
+      ofModel.get(specialty.code) ?? this.specialtyConceptIdAcunado(specialty)
     );
   }
 
@@ -403,39 +403,39 @@ export class ClinicalFormsSeedService {
    * Los conceptos acuñados huérfanos no se borran: su id es determinista —
    * volverían a nacer iguales— y otras filas podrían referenciarlos.
    */
-  private async reapuntarAlModelo(
+  private async repointToModel(
     em: EntityManager,
-    delModelo: ReadonlyMap<string, string>,
+    ofModel: ReadonlyMap<string, string>,
   ): Promise<number> {
-    if (delModelo.size === 0) return 0;
+    if (ofModel.size === 0) return 0;
 
     const vistas = new Set<string>();
-    let reasignadas = 0;
+    let reassigned = 0;
     for (const form of STANDARD_FORMS) {
-      const codigo = form.specialty.code;
-      if (vistas.has(codigo)) continue;
-      vistas.add(codigo);
+      const code = form.specialty.code;
+      if (vistas.has(code)) continue;
+      vistas.add(code);
 
-      const delModeloId = delModelo.get(codigo);
-      if (delModeloId === undefined) continue;
+      const ofModelId = ofModel.get(code);
+      if (ofModelId === undefined) continue;
 
       const acunado = this.specialtyConceptIdAcunado(form.specialty);
-      if (acunado === delModeloId) continue;
+      if (acunado === ofModelId) continue;
 
-      reasignadas += await em.nativeUpdate(
+      reassigned += await em.nativeUpdate(
         SpecialtyChartTemplates,
         { specialtyConceptId: acunado },
-        { specialtyConceptId: delModeloId },
+        { specialtyConceptId: ofModelId },
       );
     }
 
-    if (reasignadas > 0) {
+    if (reassigned > 0) {
       this.logger.info(
-        { reasignadas },
+        { reasignadas: reassigned },
         'Plantillas de ficha re-apuntadas al value set de especialidades del modelo',
       );
     }
-    return reasignadas;
+    return reassigned;
   }
 
   /**
@@ -493,7 +493,7 @@ export class ClinicalFormsSeedService {
         definitionSetId: setId,
         allowTenantFields: true,
         allowVendorFields: false,
-        maximumFields: MAX_CAMPOS_PROPIOS_POR_PLANTILLA,
+        maximumFields: MAX_OWN_FIELDS_PER_TEMPLATE,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         createdAt: now,
         updatedAt: now,
@@ -514,23 +514,23 @@ export class ClinicalFormsSeedService {
    */
   private async seedSpecialties(
     em: EntityManager,
-    delModelo: ReadonlyMap<string, string>,
+    ofModel: ReadonlyMap<string, string>,
     now: Date,
   ): Promise<number> {
-    const porId = new Map<string, StandardFormSpecialty>();
+    const byId = new Map<string, StandardFormSpecialty>();
     for (const form of STANDARD_FORMS) {
       // Las que el modelo ya declara no se acuñan: se usan las suyas.
-      if (delModelo.has(form.specialty.code)) continue;
-      porId.set(this.specialtyConceptIdAcunado(form.specialty), form.specialty);
+      if (ofModel.has(form.specialty.code)) continue;
+      byId.set(this.specialtyConceptIdAcunado(form.specialty), form.specialty);
     }
 
-    const ids = [...porId.keys()];
-    const existentes = await em.find(CatalogConcepts, { id: { $in: ids } });
-    const yaEstan = new Set(existentes.map((concept) => concept.id));
+    const ids = [...byId.keys()];
+    const existing = await em.find(CatalogConcepts, { id: { $in: ids } });
+    const alreadyPresent = new Set(existing.map((concept) => concept.id));
 
     let inserted = 0;
-    for (const [id, specialty] of porId) {
-      if (yaEstan.has(id)) continue;
+    for (const [id, specialty] of byId) {
+      if (alreadyPresent.has(id)) continue;
       em.create(
         CatalogConcepts,
         {
@@ -562,7 +562,7 @@ export class ClinicalFormsSeedService {
   private async seedForm(
     em: EntityManager,
     form: StandardFormDefinition,
-    delModelo: ReadonlyMap<string, string>,
+    ofModel: ReadonlyMap<string, string>,
     now: Date,
   ): Promise<number> {
     const templateId = deterministicId(`${ORIGIN}:template:${form.code}`);
@@ -571,11 +571,11 @@ export class ClinicalFormsSeedService {
     // comparan campos ni nombre a propósito — una plantilla que la organización
     // editó tiene que sobrevivir al despliegue. Lo único que sí se reconcilia
     // es una versión NUEVA del catálogo: ver `reconciliarVersion`.
-    const existente = await em.findOne(SpecialtyChartTemplates, {
+    const existing = await em.findOne(SpecialtyChartTemplates, {
       id: templateId,
     });
-    if (existente) {
-      await this.reconciliarVersion(em, form, existente, now);
+    if (existing) {
+      await this.reconcileVersion(em, form, existing, now);
       return 0;
     }
 
@@ -608,7 +608,7 @@ export class ClinicalFormsSeedService {
       SpecialtyChartTemplates,
       {
         id: templateId,
-        specialtyConceptId: this.specialtyConceptId(form.specialty, delModelo),
+        specialtyConceptId: this.specialtyConceptId(form.specialty, ofModel),
         // Sin tenant: el catálogo es global y toda organización lo ve. Una
         // adaptación propia se hace duplicando, que es lo que ofrece la pantalla.
         tenantId: undefined,
@@ -637,7 +637,7 @@ export class ClinicalFormsSeedService {
       },
       -1,
       sectionId,
-      fichaDeCatalogo(form),
+      catalogRecord(form),
       now,
     );
 
@@ -665,15 +665,15 @@ export class ClinicalFormsSeedService {
    * `(section_id, version)` sobrevive porque se mueve la versión de la misma
    * fila, que sigue siendo la única de esa sección.
    */
-  private async reconciliarVersion(
+  private async reconcileVersion(
     em: EntityManager,
     form: StandardFormDefinition,
-    existente: SpecialtyChartTemplates,
+    existing: SpecialtyChartTemplates,
     now: Date,
   ): Promise<void> {
-    if (existente.version >= form.version) return;
+    if (existing.version >= form.version) return;
 
-    const sectionId = existente.sectionId;
+    const sectionId = existing.sectionId;
     if (sectionId === undefined) return;
 
     // La ficha de catálogo viaja con la versión: la procedencia gana su nota
@@ -681,7 +681,7 @@ export class ClinicalFormsSeedService {
     await em.nativeUpdate(
       DynamicFieldDefinitions,
       { id: fieldIdDe(form, CHART_TEMPLATE_PROVENANCE_FIELD_CODE) },
-      { defaultValueJson: fichaDeCatalogo(form), updatedAt: now },
+      { defaultValueJson: catalogRecord(form), updatedAt: now },
     );
 
     for (const [ordinal, field] of form.fields.entries()) {
@@ -712,7 +712,7 @@ export class ClinicalFormsSeedService {
 
     // Lo que la versión nueva ya no pregunta se retira, no se borra: las
     // instancias capturadas siguen apuntando a su `field_id`.
-    const vigentes = new Set(
+    const current = new Set(
       [
         CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
         ...form.fields.map((f) => f.code),
@@ -723,7 +723,7 @@ export class ClinicalFormsSeedService {
       {
         sectionId,
         tenantId: null,
-        fieldId: { $nin: [...vigentes] },
+        fieldId: { $nin: [...current] },
       },
       {
         visible: false,
@@ -732,15 +732,15 @@ export class ClinicalFormsSeedService {
       },
     );
 
-    const desde = existente.version;
+    const from = existing.version;
     // El nombre es rótulo, no dato: la v2 unifica el de las fichas base.
-    existente.name = form.name;
-    existente.version = form.version;
-    existente.updatedAt = now;
+    existing.name = form.name;
+    existing.version = form.version;
+    existing.updatedAt = now;
     await em.flush();
 
     this.logger.info(
-      { plantilla: form.code, desde, hasta: form.version },
+      { plantilla: form.code, desde: from, hasta: form.version },
       'Plantilla del catálogo reconciliada a la versión nueva',
     );
   }
@@ -824,14 +824,14 @@ function fieldIdDe(form: StandardFormDefinition, code: string): string {
  * y, por código de campo, lo que la definición del campo no tiene dónde
  * guardar.
  */
-export function fichaDeCatalogo(
+export function catalogRecord(
   form: StandardFormDefinition,
 ): Record<string, unknown> {
   const fieldPresentation: Record<string, Record<string, unknown>> = {};
   for (const field of form.fields) {
     const { section, options, multiple, allowOther, description, showWhen } =
       field;
-    const presentacion = Object.fromEntries(
+    const presentation = Object.fromEntries(
       Object.entries({
         section,
         options,
@@ -841,8 +841,8 @@ export function fichaDeCatalogo(
         showWhen,
       }).filter(([, valor]) => valor !== undefined),
     );
-    if (Object.keys(presentacion).length > 0)
-      fieldPresentation[field.code] = presentacion;
+    if (Object.keys(presentation).length > 0)
+      fieldPresentation[field.code] = presentation;
   }
   return { ...form.provenance, kind: form.kind, fieldPresentation };
 }

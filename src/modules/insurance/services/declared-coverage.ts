@@ -90,12 +90,12 @@ export async function createDeclaredCoverage(
     );
   }
 
-  const yaExiste = await repos.coverage.findByMemberAndPlan(
+  const alreadyExists = await repos.coverage.findByMemberAndPlan(
     tx,
     data.memberIdentifier,
     data.insurancePlanId,
   );
-  if (yaExiste) {
+  if (alreadyExists) {
     // Puede pasar si alguien ya cargó la cobertura de esta persona antes de que
     // ella se registrara. Duplicarla sería peor que omitirla, y hacer fracasar
     // el alta entera por un dato opcional, peor todavía.

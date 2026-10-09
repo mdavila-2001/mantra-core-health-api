@@ -176,7 +176,7 @@ export class CommunityReviewsReadService {
     // descartarlo después dejaría los nombres de los autores anónimos en la
     // memoria del proceso, que es exactamente lo que la reseña anónima promete
     // que no pasa.
-    const firmantes = page
+    const signers = page
       .filter(
         (review) =>
           review.reviewerDisplayModeConceptId === COMM.REVIEW_DISPLAY_REAL_NAME,
@@ -186,7 +186,7 @@ export class CommunityReviewsReadService {
     const [scores, responses, nombres] = await Promise.all([
       this.reviewsRepo.listDimensionScores(em, reviewIds),
       this.reviewsRepo.listResponses(em, reviewIds),
-      this.reviewsRepo.displayNamesByPerson(em, firmantes),
+      this.reviewsRepo.displayNamesByPerson(em, signers),
     ]);
 
     const last = page.at(-1);

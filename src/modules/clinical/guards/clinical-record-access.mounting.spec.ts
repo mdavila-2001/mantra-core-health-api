@@ -33,7 +33,7 @@ import { ClinicalRecordAccessGuard } from './clinical-record-access.guard';
  * «completa» el montaje sobre esas rutas, este spec falla y obliga a resolver
  * GAP-3 de verdad en lugar de maquillarlo.
  */
-const guardsDe = (controller: unknown, handler: string): unknown[] =>
+const guards = (controller: unknown, handler: string): unknown[] =>
   (Reflect.getMetadata(
     GUARDS_METADATA,
     Object.getOwnPropertyDescriptor(
@@ -42,12 +42,12 @@ const guardsDe = (controller: unknown, handler: string): unknown[] =>
     )!.value,
   ) as unknown[]) ?? [];
 
-const guardsDeLaClase = (controller: unknown): unknown[] =>
+const guardsClass = (controller: unknown): unknown[] =>
   (Reflect.getMetadata(GUARDS_METADATA, controller as object) as unknown[]) ??
   [];
 
 /** Los 12 handlers cuyo `patientProfileId` viaja en la petición. */
-const HANDLERS_PROTEGIDOS: ReadonlyArray<readonly [unknown, string, string]> = [
+const HANDLERS_PROTECTED: ReadonlyArray<readonly [unknown, string, string]> = [
   [ClinicalRecordsController, 'createCondition', 'POST /clinical/conditions'],
   [
     ClinicalRecordsController,
@@ -102,7 +102,7 @@ const HANDLERS_PROTEGIDOS: ReadonlyArray<readonly [unknown, string, string]> = [
  * `BOOTSTRAP_ACCESS_RESIDUAL` sigue **abierto**, y estas rutas **no están
  * protegidas** por paciente.
  */
-const HANDLERS_BOOTSTRAP_SIN_GUARD: ReadonlyArray<
+const HANDLERS_BOOTSTRAP_WITHOUT_GUARD: ReadonlyArray<
   readonly [unknown, string, string]
 > = [
   [
@@ -127,7 +127,7 @@ const HANDLERS_BOOTSTRAP_SIN_GUARD: ReadonlyArray<
  * prueba que sin permiso no escriben. `checkDuplicateStudy` es otro motivo distinto — no persiste y ya pasa
  * por la misma política dentro de su servicio.
  */
-const HANDLERS_SIN_GUARD: ReadonlyArray<readonly [unknown, string, string]> = [
+const HANDLERS_WITHOUT_GUARD: ReadonlyArray<readonly [unknown, string, string]> = [
   [
     ClinicalRecordsController,
     'changeConditionStatus',
@@ -204,32 +204,32 @@ const HANDLERS_SIN_GUARD: ReadonlyArray<readonly [unknown, string, string]> = [
 ];
 
 describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
-  it.each(HANDLERS_PROTEGIDOS)(
+  it.each(HANDLERS_PROTECTED)(
     'protege %p.%s (%s)',
     (controller, handler, _ruta) => {
-      expect(guardsDe(controller, handler)).toContain(
+      expect(guards(controller, handler)).toContain(
         ClinicalRecordAccessGuard,
       );
     },
   );
 
   it('cubre exactamente los 12 handlers del CORE de SEC-01', () => {
-    expect(HANDLERS_PROTEGIDOS).toHaveLength(12);
+    expect(HANDLERS_PROTECTED).toHaveLength(12);
   });
 
-  it.each(HANDLERS_BOOTSTRAP_SIN_GUARD)(
+  it.each(HANDLERS_BOOTSTRAP_WITHOUT_GUARD)(
     'deja fuera %p.%s, sin fingir que está resuelta (%s)',
-    (controller, handler, _motivo) => {
-      expect(guardsDe(controller, handler)).not.toContain(
+    (controller, handler, reason) => {
+      expect(guards(controller, handler)).not.toContain(
         ClinicalRecordAccessGuard,
       );
     },
   );
 
-  it.each(HANDLERS_SIN_GUARD)(
+  it.each(HANDLERS_WITHOUT_GUARD)(
     'no finge proteger %p.%s (%s)',
-    (controller, handler, _motivo) => {
-      expect(guardsDe(controller, handler)).not.toContain(
+    (controller, handler, reason) => {
+      expect(guards(controller, handler)).not.toContain(
         ClinicalRecordAccessGuard,
       );
     },
@@ -247,7 +247,7 @@ describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
       ChartCarePlansController,
       ChartDocumentsController,
     ]) {
-      expect(guardsDeLaClase(controller)).not.toContain(
+      expect(guardsClass(controller)).not.toContain(
         ClinicalRecordAccessGuard,
       );
     }
@@ -256,10 +256,10 @@ describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
   it('deja intacto el montaje de clase de los dos controladores de lectura', () => {
     // FT-07-R08 ya los protegía por clase, y ahí sí corresponde: su única ruta
     // lleva `:patientProfileId`. SEC-01 no los toca.
-    expect(guardsDeLaClase(ClinicalReadController)).toContain(
+    expect(guardsClass(ClinicalReadController)).toContain(
       ClinicalRecordAccessGuard,
     );
-    expect(guardsDeLaClase(ChartReadController)).toContain(
+    expect(guardsClass(ChartReadController)).toContain(
       ClinicalRecordAccessGuard,
     );
   });

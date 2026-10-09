@@ -5,8 +5,8 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 
 function build() {
-  const orden: string[] = [];
-  let contadorPersona = 0;
+  const order: string[] = [];
+  let personAccountant = 0;
   const personsRepo = {
     create: fn(
       (
@@ -21,11 +21,11 @@ function build() {
       ) => {
         // Registra lo que de verdad importa comprobar: si vino `displayName`
         // (la forma legada, `fullName` del DTO) o las partes sueltas.
-        orden.push(
+        order.push(
           `persons.create:${data.displayName ?? `${data.name} ${data.lastName}`}`,
         );
-        contadorPersona += 1;
-        return { id: `person-${contadorPersona}`, ...data };
+        personAccountant += 1;
+        return { id: `person-${personAccountant}`, ...data };
       },
     ),
   };
@@ -38,13 +38,13 @@ function build() {
   const contactPointsRepo = { create: fn() };
   const representatives = {
     attachRegistrationRepresentatives: fn(async () => {
-      orden.push('attachRegistrationRepresentatives');
+      order.push('attachRegistrationRepresentatives');
       return { legalRepresentativeId: 'rep-1', count: 1 };
     }),
   };
   const tx = {
     flush: fn(async () => {
-      orden.push('flush');
+      order.push('flush');
     }),
   };
 
@@ -61,7 +61,7 @@ function build() {
     contactPointsRepo,
     representatives,
     tx: tx as never,
-    orden,
+    orden: order,
   };
 }
 
@@ -69,13 +69,13 @@ describe('IamOrganizationRepresentativesService', () => {
   it('sin representante ni gerencias, no crea ninguna persona ni delega', async () => {
     const d = build();
 
-    const resultado = await d.service.register(d.tx, {
+    const result = await d.service.register(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       legalDocumentFileIds: [],
     });
 
-    expect(resultado).toEqual({ representativesRegistered: 0 });
+    expect(result).toEqual({ representativesRegistered: 0 });
     expect(d.personsRepo.create).not.toHaveBeenCalled();
     expect(
       d.representatives.attachRegistrationRepresentatives,
@@ -85,7 +85,7 @@ describe('IamOrganizationRepresentativesService', () => {
   it('con representante legal: crea su persona con el CI y el correo, y lo delega con su fileId', async () => {
     const d = build();
 
-    const resultado = await d.service.register(d.tx, {
+    const result = await d.service.register(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       legalEntityType: 'SRL',
@@ -99,9 +99,9 @@ describe('IamOrganizationRepresentativesService', () => {
     });
 
     expect(d.personsRepo.create).toHaveBeenCalledTimes(1);
-    const llamada =
+    const call =
       d.representatives.attachRegistrationRepresentatives.mock.calls[0];
-    expect(llamada[1]).toMatchObject({
+    expect(call[1]).toMatchObject({
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       legalEntityType: 'SRL',
@@ -113,7 +113,7 @@ describe('IamOrganizationRepresentativesService', () => {
       },
       executives: undefined,
     });
-    expect(resultado).toEqual({ representativesRegistered: 1 });
+    expect(result).toEqual({ representativesRegistered: 1 });
   });
 
   it('sin CI declarado, el representante viaja con ciIdentifierId undefined', async () => {
@@ -132,10 +132,10 @@ describe('IamOrganizationRepresentativesService', () => {
     });
 
     expect(d.identifiersRepo.create).not.toHaveBeenCalled();
-    const llamada =
+    const call =
       d.representatives.attachRegistrationRepresentatives.mock.calls[0];
     expect(
-      (llamada[1] as { legalRepresentative?: { ciIdentifierId?: string } })
+      (call[1] as { legalRepresentative?: { ciIdentifierId?: string } })
         .legalRepresentative?.ciIdentifierId,
     ).toBeUndefined();
   });
@@ -143,7 +143,7 @@ describe('IamOrganizationRepresentativesService', () => {
   it('con las tres gerencias: crea una persona por cada una, en orden general→comercial→marketing', async () => {
     const d = build();
 
-    const resultado = await d.service.register(d.tx, {
+    const result = await d.service.register(d.tx, {
       tenantId: 'tenant-1',
       ownerUserId: 'user-1',
       legalDocumentFileIds: [],
@@ -171,14 +171,14 @@ describe('IamOrganizationRepresentativesService', () => {
       'persons.create:Ana Paz',
       'persons.create:Luis Rojas',
     ]);
-    const llamada =
+    const call =
       d.representatives.attachRegistrationRepresentatives.mock.calls[0];
-    expect((llamada[1] as { executives?: unknown }).executives).toEqual([
+    expect((call[1] as { executives?: unknown }).executives).toEqual([
       { role: 'GENERAL_MANAGER', personId: 'person-1' },
       { role: 'COMMERCIAL_MANAGER', personId: 'person-2' },
       { role: 'MARKETING_MANAGER', personId: 'person-3' },
     ]);
-    expect(resultado).toEqual({ representativesRegistered: 1 });
+    expect(result).toEqual({ representativesRegistered: 1 });
   });
 
   it('el celular del gerente se pasa como `mobile`, no como `phone`', async () => {

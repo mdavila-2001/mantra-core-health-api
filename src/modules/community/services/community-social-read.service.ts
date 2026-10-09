@@ -129,15 +129,15 @@ export class CommunitySocialReadService {
     actor: AuthenticatedUser,
   ): Promise<PublicProfileDetailDto> {
     const em = this.em.fork();
-    const perfil = await this.profilesRepo.findBySlug(em, slug);
-    if (!perfil) {
+    const profile = await this.profilesRepo.findBySlug(em, slug);
+    if (!profile) {
       throw new ResourceNotFoundException(
         'Perfil no encontrado',
         { slug },
         CommunityErrorReason.PROFILE_NOT_FOUND_BY_SLUG,
       );
     }
-    return this.getProfile(perfil.id, actor);
+    return this.getProfile(profile.id, actor);
   }
 
   async getProfile(
@@ -469,18 +469,18 @@ export class CommunitySocialReadService {
     requestedProfileId?: string,
   ): Promise<FileContentDto> {
     const em = this.em.fork();
-    const adjunto = await this.commentsRepo.findMediaByFileId(em, fileId);
-    if (!adjunto) {
+    const attachment = await this.commentsRepo.findMediaByFileId(em, fileId);
+    if (!attachment) {
       throw new ResourceNotFoundException(
         'Archivo no encontrado',
         { fileId },
         CommunityErrorReason.COMMENT_MEDIA_NOT_FOUND,
       );
     }
-    const comentario = await this.commentsRepo.findById(em, adjunto.commentId);
+    const comment = await this.commentsRepo.findById(em, attachment.commentId);
     if (
-      !comentario ||
-      comentario.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
+      !comment ||
+      comment.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
     ) {
       throw new ResourceNotFoundException(
         'Archivo no encontrado',
@@ -498,7 +498,7 @@ export class CommunitySocialReadService {
     // confirma si el archivo existe pero el post es privado.
     await this.assertPostVisible(
       em,
-      comentario.commentableRefId,
+      comment.commentableRefId,
       actorProfileId,
     );
 
@@ -761,8 +761,8 @@ export class CommunitySocialReadService {
       commentsEnabled: post.commentsEnabled ?? null,
       publishedAt: post.publishedAt ?? null,
       editedAt: post.editedAt ?? null,
-      reactions: (engagement ?? CommunityEngagementService.vacio()).reactions,
-      commentCount: (engagement ?? CommunityEngagementService.vacio())
+      reactions: (engagement ?? CommunityEngagementService.empty()).reactions,
+      commentCount: (engagement ?? CommunityEngagementService.empty())
         .commentCount,
     };
   }

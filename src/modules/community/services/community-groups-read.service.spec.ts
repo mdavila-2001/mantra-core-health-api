@@ -30,8 +30,8 @@ function buildGroups() {
     listTopics: mockFn().mockResolvedValue([]),
   };
   const visibility = {
-    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
-      Promise.resolve(pedido),
+    resolveActorProfileId: mockFn((_em: any, _actor: any, order?: string) =>
+      Promise.resolve(order),
     ),
   };
   const access = { resolve: mockFn() };
@@ -61,8 +61,8 @@ function buildPolls() {
   const postsRepo = { findById: mockFn().mockResolvedValue({ id: 'post-1' }) };
   const visibility = {
     canViewPost: mockFn().mockResolvedValue(true),
-    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
-      Promise.resolve(pedido),
+    resolveActorProfileId: mockFn((_em: any, _actor: any, order?: string) =>
+      Promise.resolve(order),
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };

@@ -129,16 +129,16 @@ describe('VerifiedIdentityGuard', () => {
   });
 
   it('cada subcaso trae su propio reason, sin leer el mensaje', async () => {
-    const sinPersona = build(true);
-    sinPersona.forked.findOne.mockResolvedValueOnce(null);
+    const withoutPerson = build(true);
+    withoutPerson.forked.findOne.mockResolvedValueOnce(null);
 
     await expect(
-      sinPersona.guard.canActivate(contextFor(actor)),
+      withoutPerson.guard.canActivate(contextFor(actor)),
     ).rejects.toMatchObject({ details: { reason: 'no-person-linked' } });
 
-    const sinUsuario = build(true);
+    const withoutUser = build(true);
     await expect(
-      sinUsuario.guard.canActivate(contextFor(undefined)),
+      withoutUser.guard.canActivate(contextFor(undefined)),
     ).rejects.toMatchObject({ details: { reason: 'no-authenticated-user' } });
   });
 });

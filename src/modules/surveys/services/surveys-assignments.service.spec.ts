@@ -345,10 +345,10 @@ describe('SurveysAssignmentsService', () => {
       );
 
       const [, data] = d.invitationsRepo.create.mock.calls[0];
-      const dias =
+      const days =
         (data.expiresAt.getTime() - data.issuedAt.getTime()) /
         (24 * 60 * 60 * 1000);
-      expect(dias).toBeCloseTo(7, 5);
+      expect(days).toBeCloseTo(7, 5);
     });
   });
 });

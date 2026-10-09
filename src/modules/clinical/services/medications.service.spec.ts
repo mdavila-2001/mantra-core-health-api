@@ -57,8 +57,8 @@ function build() {
     prescriptionIssued: mockFn().mockResolvedValue({ suppressed: false }),
   };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   // P25: adjuntos de la receta.
   const filesService = {
@@ -188,12 +188,12 @@ describe('MedicationsService', () => {
 
     // CL-02 (BR-10) — el prescriptor sale de la sesión, nunca del cuerpo.
     describe('prescriptor por sesión (CL-02)', () => {
-      const alta = {
+      const registration = {
         custodianTenantId: 't1',
         patientProfileId: 'p1',
         medicationConceptId: 'm1',
       };
-      const creada = () => ({
+      const created = () => ({
         id: 'mr1',
         patientProfileId: 'p1',
         statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
@@ -202,8 +202,8 @@ describe('MedicationsService', () => {
 
       it('sin prescriptor en el cuerpo, queda el perfil de la sesión', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada());
-        await d.service.prescribe(alta, actor);
+        d.requestsRepo.create.mockReturnValue(created());
+        await d.service.prescribe(registration, actor);
         expect(d.requestsRepo.create).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({ prescriberProfileId: 'hp-1' }),
@@ -212,9 +212,9 @@ describe('MedicationsService', () => {
 
       it('con el propio perfil en el cuerpo, lo confirma', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada());
+        d.requestsRepo.create.mockReturnValue(created());
         await d.service.prescribe(
-          { ...alta, prescriberProfileId: 'hp-1' },
+          { ...registration, prescriberProfileId: 'hp-1' },
           actor,
         );
         expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
@@ -226,7 +226,7 @@ describe('MedicationsService', () => {
         const d = build();
         await expect(
           d.service.prescribe(
-            { ...alta, prescriberProfileId: 'hp-otro' },
+            { ...registration, prescriberProfileId: 'hp-otro' },
             actor,
           ),
         ).rejects.toBeInstanceOf(ForbiddenException);
@@ -236,15 +236,15 @@ describe('MedicationsService', () => {
       it('una sesión sin perfil profesional no prescribe (403)', async () => {
         const d = build();
         await expect(
-          d.service.prescribe(alta, { id: 'u', roles: [] } as any),
+          d.service.prescribe(registration, { id: 'u', roles: [] } as any),
         ).rejects.toBeInstanceOf(ForbiddenException);
         expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });
 
       it('SUPERADMIN pasa con el perfil que declare', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada());
-        await d.service.prescribe({ ...alta, prescriberProfileId: 'hp-otro' }, {
+        d.requestsRepo.create.mockReturnValue(created());
+        await d.service.prescribe({ ...registration, prescriberProfileId: 'hp-otro' }, {
           id: 'root',
           roles: ['SUPERADMIN'],
         } as any);
@@ -256,12 +256,12 @@ describe('MedicationsService', () => {
 
     // P24 / CL-03 — «otro motivo» escrito a mano.
     describe('indicationText (P24)', () => {
-      const alta = {
+      const registration = {
         custodianTenantId: 't1',
         patientProfileId: 'p1',
         medicationConceptId: 'm1',
       };
-      const creada = () => ({
+      const created = () => ({
         id: 'mr1',
         patientProfileId: 'p1',
         statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
@@ -270,9 +270,9 @@ describe('MedicationsService', () => {
 
       it('persiste el motivo escrito cuando no hay condición codificada', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada());
+        d.requestsRepo.create.mockReturnValue(created());
         await d.service.prescribe(
-          { ...alta, indicationText: '  control de ansiedad  ' },
+          { ...registration, indicationText: '  control de ansiedad  ' },
           actor,
         );
         expect(d.requestsRepo.create.mock.calls[0][1].indicationText).toBe(
@@ -286,24 +286,24 @@ describe('MedicationsService', () => {
           id: 'condition-1',
           patientProfileId: 'p1',
         });
-        d.requestsRepo.create.mockReturnValue(creada());
+        d.requestsRepo.create.mockReturnValue(created());
         await d.service.prescribe(
           {
-            ...alta,
+            ...registration,
             indicationConditionId: 'condition-1',
             indicationText: 'control de ansiedad',
           },
           actor,
         );
-        const datos = d.requestsRepo.create.mock.calls[0][1];
-        expect(datos.indicationConditionId).toBe('condition-1');
-        expect(datos.indicationText).toBeUndefined();
+        const data = d.requestsRepo.create.mock.calls[0][1];
+        expect(data.indicationConditionId).toBe('condition-1');
+        expect(data.indicationText).toBeUndefined();
       });
 
       it('un texto vacío no se guarda como cadena vacía', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada());
-        await d.service.prescribe({ ...alta, indicationText: '   ' }, actor);
+        d.requestsRepo.create.mockReturnValue(created());
+        await d.service.prescribe({ ...registration, indicationText: '   ' }, actor);
         expect(
           d.requestsRepo.create.mock.calls[0][1].indicationText,
         ).toBeUndefined();
@@ -311,13 +311,13 @@ describe('MedicationsService', () => {
     });
 
     describe('formInstanceId (P43)', () => {
-      const alta = {
+      const registration = {
         custodianTenantId: 't1',
         patientProfileId: 'p1',
         encounterId: 'enc-1',
         medicationConceptId: 'm1',
       };
-      const creada = {
+      const created = {
         id: 'mr1',
         patientProfileId: 'p1',
         statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
@@ -327,11 +327,11 @@ describe('MedicationsService', () => {
       it('valida la instancia contra el encuentro, la guarda y la devuelve', async () => {
         const d = build();
         d.requestsRepo.create.mockImplementation((_tx: unknown, data: any) => ({
-          ...creada,
+          ...created,
           formInstanceId: data.formInstanceId,
         }));
         const res = await d.service.prescribe(
-          { ...alta, formInstanceId: 'form-1' },
+          { ...registration, formInstanceId: 'form-1' },
           actor,
         );
         expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
@@ -347,8 +347,8 @@ describe('MedicationsService', () => {
 
       it('sin formInstanceId no valida nada y responde null', async () => {
         const d = build();
-        d.requestsRepo.create.mockReturnValue(creada);
-        const res = await d.service.prescribe(alta, actor);
+        d.requestsRepo.create.mockReturnValue(created);
+        const res = await d.service.prescribe(registration, actor);
         expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
         expect(res.formInstanceId).toBeNull();
       });
@@ -359,7 +359,7 @@ describe('MedicationsService', () => {
           new PreconditionFailedException('La instancia no está cerrada'),
         );
         await expect(
-          d.service.prescribe({ ...alta, formInstanceId: 'form-1' }, actor),
+          d.service.prescribe({ ...registration, formInstanceId: 'form-1' }, actor),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
         expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });
@@ -376,7 +376,7 @@ describe('MedicationsService', () => {
         patientProfileId: 'p1',
       });
       await d.service.listAttachments('mr1', actor);
-      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -405,7 +405,7 @@ describe('MedicationsService', () => {
         statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
       });
       const res = await d.service.attachFile('mr1', { fileId: 'f1' }, actor);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -423,7 +423,7 @@ describe('MedicationsService', () => {
       await expect(
         d.service.attachFile('nope', { fileId: 'f1' }, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
       expect(d.filesService.createLink).not.toHaveBeenCalled();
     });
   });
@@ -883,22 +883,22 @@ describe('MedicationsService', () => {
 
 describe('MedicationsService · MCH-007', () => {
   // Fija: el fixture se compara consigo mismo para probar que no se tocó.
-  const CREADA = new Date('2026-09-01T12:00:00Z');
-  const borrador = () => ({
+  const CREATED = new Date('2026-09-01T12:00:00Z');
+  const draft = () => ({
     id: 'mr1',
     patientProfileId: 'paciente-ajeno',
     prescriberProfileId: 'hp-autor',
     createdByUserId: 'user-autor',
     statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
-    updatedAt: CREADA,
-    createdAt: CREADA,
+    updatedAt: CREATED,
+    createdAt: CREATED,
   });
-  const otroMedico = {
+  const otherDoctor = {
     id: 'user-otro',
     roles: ['PRACTITIONER'],
     practitionerProfileId: 'hp-otro',
   } as any;
-  const autor = {
+  const author = {
     id: 'user-autor',
     roles: ['PRACTITIONER'],
     practitionerProfileId: 'hp-autor',
@@ -907,45 +907,45 @@ describe('MedicationsService · MCH-007', () => {
   it.each([
     [
       'editDraft',
-      (d: any) => d.service.editDraft('mr1', { doseText: 'x' }, otroMedico),
+      (d: any) => d.service.editDraft('mr1', { doseText: 'x' }, otherDoctor),
     ],
-    ['sign', (d: any) => d.service.sign('mr1', otroMedico)],
-    ['issue', (d: any) => d.service.issue('mr1', otroMedico)],
+    ['sign', (d: any) => d.service.sign('mr1', otherDoctor)],
+    ['issue', (d: any) => d.service.issue('mr1', otherDoctor)],
     [
       'invalidate',
-      (d: any) => d.service.invalidate('mr1', { reasonText: 'x' }, otroMedico),
+      (d: any) => d.service.invalidate('mr1', { reasonText: 'x' }, otherDoctor),
     ],
     [
       'replace',
-      (d: any) => d.service.replace('mr1', { reasonText: 'x' }, otroMedico),
+      (d: any) => d.service.replace('mr1', { reasonText: 'x' }, otherDoctor),
     ],
-    ['renew', (d: any) => d.service.renew('mr1', {}, otroMedico)],
+    ['renew', (d: any) => d.service.renew('mr1', {}, otherDoctor)],
   ])(
     '%s pregunta por el paciente de la receta y, sin permiso, no escribe',
-    async (_nombre, operar) => {
+    async (_nombre, operate) => {
       const d = build();
-      const request = borrador();
+      const request = draft();
       d.requestsRepo.findById.mockResolvedValue(request);
-      d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
         new ForbiddenException('sin permiso'),
       );
 
-      await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      await expect(operate(d)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'paciente-ajeno',
-        otroMedico,
+        otherDoctor,
       );
-      expect(request).toEqual(borrador());
+      expect(request).toEqual(draft());
       expect(d.auditTrail.record).not.toHaveBeenCalled();
     },
   );
 
   it('poder escribir no es poder firmar por otro profesional', async () => {
     const d = build();
-    const request = borrador();
+    const request = draft();
     d.requestsRepo.findById.mockResolvedValue(request);
 
-    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+    await expect(d.service.sign('mr1', otherDoctor)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
     expect((request as any).signedAt).toBeUndefined();
@@ -954,34 +954,34 @@ describe('MedicationsService · MCH-007', () => {
 
   it('el prescriptor firma su receta', async () => {
     const d = build();
-    const request = borrador();
+    const request = draft();
     d.requestsRepo.findById.mockResolvedValue(request);
 
-    await d.service.sign('mr1', autor);
+    await d.service.sign('mr1', author);
     expect((request as any).signedByUserId).toBe('user-autor');
   });
 
   it('sin prescriptor declarado, sólo firma quien redactó el borrador', async () => {
     const d = build();
-    const request = { ...borrador(), prescriberProfileId: undefined };
+    const request = { ...draft(), prescriberProfileId: undefined };
     d.requestsRepo.findById.mockResolvedValue(request);
 
-    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+    await expect(d.service.sign('mr1', otherDoctor)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
-    await d.service.sign('mr1', autor);
+    await d.service.sign('mr1', author);
     expect((request as any).signedByUserId).toBe('user-autor');
   });
 
   it('una receta ya firmada no devuelve 200 a quien no es su prescriptor', async () => {
     const d = build();
     d.requestsRepo.findById.mockResolvedValue({
-      ...borrador(),
+      ...draft(),
       signedAt: new Date(),
       signedByUserId: 'user-autor',
     });
 
-    await expect(d.service.sign('mr1', otroMedico)).rejects.toBeInstanceOf(
+    await expect(d.service.sign('mr1', otherDoctor)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
   });

@@ -8,10 +8,10 @@ import { ProfilesPractitionersController } from './controllers';
  */
 describe('ProfilesModule', () => {
   it('publica ProfilesPractitionersController (especialidades y matrículas propias)', () => {
-    const controladores = (Reflect.getMetadata(
+    const controllers = (Reflect.getMetadata(
       'controllers',
       ProfilesModule as object,
     ) ?? []) as readonly unknown[];
-    expect(controladores).toContain(ProfilesPractitionersController);
+    expect(controllers).toContain(ProfilesPractitionersController);
   });
 });
