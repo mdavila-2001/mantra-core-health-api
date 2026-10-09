@@ -378,4 +378,12 @@ export class AlertBatchResponseDto {
    */
   @ApiProperty({ description: 'Nº de alertas generadas' })
   count!: number;
+
+  /**
+   * Reglas activas que no se pudieron evaluar porque su lógica no se entiende.
+   * Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no
+   * puede confundirse con una que no aplica.
+   */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  unevaluatedRuleIds?: string[];
 }
