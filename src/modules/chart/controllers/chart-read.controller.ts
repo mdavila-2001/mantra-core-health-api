@@ -12,7 +12,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { ParseOptionalLimitPipe, Roles } from '../../../common';
+import { ParseOptionalLimitPipe, Roles, AccessLogged } from '../../../common';
 import { ChartReadService } from '../services';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import type { PatientChartResponseDto } from '../dto';
@@ -49,6 +49,10 @@ export class ChartReadController {
    * @returns Notas, planes de cuidados y documentos del paciente.
    */
   @Get(':patientProfileId/chart')
+  @AccessLogged({
+    resourceType: 'PATIENT_CHART',
+    patient: 'param:patientProfileId',
+  })
   @ApiOperation({
     summary:
       'UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)',

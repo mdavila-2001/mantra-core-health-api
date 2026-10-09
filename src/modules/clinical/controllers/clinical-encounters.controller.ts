@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { CareEpisodesService, EncountersService } from '../services';
 import {
@@ -123,6 +128,10 @@ export class ClinicalEncountersController {
    * lee (`PATIENT` en el handler): la política de lectura la aplica el servicio.
    */
   @Get('encounters/:id/attachments')
+  @AccessLogged({
+    resourceType: 'ENCOUNTER_ATTACHMENTS',
+    resourceId: 'param:id',
+  })
   @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'Listar los adjuntos de un encuentro' })
   listEncounterAttachments(

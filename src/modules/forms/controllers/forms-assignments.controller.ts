@@ -24,6 +24,7 @@ import {
   Roles,
   getCurrentTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { FormsAssignmentsService, FormsReadService } from '../services';
 import {
@@ -67,6 +68,7 @@ export class FormsAssignmentsController {
 
   /** Fase 1 de lecturas: asignaciones visibles, con secciones resueltas. */
   @Get()
+  @AccessLogged({ resourceType: 'FORM_ASSIGNMENTS' })
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Listar asignaciones de campo (globales y del tenant)',

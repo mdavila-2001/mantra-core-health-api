@@ -9,6 +9,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { FormsReadService } from '../services';
 import {
@@ -44,6 +45,7 @@ export class FormsMeController {
 
   /** Los formularios respondidos del paciente de la sesión. */
   @Get()
+  @AccessLogged({ resourceType: 'FORM_INSTANCES', patient: 'actor' })
   @ApiOperation({ summary: 'Ver mis formularios clínicos' })
   @ApiQuery({
     name: 'limit',
@@ -59,6 +61,11 @@ export class FormsMeController {
 
   /** Un formulario propio, con sus valores vigentes. */
   @Get(':id')
+  @AccessLogged({
+    resourceType: 'FORM_INSTANCE',
+    patient: 'actor',
+    resourceId: 'param:id',
+  })
   @ApiOperation({ summary: 'Leer un formulario propio con sus respuestas' })
   getMyInstance(
     @Param('id', ParseUUIDPipe) id: string,

@@ -14,6 +14,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
+  SkipAuditTrail,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -38,6 +39,16 @@ import {
   DeliverNotificationResponseDto,
   PendingNotificationsResponseDto,
 } from '../dto';
+
+/**
+ * Plomería de la cola de mensajería: los workers la llaman cada pocos segundos
+ * para mover filas que ya son su propio rastro (`messaging.outbox_messages`,
+ * `event_deliveries`, los jobs de la cola, `notification_deliveries`). Sellar
+ * cada vuelta en `audit.audit_log` serializaría la partición global de la cadena
+ * con decenas de miles de eslabones diarios que no dicen nada nuevo.
+ */
+const QUEUE_PLUMBING =
+  'Plomería de cola de workers: el rastro es la propia cola de messaging.';
 
 /**
  * Superficie interna de mensajería: la operan los workers, no los clientes.
@@ -65,6 +76,7 @@ export class MessagingInternalController {
 
   /** UC-35-02. */
   @Post('outbox/relay/run')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -77,6 +89,7 @@ export class MessagingInternalController {
 
   /** UC-35-03. */
   @Post('events/:domainEventId/dispatch')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -94,6 +107,7 @@ export class MessagingInternalController {
 
   /** UC-35-04. */
   @Post('event-deliveries/:id/ack')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -108,6 +122,7 @@ export class MessagingInternalController {
 
   /** UC-35-06. */
   @Post('queues/:code/claim')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -124,6 +139,7 @@ export class MessagingInternalController {
 
   /** UC-35-07. */
   @Post('jobs/:id/complete')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -139,6 +155,7 @@ export class MessagingInternalController {
 
   /** UC-35-08. */
   @Post('jobs/:id/fail')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -172,6 +189,7 @@ export class MessagingInternalController {
 
   /** UC-35-11. */
   @Post('notifications/:requestId/deliver')
+  @SkipAuditTrail(QUEUE_PLUMBING)
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
