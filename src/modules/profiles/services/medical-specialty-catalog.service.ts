@@ -65,8 +65,8 @@ export class MedicalSpecialtyCatalogService {
     em: EntityManager,
     specialtyConceptId: string,
   ): Promise<void> {
-    const miembros = await this.listMemberIds(em);
-    if (!miembros.has(specialtyConceptId)) {
+    const members = await this.listMemberIds(em);
+    if (!members.has(specialtyConceptId)) {
       throw new PreconditionFailedException(
         'La especialidad no pertenece al catálogo de especialidades médicas',
         { specialtyConceptId, valueSet: MEDICAL_SPECIALTY_VALUE_SET },
@@ -83,23 +83,23 @@ export class MedicalSpecialtyCatalogService {
    * está disponible, que es lo que efectivamente pasa.
    */
   private async listMemberIds(em: EntityManager): Promise<ReadonlySet<string>> {
-    const conjunto = await this.valueSets.findByInternalCode(
+    const set = await this.valueSets.findByInternalCode(
       em,
       MEDICAL_SPECIALTY_VALUE_SET,
     );
-    const miembros =
-      conjunto === null
+    const members =
+      set === null
         ? null
         : await this.valueSets.findIncludedConceptIdsByValueSet(
             em,
-            conjunto.id,
+            set.id,
           );
-    if (miembros === null) {
+    if (members === null) {
       throw new PreconditionFailedException(
         'El catálogo de especialidades médicas no está disponible',
         { valueSet: MEDICAL_SPECIALTY_VALUE_SET },
       );
     }
-    return new Set(miembros);
+    return new Set(members);
   }
 }

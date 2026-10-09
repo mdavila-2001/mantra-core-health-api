@@ -41,13 +41,13 @@ function build() {
 }
 
 /** Programa las propiedades que devuelve el catálogo para cada código. */
-function conPropiedades(
+function withProperties(
   d: ReturnType<typeof build>,
-  porCodigo: Record<string, { conceptId: string; valueJson: unknown }[]>,
+  byCode: Record<string, { conceptId: string; valueJson: unknown }[]>,
 ): void {
   d.propertiesRepo.findPropertyForConcepts.mockImplementation(
     async (_em: unknown, _ids: string[], propertyCode: string) =>
-      porCodigo[propertyCode] ?? [],
+      byCode[propertyCode] ?? [],
   );
 }
 
@@ -58,9 +58,9 @@ describe('LinkableOrganizationsService', () => {
     const d = build();
     d.valueSetsRepo.findByInternalCode.mockResolvedValue(null);
 
-    const salida = await d.service.buscar({ query: 'foianini' });
+    const output = await d.service.search({ query: 'foianini' });
 
-    expect(salida).toEqual({ items: [], count: 0, limit: 20 });
+    expect(output).toEqual({ items: [], count: 0, limit: 20 });
     expect(d.conceptsRepo.search).not.toHaveBeenCalled();
   });
 
@@ -68,9 +68,9 @@ describe('LinkableOrganizationsService', () => {
     const d = build();
     d.valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue(null);
 
-    const salida = await d.service.buscar({});
+    const output = await d.service.search({});
 
-    expect(salida.items).toEqual([]);
+    expect(output.items).toEqual([]);
     expect(d.conceptsRepo.search).not.toHaveBeenCalled();
   });
 
@@ -80,7 +80,7 @@ describe('LinkableOrganizationsService', () => {
     // hospitales.
     const d = build();
 
-    await d.service.buscar({ query: 'clinica' });
+    await d.service.search({ query: 'clinica' });
 
     const [, filtros] = d.conceptsRepo.search.mock.calls[0];
     expect(filtros.ids).toEqual([FOIANINI, SAN_LUIS_TORNO, SAN_LUIS_URUBICHA]);
@@ -98,7 +98,7 @@ describe('LinkableOrganizationsService', () => {
         display: 'CLINICA FOIANINI',
       },
     ]);
-    conPropiedades(d, {
+    withProperties(d, {
       [BO_FACILITY_PROPERTY_CODES.municipio]: [
         { conceptId: FOIANINI, valueJson: 'SANTA CRUZ DE LA SIERRA' },
       ],
@@ -110,9 +110,9 @@ describe('LinkableOrganizationsService', () => {
       ],
     });
 
-    const salida = await d.service.buscar({ query: 'foianini' });
+    const output = await d.service.search({ query: 'foianini' });
 
-    expect(salida.items[0]).toEqual({
+    expect(output.items[0]).toEqual({
       facilityConceptId: FOIANINI,
       code: 'BO_EST_CLINICA_FOIANINI',
       name: 'CLINICA FOIANINI',
@@ -120,7 +120,7 @@ describe('LinkableOrganizationsService', () => {
       type: 'CLINICA_PRIVADA',
       address: 'Av. Irala 468',
     });
-    expect(salida.count).toBe(1);
+    expect(output.count).toBe(1);
   });
 
   it('deja el codigo del padron sin el prefijo de dominio', async () => {
@@ -136,9 +136,9 @@ describe('LinkableOrganizationsService', () => {
       },
     ]);
 
-    const salida = await d.service.buscar({});
+    const output = await d.service.search({});
 
-    expect(salida.items[0].code).toBe('BO_EST_CLINICA_FOIANINI');
+    expect(output.items[0].code).toBe('BO_EST_CLINICA_FOIANINI');
   });
 
   it('deja en null la propiedad que falta o no es texto', async () => {
@@ -148,29 +148,29 @@ describe('LinkableOrganizationsService', () => {
     d.conceptsRepo.search.mockResolvedValue([
       { id: FOIANINI, code: 'facility:bo:X', display: 'X' },
     ]);
-    conPropiedades(d, {
+    withProperties(d, {
       [BO_FACILITY_PROPERTY_CODES.municipio]: [
         { conceptId: FOIANINI, valueJson: { es: 'no soy texto' } },
       ],
     });
 
-    const salida = await d.service.buscar({});
+    const output = await d.service.search({});
 
-    expect(salida.items[0].municipality).toBeNull();
-    expect(salida.items[0].type).toBeNull();
-    expect(salida.items[0].address).toBeNull();
+    expect(output.items[0].municipality).toBeNull();
+    expect(output.items[0].type).toBeNull();
+    expect(output.items[0].address).toBeNull();
   });
 
   it('filtra por municipio antes de buscar por texto', async () => {
     const d = build();
-    conPropiedades(d, {
+    withProperties(d, {
       [BO_FACILITY_PROPERTY_CODES.municipio]: [
         { conceptId: SAN_LUIS_TORNO, valueJson: 'EL TORNO' },
         { conceptId: SAN_LUIS_URUBICHA, valueJson: 'URUBICHA' },
       ],
     });
 
-    await d.service.buscar({ query: 'san luis', municipality: 'el torno' });
+    await d.service.search({ query: 'san luis', municipality: 'el torno' });
 
     const [, filtros] = d.conceptsRepo.search.mock.calls[0];
     expect(filtros.ids).toEqual([SAN_LUIS_TORNO]);
@@ -178,28 +178,28 @@ describe('LinkableOrganizationsService', () => {
 
   it('no busca si el municipio pedido no tiene establecimientos', async () => {
     const d = build();
-    conPropiedades(d, {
+    withProperties(d, {
       [BO_FACILITY_PROPERTY_CODES.municipio]: [
         { conceptId: SAN_LUIS_TORNO, valueJson: 'EL TORNO' },
       ],
     });
 
-    const salida = await d.service.buscar({ municipality: 'LA PAZ' });
+    const output = await d.service.search({ municipality: 'LA PAZ' });
 
-    expect(salida.items).toEqual([]);
+    expect(output.items).toEqual([]);
     expect(d.conceptsRepo.search).not.toHaveBeenCalled();
   });
 
   it('respeta el tope pedido y usa 20 por defecto', async () => {
     const d = build();
 
-    await d.service.buscar({ limit: 5 });
+    await d.service.search({ limit: 5 });
     expect(d.conceptsRepo.search.mock.calls[0][2]).toBe(5);
 
-    const otro = build();
-    const salida = await otro.service.buscar({});
-    expect(otro.conceptsRepo.search.mock.calls[0][2]).toBe(20);
-    expect(salida.limit).toBe(20);
+    const other = build();
+    const output = await other.service.search({});
+    expect(other.conceptsRepo.search.mock.calls[0][2]).toBe(20);
+    expect(output.limit).toBe(20);
   });
 
   it('omite el filtro de texto cuando no se pide ninguno', async () => {
@@ -207,7 +207,7 @@ describe('LinkableOrganizationsService', () => {
     // quien abre el selector antes de escribir nada.
     const d = build();
 
-    await d.service.buscar({});
+    await d.service.search({});
 
     const [, filtros] = d.conceptsRepo.search.mock.calls[0];
     expect(filtros.query).toBeUndefined();

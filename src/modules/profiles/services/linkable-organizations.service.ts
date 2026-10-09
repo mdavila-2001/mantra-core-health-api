@@ -15,7 +15,7 @@ import type {
 } from '../dto/linkable-organization.dto';
 
 /** Tope de resultados cuando quien busca no pide otro. */
-const TOPE_POR_DEFECTO = 20;
+const DEFAULT_CAP = 20;
 
 /**
  * El buscador de instituciones para el vínculo del profesional.
@@ -74,39 +74,39 @@ export class LinkableOrganizationsService {
    * un catálogo ausente deja al buscador sin nada que ofrecer, pero no es una
    * falla de quien busca, y el formulario debe poder seguir por texto libre.
    *
-   * @param opciones - Texto a buscar, municipio y tope de resultados.
+   * @param options - Texto a buscar, municipio y tope de resultados.
    * @returns Los establecimientos que coinciden.
    */
-  async buscar(opciones: {
+  async search(options: {
     query?: string;
     municipality?: string;
     limit?: number;
   }): Promise<ListLinkableOrganizationsResponseDto> {
-    const limit = opciones.limit ?? TOPE_POR_DEFECTO;
+    const limit = options.limit ?? DEFAULT_CAP;
 
-    const miembros = await this.miembrosDelPadron();
-    if (miembros.length === 0) return { items: [], count: 0, limit };
+    const members = await this.registerMembers();
+    if (members.length === 0) return { items: [], count: 0, limit };
 
-    const candidatos = await this.acotarPorMunicipio(
-      miembros,
-      opciones.municipality,
+    const candidates = await this.narrowByMunicipality(
+      members,
+      options.municipality,
     );
-    if (candidatos.length === 0) return { items: [], count: 0, limit };
+    if (candidates.length === 0) return { items: [], count: 0, limit };
 
-    const conceptos = await this.conceptsRepo.search(
+    const concepts = await this.conceptsRepo.search(
       this.em,
-      opciones.query === undefined
-        ? { ids: candidatos }
-        : { query: opciones.query, ids: candidatos },
+      options.query === undefined
+        ? { ids: candidates }
+        : { query: options.query, ids: candidates },
       limit,
     );
-    if (conceptos.length === 0) return { items: [], count: 0, limit };
+    if (concepts.length === 0) return { items: [], count: 0, limit };
 
-    const items = await this.conFichaDelPadron(
-      conceptos.map((concepto) => ({
-        conceptId: concepto.id,
-        code: concepto.code,
-        display: concepto.display,
+    const items = await this.withRegisterRecord(
+      concepts.map((concept) => ({
+        conceptId: concept.id,
+        code: concept.code,
+        display: concept.display,
       })),
     );
     return { items, count: items.length, limit };
@@ -117,46 +117,46 @@ export class LinkableOrganizationsService {
    *
    * @returns Sus ids, o lista vacía si el catálogo no está sembrado.
    */
-  private async miembrosDelPadron(): Promise<string[]> {
+  private async registerMembers(): Promise<string[]> {
     const valueSet = await this.valueSetsRepo.findByInternalCode(
       this.em,
       BO_FACILITY_VALUE_SET,
     );
     if (valueSet === null) return [];
 
-    const miembros = await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
+    const members = await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
       this.em,
       valueSet.id,
     );
-    return miembros ?? [];
+    return members ?? [];
   }
 
   /**
    * Deja sólo los establecimientos de un municipio, si se pidió uno.
    *
-   * @param candidatos - Ids a filtrar.
+   * @param candidates - Ids a filtrar.
    * @param municipality - Municipio exacto, o `undefined` para no filtrar.
    * @returns Los ids que quedan.
    */
-  private async acotarPorMunicipio(
-    candidatos: string[],
+  private async narrowByMunicipality(
+    candidates: string[],
     municipality: string | undefined,
   ): Promise<string[]> {
-    if (municipality === undefined) return candidatos;
+    if (municipality === undefined) return candidates;
 
-    const buscado = municipality.trim().toLowerCase();
-    const filas = await this.propertiesRepo.findPropertyForConcepts(
+    const searched = municipality.trim().toLowerCase();
+    const rows = await this.propertiesRepo.findPropertyForConcepts(
       this.em,
-      candidatos,
+      candidates,
       BO_FACILITY_PROPERTY_CODES.municipio,
     );
-    return filas
+    return rows
       .filter(
-        (fila) =>
-          typeof fila.valueJson === 'string' &&
-          fila.valueJson.trim().toLowerCase() === buscado,
+        (row) =>
+          typeof row.valueJson === 'string' &&
+          row.valueJson.trim().toLowerCase() === searched,
       )
-      .map((fila) => fila.conceptId);
+      .map((row) => row.conceptId);
   }
 
   /**
@@ -166,29 +166,29 @@ export class LinkableOrganizationsService {
    * código, no una por establecimiento—, que es el patrón del módulo de
    * terminología para enriquecer un listado.
    *
-   * @param conceptos - Los conceptos ya filtrados.
+   * @param concepts - Los conceptos ya filtrados.
    * @returns Las filas listas para el cliente.
    */
-  private async conFichaDelPadron(
-    conceptos: { conceptId: string; code: string; display: string }[],
+  private async withRegisterRecord(
+    concepts: { conceptId: string; code: string; display: string }[],
   ): Promise<LinkableOrganizationDto[]> {
-    const ids = conceptos.map((concepto) => concepto.conceptId);
+    const ids = concepts.map((concept) => concept.conceptId);
     const [municipios, tipos, direcciones] = await Promise.all([
-      this.propiedadPorConcepto(ids, BO_FACILITY_PROPERTY_CODES.municipio),
-      this.propiedadPorConcepto(ids, BO_FACILITY_PROPERTY_CODES.tipo),
-      this.propiedadPorConcepto(ids, BO_FACILITY_PROPERTY_CODES.direccion),
+      this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.municipio),
+      this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.tipo),
+      this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.direccion),
     ]);
 
-    return conceptos.map((concepto) => ({
-      facilityConceptId: concepto.conceptId,
+    return concepts.map((concept) => ({
+      facilityConceptId: concept.conceptId,
       // El código viaja con prefijo de dominio (`facility:bo:BO_EST_…`); al
       // cliente le sirve el del padrón, que es el que figura en el listado
       // oficial y el que un humano puede cotejar.
-      code: concepto.code.replace(/^facility:bo:/, ''),
-      name: concepto.display,
-      municipality: municipios.get(concepto.conceptId) ?? null,
-      type: tipos.get(concepto.conceptId) ?? null,
-      address: direcciones.get(concepto.conceptId) ?? null,
+      code: concept.code.replace(/^facility:bo:/, ''),
+      name: concept.display,
+      municipality: municipios.get(concept.conceptId) ?? null,
+      type: tipos.get(concept.conceptId) ?? null,
+      address: direcciones.get(concept.conceptId) ?? null,
     }));
   }
 
@@ -199,19 +199,19 @@ export class LinkableOrganizationsService {
    * @param propertyCode - Código de la propiedad.
    * @returns Mapa `conceptId -> valor`, sin las filas que no son texto.
    */
-  private async propiedadPorConcepto(
+  private async propertyByConcept(
     ids: string[],
     propertyCode: string,
   ): Promise<Map<string, string>> {
-    const filas = await this.propertiesRepo.findPropertyForConcepts(
+    const rows = await this.propertiesRepo.findPropertyForConcepts(
       this.em,
       ids,
       propertyCode,
     );
     return new Map(
-      filas
-        .filter((fila) => typeof fila.valueJson === 'string')
-        .map((fila) => [fila.conceptId, fila.valueJson as string]),
+      rows
+        .filter((row) => typeof row.valueJson === 'string')
+        .map((row) => [row.conceptId, row.valueJson as string]),
     );
   }
 }

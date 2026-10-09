@@ -28,24 +28,24 @@ export class HealthFacilityCatalogService {
     em: EntityManager,
     conceptId: string,
   ): Promise<void> {
-    const conjunto = await this.valueSets.findByInternalCode(
+    const set = await this.valueSets.findByInternalCode(
       em,
       BO_FACILITY_VALUE_SET,
     );
-    const miembros =
-      conjunto === null
+    const members =
+      set === null
         ? null
         : await this.valueSets.findIncludedConceptIdsByValueSet(
             em,
-            conjunto.id,
+            set.id,
           );
-    if (miembros === null) {
+    if (members === null) {
       throw new PreconditionFailedException(
         'El padrón de establecimientos no está disponible',
         { valueSet: BO_FACILITY_VALUE_SET },
       );
     }
-    if (!miembros.includes(conceptId)) {
+    if (!members.includes(conceptId)) {
       throw new PreconditionFailedException(
         'El establecimiento no pertenece al padrón oficial de establecimientos de salud',
         { conceptId, valueSet: BO_FACILITY_VALUE_SET },

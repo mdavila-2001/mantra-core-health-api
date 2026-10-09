@@ -47,12 +47,12 @@ export async function findPractitionerNames(
     id: { $in: practitioners.map((row) => row.profileId) },
   });
 
-  const resultado = new Map<string, string>();
+  const result = new Map<string, string>();
   for (const persona of personas) {
     const nombre = nombreDe(persona);
-    if (nombre !== undefined) resultado.set(persona.id, nombre);
+    if (nombre !== undefined) result.set(persona.id, nombre);
   }
-  return resultado;
+  return result;
 }
 
 /**

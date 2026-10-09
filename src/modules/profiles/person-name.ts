@@ -28,23 +28,23 @@ export interface PersonNameParts {
  * que es lo habitual: sin esto, alguien sin segundo nombre quedaría con un
  * doble espacio en medio del nombre.
  *
- * @param partes - Las partes declaradas del nombre.
+ * @param parts - Las partes declaradas del nombre.
  * @returns El nombre compuesto, o `undefined` si no había ninguna parte.
  */
 export function composePersonDisplayName(
-  partes: PersonNameParts,
+  parts: PersonNameParts,
 ): string | undefined {
-  const compuesto = [
-    partes.name,
-    partes.middleName,
-    partes.lastName,
-    partes.motherLastName,
+  const composite = [
+    parts.name,
+    parts.middleName,
+    parts.lastName,
+    parts.motherLastName,
   ]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => parte !== undefined && parte !== '')
+    .map((part) => part?.trim())
+    .filter((part): part is string => part !== undefined && part !== '')
     .join(' ');
 
-  return compuesto === '' ? undefined : compuesto;
+  return composite === '' ? undefined : composite;
 }
 
 /**

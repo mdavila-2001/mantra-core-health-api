@@ -13,18 +13,18 @@ import type { Persons } from './entities';
  * @param valor - Lo que llegó en el cuerpo.
  * @returns El texto, o `undefined` para que la columna quede en `NULL`.
  */
-export function textoOpcional(valor: string): string | undefined {
+export function optionalText(valor: string): string | undefined {
   return valor.trim() === '' ? undefined : valor;
 }
 
-/** Lo único que {@link aplicarOcupacion} necesita del cuerpo del `PATCH`. */
-export interface OcupacionDeclarada {
+/** Lo único que {@link applyOccupation} necesita del cuerpo del `PATCH`. */
+export interface DeclaredOccupation {
   readonly occupationConceptId?: string;
   readonly occupationFreeText?: string;
 }
 
-/** Lo único que {@link aplicarEmpresa} necesita del cuerpo del `PATCH`. */
-export interface EmpresaDeclarada {
+/** Lo único que {@link applyCompany} necesita del cuerpo del `PATCH`. */
+export interface DeclaredCompany {
   readonly workEmployerConceptId?: string;
   readonly workEmployerFreeText?: string;
 }
@@ -53,27 +53,27 @@ export interface EmpresaDeclarada {
  * @param person - La persona bajo edición, que se muta.
  * @param dto - Los campos que llegaron en el cuerpo.
  */
-export function aplicarOcupacion(
+export function applyOccupation(
   person: Persons,
-  dto: OcupacionDeclarada,
+  dto: DeclaredOccupation,
 ): void {
-  const conceptoDeclarado = dto.occupationConceptId;
+  const declaredConcept = dto.occupationConceptId;
 
   if (dto.occupationFreeText !== undefined) {
-    person.occupationFreeText = textoOpcional(dto.occupationFreeText);
+    person.occupationFreeText = optionalText(dto.occupationFreeText);
     // Sólo un texto con contenido desplaza al concepto: vaciarlo es quedarse sin
     // texto, no negar la ocupación del catálogo. Y si el cuerpo también trae
     // concepto, decide el bloque de abajo y éste sobra.
     if (
       person.occupationFreeText !== undefined &&
-      conceptoDeclarado === undefined
+      declaredConcept === undefined
     ) {
       person.occupationConceptId = undefined;
     }
   }
 
-  if (conceptoDeclarado !== undefined) {
-    person.occupationConceptId = textoOpcional(conceptoDeclarado);
+  if (declaredConcept !== undefined) {
+    person.occupationConceptId = optionalText(declaredConcept);
     if (person.occupationConceptId !== undefined) {
       person.occupationFreeText = undefined;
     }
@@ -82,33 +82,33 @@ export function aplicarOcupacion(
 
 /**
  * Escribe la empresa donde trabaja, con la misma regla de las dos formas que
- * no pueden convivir que rige la ocupación — ver {@link aplicarOcupacion}, del
+ * no pueden convivir que rige la ocupación — ver {@link applyOccupation}, del
  * que ésta es la copia exacta para `work_employer_concept_id`/
  * `work_employer_free_text`. Existe separada y no parametrizada porque las dos
  * parejas de columnas viven en la misma entidad y una función genérica sobre
  * «cuál par» sería más difícil de leer que la duplicación de ocho líneas.
  *
- * Mismo motivo de {@link aplicarOcupacion} para vivir acá y no en un servicio:
+ * Mismo motivo de {@link applyOccupation} para vivir acá y no en un servicio:
  * paciente y profesional comparten la columna, no el DTO.
  *
  * @param person - La persona bajo edición, que se muta.
  * @param dto - Los campos que llegaron en el cuerpo.
  */
-export function aplicarEmpresa(person: Persons, dto: EmpresaDeclarada): void {
-  const conceptoDeclarado = dto.workEmployerConceptId;
+export function applyCompany(person: Persons, dto: DeclaredCompany): void {
+  const declaredConcept = dto.workEmployerConceptId;
 
   if (dto.workEmployerFreeText !== undefined) {
-    person.workEmployerFreeText = textoOpcional(dto.workEmployerFreeText);
+    person.workEmployerFreeText = optionalText(dto.workEmployerFreeText);
     if (
       person.workEmployerFreeText !== undefined &&
-      conceptoDeclarado === undefined
+      declaredConcept === undefined
     ) {
       person.workEmployerConceptId = undefined;
     }
   }
 
-  if (conceptoDeclarado !== undefined) {
-    person.workEmployerConceptId = textoOpcional(conceptoDeclarado);
+  if (declaredConcept !== undefined) {
+    person.workEmployerConceptId = optionalText(declaredConcept);
     if (person.workEmployerConceptId !== undefined) {
       person.workEmployerFreeText = undefined;
     }

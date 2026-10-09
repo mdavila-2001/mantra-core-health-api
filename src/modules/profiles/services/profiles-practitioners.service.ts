@@ -102,7 +102,7 @@ import {
   summarizeAddress,
   type AddressSummary,
 } from '../../common/services/residence-address';
-import { aplicarOcupacion, aplicarEmpresa } from '../person-work-fields';
+import { applyOccupation, applyCompany } from '../person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../common/seed/bo-professions.catalog';
@@ -130,36 +130,36 @@ import { BO_PROFESSION_CONCEPT_IDS } from '../../../common/seed/bo-professions.c
  * Correo de trabajo. El alta lo siembra con el correo de login, pero es un
  * contacto: la cuenta vive en IAM y no lee esta fila.
  */
-const PAR_CORREO_TRABAJO = {
+const PAR_WORK_EMAIL = {
   systemConceptId: CONCEPTS.CONTACT_EMAIL,
   useConceptId: CONCEPTS.CONTACT_USE_WORK,
 } as const;
 
 /** Correo personal: el que no sirve para entrar. */
-const PAR_CORREO_PERSONAL = {
+const PAR_EMAIL_PERSONAL = {
   systemConceptId: CONCEPTS.CONTACT_EMAIL,
   useConceptId: CONCEPTS.CONTACT_USE_HOME,
 } as const;
 
 /** Celular personal o privado. */
-const PAR_CELULAR_PERSONAL = {
+const PAR_MOBILE_PERSONAL = {
   systemConceptId: CONCEPTS.CONTACT_MOBILE,
   useConceptId: CONCEPTS.CONTACT_USE_HOME,
 } as const;
 
 /** Celular del lugar de trabajo. */
-const PAR_CELULAR_TRABAJO = {
+const PAR_WORK_MOBILE = {
   systemConceptId: CONCEPTS.CONTACT_MOBILE,
   useConceptId: CONCEPTS.CONTACT_USE_WORK,
 } as const;
 
 /** Teléfono fijo del lugar de trabajo. */
-const PAR_FIJO_TRABAJO = {
+const PAR_LANDLINE_WORK = {
   systemConceptId: CONCEPTS.CONTACT_PHONE,
   useConceptId: CONCEPTS.CONTACT_USE_WORK,
 } as const;
 
-const SIN_ACTIVIDAD: PractitionerActivityDto = {
+const WITHOUT_ACTIVITY: PractitionerActivityDto = {
   encounters: 0,
   medicationRequests: 0,
   clinicalNotes: 0,
@@ -175,7 +175,7 @@ const SIN_ACTIVIDAD: PractitionerActivityDto = {
  * entra es `PENDIENTE`: decir que alguien atiende en una organización que
  * todavía no lo aceptó es afirmar algo que la organización no dijo (TP-2).
  */
-const ESTADOS_PUBLICABLES = [
+const PUBLISHABLE_STATES = [
   PROF.AFFILIATION_DECLARED,
   PROF.AFFILIATION_APPROVED,
 ] as const;
@@ -186,7 +186,7 @@ const ESTADOS_PUBLICABLES = [
  * La FK acepta cualquier concepto del catálogo; quién decide qué es una
  * profesión es la clasificación, igual que `TIPOS_DE_CREDENCIAL` para el tipo.
  */
-function assertProfesionDeLaClasificacion(
+function assertClassificationProfession(
   professionConceptId: string | undefined,
 ): void {
   if (
@@ -328,14 +328,14 @@ export class ProfilesPractitionersService {
         'La cuenta no tiene una persona vinculada',
       );
     }
-    const perfil = await this.practitionersRepo.findById(em, link.personId);
-    if (!perfil) {
+    const profile = await this.practitionersRepo.findById(em, link.personId);
+    if (!profile) {
       throw new PreconditionFailedException(
         'La cuenta no tiene perfil profesional',
         { personId: link.personId },
       );
     }
-    const practitionerProfileId = perfil.profileId;
+    const practitionerProfileId = profile.profileId;
 
     const [matriculas, especialidades, afiliaciones, recursos] =
       await Promise.all([
@@ -355,27 +355,27 @@ export class ProfilesPractitionersService {
     // cupos y no sólo los futuros: si vencieran, un alta ya terminada volvería
     // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
     // propia superficie.
-    const cupos =
+    const quotas =
       recursos.length === 0
         ? 0
         : await em.count(BookableSlots, {
-            resourceId: { $in: recursos.map((recurso) => recurso.id) },
+            resourceId: { $in: recursos.map((resource) => resource.id) },
           });
 
-    const tieneFoto =
-      perfil.photoFileId !== undefined && perfil.photoFileId !== null;
+    const hasPhoto =
+      profile.photoFileId !== undefined && profile.photoFileId !== null;
 
-    const faltaEnDatos: string[] = [];
-    if (!matriculas.some((fila) => fila.licenseNumber.trim() !== '')) {
-      faltaEnDatos.push('license-number');
+    const missingInData: string[] = [];
+    if (!matriculas.some((row) => row.licenseNumber.trim() !== '')) {
+      missingInData.push('license-number');
     }
-    if (especialidades.length === 0) faltaEnDatos.push('specialty');
+    if (especialidades.length === 0) missingInData.push('specialty');
 
-    const pasos: OnboardingStepDto[] = [
+    const steps: OnboardingStepDto[] = [
       {
         key: 'professional-data',
-        complete: faltaEnDatos.length === 0,
-        missing: faltaEnDatos,
+        complete: missingInData.length === 0,
+        missing: missingInData,
       },
       {
         key: 'photo',
@@ -383,8 +383,8 @@ export class ProfilesPractitionersService {
         // hidrata como `null`, así que un profesional SIN foto daba el paso por
         // cumplido —«Tu foto: completado» con `photo_file_id` en NULL, visto en
         // pantalla—. Se comprueba la ausencia real, que son los dos valores.
-        complete: tieneFoto,
-        missing: tieneFoto ? [] : ['photo'],
+        complete: hasPhoto,
+        missing: hasPhoto ? [] : ['photo'],
       },
       {
         // Vale una afiliación **o** una agenda propia: un profesional que
@@ -397,9 +397,9 @@ export class ProfilesPractitionersService {
       },
       {
         key: 'schedule',
-        complete: cupos > 0,
+        complete: quotas > 0,
         missing:
-          cupos > 0
+          quotas > 0
             ? []
             : recursos.length === 0
               ? ['published-schedule']
@@ -409,27 +409,27 @@ export class ProfilesPractitionersService {
 
     // La revisión no pide nada propio: está cumplida cuando lo están las cuatro
     // anteriores. Se declara igual para que la pantalla dibuje cinco pasos.
-    const previosCompletos = pasos.every((paso) => paso.complete);
-    pasos.push({
+    const previousComplete = steps.every((step) => step.complete);
+    steps.push({
       key: 'review',
-      complete: previosCompletos,
-      missing: previosCompletos ? [] : ['previous-steps'],
+      complete: previousComplete,
+      missing: previousComplete ? [] : ['previous-steps'],
     });
 
-    const primerIncompleto = pasos.find((paso) => !paso.complete);
+    const primerIncomplete = steps.find((step) => !step.complete);
 
     this.logger.info(
       {
         operation: 'profiles.practitioner.onboarding',
-        firstIncomplete: primerIncompleto?.key ?? 'done',
+        firstIncomplete: primerIncomplete?.key ?? 'done',
       },
       'Calculando el avance del alta del profesional',
     );
 
     return {
       practitionerProfileId,
-      steps: pasos,
-      firstIncomplete: primerIncompleto?.key ?? 'done',
+      steps: steps,
+      firstIncomplete: primerIncomplete?.key ?? 'done',
     };
   }
 
@@ -503,29 +503,29 @@ export class ProfilesPractitionersService {
     const visibles = new Set(visibleIds);
     // Por especialidad, los profesionales SIN repetir: una fila por cada
     // vigencia haría contar dos veces a quien la recertificó.
-    const porEspecialidad = new Map<string, Set<string>>();
+    const bySpecialty = new Map<string, Set<string>>();
     for (const par of pairs) {
       if (!visibles.has(par.practitionerProfileId)) continue;
-      const gente =
-        porEspecialidad.get(par.specialtyConceptId) ?? new Set<string>();
-      gente.add(par.practitionerProfileId);
-      porEspecialidad.set(par.specialtyConceptId, gente);
+      const people =
+        bySpecialty.get(par.specialtyConceptId) ?? new Set<string>();
+      people.add(par.practitionerProfileId);
+      bySpecialty.set(par.specialtyConceptId, people);
     }
 
     // Los que no declaran ninguna especialidad vigente. Sin este número la
     // portada no puede ofrecerlos, y quien entra por especialidad no llega
     // jamás a un profesional que no tiene ninguna —que es como nace todo el
     // que se registra solo, médicos con cuenta incluidos—.
-    const conEspecialidad = new Set(
+    const withSpecialty = new Set(
       pairs
         .filter((par) => visibles.has(par.practitionerProfileId))
         .map((par) => par.practitionerProfileId),
     );
     const withoutSpecialtyCount = [...visibles].filter(
-      (id) => !conEspecialidad.has(id),
+      (id) => !withSpecialty.has(id),
     ).length;
 
-    const items = [...porEspecialidad.entries()]
+    const items = [...bySpecialty.entries()]
       .map(([specialtyConceptId, gente]) => ({
         specialtyConceptId,
         practitionerCount: gente.size,
@@ -574,10 +574,10 @@ export class ProfilesPractitionersService {
         this.practitionersRepo.findVisibleProfileIds(em, undefined),
         this.specialtiesRepo.findCurrentSpecialtyPairs(em),
       ]);
-      const conEspecialidad = new Set(
+      const withSpecialty = new Set(
         pares.map((par) => par.practitionerProfileId),
       );
-      profileIds = visibles.filter((id) => !conEspecialidad.has(id));
+      profileIds = visibles.filter((id) => !withSpecialty.has(id));
       if (profileIds.length === 0) {
         return { items: [], count: 0, limit: options.limit, nextCursor: null };
       }
@@ -614,7 +614,7 @@ export class ProfilesPractitionersService {
       // Dónde atiende cada uno. En lote y no de a uno: pedirlas por fila serían
       // cincuenta consultas por página.
       this.affiliationsRepo.findByPractitioners(em, pageIds, [
-        ...ESTADOS_PUBLICABLES,
+        ...PUBLISHABLE_STATES,
       ]),
     ]);
 
@@ -624,15 +624,15 @@ export class ProfilesPractitionersService {
     // nada más: colapsar variantes exigiría normalizar los nombres, que es otro
     // trabajo y no se hace a ciegas acá.
     const workplacesByProfile = new Map<string, string[]>();
-    for (const afiliacion of affiliations) {
-      const nombre = afiliacion.organizationName?.trim();
+    for (const affiliation of affiliations) {
+      const nombre = affiliation.organizationName?.trim();
       if (!nombre) continue;
-      const lugares =
-        workplacesByProfile.get(afiliacion.practitionerProfileId) ?? [];
-      if (!lugares.includes(nombre)) {
-        lugares.push(nombre);
+      const places =
+        workplacesByProfile.get(affiliation.practitionerProfileId) ?? [];
+      if (!places.includes(nombre)) {
+        places.push(nombre);
       }
-      workplacesByProfile.set(afiliacion.practitionerProfileId, lugares);
+      workplacesByProfile.set(affiliation.practitionerProfileId, places);
     }
 
     const specialtiesByProfile = new Map<
@@ -726,14 +726,14 @@ export class ProfilesPractitionersService {
    *
    * Una cadena vacía cierra el vigente y no abre ninguno: es cómo se borra.
    */
-  private async reemplazarTelefono(
+  private async replacePhone(
     tx: EntityManager,
     personId: string,
-    telefono: string,
+    phone: string,
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    await this.reemplazarContacto(tx, personId, telefono, actorUserId, ahora, {
+    await this.replaceContact(tx, personId, phone, actorUserId, ahora, {
       systemConceptId: CONCEPTS.CONTACT_PHONE,
       useConceptId: CONCEPTS.CONTACT_USE_WORK,
     });
@@ -742,7 +742,7 @@ export class ProfilesPractitionersService {
   /**
    * Deja vigente el contacto nuevo de un par sistema × uso y cierra el anterior.
    *
-   * Es {@link reemplazarTelefono} generalizado: desde que el alta pide correo y
+   * Es {@link replacePhone} generalizado: desde que el alta pide correo y
    * celular personales además de los del trabajo, «el teléfono de esta persona»
    * dejó de ser uno solo. El uso entra en la búsqueda para que cambiar el
    * celular personal no cierre el de trabajo, que es lo que pasaría buscando
@@ -757,7 +757,7 @@ export class ProfilesPractitionersService {
    * @param ahora - Instante del cambio, para la vigencia.
    * @param par - Sistema y uso que identifican al contacto.
    */
-  private async reemplazarContacto(
+  private async replaceContact(
     tx: EntityManager,
     personId: string,
     valor: string,
@@ -765,28 +765,28 @@ export class ProfilesPractitionersService {
     ahora: Date,
     par: { systemConceptId: string; useConceptId: string },
   ): Promise<void> {
-    const nuevo = valor.trim() === '' ? undefined : valor.trim();
-    const vigente = await this.contactPointsRepo.findVigenteByOwnerSystemAndUse(
+    const fresh = valor.trim() === '' ? undefined : valor.trim();
+    const current = await this.contactPointsRepo.findVigenteByOwnerSystemAndUse(
       tx,
       personId,
       par.systemConceptId,
       par.useConceptId,
     );
 
-    if (nuevo === undefined) {
-      if (vigente)
-        this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    if (fresh === undefined) {
+      if (current)
+        this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
       return;
     }
-    if (vigente?.value === nuevo) return;
-    if (vigente)
-      this.contactPointsRepo.closeVigente(vigente, ahora, actorUserId);
+    if (current?.value === fresh) return;
+    if (current)
+      this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
 
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       ownerId: personId,
       systemConceptId: par.systemConceptId,
-      value: nuevo,
+      value: fresh,
       useConceptId: par.useConceptId,
       actorUserId,
     });
@@ -801,11 +801,11 @@ export class ProfilesPractitionersService {
    * alta no admite corregir); ahora delega en `replaceResidenceAddress`,
    * mismo criterio que ya tenía `ProfilesPatientsService.reemplazarDireccion`.
    */
-  private async reemplazarDireccion(
+  private async replaceAddress(
     tx: EntityManager,
     personId: string,
     useConceptId: string,
-    cambios: {
+    changes: {
       municipalityConceptId?: string;
       lines?: string;
       /** `null` en las dos quita el punto. Ver `ReplaceResidenceAddressData`. */
@@ -822,10 +822,10 @@ export class ProfilesPractitionersService {
       {
         personId,
         useConceptId,
-        municipalityConceptId: cambios.municipalityConceptId,
-        lines: cambios.lines,
-        latitude: cambios.latitude,
-        longitude: cambios.longitude,
+        municipalityConceptId: changes.municipalityConceptId,
+        lines: changes.lines,
+        latitude: changes.latitude,
+        longitude: changes.longitude,
         actorUserId,
       },
       ahora,
@@ -841,7 +841,7 @@ export class ProfilesPractitionersService {
    * objeto vacío en vez de fallar, para que la envoltura `sinTumbarLaFicha`
    * tenga algo neutro con lo que seguir.
    */
-  private async leerDocumentoYDirecciones(
+  private async readDocumentAndAddresses(
     em: EntityManager,
     personId: string,
   ): Promise<{
@@ -900,14 +900,14 @@ export class ProfilesPractitionersService {
    * @param em - Contexto de persistencia.
    * @param personId - El titular del perfil (= profileId del profesional).
    * @param subjectUserId - La cuenta cuya actividad se cuenta, si hay.
-   * @param incluyeContacto - Si se leen correo y teléfono. Sólo la propia.
+   * @param includesContact - Si se leen correo y teléfono. Sólo la propia.
    * @returns El perfil completo.
    */
   private async buildSummary(
     em: EntityManager,
     personId: string,
     subjectUserId: string | undefined,
-    incluyeContacto = false,
+    includesContact = false,
   ): Promise<PractitionerProfileSummaryDto> {
     const person = await this.personsRepo.findById(em, personId);
     const practitioner = await this.practitionersRepo.findById(em, personId);
@@ -939,22 +939,22 @@ export class ProfilesPractitionersService {
       contactos,
       filiacion,
     ] = await Promise.all([
-      this.sinTumbarLaFicha(
+      this.withoutBreakingRecord(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'especialidades' },
       ),
-      this.sinTumbarLaFicha(
+      this.withoutBreakingRecord(
         () => this.credentialsRepo.findByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'credenciales' },
       ),
-      this.sinTumbarLaFicha(
+      this.withoutBreakingRecord(
         () => this.authorizationsRepo.findByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'matrículas' },
       ),
-      this.sinTumbarLaFicha(
+      this.withoutBreakingRecord(
         () => this.languagesRepo.findByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'idiomas' },
@@ -969,26 +969,26 @@ export class ProfilesPractitionersService {
       // independientes —una elige QUÉ vínculos se ven, la otra impide que esa
       // lectura tumbe la ficha entera— y quedarse con una sola habría
       // reintroducido el defecto de la otra.
-      this.sinTumbarLaFicha(
+      this.withoutBreakingRecord(
         () =>
           subjectUserId === undefined
-            ? this.affiliations.visiblesDeTerceros(em, profileId)
+            ? this.affiliations.visiblesThird(em, profileId)
             : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'afiliaciones' },
       ),
       subjectUserId === undefined
-        ? Promise.resolve(SIN_ACTIVIDAD)
-        : this.sinTumbarLaFicha(
+        ? Promise.resolve(WITHOUT_ACTIVITY)
+        : this.withoutBreakingRecord(
             () => this.countActivity(em, subjectUserId),
-            SIN_ACTIVIDAD,
+            WITHOUT_ACTIVITY,
             { profileId, pieza: 'actividad' },
           ),
       // El contacto: sólo en la lectura propia, y envuelto como las demás. Un
       // fallo leyendo `common.contact_points` deja el perfil sin correo, no
       // sin perfil.
-      incluyeContacto
-        ? this.sinTumbarLaFicha(
+      includesContact
+        ? this.withoutBreakingRecord(
             () => this.contactPointsRepo.findVigentesByOwner(em, person.id),
             [],
             { profileId, pieza: 'contacto' },
@@ -996,29 +996,29 @@ export class ProfilesPractitionersService {
         : Promise.resolve([]),
       // El documento y las direcciones: sólo en la lectura propia y envueltos
       // como el resto. Un fallo acá deja la ficha sin esos datos, no sin ficha.
-      incluyeContacto
-        ? this.sinTumbarLaFicha(
-            () => this.leerDocumentoYDirecciones(em, person.id),
+      includesContact
+        ? this.withoutBreakingRecord(
+            () => this.readDocumentAndAddresses(em, person.id),
             {},
             { profileId, pieza: 'filiación' },
           )
         : Promise.resolve(
-            {} as Awaited<ReturnType<typeof this.leerDocumentoYDirecciones>>,
+            {} as Awaited<ReturnType<typeof this.readDocumentAndAddresses>>,
           ),
     ]);
 
     // El primero de cada sistema gana: el repositorio ya los devuelve por
     // `rank`, que es la columna que dice cuál es el preferido.
-    const contacto = (sistema: string): string | undefined =>
+    const contact = (sistema: string): string | undefined =>
       contactos.find((punto) => punto.systemConceptId === sistema)?.value;
 
     // Desde que el alta pide los contactos separados, el sistema no alcanza
     // para saber cuál es cuál: hay dos correos y dos celulares, y lo que los
     // distingue es el uso. Sin este par, el personal y el de trabajo se pisan.
-    const contactoPorUso = (sistema: string, uso: string): string | undefined =>
+    const contactByUsage = (sistema: string, usage: string): string | undefined =>
       contactos.find(
         (punto) =>
-          punto.systemConceptId === sistema && punto.useConceptId === uso,
+          punto.systemConceptId === sistema && punto.useConceptId === usage,
       )?.value;
 
     return {
@@ -1029,27 +1029,27 @@ export class ProfilesPractitionersService {
       professionalTitle: practitioner.professionalTitle,
       professionalBio: practitioner.professionalBio,
       photoFileId: practitioner.photoFileId,
-      email: contacto(CONCEPTS.CONTACT_EMAIL),
-      phone: contacto(CONCEPTS.CONTACT_PHONE),
+      email: contact(CONCEPTS.CONTACT_EMAIL),
+      phone: contact(CONCEPTS.CONTACT_PHONE),
       // Los cinco contactos del registro del médico. `email`/`phone` siguen
       // arriba tal cual para no romper a quien ya los lee.
-      workEmail: contactoPorUso(
+      workEmail: contactByUsage(
         CONCEPTS.CONTACT_EMAIL,
         CONCEPTS.CONTACT_USE_WORK,
       ),
-      personalEmail: contactoPorUso(
+      personalEmail: contactByUsage(
         CONCEPTS.CONTACT_EMAIL,
         CONCEPTS.CONTACT_USE_HOME,
       ),
-      mobilePhone: contactoPorUso(
+      mobilePhone: contactByUsage(
         CONCEPTS.CONTACT_MOBILE,
         CONCEPTS.CONTACT_USE_HOME,
       ),
-      workMobilePhone: contactoPorUso(
+      workMobilePhone: contactByUsage(
         CONCEPTS.CONTACT_MOBILE,
         CONCEPTS.CONTACT_USE_WORK,
       ),
-      workLandline: contactoPorUso(
+      workLandline: contactByUsage(
         CONCEPTS.CONTACT_PHONE,
         CONCEPTS.CONTACT_USE_WORK,
       ),
@@ -1061,7 +1061,7 @@ export class ProfilesPractitionersService {
       motherLastName: person.motherLastName,
       birthDate: person.birthDate,
       // Dato personal: sólo en la lectura propia, como el documento.
-      ...(incluyeContacto && person.sexAtBirthConceptId
+      ...(includesContact && person.sexAtBirthConceptId
         ? { sexAtBirth: BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId] }
         : {}),
       nationalId: filiacion.nationalId,
@@ -1077,7 +1077,7 @@ export class ProfilesPractitionersService {
       // domicilio o el documento. `?? undefined` traduce la columna nula
       // —MikroORM la hidrata como `null`— a la ausencia que promete el
       // contrato: lo no declarado viaja ausente, no como `null` en el JSON.
-      ...(incluyeContacto
+      ...(includesContact
         ? {
             occupationConceptId: person.occupationConceptId ?? undefined,
             occupationFreeText: person.occupationFreeText ?? undefined,
@@ -1107,7 +1107,7 @@ export class ProfilesPractitionersService {
         // El identificador permite que el titular vuelva a descargar el
         // diploma. No se incluye en la ficha de terceros: un UUID no es un
         // permiso de lectura y tampoco debe revelar vínculos a documentos.
-        ...(incluyeContacto && credential.fileId
+        ...(includesContact && credential.fileId
           ? { fileId: credential.fileId }
           : {}),
         issuingInstitutionText: credential.issuingInstitutionText,
@@ -1130,7 +1130,7 @@ export class ProfilesPractitionersService {
         validFrom: license.validFrom,
         validTo: license.validTo,
         // Como el diploma: sólo el titular recupera el archivo de su matrícula.
-        ...(incluyeContacto && license.fileId
+        ...(includesContact && license.fileId
           ? { fileId: license.fileId }
           : {}),
       })),
@@ -1263,12 +1263,12 @@ export class ProfilesPractitionersService {
         // Mismas reglas y mismo ayudante que `PATCH /profiles/patients/me`
         // (`person-work-fields.ts`): las dos columnas viven en `persons`,
         // independientemente de qué perfil clínico traiga encima.
-        aplicarOcupacion(person, dto);
-        aplicarEmpresa(person, dto);
+        applyOccupation(person, dto);
+        applyCompany(person, dto);
         touch(person, actor.id);
 
         if (dto.issuerAdministrativeAreaConceptId !== undefined) {
-          await this.corregirExpedicion(
+          await this.fixIssuance(
             tx,
             person.id,
             dto.issuerAdministrativeAreaConceptId,
@@ -1277,7 +1277,7 @@ export class ProfilesPractitionersService {
         }
 
         if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
-          await this.reemplazarNit(
+          await this.replaceNit(
             tx,
             person.id,
             dto.taxId,
@@ -1288,7 +1288,7 @@ export class ProfilesPractitionersService {
         }
 
         if (dto.phone !== undefined) {
-          await this.reemplazarTelefono(
+          await this.replacePhone(
             tx,
             person.id,
             dto.phone,
@@ -1301,14 +1301,14 @@ export class ProfilesPractitionersService {
         // `workMobilePhone` escribiría con el sistema viejo, así que enviar los
         // dos a la vez no tiene sentido: gana el que llegue segundo.
         for (const [valor, par] of [
-          [dto.workEmail, PAR_CORREO_TRABAJO],
-          [dto.personalEmail, PAR_CORREO_PERSONAL],
-          [dto.mobilePhone, PAR_CELULAR_PERSONAL],
-          [dto.workMobilePhone, PAR_CELULAR_TRABAJO],
-          [dto.workLandline, PAR_FIJO_TRABAJO],
+          [dto.workEmail, PAR_WORK_EMAIL],
+          [dto.personalEmail, PAR_EMAIL_PERSONAL],
+          [dto.mobilePhone, PAR_MOBILE_PERSONAL],
+          [dto.workMobilePhone, PAR_WORK_MOBILE],
+          [dto.workLandline, PAR_LANDLINE_WORK],
         ] as const) {
           if (valor === undefined) continue;
-          await this.reemplazarContacto(
+          await this.replaceContact(
             tx,
             person.id,
             valor,
@@ -1324,7 +1324,7 @@ export class ProfilesPractitionersService {
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
         ) {
-          await this.reemplazarDireccion(
+          await this.replaceAddress(
             tx,
             person.id,
             CONCEPTS.ADDR_USE_HOME,
@@ -1343,7 +1343,7 @@ export class ProfilesPractitionersService {
           dto.workLatitude !== undefined ||
           dto.workLongitude !== undefined
         ) {
-          await this.reemplazarDireccion(
+          await this.replaceAddress(
             tx,
             person.id,
             CONCEPTS.ADDR_USE_WORK,
@@ -1372,30 +1372,30 @@ export class ProfilesPractitionersService {
    * número: la fila `ID_TYPE_NATIONAL` vigente se edita en el lugar, como en el
    * perfil del paciente. Fuera de `VS_BO_DEPARTMENT` responde 422.
    */
-  private async corregirExpedicion(
+  private async fixIssuance(
     tx: EntityManager,
     personId: string,
-    departamentoId: string,
+    departmentId: string,
     actorUserId: string,
   ): Promise<void> {
     await this.administrativeAreas.assertIsAdministrativeArea(
       tx,
-      departamentoId,
+      departmentId,
     );
-    const filas = await tx.find(Identifiers, {
+    const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
     });
-    const documento = filas.find(
+    const documento = rows.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
     if (
       !documento ||
-      documento.issuerAdministrativeAreaConceptId === departamentoId
+      documento.issuerAdministrativeAreaConceptId === departmentId
     ) {
       return;
     }
-    documento.issuerAdministrativeAreaConceptId = departamentoId;
+    documento.issuerAdministrativeAreaConceptId = departmentId;
     touch(documento, actorUserId);
   }
 
@@ -1406,7 +1406,7 @@ export class ProfilesPractitionersService {
    * únicamente uno, el otro se conserva de la fila vigente. Una cadena vacía
    * en el número cierra la fila sin abrir otra.
    */
-  private async reemplazarNit(
+  private async replaceNit(
     tx: EntityManager,
     personId: string,
     nit: string | undefined,
@@ -1414,22 +1414,22 @@ export class ProfilesPractitionersService {
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const filas = await tx.find(Identifiers, {
+    const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
     });
-    const vigente = filas.find(
-      (fila) => fila.typeConceptId === CONCEPTS.ID_TYPE_TAX,
+    const current = rows.find(
+      (row) => row.typeConceptId === CONCEPTS.ID_TYPE_TAX,
     );
-    const numero = (nit ?? vigente?.value ?? '').trim();
-    const titular = (razonSocial ?? vigente?.holderName ?? '').trim();
+    const numero = (nit ?? current?.value ?? '').trim();
+    const titular = (razonSocial ?? current?.holderName ?? '').trim();
 
-    if (vigente?.value === numero && (vigente.holderName ?? '') === titular) {
+    if (current?.value === numero && (current.holderName ?? '') === titular) {
       return;
     }
-    if (vigente) {
-      vigente.validTo = ahora;
-      touch(vigente, actorUserId);
+    if (current) {
+      current.validTo = ahora;
+      touch(current, actorUserId);
     }
     if (numero === '') return;
 
@@ -1600,19 +1600,19 @@ export class ProfilesPractitionersService {
    * pieza y el perfil, porque un vacío silencioso que en realidad es un fallo
    * es peor que el 500 que reemplaza: el log es lo que lo hace visible.
    */
-  private async sinTumbarLaFicha<T>(
+  private async withoutBreakingRecord<T>(
     leer: () => Promise<T>,
-    vacio: T,
-    contexto: { profileId: string; pieza: string },
+    empty: T,
+    context: { profileId: string; pieza: string },
   ): Promise<T> {
     try {
       return await leer();
     } catch (error) {
       this.logger.warn(
-        { ...contexto, err: error },
+        { ...context, err: error },
         'La ficha del profesional se devuelve sin esta pieza: la lectura falló',
       );
-      return vacio;
+      return empty;
     }
   }
 
@@ -1817,12 +1817,12 @@ export class ProfilesPractitionersService {
       // front decía «queda pendiente de verificación» y la fila aparecía
       // «Habilitación vigente» con el sello. Sólo el alta administrativa
       // (SECURITY_ADMIN / SUPERADMIN) la registra ya vigente.
-      const rolesQueHabilitan: readonly string[] = [
+      const rolesThatEnable: readonly string[] = [
         'SECURITY_ADMIN',
         'SUPERADMIN',
       ];
-      const esAdministrador = actor.roles.some((rol) =>
-        rolesQueHabilitan.includes(rol),
+      const isAdministrator = actor.roles.some((role) =>
+        rolesThatEnable.includes(role),
       );
       const authorization = this.authorizationsRepo.create(tx, {
         practitionerProfileId: profileId,
@@ -1831,7 +1831,7 @@ export class ProfilesPractitionersService {
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         practiceScopeConceptId: dto.practiceScopeConceptId,
-        stateConceptId: esAdministrador ? PROF.AUTH_ACTIVE : PROF.AUTH_PENDING,
+        stateConceptId: isAdministrator ? PROF.AUTH_ACTIVE : PROF.AUTH_PENDING,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
         fileId: dto.fileId,
@@ -2053,16 +2053,16 @@ export class ProfilesPractitionersService {
   ): Promise<void> {
     if (specialtyConceptIds.length === 0) return;
 
-    const unicas = [...new Set(specialtyConceptIds)];
-    if (unicas.length > MAX_SPECIALTIES_PER_PRACTITIONER) {
+    const unique = [...new Set(specialtyConceptIds)];
+    if (unique.length > MAX_SPECIALTIES_PER_PRACTITIONER) {
       throw new PreconditionFailedException(
         `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
-        { declaradas: unicas.length },
+        { declaradas: unique.length },
       );
     }
 
     const ahora = new Date();
-    for (const [orden, specialtyConceptId] of unicas.entries()) {
+    for (const [orden, specialtyConceptId] of unique.entries()) {
       await this.specialtyCatalog.assertIsMedicalSpecialty(
         tx,
         specialtyConceptId,
@@ -2137,15 +2137,15 @@ export class ProfilesPractitionersService {
 
       // El tope es del registro del cliente, y se cuenta sobre las VIGENTES:
       // una especialidad dada de baja no debería ocupar un lugar para siempre.
-      const vigentes = await this.specialtiesRepo.findAllByPractitioner(
+      const current = await this.specialtiesRepo.findAllByPractitioner(
         tx,
         profileId,
       );
-      const activas = vigentes.filter((especialidad) => !especialidad.validTo);
-      if (activas.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
+      const active = current.filter((especialidad) => !especialidad.validTo);
+      if (active.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
           `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
-          { profileId, activas: activas.length },
+          { profileId, activas: active.length },
         );
       }
 
@@ -2397,14 +2397,14 @@ export class ProfilesPractitionersService {
       verificationStatusConceptId: string;
       validTo?: Date | null;
     },
-    verbo: 'corregir' | 'retirar',
+    verb: 'corregir' | 'retirar',
   ): void {
     if (
       specialty.verificationStatusConceptId !== PROF.SPEC_VERIF_PENDING ||
       specialty.validTo
     ) {
       throw new PreconditionFailedException(
-        `Esa especialidad ya no está pendiente de verificación; no se puede ${verbo}`,
+        `Esa especialidad ya no está pendiente de verificación; no se puede ${verb}`,
         {
           specialtyId: specialty.id,
           verificationStatusConceptId: specialty.verificationStatusConceptId,
@@ -2519,7 +2519,7 @@ export class ProfilesPractitionersService {
     tx: EntityManager,
     licenseId: string,
     actor: AuthenticatedUser,
-    verbo: 'corregir' | 'retirar',
+    verb: 'corregir' | 'retirar',
   ) {
     const profileId = await this.ownership.requireOwnPractitionerProfileId(
       tx,
@@ -2536,7 +2536,7 @@ export class ProfilesPractitionersService {
     }
     if (license.stateConceptId !== PROF.AUTH_PENDING) {
       throw new PreconditionFailedException(
-        `Esa matrícula ya no está pendiente; no se puede ${verbo}`,
+        `Esa matrícula ya no está pendiente; no se puede ${verb}`,
         { licenseId, stateConceptId: license.stateConceptId },
       );
     }
@@ -2554,7 +2554,7 @@ export class ProfilesPractitionersService {
     });
     if (abiertos > 0) {
       throw new PreconditionFailedException(
-        `Esa matrícula tiene una verificación en curso; no se puede ${verbo}`,
+        `Esa matrícula tiene una verificación en curso; no se puede ${verb}`,
         { licenseId },
       );
     }
@@ -2612,7 +2612,7 @@ export class ProfilesPractitionersService {
     dto: CreateAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
-    return this.agregarAfiliacion(dto, actor, null);
+    return this.addAffiliation(dto, actor, null);
   }
 
   /**
@@ -2635,18 +2635,18 @@ export class ProfilesPractitionersService {
     dto: CreateAffiliationDto,
     actor: AuthenticatedUser,
   ): Promise<AffiliationResponseDto> {
-    return this.agregarAfiliacion(dto, actor, profileId);
+    return this.addAffiliation(dto, actor, profileId);
   }
 
   /**
    * El cuerpo compartido por las dos altas de afiliación.
    *
-   * @param perfilExplicito - `null` para tomar el perfil del actor.
+   * @param explicitProfile - `null` para tomar el perfil del actor.
    */
-  private async agregarAfiliacion(
+  private async addAffiliation(
     dto: CreateAffiliationDto,
     actor: AuthenticatedUser,
-    perfilExplicito: string | null,
+    explicitProfile: string | null,
   ): Promise<AffiliationResponseDto> {
     const startDate = new Date(dto.startDate);
     const endDate = dto.endDate ? new Date(dto.endDate) : undefined;
@@ -2661,13 +2661,13 @@ export class ProfilesPractitionersService {
       { operation: 'profiles.affiliation.add', actorId: actor.id },
       'Adding practitioner affiliation',
     );
-    const creado = await this.em.transactional(async (tx) => {
+    const created = await this.em.transactional(async (tx) => {
       const profileId =
-        perfilExplicito ??
+        explicitProfile ??
         (await this.ownership.requireOwnPractitionerProfileId(tx, actor));
-      if (perfilExplicito !== null) {
-        const existe = await this.practitionersRepo.findById(tx, profileId);
-        if (!existe) {
+      if (explicitProfile !== null) {
+        const exists = await this.practitionersRepo.findById(tx, profileId);
+        if (!exists) {
           throw new ResourceNotFoundException('Profesional no encontrado', {
             profileId,
           });
@@ -2705,7 +2705,7 @@ export class ProfilesPractitionersService {
       // ID-16: el mismo establecimiento del padrón con el mismo cargo e inicio
       // es el doble envío que el índice único de la base rechaza; se dice acá.
       if (dto.healthFacilityConceptId !== undefined) {
-        const mismoEstablecimiento =
+        const sameFacility =
           await this.affiliationsRepo.findSameFacility(
             tx,
             profileId,
@@ -2713,7 +2713,7 @@ export class ProfilesPractitionersService {
             roleTitle,
             startDate,
           );
-        if (mismoEstablecimiento) {
+        if (sameFacility) {
           throw new ConflictException(
             'Ese vínculo con el establecimiento ya está en el historial laboral',
             {
@@ -2732,15 +2732,15 @@ export class ProfilesPractitionersService {
       // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
       // la organización.
       if (dto.practiceSiteId) {
-        const yaPedida = await this.affiliationsRepo.findByPractitionerAndSite(
+        const alreadyRequested = await this.affiliationsRepo.findByPractitionerAndSite(
           tx,
           profileId,
           dto.practiceSiteId,
         );
-        if (yaPedida) {
+        if (alreadyRequested) {
           throw new ConflictException('Ya pidió vincularse a esa sede', {
             practiceSiteId: dto.practiceSiteId,
-            statusConceptId: yaPedida.statusConceptId,
+            statusConceptId: alreadyRequested.statusConceptId,
           });
         }
       }
@@ -2763,7 +2763,7 @@ export class ProfilesPractitionersService {
         // clínica se enterara siquiera. Sin sede sigue naciendo activa —eso es
         // historial laboral y no hay a quién pedirle permiso—, y con una sede
         // propia también, porque pedirse permiso a uno mismo no es una regla.
-        statusConceptId: await this.affiliations.estadoInicial(
+        statusConceptId: await this.affiliations.initialState(
           tx,
           dto.practiceSiteId,
           actor,
@@ -2786,10 +2786,10 @@ export class ProfilesPractitionersService {
     // vínculo quedó pendiente: un declarado no tiene a quién avisarle y un
     // aprobado ya está resuelto. Nunca lanza — el vínculo ya se creó, y que no
     // salga un aviso no puede deshacerlo.
-    if (creado.statusKind === 'pendiente' && dto.practiceSiteId !== undefined) {
-      await this.avisarDelPedido(dto.practiceSiteId, creado);
+    if (created.statusKind === 'pendiente' && dto.practiceSiteId !== undefined) {
+      await this.orderNotify(dto.practiceSiteId, created);
     }
-    return creado;
+    return created;
   }
 
   /**
@@ -2822,7 +2822,7 @@ export class ProfilesPractitionersService {
       'Updating practitioner affiliation',
     );
     return this.em.transactional(async (tx) => {
-      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+      const affiliation = await this.ownOrNothing(tx, affiliationId, actor);
 
       const organizationName =
         dto.organizationName?.trim() ?? affiliation.organizationName;
@@ -2854,14 +2854,14 @@ export class ProfilesPractitionersService {
         );
       }
 
-      const igual = await this.affiliationsRepo.findSame(
+      const equal = await this.affiliationsRepo.findSame(
         tx,
         affiliation.practitionerProfileId,
         organizationName,
         roleTitle ?? null,
         startDate,
       );
-      if (igual && igual.id !== affiliation.id) {
+      if (equal && equal.id !== affiliation.id) {
         throw new ConflictException(
           'Ese vínculo ya está en el historial laboral',
           { organizationName, roleTitle, startDate },
@@ -2905,7 +2905,7 @@ export class ProfilesPractitionersService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
-      const affiliation = await this.propiaONada(tx, affiliationId, actor);
+      const affiliation = await this.ownOrNothing(tx, affiliationId, actor);
       this.affiliationsRepo.remove(tx, affiliation);
       await tx.flush();
       this.logger.info(
@@ -2931,7 +2931,7 @@ export class ProfilesPractitionersService {
    * @param actor - Quien la pide.
    * @returns La fila, garantizada propia.
    */
-  private async propiaONada(
+  private async ownOrNothing(
     tx: EntityManager,
     affiliationId: string,
     actor: AuthenticatedUser,
@@ -2961,20 +2961,20 @@ export class ProfilesPractitionersService {
    * espera del otro lado sin saber por qué.
    *
    * @param practiceSiteId - La sede a la que apunta el pedido.
-   * @param afiliacion - El vínculo recién creado.
+   * @param affiliation - El vínculo recién creado.
    */
-  private async avisarDelPedido(
+  private async orderNotify(
     practiceSiteId: string,
-    afiliacion: AffiliationResponseDto,
+    affiliation: AffiliationResponseDto,
   ): Promise<void> {
-    const sede = await this.em.findOne(PracticeSites, { id: practiceSiteId });
-    const tenantId = sede?.managingTenantId;
+    const site = await this.em.findOne(PracticeSites, { id: practiceSiteId });
+    const tenantId = site?.managingTenantId;
     if (tenantId === undefined || tenantId === null) return;
 
-    await this.affiliations.avisarDelPedido(
+    await this.affiliations.orderNotify(
       tenantId,
-      afiliacion.id,
-      afiliacion.practitionerProfileId,
+      affiliation.id,
+      affiliation.practitionerProfileId,
     );
   }
 
@@ -2986,7 +2986,7 @@ export class ProfilesPractitionersService {
    * estado de cita. Quién decide cuáles son tipos de credencial es la
    * enumeración `professional-credential-type`, la misma que siembra la app.
    */
-  private static readonly TIPOS_DE_CREDENCIAL: readonly string[] = [
+  private static readonly CREDENTIAL_TYPES: readonly string[] = [
     PROF.CREDENTIAL_TYPE_DEGREE,
     PROF.CREDENTIAL_TYPE_DIPLOMA,
     PROF.CREDENTIAL_TYPE_MASTER,
@@ -3013,7 +3013,7 @@ export class ProfilesPractitionersService {
     actor: AuthenticatedUser,
   ): Promise<OwnCredentialResponseDto> {
     if (
-      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+      !ProfilesPractitionersService.CREDENTIAL_TYPES.includes(
         dto.credentialTypeConceptId,
       )
     ) {
@@ -3022,14 +3022,14 @@ export class ProfilesPractitionersService {
         { credentialTypeConceptId: dto.credentialTypeConceptId },
       );
     }
-    assertProfesionDeLaClasificacion(dto.professionConceptId);
+    assertClassificationProfession(dto.professionConceptId);
 
     this.logger.info(
       { operation: 'profiles.credential.addOwn', actorId: actor.id },
       'Adding own professional credential',
     );
 
-    const creada = await this.em.transactional(async (tx) => {
+    const created = await this.em.transactional(async (tx) => {
       const profileId = await this.ownership.requireOwnPractitionerProfileId(
         tx,
         actor,
@@ -3054,7 +3054,7 @@ export class ProfilesPractitionersService {
         );
       }
 
-      const credencial = this.credentialsRepo.create(tx, {
+      const credential = this.credentialsRepo.create(tx, {
         practitionerProfileId: profileId,
         credentialTypeConceptId: dto.credentialTypeConceptId,
         number: dto.number.trim(),
@@ -3069,22 +3069,22 @@ export class ProfilesPractitionersService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return credencial;
+      return credential;
     });
 
     return {
-      id: creada.id,
-      credentialTypeConceptId: creada.credentialTypeConceptId,
-      number: creada.number,
-      issuingInstitutionText: creada.issuingInstitutionText,
-      issuingCityText: creada.issuingCityText,
-      issuingCountryText: creada.issuingCountryText,
-      professionConceptId: creada.professionConceptId,
-      titleText: creada.titleText,
-      issueDate: creada.issueDate,
-      stateConceptId: creada.stateConceptId,
-      fileId: creada.fileId,
-      createdAt: creada.createdAt,
+      id: created.id,
+      credentialTypeConceptId: created.credentialTypeConceptId,
+      number: created.number,
+      issuingInstitutionText: created.issuingInstitutionText,
+      issuingCityText: created.issuingCityText,
+      issuingCountryText: created.issuingCountryText,
+      professionConceptId: created.professionConceptId,
+      titleText: created.titleText,
+      issueDate: created.issueDate,
+      stateConceptId: created.stateConceptId,
+      fileId: created.fileId,
+      createdAt: created.createdAt,
     };
   }
 
@@ -3100,7 +3100,7 @@ export class ProfilesPractitionersService {
   ): Promise<void> {
     if (
       dto.credentialTypeConceptId !== undefined &&
-      !ProfilesPractitionersService.TIPOS_DE_CREDENCIAL.includes(
+      !ProfilesPractitionersService.CREDENTIAL_TYPES.includes(
         dto.credentialTypeConceptId,
       )
     ) {
@@ -3109,7 +3109,7 @@ export class ProfilesPractitionersService {
         { credentialTypeConceptId: dto.credentialTypeConceptId },
       );
     }
-    assertProfesionDeLaClasificacion(dto.professionConceptId);
+    assertClassificationProfession(dto.professionConceptId);
 
     await this.em.transactional(async (tx) => {
       const profileId = await this.ownership.requireOwnPractitionerProfileId(
@@ -3211,23 +3211,23 @@ export class ProfilesPractitionersService {
         tx,
         actor,
       );
-      const credencial = await this.credentialsRepo.findByIdForUpdate(
+      const credential = await this.credentialsRepo.findByIdForUpdate(
         tx,
         credentialId,
       );
-      if (!credencial || credencial.practitionerProfileId !== profileId) {
+      if (!credential || credential.practitionerProfileId !== profileId) {
         throw new ResourceNotFoundException('Título no encontrado', {
           credentialId,
         });
       }
-      if (credencial.stateConceptId !== PROF.CRED_PENDING) {
+      if (credential.stateConceptId !== PROF.CRED_PENDING) {
         throw new PreconditionFailedException(
           'Ese título ya fue verificado o rechazado; no se puede retirar',
-          { credentialId, stateConceptId: credencial.stateConceptId },
+          { credentialId, stateConceptId: credential.stateConceptId },
         );
       }
 
-      this.credentialsRepo.remove(tx, credencial);
+      this.credentialsRepo.remove(tx, credential);
       await tx.flush();
 
       this.logger.info(
