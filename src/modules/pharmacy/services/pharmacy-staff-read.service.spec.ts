@@ -19,7 +19,7 @@ const HABILITACION = {
   code: 'PHARM_LICENSE_OPERATING',
   display: 'Licencia de funcionamiento',
 };
-const VERIFICADA = {
+const VERIFIED = {
   id: 'concept-verified',
   code: 'PHARM_VERIFICATION_VERIFIED',
   display: 'Verificada',
@@ -115,7 +115,7 @@ describe('PharmacyStaffReadService', () => {
           licenseNumber: 'LF-2026-0001',
           validFrom: new Date('2026-01-01T00:00:00Z'),
           validTo: inTenDays,
-          verificationStatusConceptId: VERIFICADA.id,
+          verificationStatusConceptId: VERIFIED.id,
           evidenceFileId: 'file-1',
         },
         {
@@ -123,13 +123,13 @@ describe('PharmacyStaffReadService', () => {
           pharmacyId: 'ph-1',
           licenseTypeConceptId: 'concept-desconocido',
           licenseNumber: 'SEDES-77',
-          verificationStatusConceptId: VERIFICADA.id,
+          verificationStatusConceptId: VERIFIED.id,
         },
       ]);
       d.repo.findSitesByIds.mockResolvedValue([
         { id: 'site-1', name: 'Sede Centro' },
       ]);
-      d.repo.findConcepts.mockResolvedValue([HABILITACION, VERIFICADA]);
+      d.repo.findConcepts.mockResolvedValue([HABILITACION, VERIFIED]);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.listLicenses('ph-1', ACTOR),
@@ -147,8 +147,8 @@ describe('PharmacyStaffReadService', () => {
         validTo: inTenDays.toISOString().slice(0, 10),
         daysToExpiry: 10,
         verificationStatus: {
-          code: VERIFICADA.code,
-          display: VERIFICADA.display,
+          code: VERIFIED.code,
+          display: VERIFIED.display,
         },
         evidenceFileId: 'file-1',
       });
