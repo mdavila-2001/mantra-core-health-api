@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Inject } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -11,7 +11,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { PatientRepresentationService } from '../../../profiles/services/patient-representation.service';
+import {
+  PATIENT_REPRESENTATION_PORT,
+  type PatientRepresentationPort,
+} from '../ports/patient-representation.port';
 import type {
   PractitionerServiceOfferings,
   SchedulableResources,
@@ -42,7 +45,8 @@ import {
   SchedulingServiceAgendaService,
   type ServiceBands,
 } from './scheduling-service-agenda.service';
-import { AGENDA_OPERATOR_ROLES } from '../bookings/scheduling-bookings.service';
+import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
 
 const MS_PER_MINUTE = 60_000;
 const MS_PER_DAY = 24 * 60 * MS_PER_MINUTE;
@@ -52,11 +56,6 @@ const MAX_QUERY_DAYS = 62;
 
 /** Cuánto dura la retención de un turno si ninguna política dice otra cosa. */
 const HOLD_TTL_SECONDS = 300;
-
-const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
-  'practitioner_profiles',
-  'health_practitioner_profiles',
-];
 
 /**
  * Leer horarios de un servicio y retener el turno elegido.
@@ -86,7 +85,8 @@ export class SchedulingServiceBookingService {
     private readonly agenda: SchedulingServiceAgendaService,
     private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly affiliations: PractitionerAffiliationGateService,
-    private readonly representation: PatientRepresentationService,
+    @Inject(PATIENT_REPRESENTATION_PORT)
+    private readonly representation: PatientRepresentationPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingServiceBookingService.name);
@@ -278,9 +278,7 @@ export class SchedulingServiceBookingService {
         endAt,
         now,
       );
-      const bands: Interval[] = groups.flatMap((group) => [
-        ...group.bands,
-      ]);
+      const bands: Interval[] = groups.flatMap((group) => [...group.bands]);
       if (!serviceFits(bands, busy, service, startAt)) {
         throw new ConflictException(
           'Ese horario ya no está disponible para este servicio. Elija otro.',
@@ -448,7 +446,8 @@ export class SchedulingServiceBookingService {
 
   /** ¿Es una cuenta de paciente sin más oficio? Mismo criterio que las reservas. */
   private isPatientActor(actor: AuthenticatedUser): boolean {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return false;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
+      return false;
     return actor.practitionerProfileId === undefined;
   }
 
@@ -457,7 +456,8 @@ export class SchedulingServiceBookingService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
+      return;
     if (actor.practitionerProfileId === undefined) return;
     const verdict = await this.affiliations.evaluate(tenantId, actor);
     if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;

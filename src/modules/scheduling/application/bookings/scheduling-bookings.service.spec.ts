@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
 
-import { SchedulingBookingsService } from './scheduling-bookings.service';
+import { createBookingsService } from './scheduling-bookings.testing';
 import {
   CONCEPTS,
   ConflictException,
@@ -185,25 +185,25 @@ function build() {
     retract: mockFn().mockResolvedValue(0),
     offeringOfSlot: mockFn().mockResolvedValue(null),
   };
-  const service = new SchedulingBookingsService(
-    em as any,
-    bookingsRepo as any,
-    catalogRepo as any,
-    historyRepo as any,
-    appointmentsRepo as any,
-    noticeRepo as any,
-    notices as any,
-    logger as any,
-    affiliations as any,
-    professionalTime as any,
-    coverageRepo as any,
-    waitlist as any,
-    encountersRepo as any,
-    claimReadRepo as any,
-    representation as any,
-    formOrigin as any,
-    serviceAgenda as any,
-  );
+  const service = createBookingsService({
+    em,
+    bookingsRepo,
+    catalogRepo,
+    historyRepo,
+    appointmentsRepo,
+    noticeRepo,
+    notices,
+    logger,
+    affiliations,
+    professionalTime,
+    coverageRepo,
+    waitlist,
+    encountersRepo,
+    claimReadRepo,
+    representation,
+    formOrigin,
+    serviceAgenda,
+  });
   return {
     serviceAgenda,
     formOrigin,
@@ -1227,11 +1227,7 @@ describe('SchedulingBookingsService', () => {
       const d = build();
       withLiveHold(d);
 
-      const res = await d.service.requestBooking(
-        'hold-token',
-        request,
-        actor,
-      );
+      const res = await d.service.requestBooking('hold-token', request, actor);
 
       expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
       const created = d.bookingsRepo.createBooking.mock.calls[0][1];
@@ -1292,7 +1288,9 @@ describe('SchedulingBookingsService', () => {
         const booking = d.appointmentsRepo.create.mock.calls[0][1];
         expect(booking.statusConceptId).toBe(CLIN.APPOINTMENT_BOOKED);
         expect(booking.typeConceptId).toBe(CLIN.ACTIVITY_PROCEDURE);
-        expect(booking.channelConceptId).toBe(CLIN.APPOINTMENT_CHANNEL_TELEHEALTH);
+        expect(booking.channelConceptId).toBe(
+          CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+        );
         expect(d.bookingsRepo.createReminder).toHaveBeenCalled();
       });
 
@@ -1362,11 +1360,7 @@ describe('SchedulingBookingsService', () => {
       const d = build();
       withLiveHold(d);
 
-      const res = await d.service.requestBooking(
-        'hold-token',
-        request,
-        actor,
-      );
+      const res = await d.service.requestBooking('hold-token', request, actor);
 
       expect(res.remindersScheduled).toBe(0);
       expect(d.bookingsRepo.createReminder).not.toHaveBeenCalled();
@@ -1484,11 +1478,7 @@ describe('SchedulingBookingsService', () => {
       withLiveHold(d);
       d.noticeRepo.describeBooking.mockResolvedValue(null);
 
-      const res = await d.service.requestBooking(
-        'hold-token',
-        request,
-        actor,
-      );
+      const res = await d.service.requestBooking('hold-token', request, actor);
 
       expect(res.id).toBe('booking-1');
       expect(d.notices.emitMany).not.toHaveBeenCalled();
@@ -1507,7 +1497,9 @@ describe('SchedulingBookingsService', () => {
 
     it('cancelar sin motivo se rechaza en el servidor, no solo en el formulario', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(activeBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        activeBooking(),
+      );
 
       await expect(
         d.service.cancel('booking-1', { cancelledBy: 'PATIENT' } as any, actor),
@@ -1518,7 +1510,9 @@ describe('SchedulingBookingsService', () => {
 
     it('un motivo de relleno tampoco pasa', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(activeBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        activeBooking(),
+      );
 
       await expect(
         d.service.cancel(
@@ -1531,7 +1525,9 @@ describe('SchedulingBookingsService', () => {
 
     it('el motivo de la cancelación queda en el historial, con quién la hizo', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(activeBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        activeBooking(),
+      );
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
 
       await d.service.cancel(
@@ -1552,7 +1548,9 @@ describe('SchedulingBookingsService', () => {
 
     it('reprogramar sin motivo se rechaza antes de mover el cupo', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(activeBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        activeBooking(),
+      );
 
       await expect(
         d.service.reschedule(
@@ -1566,7 +1564,9 @@ describe('SchedulingBookingsService', () => {
 
     it('el motivo de la reprogramación se registra como reprogramación, no como cambio de estado', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(activeBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        activeBooking(),
+      );
       d.bookingsRepo.findSlotForUpdate
         .mockResolvedValueOnce(openSlot({ id: 'slot-2', remainingCapacity: 1 }))
         .mockResolvedValueOnce(openSlot());
@@ -1689,7 +1689,9 @@ describe('SchedulingBookingsService', () => {
           // El canal de la RESERVA es otro eje y no se contagia: la asignó
           // alguien desde el mostrador, y eso sigue siendo cierto.
           const reservation = d.bookingsRepo.createBooking.mock.calls[0][1];
-          expect(reservation.bookingChannelConceptId).toBe(CONCEPTS.CHANNEL_DESK);
+          expect(reservation.bookingChannelConceptId).toBe(
+            CONCEPTS.CHANNEL_DESK,
+          );
         });
 
         it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {
@@ -1728,7 +1730,8 @@ describe('SchedulingBookingsService', () => {
         await d.service.createDirectAppointment(dto as never, practitioner);
 
         const slotArgs = d.catalogRepo.createSlot.mock.calls[0][1];
-        const durationMs = slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
+        const durationMs =
+          slotArgs.endAt.getTime() - slotArgs.startAt.getTime();
         expect(durationMs).toBe(180 * 60_000);
       });
 
@@ -1869,7 +1872,9 @@ describe('SchedulingBookingsService', () => {
 
         function withOrigin(d: ReturnType<typeof build>) {
           readyToAssign(d);
-          d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(originBooking);
+          d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+            originBooking,
+          );
           d.encountersRepo.findLatestIdsByAppointmentIds.mockResolvedValue(
             new Map([['appt-origen', 'enc-origen']]),
           );
@@ -2185,9 +2190,9 @@ describe('SchedulingBookingsService', () => {
         // agenda sigue publicada y los pedidos siguen entrando.
         const d = withVerdict(build(), 'ausente');
 
-        await expect(d.service.accept('booking-1', {}, practitioner)).rejects.toThrow(
-          /ya no está vigente/,
-        );
+        await expect(
+          d.service.accept('booking-1', {}, practitioner),
+        ).rejects.toThrow(/ya no está vigente/);
       });
 
       it('el aviso aclara que las citas ya confirmadas siguen en pie', async () => {
@@ -2195,9 +2200,9 @@ describe('SchedulingBookingsService', () => {
         // que ya se le prometieron a un paciente.
         const d = withVerdict(build(), 'ausente');
 
-        await expect(d.service.accept('booking-1', {}, practitioner)).rejects.toThrow(
-          /ya confirmó siguen/,
-        );
+        await expect(
+          d.service.accept('booking-1', {}, practitioner),
+        ).rejects.toThrow(/ya confirmó siguen/);
       });
 
       it('el error de vinculo al aceptar es 422, no 403', async () => {
@@ -2340,7 +2345,10 @@ describe('SchedulingBookingsService', () => {
 
     it('al aceptar, la cita clínica deja de estar pendiente', async () => {
       const d = build();
-      const booking = { id: 'appt-1', statusConceptId: CLIN.APPOINTMENT_PENDING };
+      const booking = {
+        id: 'appt-1',
+        statusConceptId: CLIN.APPOINTMENT_PENDING,
+      };
       d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
         pendingRequest(),
       );
@@ -2765,7 +2773,10 @@ describe('SchedulingBookingsService', () => {
         ...farFutureConfirmedBooking(),
         statusConceptId: SCHED.BOOKING_IN_PROGRESS,
       };
-      const clinicalAppointment = { id: 'appt-1', statusConceptId: CLIN.APPOINTMENT_BOOKED };
+      const clinicalAppointment = {
+        id: 'appt-1',
+        statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      };
       d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
       d.appointmentsRepo.findById.mockResolvedValue(clinicalAppointment);
 
@@ -2773,7 +2784,9 @@ describe('SchedulingBookingsService', () => {
 
       expect(booking.statusConceptId).toBe(SCHED.BOOKING_COMPLETED);
       expect(res.statusConceptId).toBe(SCHED.BOOKING_COMPLETED);
-      expect(clinicalAppointment.statusConceptId).toBe(CLIN.APPOINTMENT_FULFILLED);
+      expect(clinicalAppointment.statusConceptId).toBe(
+        CLIN.APPOINTMENT_FULFILLED,
+      );
     });
 
     it('no se completa una que nunca empezó', async () => {
@@ -2808,21 +2821,25 @@ describe('SchedulingBookingsService', () => {
 
     it('un profesional no opera la cita de un colega', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(otherPersonBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        otherPersonBooking(),
+      );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-9',
         resourceRefType: 'practitioner_profiles',
         resourceRefId: 'hp-OTRO',
       });
 
-      await expect(d.service.start('booking-1', practitioner)).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        d.service.start('booking-1', practitioner),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('sí opera la suya', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(otherPersonBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        otherPersonBooking(),
+      );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-9',
         resourceRefType: 'practitioner_profiles',
@@ -2830,12 +2847,16 @@ describe('SchedulingBookingsService', () => {
       });
       d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
 
-      await expect(d.service.start('booking-1', practitioner)).resolves.toBeDefined();
+      await expect(
+        d.service.start('booking-1', practitioner),
+      ).resolves.toBeDefined();
     });
 
     it('quien administra la agenda opera cualquiera, sin resolver el recurso', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(otherPersonBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        otherPersonBooking(),
+      );
       d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
 
       await expect(d.service.start('booking-1', actor)).resolves.toBeDefined();
@@ -3410,7 +3431,8 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(d.encountersRepo.findIdsByAppointmentIds).toHaveBeenCalledTimes(1);
-      const [, bookings] = d.encountersRepo.findIdsByAppointmentIds.mock.calls[0];
+      const [, bookings] =
+        d.encountersRepo.findIdsByAppointmentIds.mock.calls[0];
       expect(bookings).toEqual(['appt-1', 'appt-2', 'appt-3']);
       expect(d.claimReadRepo.findSummariesByEncounterIds).toHaveBeenCalledTimes(
         1,
@@ -4405,7 +4427,9 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       // el cupo. El único control era `@Roles(...,'PATIENT')`, que autoriza a
       // cualquier cuenta de paciente, no sólo a la titular.
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(foreignBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        foreignBooking(),
+      );
       d.representation.assertMayActForPatient.mockRejectedValue(
         new ForbiddenException('No cuenta con autorización de tutoría'),
       );
@@ -4424,7 +4448,9 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
 
     it('un paciente no puede reprogramar la cita de otro', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(foreignBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        foreignBooking(),
+      );
       d.representation.assertMayActForPatient.mockRejectedValue(
         new ForbiddenException('No cuenta con autorización de tutoría'),
       );
@@ -4445,7 +4471,9 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
 
     it('al mostrador no se le pregunta: cancelar turnos ajenos es su oficio', async () => {
       const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(foreignBooking());
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        foreignBooking(),
+      );
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
         openSlot({ startAt: new Date(Date.now() + 86_400_000) }),
       );

@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
-import { SchedulingCatalogService } from './scheduling-catalog.service';
+import { createCatalogService } from './scheduling-catalog.testing';
 import {
   CONCEPTS,
   ConflictException,
@@ -97,15 +97,15 @@ function buildCatalog() {
   };
   const notices = { emit: mockFn().mockResolvedValue({ delivered: true }) };
 
-  const service = new SchedulingCatalogService(
-    em as any,
+  const service = createCatalogService({
+    em,
     catalogRepo,
-    logger as any,
-    affiliations as any,
-    professionalTime as any,
-    noticeRepo as any,
-    notices as any,
-  );
+    logger,
+    affiliations,
+    professionalTime,
+    noticeRepo,
+    notices,
+  });
   return {
     service,
     tx,
@@ -422,7 +422,10 @@ describe('SchedulingCatalogService', () => {
       const d = buildCatalog();
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
-      await d.service.createResource(ownDto as never, practitionerActor as never);
+      await d.service.createResource(
+        ownDto as never,
+        practitionerActor as never,
+      );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalled();
     });
@@ -432,7 +435,10 @@ describe('SchedulingCatalogService', () => {
       withVerdict(d, 'aprobado');
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
-      await d.service.createResource(ownDto as never, practitionerActor as never);
+      await d.service.createResource(
+        ownDto as never,
+        practitionerActor as never,
+      );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalled();
     });
@@ -458,7 +464,10 @@ describe('SchedulingCatalogService', () => {
       withVerdict(d, 'ausente');
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
-      await d.service.createResource(ownDto as never, practitionerActor as never);
+      await d.service.createResource(
+        ownDto as never,
+        practitionerActor as never,
+      );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalled();
     });
@@ -704,12 +713,7 @@ describe('SchedulingCatalogService', () => {
           },
         ]);
 
-        const res = await d.service.listExceptions(
-          RESOURCE,
-          FROM,
-          TO,
-          actor,
-        );
+        const res = await d.service.listExceptions(RESOURCE, FROM, TO, actor);
 
         expect(res.count).toBe(1);
         expect(res.items[0]).toMatchObject({ id: 'exc-1', reason: 'Congreso' });
@@ -742,12 +746,7 @@ describe('SchedulingCatalogService', () => {
           },
         ]);
 
-        const res = await d.service.listExceptions(
-          RESOURCE,
-          FROM,
-          TO,
-          actor,
-        );
+        const res = await d.service.listExceptions(RESOURCE, FROM, TO, actor);
 
         expect(res.items[0]).toEqual({
           id: 'exc-1',
@@ -1572,10 +1571,7 @@ describe('SchedulingCatalogService', () => {
         const d = buildCatalog();
         withTemplate(d, CONCEPTS.TEMPLATE_RETIRED);
 
-        const res = await d.service.reactivateTemplate(
-          'tpl-1',
-          owner as never,
-        );
+        const res = await d.service.reactivateTemplate('tpl-1', owner as never);
 
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
         expect(d.catalogRepo.reactivateTemplate).toHaveBeenCalled();
@@ -1587,10 +1583,7 @@ describe('SchedulingCatalogService', () => {
         const d = buildCatalog();
         withTemplate(d, CONCEPTS.TEMPLATE_RETIRED);
 
-        const res = await d.service.reactivateTemplate(
-          'tpl-1',
-          owner as never,
-        );
+        const res = await d.service.reactivateTemplate('tpl-1', owner as never);
 
         expect(res.slotsPendientes).toBe(true);
       });
@@ -1601,10 +1594,7 @@ describe('SchedulingCatalogService', () => {
         const d = buildCatalog();
         withTemplate(d, CONCEPTS.TEMPLATE_PUBLISHED);
 
-        const res = await d.service.reactivateTemplate(
-          'tpl-1',
-          owner as never,
-        );
+        const res = await d.service.reactivateTemplate('tpl-1', owner as never);
 
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
         expect(res.slotsPendientes).toBe(false);
@@ -1755,8 +1745,7 @@ describe('SchedulingCatalogService', () => {
 
         await d.service.retireTemplate('tpl-1', owner as never);
 
-        const [, , states] =
-          d.catalogRepo.findBookingsOfTemplate.mock.calls[0];
+        const [, , states] = d.catalogRepo.findBookingsOfTemplate.mock.calls[0];
         expect(states).toHaveLength(2);
         expect(states).toContain(CONCEPTS.BOOKING_CONFIRMED);
         expect(states).toContain(CONCEPTS.BOOKING_CHECKED_IN);
@@ -1915,9 +1904,7 @@ describe('SchedulingCatalogService', () => {
         );
 
         const [, data] = d.catalogRepo.createException.mock.calls[0];
-        expect(data.exceptionTypeConceptId).toBe(
-          CONCEPTS.EXCEPTION_CONFERENCE,
-        );
+        expect(data.exceptionTypeConceptId).toBe(CONCEPTS.EXCEPTION_CONFERENCE);
       });
     });
 
@@ -2124,9 +2111,9 @@ describe('SchedulingCatalogService', () => {
 
         expect(res.created).toBe(3);
         const last = d.catalogRepo.createSlot.mock.calls.at(-1)[1];
-        expect(
-          (last.endAt.getTime() - last.startAt.getTime()) / 60_000,
-        ).toBe(45);
+        expect((last.endAt.getTime() - last.startAt.getTime()) / 60_000).toBe(
+          45,
+        );
       });
 
       it('el turno completado no pisa la franja siguiente del mismo día', async () => {
@@ -2201,9 +2188,7 @@ describe('SchedulingCatalogService', () => {
           actor,
         );
 
-        const bands = d.catalogRepo.createRule.mock.calls.map(
-          (c: any) => c[1],
-        );
+        const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
         expect(bands[0].gapMinutes).toBe(10);
         expect(bands[1].gapMinutes).toBeUndefined();
       });

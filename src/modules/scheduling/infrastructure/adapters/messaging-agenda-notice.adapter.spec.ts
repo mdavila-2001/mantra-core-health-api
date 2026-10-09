@@ -186,9 +186,7 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
     const result = await d.adapter.emit(notice);
 
     expect(result.delivered).toBe(false);
-    expect(result.skippedReason).toBe(
-      'El destinatario no acepta este canal',
-    );
+    expect(result.skippedReason).toBe('El destinatario no acepta este canal');
     expect(result.emailRequestId).toBe('request-email');
     expect(d.notifications.createRequest).toHaveBeenCalledTimes(2);
   });
@@ -243,9 +241,7 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
     const result = await d.adapter.emit(notice);
 
     expect(result.delivered).toBe(false);
-    expect(result.skippedReason).toBe(
-      'El destinatario no acepta este canal',
-    );
+    expect(result.skippedReason).toBe('El destinatario no acepta este canal');
     expect(d.notifications.deliverNotification).not.toHaveBeenCalled();
   });
 

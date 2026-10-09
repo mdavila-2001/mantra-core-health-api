@@ -89,9 +89,7 @@ describe('CreateDirectAppointmentDto — followUpOf (P42) y formInstanceId (P43)
 
   it('rechaza una clave no declarada dentro de followUpOf', async () => {
     expect(
-      await errors(
-        body({ followUpOf: { bookingId: ORIGIN, startAt: 'x' } }),
-      ),
+      await errors(body({ followUpOf: { bookingId: ORIGIN, startAt: 'x' } })),
     ).toEqual(['followUpOf.startAt']);
   });
 

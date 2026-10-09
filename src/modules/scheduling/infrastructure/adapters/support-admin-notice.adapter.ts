@@ -157,7 +157,10 @@ export class SupportAdminNoticeAdapter {
       // — si la persona más tarde arma la suya, `findByTarget` la encuentra a
       // ella primero y esta rama nunca se ejecuta.
       slug: `support-thread-${randomUUID()}`,
-      displayName: accountName === undefined || accountName === '' ? 'Usuario' : accountName,
+      displayName:
+        accountName === undefined || accountName === ''
+          ? 'Usuario'
+          : accountName,
       actorUserId: actor.id,
     });
   }

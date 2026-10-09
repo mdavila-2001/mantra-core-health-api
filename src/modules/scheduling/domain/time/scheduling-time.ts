@@ -108,7 +108,11 @@ export function dayOfWeek(day: LocalDay): number {
  * @param timeText - Hora de pared `HH:MM` o `HH:MM:SS`.
  * @param zone - Identificador IANA.
  */
-export function localTimeToUtc(day: LocalDay, timeText: string, zone: string): Date {
+export function localTimeToUtc(
+  day: LocalDay,
+  timeText: string,
+  zone: string,
+): Date {
   const [hours, minutes, seconds] = timeText.split(':').map(Number);
   const assumed = Date.UTC(
     day.year,

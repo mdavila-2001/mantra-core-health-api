@@ -16,6 +16,8 @@ import {
 } from '../../../../common';
 import { CLIN } from '../../../clinical/clinical.concepts';
 import { SCHED } from '../../domain/scheduling.concepts';
+import { ClinicalEncountersAdapter } from '../../infrastructure/adapters/clinical-encounters.adapter';
+import { ProfilesWalkInPatientAdapter } from '../../infrastructure/adapters/profiles-walk-in-patient.adapter';
 
 const actor = { id: 'actor-1', roles: ['SCHEDULING_AGENT'] };
 
@@ -58,7 +60,8 @@ function build() {
     retractedSlots: 0,
   };
   const bookingsService = {
-    createDirectAppointmentInTransaction: mockFn().mockResolvedValue(bookingResult),
+    createDirectAppointmentInTransaction:
+      mockFn().mockResolvedValue(bookingResult),
     startInTransaction: mockFn(async (_tx: any, booking: any) => {
       booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
     }),
@@ -99,13 +102,15 @@ function build() {
   const service = new SchedulingWalkInService(
     em,
     bookingsService as any,
-    encountersRepo as any,
-    personsRepo as any,
-    personProfilesRepo as any,
-    patientProfilesRepo as any,
-    identifiersRepo as any,
-    contactPointsRepo as any,
-    relatedPersonsRepo as any,
+    new ClinicalEncountersAdapter(encountersRepo as any),
+    new ProfilesWalkInPatientAdapter(
+      personsRepo as any,
+      personProfilesRepo as any,
+      patientProfilesRepo as any,
+      identifiersRepo as any,
+      contactPointsRepo as any,
+      relatedPersonsRepo as any,
+    ),
     logger as any,
   );
 
@@ -126,7 +131,9 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
     const result = await service.createWalkInAppointment(DTO, actor as any);
 
     expect(em.transactional.mock.calls).toHaveLength(1);
-    expect(bookingsService.createDirectAppointmentInTransaction).toHaveBeenCalledWith(
+    expect(
+      bookingsService.createDirectAppointmentInTransaction,
+    ).toHaveBeenCalledWith(
       tx,
       // `patient_profiles.profile_id` ES `persons.id`: por eso el paciente que
       // acaba de nacer se identifica por ese mismo valor. `channel` viaja tal

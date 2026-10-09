@@ -1,23 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 
 import { type AuthenticatedUser } from '../../../../common';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import { EncountersRepository } from '../../../clinical/repositories';
 import {
-  ContactPointsRepository,
-  IdentifiersRepository,
-} from '../../../common/repositories';
+  CLINICAL_ENCOUNTERS_PORT,
+  type ClinicalEncountersPort,
+} from '../ports/clinical-encounters.port';
 import {
-  PatientProfilesRepository,
-  PersonProfilesRepository,
-  PersonsRepository,
-  RelatedPersonsRepository,
-} from '../../../profiles/repositories';
-import { WalkInAppointmentDto, WalkInAppointmentResponseDto } from '../../presentation/dto';
+  WALK_IN_PATIENT_REGISTRY_PORT,
+  type WalkInPatientRegistryPort,
+} from '../ports/walk-in-patient-registry.port';
+import {
+  WalkInAppointmentDto,
+  WalkInAppointmentResponseDto,
+} from '../../presentation/dto';
 import { SchedulingBookingsService } from '../bookings/scheduling-bookings.service';
-import { createWalkInPatient } from './walk-in-patient';
 
 /**
  * El turno de mostrador atómico (AC-3.3): registra al paciente sin cuenta de
@@ -42,26 +41,19 @@ export class SchedulingWalkInService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param bookingsService - Reutiliza el cuerpo transaccional de la cita
    *   directa y el paso final de `start`.
-   * @param encountersRepo - Abre el encuentro y, si hay profesional, su
+   * @param encounters - Abre el encuentro y, si hay profesional, su
    *   participante, en la misma transacción.
-   * @param personsRepo - Alta de la persona del paciente de mostrador.
-   * @param personProfilesRepo - Alta de su perfil de paciente.
-   * @param patientProfilesRepo - Alta de `patient_profiles`.
-   * @param identifiersRepo - Documento oficial y comprobación de duplicados.
-   * @param contactPointsRepo - Teléfono de contacto.
-   * @param relatedPersonsRepo - Tutor o persona autorizada, si lo declaró.
+   * @param patientRegistry - Alta de la persona, su perfil, documento,
+   *   teléfono y tutor del paciente de mostrador.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly bookingsService: SchedulingBookingsService,
-    private readonly encountersRepo: EncountersRepository,
-    private readonly personsRepo: PersonsRepository,
-    private readonly personProfilesRepo: PersonProfilesRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
-    private readonly identifiersRepo: IdentifiersRepository,
-    private readonly contactPointsRepo: ContactPointsRepository,
-    private readonly relatedPersonsRepo: RelatedPersonsRepository,
+    @Inject(CLINICAL_ENCOUNTERS_PORT)
+    private readonly encounters: ClinicalEncountersPort,
+    @Inject(WALK_IN_PATIENT_REGISTRY_PORT)
+    private readonly patientRegistry: WalkInPatientRegistryPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingWalkInService.name);
@@ -88,18 +80,10 @@ export class SchedulingWalkInService {
     );
 
     return this.em.transactional(async (tx) => {
-      const patient = await createWalkInPatient(
-        {
-          persons: this.personsRepo,
-          personProfiles: this.personProfilesRepo,
-          patientProfiles: this.patientProfilesRepo,
-          identifiers: this.identifiersRepo,
-          contactPoints: this.contactPointsRepo,
-          relatedPersons: this.relatedPersonsRepo,
-        },
-        tx,
-        { ...dto.patient, actorUserId: actor.id },
-      );
+      const patient = await this.patientRegistry.register(tx, {
+        ...dto.patient,
+        actorUserId: actor.id,
+      });
 
       const { booking, slot, appointment, retractedSlots } =
         await this.bookingsService.createDirectAppointmentInTransaction(
@@ -118,7 +102,7 @@ export class SchedulingWalkInService {
 
       // El encuentro nace abierto: quien llegó al mostrador ya está siendo
       // atendido, no esperando un check-in posterior.
-      const encounter = this.encountersRepo.create(tx, {
+      const encounter = this.encounters.open(tx, {
         patientProfileId: patient.patientProfileId,
         tenantId: booking.tenantId,
         primaryPractitionerId: appointment.practitionerProfileId,
@@ -133,7 +117,7 @@ export class SchedulingWalkInService {
       await tx.flush();
 
       if (appointment.practitionerProfileId) {
-        this.encountersRepo.createParticipant(tx, {
+        this.encounters.addParticipant(tx, {
           encounterId: encounter.id,
           practitionerProfileId: appointment.practitionerProfileId,
           participantRoleConceptId: CLIN.PARTICIPANT_ROLE_ATTENDER,

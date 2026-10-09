@@ -1,7 +1,10 @@
 import type { Provider } from '@nestjs/common';
 import { createPersistenceSessionProvider } from '../../../../persistence/session/session.provider';
 import { PostgresWaitlistAdapter } from '../adapters/postgres-waitlist.adapter';
-import { WAITLIST_READ_PORT, WAITLIST_WRITE_PORT } from '../../application/ports/waitlist.port';
+import {
+  WAITLIST_READ_PORT,
+  WAITLIST_WRITE_PORT,
+} from '../../application/ports/waitlist.port';
 import { SCHEDULING_MODULE } from './scheduling.tokens';
 
 /** Cableado de persistencia del módulo piloto. */

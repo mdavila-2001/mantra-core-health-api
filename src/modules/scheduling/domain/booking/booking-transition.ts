@@ -1,6 +1,4 @@
-﻿import { PreconditionFailedException } from '../../../../common';
-
-/**
+﻿/**
  * Lo que se guarda de cada cambio en la vida de una cita
  * (`audit.appointment_bookings_history.data_snapshot`).
  *
@@ -126,8 +124,17 @@ export function normalizeReason(raw: string): string {
   return raw.trim().replace(/\s+/g, ' ');
 }
 
+/** Resultado de juzgar un motivo escrito: usable, o por qué no lo es. */
+export type ReasonVerdict =
+  | { readonly ok: true; readonly reason: string }
+  | {
+      readonly ok: false;
+      readonly violation: 'REASON_REQUIRED' | 'REASON_PLACEHOLDER';
+    };
+
 /**
- * Exige un motivo de verdad y lo devuelve normalizado (corrección #14).
+ * Juzga un motivo (corrección #14) sin lanzar nada: el dominio decide, la capa
+ * de aplicación traduce el rechazo a su excepción HTTP (`requireReason`).
  *
  * **La validación es del servidor, no de la pantalla.** El DTO ya rechaza el
  * campo ausente o corto con un 400, pero eso solo cubre a quien manda el
@@ -135,29 +142,20 @@ export function normalizeReason(raw: string): string {
  * que descarta el relleno («na», «prueba», «...»), que un `@MinLength` no ve.
  *
  * @param raw - Lo que llegó en el cuerpo.
- * @param action - Qué se estaba haciendo, para que el error lo diga.
- * @returns El motivo listo para persistir.
- * @throws PreconditionFailedException si está vacío, es demasiado corto o es
- * relleno.
+ * @returns El motivo listo para persistir, o la regla que incumple.
  */
-export function requireReason(raw: string | undefined, action: string): string {
+export function judgeReason(raw: string | undefined): ReasonVerdict {
   const reason = normalizeReason(raw ?? '');
 
   if (reason.length < MIN_REASON_LENGTH) {
-    throw new PreconditionFailedException(
-      `Indique el motivo para ${action}: es obligatorio y debe explicar el cambio.`,
-      { failureCode: 'REASON_REQUIRED', minLength: MIN_REASON_LENGTH },
-    );
+    return { ok: false, violation: 'REASON_REQUIRED' };
   }
 
   if (isPlaceholder(reason)) {
-    throw new PreconditionFailedException(
-      `El motivo para ${action} no puede ser un texto de relleno: escriba la razón real.`,
-      { failureCode: 'REASON_PLACEHOLDER' },
-    );
+    return { ok: false, violation: 'REASON_PLACEHOLDER' };
   }
 
-  return reason;
+  return { ok: true, reason };
 }
 
 /**

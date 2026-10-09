@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
 // Dónde se atiende lo sabe `practice`: es su dato y no se copia acá. La
 // dependencia va en un solo sentido —`practice` no importa `scheduling`— así
 // que no cierra ciclo.
-import { PractitionerSitesService } from '../../../practice/services';
 import { SchedulingAgendaRepository } from '../../infrastructure/repositories';
-import { findPractitionerNames } from '../../../profiles/read/practitioner-names';
+import {
+  PRACTITIONER_DIRECTORY_PORT,
+  type PractitionerDirectoryPort,
+} from '../ports/practitioner-directory.port';
 import type { BookableSlots, SchedulableResources } from '../../entities';
 import {
   AGENDA_MAX_LIMIT,
@@ -20,6 +22,7 @@ import {
   SlotListItemDto,
   type ResourceType,
 } from '../../presentation/dto';
+import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -44,15 +47,6 @@ const MAX_WINDOW_MS = MAX_WINDOW_DAYS * 24 * 60 * 60 * 1000;
  * no hay forma de obtener el `slotId` que pide `POST /scheduling/slots/{id}/holds`,
  * de modo que reservar una cita desde el portal era, literalmente, imposible.
  */
-/**
- * Las dos formas de `resourceRefType` que apuntan a un perfil profesional,
- * las mismas que aceptan bookings y el catálogo.
- */
-const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
-  'practitioner_profiles',
-  'health_practitioner_profiles',
-];
-
 @Injectable()
 export class SchedulingAgendaService {
   /**
@@ -60,13 +54,14 @@ export class SchedulingAgendaService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param agendaRepo - Repositorio de lectura de agenda.
-   * @param sitesService - Resolución de la sede de cada recurso (`practice`).
+   * @param directory - Sede y nombre de los profesionales (`practice` y `profiles`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly agendaRepo: SchedulingAgendaRepository,
-    private readonly sitesService: PractitionerSitesService,
+    @Inject(PRACTITIONER_DIRECTORY_PORT)
+    private readonly directory: PractitionerDirectoryPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
@@ -95,7 +90,7 @@ export class SchedulingAgendaService {
     // una caída.
     let sites = new Map<string, ResourceSiteDto>();
     try {
-      sites = await this.sitesService.resolveSitesForResources(
+      sites = await this.directory.resolveSitesForResources(
         resources.map((resource) => ({
           refType: resource.resourceRefType,
           refId: resource.resourceRefId,
@@ -115,7 +110,7 @@ export class SchedulingAgendaService {
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
     let names = new Map<string, string>();
     try {
-      names = await findPractitionerNames(
+      names = await this.directory.findPractitionerNames(
         em,
         resources
           .filter((resource) =>

@@ -149,9 +149,7 @@ export interface TimesInput {
  *
  * @throws RangeError con una duración, un paso o un colchón que no tiene sentido.
  */
-export function proposeServiceTimes(
-  input: TimesInput,
-): ServiceTime[] {
+export function proposeServiceTimes(input: TimesInput): ServiceTime[] {
   const { service: service } = input;
   const prep = service.prepMinutes ?? 0;
   const cleanup = service.cleanupMinutes ?? 0;
@@ -173,7 +171,9 @@ export function proposeServiceTimes(
       const start = occupiesFrom + prep * MS_PER_MINUTE;
       if (start < input.notBefore.getTime()) continue;
       if (start > input.notAfter.getTime()) break;
-      times.push(assemble(start, occupiesFrom, occupiesFrom + occupiesMs, service));
+      times.push(
+        assemble(start, occupiesFrom, occupiesFrom + occupiesMs, service),
+      );
       if (times.length >= limit) return times;
     }
   }
@@ -198,11 +198,9 @@ export function serviceFits(
   validate(service, prep, cleanup, START_STEP_MINUTES);
   const from = startAt.getTime() - prep * MS_PER_MINUTE;
   const to =
-    startAt.getTime() +
-    (service.maxDurationMinutes + cleanup) * MS_PER_MINUTE;
+    startAt.getTime() + (service.maxDurationMinutes + cleanup) * MS_PER_MINUTE;
   return subtractIntervals(bands, busy).some(
-    (free) =>
-      free.startAt.getTime() <= from && free.endAt.getTime() >= to,
+    (free) => free.startAt.getTime() <= from && free.endAt.getTime() >= to,
   );
 }
 

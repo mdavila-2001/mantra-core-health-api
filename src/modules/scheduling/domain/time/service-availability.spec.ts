@@ -176,9 +176,9 @@ describe('serviceFits', () => {
   });
 
   it('no cabe si otro paciente retuvo parte del rango entre tanto', () => {
-    expect(
-      serviceFits(bands, [iv(t(8, 40), t(9, 10))], service, t(8, 5)),
-    ).toBe(false);
+    expect(serviceFits(bands, [iv(t(8, 40), t(9, 10))], service, t(8, 5))).toBe(
+      false,
+    );
   });
 });
 
@@ -194,9 +194,9 @@ describe('slotsThatCanReopen', () => {
   });
 
   it('el cupo que sigue pisado por otro servicio no vuelve', () => {
-    expect(
-      slotsThatCanReopen(retracted, [iv(t(9, 45), t(10, 15))]),
-    ).toEqual(['a']);
+    expect(slotsThatCanReopen(retracted, [iv(t(9, 45), t(10, 15))])).toEqual([
+      'a',
+    ]);
   });
 
   it('un compromiso que apenas termina cuando empieza el cupo no lo pisa', () => {

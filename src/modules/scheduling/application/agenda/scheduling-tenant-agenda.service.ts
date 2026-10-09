@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../../common';
-import { TenantAdministrationService } from '../../../directory/services';
+import {
+  TENANT_DIRECTORY_PORT,
+  type TenantDirectoryPort,
+} from '../ports/tenant-directory.port';
 // Se importa la ENTIDAD de `profiles` y no su módulo —el mismo criterio que ya
 // usa la agenda del profesional para resolver nombres—: traer el módulo entero
 // para leer una columna abriría una dependencia que hoy no existe.
-import { Persons } from '../../../profiles/entities';
 import { SchedulingBookingsRepository } from '../../infrastructure/repositories';
 import { SchedulingAgendaRepository } from '../../infrastructure/repositories';
 import { SchedulableResources } from '../../entities';
@@ -20,18 +22,13 @@ import {
   type TenantAgendaItemDto,
   type TenantAgendaResponseDto,
 } from '../../presentation/dto';
+import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
 
 /** Milisegundos de un día. */
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Tope por omisión cuando el cliente no pide uno. */
 const DEFAULT_PAGE_LIMIT = 200;
-
-/** Las dos formas de `resourceRefType` que apuntan a un perfil profesional. */
-const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
-  'practitioner_profiles',
-  'health_practitioner_profiles',
-];
 
 /**
  * La agenda de la organización (TP-5).
@@ -65,14 +62,15 @@ export class SchedulingTenantAgendaService {
    * @param em - Contexto de persistencia.
    * @param bookingsRepo - Acceso a `scheduling.appointment_bookings`.
    * @param agendaRepo - Acceso a los recursos agendables.
-   * @param tenantAdmin - Quién administra cada organización.
+   * @param tenants - Quién administra cada organización y cómo se llaman las personas.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly agendaRepo: SchedulingAgendaRepository,
-    private readonly tenantAdmin: TenantAdministrationService,
+    @Inject(TENANT_DIRECTORY_PORT)
+    private readonly tenants: TenantDirectoryPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingTenantAgendaService.name);
@@ -96,7 +94,7 @@ export class SchedulingTenantAgendaService {
     // Leer la agenda es parte de trabajar en la organización, así que alcanza
     // con pertenecer: exigir administrarla dejaría fuera justamente a la
     // recepción, que es para quien esta pantalla existe.
-    await this.tenantAdmin.assertCanRead(em, tenantId, actor);
+    await this.tenants.assertCanRead(em, tenantId, actor);
 
     const from = new Date(query.from);
     const to = new Date(query.to);
@@ -181,17 +179,9 @@ export class SchedulingTenantAgendaService {
       ...new Set(rows.map((row) => row.booking.patientProfileId)),
     ];
 
-    const people =
-      patientIds.length > 0
-        ? await em.find(Persons, { id: { $in: patientIds } })
-        : [];
     // El nombre del paciente sale de `persons` por el mismo camino que el del
     // profesional: `patient_profiles.profile_id` referencia a `persons(id)`.
-    const nameByPerson = new Map(
-      people
-        .filter((person) => (person.displayName ?? '') !== '')
-        .map((person) => [person.id, person.displayName as string]),
-    );
+    const nameByPerson = await this.tenants.findDisplayNames(em, patientIds);
 
     return rows.map((row) => {
       const resource = row.booking.resourceId
@@ -210,8 +200,7 @@ export class SchedulingTenantAgendaService {
         resourceName: resource?.name ?? null,
         practitionerProfileId,
         patientProfileId: row.booking.patientProfileId,
-        patientName:
-          nameByPerson.get(row.booking.patientProfileId) ?? null,
+        patientName: nameByPerson.get(row.booking.patientProfileId) ?? null,
         statusConceptId: row.booking.statusConceptId,
       };
     });

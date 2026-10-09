@@ -15,6 +15,10 @@ import type {
   RelatedPersonsRepository,
 } from '../../../profiles/repositories';
 import { createGuardianRelatedPerson } from '../../../profiles/services/guardian-related-person';
+import type {
+  WalkInPatientData,
+  WalkInPatientResult,
+} from '../../application/ports/walk-in-patient-registry.port';
 
 /** Repositorios de `profiles`/`common` que necesita el alta de mostrador. */
 export interface WalkInPatientRepos {
@@ -24,32 +28,6 @@ export interface WalkInPatientRepos {
   readonly identifiers: IdentifiersRepository;
   readonly contactPoints: ContactPointsRepository;
   readonly relatedPersons: RelatedPersonsRepository;
-}
-
-/** El bloque de filiación que declara quien atiende el mostrador. */
-export interface WalkInPatientData {
-  readonly name: string;
-  readonly middleName?: string;
-  readonly lastName: string;
-  readonly motherLastName?: string;
-  readonly nationalId: string;
-  readonly issuerAdministrativeAreaConceptId?: string;
-  readonly birthDate?: string;
-  readonly phone: string;
-  readonly occupationConceptId?: string;
-  readonly occupationFreeText?: string;
-  readonly guardianName?: string;
-  readonly guardianPhone?: string;
-  readonly guardianRelationshipConceptId?: string;
-  /** Quién escribe las filas, para la auditoría. */
-  readonly actorUserId: string;
-}
-
-/** Lo que queda disponible para el resto del alta de mostrador (la cita). */
-export interface WalkInPatientResult {
-  readonly personId: string;
-  readonly patientProfileId: string;
-  readonly patientCode: string;
 }
 
 /**

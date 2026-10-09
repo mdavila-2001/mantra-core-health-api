@@ -79,9 +79,7 @@ export class SchedulingAgendaNoticesService {
     );
 
     const results = await this.notices.emitMany(notices);
-    const delivered = results.filter(
-      (result) => result.delivered,
-    ).length;
+    const delivered = results.filter((result) => result.delivered).length;
 
     this.logger.info(
       {
@@ -126,9 +124,7 @@ export class SchedulingAgendaNoticesService {
     }
 
     const results = await this.notices.emitMany(notices);
-    const delivered = results.filter(
-      (result) => result.delivered,
-    ).length;
+    const delivered = results.filter((result) => result.delivered).length;
 
     this.logger.info(
       {

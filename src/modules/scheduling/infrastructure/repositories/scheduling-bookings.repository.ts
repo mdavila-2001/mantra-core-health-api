@@ -657,9 +657,7 @@ export class SchedulingBookingsRepository {
         // Sin cupo no hay instante contra el que comparar: queda fuera en vez de
         // colarse con fecha desconocida.
         .filter(
-          (
-            row,
-          ): row is { booking: AppointmentBookings; slot: BookableSlots } =>
+          (row): row is { booking: AppointmentBookings; slot: BookableSlots } =>
             row.slot !== null &&
             row.slot.startAt >= filters.from &&
             row.slot.startAt < filters.to,
@@ -820,14 +818,7 @@ export class SchedulingBookingsRepository {
           AND s.end_at   > ?
           AND (? IS NULL OR b.id <> ?)
         ORDER BY s.start_at ASC`,
-      [
-        patientProfileId,
-        [...states],
-        to,
-        from,
-        except ?? null,
-        except ?? null,
-      ],
+      [patientProfileId, [...states], to, from, except ?? null, except ?? null],
     );
   }
 
@@ -998,8 +989,9 @@ export class SchedulingBookingsRepository {
   ): Promise<{ startAt: Date; timeZone: string | null }[]> {
     if (states.length === 0) return [];
 
-    const rows: { startAt: Date | string; timeZone: string | null }[] =
-      await em.getConnection().execute(
+    const rows: { startAt: Date | string; timeZone: string | null }[] = await em
+      .getConnection()
+      .execute(
         `SELECT s.start_at AS "startAt",
                 r.time_zone AS "timeZone"
            FROM scheduling.appointment_bookings b
@@ -1139,7 +1131,11 @@ export class SchedulingBookingsRepository {
 
     const slots = await em.find(BookableSlots, {
       id: {
-        $in: [...new Set([...latestByAppointment.values()].map((f) => f.fromSlotId))],
+        $in: [
+          ...new Set(
+            [...latestByAppointment.values()].map((f) => f.fromSlotId),
+          ),
+        ],
       },
     });
     const startBySlot = new Map(slots.map((slot) => [slot.id, slot.startAt]));

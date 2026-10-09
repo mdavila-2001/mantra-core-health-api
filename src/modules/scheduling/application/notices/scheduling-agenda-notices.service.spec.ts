@@ -125,10 +125,7 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
         .mockResolvedValueOnce(booking)
         .mockResolvedValueOnce(null);
 
-      const delivered = await d.service.notifyReminders([
-        'rem-1',
-        'rem-2',
-      ]);
+      const delivered = await d.service.notifyReminders(['rem-1', 'rem-2']);
 
       expect(d.notices.emitMany.mock.calls[0][0]).toHaveLength(1);
       expect(delivered).toBe(1);

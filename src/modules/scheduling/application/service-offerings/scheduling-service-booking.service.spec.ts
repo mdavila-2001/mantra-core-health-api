@@ -380,9 +380,9 @@ describe('SchedulingServiceBookingService', () => {
       const d = build();
       d.affiliations.evaluate.mockResolvedValue('revocado');
 
-      await expect(d.service.placeHold(OFFERING, dto, practitioner)).rejects.toThrow(
-        /ya no está vigente/,
-      );
+      await expect(
+        d.service.placeHold(OFFERING, dto, practitioner),
+      ).rejects.toThrow(/ya no está vigente/);
     });
 
     it('422 si falta más anticipación que la que pide la política', async () => {

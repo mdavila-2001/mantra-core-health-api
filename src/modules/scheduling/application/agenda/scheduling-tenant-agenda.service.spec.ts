@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { SchedulingTenantAgendaService } from './scheduling-tenant-agenda.service';
 import { PreconditionFailedException } from '../../../../common';
+import { DirectoryTenantDirectoryAdapter } from '../../infrastructure/adapters/directory-tenant-directory.adapter';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const OTHER_TENANT = '22222222-2222-2222-2222-222222222222';
@@ -51,7 +52,7 @@ function build() {
     em,
     bookingsRepo as any,
     agendaRepo as any,
-    tenantAdmin as any,
+    new DirectoryTenantDirectoryAdapter(tenantAdmin as any),
     logger as any,
   );
   return { service, em, bookingsRepo, agendaRepo, tenantAdmin };

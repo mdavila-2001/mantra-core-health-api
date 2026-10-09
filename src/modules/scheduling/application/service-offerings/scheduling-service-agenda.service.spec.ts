@@ -34,7 +34,13 @@ function build() {
     catalogRepo as any,
     professionalTime as any,
   );
-  return { service, em, offeringsRepo, catalogRepo, professionalTime: professionalTime };
+  return {
+    service,
+    em,
+    offeringsRepo,
+    catalogRepo,
+    professionalTime: professionalTime,
+  };
 }
 
 const rule = (over: Record<string, unknown> = {}) => ({

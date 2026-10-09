@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { Inject, Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../../common';
-import { PractitionerAffiliations } from '../../../profiles/entities';
-import { esEstado } from '../../../profiles/services/profiles-affiliations.service';
+import {
+  PRACTITIONER_AFFILIATIONS_PORT,
+  type PractitionerAffiliationsPort,
+} from '../ports/practitioner-affiliations.port';
 
 /**
  * En qué situación está el profesional respecto de una organización.
@@ -34,50 +35,17 @@ export type AffiliationVerdict =
  */
 @Injectable()
 export class PractitionerAffiliationGateService {
-  /**
-   * Inicializa la instancia y sus dependencias.
-   *
-   * @param em - Contexto de persistencia.
-   */
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    @Inject(PRACTITIONER_AFFILIATIONS_PORT)
+    private readonly affiliationsPort: PractitionerAffiliationsPort,
+  ) {}
 
   /**
-   * Evalúa el vínculo del profesional con una organización.
+   * Evalúa el vínculo del actor con la organización.
    *
-   * ## Sólo cuentan los vínculos que apuntan a una sede
-   *
-   * Hoy el médico declara dónde trabaja escribiendo el nombre a mano:
-   * `organization_name` es obligatorio y `practice_site_id` opcional, y en la
-   * base viva es nulo en todos. Un vínculo sin sede no identifica a ninguna
-   * organización de la plataforma, así que no puede servir de prueba en
-   * ninguna de las dos direcciones — ni para dejar pasar ni para bloquear.
-   *
-   * ## La pregunta es por ESTA organización, no por el profesional entero
-   *
-   * Antes la mano se abría sólo para quien no tuviera **ningún** vínculo con
-   * sede, y eso producía un absurdo: en cuanto una institución le aprobaba el
-   * vínculo, el médico dejaba de poder publicar en **su propio consultorio**
-   * —donde no hay vínculo que pedir ni nadie a quien pedírselo—, porque su
-   * consultorio pasaba a leerse como una organización más de la que «faltaba»
-   * el vínculo. Tener un vínculo aprobado en otro lado lo dejaba peor que no
-   * tener ninguno.
-   *
-   * Ahora la excepción se evalúa por organización: si no hay ningún vínculo con
-   * sede que apunte a **ésta**, el veredicto es el mismo que el de quien no
-   * tiene ninguno. Lo que bloquea sigue bloqueando: un vínculo pedido y no
-   * resuelto es `pendiente`, y uno negado es `no-vigente`.
-   *
-   * ## Los estados se comparan con `esEstado`, no con `===`
-   *
-   * v4.1.9 cambió los conceptos del vínculo y el backfill todavía no corrió:
-   * las filas vivas tienen escritos los ids viejos. Un `===` contra el id
-   * nuevo no reconocería ningún vínculo ya aprobado, y todo médico que hoy
-   * publica dejaría de poder. `esEstado` acepta los dos mientras dure la
-   * transición.
-   *
-   * @param tenantId - La organización en cuestión.
-   * @param actor - Quien pretende actuar en ella.
-   * @returns El veredicto; el llamador decide qué hacer con él.
+   * @param tenantId - Organización a la que pertenece lo que se quiere hacer.
+   * @param actor - Quien actúa.
+   * @returns El veredicto; `'sin-vinculos'` cuando no hay nada que mirar.
    */
   async evaluate(
     tenantId: string,
@@ -85,21 +53,12 @@ export class PractitionerAffiliationGateService {
   ): Promise<AffiliationVerdict> {
     if (actor.practitionerProfileId === undefined) return 'sin-vinculos';
 
-    const affiliations = await this.em.find(
-      PractitionerAffiliations,
-      { practitionerProfileId: actor.practitionerProfileId },
-      { fields: ['practiceSiteId', 'statusConceptId', 'organizationName'] },
-    );
-
-    const withSite = affiliations.filter(
-      (v): v is (typeof affiliations)[number] & { practiceSiteId: string } =>
-        v.practiceSiteId !== undefined && v.practiceSiteId !== null,
+    const withSite = await this.affiliationsPort.findOfPractitioner(
+      actor.practitionerProfileId,
     );
     if (withSite.length === 0) return 'sin-vinculos';
 
-    // Una sola consulta para todas las sedes: resolver el tenant de cada una
-    // por separado sería N+1 sobre el mismo puente.
-    const tenantBySite = await this.tenantOfEachSite(
+    const tenantBySite = await this.affiliationsPort.tenantsOfSites(
       withSite.map((v) => v.practiceSiteId),
     );
     const ofThisOrganization = withSite.filter(
@@ -107,66 +66,20 @@ export class PractitionerAffiliationGateService {
     );
     if (ofThisOrganization.length === 0) return 'sin-vinculos';
 
-    // `DECLARADO` habilita igual que `APROBADO`: es el médico del hospital
-    // público, donde no hay nadie que pueda aprobar. Lo que le falta es el
-    // sello de la institución, y eso se dice en pantalla, no bloqueando.
     const approved = ofThisOrganization.some(
-      (v) =>
-        esEstado(v.statusConceptId, 'APROBADO') ||
-        esEstado(v.statusConceptId, 'DECLARADO'),
+      (v) => v.status === 'APPROVED' || v.status === 'DECLARED',
     );
     if (approved) return 'aprobado';
 
-    const pendingVerdict = ofThisOrganization.some((v) =>
-      esEstado(v.statusConceptId, 'PENDIENTE'),
+    const pendingVerdict = ofThisOrganization.some(
+      (v) => v.status === 'PENDING',
     );
     if (pendingVerdict) return 'pendiente';
 
-    // Rechazado o revocado con ESTA organización es una negativa suya, y se
-    // distingue de no tener vínculo: lo primero lo dijo alguien, lo segundo no
-    // lo dijo nadie.
     return ofThisOrganization.some(
-      (v) =>
-        esEstado(v.statusConceptId, 'RECHAZADO') ||
-        esEstado(v.statusConceptId, 'REVOCADO'),
+      (v) => v.status === 'REJECTED' || v.status === 'REVOKED',
     )
       ? 'no-vigente'
       : 'ausente';
-  }
-
-  /**
-   * La organización a cargo de cada sede.
-   *
-   * El vínculo apunta a una sede y la agenda a una organización; el puente es
-   * `sede -> práctica -> organización`. Devuelve un mapa y no un conjunto
-   * porque hace falta saber **de cuál** organización es cada vínculo, no sólo
-   * qué organizaciones aparecen entre todos.
-   *
-   * `managing_tenant_id` manda sobre el tenant de la práctica: es la columna que
-   * dice quién administra ESTA sede, y es la que miran tanto la aprobación del
-   * vínculo como el cargador del padrón. Preguntar sólo por la práctica dejaba
-   * dos respuestas posibles para el mismo hecho —hoy coinciden porque el
-   * cargador las escribe juntas, pero una sede cedida a otra organización las
-   * separaría, y entonces el gate y la aprobación disentirían—. El `COALESCE`
-   * conserva el camino viejo para las sedes que no declaran administrador.
-   *
-   * @param sites - Ids de sede.
-   * @returns Mapa `sede -> organización que la administra`.
-   */
-  private async tenantOfEachSite(
-    sites: string[],
-  ): Promise<Map<string, string>> {
-    if (sites.length === 0) return new Map();
-    const rows = await this.em.execute<
-      { site_id: string; tenant_id: string }[]
-    >(
-      `SELECT s.id AS site_id,
-              COALESCE(s.managing_tenant_id, p.tenant_id) AS tenant_id
-         FROM practice.practice_sites s
-         JOIN practice.practices p ON p.id = s.practice_id
-        WHERE s.id IN (?)`,
-      [sites],
-    );
-    return new Map(rows.map((row) => [row.site_id, row.tenant_id]));
   }
 }

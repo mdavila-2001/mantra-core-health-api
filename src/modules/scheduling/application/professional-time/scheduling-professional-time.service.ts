@@ -139,15 +139,14 @@ export class SchedulingProfessionalTimeService {
     to: Date,
     except?: string,
   ): Promise<PractitionerCommitment[]> {
-    const rows =
-      await this.bookingsRepo.findProfessionalCommitmentsOverlapping(
-        em,
-        practitionerProfileId,
-        from,
-        to,
-        COMMITTING_STATES,
-        except,
-      );
+    const rows = await this.bookingsRepo.findProfessionalCommitmentsOverlapping(
+      em,
+      practitionerProfileId,
+      from,
+      to,
+      COMMITTING_STATES,
+      except,
+    );
     return rows.map((row) => ({
       id: row.id,
       startAt: row.startAt,

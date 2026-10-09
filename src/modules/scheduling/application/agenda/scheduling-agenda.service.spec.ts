@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { SchedulingAgendaService } from './scheduling-agenda.service';
+import { PracticeProfilesDirectoryAdapter } from '../../infrastructure/adapters/practice-profiles-directory.adapter';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
 
@@ -40,7 +41,7 @@ function build() {
   const service = new SchedulingAgendaService(
     em as any,
     agendaRepo as any,
-    sitesService as any,
+    new PracticeProfilesDirectoryAdapter(sitesService as any, {} as any),
     logger as any,
   );
   return { service, em, agendaRepo, sitesService, logger };

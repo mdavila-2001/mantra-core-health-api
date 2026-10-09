@@ -413,9 +413,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   }
 
   /** La cuenta a la que va el aviso, venga dada o haya que deducirla del perfil. */
-  private async resolveRecipient(
-    notice: AgendaNotice,
-  ): Promise<string | null> {
+  private async resolveRecipient(notice: AgendaNotice): Promise<string | null> {
     if (notice.recipient.userId !== undefined) return notice.recipient.userId;
     if (notice.recipient.patientProfileId === undefined) return null;
     return this.noticeRepo.findAccountForProfile(

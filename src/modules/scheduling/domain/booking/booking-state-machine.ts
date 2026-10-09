@@ -1,4 +1,4 @@
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import { SCHED } from '../scheduling.concepts';
 
 /**

@@ -144,9 +144,14 @@ describe('redacción de los avisos de agenda (P8)', () => {
     });
 
     it('el cambio de cita elige el destino según a quién avisa', () => {
-      const toPractitioner = bookingChangeNotice(booking, 'CANCELLED', undefined, {
-        userId: USER,
-      });
+      const toPractitioner = bookingChangeNotice(
+        booking,
+        'CANCELLED',
+        undefined,
+        {
+          userId: USER,
+        },
+      );
       const toPatient = bookingChangeNotice(booking, 'ACCEPTED', undefined, {
         patientProfileId: PATIENT,
       });
@@ -161,9 +166,14 @@ describe('redacción de los avisos de agenda (P8)', () => {
       const rejection = bookingChangeNotice(booking, 'REJECTED', 'Sin cupo', {
         patientProfileId: PATIENT,
       });
-      const cancellation = bookingChangeNotice(booking, 'CANCELLED', 'Sin cupo', {
-        patientProfileId: PATIENT,
-      });
+      const cancellation = bookingChangeNotice(
+        booking,
+        'CANCELLED',
+        'Sin cupo',
+        {
+          patientProfileId: PATIENT,
+        },
+      );
 
       expect(rejection.subject).not.toBe(cancellation.subject);
       expect(rejection.subject).toContain('No se pudo tomar');

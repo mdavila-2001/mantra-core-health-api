@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { CLIN } from '../../../clinical/clinical.concepts';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { SchedulingServiceOfferingsService } from './scheduling-service-offerings.service';
+import { PracticeProfilesDirectoryAdapter } from '../../infrastructure/adapters/practice-profiles-directory.adapter';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -56,7 +57,7 @@ function build() {
   const service = new SchedulingServiceOfferingsService(
     em as any,
     repo as any,
-    practiceLookup as any,
+    new PracticeProfilesDirectoryAdapter({} as any, practiceLookup as any),
     logger as any,
   );
   return { service, repo, practiceLookup, tx };
@@ -135,7 +136,9 @@ describe('SchedulingServiceOfferingsService', () => {
       const d = build();
       d.repo.findCatalogItem.mockResolvedValue(serviceRow({ isActive: false }));
 
-      await expect(d.service.create(dto, practitioner)).rejects.toThrow(/inactivo/);
+      await expect(d.service.create(dto, practitioner)).rejects.toThrow(
+        /inactivo/,
+      );
     });
 
     it('un paciente no ofrece servicios', async () => {
@@ -157,7 +160,10 @@ describe('SchedulingServiceOfferingsService', () => {
 
     it('quien atiende Y administra agendas crea la suya sin repetir su propio id', async () => {
       const d = build();
-      const both = { ...practitioner, roles: ['PRACTITIONER', 'SCHEDULING_ADMIN'] };
+      const both = {
+        ...practitioner,
+        roles: ['PRACTITIONER', 'SCHEDULING_ADMIN'],
+      };
 
       await d.service.create(dto, both);
 
@@ -254,10 +260,14 @@ describe('SchedulingServiceOfferingsService', () => {
 
       await d.service.list(PRACTITIONER_ACTOR, patient);
 
-      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, PRACTITIONER_ACTOR, {
-        statusConceptId: SCHED.OFFERING_ACTIVE,
-        onlyBookable: true,
-      });
+      expect(d.repo.listOfferings).toHaveBeenCalledWith(
+        d.tx,
+        PRACTITIONER_ACTOR,
+        {
+          statusConceptId: SCHED.OFFERING_ACTIVE,
+          onlyBookable: true,
+        },
+      );
     });
 
     it('el dueño ve todo lo suyo, apagado incluido', async () => {
@@ -265,7 +275,11 @@ describe('SchedulingServiceOfferingsService', () => {
 
       await d.service.list(undefined, practitioner);
 
-      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, PRACTITIONER_ACTOR, {});
+      expect(d.repo.listOfferings).toHaveBeenCalledWith(
+        d.tx,
+        PRACTITIONER_ACTOR,
+        {},
+      );
     });
 
     it('un servicio que el catálogo apagó no se muestra a un paciente aunque la oferta siga viva', async () => {

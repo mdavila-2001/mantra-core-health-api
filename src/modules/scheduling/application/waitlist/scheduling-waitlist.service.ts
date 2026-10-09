@@ -11,7 +11,10 @@ import {
 } from '../../../../persistence';
 import { SCHEDULING_MODULE } from '../../infrastructure/persistence/scheduling.tokens';
 import { SchedulingAgendaNoticesService } from '../notices/scheduling-agenda-notices.service';
-import { PatientRepresentationService } from '../../../profiles/services/patient-representation.service';
+import {
+  PATIENT_REPRESENTATION_PORT,
+  type PatientRepresentationPort,
+} from '../ports/patient-representation.port';
 import {
   WAITLIST_READ_PORT,
   WAITLIST_WRITE_PORT,
@@ -29,26 +32,13 @@ import {
   WorkerBatchResultDto,
   WaitlistCandidateSlotsResponseDto,
 } from '../../presentation/dto';
+import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
 
 const DEFAULT_WORKER_BATCH = 100;
 const DEFAULT_PRIORITY = 0;
 
 /** Tope por omisión de la lectura de la lista de espera de un paciente. */
 const DEFAULT_LIST_LIMIT = 50;
-
-/**
- * Roles que operan cualquier agenda, no sólo la propia.
- *
- * Los mismos tres que `SchedulingDelayService`: quien puede avisar la demora de
- * una agenda ajena puede ver quién la espera. Repetir la lista en vez de
- * compartirla es deliberado por ahora — son dos servicios y una constante de
- * cuatro líneas—, pero si aparece un tercero conviene subirla al módulo.
- */
-const AGENDA_OPERATOR_ROLES: readonly string[] = [
-  'SCHEDULING_ADMIN',
-  'SCHEDULING_AGENT',
-  'SUPERADMIN',
-];
 
 /**
  * Lista de espera y recordatorios de cita (UC-41-11/12/13/14).
@@ -78,7 +68,8 @@ export class SchedulingWaitlistService {
     private readonly logger: PinoLogger,
     // B.1 — quién puede actuar por un paciente. La regla vive en `profiles`;
     // acá sólo se consulta, igual que en el servicio de reservas.
-    private readonly representation: PatientRepresentationService,
+    @Inject(PATIENT_REPRESENTATION_PORT)
+    private readonly representation: PatientRepresentationPort,
   ) {
     this.logger.setContext(SchedulingWaitlistService.name);
   }
@@ -234,7 +225,8 @@ export class SchedulingWaitlistService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
+      return;
     if (actor.patientProfileId === patientProfileId) return;
     // Quien lo representa (B.1): la madre que anota a su hijo en la cola tiene
     // que poder verla. Se pregunta al final y sólo si hizo falta, para no pagar
@@ -259,7 +251,8 @@ export class SchedulingWaitlistService {
     resourceId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
+      return;
 
     const practitioner = await this.reader.findResourcePractitioner(resourceId);
     if (
@@ -467,9 +460,7 @@ export class SchedulingWaitlistService {
     // P8 · aviso (3): la entrega in-app. El comentario anterior decía «la
     // entrega la ejecuta messaging (35)», y era cierto salvo que nadie la
     // pedía: el recordatorio se marcaba enviado y no salía por ningún canal.
-    const notified = await this.notices.notifyReminders(
-      dispatch.dispatchedIds,
-    );
+    const notified = await this.notices.notifyReminders(dispatch.dispatchedIds);
 
     return {
       processed: dispatch.processed,

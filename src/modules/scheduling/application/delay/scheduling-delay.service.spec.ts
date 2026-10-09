@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { SchedulingDelayService } from './scheduling-delay.service';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { CONCEPTS } from '../../../../common';
+import { AuditBookingHistoryAdapter } from '../../infrastructure/adapters/audit-booking-history.adapter';
 
 const BOOKING = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const RESOURCE = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
@@ -72,7 +73,7 @@ function build() {
   const service = new SchedulingDelayService(
     em as any,
     catalogRepo as any,
-    historyRepo as any,
+    new AuditBookingHistoryAdapter(historyRepo as any),
     noticeRepo as any,
     notices as any,
     logger as any,
@@ -109,7 +110,11 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
 
     it('no cambia el estado de la cita: una demora no la mueve', async () => {
       const d = build();
-      await d.service.delayBooking(BOOKING, { delayMinutes: 10 }, PRACTITIONER_ACTOR);
+      await d.service.delayBooking(
+        BOOKING,
+        { delayMinutes: 10 },
+        PRACTITIONER_ACTOR,
+      );
       // El servicio no tiene repositorio de reservas: no puede tocar el motor
       // de agenda ni por descuido. La prueba lo deja escrito.
       expect((d.service as any).bookingsRepo).toBeUndefined();
@@ -129,7 +134,11 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
       const d = build();
 
       await expect(
-        d.service.delayBooking(BOOKING, { delayMinutes: 10 }, OTHER_PRACTITIONER),
+        d.service.delayBooking(
+          BOOKING,
+          { delayMinutes: 10 },
+          OTHER_PRACTITIONER,
+        ),
       ).rejects.toThrow(/otro profesional/i);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
     });

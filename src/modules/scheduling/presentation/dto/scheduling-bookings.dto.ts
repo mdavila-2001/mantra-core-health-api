@@ -19,9 +19,14 @@ import {
   MAX_REASON_LENGTH,
   MIN_REASON_LENGTH,
 } from '../../domain/booking/booking-transition';
+import type {
+  AppointmentChannel,
+  BookingChannel,
+} from '../../domain/booking/booking-channels';
+import type { PaymentState } from '../../domain/booking/payment-state';
 
 /** Canal por el que se originó la reserva. */
-export type BookingChannel = 'PORTAL' | 'DESK' | 'PHONE';
+export type { BookingChannel };
 export const BOOKING_CHANNELS: readonly BookingChannel[] = [
   'PORTAL',
   'DESK',
@@ -37,7 +42,7 @@ export const BOOKING_CHANNELS: readonly BookingChannel[] = [
  * (`appointment_bookings.booking_channel_concept_id` y
  * `clinical.appointments.channel_concept_id`).
  */
-export type AppointmentChannel = 'PRESENCIAL' | 'TELECONSULTA' | 'DOMICILIO';
+export type { AppointmentChannel };
 export const APPOINTMENT_CHANNELS: readonly AppointmentChannel[] = [
   'PRESENCIAL',
   'TELECONSULTA',
@@ -1078,7 +1083,7 @@ export class DirectAppointmentResponseDto {
  * expresamente fuera**. Viajan como claves estables y no como uuid porque el
  * cliente no tiene por qué conocer los conceptos; el servidor los traduce.
  */
-export type PaymentState = 'PENDING' | 'PARTIALLY_PAID' | 'PAID';
+export type { PaymentState };
 export const PAYMENT_STATES: readonly PaymentState[] = [
   'PENDING',
   'PARTIALLY_PAID',

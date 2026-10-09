@@ -568,7 +568,9 @@ export class SchedulingCatalogRepository {
     }[]
   > {
     const resources = await em.find(SchedulableResources, { resourceRefId });
-    const ownOnes = resources.filter((resource) => resource.id !== exceptResourceId);
+    const ownOnes = resources.filter(
+      (resource) => resource.id !== exceptResourceId,
+    );
     if (ownOnes.length === 0) return [];
 
     const templates = await em.find(ScheduleTemplates, {

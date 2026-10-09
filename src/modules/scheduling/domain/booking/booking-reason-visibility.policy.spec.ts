@@ -17,10 +17,7 @@ describe('canSeeBookingReason (MCH-030 · política pura, sin app)', () => {
 
   it('el titular de la cita lo ve', () => {
     expect(
-      canSeeBookingReason(
-        booking,
-        actor({ patientProfileId: 'paciente-1' }),
-      ),
+      canSeeBookingReason(booking, actor({ patientProfileId: 'paciente-1' })),
     ).toBe(true);
   });
 
@@ -37,12 +34,7 @@ describe('canSeeBookingReason (MCH-030 · política pura, sin app)', () => {
     const representative = actor({ patientProfileId: 'madre-1' });
     const represented = new Set(['paciente-1']);
     expect(
-      canSeeBookingReason(
-        booking,
-        representative,
-        undefined,
-        represented,
-      ),
+      canSeeBookingReason(booking, representative, undefined, represented),
     ).toBe(true);
   });
 
@@ -50,12 +42,7 @@ describe('canSeeBookingReason (MCH-030 · política pura, sin app)', () => {
     const representative = actor({ patientProfileId: 'madre-1' });
     const represented = new Set(['paciente-de-otra-familia']);
     expect(
-      canSeeBookingReason(
-        booking,
-        representative,
-        undefined,
-        represented,
-      ),
+      canSeeBookingReason(booking, representative, undefined, represented),
     ).toBe(false);
   });
 
@@ -66,7 +53,9 @@ describe('canSeeBookingReason (MCH-030 · política pura, sin app)', () => {
 
   it('un profesional que no atiende esta cita no lo ve', () => {
     const otherPractitioner = actor({ practitionerProfileId: 'prof-2' });
-    expect(canSeeBookingReason(booking, otherPractitioner, 'prof-1')).toBe(false);
+    expect(canSeeBookingReason(booking, otherPractitioner, 'prof-1')).toBe(
+      false,
+    );
   });
 
   it('sin resolver quién atiende, ningún profesional lo ve por esa vía', () => {

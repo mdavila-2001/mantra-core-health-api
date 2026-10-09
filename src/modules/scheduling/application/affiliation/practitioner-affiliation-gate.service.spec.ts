@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
 import { ESTADO_DEL_VINCULO } from '../../../profiles/services/profiles-affiliations.service';
 import { PROF } from '../../../profiles/profiles.concepts';
+import { ProfilesAffiliationsAdapter } from '../../infrastructure/adapters/profiles-affiliations.adapter';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const OTHER_TENANT = '22222222-2222-2222-2222-222222222222';
@@ -29,7 +30,9 @@ function build() {
     find: mockFn(async () => []),
     execute: mockFn(async () => []),
   };
-  const service = new PractitionerAffiliationGateService(em as any);
+  const service = new PractitionerAffiliationGateService(
+    new ProfilesAffiliationsAdapter(em as any),
+  );
   return { service, em };
 }
 
@@ -169,7 +172,9 @@ describe('PractitionerAffiliationGateService', () => {
     ]);
     spreadSites(d, { 'sede-caja': OTHER_TENANT });
 
-    expect(await d.service.evaluate(OTHER_TENANT, practitioner)).toBe('aprobado');
+    expect(await d.service.evaluate(OTHER_TENANT, practitioner)).toBe(
+      'aprobado',
+    );
     expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
   });
 

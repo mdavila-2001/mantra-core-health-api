@@ -1,5 +1,4 @@
-import type { AuthenticatedUser } from '../../../../common';
-import type { AppointmentBookings } from '../../entities';
+import type { AgendaActor } from './agenda-actors';
 
 /**
  * MCH-030 — política de visibilidad del motivo de una cita, extraída de
@@ -34,8 +33,8 @@ import type { AppointmentBookings } from '../../entities';
  *   que atiende.
  */
 export function canSeeBookingReason(
-  booking: Pick<AppointmentBookings, 'patientProfileId'>,
-  actor?: AuthenticatedUser,
+  booking: { readonly patientProfileId: string },
+  actor?: AgendaActor,
   agendaPractitioner?: string,
   representedPatients?: ReadonlySet<string>,
 ): boolean {

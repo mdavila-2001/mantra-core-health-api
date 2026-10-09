@@ -26,7 +26,10 @@ const UUID_V5 = '2b1f8a3c-4d5e-5f60-8a7b-9c0d1e2f3a4b';
 const UUID_V4 = '0f8fad5b-d9cb-469f-a165-70867728950e';
 
 /** Cuerpos válidos en todo salvo en lo que cada prueba cambia: `slotIds`. */
-const closeAction = (slotIds: string[]) => ({ exceptionType: 'ABSENCE', slotIds });
+const closeAction = (slotIds: string[]) => ({
+  exceptionType: 'ABSENCE',
+  slotIds,
+});
 const shift = (slotIds: string[]) => ({
   shiftMinutes: 15,
   from: '2026-10-01T12:00:00.000Z',
@@ -62,7 +65,9 @@ describe('slotIds de cerrar y correr cupos (M4 · H1.S2.M4)', () => {
   });
 
   it('un texto que no es UUID sigue dando 400', async () => {
-    expect(await rejection(closeAction(['cupo-1']), CloseSlotsDto)).not.toBeNull();
+    expect(
+      await rejection(closeAction(['cupo-1']), CloseSlotsDto),
+    ).not.toBeNull();
     expect(await rejection(shift(['cupo-1']), ShiftSlotsDto)).not.toBeNull();
   });
 

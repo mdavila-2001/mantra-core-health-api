@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, touch } from '../../../../common';
-import type { BookableSlots, PractitionerServiceOfferings } from '../../entities';
+import type {
+  BookableSlots,
+  PractitionerServiceOfferings,
+} from '../../entities';
 import type { ServiceCatalog } from '../../../billing/entities';
 import {
   SchedulingCatalogRepository,
@@ -147,10 +150,7 @@ export class SchedulingServiceAgendaService {
       CONCEPTS.TEMPLATE_PUBLISHED,
     );
 
-    const byTemplate = new Map<
-      string,
-      ServiceBands & { bands: Interval[] }
-    >();
+    const byTemplate = new Map<string, ServiceBands & { bands: Interval[] }>();
     for (const { rule, resourceId, validTo: validUntil } of rules) {
       const site = siteById.get(resourceId);
       if (site === undefined) continue;
@@ -170,12 +170,7 @@ export class SchedulingServiceAgendaService {
       }
 
       const zone = site.timeZone ?? 'UTC';
-      for (const day of matchingLocalDays(
-        from,
-        to,
-        rule.dayOfWeek,
-        zone,
-      )) {
+      for (const day of matchingLocalDays(from, to, rule.dayOfWeek, zone)) {
         if (!validThatDay(day, rule.validFrom, rule.validTo ?? validUntil))
           continue;
         const start = localTimeToUtc(day, rule.startTime, zone);

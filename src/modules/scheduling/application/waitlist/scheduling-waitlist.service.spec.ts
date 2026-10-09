@@ -481,10 +481,7 @@ describe('SchedulingWaitlistService', () => {
         roles: ['SCHEDULING_AGENT'],
       } as any;
 
-      await d.service.listForPatient(
-        { patientProfileId: 'paciente-1' },
-        agent,
-      );
+      await d.service.listForPatient({ patientProfileId: 'paciente-1' }, agent);
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalled();
     });
@@ -647,7 +644,10 @@ describe('SchedulingWaitlistService', () => {
       const d = build();
 
       await expect(
-        d.service.listForPatient({ patientProfileId: 'pat-1' } as any, intruder),
+        d.service.listForPatient(
+          { patientProfileId: 'pat-1' } as any,
+          intruder,
+        ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });

@@ -7,7 +7,6 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../common';
-import { HistoryRepository } from '../../../audit/repositories';
 import { SchedulingCatalogRepository } from '../../infrastructure/repositories';
 import {
   SchedulingNoticeRepository,
@@ -26,24 +25,17 @@ import {
   type DelayNoticeResponseDto,
   type DelayResourceDto,
 } from '../../presentation/dto';
+import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
+import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import {
+  BOOKING_HISTORY_PORT,
+  type BookingHistoryPort,
+} from '../ports/booking-history.port';
 
 /** Estados en los que una cita todavía puede sufrir una demora. */
 const REACHABLE_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
-];
-
-/** Roles que operan cualquier agenda, no sólo la propia. */
-const AGENDA_OPERATOR_ROLES: readonly string[] = [
-  'SCHEDULING_ADMIN',
-  'SCHEDULING_AGENT',
-  'SUPERADMIN',
-];
-
-/** Cómo nombra un recurso a la tabla de perfiles profesionales. */
-const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
-  'practitioner_profiles',
-  'health_practitioner_profiles',
 ];
 
 /** Tope de citas que una sola demora alcanza. Una jornada no tiene más. */
@@ -77,7 +69,8 @@ export class SchedulingDelayService {
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
-    private readonly historyRepo: HistoryRepository,
+    @Inject(BOOKING_HISTORY_PORT)
+    private readonly history: BookingHistoryPort,
     private readonly noticeRepo: SchedulingNoticeRepository,
     @Inject(AGENDA_NOTICE_PORT)
     private readonly notices: AgendaNoticePort,
@@ -202,7 +195,7 @@ export class SchedulingDelayService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.em.transactional(async (tx) => {
-      await this.historyRepo.append(tx, 'appointment_bookings', bookingId, {
+      await this.history.append(tx, bookingId, {
         operationConceptId: SCHED.HISTORY_OP_DELAY,
         dataSnapshot: {
           bookingId,
@@ -264,7 +257,8 @@ export class SchedulingDelayService {
     resourceId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
+      return;
 
     const resource =
       resourceId === undefined

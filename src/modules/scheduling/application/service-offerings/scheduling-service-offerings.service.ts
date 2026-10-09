@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -9,7 +9,10 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import { PracticeTenantLookupService } from '../../../practice/services';
+import {
+  PRACTITIONER_DIRECTORY_PORT,
+  type PractitionerDirectoryPort,
+} from '../ports/practitioner-directory.port';
 import type { PractitionerServiceOfferings } from '../../entities';
 import { SchedulingOfferingsRepository } from '../../infrastructure/repositories/scheduling-offerings.repository';
 import { SCHED } from '../../domain/scheduling.concepts';
@@ -29,13 +32,12 @@ const AGENDA_ADMIN_ROLES: readonly string[] = [
 ];
 
 /** Modalidad de atención, a su concepto de `clinical`. */
-export const CONCEPT_OF_MODALITY: Readonly<
-  Record<AppointmentChannel, string>
-> = {
-  PRESENCIAL: CLIN.APPOINTMENT_CHANNEL_IN_PERSON,
-  TELECONSULTA: CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
-  DOMICILIO: CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
-};
+export const CONCEPT_OF_MODALITY: Readonly<Record<AppointmentChannel, string>> =
+  {
+    PRESENCIAL: CLIN.APPOINTMENT_CHANNEL_IN_PERSON,
+    TELECONSULTA: CLIN.APPOINTMENT_CHANNEL_TELEHEALTH,
+    DOMICILIO: CLIN.APPOINTMENT_CHANNEL_HOME_VISIT,
+  };
 
 /** Y de vuelta: el concepto guardado, a lo que el cliente entiende. */
 const MODALITY_OF_CONCEPT: ReadonlyMap<string, AppointmentChannel> = new Map(
@@ -63,7 +65,8 @@ export class SchedulingServiceOfferingsService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: SchedulingOfferingsRepository,
-    private readonly practiceLookup: PracticeTenantLookupService,
+    @Inject(PRACTITIONER_DIRECTORY_PORT)
+    private readonly directory: PractitionerDirectoryPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingServiceOfferingsService.name);
@@ -90,10 +93,7 @@ export class SchedulingServiceOfferingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const service = await this.repo.findCatalogItem(
-        tx,
-        dto.serviceCatalogId,
-      );
+      const service = await this.repo.findCatalogItem(tx, dto.serviceCatalogId);
       await this.assertServiceReachable(
         service,
         practitionerProfileId,
@@ -216,9 +216,7 @@ export class SchedulingServiceOfferingsService {
         tx,
         offerings.map((offering) => offering.serviceCatalogId),
       );
-      const byId = new Map(
-        catalog.map((service) => [service.id, service]),
-      );
+      const byId = new Map(catalog.map((service) => [service.id, service]));
       return {
         items: offerings
           .map((offering) =>
@@ -289,17 +287,13 @@ export class SchedulingServiceOfferingsService {
     practitionerProfileId: string,
     serviceCatalogId: string,
   ): Promise<void> {
-    const notFound = new ResourceNotFoundException(
-      'Servicio no encontrado',
-      {
-        serviceCatalogId,
-      },
-    );
+    const notFound = new ResourceNotFoundException('Servicio no encontrado', {
+      serviceCatalogId,
+    });
     if (service === null) throw notFound;
-    const ownOnes =
-      await this.practiceLookup.findActivePracticeIdsForPractitioner(
-        practitionerProfileId,
-      );
+    const ownOnes = await this.directory.findActivePracticeIdsForPractitioner(
+      practitionerProfileId,
+    );
     if (!ownOnes.includes(service.practiceId)) throw notFound;
   }
 }

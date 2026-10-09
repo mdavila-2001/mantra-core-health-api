@@ -1,8 +1,8 @@
-import type { AgendaNotice } from '../../application/ports/agenda-notice.port';
+import type { AgendaNotice } from './agenda-notice';
 import type {
   BookingNoticeSnapshot,
   SlotNoticeSnapshot,
-} from '../../infrastructure/repositories/scheduling-notice.repository';
+} from './notice-snapshots';
 
 /**
  * Redacción de los cuatro avisos de agenda (P8).
