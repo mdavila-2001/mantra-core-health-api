@@ -5,6 +5,67 @@ devengos, subledgers AR/AP, activos fijos, pasivos y tipos de cambio. Sigue el
 patrón de capas de `iam` (controllers finos → services con `em.transactional` →
 repositorios stateless con `em` como primer parámetro).
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/accounting -name '*.controller.ts' | wc -l
+  find src/modules/accounting -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/accounting -name '*.entity.ts' | wc -l
+  find src/modules/accounting -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **9 controllers, 45 rutas HTTP, 42 entidades y 10 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Importa (`accounting.module.ts`): `AuditModule`, `PracticeModule`, `BillingModule`, `MessagingModule`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /accounting/accrual-objects` | SECURITY_ADMIN | `accounting-accrual` |
+| `POST /accounting/accruals/run` | SECURITY_ADMIN | `accounting-accrual` |
+| `POST /accounting/assets/capitalize` | SECURITY_ADMIN | `accounting-asset` |
+| `POST /accounting/depreciation/run` | SECURITY_ADMIN | `accounting-asset` |
+| `GET /accounting/fiscal-years` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `GET /accounting/open-items` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `GET /accounting/dimensions` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `GET /accounting/journal-transactions/:id/document-flow` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `GET /accounting/assets` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `GET /accounting/accrual-objects` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
+| `POST /accounting/exchange-rates` | SECURITY_ADMIN | `accounting-exchange-rate` |
+| `POST /accounting/fiscal-years` | SECURITY_ADMIN | `accounting-fiscal` |
+| `POST /accounting/fiscal-periods/:id/lock` | SECURITY_ADMIN | `accounting-fiscal` |
+| `GET /accounting/accounts` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/trial-balance` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/journal-transactions` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/general-ledger` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/income-statement` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/balance-sheet` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `GET /accounting/journal-transactions/:id` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
+| `POST /accounting/accounts` | SECURITY_ADMIN | `accounting-ledger` |
+| `POST /accounting/journal-transactions` | SECURITY_ADMIN | `accounting-ledger` |
+| `POST /accounting/journal-transactions/drafts` | SECURITY_ADMIN, PRACTITIONER | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/classify` | SECURITY_ADMIN, PRACTITIONER | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/submit-review` | SECURITY_ADMIN, PRACTITIONER | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/approve` | SECURITY_ADMIN, ACCOUNTING_APPROVER | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/post` | SECURITY_ADMIN | `accounting-ledger` |
+| `POST /accounting/postings/determine-accounts` | SECURITY_ADMIN | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/reverse` | SECURITY_ADMIN | `accounting-ledger` |
+| `POST /accounting/journal-transactions/:id/files` | SECURITY_ADMIN, PRACTITIONER | `accounting-ledger` |
+| `POST /accounting/liabilities/:id/payments` | SECURITY_ADMIN | `accounting-liability` |
+| `GET /accounting/practitioner/paid-consultations` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/consultation-income` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/entries` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/assets` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/assets` | PRACTITIONER | `accounting-practitioner` |
+| `PATCH /accounting/practitioner/assets/:id/automation` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/assets/:id/progress` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/liabilities` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/liabilities` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/liabilities/:id/schedule` | PRACTITIONER | `accounting-practitioner` |
+| `PATCH /accounting/practitioner/liabilities/:id/automation` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/liabilities/:id/progress` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/open-items` | SECURITY_ADMIN | `accounting-subledger` |
+| `POST /accounting/clearing-documents` | SECURITY_ADMIN | `accounting-subledger` |
+
 ## Regla clave — partida doble balanceada
 
 Un asiento **solo** se postea si `sum(DEBIT) == sum(CREDIT)`. La validación vive
@@ -15,7 +76,9 @@ centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante. La
 conversión de entrada sigue pasando por `Number`; los límites de precisión y de
 alcance por práctica están documentados en la [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md).
 
-## Endpoints (UC-16-01..14)
+## Endpoints por caso de uso (UC-16-01..14, subconjunto)
+
+Sólo los 14 casos de uso originales más el alta de cuenta. El módulo expone además el cockpit (6 lecturas, sección siguiente) y el auto-servicio contable del profesional (`/accounting/practitioner/*`, 12 rutas, rol `PRACTITIONER`, controller `accounting-practitioner`); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
 
 | UC | Método y ruta | Descripción |
 |----|---------------|-------------|
@@ -91,6 +154,8 @@ dimensiones), `accounting_document_links`, `account_determination_rules`,
 `asset_valuations`, `asset_assignments`, `asset_postings`, `asset_depreciations`,
 `liabilities`, `liability_schedules`, `liability_payments`, `liability_postings`,
 `transaction_files`, `exchange_rates`.
+
+El módulo mapea **42 entidades** (`find src/modules/accounting -name '*.entity.ts' | wc -l`); las 15 no listadas arriba son `account_groups`, `asset_classes`, `company_bank_accounts`, `controlling_areas`, `cost_center_maps`, `cost_centers`, `depreciation_areas`, `employee_payments`, `functional_areas`, `infrastructure_items`, `internal_orders`, `profit_centers`, `purchases`, `sales` y `segments`. Que una entidad esté mapeada no implica que algún servicio la escriba: eso no se verificó.
 
 Las FK son columnas uuid planas: los servicios hacen `flush` del padre antes de
 crear los hijos y cada `em.create` usa `{ partial: true }`. `rowVersion` nunca se
