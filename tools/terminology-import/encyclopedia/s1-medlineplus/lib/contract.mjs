@@ -40,6 +40,8 @@ export function validateArticle(article) {
     for (const k of IMAGE_REQUIRED) if (!present(img[k])) at('images', `falta ${k}`);
     for (const u of [img.url, img.thumbUrl]) if (!isAllowedImageUrl(u)) at('images', `host fuera de la CSP: ${u}`);
     if (!allowedLicense(img.license)) at('images', `licencia no permitida: ${img.license}`);
+    if (typeof img.enabled !== 'boolean') at('images', 'falta enabled (boolean)');
+    if (img.match === 'label-match' && img.enabled !== false) at('images', 'label-match debe salir apagada por defecto (decisión del propietario)');
     if (!['caption', 'generic'].includes(img.altTextQuality)) at('images', 'altTextQuality inválido');
     if (img.altTextQuality === 'caption' && img.captionLang !== 'es') at('images', 'altText «caption» solo con pie en castellano');
     if (img.license && allowedLicense(img.license)?.family !== 'public-domain' && !present(img.licenseUrl)) at('images', 'falta licenseUrl');

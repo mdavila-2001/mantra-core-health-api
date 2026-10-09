@@ -39,7 +39,7 @@ lib/contract.mjs    validador del contrato de §12.3: la corrida falla si un art
 lib/coverage.mjs    cifras de cobertura medidas sobre la salida
 render-evidence.mjs tablas de COVERAGE.md (cuenta, no interpreta)
 render-gaps.mjs     tablas de GAPS.md
-test/               38 pruebas con fixtures reales y chicos (node --test)
+test/               39 pruebas con fixtures reales y chicos (node --test)
 ```
 
 ## Correr
@@ -79,7 +79,7 @@ ficha, todas opcionales para el consumidor:
 - `sections[].excerpt` + `omitted[{reason, paragraphs}]` — la sección sale sin los párrafos con dosis (o sin los elementos de lista que apuntan a A.D.A.M.).
 - `sections[].table` — la sección trae una tabla: una fila por línea, celdas unidas por « | ».
 - Varias secciones pueden tener el mismo `kind` (se distinguen por `locator`); 11 `kind` transversales nuevos, registrados en la ficha §12.3.
-- `images[].match` (`name-match` | `label-match`), hasta 3 imágenes por término.
+- `images[].match` (`name-match` | `label-match`) y `images[].enabled`: **`label-match` sale apagada por defecto** (decisión del propietario, 2026-10-09); el front muestra solo `enabled === true`. Hasta 3 imágenes por término.
 - `images[].licenseFamily` (`public-domain` · `cc0` · `cc-by` · `cc-by-sa`),
   `images[].captionLang` y `images[].wikidataId`.
 - `images[].kind` es `image` (ráster) o `diagram` (SVG). **No** se afirma «foto»:

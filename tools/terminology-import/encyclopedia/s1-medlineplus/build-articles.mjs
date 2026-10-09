@@ -200,7 +200,8 @@ export async function buildAll(opts) {
         rejected.push({ scope: 'image', conceptRef: { system: c.seedRow.codeSystem, code: c.seedRow.code, slug: c.seedRow.slug }, term: c.seedRow.esName, category: c.seedRow.categoryKey, reason: built.reject.reason, detail: built.reject.detail, file: row.file });
         continue;
       }
-      c.article.images.push({ ...built.image, match: c.tier });
+      // Decisión del propietario (2026-10-09): `label-match` queda APAGADA por defecto; `name-match` se muestra.
+      c.article.images.push({ ...built.image, match: c.tier, enabled: c.tier === 'name-match' });
       trace.push({ ...base, outcome: 'accepted', license: built.image.license, sourcePage: built.image.sourcePage });
     }
   }

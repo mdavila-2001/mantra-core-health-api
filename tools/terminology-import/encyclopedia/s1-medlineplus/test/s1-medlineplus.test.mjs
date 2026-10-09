@@ -376,6 +376,8 @@ test('Commons: imagen de dominio público aceptada con autor, página de origen 
   assert.equal(img.licenseFamily, 'public-domain');
   assert.equal(img.author, 'Leonardo da Vinci');
   assert.equal(img.sourcePage, 'https://commons.wikimedia.org/wiki/File:Leonardo_da_vinci,_Drawing_of_a_Woman%27s_Torso.jpg');
+  assert.equal(img.match, 'name-match');
+  assert.equal(img.enabled, true, 'name-match se muestra');
   assert.equal(img.altTextQuality, 'generic');
   assert.equal(img.altText, 'Imagen de Anatomía');
   assert.equal(img.retrievedAt, '2026-10-08');
@@ -398,6 +400,15 @@ test('buildImage rechaza licencia no permitida, restricciones y hosts fuera de l
   assert.equal(buildImage({ commons: { ...base, restrictions: 'trademarked' }, term: 'X', wikidataId: 'Q1' }).reject.reason, 'restricted-on-commons');
   assert.equal(buildImage({ commons: { ...base, url: 'https://example.org/x.jpg' }, term: 'X', wikidataId: 'Q1' }).reject.reason, 'host-outside-csp');
   assert.equal(buildImage({ commons: null, term: 'X', wikidataId: 'Q1' }).reject.reason, 'commons-not-verified');
+});
+
+test('contrato: una imagen label-match solo es válida apagada por defecto', async () => {
+  const { articles } = await runFixtures();
+  const art = structuredClone(articles.find((x) => x.images.length));
+  art.images[0].match = 'label-match';
+  assert.ok(validateArticle(art).some((e) => /apagada por defecto/.test(e)));
+  art.images[0].enabled = false;
+  assert.deepEqual(validateArticle(art), []);
 });
 
 test('Commons: el pie en castellano da alt «caption»; en otro idioma queda como genérico', () => {
