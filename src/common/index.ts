@@ -57,6 +57,13 @@ export {
   IdentityVerificationRequiredException,
 } from './errors/domain.exception';
 export { AllExceptionsFilter } from './filters/all-exceptions.filter';
+export {
+  createGlobalValidationPipe,
+  flattenValidationErrors,
+  validationFailed,
+  UNKNOWN_PROPERTY_CONSTRAINT,
+} from './http/validation-pipe';
+export type { FieldViolation } from './http/validation-pipe';
 
 // Ciclo de vida del proceso (fallo terminal observable, apagado acotado)
 export {

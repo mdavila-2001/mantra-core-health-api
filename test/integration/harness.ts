@@ -1,4 +1,3 @@
-import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
@@ -6,7 +5,13 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createHash } from 'node:crypto';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
-import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  TokenService,
+  createGlobalValidationPipe,
+  createdBy,
+} from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
 import {
@@ -197,14 +202,7 @@ export async function bootstrapTestApp(
   // está registrado como APP_FILTER en AppModule, así que no se vuelve a añadir.
   app.useLogger(app.get(Logger));
   app.flushLogs();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  app.useGlobalPipes(createGlobalValidationPipe());
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
   // Nest conecta cada `@WebSocketGateway` al servidor.
   if (opts.realtime) {

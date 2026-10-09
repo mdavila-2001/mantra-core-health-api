@@ -22,6 +22,12 @@ import {
   TracingService,
   applyTraceHeader,
 } from '../../observability';
+import {
+  describeForDiagnostics,
+  errorDiagnosticsEnabled,
+  violationsForLog,
+  type ErrorDiagnostics,
+} from './error-diagnostics';
 
 /**
  * Códigos 5xx cuyo cuerpo **sí** se le devuelve al cliente tal cual.
@@ -78,6 +84,12 @@ interface ErrorResponseBody {
    * Valor de path mantenido por la instancia.
    */
   path: string;
+  /**
+   * Sólo con `API_ERROR_DIAGNOSTICS=true` (entornos locales o de prueba con
+   * datos sintéticos): qué excepción fue, su mensaje interno y dónde se
+   * originó. Ver `error-diagnostics.ts`.
+   */
+  diagnostics?: ErrorDiagnostics;
 }
 
 /**
@@ -103,6 +115,19 @@ function toCorrelationId(value: unknown): string | undefined {
   return typeof single === 'number' && Number.isFinite(single)
     ? String(single)
     : undefined;
+}
+
+/**
+ * El usuario autenticado de la petición, si lo hay.
+ *
+ * Lo deja `JwtAuthGuard` en `request.user`, que Express tipa como `any`; se lee
+ * como `unknown` para no confiar en una forma que en una ruta pública no existe.
+ */
+function userIdOf(request: { user?: unknown }): string | undefined {
+  const user: unknown = request.user;
+  if (typeof user !== 'object' || user === null) return undefined;
+  const id: unknown = (user as { id?: unknown }).id;
+  return typeof id === 'string' ? id : undefined;
 }
 
 /**
@@ -156,6 +181,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         id?: string | number;
       }
     >();
+    const userId = userIdOf(request);
 
     // pino-http asigna `req.id`; se reutiliza como correlationId para hilar el
     // error del cliente con la línea de log del servidor.
@@ -195,6 +221,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           correlationId,
           path: request.url,
           method: request.method,
+          userId,
         },
         'Unhandled exception',
       );
@@ -213,6 +240,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
           path: request.url,
           method: request.method,
           status,
+          userId,
+          // Qué campos del cuerpo fallaron y por qué restricción. Sin esto el
+          // log de un 400 decía sólo «Error de validación», y saber qué campo
+          // había rechazado el DTO exigía reproducir el envío.
+          ...violationsForLog(details),
           // Restricción, tabla y columna del error del driver. Van al log y NO
           // a la respuesta: el nombre de una FK y el valor de la clave que la
           // violó describen el esquema y los datos, y el cliente no ramifica
@@ -222,6 +254,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         },
         message,
       );
+    }
+
+    // Después de la censura de los 5xx a propósito: el diagnóstico es para
+    // quien depura, y sólo existe con el interruptor encendido.
+    if (errorDiagnosticsEnabled()) {
+      body.diagnostics = describeForDiagnostics(exception, internals);
     }
 
     response.status(status).json(body);
