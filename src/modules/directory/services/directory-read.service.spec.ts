@@ -139,13 +139,13 @@ describe('DirectoryReadService — alcance por organización', () => {
       (s: any) => s.listBranchAssignments(TENANT, 'm1', actor),
     ],
     ['getTenantById', (s: any) => s.getTenantById(TENANT, actor)],
-  ])('%s exige poder leer la organización', async (_nombre, invocar) => {
+  ])('%s exige poder leer la organización', async (_nombre, invoke) => {
     // Un listado es justo la forma en que un fallo de alcance se vuelve una fuga
     // masiva entre organizaciones.
     const d = build();
     d.tenantAdmin.assertCanRead.mockRejectedValue(new ForbiddenException());
 
-    await expect(invocar(d.service)).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(invoke(d.service)).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('el listado global de organizaciones no pasa por el alcance de tenant', async () => {
@@ -213,11 +213,11 @@ describe('DirectoryReadService.searchTenants', () => {
       tenantRow('t1', 'AAA'),
       tenantRow('t2', 'BBB'),
     ]);
-    const primera = await d.service.searchTenants({ limit: 1 });
+    const first = await d.service.searchTenants({ limit: 1 });
 
     d.tenantsRepo.searchPage.mockClear();
     d.tenantsRepo.searchPage.mockResolvedValue([]);
-    await d.service.searchTenants({ cursor: primera.nextCursor!, limit: 1 });
+    await d.service.searchTenants({ cursor: first.nextCursor!, limit: 1 });
 
     expect(d.tenantsRepo.searchPage).toHaveBeenCalledWith(
       expect.anything(),
@@ -264,7 +264,7 @@ describe('DirectoryReadService.listMemberships', () => {
       membershipRow('m1', '2026-01-01T00:00:00Z'),
       membershipRow('m2', '2026-01-01T00:00:00Z'),
     ]);
-    const primera = await d.service.listMemberships(
+    const first = await d.service.listMemberships(
       TENANT,
       { limit: 1 },
       actor,
@@ -274,7 +274,7 @@ describe('DirectoryReadService.listMemberships', () => {
     d.membershipsRepo.findPageByTenant.mockResolvedValue([]);
     await d.service.listMemberships(
       TENANT,
-      { cursor: primera.nextCursor!, limit: 1 },
+      { cursor: first.nextCursor!, limit: 1 },
       actor,
     );
 
@@ -347,12 +347,12 @@ describe('DirectoryReadService.listMemberships', () => {
         updatedAt: new Date('2026-01-02T00:00:00.000Z'),
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items).toHaveLength(1);
-      expect(salida.items[0].id).toBe('ten-1');
-      expect(salida.items[0].myRoleConceptId).toBe(DIR.ROLE_ADMIN);
-      expect(salida.items[0].canAdminister).toBe(true);
+      expect(output.items).toHaveLength(1);
+      expect(output.items[0].id).toBe('ten-1');
+      expect(output.items[0].myRoleConceptId).toBe(DIR.ROLE_ADMIN);
+      expect(output.items[0].canAdminister).toBe(true);
     });
 
     /**
@@ -376,9 +376,9 @@ describe('DirectoryReadService.listMemberships', () => {
         updatedAt: new Date(),
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0].canAdminister).toBe(false);
+      expect(output.items[0].canAdminister).toBe(false);
     });
 
     /**
@@ -409,9 +409,9 @@ describe('DirectoryReadService.listMemberships', () => {
         address: 'Av. Siempre Viva 742',
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0].payer).toEqual({
+      expect(output.items[0].payer).toEqual({
         carrierCode: 'CAR-1',
         regulatorIdentifier: 'APS-4821',
         sigla: 'ASX',
@@ -449,9 +449,9 @@ describe('DirectoryReadService.listMemberships', () => {
         longitude: '-63.1821',
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0].payer).toEqual({
+      expect(output.items[0].payer).toEqual({
         carrierCode: 'CAR-1',
         regulatorIdentifier: 'APS-4821',
         sigla: 'ASX',
@@ -478,9 +478,9 @@ describe('DirectoryReadService.listMemberships', () => {
         updatedAt: new Date(),
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0]).not.toHaveProperty('payer');
+      expect(output.items[0]).not.toHaveProperty('payer');
       expect(d.catalogRepo.findCarrierByTenantId).not.toHaveBeenCalled();
     });
 
@@ -637,16 +637,16 @@ describe('DirectoryReadService.listMemberships', () => {
         },
       ]);
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0].legalRepresentative).toEqual({
+      expect(output.items[0].legalRepresentative).toEqual({
         role: 'LEGAL_REPRESENTATIVE',
         fullName: 'Mariana Siles',
         email: 'legal@aseguradora.com',
         phone: '+591 70012345',
         idNumber: '4872190 SC',
       });
-      expect(salida.items[0].executives).toEqual([
+      expect(output.items[0].executives).toEqual([
         {
           role: 'GENERAL_MANAGER',
           fullName: 'Carlos Mendoza',
@@ -719,9 +719,9 @@ describe('DirectoryReadService.listMemberships', () => {
         },
       ]);
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0].legalRepresentative).toEqual({
+      expect(output.items[0].legalRepresentative).toEqual({
         role: 'LEGAL_REPRESENTATIVE',
         fullName: 'Mariana Elena Sofía Siles Justiniano',
         name: 'Mariana',
@@ -751,10 +751,10 @@ describe('DirectoryReadService.listMemberships', () => {
         updatedAt: new Date(),
       });
 
-      const salida = await d.service.listMyTenants(actor);
+      const output = await d.service.listMyTenants(actor);
 
-      expect(salida.items[0]).not.toHaveProperty('legalRepresentative');
-      expect(salida.items[0]).not.toHaveProperty('executives');
+      expect(output.items[0]).not.toHaveProperty('legalRepresentative');
+      expect(output.items[0]).not.toHaveProperty('executives');
       expect(d.legalRepo.findPersonsByIds).not.toHaveBeenCalled();
     });
   });
@@ -774,13 +774,13 @@ describe('DirectoryReadService.readRepresentation', () => {
       new Map([['person-rep', { id: 'person-rep', displayName: 'Ana Pérez' }]]),
     );
 
-    const salida = await d.service.readRepresentation('ten-farmacia');
+    const output = await d.service.readRepresentation('ten-farmacia');
 
     expect(d.legalRepo.listLegalRepsByTenant).toHaveBeenCalledWith(
       expect.anything(),
       'ten-farmacia',
     );
-    expect(salida.legalRepresentative).toMatchObject({
+    expect(output.legalRepresentative).toMatchObject({
       role: 'LEGAL_REPRESENTATIVE',
       fullName: 'Ana Pérez',
     });

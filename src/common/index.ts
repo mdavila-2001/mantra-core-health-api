@@ -38,6 +38,9 @@ export {
 } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
+
+// Bitácora transversal (informe C §8.4): decoradores y contexto por request.
+export * from './audit-trail';
 export {
   TenantAgnostic,
   IS_TENANT_AGNOSTIC_KEY,
@@ -185,7 +188,7 @@ export {
   CONCEPT_DEFS,
   SEED,
   deterministicId,
-  SALUD_UUID_NAMESPACE,
+  HEALTH_UUID_NAMESPACE as SALUD_UUID_NAMESPACE,
 } from './constants/concepts';
 export type { ConceptName } from './constants/concepts';
 
@@ -195,4 +198,4 @@ export type { StickerPackEntry } from './constants/sticker-pack';
 
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)
-export { sumarDecimales, mismosDecimales } from './money/decimal-money';
+export { addDecimals as sumarDecimales, sameDecimals as mismosDecimales } from './money/decimal-money';

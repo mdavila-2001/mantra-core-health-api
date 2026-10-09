@@ -16,8 +16,8 @@ import {
 } from '../dto';
 import {
   RestoreObjectiveStatus,
-  evaluarRestauracion,
-  validarObjetivosDeContinuidad,
+  evaluateRestore,
+  continuityValidateTargets,
 } from '../policies';
 import { SYSOPS } from '../system_ops.concepts';
 
@@ -56,11 +56,11 @@ export class BackupService {
     dto: CreateBackupPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
-    const fueraDeRango = validarObjetivosDeContinuidad(dto);
-    if (fueraDeRango.length > 0) {
+    const rangeOutside = continuityValidateTargets(dto);
+    if (rangeOutside.length > 0) {
       throw new PreconditionFailedException(
-        fueraDeRango.map((v) => v.mensaje).join('; '),
-        Object.fromEntries(fueraDeRango.map((v) => [v.campo, v.valor])),
+        rangeOutside.map((v) => v.mensaje).join('; '),
+        Object.fromEntries(rangeOutside.map((v) => [v.campo, v.valor])),
       );
     }
     return this.em.transactional(async (tx) => {
@@ -113,17 +113,17 @@ export class BackupService {
       // MCH-023: la evaluación es trivalente. Sin las mediciones que la
       // política exige el resultado es NOT_MEASURED — desconocido, nunca
       // aprobado — y un fallo informado no se revierte por omitir métricas.
-      const evaluacion = evaluarRestauracion(policy, {
+      const evaluation = evaluateRestore(policy, {
         measuredRpoSeconds: dto.measuredRpoSeconds,
         measuredRtoSeconds: dto.measuredRtoSeconds,
         integrityCheckPassed: dto.integrityCheckPassed,
         reportedFailure: dto.outcomeConceptId === SYSOPS.RESTORE_OUTCOME_FAIL,
       });
       const objectiveBreached =
-        evaluacion.status === RestoreObjectiveStatus.FAILED;
+        evaluation.status === RestoreObjectiveStatus.FAILED;
 
       const run = this.repo.createTestRun(tx, {
-        objectiveStatus: evaluacion.status,
+        objectiveStatus: evaluation.status,
         backupPolicyId: policy.id,
         backupReference: dto.backupReference,
         outcomeConceptId: dto.outcomeConceptId,
@@ -136,15 +136,15 @@ export class BackupService {
         recordedByUserId: actor.id,
       });
       await tx.flush();
-      if (evaluacion.status !== RestoreObjectiveStatus.PASSED) {
+      if (evaluation.status !== RestoreObjectiveStatus.PASSED) {
         this.logger.warn(
           {
             operation: 'sysops.backup.restore-test',
             runId: run.id,
-            objectiveStatus: evaluacion.status,
-            motivo: evaluacion.motivo,
+            objectiveStatus: evaluation.status,
+            motivo: evaluation.motivo,
           },
-          evaluacion.status === RestoreObjectiveStatus.FAILED
+          evaluation.status === RestoreObjectiveStatus.FAILED
             ? 'Restore objective breached'
             : 'Restore objective not measured',
         );
@@ -152,8 +152,8 @@ export class BackupService {
       return {
         id: run.id,
         outcomeConceptId: run.outcomeConceptId,
-        objectiveStatus: evaluacion.status,
-        objectiveStatusReason: evaluacion.motivo,
+        objectiveStatus: evaluation.status,
+        objectiveStatusReason: evaluation.motivo,
         objectiveBreached,
       };
     });

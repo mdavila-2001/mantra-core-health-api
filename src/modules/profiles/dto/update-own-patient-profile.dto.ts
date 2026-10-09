@@ -38,8 +38,8 @@ import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
  * `false` y la validación de más abajo exige que los dos sean números, así que
  * el `null` suelto falla como el dato incoherente que es.
  */
-function quitaElPunto(latitud: unknown, longitud: unknown): boolean {
-  return latitud === null && longitud === null;
+function removesDot(latitude: unknown, longitud: unknown): boolean {
+  return latitude === null && longitud === null;
 }
 
 /**
@@ -337,7 +337,7 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      !removesDot(dto.homeLatitude, dto.homeLongitude) &&
       (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
@@ -349,7 +349,7 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      !removesDot(dto.homeLatitude, dto.homeLongitude) &&
       (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
@@ -372,7 +372,7 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      !removesDot(dto.workLatitude, dto.workLongitude) &&
       (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()
@@ -384,7 +384,7 @@ export class UpdateOwnPatientProfileDto {
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPatientProfileDto) =>
-      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      !removesDot(dto.workLatitude, dto.workLongitude) &&
       (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()

@@ -313,11 +313,11 @@ describe('PeriopDentalService', () => {
     it('trae las 32 piezas permanentes y los cuatro cuadrantes', () => {
       const d = build();
 
-      const catalogo = d.service.catalog();
+      const catalog = d.service.catalog();
 
-      expect(catalogo.teeth).toHaveLength(32);
-      expect(catalogo.quadrants).toHaveLength(4);
-      expect(catalogo.procedureCodes.length).toBeGreaterThan(0);
+      expect(catalog.teeth).toHaveLength(32);
+      expect(catalog.quadrants).toHaveLength(4);
+      expect(catalog.procedureCodes.length).toBeGreaterThan(0);
     });
 
     /**
@@ -328,22 +328,22 @@ describe('PeriopDentalService', () => {
     it('sirve los mismos identificadores que el alta acepta', () => {
       const d = build();
 
-      const catalogo = d.service.catalog();
+      const catalog = d.service.catalog();
 
-      expect(catalogo.teeth.map((t) => t.conceptId)).toContain(PERIOP.TOOTH_11);
-      expect(catalogo.quadrants[0].conceptId).toBe(PERIOP.QUADRANT_1);
+      expect(catalog.teeth.map((t) => t.conceptId)).toContain(PERIOP.TOOTH_11);
+      expect(catalog.quadrants[0].conceptId).toBe(PERIOP.QUADRANT_1);
     });
 
     it('cada entrada trae su código y su etiqueta', () => {
       const d = build();
 
-      const catalogo = d.service.catalog();
+      const catalog = d.service.catalog();
 
-      expect(catalogo.teeth[0]).toMatchObject({
+      expect(catalog.teeth[0]).toMatchObject({
         conceptId: PERIOP.TOOTH_11,
         code: 'FDI_11',
       });
-      expect(catalogo.teeth[0].display).toContain('Tooth 11');
+      expect(catalog.teeth[0].display).toContain('Tooth 11');
     });
   });
 });

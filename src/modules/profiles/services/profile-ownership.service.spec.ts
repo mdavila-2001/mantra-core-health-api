@@ -84,9 +84,9 @@ describe('ProfileOwnershipService', () => {
       service.assertOwnsPatientProfile(tx, 'person-1', titular),
     ).resolves.toBeUndefined();
 
-    const ajeno = build({ link: { personId: 'person-OTRA' } });
+    const foreign = build({ link: { personId: 'person-OTRA' } });
     await expect(
-      ajeno.service.assertOwnsPatientProfile(ajeno.tx, 'person-1', titular),
+      foreign.service.assertOwnsPatientProfile(foreign.tx, 'person-1', titular),
     ).rejects.toThrow(ForbiddenException);
   });
 

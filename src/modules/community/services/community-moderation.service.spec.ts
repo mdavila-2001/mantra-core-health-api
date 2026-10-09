@@ -291,13 +291,13 @@ describe('CommunityModerationService', () => {
 
     it('marca la resolución, quién y cuándo', async () => {
       const d = build();
-      const apelacion: any = {
+      const appeal: any = {
         id: 'ap-1',
         moderationDecisionId: 'dec1',
         statusConceptId: COMM.APPEAL_OPEN,
         updatedAt: new Date(),
       };
-      d.moderationRepo.findAppealById.mockResolvedValue(apelacion);
+      d.moderationRepo.findAppealById.mockResolvedValue(appeal);
       d.moderationRepo.findDecisionById.mockResolvedValue(null);
 
       const res = await d.service.resolveAppeal(
@@ -307,10 +307,10 @@ describe('CommunityModerationService', () => {
       );
 
       expect(res).toEqual({ id: 'ap-1' });
-      expect(apelacion.statusConceptId).toBe(COMM.APPEAL_OVERTURNED);
-      expect(apelacion.resolutionConceptId).toBe(COMM.APPEAL_OVERTURNED);
-      expect(apelacion.reviewedByUserId).toBe('mod-1');
-      expect(apelacion.resolvedAt).toBeInstanceOf(Date);
+      expect(appeal.statusConceptId).toBe(COMM.APPEAL_OVERTURNED);
+      expect(appeal.resolutionConceptId).toBe(COMM.APPEAL_OVERTURNED);
+      expect(appeal.reviewedByUserId).toBe('mod-1');
+      expect(appeal.resolvedAt).toBeInstanceOf(Date);
     });
 
     /**
@@ -333,12 +333,12 @@ describe('CommunityModerationService', () => {
         id: 'q-original',
         contentRefId: 'post-1',
       });
-      const reencolada: any = {
+      const requeued: any = {
         id: 'q-apelacion',
         statusConceptId: COMM.QUEUE_QUEUED,
         updatedAt: new Date(),
       };
-      d.moderationRepo.findOpenQueueForContent.mockResolvedValue(reencolada);
+      d.moderationRepo.findOpenQueueForContent.mockResolvedValue(requeued);
 
       await d.service.resolveAppeal(
         'ap-1',
@@ -346,7 +346,7 @@ describe('CommunityModerationService', () => {
         actor,
       );
 
-      expect(reencolada.statusConceptId).toBe(COMM.QUEUE_RESOLVED);
+      expect(requeued.statusConceptId).toBe(COMM.QUEUE_RESOLVED);
     });
 
     /**

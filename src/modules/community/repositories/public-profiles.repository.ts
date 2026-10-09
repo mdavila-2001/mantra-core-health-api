@@ -330,14 +330,14 @@ export class PublicProfilesRepository {
    * @param fileId - El archivo a comprobar.
    */
   async isPublicMedia(em: EntityManager, fileId: string): Promise<boolean> {
-    const fila = await em.findOne(PublicProfiles, {
+    const row = await em.findOne(PublicProfiles, {
       $and: [
         { $or: [{ avatarFileId: fileId }, { coverFileId: fileId }] },
         { visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC },
         { statusConceptId: CONCEPTS.STATE_ACTIVE },
       ],
     });
-    return fila !== null;
+    return row !== null;
   }
 
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {

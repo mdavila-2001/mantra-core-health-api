@@ -100,21 +100,21 @@ describe('DTOs administrativos de planes y coberturas', () => {
   });
 
   it('rechaza una prima de lista con más de dos decimales o negativa', async () => {
-    const negativo = plainToInstance(CreatePlanDto, {
+    const negative = plainToInstance(CreatePlanDto, {
       planCode: 'ORO',
       name: 'Plan Oro',
       monthlyPremiumAmount: '-1',
     });
-    const conMasDecimales = plainToInstance(CreatePlanDto, {
+    const withMoreDecimals = plainToInstance(CreatePlanDto, {
       planCode: 'ORO',
       name: 'Plan Oro',
       monthlyPremiumAmount: '350.001',
     });
 
-    expect((await validate(negativo)).map((e) => e.property)).toEqual(
+    expect((await validate(negative)).map((e) => e.property)).toEqual(
       expect.arrayContaining(['monthlyPremiumAmount']),
     );
-    expect((await validate(conMasDecimales)).map((e) => e.property)).toEqual(
+    expect((await validate(withMoreDecimals)).map((e) => e.property)).toEqual(
       expect.arrayContaining(['monthlyPremiumAmount']),
     );
   });
@@ -138,17 +138,17 @@ describe('UpdatePlanPremiumDto (v4.2.14, subtarea 3.1)', () => {
   });
 
   it('rechaza un valor no numérico o con más de dos decimales', async () => {
-    const noNumerico = plainToInstance(UpdatePlanPremiumDto, {
+    const nonNumeric = plainToInstance(UpdatePlanPremiumDto, {
       monthlyPremiumAmount: 'abc',
     });
-    const conMasDecimales = plainToInstance(UpdatePlanPremiumDto, {
+    const withMoreDecimals = plainToInstance(UpdatePlanPremiumDto, {
       monthlyPremiumAmount: '350.001',
     });
 
-    expect((await validate(noNumerico)).map((e) => e.property)).toEqual(
+    expect((await validate(nonNumeric)).map((e) => e.property)).toEqual(
       expect.arrayContaining(['monthlyPremiumAmount']),
     );
-    expect((await validate(conMasDecimales)).map((e) => e.property)).toEqual(
+    expect((await validate(withMoreDecimals)).map((e) => e.property)).toEqual(
       expect.arrayContaining(['monthlyPremiumAmount']),
     );
   });

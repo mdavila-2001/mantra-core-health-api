@@ -11,7 +11,7 @@ import { ClinicalPrescriptionsPublicController } from './clinical-prescriptions-
 
 describe('ClinicalPrescriptionsPublicController', () => {
   it('delega en PrescriptionPdfService.verify y devuelve el resultado sin tocarlo', async () => {
-    const resultado = {
+    const result = {
       id: 'req1',
       status: 'ISSUED' as const,
       issuedAt: new Date('2026-09-16T00:00:00.000Z'),
@@ -19,7 +19,7 @@ describe('ClinicalPrescriptionsPublicController', () => {
       prescriberLicense: null,
     };
     const prescriptionPdfService = {
-      verify: mockFn().mockResolvedValue(resultado),
+      verify: mockFn().mockResolvedValue(result),
     };
     const controller = new ClinicalPrescriptionsPublicController(
       prescriptionPdfService as any,
@@ -28,7 +28,7 @@ describe('ClinicalPrescriptionsPublicController', () => {
     const res = await controller.verify('req1');
 
     expect(prescriptionPdfService.verify).toHaveBeenCalledWith('req1');
-    expect(res).toBe(resultado);
+    expect(res).toBe(result);
     // Sin PHI: ni nombre de paciente ni de medicamento en la respuesta.
     expect(res).not.toHaveProperty('patientName');
     expect(res).not.toHaveProperty('medicationConceptId');

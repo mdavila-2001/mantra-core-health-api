@@ -163,7 +163,7 @@ export class InsuranceCampaignsRepository {
     em: EntityManager,
     code: string,
   ): Promise<string | null> {
-    const filas = await em.getConnection().execute<{ id: string }[]>(
+    const rows = await em.getConnection().execute<{ id: string }[]>(
       `select cc.id
          from terminology.catalog_concepts cc
          join terminology.code_system_versions csv on csv.id = cc.code_system_version_id
@@ -173,7 +173,7 @@ export class InsuranceCampaignsRepository {
         limit 1`,
       [code],
     );
-    return filas[0]?.id ?? null;
+    return rows[0]?.id ?? null;
   }
 
   /** Una campaña de la aseguradora, con aliados y patología. */
@@ -182,7 +182,7 @@ export class InsuranceCampaignsRepository {
     insuranceCarrierId: string,
     id: string,
   ): Promise<CampaignRow | null> {
-    const filas = await em.getConnection().execute<CampaignRow[]>(
+    const rows = await em.getConnection().execute<CampaignRow[]>(
       `select ${CAMPAIGN_COLUMNS}
          from insurance.insurance_campaigns c
          left join terminology.catalog_concepts cond on cond.id = c.target_condition_concept_id
@@ -195,7 +195,7 @@ export class InsuranceCampaignsRepository {
       'all',
       em.getTransactionContext(),
     );
-    return filas[0] ?? null;
+    return rows[0] ?? null;
   }
 
   /**
@@ -251,7 +251,7 @@ export class InsuranceCampaignsRepository {
     patientProfileId: string,
     referenceDate: string,
   ): Promise<string[]> {
-    const filas = await em.getConnection().execute<
+    const rows = await em.getConnection().execute<
       {
         carrier_id: string;
         status_concept_id: string | null;
@@ -275,24 +275,24 @@ export class InsuranceCampaignsRepository {
         where c.patient_profile_id = ?`,
       [patientProfileId],
     );
-    const vigentes = filas.filter(
-      (fila) =>
+    const current = rows.filter(
+      (row) =>
         patientCoverageValidity(referenceDate, [
           {
-            statusConceptId: fila.status_concept_id,
+            statusConceptId: row.status_concept_id,
             activeConceptId: INS.COVERAGE_ACTIVE,
-            effectiveFrom: fila.effective_from,
-            effectiveTo: fila.effective_to,
+            effectiveFrom: row.effective_from,
+            effectiveTo: row.effective_to,
           },
           {
-            statusConceptId: fila.plan_status_concept_id,
+            statusConceptId: row.plan_status_concept_id,
             activeConceptId: INS.PLAN_ACTIVE,
-            effectiveFrom: fila.plan_effective_from,
-            effectiveTo: fila.plan_effective_to,
+            effectiveFrom: row.plan_effective_from,
+            effectiveTo: row.plan_effective_to,
           },
         ]) === 'CURRENT',
     );
-    return [...new Set(vigentes.map((fila) => fila.carrier_id))];
+    return [...new Set(current.map((row) => row.carrier_id))];
   }
 
   /**
@@ -370,13 +370,13 @@ export class InsuranceCampaignsRepository {
     networkProviderMembershipId: string,
     insuranceCarrierId: string,
   ): Promise<boolean> {
-    const filas = await em.getConnection().execute<{ ok: number }[]>(
+    const rows = await em.getConnection().execute<{ ok: number }[]>(
       `select 1 as ok
          from insurance.network_provider_memberships m
          join insurance.provider_networks n on n.id = m.provider_network_id
         where m.id = ? and n.insurance_carrier_id = ?`,
       [networkProviderMembershipId, insuranceCarrierId],
     );
-    return filas.length > 0;
+    return rows.length > 0;
   }
 }

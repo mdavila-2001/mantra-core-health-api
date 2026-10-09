@@ -7,7 +7,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { CoverageService } from '../services';
 import {
   CreateCoverageDto,
@@ -40,6 +45,7 @@ export class CoverageController {
    * `ReferralsController.listMine`.
    */
   @Get('patient-coverages/me')
+  @AccessLogged({ resourceType: 'PATIENT_COVERAGES', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mi cobertura' })
   listMine(@CurrentUser() actor: AuthenticatedUser): Promise<MyCoverageDto[]> {

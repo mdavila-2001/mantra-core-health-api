@@ -55,8 +55,8 @@ const PATRON_TELEFONO = /^[+]?[0-9 ()-]{6,}$/;
  * Medio `null` no quita nada: la validación de abajo exige entonces que los dos
  * sean números, así que el `null` suelto falla como el dato incoherente que es.
  */
-function quitaElPunto(latitud: unknown, longitud: unknown): boolean {
-  return latitud === null && longitud === null;
+function removesDot(latitude: unknown, longitud: unknown): boolean {
+  return latitude === null && longitud === null;
 }
 
 /** Mensaje único para los cuatro campos telefónicos del perfil. */
@@ -291,7 +291,7 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      !removesDot(dto.homeLatitude, dto.homeLongitude) &&
       (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
@@ -303,7 +303,7 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      !quitaElPunto(dto.homeLatitude, dto.homeLongitude) &&
+      !removesDot(dto.homeLatitude, dto.homeLongitude) &&
       (dto.homeLatitude !== undefined || dto.homeLongitude !== undefined),
   )
   @IsNumber()
@@ -325,7 +325,7 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      !removesDot(dto.workLatitude, dto.workLongitude) &&
       (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()
@@ -337,7 +337,7 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({ minimum: -180, maximum: 180 })
   @ValidateIf(
     (dto: UpdateOwnPractitionerProfileDto) =>
-      !quitaElPunto(dto.workLatitude, dto.workLongitude) &&
+      !removesDot(dto.workLatitude, dto.workLongitude) &&
       (dto.workLatitude !== undefined || dto.workLongitude !== undefined),
   )
   @IsNumber()

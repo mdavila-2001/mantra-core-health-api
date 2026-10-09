@@ -55,11 +55,11 @@ export class CodeSystemsReadService {
    * @returns Los sistemas, por su código interno.
    */
   async listCodeSystems(): Promise<CodeSystemListItemDto[]> {
-    const filas = await this.em
+    const rows = await this.em
       .fork()
       .find(CodeSystems, {}, { orderBy: { internalCode: 'asc' }, limit: TOPE });
 
-    return filas.map((sistema) => ({
+    return rows.map((sistema) => ({
       id: sistema.id,
       internalCode: sistema.internalCode,
       name: sistema.name,
@@ -81,7 +81,7 @@ export class CodeSystemsReadService {
   async listVersions(
     codeSystemId: string,
   ): Promise<CodeSystemVersionListItemDto[]> {
-    const filas = await this.em.fork().find(
+    const rows = await this.em.fork().find(
       CodeSystemVersions,
       { codeSystemId },
       {
@@ -95,7 +95,7 @@ export class CodeSystemsReadService {
       },
     );
 
-    if (filas.length === TOPE) {
+    if (rows.length === TOPE) {
       // El tope existe para que esto no se convierta en una consulta sin
       // límite, pero recortar en silencio es la forma en que una lista de
       // administración empieza a mentir por omisión.
@@ -105,13 +105,13 @@ export class CodeSystemsReadService {
       );
     }
 
-    return filas.map((version) => ({
+    return rows.map((version) => ({
       id: version.id,
       version: version.version,
       state: estadoLegible(version.stateConceptId),
       isDefault: version.isDefault === true,
       publishedAt: version.publishedAt ?? null,
-      acceptsConcepts: admiteConceptos(version.stateConceptId),
+      acceptsConcepts: acceptsConcepts(version.stateConceptId),
     }));
   }
 }
@@ -147,6 +147,6 @@ function estadoLegible(
  *
  * @param stateConceptId - El estado tal como está guardado.
  */
-function admiteConceptos(stateConceptId: string | null | undefined): boolean {
+function acceptsConcepts(stateConceptId: string | null | undefined): boolean {
   return stateConceptId == null || stateConceptId === CONCEPTS.TERM_DRAFT;
 }

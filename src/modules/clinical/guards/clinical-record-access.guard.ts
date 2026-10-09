@@ -10,7 +10,7 @@ import { ClinicalReadService } from '../services';
  * conjunto sin una ruta que lo justifique sería decidir por la fuente. Si algún
  * día aparece un `DELETE` con paciente en el cuerpo, se agrega acá y se prueba.
  */
-const METODOS_MUTANTES: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH']);
+const MUTATING_METHODS: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH']);
 
 /**
  * Saca el paciente del cuerpo crudo de la petición, o `undefined`.
@@ -30,7 +30,7 @@ const METODOS_MUTANTES: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH']);
  * handler, así que un cuerpo malformado no escribe en el expediente por mucho
  * que el guard lo haya ignorado.
  */
-function pacienteDelCuerpo(body: unknown): string | undefined {
+function bodyPatient(body: unknown): string | undefined {
   if (typeof body !== 'object' || body === null) return undefined;
   const valor = (body as Record<string, unknown>).patientProfileId;
   return typeof valor === 'string' && valor.length > 0 ? valor : undefined;
@@ -40,7 +40,7 @@ function pacienteDelCuerpo(body: unknown): string | undefined {
  * FT-07-R08 (CAN-AUTH-001): la puerta única del expediente clínico.
  *
  * Delega la decisión entera en
- * {@link ClinicalReadService.assertPuedeLeerHistoria}, que ya resuelve, en este
+ * {@link ClinicalReadService.assertCanReadHistory}, que ya resuelve, en este
  * orden: `SUPERADMIN` pasa; el paciente lee sólo la propia historia
  * (`assertOwnRecord`); quien atiende pasa con un turno de HOY con esa persona
  * o —sin turno— con una relación asistencial/acceso clínico vigente que el
@@ -69,7 +69,7 @@ function pacienteDelCuerpo(body: unknown): string | undefined {
  * ## MCH-007: escribir no es leer
  *
  * En `POST`/`PUT`/`PATCH` la pregunta es
- * {@link ClinicalReadService.assertPuedeEscribirHistoria}: la misma base
+ * {@link ClinicalReadService.assertCanWriteHistory}: la misma base
  * asistencial que la lectura, pero el PDP se consulta con `WRITE` y no hay red
  * de titularidad. Antes una escritura se autorizaba con la política de
  * lectura, y un grant `READ` —el que crea el paciente al aprobar una solicitud
@@ -100,13 +100,13 @@ export class ClinicalRecordAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const actor = request.user;
-    const parametro = request.params?.patientProfileId;
-    const deLaRuta = Array.isArray(parametro) ? parametro[0] : parametro;
+    const param = request.params?.patientProfileId;
+    const ofRoute = Array.isArray(param) ? param[0] : param;
 
     // El cuerpo sólo se mira en los métodos que escriben. Un `GET` se sigue
     // decidiendo con la ruta y nada más.
-    const escribe = METODOS_MUTANTES.has(request.method);
-    const delCuerpo = escribe ? pacienteDelCuerpo(request.body) : undefined;
+    const escribe = MUTATING_METHODS.has(request.method);
+    const ofBody = escribe ? bodyPatient(request.body) : undefined;
 
     // Ruta primero, cuerpo después, y sin repetir: cuando los dos traen el
     // mismo paciente se pregunta una sola vez —preguntar dos veces por la misma
@@ -115,31 +115,31 @@ export class ClinicalRecordAccessGuard implements CanActivate {
     // historias, y el permiso sobre una no es permiso sobre la otra. No hace
     // falta inventar un error de «discrepancia»: si el actor no puede con
     // alguna de las dos, la política ya responde lo que corresponde.
-    const aEvaluar: string[] = [];
-    for (const candidato of [deLaRuta, delCuerpo]) {
-      if (candidato && !aEvaluar.includes(candidato)) aEvaluar.push(candidato);
+    const toEvaluate: string[] = [];
+    for (const candidate of [ofRoute, ofBody]) {
+      if (candidate && !toEvaluate.includes(candidate)) toEvaluate.push(candidate);
     }
 
-    if (!actor || aEvaluar.length === 0) {
+    if (!actor || toEvaluate.length === 0) {
       // Sin sujeto o sin paciente identificable en la petición: no es de la
       // incumbencia de este guard — `JwtAuthGuard`/`RolesGuard` ya se ocuparon,
       // o el handler no aplica.
       return true;
     }
 
-    for (const patientProfileId of aEvaluar) {
+    for (const patientProfileId of toEvaluate) {
       // Lanza `ForbiddenException` si no corresponde; NestJS la propaga tal
       // cual. Secuencial y no en paralelo: el primer paciente que el actor no
       // puede tocar corta la petición sin lanzar la consulta del segundo.
       // MCH-007: una escritura se decide con la política de escritura —un
       // grant de sólo lectura no alcanza—, también para el paciente de la ruta.
       if (escribe) {
-        await this.readService.assertPuedeEscribirHistoria(
+        await this.readService.assertCanWriteHistory(
           patientProfileId,
           actor,
         );
       } else {
-        await this.readService.assertPuedeLeerHistoria(patientProfileId, actor);
+        await this.readService.assertCanReadHistory(patientProfileId, actor);
       }
     }
     return true;

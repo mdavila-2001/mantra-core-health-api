@@ -93,7 +93,7 @@ export class BoliviaFacilitiesSeedService {
 
     const em = this.orm.em.fork();
     const now = new Date();
-    const contadores: BoliviaFacilitiesResult = {
+    const counters: BoliviaFacilitiesResult = {
       valueSets: 0,
       versions: 0,
       facilities: 0,
@@ -121,7 +121,7 @@ export class BoliviaFacilitiesSeedService {
         },
         { partial: true },
       );
-      contadores.valueSets += 1;
+      counters.valueSets += 1;
     }
     await em.flush();
 
@@ -148,32 +148,32 @@ export class BoliviaFacilitiesSeedService {
         },
         { partial: true },
       );
-      contadores.versions += 1;
+      counters.versions += 1;
     }
     await em.flush();
 
     // --- Nivel 3: los conceptos ---
-    contadores.facilities += await this.seedConcepts(em, now);
+    counters.facilities += await this.seedConcepts(em, now);
 
     // --- Nivel 4: sus propiedades ---
-    contadores.properties += await this.seedProperties(em, now);
+    counters.properties += await this.seedProperties(em, now);
 
     // --- Nivel 5: la expansión ---
-    contadores.memberships += await this.seedMemberships(em, now);
+    counters.memberships += await this.seedMemberships(em, now);
 
     const total =
-      contadores.valueSets +
-      contadores.versions +
-      contadores.facilities +
-      contadores.properties +
-      contadores.memberships;
+      counters.valueSets +
+      counters.versions +
+      counters.facilities +
+      counters.properties +
+      counters.memberships;
     if (total > 0) {
       this.logger.info(
-        { operation: 'seed.bolivia-facilities', ...contadores },
+        { operation: 'seed.bolivia-facilities', ...counters },
         'Directorio de establecimientos de salud materializado',
       );
     }
-    return contadores;
+    return counters;
   }
 
   /** Rompe si el catálogo declara dos veces el mismo código. */
@@ -194,16 +194,16 @@ export class BoliviaFacilitiesSeedService {
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       CatalogConcepts,
       BOLIVIA_FACILITIES.map((f) => boFacilityConceptId(f.code)),
     );
 
-    let creados = 0;
+    let created = 0;
     for (const facility of BOLIVIA_FACILITIES) {
       const id = boFacilityConceptId(facility.code);
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         CatalogConcepts,
         {
@@ -222,10 +222,10 @@ export class BoliviaFacilitiesSeedService {
         },
         { partial: true },
       );
-      creados += 1;
+      created += 1;
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /** Tipo, nivel, naturaleza, municipio, dirección, teléfono y NIT. */
@@ -233,7 +233,7 @@ export class BoliviaFacilitiesSeedService {
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const declaradas = BOLIVIA_FACILITIES.flatMap((facility) =>
+    const declared = BOLIVIA_FACILITIES.flatMap((facility) =>
       this.propertiesOf(facility).map(([propertyCode, value]) => ({
         id: boFacilityPropertyId(facility.code, propertyCode),
         conceptId: boFacilityConceptId(facility.code),
@@ -242,32 +242,32 @@ export class BoliviaFacilitiesSeedService {
       })),
     );
 
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       ConceptProperties,
-      declaradas.map((p) => p.id),
+      declared.map((p) => p.id),
     );
 
-    let creadas = 0;
-    for (const propiedad of declaradas) {
-      if (existentes.has(propiedad.id)) continue;
+    let created = 0;
+    for (const property of declared) {
+      if (existing.has(property.id)) continue;
       em.create(
         ConceptProperties,
         {
-          id: propiedad.id,
-          conceptId: propiedad.conceptId,
-          propertyCode: propiedad.propertyCode,
+          id: property.id,
+          conceptId: property.conceptId,
+          propertyCode: property.propertyCode,
           dataType: BO_FACILITY_PROPERTY_DATA_TYPE,
-          valueJson: propiedad.value,
+          valueJson: property.value,
           createdAt: now,
           updatedAt: now,
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -299,19 +299,19 @@ export class BoliviaFacilitiesSeedService {
     now: Date,
   ): Promise<number> {
     const versionIdentifier = boFacilityVersionId();
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       ValueSetMembers,
       BOLIVIA_FACILITIES.map((f) => boFacilityMemberId(f.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     let ordinal = 0;
     for (const facility of BOLIVIA_FACILITIES) {
       const id = boFacilityMemberId(facility.code);
-      const posicion = ordinal;
+      const position = ordinal;
       ordinal += 1;
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         ValueSetMembers,
         {
@@ -319,16 +319,16 @@ export class BoliviaFacilitiesSeedService {
           valueSetVersionId: versionIdentifier,
           conceptId: boFacilityConceptId(facility.code),
           included: true,
-          ordinal: posicion,
+          ordinal: position,
           createdAt: now,
           updatedAt: now,
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -342,17 +342,17 @@ export class BoliviaFacilitiesSeedService {
     entity: new () => T,
     ids: string[],
   ): Promise<Set<string>> {
-    const TAMANO_DE_BLOQUE = 500;
-    const encontrados = new Set<string>();
-    for (let i = 0; i < ids.length; i += TAMANO_DE_BLOQUE) {
-      const bloque = ids.slice(i, i + TAMANO_DE_BLOQUE);
-      const filas = await em.find(
+    const BLOCK_SIZE = 500;
+    const found = new Set<string>();
+    for (let i = 0; i < ids.length; i += BLOCK_SIZE) {
+      const block = ids.slice(i, i + BLOCK_SIZE);
+      const rows = await em.find(
         entity,
-        { id: { $in: bloque } },
+        { id: { $in: block } },
         { fields: ['id'] as never },
       );
-      for (const fila of filas) encontrados.add((fila as { id: string }).id);
+      for (const row of rows) found.add((row as { id: string }).id);
     }
-    return encontrados;
+    return found;
   }
 }

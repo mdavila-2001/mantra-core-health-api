@@ -21,7 +21,12 @@ import {
   ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartDocumentsService } from '../services';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
@@ -66,6 +71,10 @@ export class ChartDocumentsController {
    * después de cerrar sesión.
    */
   @Get(':documentId/files/:fileId/content')
+  @AccessLogged({
+    resourceType: 'DOCUMENT_FILE_CONTENT',
+    resourceId: 'param:fileId',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el archivo de un documento del expediente',
@@ -88,18 +97,18 @@ export class ChartDocumentsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     res.setHeader('Cache-Control', 'private, no-store');
-    const contenido = await this.documentsService.getDocumentFileContent(
+    const content = await this.documentsService.getDocumentFileContent(
       documentId,
       fileId,
       actor,
     );
-    res.setHeader('Content-Type', contenido.mimeType);
-    if (contenido.originalName) {
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(contenido.originalName)}`,
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
       );
     }
-    res.send(contenido.buffer);
+    res.send(content.buffer);
   }
 }

@@ -57,8 +57,8 @@ describe('FeedFanoutJob', () => {
 
   it('un fallo repartiendo un post no impide intentar el resto', async () => {
     const d = build();
-    const otro = { ...pendingPost, postId: 'post-2' };
-    d.api.get.mockResolvedValue({ items: [pendingPost, otro] });
+    const other = { ...pendingPost, postId: 'post-2' };
+    d.api.get.mockResolvedValue({ items: [pendingPost, other] });
     d.api.post
       .mockRejectedValueOnce(new Error('500 en el reparto'))
       .mockResolvedValueOnce({ itemsCreated: 2 });

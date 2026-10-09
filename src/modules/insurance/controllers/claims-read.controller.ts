@@ -6,7 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../../../common';
+import { Roles, AccessLogged } from '../../../common';
 import { ClaimsReadService } from '../services';
 import {
   ClaimDetailDto,
@@ -61,6 +61,7 @@ export class ClaimsReadController {
    * @returns Página de solicitudes con el cursor de la siguiente.
    */
   @Get('insurance-claims')
+  @AccessLogged({ resourceType: 'INSURANCE_CLAIMS', purpose: 'PAYMENT' })
   @ApiOperation({
     summary: 'Listar las solicitudes de seguro presentadas (cursor)',
   })
@@ -81,6 +82,11 @@ export class ClaimsReadController {
    * @returns El detalle completo.
    */
   @Get('insurance-claims/:id')
+  @AccessLogged({
+    resourceType: 'INSURANCE_CLAIM',
+    resourceId: 'param:id',
+    purpose: 'PAYMENT',
+  })
   @ApiOperation({
     summary: 'Consultar una solicitud de seguro con sus ítems y su dictamen',
   })

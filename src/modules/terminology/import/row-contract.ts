@@ -5,7 +5,7 @@
  * contenido, nunca la extensión ni el tipo declarado por quien sube el archivo,
  * así que cada valor de acá tiene detrás una regla de reconocimiento concreta.
  */
-export type FormatoDeArchivo = 'ndjson' | 'csv' | 'xlsx';
+export type FileFormat = 'ndjson' | 'csv' | 'xlsx';
 
 /**
  * Una fila del archivo tal como se leyó, sin validar.
@@ -18,7 +18,7 @@ export type FormatoDeArchivo = 'ndjson' | 'csv' | 'xlsx';
  * Los valores llegan como texto sin recortar y sin interpretar: convertir,
  * recortar o rechazar es trabajo de la validación, no del parseador.
  */
-export interface FilaLeida {
+export interface ReadRow {
   readonly numero: number;
   readonly valores: Readonly<Record<string, string>>;
 }
@@ -30,7 +30,7 @@ export interface FilaLeida {
  * es siempre la fila 1. El `motivo` se le muestra a quien cargó el archivo, así
  * que va en castellano y describe qué corregir, no qué falló por dentro.
  */
-export interface ProblemaDeFila {
+export interface RowProblem {
   readonly fila: number;
   readonly columna?: string;
   readonly motivo: string;
@@ -44,9 +44,9 @@ export interface ProblemaDeFila {
  * sus filas buenas, porque quién corta la importación es una decisión del
  * servicio —hoy, todo o nada— y no del parseador.
  */
-export interface ResultadoDeParseo {
-  readonly filas: readonly FilaLeida[];
-  readonly problemas: readonly ProblemaDeFila[];
+export interface ParsingResult {
+  readonly filas: readonly ReadRow[];
+  readonly problemas: readonly RowProblem[];
 }
 
 /**
@@ -57,7 +57,7 @@ export interface ResultadoDeParseo {
  * canónico, comparados sin distinguir mayúsculas ni espacios laterales, para
  * que una planilla escrita en castellano entre sin renombrar columnas.
  */
-export interface ColumnaDePerfil {
+export interface ProfileColumn {
   readonly nombre: string;
   readonly alias: readonly string[];
   readonly obligatoria: boolean;
@@ -74,9 +74,9 @@ export interface ColumnaDePerfil {
  * `ejemplo` es una fila sintética que se usa para la plantilla descargable, y
  * por eso sus valores llevan el prefijo reservado para datos de prueba.
  */
-export interface PerfilDeImportacion {
+export interface ImportProfile {
   readonly id: 'conceptos' | 'designaciones';
-  readonly columnas: readonly ColumnaDePerfil[];
+  readonly columnas: readonly ProfileColumn[];
   readonly ejemplo: Readonly<Record<string, string>>;
 }
 
@@ -88,9 +88,9 @@ export interface PerfilDeImportacion {
  * Sólo lanza si el buffer no es de su formato, que es un error del archivo y no
  * de una fila.
  */
-export interface ParseadorDeArchivo {
-  readonly formato: FormatoDeArchivo;
-  parsear(buffer: Buffer, perfil: PerfilDeImportacion): ResultadoDeParseo;
+export interface FileParser {
+  readonly formato: FileFormat;
+  parse(buffer: Buffer, perfil: ImportProfile): ParsingResult;
 }
 
 /**
@@ -102,7 +102,7 @@ export interface ParseadorDeArchivo {
  * la carpeta; acá va sólo el tipo, para que un parseador pueda depender de la
  * firma sin arrastrar la implementación.
  */
-export type DetectorDeFormato = (buffer: Buffer) => FormatoDeArchivo;
+export type DetectorFormat = (buffer: Buffer) => FileFormat;
 
 /**
  * El archivo no es ninguno de los formatos admitidos.
@@ -112,17 +112,17 @@ export type DetectorDeFormato = (buffer: Buffer) => FormatoDeArchivo;
  * archivo: «no es un archivo de texto ni una planilla», no el detalle de qué
  * bytes se miraron.
  */
-export class FormatoNoAdmitidoError extends Error {
+export class UnsupportedFormatError extends Error {
   readonly motivo: string;
 
   /**
    * Crea el error con el motivo que se le muestra a quien cargó el archivo.
    *
-   * @param motivo - Por qué no se admitió, en castellano y accionable.
+   * @param reason - Por qué no se admitió, en castellano y accionable.
    */
-  constructor(motivo: string) {
-    super(motivo);
+  constructor(reason: string) {
+    super(reason);
     this.name = 'FormatoNoAdmitidoError';
-    this.motivo = motivo;
+    this.motivo = reason;
   }
 }

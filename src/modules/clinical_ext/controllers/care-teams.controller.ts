@@ -11,7 +11,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { CareTeamsService } from '../services';
 import {
   CreateCareTeamDto,
@@ -66,6 +71,7 @@ export class CareTeamsController {
    * no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
    */
   @Get()
+  @AccessLogged({ resourceType: 'CARE_TEAMS' })
   @ApiOperation({ summary: 'Listar equipos de cuidado de un paciente' })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,

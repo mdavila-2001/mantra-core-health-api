@@ -53,8 +53,8 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   // P25: adjuntos del encuentro.
   const filesService = {
@@ -108,7 +108,7 @@ describe('EncountersService', () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue(encounter());
       await d.service.listAttachments('enc1', actor);
-      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -133,7 +133,7 @@ describe('EncountersService', () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue(encounter());
       const res = await d.service.attachFile('enc1', { fileId: 'f1' }, actor);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -151,7 +151,7 @@ describe('EncountersService', () => {
       await expect(
         d.service.attachFile('nope', { fileId: 'f1' }, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
       expect(d.filesService.createLink).not.toHaveBeenCalled();
     });
   });
@@ -233,13 +233,13 @@ describe('EncountersService', () => {
       };
       d.encountersRepo.findByAppointmentId.mockResolvedValue([enc]);
 
-      const promesa = d.service.checkIn(
+      const promise = d.service.checkIn(
         { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
         actor,
       );
 
-      await expect(promesa).rejects.toBeInstanceOf(ConflictException);
-      await expect(promesa).rejects.toMatchObject({
+      await expect(promise).rejects.toBeInstanceOf(ConflictException);
+      await expect(promise).rejects.toMatchObject({
         details: {
           encounterId: 'enc-finished',
           status: 'ENC_FINISHED',
@@ -342,14 +342,14 @@ describe('EncountersService · MCH-007, cierre por id', () => {
     const d = build();
     const enc = { ...encounter(), patientProfileId: 'paciente-ajeno' };
     d.encountersRepo.findById.mockResolvedValue(enc);
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
     await expect(d.service.close('enc1', {}, actor)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );

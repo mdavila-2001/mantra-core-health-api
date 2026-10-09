@@ -424,7 +424,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      const res = await d.service.ensureMembresiaAsistencial(
+      const res = await d.service.ensureCareMembership(
         d.tx as any,
         params,
       );
@@ -448,20 +448,20 @@ describe('DirectoryMembershipsService', () => {
      */
     it('no degrada a quien ya era ADMIN de la organización', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'm-vieja',
         tenantRoleConceptId: DIR.ROLE_ADMIN,
       };
-      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existente);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existing);
 
-      const res = await d.service.ensureMembresiaAsistencial(
+      const res = await d.service.ensureCareMembership(
         d.tx as any,
         params,
       );
 
-      expect(res).toEqual({ membership: existente, creada: false });
+      expect(res).toEqual({ membership: existing, creada: false });
       expect(d.membershipsRepo.create).not.toHaveBeenCalled();
-      expect(existente.tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+      expect(existing.tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
     });
 
     /**
@@ -473,7 +473,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+      await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
         d.tx,
@@ -492,7 +492,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+      await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
@@ -503,7 +503,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      await d.service.ensureMembresiaAsistencial(d.tx as any, params);
+      await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(d.tenantAdmin.assertCanAdminister).not.toHaveBeenCalled();
     });

@@ -63,7 +63,7 @@ describe('MCH-028 · caché de representación evita la consulta en 304 (integra
 
   it('una relectura con If-None-Match no vuelve a consultar el repositorio', async () => {
     const repo = ctx.app.get(PublicSearchRepository);
-    const espia = jest.spyOn(repo, 'listFeedPublico');
+    const espia = jest.spyOn(repo, 'listFeedPublic');
     const llamadasAntes = espia.mock.calls.length;
 
     const primero = await http().get('/public/posts').expect(200);
@@ -86,7 +86,7 @@ describe('MCH-028 · caché de representación evita la consulta en 304 (integra
 
   it('una relectura sin If-None-Match dentro del max-age sirve el cuerpo cacheado, sin repetir la consulta', async () => {
     const repo = ctx.app.get(PublicSearchRepository);
-    const espia = jest.spyOn(repo, 'listFeedPublico');
+    const espia = jest.spyOn(repo, 'listFeedPublic');
     const llamadasAntes = espia.mock.calls.length;
 
     const primero = await http().get('/public/posts').expect(200);
@@ -103,7 +103,7 @@ describe('MCH-028 · caché de representación evita la consulta en 304 (integra
 
   it('publicar un post invalida la caché: el feed vuelve a consultar y trae el post nuevo', async () => {
     const repo = ctx.app.get(PublicSearchRepository);
-    const espia = jest.spyOn(repo, 'listFeedPublico');
+    const espia = jest.spyOn(repo, 'listFeedPublic');
     const llamadasAntes = espia.mock.calls.length;
 
     const primero = await http().get('/public/posts').expect(200);

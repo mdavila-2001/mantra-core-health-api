@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { ResourceNotFoundException } from '../../../common';
 import {
   PharmacyMarketplaceRepository,
-  type OfertaPublicada,
+  type PublishedOffer,
 } from '../repositories';
 import type {
   PublicMedicationAvailabilityDto,
@@ -13,11 +13,11 @@ import type {
 } from '../dto';
 
 /** Radio de la Tierra en km, para la distancia en línea recta. */
-const RADIO_TERRESTRE_KM = 6371;
+const EARTH_RADIUS_KM = 6371;
 
 /** Tope por defecto de la vitrina, y el techo que ningún `limit` supera. */
-const TOPE_POR_DEFECTO = 24;
-const TOPE_MAXIMO = 60;
+const DEFAULT_CAP = 24;
+const MAX_CAP = 60;
 
 /**
  * Grupos terapéuticos por la primera letra del ATC.
@@ -27,7 +27,7 @@ const TOPE_MAXIMO = 60;
  * la vitrina tenga filtros con sentido clínico —«antiinfecciosos», «aparato
  * cardiovascular»— en vez de una lista alfabética de diecisiete nombres.
  */
-const GRUPOS_ATC: Readonly<Record<string, string>> = {
+const GROUPS_ATC: Readonly<Record<string, string>> = {
   A: 'Aparato digestivo y metabolismo',
   B: 'Sangre y órganos hematopoyéticos',
   C: 'Aparato cardiovascular',
@@ -45,7 +45,7 @@ const GRUPOS_ATC: Readonly<Record<string, string>> = {
 };
 
 /** Un punto desde donde medir. */
-interface Origen {
+interface Origin {
   /** Latitud WGS84. */
   lat: number;
   /** Longitud WGS84. */
@@ -92,53 +92,53 @@ export class PharmacyMarketplaceService {
    * La vitrina: un medicamento por tarjeta, con su rango de precio y en
    * cuántas farmacias está.
    *
-   * @param consulta - Texto, grupo terapéutico, origen y tope.
+   * @param consultation - Texto, grupo terapéutico, origen y tope.
    * @returns La página de la vitrina y los grupos disponibles.
    */
-  async listMedications(consulta: {
+  async listMedications(consultation: {
     q?: string;
     group?: string;
-    origin?: Origen;
+    origin?: Origin;
     radiusKm?: number;
     limit?: number;
   }): Promise<PublicMedicationPageDto> {
     const em = this.em.fork();
-    const ofertas = await this.repo.findPublishedOffers(em, {
-      texto: consulta.q,
+    const offers = await this.repo.findPublishedOffers(em, {
+      texto: consultation.q,
     });
 
-    const enAlcance = this.acotarPorRadio(
-      ofertas,
-      consulta.origin,
-      consulta.radiusKm,
+    const inScope = this.narrowByRadius(
+      offers,
+      consultation.origin,
+      consultation.radiusKm,
     );
-    const tarjetas = this.agrupar(enAlcance, consulta.origin);
+    const cards = this.group(inScope, consultation.origin);
 
     // Los grupos salen de lo que trajo la búsqueda de texto, **antes** de
     // aplicar el grupo elegido. Calcularlos después dejaría en pie sólo el
     // grupo ya elegido y no habría forma de cambiar de idea sin limpiar todo;
     // calcularlos sobre el catálogo entero ofrecería grupos que esa búsqueda
     // no puede llenar, y elegirlos daría una vitrina vacía.
-    const grupos = [
-      ...new Set(ofertas.map((oferta) => grupoDe(oferta.atcCode))),
+    const groups = [
+      ...new Set(offers.map((offer) => grupoDe(offer.atcCode))),
     ].sort((a, b) => a.localeCompare(b, 'es'));
 
-    const filtradas =
-      consulta.group === undefined || consulta.group === ''
-        ? tarjetas
-        : tarjetas.filter(
-            (tarjeta) => tarjeta.therapeuticGroup === consulta.group,
+    const filtered =
+      consultation.group === undefined || consultation.group === ''
+        ? cards
+        : cards.filter(
+            (tarjeta) => tarjeta.therapeuticGroup === consultation.group,
           );
 
     const tope = Math.min(
-      Math.max(consulta.limit ?? TOPE_POR_DEFECTO, 1),
-      TOPE_MAXIMO,
+      Math.max(consultation.limit ?? DEFAULT_CAP, 1),
+      MAX_CAP,
     );
 
     return {
-      items: filtradas.slice(0, tope),
-      total: filtradas.length,
-      groups: grupos,
+      items: filtered.slice(0, tope),
+      total: filtered.length,
+      groups: groups,
       generatedAt: new Date().toISOString(),
     };
   }
@@ -147,18 +147,18 @@ export class PharmacyMarketplaceService {
    * La disponibilidad de un medicamento, farmacia por farmacia.
    *
    * @param conceptId - Medicamento del vademécum.
-   * @param consulta - Origen y radio, los dos opcionales.
+   * @param consultation - Origen y radio, los dos opcionales.
    * @returns La ficha y sus ofertas, más cercana primero.
    * @throws ResourceNotFoundException si ninguna farmacia lo publica.
    */
   async getAvailability(
     conceptId: string,
-    consulta: { origin?: Origen; radiusKm?: number },
+    consultation: { origin?: Origin; radiusKm?: number },
   ): Promise<PublicMedicationAvailabilityDto> {
     const em = this.em.fork();
-    const ofertas = await this.repo.findPublishedOffers(em, { conceptId });
+    const offers = await this.repo.findPublishedOffers(em, { conceptId });
 
-    if (ofertas.length === 0) {
+    if (offers.length === 0) {
       // Mismo 404 indistinguible que el resto de la superficie pública: acá
       // nada separa «no existe ese medicamento» de «nadie lo publica».
       throw new ResourceNotFoundException('Medicamento no encontrado', {
@@ -169,19 +169,19 @@ export class PharmacyMarketplaceService {
     // El radio acota las ofertas que se listan, pero la ficha se arma con
     // TODAS: si no, un radio corto diría «desde Bs 80» cuando el precio más
     // bajo del país es Bs 45, y eso es un precio inventado.
-    const enAlcance = this.acotarPorRadio(
-      ofertas,
-      consulta.origin,
-      consulta.radiusKm,
+    const inScope = this.narrowByRadius(
+      offers,
+      consultation.origin,
+      consultation.radiusKm,
     );
-    const [ficha] = this.agrupar(ofertas, consulta.origin);
+    const [ficha] = this.group(offers, consultation.origin);
 
-    const conDistancia = enAlcance.map((oferta) => ({
-      oferta,
-      distancia: this.distanciaDe(oferta, consulta.origin),
+    const withDistance = inScope.map((offer) => ({
+      oferta: offer,
+      distancia: this.distance(offer, consultation.origin),
     }));
 
-    conDistancia.sort((a, b) => {
+    withDistance.sort((a, b) => {
       // Con stock primero: un precio más bajo en una farmacia que hoy no lo
       // tiene no es una mejor opción, es un viaje perdido.
       if (a.oferta.availableQuantity > 0 !== b.oferta.availableQuantity > 0) {
@@ -199,8 +199,8 @@ export class PharmacyMarketplaceService {
 
     return {
       medication: ficha,
-      offers: conDistancia.map(({ oferta, distancia }) =>
-        this.aOferta(oferta, distancia),
+      offers: withDistance.map(({ oferta, distancia }) =>
+        this.toOffer(oferta, distancia),
       ),
       generatedAt: new Date().toISOString(),
     };
@@ -209,28 +209,28 @@ export class PharmacyMarketplaceService {
   /* ---- interno ------------------------------------------------------------ */
 
   /** Las ofertas dentro del radio; sin origen o sin radio, todas. */
-  private acotarPorRadio(
-    ofertas: readonly OfertaPublicada[],
-    origen: Origen | undefined,
+  private narrowByRadius(
+    offers: readonly PublishedOffer[],
+    origen: Origin | undefined,
     radiusKm: number | undefined,
-  ): OfertaPublicada[] {
-    if (origen === undefined || radiusKm === undefined) return [...ofertas];
-    return ofertas.filter((oferta) => {
-      const distancia = this.distanciaDe(oferta, origen);
-      return distancia !== null && distancia <= radiusKm;
+  ): PublishedOffer[] {
+    if (origen === undefined || radiusKm === undefined) return [...offers];
+    return offers.filter((offer) => {
+      const distance = this.distance(offer, origen);
+      return distance !== null && distance <= radiusKm;
     });
   }
 
   /** Distancia en línea recta al origen, redondeada a un decimal. */
-  private distanciaDe(
-    oferta: OfertaPublicada,
-    origen: Origen | undefined,
+  private distance(
+    offer: PublishedOffer,
+    origen: Origin | undefined,
   ): number | null {
     if (origen === undefined) return null;
     return Number(
       haversineKm(origen, {
-        lat: oferta.latitude,
-        lng: oferta.longitude,
+        lat: offer.latitude,
+        lng: offer.longitude,
       }).toFixed(1),
     );
   }
@@ -242,49 +242,49 @@ export class PharmacyMarketplaceService {
    * hay: sin ubicación, «en cuántas farmacias se consigue» es lo más cercano a
    * «qué tan fácil es conseguirlo».
    */
-  private agrupar(
-    ofertas: readonly OfertaPublicada[],
-    origen: Origen | undefined,
+  private group(
+    offers: readonly PublishedOffer[],
+    origen: Origin | undefined,
   ): PublicMedicationCardDto[] {
-    const porConcepto = new Map<string, OfertaPublicada[]>();
-    for (const oferta of ofertas) {
-      const grupo = porConcepto.get(oferta.conceptId);
-      if (grupo === undefined) porConcepto.set(oferta.conceptId, [oferta]);
-      else grupo.push(oferta);
+    const byConcept = new Map<string, PublishedOffer[]>();
+    for (const offer of offers) {
+      const group = byConcept.get(offer.conceptId);
+      if (group === undefined) byConcept.set(offer.conceptId, [offer]);
+      else group.push(offer);
     }
 
-    const tarjetas = [...porConcepto.values()].map((grupo) => {
-      const precios = grupo.map((oferta) => Number(oferta.price));
-      const distancias = grupo
-        .map((oferta) => this.distanciaDe(oferta, origen))
-        .filter((distancia): distancia is number => distancia !== null);
+    const cards = [...byConcept.values()].map((group) => {
+      const prices = group.map((offer) => Number(offer.price));
+      const distances = group
+        .map((offer) => this.distance(offer, origen))
+        .filter((distance): distance is number => distance !== null);
 
       // El rango se toma del texto original y no del número: reformatear
       // `46.00` como `46` pierde el centavo que la farmacia publicó.
-      const masBarata = grupo[precios.indexOf(Math.min(...precios))];
-      const masCara = grupo[precios.indexOf(Math.max(...precios))];
+      const cheapest = group[prices.indexOf(Math.min(...prices))];
+      const mostExpensive = group[prices.indexOf(Math.max(...prices))];
 
       return {
-        conceptId: grupo[0].conceptId,
-        atcCode: grupo[0].atcCode,
-        genericName: grupo[0].genericName,
-        therapeuticGroup: grupoDe(grupo[0].atcCode),
-        brands: unicos(grupo.map((oferta) => oferta.brandName)),
-        presentations: unicos(grupo.map((oferta) => presentacionDe(oferta))),
-        requiresPrescription: grupo.some(
-          (oferta) => oferta.requiresPrescription,
+        conceptId: group[0].conceptId,
+        atcCode: group[0].atcCode,
+        genericName: group[0].genericName,
+        therapeuticGroup: grupoDe(group[0].atcCode),
+        brands: unique(group.map((offer) => offer.brandName)),
+        presentations: unique(group.map((offer) => presentation(offer))),
+        requiresPrescription: group.some(
+          (offer) => offer.requiresPrescription,
         ),
-        priceFrom: masBarata.price,
-        priceTo: masCara.price,
-        currency: grupo[0].currency,
+        priceFrom: cheapest.price,
+        priceTo: mostExpensive.price,
+        currency: group[0].currency,
         // Farmacias distintas, no ofertas: la misma farmacia puede publicar
         // dos marcas del mismo genérico y eso sigue siendo una farmacia.
-        pharmacyCount: new Set(grupo.map((oferta) => oferta.pharmacySlug)).size,
-        nearestKm: distancias.length === 0 ? null : Math.min(...distancias),
+        pharmacyCount: new Set(group.map((offer) => offer.pharmacySlug)).size,
+        nearestKm: distances.length === 0 ? null : Math.min(...distances),
       };
     });
 
-    tarjetas.sort((a, b) => {
+    cards.sort((a, b) => {
       if (
         a.nearestKm !== null &&
         b.nearestKm !== null &&
@@ -297,30 +297,30 @@ export class PharmacyMarketplaceService {
       return a.genericName.localeCompare(b.genericName, 'es');
     });
 
-    return tarjetas;
+    return cards;
   }
 
   /** Una oferta cruda, lista para viajar. */
-  private aOferta(
-    oferta: OfertaPublicada,
-    distancia: number | null,
+  private toOffer(
+    offer: PublishedOffer,
+    distance: number | null,
   ): PublicMedicationOfferDto {
     return {
-      pharmacySlug: oferta.pharmacySlug,
-      pharmacyName: oferta.pharmacyName,
-      addressText: oferta.addressText,
-      city: oferta.city,
-      latitude: oferta.latitude,
-      longitude: oferta.longitude,
-      distanceKm: distancia,
-      brandName: oferta.brandName,
-      presentation: presentacionDe(oferta),
-      price: oferta.price,
-      currency: oferta.currency,
-      inStock: oferta.availableQuantity > 0,
-      homeDelivery: oferta.homeDelivery,
-      pickup: oferta.pickup,
-      requiresPrescription: oferta.requiresPrescription,
+      pharmacySlug: offer.pharmacySlug,
+      pharmacyName: offer.pharmacyName,
+      addressText: offer.addressText,
+      city: offer.city,
+      latitude: offer.latitude,
+      longitude: offer.longitude,
+      distanceKm: distance,
+      brandName: offer.brandName,
+      presentation: presentation(offer),
+      price: offer.price,
+      currency: offer.currency,
+      inStock: offer.availableQuantity > 0,
+      homeDelivery: offer.homeDelivery,
+      pickup: offer.pickup,
+      requiresPrescription: offer.requiresPrescription,
     };
   }
 }
@@ -329,22 +329,22 @@ export class PharmacyMarketplaceService {
 
 /** El grupo terapéutico de un código ATC, o «Varios» si la letra no está. */
 function grupoDe(atcCode: string): string {
-  return GRUPOS_ATC[atcCode.charAt(0).toUpperCase()] ?? 'Varios';
+  return GROUPS_ATC[atcCode.charAt(0).toUpperCase()] ?? 'Varios';
 }
 
 /** «500 mg · Caja x 20 tabletas», con lo que la farmacia publique. */
-function presentacionDe(oferta: OfertaPublicada): string | null {
-  const partes = [oferta.strengthText, oferta.packageSizeText].filter(
-    (parte): parte is string => typeof parte === 'string' && parte !== '',
+function presentation(offer: PublishedOffer): string | null {
+  const parts = [offer.strengthText, offer.packageSizeText].filter(
+    (part): part is string => typeof part === 'string' && part !== '',
   );
-  return partes.length === 0 ? null : partes.join(' · ');
+  return parts.length === 0 ? null : parts.join(' · ');
 }
 
 /** Los valores no vacíos, sin repetir y en orden de aparición. */
-function unicos(valores: readonly (string | null)[]): string[] {
+function unique(values: readonly (string | null)[]): string[] {
   return [
     ...new Set(
-      valores.filter(
+      values.filter(
         (valor): valor is string => typeof valor === 'string' && valor !== '',
       ),
     ),
@@ -352,14 +352,14 @@ function unicos(valores: readonly (string | null)[]): string[] {
 }
 
 /** Distancia en línea recta entre dos puntos, en km. */
-function haversineKm(desde: Origen, hasta: Origen): number {
-  const aRadianes = (grados: number): number => (grados * Math.PI) / 180;
-  const deltaLat = aRadianes(hasta.lat - desde.lat);
-  const deltaLng = aRadianes(hasta.lng - desde.lng);
+function haversineKm(from: Origin, hasta: Origin): number {
+  const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
+  const deltaLat = toRadians(hasta.lat - from.lat);
+  const deltaLng = toRadians(hasta.lng - from.lng);
   const cuerda =
     Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(aRadianes(desde.lat)) *
-      Math.cos(aRadianes(hasta.lat)) *
+    Math.cos(toRadians(from.lat)) *
+      Math.cos(toRadians(hasta.lat)) *
       Math.sin(deltaLng / 2) ** 2;
-  return 2 * RADIO_TERRESTRE_KM * Math.asin(Math.sqrt(cuerda));
+  return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(cuerda));
 }

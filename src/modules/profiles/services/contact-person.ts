@@ -114,7 +114,7 @@ export function createContactPerson(
 
   let identifierId: string | undefined;
   if (data.nationalId) {
-    const identificador = repos.identifiers.create(tx, {
+    const identifier = repos.identifiers.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
       ownerId: persona.id,
       typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
@@ -123,7 +123,7 @@ export function createContactPerson(
       stateConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId: data.actorUserId,
     });
-    identifierId = identificador.id;
+    identifierId = identifier.id;
   }
 
   // Todos los contactos son de uso `WORK`: se los declara por su cargo en la

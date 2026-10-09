@@ -37,7 +37,7 @@ function build() {
     assertUsableBy: mockFn().mockResolvedValue({ file: {}, version: {} }),
   };
   const clinicalRead = {
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const fileUpload = {
     downloadForAuthorizedContext: mockFn().mockResolvedValue({
@@ -233,7 +233,7 @@ describe('ChartDocumentsService', () => {
       await expect(
         d.service.getDocumentFileContent('doc1', 'f1', actor),
       ).rejects.toThrow(/no encontrado/);
-      expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
     });
 
     it('returns the same 404 when the file does not hang from that document', async () => {
@@ -249,7 +249,7 @@ describe('ChartDocumentsService', () => {
       await expect(
         d.service.getDocumentFileContent('doc1', 'f1', actor),
       ).rejects.toThrow(/no encontrado/);
-      expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
     });
 
     it('does not download when the actor cannot read the patient chart', async () => {
@@ -262,7 +262,7 @@ describe('ChartDocumentsService', () => {
         { documentRecordId: 'doc1', fileId: 'f1' },
       ]);
       const forbidden = new Error('forbidden');
-      d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(forbidden);
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(forbidden);
 
       await expect(
         d.service.getDocumentFileContent('doc1', 'f1', actor),
@@ -286,7 +286,7 @@ describe('ChartDocumentsService', () => {
         actor,
       );
 
-      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
         'pat-1',
         actor,
       );

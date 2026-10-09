@@ -307,7 +307,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Plan de cuidado no encontrado | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 404 | `NOT_FOUND` | Actividad no encontrada | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -581,7 +581,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Documento no encontrado | Excepción explícita en src/modules/chart/services/chart-documents.service.ts |
 | 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -685,7 +685,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/encounter-pdf.service.ts |
 | 422 | `PRECONDITION_FAILED` | El encuentro no está cerrado | Excepción explícita en src/modules/chart/services/encounter-pdf.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1599,7 +1599,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Una nota clínica necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que escribir la nota. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La nota no está firmada; edítela como borrador (UC-15-02) | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
@@ -1744,7 +1744,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Una nota clínica necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que escribir la nota. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La nota ya no está en borrador; use una enmienda (UC-15-05) | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
@@ -1885,7 +1885,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que firmar. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | Una nota la firma su profesional: no se puede firmar en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión de nota no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 409 | `CONFLICT` | El cofirmante ya firmó esta versión | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
@@ -2029,7 +2029,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que firmar. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | Una nota la firma su profesional: no se puede firmar en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión de nota no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -2173,7 +2173,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión de nota no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -2302,7 +2302,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión de nota no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -2434,7 +2434,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | SIN_ACCESO_A_LA_HISTORIA | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Versión de nota no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 404 | `NOT_FOUND` | Nota clínica no encontrada | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |

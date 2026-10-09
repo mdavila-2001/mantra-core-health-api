@@ -173,12 +173,12 @@ describe('CommunitySocialService', () => {
       const d = build();
       d.profilesRepo.findByTarget.mockResolvedValue(null);
 
-      const perfil = await d.service.getOwnProfile({
+      const profile = await d.service.getOwnProfile({
         id: 'u-1',
         roles: [],
       } as any);
 
-      expect(perfil).toBeNull();
+      expect(profile).toBeNull();
     });
 
     /** Un profesional se representa por su perfil profesional, no por la cuenta. */
@@ -233,13 +233,13 @@ describe('CommunitySocialService', () => {
           ),
       );
 
-      const perfil = await d.service.getOwnProfile({
+      const profile = await d.service.getOwnProfile({
         id: 'u-1',
         roles: [],
         practitionerProfileId: 'hp-1',
       } as any);
 
-      expect(perfil?.id).toBe('pp-1');
+      expect(profile?.id).toBe('pp-1');
       // Primero el perfil profesional, que es el sujeto canónico; la cuenta es
       // el camino alternativo, no el preferido.
       expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(
@@ -261,7 +261,7 @@ describe('CommunitySocialService', () => {
       // preferido, editar su propia vitrina le respondería «ese enlace ya está
       // en uso».
       const d = build();
-      const propia = {
+      const own = {
         id: 'pp-1',
         tenantId: 't-1',
         targetId: 'u-1',
@@ -269,10 +269,10 @@ describe('CommunitySocialService', () => {
         displayName: 'Dra. Salas',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
-      d.profilesRepo.findBySlug.mockResolvedValue(propia);
+      d.profilesRepo.findBySlug.mockResolvedValue(own);
       d.profilesRepo.findByTarget.mockImplementation(
         (_em: any, targetId: string) =>
-          Promise.resolve(targetId === 'u-1' ? propia : null),
+          Promise.resolve(targetId === 'u-1' ? own : null),
       );
 
       await expect(
@@ -297,19 +297,19 @@ describe('CommunitySocialService', () => {
           statusConceptId: CONCEPTS.STATE_ACTIVE,
         }); // la relectura posterior
 
-      const resultado = await d.service.upsertOwnProfile(
+      const result = await d.service.upsertOwnProfile(
         { tenantId: 't-1', slug: 'nuevo-slug', displayName: 'Nombre' },
         { id: 'u-1', roles: [] } as any,
       );
 
       expect(d.profilesRepo.create).toHaveBeenCalled();
-      expect(resultado.slug).toBe('nuevo-slug');
+      expect(result.slug).toBe('nuevo-slug');
     });
 
     /** Con vitrina previa: actualiza el objeto existente, no crea uno nuevo. */
     it('actualiza la vitrina existente en vez de duplicarla', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         tenantId: 't-1',
         targetId: 'u-1',
@@ -319,10 +319,10 @@ describe('CommunitySocialService', () => {
         biography: undefined,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
       // El `findBySlug` dentro de la transacción encuentra la MISMA fila que se
       // está editando: no es un choque, es la vitrina propia.
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
 
       await d.service.upsertOwnProfile(
         { tenantId: 't-1', slug: 'slug-nuevo', displayName: 'Nombre nuevo' },
@@ -330,8 +330,8 @@ describe('CommunitySocialService', () => {
       );
 
       expect(d.profilesRepo.create).not.toHaveBeenCalled();
-      expect(existente.slug).toBe('slug-nuevo');
-      expect(existente.displayName).toBe('Nombre nuevo');
+      expect(existing.slug).toBe('slug-nuevo');
+      expect(existing.displayName).toBe('Nombre nuevo');
     });
 
     /* --- El avatar de la vitrina (viaja en el mismo PUT que el resto) ---- */
@@ -379,7 +379,7 @@ describe('CommunitySocialService', () => {
 
     it('fijar el avatar en una vitrina existente exige que sea una imagen viva', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         tenantId: 't-1',
         targetId: 'u-1',
@@ -391,8 +391,8 @@ describe('CommunitySocialService', () => {
         // lee al final, y sin la propiedad no habría nada que comprobar.
         avatarFileId: undefined as string | undefined,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
       d.filesRepo.findById.mockResolvedValue({
         id: 'f1',
         createdByUserId: 'u-1',
@@ -415,7 +415,7 @@ describe('CommunitySocialService', () => {
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existente.avatarFileId).toBe('f1');
+      expect(existing.avatarFileId).toBe('f1');
     });
 
     it('rechaza un archivo que no es imagen para el avatar', async () => {
@@ -453,7 +453,7 @@ describe('CommunitySocialService', () => {
 
     it('omitir el avatar conserva el que ya tenía', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         targetId: 'u-1',
         slug: 'dra-salas',
@@ -461,20 +461,20 @@ describe('CommunitySocialService', () => {
         avatarFileId: 'f-viejo',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
 
       await d.service.upsertOwnProfile(
         { tenantId: 't-1', slug: 'dra-salas', displayName: 'Dra. Salas nueva' },
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existente.avatarFileId).toBe('f-viejo');
+      expect(existing.avatarFileId).toBe('f-viejo');
     });
 
     it('un avatar en null lo quita', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         targetId: 'u-1',
         slug: 'dra-salas',
@@ -482,8 +482,8 @@ describe('CommunitySocialService', () => {
         avatarFileId: 'f-viejo',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
 
       await d.service.upsertOwnProfile(
         {
@@ -495,7 +495,7 @@ describe('CommunitySocialService', () => {
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existente.avatarFileId).toBeUndefined();
+      expect(existing.avatarFileId).toBeUndefined();
     });
 
     /**
@@ -536,7 +536,7 @@ describe('CommunitySocialService', () => {
           statusConceptId: CONCEPTS.STATE_ACTIVE,
         });
 
-      const resultado = await d.service.upsertOwnProfile(
+      const result = await d.service.upsertOwnProfile(
         { tenantId: 't-1', slug: 'nuevo-slug', displayName: 'Nombre' },
         { id: 'u-1', roles: [] } as any,
       );
@@ -545,7 +545,7 @@ describe('CommunitySocialService', () => {
         d.tx,
         expect.objectContaining({ visibilityConceptId: undefined }),
       );
-      expect(resultado.visibility).toBe('PRIVATE');
+      expect(result.visibility).toBe('PRIVATE');
     });
 
     /** Declararla `PUBLIC` es lo que la lista en el directorio anónimo. */
@@ -563,7 +563,7 @@ describe('CommunitySocialService', () => {
           visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
         });
 
-      const resultado = await d.service.upsertOwnProfile(
+      const result = await d.service.upsertOwnProfile(
         {
           tenantId: 't-1',
           slug: 'doctor-uno-e2e',
@@ -579,7 +579,7 @@ describe('CommunitySocialService', () => {
           visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
         }),
       );
-      expect(resultado.visibility).toBe('PUBLIC');
+      expect(result.visibility).toBe('PUBLIC');
     });
 
     /**
@@ -589,7 +589,7 @@ describe('CommunitySocialService', () => {
      */
     it('conserva la visibilidad existente cuando el PUT no la menciona', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         tenantId: 't-1',
         targetId: 'u-1',
@@ -598,8 +598,8 @@ describe('CommunitySocialService', () => {
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
 
       await d.service.upsertOwnProfile(
         {
@@ -610,7 +610,7 @@ describe('CommunitySocialService', () => {
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existente.visibilityConceptId).toBe(
+      expect(existing.visibilityConceptId).toBe(
         COMM.PROFILE_VISIBILITY_PUBLIC,
       );
     });
@@ -618,7 +618,7 @@ describe('CommunitySocialService', () => {
     /** Y declararla `PRIVATE` la saca del directorio. */
     it('despublica la vitrina cuando el titular declara PRIVATE', async () => {
       const d = build();
-      const existente = {
+      const existing = {
         id: 'pp-1',
         tenantId: 't-1',
         targetId: 'u-1',
@@ -627,8 +627,8 @@ describe('CommunitySocialService', () => {
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
       };
-      d.profilesRepo.findByTarget.mockResolvedValue(existente);
-      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+      d.profilesRepo.findByTarget.mockResolvedValue(existing);
+      d.profilesRepo.findBySlug.mockResolvedValue(existing);
 
       await d.service.upsertOwnProfile(
         {
@@ -640,7 +640,7 @@ describe('CommunitySocialService', () => {
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existente.visibilityConceptId).toBe(
+      expect(existing.visibilityConceptId).toBe(
         COMM.PROFILE_VISIBILITY_PRIVATE,
       );
     });
@@ -1053,18 +1053,18 @@ describe('CommunitySocialService', () => {
      */
     it('vuelve a bloquear reactivando la fila revocada, sin 409', async () => {
       const d = build();
-      const previo = {
+      const previous = {
         id: 'blk1',
         statusConceptId: CONCEPTS.STATE_REVOKED,
         updatedAt: new Date(),
       };
-      d.blocksRepo.findByPair.mockResolvedValue(previo);
+      d.blocksRepo.findByPair.mockResolvedValue(previous);
       const res = await d.service.block(
         { blockerProfileId: 'p1', blockedProfileId: 'p2' } as any,
         actor,
       );
       expect(res).toEqual({ id: 'blk1' });
-      expect(previo.statusConceptId).toBe(CONCEPTS.STATE_ACTIVE);
+      expect(previous.statusConceptId).toBe(CONCEPTS.STATE_ACTIVE);
       expect(d.blocksRepo.create).not.toHaveBeenCalled();
     });
   });
@@ -1082,7 +1082,7 @@ describe('CommunitySocialService', () => {
    * `CommunityVisibilityService`.
    */
   describe('propiedad del perfil que firma', () => {
-    const casos: readonly {
+    const cases: readonly {
       nombre: string;
       perfil: string;
       ejecutar: (d: ReturnType<typeof build>) => Promise<unknown>;
@@ -1217,23 +1217,23 @@ describe('CommunitySocialService', () => {
       },
     ];
 
-    for (const caso of casos) {
-      it(`${caso.nombre} exige que el perfil sea del actor`, async () => {
+    for (const caseItem of cases) {
+      it(`${caseItem.nombre} exige que el perfil sea del actor`, async () => {
         const d = build();
-        await caso.ejecutar(d);
+        await caseItem.ejecutar(d);
         expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
           expect.anything(),
-          caso.perfil,
+          caseItem.perfil,
           actor,
         );
       });
 
-      it(`${caso.nombre} no escribe si el perfil no es del actor`, async () => {
+      it(`${caseItem.nombre} no escribe si el perfil no es del actor`, async () => {
         const d = build();
         d.visibility.assertActsAsProfile.mockRejectedValue(
           new Error('perfil ajeno'),
         );
-        await expect(caso.ejecutar(d)).rejects.toThrow('perfil ajeno');
+        await expect(caseItem.ejecutar(d)).rejects.toThrow('perfil ajeno');
         expect(d.tx.flush).not.toHaveBeenCalled();
       });
     }

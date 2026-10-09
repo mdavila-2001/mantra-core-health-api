@@ -20,7 +20,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { ProfilesPatientsService } from '../services';
 import {
   CreatePatientDto,
@@ -81,6 +86,7 @@ export class ProfilesPatientsController {
    * @returns Datos básicos del paciente.
    */
   @Get('patients/me/summary')
+  @AccessLogged({ resourceType: 'PATIENT_PROFILE_SUMMARY', patient: 'actor' })
   @ApiOperation({ summary: 'Consultar el resumen propio' })
   getOwnSummary(
     @CurrentUser() actor: AuthenticatedUser,
@@ -103,6 +109,7 @@ export class ProfilesPatientsController {
    * @returns Sus datos de filiación.
    */
   @Get('patients/me')
+  @AccessLogged({ resourceType: 'PATIENT_PROFILE', patient: 'actor' })
   @ApiOperation({ summary: 'Consultar los propios datos de filiación' })
   @ApiOkResponse({
     type: OwnPatientProfileResponseDto,
@@ -189,6 +196,7 @@ export class ProfilesPatientsController {
    * @returns Sus dependientes; un arreglo vacío si no tiene ninguno.
    */
   @Get('patients/me/dependents')
+  @AccessLogged({ resourceType: 'PATIENT_DEPENDENTS', patient: 'actor' })
   @ApiOperation({
     summary: 'Listar los dependientes a cargo del paciente autenticado',
   })
@@ -269,6 +277,7 @@ export class ProfilesPatientsController {
    * @returns Página de pacientes.
    */
   @Get('patients')
+  @AccessLogged({ resourceType: 'PATIENT_PROFILES' })
   @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
   @ApiOperation({ summary: 'UC-05-13: listado paginado de pacientes' })
   @ApiQuery({
@@ -379,6 +388,7 @@ export class ProfilesPatientsController {
    * @returns Ficha de filiación, sin datos clínicos.
    */
   @Get('patients/:profileId')
+  @AccessLogged({ resourceType: 'PATIENT_PROFILE', patient: 'param:profileId' })
   @Roles('SECURITY_ADMIN')
   @ApiOperation({
     summary: 'UC-05-14: ficha de filiación de un paciente (F-01)',

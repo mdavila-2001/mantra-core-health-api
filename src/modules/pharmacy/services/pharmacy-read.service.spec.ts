@@ -9,7 +9,7 @@ import { PharmacyReadService } from './pharmacy-read.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const TIPO = {
+const KIND = {
   id: 'concept-retail',
   code: 'PHARM_TYPE_RETAIL',
   display: 'Retail pharmacy',
@@ -32,7 +32,7 @@ function pharmacy(id: string, extra: Record<string, unknown> = {}) {
     code: `PH-${id}`,
     legalName: `Farmacia ${id} S.R.L.`,
     tradeName: `Farmacia ${id}`,
-    pharmacyTypeConceptId: TIPO.id,
+    pharmacyTypeConceptId: KIND.id,
     ...extra,
   } as any;
 }
@@ -85,7 +85,7 @@ describe('PharmacyReadService', () => {
       { id: 'prod-2', pharmacyId: '1' },
       { id: 'prod-3', pharmacyId: '2' },
     ]);
-    d.repo.findConcepts.mockResolvedValue([TIPO]);
+    d.repo.findConcepts.mockResolvedValue([KIND]);
 
     const result = await runWithTenant('tenant-a', () =>
       d.service.listPharmacies(),
@@ -97,8 +97,8 @@ describe('PharmacyReadService', () => {
     expect(result.items[0].name).toBe('Farmacia 1');
     expect(result.items[1].name).toBe('Farmacia 2 S.R.L.');
     expect(result.items[0].type).toEqual({
-      code: TIPO.code,
-      display: TIPO.display,
+      code: KIND.code,
+      display: KIND.display,
     });
     expect(result.items.map((item) => item.siteCount)).toEqual([2, 0]);
     expect(result.items.map((item) => item.productCount)).toEqual([2, 1]);
@@ -157,7 +157,7 @@ describe('PharmacyReadService', () => {
         longitude: '-68.1500',
       },
     ]);
-    d.repo.findConcepts.mockResolvedValue([TIPO]);
+    d.repo.findConcepts.mockResolvedValue([KIND]);
 
     const result = await runWithTenant('tenant-a', () =>
       d.service.getPharmacy('1'),
@@ -183,7 +183,7 @@ describe('PharmacyReadService', () => {
       code: 'NIT_EXHIBICION',
       display: 'NIT',
     };
-    const OTRO_DOC = {
+    const OTHER_DOC = {
       id: 'concept-seprec',
       code: 'MATRICULA_SEPREC',
       display: 'SEPREC',
@@ -203,7 +203,7 @@ describe('PharmacyReadService', () => {
       d.repo.findVisibleById.mockResolvedValue(pharmacy('1'));
       d.repo.findTenant.mockResolvedValue(pharmacyTenant());
       d.repo.findActiveAffiliationDocuments.mockResolvedValue([
-        { documentTypeConceptId: OTRO_DOC.id, documentNumber: '999' },
+        { documentTypeConceptId: OTHER_DOC.id, documentNumber: '999' },
         { documentTypeConceptId: NIT_DOC.id, documentNumber: ' 1020304025 ' },
       ]);
       d.repo.findHeadquartersAddress.mockResolvedValue({
@@ -212,7 +212,7 @@ describe('PharmacyReadService', () => {
         latitude: '-16.4955',
         longitude: '-68.1336',
       });
-      d.repo.findConcepts.mockResolvedValue([TIPO, SRL, NIT_DOC, OTRO_DOC]);
+      d.repo.findConcepts.mockResolvedValue([KIND, SRL, NIT_DOC, OTHER_DOC]);
 
       const result = await runWithTenant('tenant-a', () =>
         d.service.getPharmacy('1'),

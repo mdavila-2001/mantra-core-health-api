@@ -300,7 +300,7 @@ export class DirectoryTenantsService {
         // farmacias, no en la de organizaciones. Proyectarlas todas como
         // organización dejaba `/public/search/pharmacies` en cero para siempre,
         // y el buscador público con una vertical muerta.
-        targetTypeConceptId: vitrinaSegunTipo(tenant.tenantTypeConceptId),
+        targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
       });
 
       this.logger.info(
@@ -575,7 +575,7 @@ export class DirectoryTenantsService {
  * `verify-and-publish`. Mapear `HEALTH_OTHER` a laboratorio metería en esa
  * vertical a cualquier negocio de salud que no sea ninguna de las otras cosas.
  */
-function vitrinaSegunTipo(tenantTypeConceptId: string | undefined): string {
+function showcaseByKind(tenantTypeConceptId: string | undefined): string {
   if (tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
     return COMM.PROFILE_TARGET_PHARMACY;
   }

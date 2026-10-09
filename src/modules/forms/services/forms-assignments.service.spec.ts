@@ -20,10 +20,10 @@ import { FORMS } from '../forms.concepts';
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 /** Un doctor: mismo endpoint, contrato estrictamente menor. */
-const doctora = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+const doctor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
 
 /** La política que un target abierto a campos del tenant declara. */
-const POLITICA_ABIERTA = { allowTenantFields: true, maximumFields: 3 };
+const OPEN_POLICY = { allowTenantFields: true, maximumFields: 3 };
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -53,7 +53,7 @@ function build() {
 }
 
 /** Una asignación propia del tenant A, activa, en la posición dada. */
-function propia(
+function own(
   id: string,
   ordinal: number,
   over: Record<string, unknown> = {},
@@ -73,7 +73,7 @@ function propia(
 }
 
 /** Ejecuta dentro del contexto de tenant que exige la propiedad. */
-function enTenantA<T>(fn: () => Promise<T>): Promise<T> {
+function inTenantA<T>(fn: () => Promise<T>): Promise<T> {
   return runWithTenant('tenant-a', fn);
 }
 
@@ -82,24 +82,24 @@ describe('FormsAssignmentsService', () => {
   describe('updateAssignment (CL-61)', () => {
     it('cambia lo obligatorio de una asignación propia y responde ok', async () => {
       const d = build();
-      const asignacion = propia('as1', 0);
-      d.assignmentsRepo.findAssignmentById.mockResolvedValue(asignacion);
-      const res = await enTenantA(() =>
-        d.service.updateAssignment('as1', { required: true }, doctora),
+      const assignment = own('as1', 0);
+      d.assignmentsRepo.findAssignmentById.mockResolvedValue(assignment);
+      const res = await inTenantA(() =>
+        d.service.updateAssignment('as1', { required: true }, doctor),
       );
       expect(res).toEqual({ ok: true });
-      expect(asignacion.required).toBe(true);
-      expect(asignacion.visible).toBe(true);
+      expect(assignment.required).toBe(true);
+      expect(assignment.visible).toBe(true);
     });
 
     it('una asignación del estándar (global) responde 403 desde un consultorio', async () => {
       const d = build();
       d.assignmentsRepo.findAssignmentById.mockResolvedValue(
-        propia('as-global', 0, { tenantId: undefined }),
+        own('as-global', 0, { tenantId: undefined }),
       );
       await expect(
-        enTenantA(() =>
-          d.service.updateAssignment('as-global', { required: true }, doctora),
+        inTenantA(() =>
+          d.service.updateAssignment('as-global', { required: true }, doctor),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
@@ -107,29 +107,29 @@ describe('FormsAssignmentsService', () => {
     it('una asignación de otro tenant responde 403', async () => {
       const d = build();
       d.assignmentsRepo.findAssignmentById.mockResolvedValue(
-        propia('as-b', 0, { tenantId: 'tenant-b' }),
+        own('as-b', 0, { tenantId: 'tenant-b' }),
       );
       await expect(
-        enTenantA(() =>
-          d.service.updateAssignment('as-b', { required: true }, doctora),
+        inTenantA(() =>
+          d.service.updateAssignment('as-b', { required: true }, doctor),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('quien gobierna edita la del estándar', async () => {
       const d = build();
-      const asignacion = propia('as-global', 0, { tenantId: undefined });
-      d.assignmentsRepo.findAssignmentById.mockResolvedValue(asignacion);
+      const assignment = own('as-global', 0, { tenantId: undefined });
+      d.assignmentsRepo.findAssignmentById.mockResolvedValue(assignment);
       await d.service.updateAssignment('as-global', { visible: false }, actor);
-      expect(asignacion.visible).toBe(false);
+      expect(assignment.visible).toBe(false);
     });
 
     it('responde 404 cuando la asignación no existe', async () => {
       const d = build();
       d.assignmentsRepo.findAssignmentById.mockResolvedValue(null);
       await expect(
-        enTenantA(() =>
-          d.service.updateAssignment('nope', { required: true }, doctora),
+        inTenantA(() =>
+          d.service.updateAssignment('nope', { required: true }, doctor),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -138,61 +138,61 @@ describe('FormsAssignmentsService', () => {
   describe('retireAssignment (CL-61)', () => {
     it('es una baja lógica: cierra valid_to y pasa a retirada, sin borrar', async () => {
       const d = build();
-      const asignacion = propia('as1', 0);
-      d.assignmentsRepo.findAssignmentById.mockResolvedValue(asignacion);
-      const res = await enTenantA(() =>
-        d.service.retireAssignment('as1', doctora),
+      const assignment = own('as1', 0);
+      d.assignmentsRepo.findAssignmentById.mockResolvedValue(assignment);
+      const res = await inTenantA(() =>
+        d.service.retireAssignment('as1', doctor),
       );
       expect(res).toEqual({ ok: true });
-      expect(asignacion.stateConceptId).toBe(FORMS.ASSIGNMENT_RETIRED);
-      expect((asignacion as any).validTo).toBeInstanceOf(Date);
+      expect(assignment.stateConceptId).toBe(FORMS.ASSIGNMENT_RETIRED);
+      expect((assignment as any).validTo).toBeInstanceOf(Date);
     });
 
     it('retirar dos veces responde 409', async () => {
       const d = build();
       d.assignmentsRepo.findAssignmentById.mockResolvedValue(
-        propia('as1', 0, { stateConceptId: FORMS.ASSIGNMENT_RETIRED }),
+        own('as1', 0, { stateConceptId: FORMS.ASSIGNMENT_RETIRED }),
       );
       await expect(
-        enTenantA(() => d.service.retireAssignment('as1', doctora)),
+        inTenantA(() => d.service.retireAssignment('as1', doctor)),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('el estándar no se retira desde un consultorio (403)', async () => {
       const d = build();
       d.assignmentsRepo.findAssignmentById.mockResolvedValue(
-        propia('as-global', 0, { tenantId: undefined }),
+        own('as-global', 0, { tenantId: undefined }),
       );
       await expect(
-        enTenantA(() => d.service.retireAssignment('as-global', doctora)),
+        inTenantA(() => d.service.retireAssignment('as-global', doctor)),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 
   describe('reorderAssignments (CL-61)', () => {
-    const cuatro = () => [
-      propia('A', 0),
-      propia('B', 1),
-      propia('C', 2),
-      propia('D', 3),
+    const four = () => [
+      own('A', 0),
+      own('B', 1),
+      own('C', 2),
+      own('D', 3),
     ];
 
     it('aplica el orden entero como ordinal 0..n', async () => {
       const d = build();
-      const filas = cuatro();
+      const rows = four();
       d.assignmentsRepo.findActiveOwnAssignmentsForTarget.mockResolvedValue(
-        filas,
+        rows,
       );
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.reorderAssignments(
           {
             targetResourceConceptId: 'rt-1',
             assignmentIds: ['D', 'C', 'B', 'A'],
           },
-          doctora,
+          doctor,
         ),
       );
-      expect(filas.map((f) => [f.id, f.ordinal])).toEqual([
+      expect(rows.map((f) => [f.id, f.ordinal])).toEqual([
         ['A', 3],
         ['B', 2],
         ['C', 1],
@@ -202,33 +202,33 @@ describe('FormsAssignmentsService', () => {
 
     it('una lista parcial manda las no nombradas al final en su orden previo', async () => {
       const d = build();
-      const filas = cuatro();
+      const rows = four();
       d.assignmentsRepo.findActiveOwnAssignmentsForTarget.mockResolvedValue(
-        filas,
+        rows,
       );
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.reorderAssignments(
           { targetResourceConceptId: 'rt-1', assignmentIds: ['C', 'A'] },
-          doctora,
+          doctor,
         ),
       );
-      const porOrdinal = [...filas].sort((x, y) => x.ordinal - y.ordinal);
-      expect(porOrdinal.map((f) => f.id)).toEqual(['C', 'A', 'B', 'D']);
+      const byOrdinal = [...rows].sort((x, y) => x.ordinal - y.ordinal);
+      expect(byOrdinal.map((f) => f.id)).toEqual(['C', 'A', 'B', 'D']);
     });
 
     it('un id que no es propio y activo de ese formulario responde 422', async () => {
       const d = build();
       d.assignmentsRepo.findActiveOwnAssignmentsForTarget.mockResolvedValue(
-        cuatro(),
+        four(),
       );
       await expect(
-        enTenantA(() =>
+        inTenantA(() =>
           d.service.reorderAssignments(
             {
               targetResourceConceptId: 'rt-1',
               assignmentIds: ['A', 'as-global'],
             },
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -237,12 +237,12 @@ describe('FormsAssignmentsService', () => {
     it('sólo consulta las asignaciones propias del tenant del actor', async () => {
       const d = build();
       d.assignmentsRepo.findActiveOwnAssignmentsForTarget.mockResolvedValue([
-        propia('A', 0),
+        own('A', 0),
       ]);
-      await enTenantA(() =>
+      await inTenantA(() =>
         d.service.reorderAssignments(
           { targetResourceConceptId: 'rt-1', assignmentIds: ['A'] },
-          doctora,
+          doctor,
         ),
       );
       expect(
@@ -338,7 +338,7 @@ describe('FormsAssignmentsService', () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'f1' });
       d.assignmentsRepo.findActivePolicyForTenant.mockResolvedValue(
-        POLITICA_ABIERTA,
+        OPEN_POLICY,
       );
       d.assignmentsRepo.createSection.mockReturnValue({ id: 'sec1' });
       d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
@@ -346,7 +346,7 @@ describe('FormsAssignmentsService', () => {
       const res = await runWithTenant('tenant-a', () =>
         d.service.createAssignment(
           { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
-          doctora,
+          doctor,
         ),
       );
 
@@ -361,7 +361,7 @@ describe('FormsAssignmentsService', () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'f1' });
       d.assignmentsRepo.findActivePolicyForTenant.mockResolvedValue(
-        POLITICA_ABIERTA,
+        OPEN_POLICY,
       );
 
       await expect(
@@ -372,7 +372,7 @@ describe('FormsAssignmentsService', () => {
               targetResourceConceptId: 'rt-1',
               tenantId: 'tenant-b',
             } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -386,7 +386,7 @@ describe('FormsAssignmentsService', () => {
       await expect(
         d.service.createAssignment(
           { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
-          doctora,
+          doctor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.assignmentsRepo.createAssignment).not.toHaveBeenCalled();
@@ -401,7 +401,7 @@ describe('FormsAssignmentsService', () => {
         runWithTenant('tenant-a', () =>
           d.service.createAssignment(
             { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -419,7 +419,7 @@ describe('FormsAssignmentsService', () => {
         runWithTenant('tenant-a', () =>
           d.service.createAssignment(
             { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -438,7 +438,7 @@ describe('FormsAssignmentsService', () => {
         runWithTenant('tenant-a', () =>
           d.service.createAssignment(
             { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
-            doctora,
+            doctor,
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

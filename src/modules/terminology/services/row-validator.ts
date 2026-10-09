@@ -6,7 +6,7 @@ import type {
 } from '../import';
 
 /** Lo que devuelve la validación: las filas que sirven y los problemas. */
-export interface ResultadoDeValidacion {
+export interface ValidationResult {
   readonly validas: readonly FilaLeida[];
   readonly problemas: readonly ProblemaDeFila[];
 }
@@ -33,114 +33,114 @@ export interface ResultadoDeValidacion {
  * espacio al final es el mismo código: si no se recorta antes, el archivo entra
  * con dos conceptos que se ven idénticos y no lo son.
  *
- * @param filas - Las filas tal como las leyó el parseador.
- * @param perfil - Qué columnas se esperan y con qué reglas.
+ * @param rows - Las filas tal como las leyó el parseador.
+ * @param profile - Qué columnas se esperan y con qué reglas.
  * @returns Las filas que sirven, ya recortadas, y los problemas encontrados.
  */
-export function validarFilas(
-  filas: readonly FilaLeida[],
-  perfil: PerfilDeImportacion,
-): ResultadoDeValidacion {
-  const validas: FilaLeida[] = [];
-  const problemas: ProblemaDeFila[] = [];
-  const identidad = perfil.columnas.find((columna) => columna.obligatoria);
+export function validateRows(
+  rows: readonly FilaLeida[],
+  profile: PerfilDeImportacion,
+): ValidationResult {
+  const valid: FilaLeida[] = [];
+  const problems: ProblemaDeFila[] = [];
+  const identity = profile.columnas.find((column) => column.obligatoria);
   const vistos = new Map<string, number>();
 
-  for (const fila of filas) {
-    const valores = recortar(fila.valores);
-    const problemasDeLaFila = revisarColumnas(fila.numero, valores, perfil);
+  for (const row of rows) {
+    const values = trim(row.valores);
+    const rowProblems = reviewColumns(row.numero, values, profile);
 
     const clave =
-      identidad === undefined ? undefined : valores[identidad.nombre];
+      identity === undefined ? undefined : values[identity.nombre];
     if (
-      problemasDeLaFila.length === 0 &&
-      identidad !== undefined &&
+      rowProblems.length === 0 &&
+      identity !== undefined &&
       clave !== undefined &&
       clave !== ''
     ) {
       const anterior = vistos.get(clave);
       if (anterior !== undefined) {
-        problemasDeLaFila.push({
-          fila: fila.numero,
-          columna: identidad.nombre,
+        rowProblems.push({
+          fila: row.numero,
+          columna: identity.nombre,
           motivo: `«${clave}» ya está repetido en la fila ${anterior}`,
         });
       } else {
-        vistos.set(clave, fila.numero);
+        vistos.set(clave, row.numero);
       }
     }
 
-    if (problemasDeLaFila.length > 0) {
-      problemas.push(...problemasDeLaFila);
+    if (rowProblems.length > 0) {
+      problems.push(...rowProblems);
       continue;
     }
-    validas.push({ numero: fila.numero, valores });
+    valid.push({ numero: row.numero, valores: values });
   }
 
-  return { validas, problemas };
+  return { validas: valid, problemas: problems };
 }
 
 /**
  * Recorta los espacios laterales de cada valor.
  *
- * @param valores - Los valores tal como vinieron.
+ * @param values - Los valores tal como vinieron.
  * @returns Los mismos valores, recortados.
  */
-function recortar(
-  valores: Readonly<Record<string, string>>,
+function trim(
+  values: Readonly<Record<string, string>>,
 ): Record<string, string> {
-  const recortados: Record<string, string> = {};
-  for (const [clave, valor] of Object.entries(valores)) {
-    recortados[clave] = valor.trim();
+  const trimmed: Record<string, string> = {};
+  for (const [clave, valor] of Object.entries(values)) {
+    trimmed[clave] = valor.trim();
   }
-  return recortados;
+  return trimmed;
 }
 
 /**
  * Revisa una fila contra cada columna declarada por el perfil.
  *
- * @param fila - Número de fila en el archivo.
- * @param valores - Valores ya recortados.
- * @param perfil - El perfil en uso.
+ * @param row - Número de fila en el archivo.
+ * @param values - Valores ya recortados.
+ * @param profile - El perfil en uso.
  * @returns Los problemas de esa fila.
  */
-function revisarColumnas(
-  fila: number,
-  valores: Readonly<Record<string, string>>,
-  perfil: PerfilDeImportacion,
+function reviewColumns(
+  row: number,
+  values: Readonly<Record<string, string>>,
+  profile: PerfilDeImportacion,
 ): ProblemaDeFila[] {
-  const problemas: ProblemaDeFila[] = [];
+  const problems: ProblemaDeFila[] = [];
 
-  for (const columna of perfil.columnas) {
-    const valor = valores[columna.nombre];
+  for (const column of profile.columnas) {
+    const valor = values[column.nombre];
 
     if (valor === undefined || valor === '') {
       // Una columna opcional ausente no es un problema: es lo normal.
-      if (columna.obligatoria) {
-        problemas.push({
-          fila,
-          columna: columna.nombre,
-          motivo: `«${columna.nombre}» está vacía`,
+      if (column.obligatoria) {
+        problems.push({
+          fila: row,
+          columna: column.nombre,
+          motivo: `«${column.nombre}» está vacía`,
         });
       }
       continue;
     }
 
-    if (columna.maxLargo !== undefined && valor.length > columna.maxLargo) {
-      problemas.push({
-        fila,
-        columna: columna.nombre,
-        motivo: `«${columna.nombre}» supera ${columna.maxLargo} caracteres`,
+    if (column.maxLargo !== undefined && valor.length > column.maxLargo) {
+      problems.push({
+        fila: row,
+        columna: column.nombre,
+        motivo: `«${column.nombre}» supera ${column.maxLargo} caracteres`,
       });
       continue;
     }
 
-    if (contieneNul(valor)) {
-      problemas.push(problemaDeNul(fila, columna));
+    if (containsNul(valor)) {
+      problems.push(nulProblem(row, column));
     }
   }
 
-  return problemas;
+  return problems;
 }
 
 /**
@@ -151,15 +151,15 @@ function revisarColumnas(
  * hacía volar la tanda entera de conceptos buenos, y con ella toda la
  * importación: como problema de fila cuesta una fila.
  *
- * @param fila - Número de fila en el archivo.
- * @param columna - La columna que lo trae.
+ * @param row - Número de fila en el archivo.
+ * @param column - La columna que lo trae.
  * @returns El problema.
  */
-function problemaDeNul(fila: number, columna: ColumnaDePerfil): ProblemaDeFila {
+function nulProblem(row: number, column: ColumnaDePerfil): ProblemaDeFila {
   return {
-    fila,
-    columna: columna.nombre,
-    motivo: `«${columna.nombre}» tiene un carácter que no se puede guardar`,
+    fila: row,
+    columna: column.nombre,
+    motivo: `«${column.nombre}» tiene un carácter que no se puede guardar`,
   };
 }
 
@@ -169,6 +169,6 @@ function problemaDeNul(fila: number, columna: ColumnaDePerfil): ProblemaDeFila {
  * @param valor - El texto a revisar.
  * @returns Si lo trae.
  */
-function contieneNul(valor: string): boolean {
+function containsNul(valor: string): boolean {
   return valor.includes('\u0000');
 }

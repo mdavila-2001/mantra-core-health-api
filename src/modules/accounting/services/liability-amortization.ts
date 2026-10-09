@@ -60,11 +60,11 @@ export function buildAmortizationSchedule(params: {
 
   const baseInstallmentCents = Math.floor(principalCents / installments);
   let outstandingCents = principalCents;
-  const filas: AmortizationInstallment[] = [];
+  const rows: AmortizationInstallment[] = [];
 
   for (let n = 1; n <= installments; n++) {
-    const esLaUltima = n === installments;
-    const principalDueCents = esLaUltima
+    const isLast = n === installments;
+    const principalDueCents = isLast
       ? outstandingCents
       : baseInstallmentCents;
     const interestDueCents = Math.round(outstandingCents * monthlyRate);
@@ -72,7 +72,7 @@ export function buildAmortizationSchedule(params: {
     const dueDate = new Date(startDate);
     dueDate.setMonth(dueDate.getMonth() + n);
 
-    filas.push({
+    rows.push({
       installmentNumber: n,
       dueDate,
       principalDue: fromCents(principalDueCents),
@@ -82,5 +82,5 @@ export function buildAmortizationSchedule(params: {
     outstandingCents -= principalDueCents;
   }
 
-  return filas;
+  return rows;
 }

@@ -7452,8 +7452,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa matrícula ya tiene historial de auditoría; no se puede borrar | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7573,8 +7573,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -7613,7 +7613,7 @@ Contexto declarado en el controlador: El buscador de instituciones para declarar
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.buscar`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
+NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.search`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
 
 ### Parámetros
 
@@ -8153,7 +8153,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8268,7 +8268,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 409 | `CONFLICT` | El profesional ya tiene esa especialidad activa | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -8867,7 +8867,7 @@ Contexto declarado en el controlador: Las solicitudes pendientes de las sedes de
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listarSolicitudes`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
+NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listSolicitudes`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
 
 ### Parámetros
 
@@ -8997,7 +8997,7 @@ Contexto declarado en el controlador: La organización acepta el vínculo.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.aprobar`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.approve`. No recibe body. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -9097,7 +9097,7 @@ Contexto declarado en el controlador: La organización rechaza el vínculo, con 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.rechazar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.reject`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -9210,7 +9210,7 @@ Contexto declarado en el controlador: La organización da de baja un vínculo qu
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revocar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revoke`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 

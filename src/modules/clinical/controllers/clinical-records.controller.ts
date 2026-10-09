@@ -11,7 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { ClinicalRecordAccessGuard } from '../guards';
 import {
@@ -174,6 +179,10 @@ export class ClinicalRecordsController {
    * (`PATIENT` en el handler): la política de lectura la aplica el servicio.
    */
   @Get('allergy-intolerances/:id/attachments')
+  @AccessLogged({
+    resourceType: 'ALLERGY_INTOLERANCE_ATTACHMENTS',
+    resourceId: 'param:id',
+  })
   @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'Listar los adjuntos de una alergia' })
   listAllergyAttachments(
@@ -215,6 +224,10 @@ export class ClinicalRecordsController {
    * (`PATIENT` en el handler): la política de lectura la aplica el servicio.
    */
   @Get('medication-requests/:id/attachments')
+  @AccessLogged({
+    resourceType: 'MEDICATION_REQUEST_ATTACHMENTS',
+    resourceId: 'param:id',
+  })
   @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'Listar los adjuntos de una receta' })
   listMedicationRequestAttachments(

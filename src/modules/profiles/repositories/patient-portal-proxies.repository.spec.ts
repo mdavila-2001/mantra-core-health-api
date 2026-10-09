@@ -10,7 +10,7 @@ import { PatientPortalProxiesRepository } from './patient-portal-proxies.reposit
  *
  * @returns El doble y la función `execute` para inspeccionar lo que recibió.
  */
-function conConexion() {
+function withConnection() {
   const execute = fn().mockResolvedValue([]);
   const em = { getConnection: () => ({ execute }) };
   return { em: em as never, execute };
@@ -29,7 +29,7 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
   const repo = new PatientPortalProxiesRepository();
 
   it('lleva tantos parámetros como `?` tiene la consulta, en el orden en que ésta los lee', async () => {
-    const { em, execute } = conConexion();
+    const { em, execute } = withConnection();
 
     await repo.searchRepresentableByName(em, {
       ...base,
@@ -55,7 +55,7 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
   });
 
   it('pide una condición de palabra por cada palabra escrita', async () => {
-    const { em, execute } = conConexion();
+    const { em, execute } = withConnection();
 
     await repo.searchRepresentableByName(em, {
       ...base,
@@ -68,7 +68,7 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
   });
 
   it('una sola palabra también deja la consulta alineada', async () => {
-    const { em, execute } = conConexion();
+    const { em, execute } = withConnection();
 
     await repo.searchRepresentableByName(em, { ...base, tokens: ['ana'] });
 
@@ -78,21 +78,21 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
   });
 
   it('escapa los comodines de LIKE aunque hoy el servicio ya no los deje pasar', async () => {
-    const { em, execute } = conConexion();
+    const { em, execute } = withConnection();
 
     await repo.searchRepresentableByName(em, {
       ...base,
       tokens: ['50%', 'a_b', 'c\\d'],
     });
 
-    const parametros: unknown[] = execute.mock.calls[0][1];
-    expect(parametros).toEqual(
+    const params: unknown[] = execute.mock.calls[0][1];
+    expect(params).toEqual(
       expect.arrayContaining(['% 50\\%%', '% a\\_b%', '% c\\\\d%']),
     );
   });
 
   it('sin palabras no consulta: devolver el padrón entero sería enumerarlo', async () => {
-    const { em, execute } = conConexion();
+    const { em, execute } = withConnection();
 
     await expect(
       repo.searchRepresentableByName(em, { ...base, tokens: [] }),
@@ -101,12 +101,12 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
   });
 
   it('devuelve las filas tal como las trae la base', async () => {
-    const { em, execute } = conConexion();
-    const fila = { patient_profile_id: 'p-1', display_name: 'Ana Pérez' };
-    execute.mockResolvedValue([fila]);
+    const { em, execute } = withConnection();
+    const row = { patient_profile_id: 'p-1', display_name: 'Ana Pérez' };
+    execute.mockResolvedValue([row]);
 
     await expect(
       repo.searchRepresentableByName(em, { ...base, tokens: ['ana'] }),
-    ).resolves.toEqual([fila]);
+    ).resolves.toEqual([row]);
   });
 });

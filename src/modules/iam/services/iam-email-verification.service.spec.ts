@@ -51,7 +51,7 @@ describe('IamEmailVerificationService', () => {
     };
   }
 
-  const MENSAJE =
+  const MESSAGE =
     'Si el identificador corresponde a una cuenta con correo pendiente de verificar, enviamos un enlace nuevo.';
 
   it('emite un token nuevo y lo manda al correo declarado', async () => {
@@ -59,7 +59,7 @@ describe('IamEmailVerificationService', () => {
 
     const res = await d.service.resend({ identifier: 'quien@example.test' });
 
-    expect(res.message).toBe(MENSAJE);
+    expect(res.message).toBe(MESSAGE);
     expect(d.emailVerificationsRepo.create).toHaveBeenCalledWith(
       d.tx,
       expect.objectContaining({ userId: 'user-1', tokenHash: 'hashed' }),
@@ -100,15 +100,15 @@ describe('IamEmailVerificationService', () => {
       (d: ReturnType<typeof build>) =>
         d.emailVerificationsRepo.findLatestByUser.mockResolvedValue(null),
     ],
-  ])('responde lo mismo ante %s, y no emite token', async (_caso, preparar) => {
+  ])('responde lo mismo ante %s, y no emite token', async (_caso, prepare) => {
     const d = build();
-    preparar(d);
+    prepare(d);
 
     const res = await d.service.resend({ identifier: 'CI-4821993' });
 
     // Tres respuestas distinguibles convertirían el formulario en un oráculo de
     // qué direcciones tienen cuenta en una plataforma de salud.
-    expect(res.message).toBe(MENSAJE);
+    expect(res.message).toBe(MESSAGE);
     expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
     expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe('IamEmailVerificationService', () => {
 
     const res = await d.service.resend({ identifier: 'quien@example.test' });
 
-    expect(res.message).toBe(MENSAJE);
+    expect(res.message).toBe(MESSAGE);
     expect(d.emailVerificationsRepo.create).toHaveBeenCalled();
   });
 });

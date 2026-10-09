@@ -71,20 +71,20 @@ describe('CommunityEngagementService', () => {
       { commentableRefId: 'post-1', count: 3 },
     ]);
 
-    const mapa = await d.service.ofPosts(em, ['post-1', 'post-2']);
+    const map = await d.service.ofPosts(em, ['post-1', 'post-2']);
 
-    expect(mapa.get('post-1')?.reactions.total).toBe(12);
-    expect(mapa.get('post-1')?.reactions.tallies).toHaveLength(2);
-    expect(mapa.get('post-1')?.commentCount).toBe(3);
-    expect(mapa.get('post-2')?.reactions.total).toBe(1);
+    expect(map.get('post-1')?.reactions.total).toBe(12);
+    expect(map.get('post-1')?.reactions.tallies).toHaveLength(2);
+    expect(map.get('post-1')?.commentCount).toBe(3);
+    expect(map.get('post-2')?.reactions.total).toBe(1);
     // Sin comentarios es 0, no `undefined`: una tarjeta necesita un número.
-    expect(mapa.get('post-2')?.commentCount).toBe(0);
+    expect(map.get('post-2')?.commentCount).toBe(0);
   });
 
   it('una publicación sin nada aparece igual, con ceros', async () => {
     const d = build();
-    const mapa = await d.service.ofPosts(em, ['post-solo']);
-    expect(mapa.get('post-solo')).toEqual({
+    const map = await d.service.ofPosts(em, ['post-solo']);
+    expect(map.get('post-solo')).toEqual({
       reactions: { tallies: [], total: 0 },
       commentCount: 0,
     });
@@ -101,13 +101,13 @@ describe('CommunityEngagementService', () => {
       { reactableRefId: 'post-1', reactionTypeConceptId: 'LIKE' },
     ]);
 
-    const mapa = await d.service.ofPosts(em, ['post-1', 'post-2'], 'p-lector');
+    const map = await d.service.ofPosts(em, ['post-1', 'post-2'], 'p-lector');
 
-    expect(mapa.get('post-1')?.reactions.actorReactionTypeConceptId).toBe(
+    expect(map.get('post-1')?.reactions.actorReactionTypeConceptId).toBe(
       'LIKE',
     );
     // `null` es «no reaccionó», que es distinto de «no se preguntó».
-    expect(mapa.get('post-2')?.reactions.actorReactionTypeConceptId).toBeNull();
+    expect(map.get('post-2')?.reactions.actorReactionTypeConceptId).toBeNull();
   });
 
   /**
@@ -117,10 +117,10 @@ describe('CommunityEngagementService', () => {
    */
   it('un lector sin perfil no recibe estado propio, ni siquiera nulo', async () => {
     const d = build();
-    const mapa = await d.service.ofPosts(em, ['post-1']);
+    const map = await d.service.ofPosts(em, ['post-1']);
 
     expect(
-      'actorReactionTypeConceptId' in (mapa.get('post-1')?.reactions ?? {}),
+      'actorReactionTypeConceptId' in (map.get('post-1')?.reactions ?? {}),
     ).toBe(false);
     expect(d.reactionsRepo.listByActorTargets).not.toHaveBeenCalled();
   });
@@ -146,10 +146,10 @@ describe('CommunityEngagementService', () => {
       },
     ]);
 
-    const mapa = await d.service.ofPosts(em, ['post-1'], 'p-lector');
+    const map = await d.service.ofPosts(em, ['post-1'], 'p-lector');
 
-    expect(mapa.get('post-1')?.reactions.tallies[0]?.reactionType).toBe('LIKE');
-    expect(mapa.get('post-1')?.reactions.actorReactionType).toBe('INSIGHTFUL');
+    expect(map.get('post-1')?.reactions.tallies[0]?.reactionType).toBe('LIKE');
+    expect(map.get('post-1')?.reactions.actorReactionType).toBe('INSIGHTFUL');
   });
 
   /**
@@ -167,10 +167,10 @@ describe('CommunityEngagementService', () => {
       },
     ]);
 
-    const mapa = await d.service.ofPosts(em, ['post-1']);
+    const map = await d.service.ofPosts(em, ['post-1']);
 
-    expect(mapa.get('post-1')?.reactions.tallies[0]?.reactionType).toBeNull();
-    expect(mapa.get('post-1')?.reactions.total).toBe(1);
+    expect(map.get('post-1')?.reactions.tallies[0]?.reactionType).toBeNull();
+    expect(map.get('post-1')?.reactions.total).toBe(1);
   });
 
   it('sólo cuenta comentarios vigentes', async () => {

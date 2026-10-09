@@ -306,20 +306,20 @@ export class EncountersRepository {
     em: EntityManager,
     appointmentIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const mapa = new Map<string, string>();
-    if (appointmentIds.length === 0) return mapa;
-    const encuentros = await em.find(
+    const map = new Map<string, string>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
       Encounters,
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encuentros) {
+    for (const encuentro of encounters) {
       if (encuentro.appointmentId == null) continue;
-      if (!mapa.has(encuentro.appointmentId)) {
-        mapa.set(encuentro.appointmentId, encuentro.id);
+      if (!map.has(encuentro.appointmentId)) {
+        map.set(encuentro.appointmentId, encuentro.id);
       }
     }
-    return mapa;
+    return map;
   }
 
   /**
@@ -339,20 +339,20 @@ export class EncountersRepository {
     em: EntityManager,
     appointmentIds: readonly string[],
   ): Promise<Map<string, string[]>> {
-    const mapa = new Map<string, string[]>();
-    if (appointmentIds.length === 0) return mapa;
-    const encuentros = await em.find(
+    const map = new Map<string, string[]>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
       Encounters,
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encuentros) {
+    for (const encuentro of encounters) {
       if (encuentro.appointmentId == null) continue;
-      const ids = mapa.get(encuentro.appointmentId) ?? [];
+      const ids = map.get(encuentro.appointmentId) ?? [];
       ids.push(encuentro.id);
-      mapa.set(encuentro.appointmentId, ids);
+      map.set(encuentro.appointmentId, ids);
     }
-    return mapa;
+    return map;
   }
 
   /**

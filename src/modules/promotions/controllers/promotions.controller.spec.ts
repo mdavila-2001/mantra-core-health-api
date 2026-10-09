@@ -248,12 +248,12 @@ describe('LoyaltyController', () => {
       string,
       unknown
     >;
-    const roles = (metodo: string): string[] =>
-      Reflect.getMetadata(ROLES_KEY, prototipo[metodo] as object) ?? [];
+    const roles = (method: string): string[] =>
+      Reflect.getMetadata(ROLES_KEY, prototipo[method] as object) ?? [];
 
-    for (const metodo of ['myLoyalty', 'myPoints', 'redeemOwnPoints']) {
-      expect(roles(metodo)).toEqual(['PATIENT']);
-      expect(roles(metodo)).not.toContain('MEMBER');
+    for (const method of ['myLoyalty', 'myPoints', 'redeemOwnPoints']) {
+      expect(roles(method)).toEqual(['PATIENT']);
+      expect(roles(method)).not.toContain('MEMBER');
     }
   });
 });

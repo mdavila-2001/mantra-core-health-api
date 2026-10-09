@@ -1181,11 +1181,11 @@ export class PeriopCasesService {
         );
       }
 
-      const esAdministracion =
+      const isAdministration =
         actor.roles.includes('PERIOP_ADMIN') ||
         actor.roles.includes('SUPERADMIN');
       if (
-        !esAdministracion &&
+        !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId
       ) {
         throw new PreconditionFailedException(
@@ -1205,12 +1205,12 @@ export class PeriopCasesService {
       }
 
       // Fail-closed: no se declara aceptado a quien no puede ejercer.
-      const credencialVigente = await this.credentialsRepo.hasCurrentCredential(
+      const currentCredential = await this.credentialsRepo.hasCurrentCredential(
         tx,
         member.practitionerProfileId,
         new Date(),
       );
-      if (!credencialVigente) {
+      if (!currentCredential) {
         throw new PreconditionFailedException(
           'CAN-INT-002: el integrante no tiene credencial profesional vigente',
           { caseId, memberId },
@@ -1298,11 +1298,11 @@ export class PeriopCasesService {
       // Spec 168: responder por otro es exactamente lo que la regla impide. La
       // excepción administrativa es la misma que admite `acceptTeamMember`
       // —autorización institucional expresa— y no se amplía aquí.
-      const esAdministracion =
+      const isAdministration =
         actor.roles.includes('PERIOP_ADMIN') ||
         actor.roles.includes('SUPERADMIN');
       if (
-        !esAdministracion &&
+        !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId
       ) {
         throw new PreconditionFailedException(

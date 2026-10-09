@@ -175,12 +175,12 @@ describe('IamUsersController — lecturas', () => {
     ['listMfaFactors', 'listMfaFactors'],
     ['listSessions', 'listSessions'],
     ['listGlobalRoles', 'listGlobalRoles'],
-  ])('%s delega en el servicio de lectura', async (metodo, delegado) => {
+  ])('%s delega en el servicio de lectura', async (method, delegate) => {
     const d = build();
-    (d.usersReadService as any)[delegado].mockResolvedValue({ items: [] });
+    (d.usersReadService as any)[delegate].mockResolvedValue({ items: [] });
 
-    await (d.controller as any)[metodo]('u1');
+    await (d.controller as any)[method]('u1');
 
-    expect((d.usersReadService as any)[delegado]).toHaveBeenCalledWith('u1');
+    expect((d.usersReadService as any)[delegate]).toHaveBeenCalledWith('u1');
   });
 });

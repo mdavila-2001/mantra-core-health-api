@@ -22,14 +22,14 @@ import { ProfessionalCredentialsRepository } from './professional-credentials.re
  */
 describe('ProfessionalCredentialsRepository', () => {
   /** Un `EntityManager` que sólo recuerda con qué lo llamaron. */
-  function emQueRecuerda() {
-    const llamadas: Record<string, unknown>[] = [];
+  function rememberingEm() {
+    const calls: Record<string, unknown>[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
-        create: (_entidad: unknown, datos: Record<string, unknown>) => {
-          llamadas.push(datos);
-          return datos;
+        create: (entity: unknown, data: Record<string, unknown>) => {
+          calls.push(data);
+          return data;
         },
       } as never,
     };
@@ -43,7 +43,7 @@ describe('ProfessionalCredentialsRepository', () => {
   };
 
   it('el archivo del diploma llega a la fila', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     new ProfessionalCredentialsRepository().create(em, {
       ...base,
@@ -54,7 +54,7 @@ describe('ProfessionalCredentialsRepository', () => {
   });
 
   it('sin archivo la fila no lo inventa', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     new ProfessionalCredentialsRepository().create(em, base);
 
@@ -62,33 +62,33 @@ describe('ProfessionalCredentialsRepository', () => {
   });
 
   it('los campos que ya existían siguen llegando', () => {
-    const { em, llamadas } = emQueRecuerda();
-    const emision = new Date('2024-03-15');
+    const { em, llamadas } = rememberingEm();
+    const issuance = new Date('2024-03-15');
 
     new ProfessionalCredentialsRepository().create(em, {
       ...base,
       issuingInstitutionText: 'Universidad Gabriel René Moreno',
-      issueDate: emision,
+      issueDate: issuance,
       verificationSourceUri: 'https://registro.test/dip/17',
     });
 
-    const fila = llamadas[0];
-    expect(fila.practitionerProfileId).toBe('pp-1');
-    expect(fila.credentialTypeConceptId).toBe('cred-type-diploma');
-    expect(fila.number).toBe('DIP-2024-17');
-    expect(fila.issuingInstitutionText).toBe('Universidad Gabriel René Moreno');
-    expect(fila.issueDate).toBe(emision);
-    expect(fila.verificationSourceUri).toBe('https://registro.test/dip/17');
-    expect(fila.stateConceptId).toBe('cred-pending');
+    const row = llamadas[0];
+    expect(row.practitionerProfileId).toBe('pp-1');
+    expect(row.credentialTypeConceptId).toBe('cred-type-diploma');
+    expect(row.number).toBe('DIP-2024-17');
+    expect(row.issuingInstitutionText).toBe('Universidad Gabriel René Moreno');
+    expect(row.issueDate).toBe(issuance);
+    expect(row.verificationSourceUri).toBe('https://registro.test/dip/17');
+    expect(row.stateConceptId).toBe('cred-pending');
   });
 
   it('lee la credencial con bloqueo de escritura antes de cambiar su estado', async () => {
     const repository = new ProfessionalCredentialsRepository();
-    const llamadas: unknown[][] = [];
+    const calls: unknown[][] = [];
     const row = { id: 'cred-1' };
     const em = {
       findOne: (...args: unknown[]) => {
-        llamadas.push(args);
+        calls.push(args);
         return Promise.resolve(row);
       },
     } as never;
@@ -105,7 +105,7 @@ describe('ProfessionalCredentialsRepository', () => {
       ),
     ).resolves.toBe(row);
 
-    expect(llamadas[0]?.[1]).toEqual({ id: 'cred-1' });
-    expect(llamadas[0]?.[2]).toEqual({ lockMode: LockMode.PESSIMISTIC_WRITE });
+    expect(calls[0]?.[1]).toEqual({ id: 'cred-1' });
+    expect(calls[0]?.[2]).toEqual({ lockMode: LockMode.PESSIMISTIC_WRITE });
   });
 });

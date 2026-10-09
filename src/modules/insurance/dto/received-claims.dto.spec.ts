@@ -6,11 +6,11 @@ import { ReceivedClaimDecisionDto } from './received-claims.dto';
  * Los errores de validación, como los vería el `ValidationPipe` global de
  * `main.ts` (`whitelist` y `forbidNonWhitelisted`).
  *
- * @param cuerpo - Lo que mandaría el cliente.
+ * @param body - Lo que mandaría el cliente.
  * @returns Las propiedades que no pasaron, en orden.
  */
-async function erroresDe(cuerpo: unknown): Promise<string[]> {
-  const dto = plainToInstance(ReceivedClaimDecisionDto, cuerpo);
+async function errors(body: unknown): Promise<string[]> {
+  const dto = plainToInstance(ReceivedClaimDecisionDto, body);
   const errores = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -23,13 +23,13 @@ describe('ReceivedClaimDecisionDto', () => {
     it.each(['APPROVED', 'PARTIAL', 'REJECTED'])(
       'acepta el resultado %s solo',
       async (outcome) => {
-        expect(await erroresDe({ outcome })).toEqual([]);
+        expect(await errors({ outcome })).toEqual([]);
       },
     );
 
     it('acepta el cuerpo completo de una aprobación parcial', async () => {
       expect(
-        await erroresDe({
+        await errors({
           outcome: 'PARTIAL',
           approvedAmount: '200.00',
           reason: 'El plan cubre la mitad',
@@ -43,7 +43,7 @@ describe('ReceivedClaimDecisionDto', () => {
     it.each(['0', '0.5', '0.05', '1', '400.25', '1234567.89'])(
       'acepta el monto %s',
       async (approvedAmount) => {
-        expect(await erroresDe({ outcome: 'PARTIAL', approvedAmount })).toEqual(
+        expect(await errors({ outcome: 'PARTIAL', approvedAmount })).toEqual(
           [],
         );
       },
@@ -51,7 +51,7 @@ describe('ReceivedClaimDecisionDto', () => {
 
     it('acepta un motivo de 1000 caracteres y una cláusula de 255', async () => {
       expect(
-        await erroresDe({
+        await errors({
           outcome: 'REJECTED',
           reason: 'a'.repeat(1000),
           policyClauseReference: 'c'.repeat(255),
@@ -65,14 +65,14 @@ describe('ReceivedClaimDecisionDto', () => {
       ['un resultado fuera del set', { outcome: 'DENIED' }],
       ['un resultado ausente', {}],
       ['un resultado en minúsculas', { outcome: 'approved' }],
-    ])('rechaza %s', async (_caso, cuerpo) => {
-      expect(await erroresDe(cuerpo)).toEqual(['outcome']);
+    ])('rechaza %s', async (_caso, body) => {
+      expect(await errors(body)).toEqual(['outcome']);
     });
 
     it.each(['abc', '-5', '10.123', '1,5', '1e3', '', ' 10.00'])(
       'rechaza el monto %j',
       async (approvedAmount) => {
-        expect(await erroresDe({ outcome: 'PARTIAL', approvedAmount })).toEqual(
+        expect(await errors({ outcome: 'PARTIAL', approvedAmount })).toEqual(
           ['approvedAmount'],
         );
       },
@@ -80,13 +80,13 @@ describe('ReceivedClaimDecisionDto', () => {
 
     it('rechaza un monto que no es cadena: el dinero viaja como cadena decimal', async () => {
       expect(
-        await erroresDe({ outcome: 'PARTIAL', approvedAmount: 200 }),
+        await errors({ outcome: 'PARTIAL', approvedAmount: 200 }),
       ).toEqual(['approvedAmount']);
     });
 
     it('rechaza un motivo de más de 1000 caracteres y una cláusula de más de 255', async () => {
       expect(
-        await erroresDe({
+        await errors({
           outcome: 'REJECTED',
           reason: 'a'.repeat(1001),
           policyClauseReference: 'c'.repeat(256),
@@ -96,7 +96,7 @@ describe('ReceivedClaimDecisionDto', () => {
 
     it('rechaza claves que el contrato no declara: no se cuela un estado, un autor ni un id', async () => {
       expect(
-        await erroresDe({
+        await errors({
           outcome: 'APPROVED',
           statusConceptId: 'x',
           decidedBy: 'x',

@@ -1,29 +1,29 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { ROLES_KEY } from '../../../common/auth/roles.decorator';
-import { LECTOR_DE_IMPORTACION } from '../services/import-parsers.provider';
+import { LECTOR_IMPORT } from '../services/import-parsers.provider';
 import { ImportTemplateService } from '../services/import-template.service';
 import { TerminologyImportTemplateController } from './terminology-import-template.controller';
 
 describe('TerminologyImportTemplateController', () => {
   /** El controlador con el generador real: la plantilla es su contrato. */
-  function armar() {
+  function build() {
     const controller = new TerminologyImportTemplateController(
-      new ImportTemplateService(LECTOR_DE_IMPORTACION),
+      new ImportTemplateService(LECTOR_IMPORT),
     );
-    const cabeceras: Record<string, string> = {};
+    const headers: Record<string, string> = {};
     const response = {
       setHeader: jest.fn((nombre: string, valor: string) => {
-        cabeceras[nombre] = valor;
+        headers[nombre] = valor;
       }),
     };
-    return { controller, response, cabeceras };
+    return { controller, response, cabeceras: headers };
   }
 
   it('descarga la plantilla con su tipo y su nombre de archivo', () => {
-    const { controller, response, cabeceras } = armar();
+    const { controller, response, cabeceras } = build();
 
-    const archivo = controller.descargarPlantilla(
+    const file = controller.descargarPlantilla(
       { profile: 'conceptos', format: 'csv' },
       response as never,
     );
@@ -32,13 +32,13 @@ describe('TerminologyImportTemplateController', () => {
     expect(cabeceras['Content-Disposition']).toBe(
       'attachment; filename="plantilla-conceptos.csv"',
     );
-    expect(archivo.getStream()).toBeDefined();
+    expect(file.getStream()).toBeDefined();
   });
 
   it('sin decir nada descarga la de conceptos en CSV', () => {
     // Es lo que se carga casi siempre; pedirlo explícito no debería ser
     // requisito para bajar la plantilla.
-    const { controller, response, cabeceras } = armar();
+    const { controller, response, cabeceras } = build();
 
     controller.descargarPlantilla({}, response as never);
 

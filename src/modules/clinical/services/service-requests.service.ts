@@ -90,7 +90,7 @@ export class ServiceRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DuplicateStudyCheckResultDto> {
     const tenantId = requireTenantId();
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       dto.patientProfileId,
       actor,
     );

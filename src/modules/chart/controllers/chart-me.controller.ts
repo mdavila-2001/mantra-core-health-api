@@ -23,6 +23,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { ChartMeReadService, EncounterPdfService } from '../services';
 import {
@@ -99,19 +100,19 @@ export class ChartMeController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     res.setHeader('Cache-Control', 'private, no-store');
-    const contenido = await this.readService.getMyDocumentFileContent(
+    const content = await this.readService.getMyDocumentFileContent(
       documentId,
       fileId,
       actor,
     );
-    res.setHeader('Content-Type', contenido.mimeType);
-    if (contenido.originalName) {
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(contenido.originalName)}`,
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
       );
     }
-    res.send(contenido.buffer);
+    res.send(content.buffer);
   }
 
   /**
@@ -120,6 +121,11 @@ export class ChartMeController {
    * documentos sólo para el profesional.
    */
   @Get('encounters/:id/pdf')
+  @AccessLogged({
+    resourceType: 'ENCOUNTER_PDF',
+    patient: 'actor',
+    resourceId: 'param:id',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el PDF oficial de una atención propia',

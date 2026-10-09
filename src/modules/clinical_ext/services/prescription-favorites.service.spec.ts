@@ -52,7 +52,7 @@ function build() {
   return { service, favoritesRepo, ownership, tx };
 }
 
-const nuevoFavorito = {
+const newFavorite = {
   name: 'ATB post extracción',
   medicationConceptId: 'med-1',
   doseText: '500 mg',
@@ -78,7 +78,7 @@ describe('PrescriptionFavoritesService', () => {
   describe('create', () => {
     it('saves the favorite for the practitioner in session', async () => {
       const d = build();
-      const res = await d.service.create(nuevoFavorito as any, actor);
+      const res = await d.service.create(newFavorite as any, actor);
       expect(res.name).toBe('ATB post extracción');
       expect(
         d.favoritesRepo.create.mock.calls[0][1].practitionerProfileId,
@@ -88,7 +88,7 @@ describe('PrescriptionFavoritesService', () => {
     it('converts the quantity to string for the numeric column', async () => {
       const d = build();
       await d.service.create(
-        { ...nuevoFavorito, quantityDecimal: 21 } as any,
+        { ...newFavorite, quantityDecimal: 21 } as any,
         actor,
       );
       expect(d.favoritesRepo.create.mock.calls[0][1].quantityDecimal).toBe(
@@ -102,7 +102,7 @@ describe('PrescriptionFavoritesService', () => {
         { id: 'fav-0', name: 'ATB post extracción' },
       ]);
       await expect(
-        d.service.create(nuevoFavorito as any, actor),
+        d.service.create(newFavorite as any, actor),
       ).rejects.toThrow(ConflictException);
       expect(d.favoritesRepo.create).not.toHaveBeenCalled();
     });
@@ -113,7 +113,7 @@ describe('PrescriptionFavoritesService', () => {
         MAX_FAVORITES_PER_PRACTITIONER,
       );
       await expect(
-        d.service.create(nuevoFavorito as any, actor),
+        d.service.create(newFavorite as any, actor),
       ).rejects.toThrow(PreconditionFailedException);
       expect(d.favoritesRepo.create).not.toHaveBeenCalled();
     });

@@ -23,7 +23,7 @@ import { createHash } from 'node:crypto';
  * cambiarlo reescribiría todos los identificadores derivados y rompería las FK
  * ya persistidas, así que se trata como una constante inmutable del proyecto.
  */
-export const SALUD_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
+export const HEALTH_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
 
 /**
  * Implementación local de UUID versión 5 (nombre + namespace, SHA-1). Se prefiere
@@ -33,7 +33,7 @@ export const SALUD_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
  */
 export function deterministicId(key: string): string {
   const namespaceBytes = Buffer.from(
-    SALUD_UUID_NAMESPACE.replace(/-/g, ''),
+    HEALTH_UUID_NAMESPACE.replace(/-/g, ''),
     'hex',
   );
   const hash = createHash('sha1')

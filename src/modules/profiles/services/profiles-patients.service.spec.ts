@@ -510,12 +510,12 @@ describe('ProfilesPatientsService', () => {
      */
     it.each(['SECURITY_ADMIN', 'SUPERADMIN', 'PRACTITIONER', 'CLINICIAN'])(
       '%s busca el padrón sin acotar (scope unrestricted)',
-      async (rol) => {
+      async (role) => {
         const d = build();
 
         await d.service.searchPatients({ query: 'ana', limit: 50 }, {
           id: 'u-1',
-          roles: [rol],
+          roles: [role],
         } as any);
 
         expect(d.patientProfilesRepo.searchPage).toHaveBeenCalledWith(
@@ -537,9 +537,9 @@ describe('ProfilesPatientsService', () => {
      */
     it.each(['PRACTITIONER', 'CLINICIAN'])(
       '%s sin texto ni documento: 422, no enumera el padrón',
-      async (rol) => {
+      async (role) => {
         const d = build();
-        const actor = { id: 'u-1', roles: [rol] } as any;
+        const actor = { id: 'u-1', roles: [role] } as any;
 
         await expect(
           d.service.searchPatients({ limit: 50 }, actor),
@@ -550,9 +550,9 @@ describe('ProfilesPatientsService', () => {
 
     it.each(['PRACTITIONER', 'CLINICIAN'])(
       '%s con sólo nationalId (sin texto) sí puede buscar',
-      async (rol) => {
+      async (role) => {
         const d = build();
-        const actor = { id: 'u-1', roles: [rol] } as any;
+        const actor = { id: 'u-1', roles: [role] } as any;
 
         await d.service.searchPatients(
           { nationalId: '1234567', limit: 50 },
@@ -565,9 +565,9 @@ describe('ProfilesPatientsService', () => {
 
     it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
       '%s sin texto ni documento igual puede listar: administra el padrón',
-      async (rol) => {
+      async (role) => {
         const d = build();
-        const actor = { id: 'u-1', roles: [rol] } as any;
+        const actor = { id: 'u-1', roles: [role] } as any;
 
         await d.service.searchPatients({ limit: 50 }, actor);
 
@@ -735,7 +735,7 @@ describe('ProfilesPatientsService', () => {
      * único que el resumen necesita antes de mirar la verificación.
      * @returns El sistema bajo prueba con sus dobles.
      */
-    function conPaciente() {
+    function withPatient() {
       const d = build();
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'per-1',
@@ -754,7 +754,7 @@ describe('ProfilesPatientsService', () => {
     }
 
     it('sin identidad verificada devuelve la filiación y NO el código de paciente', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       // Sin aserción vigente para la persona.
       d.tx.findOne.mockResolvedValue(null);
 
@@ -772,7 +772,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('con identidad verificada suma el código de paciente', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.findOne.mockResolvedValue({ id: 'assertion-1' });
 
       const res = await d.service.getOwnSummary(titular);
@@ -784,7 +784,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('pregunta por la aserción de la persona del titular, no por otra', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       await d.service.getOwnSummary(titular);
 
@@ -804,7 +804,7 @@ describe('ProfilesPatientsService', () => {
      * del nombre que el alta escribió.
      * @returns El sistema bajo prueba con sus dobles.
      */
-    function conPaciente() {
+    function withPatient() {
       const d = build();
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'per-1',
@@ -826,7 +826,7 @@ describe('ProfilesPatientsService', () => {
     }
 
     it('devuelve las partes del nombre y el sexo al nacer como código', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       const res = await d.service.getOwnProfile(titular);
 
@@ -843,7 +843,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('trae el teléfono vigente y el municipio del domicilio vigente', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
         value: '+591 700 12345',
       });
@@ -868,7 +868,7 @@ describe('ProfilesPatientsService', () => {
      * la forma que la pantalla necesita para pintarlos sin resolver catálogos.
      */
     it('devuelve documento, departamento emisor y NIT', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([
         {
           typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
@@ -889,7 +889,7 @@ describe('ProfilesPatientsService', () => {
 
     it('devuelve las dos direcciones, y las coordenadas viajan juntas', async () => {
       // Media coordenada no ubica nada: si falta una, no viaja ninguna.
-      const d = conPaciente();
+      const d = withPatient();
       d.addressesRepo.findVigenteByOwnerAndUse
         .mockResolvedValueOnce({
           lines: 'Av. Banzer #1234',
@@ -915,25 +915,25 @@ describe('ProfilesPatientsService', () => {
       // prueban en `insurance/services/declared-coverages-reader.spec.ts`
       // (subtarea B.3): esta clase la usa `clinical` también, para el PDF
       // oficial de receta. Acá sólo se comprueba la delegación.
-      const d = conPaciente();
-      const declarada = {
+      const d = withPatient();
+      const declared = {
         id: 'coverage-a',
         carrierName: 'Alianza Vida Seguros',
         planName: 'AFI Gold',
         verified: false,
       } as any;
-      d.declaredCoverages.read.mockResolvedValue([declarada]);
+      d.declaredCoverages.read.mockResolvedValue([declared]);
 
       const res = await d.service.getOwnProfile(titular);
 
       expect(d.declaredCoverages.read).toHaveBeenCalledWith(d.tx, 'pp-1');
-      expect(res.coverages).toEqual([declarada]);
+      expect(res.coverages).toEqual([declared]);
     });
 
     it('sin nada declarado, las listas llegan vacías y no ausentes', async () => {
       // Quien las pinta distingue «no declaró ninguna» de «esta respuesta no
       // las trae»; por eso viajan siempre.
-      const d = conPaciente();
+      const d = withPatient();
 
       const res = await d.service.getOwnProfile(titular);
 
@@ -943,7 +943,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('separa los contactos de emergencia de los representantes aceptados', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
         [
           {
@@ -981,7 +981,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('omite campos nulos de contactos y tutores, sin perder sus valores por defecto', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
         [
           {
@@ -1014,7 +1014,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('un contacto de emergencia sin representación activa no aparece como tutor', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
         [
           {
@@ -1032,7 +1032,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('lo que la persona no declaró llega ausente, no null', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       // El ORM hidrata una columna NULL como `null`, y el contrato promete que un
       // dato no declarado no viaja: `null` se leería como «campo vaciado».
       d.personsRepo.findById.mockResolvedValue({
@@ -1058,7 +1058,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('devuelve la ocupación del catálogo de quien la eligió del desplegable', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.personsRepo.findById.mockResolvedValue({
         id: 'per-1',
         name: 'Ada',
@@ -1075,7 +1075,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('sin identidad verificada no viaja el código de paciente', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.findOne.mockResolvedValue(null);
 
       const res = await d.service.getOwnProfile(titular);
@@ -1085,7 +1085,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('con identidad verificada suma el código de paciente', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.findOne.mockResolvedValue({ id: 'assertion-1' });
 
       const res = await d.service.getOwnProfile(titular);
@@ -1115,7 +1115,7 @@ describe('ProfilesPatientsService', () => {
      * @param d - El sistema bajo prueba.
      * @returns La persona resuelta, para que la prueba lea/asigne sobre ella.
      */
-    function conPaciente(d: ReturnType<typeof build>) {
+    function withPatient(d: ReturnType<typeof build>) {
       const person: any = {
         id: 'per-1',
         name: 'Ada',
@@ -1135,12 +1135,12 @@ describe('ProfilesPatientsService', () => {
 
     it('escribe photo_file_id y lo devuelve en el perfil releído', async () => {
       const d = build();
-      const person = conPaciente(d);
+      const person = withPatient(d);
 
-      const perfil = await d.service.setOwnPhoto({ fileId: 'file-1' }, titular);
+      const profile = await d.service.setOwnPhoto({ fileId: 'file-1' }, titular);
 
       expect(person.photoFileId).toBe('file-1');
-      expect(perfil.photoFileId).toBe('file-1');
+      expect(profile.photoFileId).toBe('file-1');
       expect(d.tx.flush).toHaveBeenCalled();
     });
 
@@ -1155,7 +1155,7 @@ describe('ProfilesPatientsService', () => {
 
     it('no acepta el archivo de otra persona', async () => {
       const d = build();
-      conPaciente(d);
+      withPatient(d);
       d.filesRepo.findById.mockResolvedValue({
         id: 'file-1',
         createdByUserId: 'otro-usuario',
@@ -1170,7 +1170,7 @@ describe('ProfilesPatientsService', () => {
 
     it('no acepta un archivo que no existe', async () => {
       const d = build();
-      conPaciente(d);
+      withPatient(d);
       d.filesRepo.findById.mockResolvedValue(null);
 
       await expect(
@@ -1180,7 +1180,7 @@ describe('ProfilesPatientsService', () => {
 
     it('no acepta un archivo que no es imagen', async () => {
       const d = build();
-      conPaciente(d);
+      withPatient(d);
       d.fileVersionsRepo.findById.mockResolvedValue({
         id: 'v1',
         mimeType: 'application/pdf',
@@ -1194,19 +1194,19 @@ describe('ProfilesPatientsService', () => {
 
     it('quitar la foto deja la referencia en nulo sin tocar el archivo', async () => {
       const d = build();
-      const person = conPaciente(d);
+      const person = withPatient(d);
       person.photoFileId = 'file-1';
 
-      const perfil = await d.service.removeOwnPhoto(titular);
+      const profile = await d.service.removeOwnPhoto(titular);
 
       expect(person.photoFileId).toBeUndefined();
-      expect(perfil.photoFileId).toBeUndefined();
+      expect(profile.photoFileId).toBeUndefined();
       expect(d.filesRepo.findById).not.toHaveBeenCalled();
     });
 
     it('quitar la foto de un perfil que no la tiene no falla', async () => {
       const d = build();
-      conPaciente(d);
+      withPatient(d);
 
       await expect(d.service.removeOwnPhoto(titular)).resolves.toBeDefined();
     });
@@ -1229,7 +1229,7 @@ describe('ProfilesPatientsService', () => {
      * sobre la que la edición escribe.
      * @returns El sistema bajo prueba, sus dobles y la persona.
      */
-    function conPaciente() {
+    function withPatient() {
       const d = build();
       const person = {
         id: 'per-1',
@@ -1254,7 +1254,7 @@ describe('ProfilesPatientsService', () => {
     }
 
     it('sólo aplica los campos presentes: lo omitido no se toca', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       await d.service.updateOwnProfile(
         { occupationFreeText: 'Programadora' },
@@ -1269,7 +1269,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('un cuerpo vacío no cambia nada y devuelve el perfil', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       const res = await d.service.updateOwnProfile({}, titular);
 
@@ -1280,7 +1280,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('un cuerpo vacío no toca la auditoría de la persona', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const antes = d.person.updatedAt;
 
       const res = await d.service.updateOwnProfile({}, titular);
@@ -1295,7 +1295,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('un PATCH que sólo trae el teléfono no toca la persona', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const antes = d.person.updatedAt;
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
@@ -1308,7 +1308,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('al cambiar una parte del nombre recompone el nombre visible', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       await d.service.updateOwnProfile(
         { lastName: 'Byron', motherLastName: 'King' },
@@ -1321,7 +1321,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('vaciar el segundo nombre lo guarda en NULL, no como cadena vacía', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.middleName = 'Augusta';
 
       await d.service.updateOwnProfile({ middleName: '' }, titular);
@@ -1334,7 +1334,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('vaciar el apellido materno y la ocupación los deja en NULL', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.motherLastName = 'Byron';
 
       await d.service.updateOwnProfile(
@@ -1349,10 +1349,10 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('vaciar el teléfono cierra el vigente y no crea ninguno', async () => {
-      const d = conPaciente();
-      const vigente = { id: 'cp-1', value: '+591 700 12345' };
+      const d = withPatient();
+      const current = { id: 'cp-1', value: '+591 700 12345' };
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
-        vigente,
+        current,
       );
 
       await d.service.updateOwnProfile({ phone: '' }, titular);
@@ -1360,7 +1360,7 @@ describe('ProfilesPatientsService', () => {
       // Quedarse sin teléfono es un dato; una fila con el valor vacío lo
       // contaría como si todavía tuviera uno.
       expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
-        vigente,
+        current,
         expect.any(Date),
         'user-1',
       );
@@ -1368,7 +1368,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('vaciar el teléfono sin tener ninguno no escribe nada', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '' }, titular);
@@ -1378,7 +1378,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('traduce el sexo al nacer al concepto que persiste la columna', async () => {
-      const d = conPaciente();
+      const d = withPatient();
 
       await d.service.updateOwnProfile({ sexAtBirth: 'MALE' }, titular);
 
@@ -1386,16 +1386,16 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('al cambiar el teléfono cierra el vigente y crea el nuevo', async () => {
-      const d = conPaciente();
-      const vigente = { id: 'cp-1', value: '+591 700 00000' };
+      const d = withPatient();
+      const current = { id: 'cp-1', value: '+591 700 00000' };
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
-        vigente,
+        current,
       );
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
       expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
-        vigente,
+        current,
         expect.any(Date),
         'user-1',
       );
@@ -1406,7 +1406,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('el mismo teléfono no cierra nada ni crea una fila', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
         id: 'cp-1',
         value: '+591 700 12345',
@@ -1419,7 +1419,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('sin teléfono vigente crea el primero sin cerrar nada', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
@@ -1429,9 +1429,9 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('al cambiar el municipio cierra el domicilio vigente y crea el nuevo', async () => {
-      const d = conPaciente();
-      const vigente = { id: 'ad-1', municipalityConceptId: 'mun-vieja' };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(vigente);
+      const d = withPatient();
+      const current = { id: 'ad-1', municipalityConceptId: 'mun-vieja' };
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(current);
 
       await d.service.updateOwnProfile(
         { residenceMunicipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID },
@@ -1439,7 +1439,7 @@ describe('ProfilesPatientsService', () => {
       );
 
       expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
-        vigente,
+        current,
         expect.any(Date),
         'user-1',
       );
@@ -1455,7 +1455,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('el mismo municipio no cierra el domicilio ni crea otro', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         id: 'ad-1',
         municipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID,
@@ -1478,7 +1478,7 @@ describe('ProfilesPatientsService', () => {
      */
     describe('ocupación', () => {
       it('elegir una del catálogo borra el texto libre que hubiera', async () => {
-        const d = conPaciente();
+        const d = withPatient();
 
         await d.service.updateOwnProfile(
           { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
@@ -1492,7 +1492,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('vaciar la del catálogo la deja en NULL y no toca el texto libre', async () => {
-        const d = conPaciente();
+        const d = withPatient();
         d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
 
         await d.service.updateOwnProfile({ occupationConceptId: '' }, titular);
@@ -1503,7 +1503,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('declararla en texto libre borra la del catálogo', async () => {
-        const d = conPaciente();
+        const d = withPatient();
         d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
 
         await d.service.updateOwnProfile(
@@ -1517,7 +1517,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('vaciar el texto libre no borra la del catálogo', async () => {
-        const d = conPaciente();
+        const d = withPatient();
         d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
 
         await d.service.updateOwnProfile({ occupationFreeText: '' }, titular);
@@ -1529,7 +1529,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('con las dos en el mismo cuerpo gana el catálogo', async () => {
-        const d = conPaciente();
+        const d = withPatient();
 
         await d.service.updateOwnProfile(
           {
@@ -1546,7 +1546,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('vaciar la del catálogo y declarar texto en el mismo cuerpo deja el texto', async () => {
-        const d = conPaciente();
+        const d = withPatient();
         d.person.occupationConceptId = BO_OCCUPATION_CONCEPT_ID;
 
         await d.service.updateOwnProfile(
@@ -1561,7 +1561,7 @@ describe('ProfilesPatientsService', () => {
       });
 
       it('un PATCH que sólo trae la del catálogo marca la fila como modificada', async () => {
-        const d = conPaciente();
+        const d = withPatient();
         const antes = d.person.updatedAt;
 
         await d.service.updateOwnProfile(
@@ -1596,7 +1596,7 @@ describe('ProfilesPatientsService', () => {
   describe('updateOwnProfile · NIT y direcciones', () => {
     const titular = { id: 'user-1', roles: [] } as any;
 
-    function conPaciente() {
+    function withPatient() {
       const d = build();
       const person = { id: 'per-1', name: 'Ada', lastName: 'Lovelace' } as any;
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
@@ -1615,7 +1615,7 @@ describe('ProfilesPatientsService', () => {
      * existía el número: la ficha mostraba un NIT sin decir de quién era.
      */
     it('la razón social se guarda junto al NIT', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([]);
 
       await d.service.updateOwnProfile(
@@ -1633,7 +1633,7 @@ describe('ProfilesPatientsService', () => {
      * razón social, el número se conserva de la fila vigente.
      */
     it('cambiar sólo la razón social conserva el número', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([
         {
           typeConceptId: CONCEPTS.ID_TYPE_TAX,
@@ -1655,7 +1655,7 @@ describe('ProfilesPatientsService', () => {
 
     /** Y al revés: cambiar el número no pierde a nombre de quién factura. */
     it('cambiar sólo el número conserva la razón social', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([
         {
           typeConceptId: CONCEPTS.ID_TYPE_TAX,
@@ -1674,7 +1674,7 @@ describe('ProfilesPatientsService', () => {
 
     /** Una razón social sola no es un NIT: no se abre una fila fiscal sin valor. */
     it('sin número no se abre identificador, aunque venga la razón social', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([]);
 
       await d.service.updateOwnProfile(
@@ -1686,7 +1686,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('cargar el NIT abre un identificador fiscal', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([]);
 
       await d.service.updateOwnProfile({ taxId: '1234567' } as any, titular);
@@ -1701,7 +1701,7 @@ describe('ProfilesPatientsService', () => {
      * emitida con el NIT anterior tiene que seguir explicándose.
      */
     it('cambiarlo cierra el anterior en vez de pisarlo', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const anterior = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
@@ -1715,7 +1715,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('vaciarlo cierra el anterior y no abre otro', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const anterior = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
@@ -1733,7 +1733,7 @@ describe('ProfilesPatientsService', () => {
      * se perdieran, el «Ver en el mapa» de la ficha quedaría mudo.
      */
     it('mudarse conserva el municipio y las coordenadas', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         lines: 'Calle vieja 1',
@@ -1756,7 +1756,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('el mismo texto no abre una dirección nueva', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Nueva 200',
       });
@@ -1778,7 +1778,7 @@ describe('ProfilesPatientsService', () => {
      * la de más abajo fija además el `CONCEPTS.COUNTRY_BOLIVIA` que no existía.
      */
     it('cambiar sólo el municipio conserva la calle y el GPS', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       const trinidad = boMunicipalityConceptId('030301');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
@@ -1803,7 +1803,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('cambiar sólo el GPS conserva la calle y el municipio', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
@@ -1826,7 +1826,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('los mismos tres valores no cierran ni abren ninguna fila', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
@@ -1861,7 +1861,7 @@ describe('ProfilesPatientsService', () => {
      * trabajo previa, no estaba cubierto por ningún spec.
      */
     it('sin dirección de trabajo previa, el país es el de Bolivia', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnProfile(
@@ -1876,7 +1876,7 @@ describe('ProfilesPatientsService', () => {
 
     /** El mismo defecto que el perfil del profesional tenía, y que vivía acá también. */
     it('borrar la fecha de nacimiento la deja sin valor, no en 1970', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.birthDate = new Date(1990, 4, 5);
 
       await d.service.updateOwnProfile({ birthDate: null } as any, titular);
@@ -1898,7 +1898,7 @@ describe('ProfilesPatientsService', () => {
   describe('updateOwnProfile · trabajo, empresa, expedición, tutor y seguro', () => {
     const titular = { id: 'user-1', roles: [] } as any;
 
-    function conPaciente() {
+    function withPatient() {
       const d = build();
       const person = {
         id: 'per-1',
@@ -1921,7 +1921,7 @@ describe('ProfilesPatientsService', () => {
     /* ---- trabajo: municipio + calle + GPS fundidos, igual que el domicilio */
 
     it('el municipio de trabajo se guarda como una dirección de uso WORK', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const trinidad = boMunicipalityConceptId('030301');
       d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
 
@@ -1943,21 +1943,21 @@ describe('ProfilesPatientsService', () => {
     /* ---- empresa: misma matriz de reglas que la ocupación ------------------ */
 
     it('elegir una empresa del catálogo borra el texto libre que hubiera', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.workEmployerFreeText = 'Kiosco de la esquina';
-      const empresa = boEmployerConceptId('BANCO_UNION');
+      const company = boEmployerConceptId('BANCO_UNION');
 
       await d.service.updateOwnProfile(
-        { workEmployerConceptId: empresa } as any,
+        { workEmployerConceptId: company } as any,
         titular,
       );
 
-      expect(d.person.workEmployerConceptId).toBe(empresa);
+      expect(d.person.workEmployerConceptId).toBe(company);
       expect(d.person.workEmployerFreeText).toBeUndefined();
     });
 
     it('vaciar la del catálogo la deja en NULL y no toca el texto libre', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.workEmployerConceptId = boEmployerConceptId('BANCO_UNION');
       d.person.workEmployerFreeText = 'Kiosco de la esquina';
 
@@ -1971,7 +1971,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('declararla en texto libre borra la del catálogo', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.person.workEmployerConceptId = boEmployerConceptId('BANCO_UNION');
 
       await d.service.updateOwnProfile(
@@ -1984,25 +1984,25 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('con las dos en el mismo cuerpo gana el catálogo', async () => {
-      const d = conPaciente();
-      const empresa = boEmployerConceptId('BANCO_UNION');
+      const d = withPatient();
+      const company = boEmployerConceptId('BANCO_UNION');
 
       await d.service.updateOwnProfile(
         {
-          workEmployerConceptId: empresa,
+          workEmployerConceptId: company,
           workEmployerFreeText: 'Kiosco de la esquina',
         } as any,
         titular,
       );
 
-      expect(d.person.workEmployerConceptId).toBe(empresa);
+      expect(d.person.workEmployerConceptId).toBe(company);
       expect(d.person.workEmployerFreeText).toBeUndefined();
     });
 
     /* ---- expedición del documento: edita en el lugar, no cierra y reabre --- */
 
     it('corrige el departamento de emisión sin tocar el número del documento', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const documento = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '4821993',
@@ -2023,7 +2023,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('sin documento vigente no hace nada: no hay a qué departamento atarlo', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.tx.find.mockResolvedValue([]);
 
       await d.service.updateOwnProfile(
@@ -2037,7 +2037,7 @@ describe('ProfilesPatientsService', () => {
     /* ---- tutor: declara si no hay, corrige en el lugar si ya había -------- */
 
     it('sin tutor declarado, lo crea con el mismo helper del alta', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       d.relatedPersonsRepo.findActiveDeclaredGuardian.mockResolvedValue(null);
       d.personsRepo.create.mockReturnValue({ id: 'guardian-1' });
 
@@ -2069,7 +2069,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('con un tutor ya declarado, corrige su nombre en el lugar', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const guardianPerson = {
         id: 'guardian-1',
         displayName: 'María Paz',
@@ -2094,13 +2094,13 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('con un tutor ya declarado, corrige el parentesco sin tocar el nombre', async () => {
-      const d = conPaciente();
-      const declarado = {
+      const d = withPatient();
+      const declared = {
         personId: 'guardian-1',
         relationshipConceptId: 'rel-madre',
       } as any;
       d.relatedPersonsRepo.findActiveDeclaredGuardian.mockResolvedValue(
-        declarado,
+        declared,
       );
 
       await d.service.updateOwnProfile(
@@ -2108,7 +2108,7 @@ describe('ProfilesPatientsService', () => {
         titular,
       );
 
-      expect(declarado.relationshipConceptId).toBe('rel-abuela');
+      expect(declared.relationshipConceptId).toBe('rel-abuela');
       // `findById` se llama para resolver al titular y de nuevo al releer el
       // perfil al final, pero nunca con el id del tutor: sin `guardianName` en
       // el cuerpo no hay por qué corregirle el nombre.
@@ -2121,7 +2121,7 @@ describe('ProfilesPatientsService', () => {
     /* ---- seguro declarado: agrega si no había, no reemplaza si ya había --- */
 
     it('declara el seguro privado si el paciente no tenía ninguno de ese sector', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const plan = carrierPlanId(
         'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
         'RED_MAX',
@@ -2154,7 +2154,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('el seguro público usa el orden 2, y no se toca si ya había uno declarado', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const plan = carrierPlanId(BOLIVIA_PUBLIC_INSURERS[0].code, 'BASE');
       d.coverageRepo.findActiveByPatientAndOrder.mockResolvedValue({
         id: 'cov-existente',
@@ -2169,7 +2169,7 @@ describe('ProfilesPatientsService', () => {
     });
 
     it('sin documento vigente, no declara el seguro: no hay número de afiliado', async () => {
-      const d = conPaciente();
+      const d = withPatient();
       const plan = carrierPlanId(
         'BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A',
         'RED_MAX',
@@ -2198,7 +2198,7 @@ describe('ProfilesPatientsService', () => {
   describe('las coordenadas de una dirección', () => {
     const titular = { id: 'user-1', roles: [] } as any;
 
-    function conDireccion(direccion: any) {
+    function withAddress(address: any) {
       const d = build();
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'per-1',
@@ -2208,40 +2208,40 @@ describe('ProfilesPatientsService', () => {
         profileId: 'pp-1',
         patientCode: 'PC-1',
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(direccion);
+      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(address);
       return d;
     }
 
     it('sin coordenadas no viaja ninguna, ni como cero', async () => {
-      const d = conDireccion({
+      const d = withAddress({
         lines: 'Calle Ayacucho 241',
         latitude: null,
         longitude: null,
       });
 
-      const perfil = await d.service.getOwnProfile(titular);
+      const profile = await d.service.getOwnProfile(titular);
 
-      expect(perfil.homeAddress?.latitude).toBeUndefined();
-      expect(perfil.homeAddress?.longitude).toBeUndefined();
+      expect(profile.homeAddress?.latitude).toBeUndefined();
+      expect(profile.homeAddress?.longitude).toBeUndefined();
     });
 
     it('y con coordenadas viajan como números', async () => {
-      const d = conDireccion({
+      const d = withAddress({
         lines: 'Av. Beni 5100',
         latitude: '-17.758',
         longitude: '-63.178',
       });
 
-      const perfil = await d.service.getOwnProfile(titular);
+      const profile = await d.service.getOwnProfile(titular);
 
-      expect(perfil.homeAddress?.latitude).toBe(-17.758);
-      expect(perfil.homeAddress?.longitude).toBe(-63.178);
+      expect(profile.homeAddress?.latitude).toBe(-17.758);
+      expect(profile.homeAddress?.longitude).toBe(-63.178);
     });
   });
 
   describe('dependientes (B.1)', () => {
     /** Lo que el formulario manda para registrar a un hijo. */
-    const hijo = {
+    const child = {
       name: 'Mateo',
       lastName: 'Quispe',
       birthDate: '2018-03-14',
@@ -2254,7 +2254,7 @@ describe('ProfilesPatientsService', () => {
      * Deja el doble listo para un alta: la cuenta es de un paciente y las
      * escrituras devuelven filas con id, como haría la base.
      */
-    function prepararAlta(b: ReturnType<typeof build>) {
+    function prepareRegistration(b: ReturnType<typeof build>) {
       b.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'person-titular',
       });
@@ -2275,9 +2275,9 @@ describe('ProfilesPatientsService', () => {
 
     it('escribe la persona, el perfil, el parentesco y el apoderamiento', async () => {
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
 
-      const res = await b.service.registerOwnDependent(hijo as never, actor);
+      const res = await b.service.registerOwnDependent(child as never, actor);
 
       // El parentesco cuelga del DEPENDIENTE y nombra al TITULAR, que es lo que
       // significa esa columna en todas las filas que ya existen.
@@ -2310,9 +2310,9 @@ describe('ProfilesPatientsService', () => {
 
     it('la respuesta dice «Hijo/a», no «Madre»', async () => {
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
 
-      const res = await b.service.registerOwnDependent(hijo as never, actor);
+      const res = await b.service.registerOwnDependent(child as never, actor);
 
       expect(res.relationshipCode).toBe('CHILD');
       expect(res.relationshipDisplay).toBe('Hijo/a');
@@ -2322,9 +2322,9 @@ describe('ProfilesPatientsService', () => {
     it('el apoderamiento nace sin fecha de fin', async () => {
       // La representación de una madre sobre su hijo no vence: se revoca.
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
 
-      await b.service.registerOwnDependent(hijo as never, actor);
+      await b.service.registerOwnDependent(child as never, actor);
 
       const [, datos] = b.portalProxiesRepo.create.mock.calls[0];
       expect(datos.validFrom).toBeInstanceOf(Date);
@@ -2333,9 +2333,9 @@ describe('ProfilesPatientsService', () => {
 
     it('sin documento no escribe identificador: un recién nacido no tiene cédula', async () => {
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
 
-      await b.service.registerOwnDependent(hijo as never, actor);
+      await b.service.registerOwnDependent(child as never, actor);
 
       expect(b.identifiersRepo.create).not.toHaveBeenCalled();
       expect(b.identifiersRepo.findActiveDuplicate).not.toHaveBeenCalled();
@@ -2343,12 +2343,12 @@ describe('ProfilesPatientsService', () => {
 
     it('con documento lo registra y comprueba el departamento que lo expidió', async () => {
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
       b.identifiersRepo.findActiveDuplicate.mockResolvedValue(null);
 
       await b.service.registerOwnDependent(
         {
-          ...hijo,
+          ...child,
           nationalId: 'CI-9876543',
           issuerAdministrativeAreaConceptId: 'dep-scz',
         } as never,
@@ -2372,14 +2372,14 @@ describe('ProfilesPatientsService', () => {
       // Dos perfiles con el mismo documento son dos historias clínicas de la
       // misma persona, que es lo que la fusión existe para deshacer.
       const b = build();
-      prepararAlta(b);
+      prepareRegistration(b);
       b.identifiersRepo.findActiveDuplicate.mockResolvedValue({
         id: 'ident-1',
       });
 
       await expect(
         b.service.registerOwnDependent(
-          { ...hijo, nationalId: 'CI-9876543' } as never,
+          { ...child, nationalId: 'CI-9876543' } as never,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -2388,14 +2388,14 @@ describe('ProfilesPatientsService', () => {
 
     it('rechaza una fecha de nacimiento futura antes de tocar nada', async () => {
       const b = build();
-      prepararAlta(b);
-      const manana = new Date(Date.now() + 86_400_000)
+      prepareRegistration(b);
+      const tomorrow = new Date(Date.now() + 86_400_000)
         .toISOString()
         .slice(0, 10);
 
       await expect(
         b.service.registerOwnDependent(
-          { ...hijo, birthDate: manana } as never,
+          { ...child, birthDate: tomorrow } as never,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -2409,7 +2409,7 @@ describe('ProfilesPatientsService', () => {
       b.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
 
       await expect(
-        b.service.registerOwnDependent(hijo as never, actor),
+        b.service.registerOwnDependent(child as never, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 

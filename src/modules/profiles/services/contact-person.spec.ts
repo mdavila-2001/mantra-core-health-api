@@ -91,7 +91,7 @@ describe('createContactPerson', () => {
   it('con teléfono crea un CONTACT_PHONE; sin CI, no crea ningún identifier', () => {
     const d = build();
 
-    const resultado = createContactPerson(d.repos as never, d.tx, {
+    const result = createContactPerson(d.repos as never, d.tx, {
       displayName: 'Mariana Siles',
       email: 'legal@aseguradora.com',
       phone: '+591 70099999',
@@ -106,13 +106,13 @@ describe('createContactPerson', () => {
       }),
     );
     expect(d.identifiers.create).not.toHaveBeenCalled();
-    expect(resultado.identifierId).toBeUndefined();
+    expect(result.identifierId).toBeUndefined();
   });
 
   it('con CI crea el identifier con OWNER_PERSON/ID_TYPE_NATIONAL/USE_OFFICIAL/STATE_ACTIVE y devuelve su id', () => {
     const d = build();
 
-    const resultado = createContactPerson(d.repos as never, d.tx, {
+    const result = createContactPerson(d.repos as never, d.tx, {
       displayName: 'Mariana Siles',
       email: 'legal@aseguradora.com',
       nationalId: '4872190 SC',
@@ -128,7 +128,7 @@ describe('createContactPerson', () => {
       stateConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId: 'user-1',
     });
-    expect(resultado.personId).toBe('person-1');
-    expect(resultado.identifierId).toBe('identifier-1');
+    expect(result.personId).toBe('person-1');
+    expect(result.identifierId).toBe('identifier-1');
   });
 });

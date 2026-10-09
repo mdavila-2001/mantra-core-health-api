@@ -35,11 +35,11 @@ describe('synthetic-person', () => {
   });
 
   it('la fecha de nacimiento sintética cae entre 1955 y 2004', () => {
-    const fecha = syntheticBirthDate('cualquier-fila');
-    expect(fecha).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    const anio = Number(fecha.slice(0, 4));
-    expect(anio).toBeGreaterThanOrEqual(1955);
-    expect(anio).toBeLessThanOrEqual(2004);
+    const date = syntheticBirthDate('cualquier-fila');
+    expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const year = Number(date.slice(0, 4));
+    expect(year).toBeGreaterThanOrEqual(1955);
+    expect(year).toBeLessThanOrEqual(2004);
   });
 
   it('el correo sigue el patrón congelado <nombre>.<apellido>@alovida.test', () => {

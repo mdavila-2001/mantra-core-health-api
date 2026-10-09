@@ -50,7 +50,7 @@ import type { DirectMessages } from '../entities';
  * El cliente aplica la misma regla para no ofrecer un botón que va a fallar,
  * pero la barrera es ésta: una pantalla no autoriza nada.
  */
-export const VENTANA_DE_EDICION_MS = 5 * 60_000;
+export const EDIT_WINDOW_MS = 5 * 60_000;
 
 /**
  * Mensajería social: crea conversaciones con participantes (bootstrap), envía
@@ -140,7 +140,7 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
     requirePublicRecipient: boolean,
   ): Promise<IdResponseDto> {
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const [initiatorProfileId] = dto.participantProfileIds;
       await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
 
@@ -160,16 +160,16 @@ export class CommunityMessagingService {
       }
 
       const [perfilA, perfilB] = dto.participantProfileIds;
-      const destinatario = await this.profilesRepo.findById(tx, perfilB);
-      const destinatarioElegible =
-        destinatario?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
+      const recipient = await this.profilesRepo.findById(tx, perfilB);
+      const eligibleRecipient =
+        recipient?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
         (!requirePublicRecipient ||
-          destinatario.visibilityConceptId ===
+          recipient.visibilityConceptId ===
             COMM.PROFILE_VISIBILITY_PUBLIC) &&
         [COMM.PROFILE_TARGET_USER, COMM.PROFILE_TARGET_PRACTITIONER].includes(
-          destinatario.targetTypeConceptId,
+          recipient.targetTypeConceptId,
         );
-      if (!destinatarioElegible) {
+      if (!eligibleRecipient) {
         throw new PreconditionFailedException(
           'La persona no está disponible para iniciar una conversación',
           {},
@@ -189,14 +189,14 @@ export class CommunityMessagingService {
         );
       }
 
-      const existente = await this.conversationsRepo.findDirectBetween(
+      const existing = await this.conversationsRepo.findDirectBetween(
         tx,
         perfilA,
         perfilB,
         COMM.CONVERSATION_DIRECT,
         CONCEPTS.STATE_ACTIVE,
       );
-      if (existente) return { id: existente.id, creada: false };
+      if (existing) return { id: existing.id, creada: false };
 
       const conversation = this.conversationsRepo.createConversation(tx, {
         conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
@@ -221,11 +221,11 @@ export class CommunityMessagingService {
     // Fuera de la transacción y sólo si de verdad nació una conversación: la
     // reutilizada no es una novedad para nadie, avisarla sería un badge de
     // «conversación nueva» sobre un hilo que ya conocían.
-    if (resultado.creada) {
-      this.gateway.emitNewConversation(resultado.id, dto.participantProfileIds);
+    if (result.creada) {
+      this.gateway.emitNewConversation(result.id, dto.participantProfileIds);
     }
 
-    return { id: resultado.id };
+    return { id: result.id };
   }
 
   /** UC-19-06: envía un mensaje directo; actualiza contadores de la conversación. */
@@ -234,7 +234,7 @@ export class CommunityMessagingService {
     dto: SendMessageDto,
     actor: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
-    return this.enviar(conversationId, dto, actor.id, true, actor);
+    return this.send(conversationId, dto, actor.id, true, actor);
   }
 
   /**
@@ -249,21 +249,21 @@ export class CommunityMessagingService {
    * @param conversationId - La conversación.
    * @param dto - Quién escribe y qué.
    * @param actorUserId - Qué usuario queda como autor de la fila, si alguno.
-   * @param evaluarRespuestaAutomatica - `false` para el propio mensaje
+   * @param evaluateAutomaticResponse - `false` para el propio mensaje
    *   automático: no se contesta a un contestador.
    */
-  private async enviar(
+  private async send(
     conversationId: string,
     dto: SendMessageDto,
     actorUserId: string | undefined,
-    evaluarRespuestaAutomatica: boolean,
+    evaluateAutomaticResponse: boolean,
     authorizingActor?: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
     this.logger.info(
       { operation: 'community.message.send', conversationId },
       'Sending direct message',
     );
-    const enviado = await this.em.transactional(async (tx) => {
+    const sent = await this.em.transactional(async (tx) => {
       if (authorizingActor) {
         await this.visibility.assertActsAsProfile(
           tx,
@@ -412,10 +412,10 @@ export class CommunityMessagingService {
     // Después del commit y no dentro: el mensaje ya está guardado cuando esto
     // corre, así que ningún problema de la campana puede hacerlo desaparecer.
     // `mensajeNuevo` no lanza.
-    await this.messageNotifications.mensajeNuevo(
+    await this.messageNotifications.newMessage(
       conversationId,
       dto.senderProfileId,
-      enviado.destinatarios,
+      sent.destinatarios,
       actorUserId,
     );
 
@@ -425,17 +425,17 @@ export class CommunityMessagingService {
     // filtrar por WS un campo que el contrato REST tampoco expone.
     this.gateway.emitMessage(
       {
-        id: enviado.id,
-        conversationId: enviado.conversationId,
-        senderProfileId: enviado.senderProfileId,
-        replyToMessageId: enviado.replyToMessageId,
-        contentTypeConceptId: enviado.contentTypeConceptId,
-        bodyText: enviado.bodyText,
-        attachmentFileId: enviado.attachmentFileId,
-        isEdited: enviado.isEdited,
-        sentAt: enviado.sentAt,
+        id: sent.id,
+        conversationId: sent.conversationId,
+        senderProfileId: sent.senderProfileId,
+        replyToMessageId: sent.replyToMessageId,
+        contentTypeConceptId: sent.contentTypeConceptId,
+        bodyText: sent.bodyText,
+        attachmentFileId: sent.attachmentFileId,
+        isEdited: sent.isEdited,
+        sentAt: sent.sentAt,
       },
-      enviado.destinatarios,
+      sent.destinatarios,
     );
 
     // F4.7 · La respuesta automática de quien recibió, si corresponde.
@@ -448,14 +448,14 @@ export class CommunityMessagingService {
     // **No se evalúa el contestador del mensaje automático.** Es la condición
     // que corta el bucle: con dos personas ausentes y las dos con respuesta
     // automática encendida, cada aviso dispararía el del otro para siempre.
-    if (evaluarRespuestaAutomatica) {
-      await this.responderSolo(conversationId, enviado.destinatarios);
+    if (evaluateAutomaticResponse) {
+      await this.responderSolo(conversationId, sent.destinatarios);
     }
 
     return {
-      id: enviado.id,
-      conversationId: enviado.conversationId,
-      sentAt: enviado.sentAt,
+      id: sent.id,
+      conversationId: sent.conversationId,
+      sentAt: sent.sentAt,
     };
   }
 
@@ -549,30 +549,30 @@ export class CommunityMessagingService {
    *
    * @param conversationId - Dónde llegó el mensaje.
    * @param senderProfileId - Quién escribió, para no contestarse a sí mismo.
-   * @param destinatarios - A quiénes les llegó.
+   * @param recipients - A quiénes les llegó.
    */
   private async responderSolo(
     conversationId: string,
-    destinatarios: readonly string[],
+    recipients: readonly string[],
   ): Promise<void> {
-    for (const destinatario of destinatarios) {
+    for (const recipient of recipients) {
       try {
         // La evaluación y la marca del descanso van en una transacción, y el
         // envío en otra: si el envío falla, la marca se revierte con ella y el
         // próximo mensaje vuelve a intentarlo en vez de quedar en silencio.
-        const texto = await this.em.transactional((tx) =>
-          this.autoReply.textoParaResponder(tx, conversationId, destinatario),
+        const text = await this.em.transactional((tx) =>
+          this.autoReply.textForResponder(tx, conversationId, recipient),
         );
-        if (texto === null) {
+        if (text === null) {
           continue;
         }
         // Sin `actorUserId`: `created_by_user_id` queda nulo a propósito. Nadie
         // apretó enviar —el titular está ausente, que es la razón de que exista
         // este mensaje—, y anotar un usuario diría que sí lo hizo. El mensaje
         // igual es suyo: lo firma su perfil, que es lo que ve la otra persona.
-        await this.enviar(
+        await this.send(
           conversationId,
-          { senderProfileId: destinatario, bodyText: texto },
+          { senderProfileId: recipient, bodyText: text },
           undefined,
           false,
         );
@@ -581,7 +581,7 @@ export class CommunityMessagingService {
           {
             operation: 'community.message.auto-reply',
             conversationId,
-            destinatario,
+            destinatario: recipient,
             err: error,
           },
           'No se pudo mandar la respuesta automática',
@@ -596,7 +596,7 @@ export class CommunityMessagingService {
     dto: MarkReadDto,
     actor: AuthenticatedUser,
   ): Promise<ReadReceiptResponseDto> {
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       // El lector sale del cuerpo, así que se prueba contra la sesión: sin
       // esto cualquiera podía dejar «leído» un hilo ajeno a nombre de otro.
       await this.visibility.assertActsAsProfile(
@@ -655,15 +655,15 @@ export class CommunityMessagingService {
       return { receiptsRecorded: 1, lastReadMessageId: messageId };
     });
 
-    if (resultado.lastReadMessageId) {
+    if (result.lastReadMessageId) {
       this.gateway.emitRead({
         conversationId,
         profileId: dto.recipientProfileId,
-        lastReadMessageId: resultado.lastReadMessageId,
+        lastReadMessageId: result.lastReadMessageId,
       });
     }
 
-    return resultado;
+    return result;
   }
 
   /* --- F4.4 · lo que un participante marca de su lado ---------------------- */
@@ -682,7 +682,7 @@ export class CommunityMessagingService {
   ): Promise<ParticipantPreferencesDto> {
     return this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
-      const participant = await this.participanteActivoODeNoEncontrado(
+      const participant = await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
         dto.profileId,
@@ -722,20 +722,20 @@ export class CommunityMessagingService {
     dto: EditMessageDto,
     actor: AuthenticatedUser,
   ): Promise<DirectMessageDto> {
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, dto.senderProfileId, actor);
-      await this.participanteActivoODeNoEncontrado(
+      await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
         dto.senderProfileId,
       );
-      const message = await this.mensajePropioVivo(
+      const message = await this.ownLiveMessage(
         tx,
         conversationId,
         messageId,
         dto.senderProfileId,
       );
-      this.assertDentroDeLaVentanaDeEdicion(message, conversationId, messageId);
+      this.assertEditionWindowInside(message, conversationId, messageId);
 
       message.bodyText = dto.bodyText;
       message.isEdited = true;
@@ -743,8 +743,8 @@ export class CommunityMessagingService {
       await tx.flush();
 
       return {
-        dto: this.aDto(message),
-        destinatarios: await this.otrosParticipantes(
+        dto: this.toDto(message),
+        destinatarios: await this.otherParticipants(
           tx,
           conversationId,
           dto.senderProfileId,
@@ -752,8 +752,8 @@ export class CommunityMessagingService {
       };
     });
 
-    this.gateway.emitMessageUpdated(resultado.dto, resultado.destinatarios);
-    return resultado.dto;
+    this.gateway.emitMessageUpdated(result.dto, result.destinatarios);
+    return result.dto;
   }
 
   /**
@@ -767,14 +767,14 @@ export class CommunityMessagingService {
     profileId: string,
     actor: AuthenticatedUser,
   ): Promise<DeletedMessageResponseDto> {
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
-      await this.participanteActivoODeNoEncontrado(
+      await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
         profileId,
       );
-      const message = await this.mensajePropioVivo(
+      const message = await this.ownLiveMessage(
         tx,
         conversationId,
         messageId,
@@ -789,18 +789,18 @@ export class CommunityMessagingService {
         tx,
         conversationId,
       );
-      let seSolto = false;
+      let wasReleased = false;
       if (conversation?.pinnedMessageId === messageId) {
         conversation.pinnedMessageId = undefined;
         touch(conversation, actor.id);
-        seSolto = true;
+        wasReleased = true;
       }
       await tx.flush();
 
       return {
         deletedAt: ahora,
-        seSolto,
-        destinatarios: await this.otrosParticipantes(
+        seSolto: wasReleased,
+        destinatarios: await this.otherParticipants(
           tx,
           conversationId,
           profileId,
@@ -809,16 +809,16 @@ export class CommunityMessagingService {
     });
 
     this.gateway.emitMessageDeleted(
-      { conversationId, messageId, deletedAt: resultado.deletedAt },
-      resultado.destinatarios,
+      { conversationId, messageId, deletedAt: result.deletedAt },
+      result.destinatarios,
     );
-    if (resultado.seSolto) {
+    if (result.seSolto) {
       this.gateway.emitPinned(
         { conversationId, pinnedMessageId: null },
-        resultado.destinatarios,
+        result.destinatarios,
       );
     }
-    return { conversationId, messageId, deletedAt: resultado.deletedAt };
+    return { conversationId, messageId, deletedAt: result.deletedAt };
   }
 
   /* --- F4.6 · fijar ---------------------------------------------------------- */
@@ -833,9 +833,9 @@ export class CommunityMessagingService {
     dto: PinMessageDto,
     actor: AuthenticatedUser,
   ): Promise<PinnedMessageResponseDto> {
-    const destinatarios = await this.em.transactional(async (tx) => {
+    const recipients = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
-      await this.participanteActivoODeNoEncontrado(
+      await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
         dto.profileId,
@@ -862,12 +862,12 @@ export class CommunityMessagingService {
       conversation.pinnedMessageId = dto.messageId;
       touch(conversation, actor.id);
       await tx.flush();
-      return this.otrosParticipantes(tx, conversationId, dto.profileId);
+      return this.otherParticipants(tx, conversationId, dto.profileId);
     });
 
     this.gateway.emitPinned(
       { conversationId, pinnedMessageId: dto.messageId },
-      destinatarios,
+      recipients,
     );
     return { conversationId, pinnedMessageId: dto.messageId };
   }
@@ -878,9 +878,9 @@ export class CommunityMessagingService {
     profileId: string,
     actor: AuthenticatedUser,
   ): Promise<PinnedMessageResponseDto> {
-    const destinatarios = await this.em.transactional(async (tx) => {
+    const recipients = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
-      await this.participanteActivoODeNoEncontrado(
+      await this.activeOrNotFoundParticipant(
         tx,
         conversationId,
         profileId,
@@ -896,12 +896,12 @@ export class CommunityMessagingService {
       conversation.pinnedMessageId = undefined;
       touch(conversation, actor.id);
       await tx.flush();
-      return this.otrosParticipantes(tx, conversationId, profileId);
+      return this.otherParticipants(tx, conversationId, profileId);
     });
 
     this.gateway.emitPinned(
       { conversationId, pinnedMessageId: null },
-      destinatarios,
+      recipients,
     );
     return { conversationId, pinnedMessageId: null };
   }
@@ -912,7 +912,7 @@ export class CommunityMessagingService {
    * El participante activo, o 404. 404 y no 403 (igual que la lectura):
    * confirmar que la conversación existe ya diría con quién habla otro.
    */
-  private async participanteActivoODeNoEncontrado(
+  private async activeOrNotFoundParticipant(
     em: EntityManager,
     conversationId: string,
     profileId: string,
@@ -951,32 +951,32 @@ export class CommunityMessagingService {
    * que medir, y dar por buena la edición sería abrir la ventana para siempre
    * justo en el caso raro.
    */
-  private assertDentroDeLaVentanaDeEdicion(
+  private assertEditionWindowInside(
     message: DirectMessages,
     conversationId: string,
     messageId: string,
   ): void {
-    const enviado = message.sentAt;
-    if (!enviado) {
+    const sent = message.sentAt;
+    if (!sent) {
       throw new PreconditionFailedException(
         'El mensaje no tiene marca de envío: no se puede editar',
         { conversationId, messageId },
       );
     }
-    const transcurrido = Date.now() - enviado.getTime();
-    if (transcurrido > VENTANA_DE_EDICION_MS) {
+    const elapsed = Date.now() - sent.getTime();
+    if (elapsed > EDIT_WINDOW_MS) {
       throw new PreconditionFailedException(
         'Pasaron más de 5 minutos: el mensaje ya no se puede editar',
         {
           conversationId,
           messageId,
-          ventanaMinutos: VENTANA_DE_EDICION_MS / 60_000,
+          ventanaMinutos: EDIT_WINDOW_MS / 60_000,
         },
       );
     }
   }
 
-  private async mensajePropioVivo(
+  private async ownLiveMessage(
     em: EntityManager,
     conversationId: string,
     messageId: string,
@@ -1005,7 +1005,7 @@ export class CommunityMessagingService {
     return message;
   }
 
-  private async otrosParticipantes(
+  private async otherParticipants(
     em: EntityManager,
     conversationId: string,
     profileId: string,
@@ -1016,10 +1016,10 @@ export class CommunityMessagingService {
     );
     return participants
       .map((p) => p.participantProfileId)
-      .filter((otro) => otro !== profileId);
+      .filter((other) => other !== profileId);
   }
 
-  private aDto(message: DirectMessages): DirectMessageDto {
+  private toDto(message: DirectMessages): DirectMessageDto {
     return {
       id: message.id,
       conversationId: message.conversationId,

@@ -18,7 +18,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartNotesService, ChartNotesReadService } from '../services';
 import {
@@ -71,6 +76,7 @@ export class ChartNotesController {
 
   /** P18: colección de notas de evolución de un profesional. */
   @Get()
+  @AccessLogged({ resourceType: 'CLINICAL_NOTES' })
   @ApiOperation({
     summary:
       'Listar las notas de evolución de un profesional por ventana de fechas',

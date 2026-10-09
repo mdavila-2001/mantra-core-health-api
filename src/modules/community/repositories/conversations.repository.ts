@@ -267,44 +267,44 @@ export class ConversationsRepository {
    * acotadas por perfil, no un recorrido de la tabla.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param perfilA - Uno de los dos perfiles.
-   * @param perfilB - El otro.
+   * @param profileA - Uno de los dos perfiles.
+   * @param profileB - El otro.
    * @param directTypeConceptId - Concepto que marca una conversación directa.
    * @param activeStatusConceptId - Estado que cuenta como vivo.
    * @returns La conversación directa compartida, o `null`.
    */
   async findDirectBetween(
     em: EntityManager,
-    perfilA: string,
-    perfilB: string,
+    profileA: string,
+    profileB: string,
     directTypeConceptId: string,
     activeStatusConceptId: string,
   ): Promise<Conversations | null> {
     const [deA, deB] = await Promise.all([
       em.find(ConversationParticipants, {
-        participantProfileId: perfilA,
+        participantProfileId: profileA,
         statusConceptId: activeStatusConceptId,
       }),
       em.find(ConversationParticipants, {
-        participantProfileId: perfilB,
+        participantProfileId: profileB,
         statusConceptId: activeStatusConceptId,
       }),
     ]);
 
-    const deBPorConversacion = new Set(
-      deB.map((participacion) => participacion.conversationId),
+    const bByConversation = new Set(
+      deB.map((participation) => participation.conversationId),
     );
-    const compartidas = deA
-      .map((participacion) => participacion.conversationId)
-      .filter((conversationId) => deBPorConversacion.has(conversationId));
-    if (compartidas.length === 0) return null;
+    const shared = deA
+      .map((participation) => participation.conversationId)
+      .filter((conversationId) => bByConversation.has(conversationId));
+    if (shared.length === 0) return null;
 
     // Sólo las directas: los dos pueden compartir además un grupo, y un grupo
     // no es el hilo al que lleva «Escribir al doctor».
-    const candidatas = await em.find(
+    const candidates = await em.find(
       Conversations,
       {
-        id: { $in: compartidas },
+        id: { $in: shared },
         conversationTypeConceptId: directTypeConceptId,
         statusConceptId: activeStatusConceptId,
       },
@@ -313,19 +313,19 @@ export class ConversationsRepository {
 
     // Si hubiera más de una —creadas antes de que esto existiera—, gana la más
     // activa: es donde está la conversación que la gente reconoce.
-    for (const conversacion of candidatas) {
-      const participantes = await em.find(ConversationParticipants, {
-        conversationId: conversacion.id,
+    for (const conversation of candidates) {
+      const participants = await em.find(ConversationParticipants, {
+        conversationId: conversation.id,
       });
       // Exactamente los dos: una directa con un tercero adentro no es la
       // conversación privada que se está buscando.
-      const perfiles = new Set(
-        participantes.map(
-          (participacion) => participacion.participantProfileId,
+      const profiles = new Set(
+        participants.map(
+          (participation) => participation.participantProfileId,
         ),
       );
-      if (perfiles.size === 2 && perfiles.has(perfilA) && perfiles.has(perfilB))
-        return conversacion;
+      if (profiles.size === 2 && profiles.has(profileA) && profiles.has(profileB))
+        return conversation;
     }
     return null;
   }
@@ -434,21 +434,21 @@ export class ConversationsRepository {
     readerProfileId: string,
     lastReadMessageId: string | undefined,
   ): Promise<number> {
-    const deOtros = {
+    const ofOthers = {
       conversationId,
       deletedAt: null,
       senderProfileId: { $ne: readerProfileId },
     } as const;
 
-    if (!lastReadMessageId) return em.count(DirectMessages, deOtros);
+    if (!lastReadMessageId) return em.count(DirectMessages, ofOthers);
 
     const lastRead = await em.findOne(DirectMessages, {
       id: lastReadMessageId,
     });
-    if (!lastRead?.sentAt) return em.count(DirectMessages, deOtros);
+    if (!lastRead?.sentAt) return em.count(DirectMessages, ofOthers);
 
     return em.count(DirectMessages, {
-      ...deOtros,
+      ...ofOthers,
       sentAt: { $gt: lastRead.sentAt },
     });
   }

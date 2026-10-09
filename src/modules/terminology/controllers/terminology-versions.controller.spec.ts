@@ -49,10 +49,10 @@ describe('TerminologyVersionsController', () => {
 
   describe('importConceptsFile', () => {
     /** El archivo tal como lo deja el interceptor de multipart. */
-    const archivo = { buffer: Buffer.from('x'), originalname: 'c.ndjson' };
+    const file = { buffer: Buffer.from('x'), originalname: 'c.ndjson' };
 
     /** Un informe de importación, con lo que cada caso necesita cambiar. */
-    const informe = (cambios: Record<string, unknown> = {}) => ({
+    const report = (changes: Record<string, unknown> = {}) => ({
       batchId: 'b-1',
       format: 'ndjson',
       profile: 'conceptos',
@@ -63,21 +63,21 @@ describe('TerminologyVersionsController', () => {
       skipped: 1,
       errors: 0,
       errorSamples: [],
-      ...cambios,
+      ...changes,
     });
 
     /** La respuesta HTTP, para ver si alguien le cambia el estado. */
-    const respuesta = () => ({ status: jest.fn() });
+    const response = () => ({ status: jest.fn() });
 
     it('delega el archivo y lo que lo acompaña', async () => {
       const { controller, fileImport } = build();
-      const esperado = informe();
-      fileImport.importFromFile.mockResolvedValue(esperado);
-      const res = respuesta();
+      const expected = report();
+      fileImport.importFromFile.mockResolvedValue(expected);
+      const res = response();
 
       const result = await controller.importConceptsFile(
         'v-1',
-        archivo,
+        file,
         { dryRun: false, profile: 'conceptos' },
         user,
         res as never,
@@ -89,17 +89,17 @@ describe('TerminologyVersionsController', () => {
         user,
         { dryRun: false, profile: 'conceptos' },
       );
-      expect(result).toBe(esperado);
+      expect(result).toBe(expected);
     });
 
     it('una importación que escribió conserva el 201', async () => {
       const { controller, fileImport } = build();
-      fileImport.importFromFile.mockResolvedValue(informe());
-      const res = respuesta();
+      fileImport.importFromFile.mockResolvedValue(report());
+      const res = response();
 
       await controller.importConceptsFile(
         'v-1',
-        archivo,
+        file,
         {},
         user,
         res as never,
@@ -111,13 +111,13 @@ describe('TerminologyVersionsController', () => {
     it('validar sin escribir responde 200, porque no creó nada', async () => {
       const { controller, fileImport } = build();
       fileImport.importFromFile.mockResolvedValue(
-        informe({ dryRun: true, batchId: null, inserted: 0 }),
+        report({ dryRun: true, batchId: null, inserted: 0 }),
       );
-      const res = respuesta();
+      const res = response();
 
       await controller.importConceptsFile(
         'v-1',
-        archivo,
+        file,
         { dryRun: true },
         user,
         res as never,
@@ -131,13 +131,13 @@ describe('TerminologyVersionsController', () => {
       // un 201 diría que se creó algo, y no se creó nada.
       const { controller, fileImport } = build();
       fileImport.importFromFile.mockResolvedValue(
-        informe({ aborted: true, batchId: null, inserted: 0, errors: 4 }),
+        report({ aborted: true, batchId: null, inserted: 0, errors: 4 }),
       );
-      const res = respuesta();
+      const res = response();
 
       await controller.importConceptsFile(
         'v-1',
-        archivo,
+        file,
         {},
         user,
         res as never,
@@ -162,7 +162,7 @@ describe('TerminologyVersionsController', () => {
 
     it('sin archivo no se llama al importador', async () => {
       const { controller, fileImport } = build();
-      const res = respuesta();
+      const res = response();
 
       await expect(
         controller.importConceptsFile('v-1', undefined, {}, user, res as never),

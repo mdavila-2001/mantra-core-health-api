@@ -17,7 +17,7 @@ const TENANT = 'tenant-1';
  * otro target. Los tenants globales llevan `null` explícito, igual que la
  * columna.
  */
-const FILAS = [
+const ROWS = [
   {
     id: 'a-activa-global',
     stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
@@ -69,16 +69,16 @@ const FILAS = [
  * Evalúa el `where` que construye el repositorio sobre una fila: igualdad
  * plana y ramas `$or`. Suficiente para las formas que usa `findAssignments`.
  *
- * @param fila - Valor de fila requerido por la operación.
+ * @param row - Valor de fila requerido por la operación.
  * @param where - Valor de where requerido por la operación.
  * @returns true si la fila satisface la condición.
  */
-function cumple(fila: any, where: any): boolean {
+function meets(row: any, where: any): boolean {
   return Object.entries(where).every(([clave, condicion]) => {
     if (clave === '$or') {
-      return (condicion as any[]).some((rama) => cumple(fila, rama));
+      return (condicion as any[]).some((rama) => meets(row, rama));
     }
-    return fila[clave] === condicion;
+    return row[clave] === condicion;
   });
 }
 
@@ -91,9 +91,9 @@ function build() {
   // que el test demuestre el filtrado y no solo la forma de la consulta.
   const em = {
     find: mockFn((_entity: any, where: any, opts: any) => {
-      const coincidentes = FILAS.filter((fila) => cumple(fila, where));
+      const matching = ROWS.filter((row) => meets(row, where));
       return Promise.resolve(
-        opts?.limit ? coincidentes.slice(0, opts.limit) : coincidentes,
+        opts?.limit ? matching.slice(0, opts.limit) : matching,
       );
     }),
   };
@@ -105,7 +105,7 @@ describe('AssignmentsRepository', () => {
     it('returns active assignments and excludes the inactive one', async () => {
       const d = build();
       const res = await d.repo.findAssignments(d.em as any, {}, TENANT, 50);
-      const ids = res.map((fila: any) => fila.id);
+      const ids = res.map((row: any) => row.id);
       expect(ids).toContain('a-activa-global');
       expect(ids).toContain('a-activa-propia');
       expect(ids).not.toContain('a-inactiva');
@@ -114,35 +114,35 @@ describe('AssignmentsRepository', () => {
     it('excludes the assignment of another tenant', async () => {
       const d = build();
       const res = await d.repo.findAssignments(d.em as any, {}, TENANT, 50);
-      expect(res.map((fila: any) => fila.id)).not.toContain('a-tenant-ajeno');
+      expect(res.map((row: any) => row.id)).not.toContain('a-tenant-ajeno');
     });
 
     it('keeps narrowing by target, field and section', async () => {
       const d = build();
 
-      const porTarget = await d.repo.findAssignments(
+      const byTarget = await d.repo.findAssignments(
         d.em as any,
         { targetResourceConceptId: 'rt-2' },
         TENANT,
         50,
       );
-      expect(porTarget.map((fila: any) => fila.id)).toEqual(['a-otro-target']);
+      expect(byTarget.map((row: any) => row.id)).toEqual(['a-otro-target']);
 
-      const porCampo = await d.repo.findAssignments(
+      const byField = await d.repo.findAssignments(
         d.em as any,
         { fieldId: 'f-2' },
         TENANT,
         50,
       );
-      expect(porCampo.map((fila: any) => fila.id)).toEqual(['a-activa-propia']);
+      expect(byField.map((row: any) => row.id)).toEqual(['a-activa-propia']);
 
-      const porSeccion = await d.repo.findAssignments(
+      const bySection = await d.repo.findAssignments(
         d.em as any,
         { sectionId: 'sec-2' },
         TENANT,
         50,
       );
-      expect(porSeccion.map((fila: any) => fila.id)).toEqual([
+      expect(bySection.map((row: any) => row.id)).toEqual([
         'a-activa-propia',
       ]);
     });
@@ -150,7 +150,7 @@ describe('AssignmentsRepository', () => {
     it('without a tenant in context it only serves the global ones', async () => {
       const d = build();
       const res = await d.repo.findAssignments(d.em as any, {}, undefined, 50);
-      const ids = res.map((fila: any) => fila.id);
+      const ids = res.map((row: any) => row.id);
       expect(ids).toEqual(['a-activa-global', 'a-otro-target']);
     });
   });

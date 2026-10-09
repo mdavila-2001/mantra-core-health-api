@@ -44,7 +44,7 @@ const GROUP_TYPE_BY_CODE: Record<string, string> = {
  * «configurá tu perfil» sin adivinar por el contenido del mensaje — que
  * cambiaría con cualquier reescritura.
  */
-export const PERFIL_PUBLICO_REQUERIDO = 'PUBLIC_PROFILE_REQUIRED';
+export const PUBLIC_REQUIRED_PROFILE = 'PUBLIC_PROFILE_REQUIRED';
 
 /**
  * El estado terminal de un grupo sin nadie adentro (TP-3, regla 08).
@@ -63,7 +63,7 @@ export const PERFIL_PUBLICO_REQUERIDO = 'PUBLIC_PROFILE_REQUIRED';
  *
  * Cuando el concepto exista, cambia esta constante y nada más.
  */
-export const GRUPO_DISUELTO = CONCEPTS.STATE_REVOKED;
+export const DISSOLVED_GROUP = CONCEPTS.STATE_REVOKED;
 
 /**
  * Los roles que heredan el grupo antes que un integrante común.
@@ -71,7 +71,7 @@ export const GRUPO_DISUELTO = CONCEPTS.STATE_REVOKED;
  * Se prefiere a quien ya administraba: la sucesión es una continuidad, no un
  * ascenso sorpresa para alguien que sólo participaba.
  */
-const ROLES_QUE_PUEDEN_HEREDAR: readonly string[] = [
+const ROLES_THAT_CAN_INHERIT: readonly string[] = [
   COMM.GROUP_ROLE_ADMIN,
   COMM.GROUP_ROLE_MODERATOR,
 ];
@@ -84,7 +84,7 @@ const ROLES_QUE_PUEDEN_HEREDAR: readonly string[] = [
  * tratar la ausencia igual que el valor explícito, o la regla se saltea con
  * sólo omitir el campo.
  */
-function esVisibilidadPublica(visibility: string | undefined): boolean {
+function isPublicVisibility(visibility: string | undefined): boolean {
   return (visibility ?? 'PUBLIC') === 'PUBLIC';
 }
 
@@ -188,7 +188,7 @@ export class CommunityGroupsService {
       if (!ownerProfileId) {
         throw new PreconditionFailedException(
           'Para crear un grupo necesita su perfil público configurado',
-          { code: PERFIL_PUBLICO_REQUERIDO },
+          { code: PUBLIC_REQUIRED_PROFILE },
         );
       }
 
@@ -198,8 +198,8 @@ export class CommunityGroupsService {
       // creó. Si esa cara es un perfil a medio hacer —sin nombre visible, sin
       // foto, o en privado— el grupo aparece en el directorio presentado por
       // alguien que, del otro lado, no existe.
-      if (esVisibilidadPublica(dto.visibility)) {
-        await this.assertPerfilPublicoCompleto(tx, ownerProfileId);
+      if (isPublicVisibility(dto.visibility)) {
+        await this.assertPublicCompleteProfile(tx, ownerProfileId);
       }
 
       const group = this.groupsRepo.create(tx, {
@@ -349,7 +349,7 @@ export class CommunityGroupsService {
         });
 
       const wasActive = member.joinStatusConceptId === COMM.GROUP_JOIN_ACTIVE;
-      const eraDueno = member.memberRoleConceptId === COMM.GROUP_ROLE_OWNER;
+      const wasOwner = member.memberRoleConceptId === COMM.GROUP_ROLE_OWNER;
 
       // Al dueño lo saca el dueño, y nadie más.
       //
@@ -359,7 +359,7 @@ export class CommunityGroupsService {
       // corre abajo lo deja a él a cargo. Es decir, cualquier admin se
       // apodera del grupo con una sola llamada. La regla nueva abrió esa
       // puerta y ésta la cierra.
-      if (eraDueno && !isSelf)
+      if (wasOwner && !isSelf)
         throw new ConflictException(
           'Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes',
           { groupId, memberProfileId },
@@ -375,14 +375,14 @@ export class CommunityGroupsService {
       // restándole uno a lo que decía la fila. Un contador que se decrementa a
       // ciegas termina en negativo o en «uno de más» apenas dos salidas se
       // cruzan, y es el número del que depende disolver el grupo.
-      const quedan = await this.groupsRepo.countMembersByStatus(
+      const remain = await this.groupsRepo.countMembersByStatus(
         tx,
         groupId,
         COMM.GROUP_JOIN_ACTIVE,
       );
-      group.memberCount = quedan;
+      group.memberCount = remain;
 
-      if (quedan === 0) {
+      if (remain === 0) {
         // Sin nadie adentro, el grupo deja de estar en pie: fuera de listados,
         // fuera de la búsqueda, su dirección deja de abrir.
         //
@@ -390,8 +390,8 @@ export class CommunityGroupsService {
         // `audit.groups_history`, que es WORM, y la retención la gobierna
         // UC-10-09. Inventar acá una segunda purga sería tener dos políticas de
         // borrado que se contradicen.
-        group.statusConceptId = GRUPO_DISUELTO;
-      } else if (eraDueno && wasActive) {
+        group.statusConceptId = DISSOLVED_GROUP;
+      } else if (wasOwner && wasActive) {
         // El dueño se fue y queda gente: alguien tiene que quedar a cargo. Sin
         // sucesión, el grupo sobrevive sin nadie que pueda administrarlo — la
         // misma trampa que la regla 07 arregla del otro lado.
@@ -399,15 +399,15 @@ export class CommunityGroupsService {
         // Antes esto ni siquiera podía pasar: el dueño tenía prohibido irse
         // «hasta transferirlo», lo que en la práctica lo dejaba atado a un
         // grupo del que quería salir.
-        const heredero = await this.elegirHeredero(
+        const heir = await this.chooseHeir(
           tx,
           groupId,
           memberProfileId,
         );
-        if (heredero) {
-          heredero.memberRoleConceptId = COMM.GROUP_ROLE_OWNER;
-          touch(heredero, actor.id);
-          group.ownerProfileId = heredero.memberProfileId;
+        if (heir) {
+          heir.memberRoleConceptId = COMM.GROUP_ROLE_OWNER;
+          touch(heir, actor.id);
+          group.ownerProfileId = heir.memberProfileId;
         }
       }
 
@@ -539,26 +539,26 @@ export class CommunityGroupsService {
    *
    * @param em - Transacción activa.
    * @param groupId - Grupo que se queda sin dueño.
-   * @param salienteProfileId - Quien se va, que no puede heredarse a sí mismo.
+   * @param outgoingProfileId - Quien se va, que no puede heredarse a sí mismo.
    * @returns La membresía que hereda, o `null` si no queda nadie.
    */
-  private async elegirHeredero(
+  private async chooseHeir(
     em: EntityManager,
     groupId: string,
-    salienteProfileId: string,
+    outgoingProfileId: string,
   ): Promise<GroupMembers | null> {
-    const candidatos = await this.groupsRepo.listActiveMembersByAge(
+    const candidates = await this.groupsRepo.listActiveMembersByAge(
       em,
       groupId,
       COMM.GROUP_JOIN_ACTIVE,
-      salienteProfileId,
+      outgoingProfileId,
     );
-    if (candidatos.length === 0) return null;
+    if (candidates.length === 0) return null;
 
     return (
-      candidatos.find((candidato) =>
-        ROLES_QUE_PUEDEN_HEREDAR.includes(candidato.memberRoleConceptId),
-      ) ?? candidatos[0]
+      candidates.find((candidate) =>
+        ROLES_THAT_CAN_INHERIT.includes(candidate.memberRoleConceptId),
+      ) ?? candidates[0]
     );
   }
 
@@ -579,29 +579,29 @@ export class CommunityGroupsService {
    * @param em - Transacción activa.
    * @param ownerProfileId - Perfil con el que se crearía el grupo.
    */
-  private async assertPerfilPublicoCompleto(
+  private async assertPublicCompleteProfile(
     em: EntityManager,
     ownerProfileId: string,
   ): Promise<void> {
-    const perfil = await this.publicProfilesRepo.findById(em, ownerProfileId);
-    if (!perfil) {
+    const profile = await this.publicProfilesRepo.findById(em, ownerProfileId);
+    if (!profile) {
       throw new PreconditionFailedException(
         'Para crear un grupo público necesita su perfil público configurado',
-        { code: PERFIL_PUBLICO_REQUERIDO },
+        { code: PUBLIC_REQUIRED_PROFILE },
       );
     }
 
-    const falta: string[] = [];
-    if (!perfil.displayName?.trim()) falta.push('display-name');
-    if (!perfil.avatarFileId) falta.push('avatar');
-    if (perfil.visibilityConceptId !== COMM.PROFILE_VISIBILITY_PUBLIC) {
-      falta.push('visibility');
+    const missing: string[] = [];
+    if (!profile.displayName?.trim()) missing.push('display-name');
+    if (!profile.avatarFileId) missing.push('avatar');
+    if (profile.visibilityConceptId !== COMM.PROFILE_VISIBILITY_PUBLIC) {
+      missing.push('visibility');
     }
 
-    if (falta.length > 0) {
+    if (missing.length > 0) {
       throw new PreconditionFailedException(
         'Para crear un grupo público, su perfil público tiene que estar completo',
-        { code: PERFIL_PUBLICO_REQUERIDO, missing: falta },
+        { code: PUBLIC_REQUIRED_PROFILE, missing: missing },
       );
     }
   }

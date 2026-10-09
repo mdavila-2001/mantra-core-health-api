@@ -8,19 +8,19 @@ import { SEED } from '../constants/concepts';
 /**
  * Construye el sistema bajo prueba con un `EntityManager` doblado.
  *
- * @param existentes - Ids que la base ya tiene; el resto se considera ausente.
+ * @param existing - Ids que la base ya tiene; el resto se considera ausente.
  * @returns El servicio y lo que el doble registró.
  */
-function build(existentes: string[] = []) {
-  const yaEstan = new Set(existentes);
-  const creados: { entidad: string; datos: Record<string, unknown> }[] = [];
+function build(existing: string[] = []) {
+  const alreadyPresent = new Set(existing);
+  const created: { entidad: string; datos: Record<string, unknown> }[] = [];
   const em = {
-    findOne: fn(async (_entidad: unknown, where: { id: string }) =>
-      yaEstan.has(where.id) ? { id: where.id } : null,
+    findOne: fn(async (entity: unknown, where: { id: string }) =>
+      alreadyPresent.has(where.id) ? { id: where.id } : null,
     ),
-    create: fn((entidad: { name: string }, datos: Record<string, unknown>) => {
-      creados.push({ entidad: entidad.name, datos });
-      return datos;
+    create: fn((entity: { name: string }, data: Record<string, unknown>) => {
+      created.push({ entidad: entity.name, datos: data });
+      return data;
     }),
     flush: fn(async () => undefined),
   };
@@ -30,16 +30,16 @@ function build(existentes: string[] = []) {
     orm as never,
     logger as never,
   );
-  return { service, creados, em };
+  return { service, creados: created, em };
 }
 
 describe('PatientPortalProxySeedService', () => {
   it('siembra el conjunto, su versión vigente y la base legal', async () => {
     const { service, creados } = build();
 
-    const contadores = await service.run();
+    const counters = await service.run();
 
-    expect(contadores).toEqual({ valueSets: 1, versions: 1, legalBases: 1 });
+    expect(counters).toEqual({ valueSets: 1, versions: 1, legalBases: 1 });
     expect(creados.map((c) => c.entidad)).toEqual([
       'ValueSets',
       'ValueSetVersions',
@@ -97,9 +97,9 @@ describe('PatientPortalProxySeedService', () => {
       SEED.guardianProxyLegalBasisId,
     ]);
 
-    const contadores = await service.run();
+    const counters = await service.run();
 
-    expect(contadores).toEqual({ valueSets: 0, versions: 0, legalBases: 0 });
+    expect(counters).toEqual({ valueSets: 0, versions: 0, legalBases: 0 });
     expect(creados).toEqual([]);
   });
 
@@ -108,9 +108,9 @@ describe('PatientPortalProxySeedService', () => {
       SEED.patientPortalProxyScopeValueSetId,
     ]);
 
-    const contadores = await service.run();
+    const counters = await service.run();
 
-    expect(contadores).toEqual({ valueSets: 0, versions: 1, legalBases: 1 });
+    expect(counters).toEqual({ valueSets: 0, versions: 1, legalBases: 1 });
     expect(creados.map((c) => c.entidad)).toEqual([
       'ValueSetVersions',
       'ProcessingLegalBases',

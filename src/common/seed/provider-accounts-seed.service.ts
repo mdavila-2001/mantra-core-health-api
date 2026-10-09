@@ -116,8 +116,8 @@ export class ProviderAccountsSeedService {
 
     const em = this.orm.em.fork();
     let created = 0;
-    for (const cuenta of PROVIDER_ACCOUNTS) {
-      if (await this.ensureAccount(em, cuenta, password)) created += 1;
+    for (const account of PROVIDER_ACCOUNTS) {
+      if (await this.ensureAccount(em, account, password)) created += 1;
     }
     await em.flush();
 
@@ -134,27 +134,27 @@ export class ProviderAccountsSeedService {
    * Crea una cuenta si todavía no existe, y la hace miembro del tenant semilla.
    *
    * @param em - Contexto de persistencia.
-   * @param cuenta - La cuenta declarada en el catálogo.
+   * @param account - La cuenta declarada en el catálogo.
    * @param password - Contraseña compartida.
    * @returns `true` si esta pasada la creó.
    */
   private async ensureAccount(
     em: EntityManager,
-    cuenta: ProviderAccountSeed,
+    account: ProviderAccountSeed,
     password: string,
   ): Promise<boolean> {
-    const existente = await em.findOne(AuthenticationCredentials, {
-      externalSubject: cuenta.email,
+    const existing = await em.findOne(AuthenticationCredentials, {
+      externalSubject: account.email,
     });
-    if (existente) {
-      await this.ensureMembership(em, existente.userId, cuenta.tenantRole);
+    if (existing) {
+      await this.ensureMembership(em, existing.userId, account.tenantRole);
       return false;
     }
 
-    const creado = await this.users.createUser(
+    const created = await this.users.createUser(
       {
-        displayName: cuenta.displayName,
-        email: cuenta.email,
+        displayName: account.displayName,
+        email: account.email,
         password,
         // `initialRole` solo admite USER o SECURITY_ADMIN: es el rol GLOBAL de
         // la plataforma. El de dominio —farmacia, laboratorio…— vive en
@@ -167,14 +167,14 @@ export class ProviderAccountsSeedService {
     // Sin membresía en un tenant, la sesión entra pero no tiene organización
     // activa: toda pantalla que dependa de `tenantId` queda bloqueada pidiendo
     // que se elija una que la cuenta no tiene.
-    await this.ensureMembership(em, creado.id, cuenta.tenantRole);
-    await this.ensureRole(em, creado.id, cuenta.initialRole);
+    await this.ensureMembership(em, created.id, account.tenantRole);
+    await this.ensureRole(em, created.id, account.initialRole);
 
     this.logger.info(
       {
         operation: 'seed.provider-accounts',
-        organizacion: cuenta.organizacion,
-        role: cuenta.initialRole,
+        organizacion: account.organizacion,
+        role: account.initialRole,
       },
       'Cuenta de demostración creada',
     );
@@ -195,14 +195,14 @@ export class ProviderAccountsSeedService {
     tenantRole: ProviderAccountSeed['tenantRole'],
   ): Promise<void> {
     const tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[tenantRole];
-    const existente = await em.findOne(TenantMemberships, {
+    const existing = await em.findOne(TenantMemberships, {
       userId,
       tenantId: SEED.tenantId,
     });
-    if (existente) {
-      if (existente.tenantRoleConceptId === tenantRoleConceptId) return;
-      existente.tenantRoleConceptId = tenantRoleConceptId;
-      touch(existente, SEED_ACTOR_ID);
+    if (existing) {
+      if (existing.tenantRoleConceptId === tenantRoleConceptId) return;
+      existing.tenantRoleConceptId = tenantRoleConceptId;
+      touch(existing, SEED_ACTOR_ID);
       await em.flush();
       return;
     }
@@ -236,8 +236,8 @@ export class ProviderAccountsSeedService {
     userId: string,
     code: string,
   ): Promise<void> {
-    const rol = await em.findOne(Roles, { code });
-    if (!rol) {
+    const role = await em.findOne(Roles, { code });
+    if (!role) {
       this.logger.warn(
         { operation: 'seed.provider-accounts', role: code },
         'Rol no declarado en authz.roles: la cuenta queda sin él',
@@ -245,18 +245,18 @@ export class ProviderAccountsSeedService {
       return;
     }
 
-    const existente = await em.findOne(UserRoleAssignments, {
+    const existing = await em.findOne(UserRoleAssignments, {
       userId,
-      roleId: rol.id,
+      roleId: role.id,
       tenantId: SEED.tenantId,
     });
-    if (existente) return;
+    if (existing) return;
 
     em.create(
       UserRoleAssignments,
       {
         userId,
-        roleId: rol.id,
+        roleId: role.id,
         tenantId: SEED.tenantId,
         assignedByUserId: SEED_ACTOR_ID,
         statusConceptId: CONCEPTS.STATE_ACTIVE,

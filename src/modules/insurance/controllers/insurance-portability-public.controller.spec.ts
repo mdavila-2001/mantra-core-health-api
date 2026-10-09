@@ -51,7 +51,7 @@ describe('ParseShaHashPipe', () => {
 
 describe('InsurancePortabilityPublicController', () => {
   it('delega en InsurancePortabilityService.verify y devuelve el resultado sin tocarlo', async () => {
-    const resultado = {
+    const result = {
       status: 'VALID' as const,
       certificateId: 'certificate-a',
       manifestHash: LOWER_HASH,
@@ -60,13 +60,13 @@ describe('InsurancePortabilityPublicController', () => {
       algorithm: 'SHA-256' as const,
       issuer: 'AloVida',
     };
-    const service = { verify: mockFn().mockResolvedValue(resultado) };
+    const service = { verify: mockFn().mockResolvedValue(result) };
     const controller = new InsurancePortabilityPublicController(service as any);
 
     const res = await controller.verify(LOWER_HASH);
 
     expect(service.verify).toHaveBeenCalledWith(LOWER_HASH);
-    expect(res).toBe(resultado);
+    expect(res).toBe(result);
     // Sin PHI: ni nombre ni documento del titular en la respuesta.
     expect(res).not.toHaveProperty('patientName');
     expect(res).not.toHaveProperty('nationalId');

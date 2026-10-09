@@ -123,20 +123,20 @@ describe('VademecumSeedService', () => {
       }
       if (ids.length > 0 && propertyById.has(ids[0])) {
         // Como lo devuelve Postgres: `jsonb` no conserva el orden de las claves.
-        const reordenado = (v: unknown): unknown =>
+        const reordered = (v: unknown): unknown =>
           Array.isArray(v)
-            ? v.map(reordenado)
+            ? v.map(reordered)
             : v !== null && typeof v === 'object'
               ? Object.fromEntries(
                   Object.entries(v)
                     .reverse()
-                    .map(([k, x]) => [k, reordenado(x)]),
+                    .map(([k, x]) => [k, reordered(x)]),
                 )
               : v;
         return Promise.resolve(
           ids.map((id) => ({
             id,
-            valueJson: reordenado(propertyById.get(id)!.value_json),
+            valueJson: reordered(propertyById.get(id)!.value_json),
           })),
         );
       }
@@ -164,22 +164,22 @@ describe('VademecumSeedService', () => {
     const salbutamol = vademecumDataset.concepts.find(
       (c) => c.code === 'R03AC02',
     )!;
-    const fila = {
+    const row = {
       id: salbutamol.id,
       display: 'Albuterol',
       definition: 'Short-acting beta-2 agonist.',
     } as any;
     em.find.mockImplementation((_entity: unknown, where: any) => {
       const ids: string[] = where?.id?.$in ?? [];
-      if (ids.includes(salbutamol.id)) return Promise.resolve([fila]);
+      if (ids.includes(salbutamol.id)) return Promise.resolve([row]);
       if (where?.code?.$in) return Promise.resolve([]);
       return Promise.resolve([]);
     });
 
     await service.run('development', false);
 
-    expect(fila.display).toBe('Salbutamol');
-    expect(fila.definition).toBeUndefined();
+    expect(row.display).toBe('Salbutamol');
+    expect(row.definition).toBeUndefined();
   });
 
   // --- B-13: el dataset nunca vuelve a traer contenido clínico ni las tres
@@ -246,12 +246,12 @@ describe('vademécum: la LINAME 2022-2024', () => {
     const gentamicina = vademecumDataset.concepts.find(
       (c) => c.code === 'J01GB03',
     )!;
-    const presentaciones = vademecumDataset.properties.find(
+    const presentations = vademecumDataset.properties.find(
       (p) =>
         p.concept_id === gentamicina.id &&
         p.property_code === 'liname_presentations',
     )!;
-    expect(presentaciones.value_json).toEqual(
+    expect(presentations.value_json).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           code: 'J-01-49',

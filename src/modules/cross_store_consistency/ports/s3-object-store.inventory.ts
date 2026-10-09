@@ -2,10 +2,10 @@ import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { loadStorageEnv } from '../../../common/storage/storage.env';
 import type {
-  AlcanceDeInventario,
-  InventarioDeObjetos,
+  InventoryScope,
+  ObjectInventory,
   ObjectStoreInventory,
-  ObjetoInventariado,
+  InventoriedObject,
 } from './object-store-inventory.port';
 
 /** Backends que hablan S3: MinIO en el stack local, S3/R2 en despliegue. */
@@ -29,37 +29,37 @@ const PAGINA = 1000;
 export class S3ObjectStoreInventory implements ObjectStoreInventory {
   private client?: S3Client;
 
-  async listar(alcance: AlcanceDeInventario): Promise<InventarioDeObjetos> {
-    if (!S3_BACKENDS.has(alcance.backendCode)) {
+  async list(scope: InventoryScope): Promise<ObjectInventory> {
+    if (!S3_BACKENDS.has(scope.backendCode)) {
       return {
         estado: 'NO_DISPONIBLE',
-        motivo: `BACKEND_UNSUPPORTED:${alcance.backendCode}`,
+        motivo: `BACKEND_UNSUPPORTED:${scope.backendCode}`,
       };
     }
 
-    const objetos: ObjetoInventariado[] = [];
+    const objetos: InventoriedObject[] = [];
     let continuationToken: string | undefined;
 
     try {
       const client = this.cliente();
       do {
-        const restante = alcance.limit - objetos.length;
-        if (restante <= 0) return { estado: 'TRUNCADO', objetos };
+        const remaining = scope.limit - objetos.length;
+        if (remaining <= 0) return { estado: 'TRUNCADO', objetos };
 
         const pagina = await client.send(
           new ListObjectsV2Command({
-            Bucket: alcance.bucket,
-            Prefix: alcance.prefix || undefined,
-            MaxKeys: Math.min(PAGINA, restante),
+            Bucket: scope.bucket,
+            Prefix: scope.prefix || undefined,
+            MaxKeys: Math.min(PAGINA, remaining),
             ContinuationToken: continuationToken,
           }),
         );
 
-        for (const objeto of pagina.Contents ?? []) {
-          if (objeto.Key === undefined) continue;
+        for (const obj of pagina.Contents ?? []) {
+          if (obj.Key === undefined) continue;
           objetos.push({
-            key: objeto.Key,
-            sizeBytes: BigInt(objeto.Size ?? 0),
+            key: obj.Key,
+            sizeBytes: BigInt(obj.Size ?? 0),
           });
         }
 
@@ -68,7 +68,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
         continuationToken = pagina.IsTruncated
           ? pagina.NextContinuationToken
           : undefined;
-        if (continuationToken && objetos.length >= alcance.limit) {
+        if (continuationToken && objetos.length >= scope.limit) {
           return { estado: 'TRUNCADO', objetos };
         }
       } while (continuationToken);

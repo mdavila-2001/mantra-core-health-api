@@ -24,7 +24,7 @@ import { MfaFactorDto, MfaFactorResponseDto } from '../dto';
  * esas rutas llevan `@Roles('SECURITY_ADMIN')`; `SUPERADMIN` pasa cualquier
  * `@Roles`, ver `roles.guard.ts`).
  */
-const ROLES_QUE_ADMINISTRAN_MFA: readonly string[] = [
+const ROLES_THAT_MANAGE_MFA: readonly string[] = [
   'SECURITY_ADMIN',
   'SUPERADMIN',
 ];
@@ -70,7 +70,7 @@ export class IamMfaService {
     // genérico, sin confirmar el id).
     if (
       actor.id !== userId &&
-      !actor.roles.some((rol) => ROLES_QUE_ADMINISTRAN_MFA.includes(rol))
+      !actor.roles.some((role) => ROLES_THAT_MANAGE_MFA.includes(role))
     ) {
       this.logger.warn(
         { operation: 'iam.mfa.forbidden', userId, actorId: actor.id },

@@ -11,19 +11,19 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityProfileStatsService } from './community-profile-stats.service';
 
 const TENANT = 'tenant-1';
-const PERFIL = 'perfil-1';
+const PROFILE = 'perfil-1';
 const HOY = new Date('2026-08-18T10:00:00Z');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  *
- * @param contadores - Valores que devuelve Redis por clave.
+ * @param counters - Valores que devuelve Redis por clave.
  * @returns Resultado de build.
  */
-function build(contadores?: Map<string, number>) {
+function build(counters?: Map<string, number>) {
   const redis = {
     incrWithWindow: mockFn().mockResolvedValue({ count: 1, ttlSec: 100 }),
-    getCounters: mockFn().mockResolvedValue(contadores ?? new Map()),
+    getCounters: mockFn().mockResolvedValue(counters ?? new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityProfileStatsService(redis as any, logger as any);
@@ -35,7 +35,7 @@ describe('CommunityProfileStatsService', () => {
     it('la clave lleva perfil, señal y día — y nada más', () => {
       const d = build();
 
-      d.service.recordView(TENANT, PERFIL);
+      d.service.recordView(TENANT, PROFILE);
 
       const [[tenant, key]] = d.redis.incrWithWindow.mock.calls;
       expect(tenant).toBe(TENANT);
@@ -45,7 +45,7 @@ describe('CommunityProfileStatsService', () => {
     it('las apariciones se cuentan aparte de las visitas', () => {
       const d = build();
 
-      d.service.recordImpressions(TENANT, [PERFIL]);
+      d.service.recordImpressions(TENANT, [PROFILE]);
 
       const [[, key]] = d.redis.incrWithWindow.mock.calls;
       // Aparecer y ser abierto son dos cosas, y separarlas es lo que permite
@@ -59,7 +59,7 @@ describe('CommunityProfileStatsService', () => {
       const d = build();
       d.redis.incrWithWindow.mockRejectedValue(new Error('redis caído'));
 
-      expect(() => d.service.recordView(TENANT, PERFIL)).not.toThrow();
+      expect(() => d.service.recordView(TENANT, PROFILE)).not.toThrow();
       // La promesa colgada se resuelve sola; lo que importa es que nadie la
       // espere y que el fallo quede registrado en vez de tirar la ficha.
       await new Promise((r) => setImmediate(r));
@@ -69,7 +69,7 @@ describe('CommunityProfileStatsService', () => {
     it('sin perfil o sin tenant no se toca Redis', () => {
       const d = build();
 
-      d.service.recordView('', PERFIL);
+      d.service.recordView('', PROFILE);
       d.service.recordView(TENANT, '');
 
       expect(d.redis.incrWithWindow).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe('CommunityProfileStatsService', () => {
       const d = build();
       d.redis.getCounters.mockRejectedValue(new Error('redis caído'));
 
-      const res = await d.service.read(TENANT, PERFIL, HOY);
+      const res = await d.service.read(TENANT, PROFILE, HOY);
 
       expect(res.views).toBe(0);
       expect(res.daily).toHaveLength(7);
@@ -91,13 +91,13 @@ describe('CommunityProfileStatsService', () => {
     it('suma la ventana y la desglosa por día, del más viejo al más nuevo', async () => {
       const d = build(
         new Map([
-          [`profile-stats:${PERFIL}:view:2026-08-17`, 4],
-          [`profile-stats:${PERFIL}:view:2026-08-18`, 6],
-          [`profile-stats:${PERFIL}:impression:2026-08-18`, 30],
+          [`profile-stats:${PROFILE}:view:2026-08-17`, 4],
+          [`profile-stats:${PROFILE}:view:2026-08-18`, 6],
+          [`profile-stats:${PROFILE}:impression:2026-08-18`, 30],
         ]),
       );
 
-      const res = await d.service.read(TENANT, PERFIL, HOY);
+      const res = await d.service.read(TENANT, PROFILE, HOY);
 
       expect(res.windowDays).toBe(7);
       expect(res.views).toBe(10);
@@ -114,9 +114,9 @@ describe('CommunityProfileStatsService', () => {
     it('un día sin datos vale 0 y aparece igual: el hueco es información', async () => {
       const d = build();
 
-      const res = await d.service.read(TENANT, PERFIL, HOY);
+      const res = await d.service.read(TENANT, PROFILE, HOY);
 
-      expect(res.daily.every((dia: any) => dia.views === 0)).toBe(true);
+      expect(res.daily.every((day: any) => day.views === 0)).toBe(true);
       expect(res.daily).toHaveLength(7);
     });
   });

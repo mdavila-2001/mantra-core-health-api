@@ -141,18 +141,18 @@ export class RedisRuntimeService {
     tenant: string,
     keys: readonly string[],
   ): Promise<Map<string, number>> {
-    const salida = new Map<string, number>();
-    if (keys.length === 0) return salida;
+    const output = new Map<string, number>();
+    if (keys.length === 0) return output;
 
-    const valores = await this.redis.mget(
+    const values = await this.redis.mget(
       ...keys.map((key) => this.keyFor(tenant, 'counter', key)),
     );
     keys.forEach((key, i) => {
-      const crudo = valores[i];
-      const valor = crudo === null ? 0 : Number.parseInt(crudo, 10);
-      salida.set(key, Number.isFinite(valor) ? valor : 0);
+      const raw = values[i];
+      const valor = raw === null ? 0 : Number.parseInt(raw, 10);
+      output.set(key, Number.isFinite(valor) ? valor : 0);
     });
-    return salida;
+    return output;
   }
 
   // --- Locks distribuidos --------------------------------------------------

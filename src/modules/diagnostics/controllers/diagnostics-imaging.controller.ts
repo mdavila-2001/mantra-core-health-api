@@ -17,6 +17,7 @@ import {
   Roles,
   requireTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import {
   DiagnosticsImagingService,
@@ -63,6 +64,10 @@ export class DiagnosticsImagingController {
    * encontrar su resultado sin conocer de antemano el uuid del estudio.
    */
   @Get('diagnostics/patients/:patientProfileId/imaging-studies')
+  @AccessLogged({
+    resourceType: 'IMAGING_STUDIES',
+    patient: 'param:patientProfileId',
+  })
   @ApiOperation({ summary: 'Listar los estudios de imagen del paciente' })
   listStudies(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,

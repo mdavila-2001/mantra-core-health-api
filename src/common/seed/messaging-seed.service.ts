@@ -107,26 +107,26 @@ export class MessagingSeedService {
    *
    * @param em - Contexto de persistencia.
    * @param code - Código del canal.
-   * @param porDefecto - El id que este seed usaría si tuviera que crearlo.
+   * @param byDefault - El id que este seed usaría si tuviera que crearlo.
    * @returns El id que hay que referenciar.
    */
-  private async idDeCanal(
+  private async idChannel(
     em: EntityManager,
     code: string,
-    porDefecto: string,
+    byDefault: string,
   ): Promise<string> {
-    const fila = await em.findOne(MessageChannels, { code });
-    return fila?.id ?? porDefecto;
+    const row = await em.findOne(MessageChannels, { code });
+    return row?.id ?? byDefault;
   }
 
-  /** El id vigente de un proveedor, por su código. Ver {@link idDeCanal}. */
-  private async idDeProveedor(
+  /** El id vigente de un proveedor, por su código. Ver {@link idChannel}. */
+  private async idProvider(
     em: EntityManager,
     code: string,
-    porDefecto: string,
+    byDefault: string,
   ): Promise<string> {
-    const fila = await em.findOne(MessagingProviders, { code });
-    return fila?.id ?? porDefecto;
+    const row = await em.findOne(MessagingProviders, { code });
+    return row?.id ?? byDefault;
   }
 
   private async seedChannel(em: EntityManager, now: Date): Promise<number> {
@@ -284,12 +284,12 @@ export class MessagingSeedService {
       })
     )
       return 0;
-    const channelId = await this.idDeCanal(
+    const channelId = await this.idChannel(
       em,
       MESSAGING_SEED.inAppChannelCode,
       MESSAGING_SEED.inAppChannelId,
     );
-    const providerId = await this.idDeProveedor(
+    const providerId = await this.idProvider(
       em,
       MESSAGING_SEED.inAppProviderCode,
       MESSAGING_SEED.inAppProviderId,
@@ -326,12 +326,12 @@ export class MessagingSeedService {
       })
     )
       return 0;
-    const channelId = await this.idDeCanal(
+    const channelId = await this.idChannel(
       em,
       MESSAGING_SEED.emailChannelCode,
       MESSAGING_SEED.emailChannelId,
     );
-    const providerId = await this.idDeProveedor(
+    const providerId = await this.idProvider(
       em,
       MESSAGING_SEED.emailProviderCode,
       MESSAGING_SEED.emailProviderId,
