@@ -77,7 +77,7 @@ verde allí no demuestra que el actor pueda ejecutarlo.
 
 Los dos últimos no tenían principio: crear una conexión de origen y crear un
 perfil de de-identificación no existían como operación, y sin ellas el resto de
-su flujo era inalcanzable. Ver `ESTADO-Y-PENDIENTES.md` §P1.
+su flujo era inalcanzable. Ver `docs/progress/ESTADO-Y-PENDIENTES.md` §P1.
 
 ### Lecturas
 
@@ -92,5 +92,5 @@ y `practice` no exponían ni una sola lectura.
 `yarn alovida:guardrails` (bloqueante): `HARD_DELETE_RESTRICTED_DATA`, `GENERIC_CRUD_ON_IMMUTABLE`,
 `UNSCOPED_MUTATION`, `CASCADE_ON_RESTRICTED`, `TENANT_SCOPE_MISSING` (2026-07-30: listado/conteo
 sobre entidad con `tenant_id` sin acotar por tenant ni por id de principal/recurso puntual — ver
-`ESTADO-Y-PENDIENTES.md`). `yarn alovida:coverage` (informe): `ORPHAN_TABLE`, `ORPHAN_ENDPOINT`,
-`DIRECT_CROSS_DOMAIN_ACCESS`. Ver `ALOVIDA-COBERTURA.md`.
+`docs/progress/ESTADO-Y-PENDIENTES.md`). `yarn alovida:coverage` (informe): `ORPHAN_TABLE`, `ORPHAN_ENDPOINT`,
+`DIRECT_CROSS_DOMAIN_ACCESS`. Ver `docs/reports/ALOVIDA-COBERTURA.md`.
