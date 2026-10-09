@@ -35,7 +35,7 @@ import { DsarRequestsRepository } from '../../audit/repositories/dsar-requests.r
 import { DataAccessLogRepository } from '../../audit/repositories/data-access-log.repository';
 import { AuditTrailService } from '../../audit/services';
 import { AUD } from '../../audit/audit.concepts';
-import { loadAgendaNoticesEnv } from '../../scheduling/notices/agenda-notices.env';
+import { loadAgendaNoticesEnv } from '../../scheduling/infrastructure/config/agenda-notices.env';
 import { InsurancePortabilityPdfService } from './insurance-portability-pdf.service';
 import {
   PortabilityExportFormat,

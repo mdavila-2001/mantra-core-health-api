@@ -8,7 +8,7 @@ import {
   SchedulingConfirmationController,
   SchedulingAgendaController,
   TenantAgendaController,
-} from './controllers';
+} from './presentation/controllers';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
@@ -21,7 +21,7 @@ import {
   PractitionerAffiliationGateService,
   SchedulingProfessionalTimeService,
   SchedulingWalkInService,
-} from './services';
+} from './application';
 import {
   SchedulingCatalogRepository,
   SchedulingBookingsRepository,
@@ -29,7 +29,7 @@ import {
   SchedulingAbsencesRepository,
   SchedulingAgendaRepository,
   SchedulingNoticeRepository,
-} from './repositories';
+} from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { InsuranceModule } from '../insurance/insurance.module';
@@ -66,10 +66,47 @@ import { CommunityModule } from '../community/community.module';
 // cuenta va y cómo se llama el profesional. Se registran acá —y no se importa
 // el módulo entero— por el mismo criterio que `AppointmentsRepository`.
 import * as profileEntities from '../profiles/entities';
-import { schedulingPersistenceProviders } from './scheduling.persistence';
-import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
-import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice.adapter';
-import { SupportAdminNoticeAdapter } from './adapters/support-admin-notice.adapter';
+import {
+  BookingAccess,
+  BookingChangeNotifier,
+  BookingItemAssembler,
+  BookingMaterializer,
+  BookingTransitionRecorder,
+  ClinicalAppointmentSync,
+  DisplacedRequestsCanceller,
+  SlotPolicyResolver,
+} from './application/bookings/support';
+import { bookingUseCases } from './application/bookings/use-cases';
+import {
+  AgendaOverlapGuard,
+  CatalogAccess,
+  SlotMoveNotifier,
+} from './application/catalog/support';
+import { catalogUseCases } from './application/catalog/use-cases';
+import { BOOKING_HISTORY_PORT } from './application/ports/booking-history.port';
+import { CLINICAL_APPOINTMENTS_PORT } from './application/ports/clinical-appointments.port';
+import { FORM_ORIGIN_PORT } from './application/ports/form-origin.port';
+import { INSURANCE_READ_PORT } from './application/ports/insurance-read.port';
+import { PRACTITIONER_AFFILIATIONS_PORT } from './application/ports/practitioner-affiliations.port';
+import { PRACTITIONER_DIRECTORY_PORT } from './application/ports/practitioner-directory.port';
+import { TENANT_DIRECTORY_PORT } from './application/ports/tenant-directory.port';
+import { DirectoryTenantDirectoryAdapter } from './infrastructure/adapters/directory-tenant-directory.adapter';
+import { PracticeProfilesDirectoryAdapter } from './infrastructure/adapters/practice-profiles-directory.adapter';
+import { ProfilesAffiliationsAdapter } from './infrastructure/adapters/profiles-affiliations.adapter';
+import { CLINICAL_ENCOUNTERS_PORT } from './application/ports/clinical-encounters.port';
+import { WALK_IN_PATIENT_REGISTRY_PORT } from './application/ports/walk-in-patient-registry.port';
+import { ClinicalEncountersAdapter } from './infrastructure/adapters/clinical-encounters.adapter';
+import { ProfilesWalkInPatientAdapter } from './infrastructure/adapters/profiles-walk-in-patient.adapter';
+import { PATIENT_REPRESENTATION_PORT } from './application/ports/patient-representation.port';
+import { AuditBookingHistoryAdapter } from './infrastructure/adapters/audit-booking-history.adapter';
+import { ClinicalAppointmentsAdapter } from './infrastructure/adapters/clinical-appointments.adapter';
+import { FormsOriginAdapter } from './infrastructure/adapters/forms-origin.adapter';
+import { InsuranceReadAdapter } from './infrastructure/adapters/insurance-read.adapter';
+import { ProfilesPatientRepresentationAdapter } from './infrastructure/adapters/profiles-patient-representation.adapter';
+import { schedulingPersistenceProviders } from './infrastructure/persistence/scheduling.persistence';
+import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
+import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
+import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-admin-notice.adapter';
 // P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
 // Clase sin estado de `forms` (`EntityManager` por parámetro): se provee suelta,
 // sin importar `FormsModule` entero, mismo criterio que `AppointmentsRepository`.
@@ -145,6 +182,65 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SupportAdminNoticeAdapter,
     MessagingAgendaNoticeAdapter,
     { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
+    // Puertos hacia otros contextos (audit, profiles, clinical, insurance,
+    // forms): los casos de uso dependen del token; el adaptador es el único que
+    // conoce al otro módulo.
+    AuditBookingHistoryAdapter,
+    ProfilesPatientRepresentationAdapter,
+    ClinicalAppointmentsAdapter,
+    InsuranceReadAdapter,
+    FormsOriginAdapter,
+    { provide: BOOKING_HISTORY_PORT, useExisting: AuditBookingHistoryAdapter },
+    {
+      provide: PATIENT_REPRESENTATION_PORT,
+      useExisting: ProfilesPatientRepresentationAdapter,
+    },
+    {
+      provide: CLINICAL_APPOINTMENTS_PORT,
+      useExisting: ClinicalAppointmentsAdapter,
+    },
+    { provide: INSURANCE_READ_PORT, useExisting: InsuranceReadAdapter },
+    { provide: FORM_ORIGIN_PORT, useExisting: FormsOriginAdapter },
+    ClinicalEncountersAdapter,
+    ProfilesWalkInPatientAdapter,
+    {
+      provide: CLINICAL_ENCOUNTERS_PORT,
+      useExisting: ClinicalEncountersAdapter,
+    },
+    {
+      provide: WALK_IN_PATIENT_REGISTRY_PORT,
+      useExisting: ProfilesWalkInPatientAdapter,
+    },
+    ProfilesAffiliationsAdapter,
+    PracticeProfilesDirectoryAdapter,
+    DirectoryTenantDirectoryAdapter,
+    {
+      provide: PRACTITIONER_AFFILIATIONS_PORT,
+      useExisting: ProfilesAffiliationsAdapter,
+    },
+    {
+      provide: PRACTITIONER_DIRECTORY_PORT,
+      useExisting: PracticeProfilesDirectoryAdapter,
+    },
+    {
+      provide: TENANT_DIRECTORY_PORT,
+      useExisting: DirectoryTenantDirectoryAdapter,
+    },
+    // Reservas: colaboradores compartidos y un caso de uso por operación.
+    BookingAccess,
+    BookingTransitionRecorder,
+    BookingChangeNotifier,
+    ClinicalAppointmentSync,
+    SlotPolicyResolver,
+    BookingMaterializer,
+    DisplacedRequestsCanceller,
+    BookingItemAssembler,
+    ...bookingUseCases,
+    // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
+    CatalogAccess,
+    AgendaOverlapGuard,
+    SlotMoveNotifier,
+    ...catalogUseCases,
   ],
 })
 export class SchedulingModule {}

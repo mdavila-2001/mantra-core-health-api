@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { SurveysAssignmentsService } from './surveys-assignments.service';
 import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
-import { SCHED } from '../../scheduling/scheduling.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import {
   ConflictException,
   PreconditionFailedException,

@@ -109,7 +109,7 @@ import { PatientRepresentationService } from '../profiles/services/patient-repre
 // sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
-import { SchedulingBookingsRepository } from '../scheduling/repositories';
+import { SchedulingBookingsRepository } from '../scheduling/infrastructure/repositories';
 // ALV-029 — el permiso de lectura también nace de una relación asistencial
 // vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
 // criterio de arriba: repo sin estado por `EntityManager`, sin importar el
