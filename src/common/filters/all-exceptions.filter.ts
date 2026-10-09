@@ -624,19 +624,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
         internals?: unknown;
       }
     | undefined {
-    const causa = this.findSqlState(exception);
-    if (!causa) {
+    const cause = this.findSqlState(exception);
+    if (!cause) {
       return undefined;
     }
 
     const internals = {
-      constraint: causa.constraint,
-      table: causa.table,
-      column: causa.column,
-      detail: causa.detail,
+      constraint: cause.constraint,
+      table: cause.table,
+      column: cause.column,
+      detail: cause.detail,
     };
 
-    switch (causa.sqlstate) {
+    switch (cause.sqlstate) {
       // Clave foránea inexistente. Es 422 y por tanto **no** puede llevar
       // `VALIDATION_FAILED`, que el contrato publica como 400: un cliente que
       // ramifique por `code` para decidir si reintenta con otro cuerpo recibía
