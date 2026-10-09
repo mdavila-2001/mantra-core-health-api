@@ -5,7 +5,7 @@ import { CONS } from '../consent.concepts';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 const ACTOR = { id: 'u1', roles: ['PATIENT'] } as any;
-const PACIENTE = 'p1';
+const PATIENT = 'p1';
 
 /**
  * Aislamiento por titular y retiro (BR-20): las lecturas `me` sólo devuelven
@@ -24,7 +24,7 @@ function build(opts: { hasProfile?: boolean; found?: any } = {}) {
     ),
   };
   const patientProfilesRepo = {
-    findById: mockFn().mockResolvedValue({ profileId: PACIENTE }),
+    findById: mockFn().mockResolvedValue({ profileId: PATIENT }),
   };
   const consents = { withdraw: mockFn().mockResolvedValue({ ok: true }) };
   const logger = { setContext: mockFn(), warn: mockFn(), info: mockFn() };
@@ -47,8 +47,8 @@ describe('ConsentMeService (BR-20)', () => {
     await d.service.listTreatmentConsents(ACTOR);
     const filtros = d.em.find.mock.calls.map((call: any[]) => call[1]);
     expect(filtros.length).toBe(4);
-    for (const filtro of filtros) {
-      expect(filtro.patientProfileId).toBe(PACIENTE);
+    for (const filter of filtros) {
+      expect(filter.patientProfileId).toBe(PATIENT);
     }
   });
 
@@ -60,7 +60,7 @@ describe('ConsentMeService (BR-20)', () => {
 
   it('un consentimiento retirado figura como WITHDRAWN con su fecha, y las solicitudes de vínculo no se listan', async () => {
     const d = build();
-    const retirado = new Date('2026-09-01T10:00:00Z');
+    const withdrawn = new Date('2026-09-01T10:00:00Z');
     d.em.find.mockImplementation(async (entity: any) =>
       entity.name === 'Consents'
         ? [
@@ -68,9 +68,9 @@ describe('ConsentMeService (BR-20)', () => {
               id: 'c1',
               processingPurposeId: 'pp',
               statusConceptId: CONS.CONSENT_WITHDRAWN,
-              withdrawnAt: retirado,
-              validTo: retirado,
-              createdAt: retirado,
+              withdrawnAt: withdrawn,
+              validTo: withdrawn,
+              createdAt: withdrawn,
             },
           ]
         : [{ id: 'pp', code: 'TREATMENT', name: 'Tratamiento' }],
@@ -79,11 +79,11 @@ describe('ConsentMeService (BR-20)', () => {
     expect(items[0]).toMatchObject({
       id: 'c1',
       state: 'WITHDRAWN',
-      withdrawnAt: retirado,
+      withdrawnAt: withdrawn,
       purpose: { id: 'pp', name: 'Tratamiento' },
     });
-    const filtro = d.em.find.mock.calls[0][1];
-    expect(filtro.categoryConceptId).toEqual({
+    const filter = d.em.find.mock.calls[0][1];
+    expect(filter.categoryConceptId).toEqual({
       $ne: CONS.CATEGORY_PRACTITIONER_ACCESS,
     });
   });
@@ -106,7 +106,7 @@ describe('ConsentMeService (BR-20)', () => {
     expect(d.consents.withdraw).toHaveBeenCalledWith('c1', {}, ACTOR);
     expect(d.em.findOne.mock.calls[0][1]).toEqual({
       id: 'c1',
-      patientProfileId: PACIENTE,
+      patientProfileId: PATIENT,
     });
   });
 });
