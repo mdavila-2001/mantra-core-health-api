@@ -74,6 +74,8 @@ scrape_configs:
           - https://dev.62.169.18.132.sslip.io/
           - https://mockup.62.169.18.132.sslip.io/
           - http://62.169.18.132:8000/api/health
+          # Visor de docker logs (infra/log-viewer). /healthcheck no pide login ni expone datos.
+          - https://logs.62.169.18.132.sslip.io/healthcheck
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
