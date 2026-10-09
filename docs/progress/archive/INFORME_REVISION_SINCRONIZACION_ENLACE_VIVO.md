@@ -63,19 +63,19 @@ graph TD
 Las capturas fueron tomadas directamente desde `https://pablo-h310.taila8f993.ts.net:8443/auth/register/organization`:
 
 ````carousel
-![Paso 1: La Empresa](/images_live_7steps/02_step1_filled.png)
+Captura «Paso 1: La Empresa» (`/images_live_7steps/02_step1_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 2: Identificación](/images_live_7steps/04_step2_filled.png)
+Captura «Paso 2: Identificación» (`/images_live_7steps/04_step2_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 3: Datos de la Aseguradora](/images_live_7steps/06_step3_filled.png)
+Captura «Paso 3: Datos de la Aseguradora» (`/images_live_7steps/06_step3_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 4: Documentos Legales (Tanda 1: Constitución, NIT, SEPREC, Licencia)](/images_live_7steps/08_step4_docs_filled.png)
+Captura «Paso 4: Documentos Legales (Tanda 1: Constitución, NIT, SEPREC, Licencia)» (`/images_live_7steps/08_step4_docs_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 5: Documentos Legales (Tanda 2: Certificado SEDES)](/images_live_7steps/10_step5_sedes_filled.png)
+Captura «Paso 5: Documentos Legales (Tanda 2: Certificado SEDES)» (`/images_live_7steps/10_step5_sedes_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 6: Tu Cuenta (Administrador)](/images_live_7steps/12_step6_admin_names_filled.png)
+Captura «Paso 6: Tu Cuenta (Administrador)» (`/images_live_7steps/12_step6_admin_names_filled.png`, no versionada en este repositorio)
 <!-- slide -->
-![Paso 7: Credenciales de Acceso](/images_live_7steps/14_step7_credentials_filled.png)
+Captura «Paso 7: Credenciales de Acceso» (`/images_live_7steps/14_step7_credentials_filled.png`, no versionada en este repositorio)
 ````
 
 ---
