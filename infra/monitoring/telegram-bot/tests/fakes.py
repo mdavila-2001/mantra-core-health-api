@@ -25,8 +25,12 @@ def container(**overrides) -> ContainerState:
 
 
 class FakeSources:
-    def __init__(self, samples=None, alerts=None, states=None, docker_up=True):
+    timezone = "America/La_Paz"
+
+    def __init__(self, samples=None, alerts=None, states=None, docker_up=True, ranges=None, series=None):
         self.samples = samples or {}
+        self.series = series or {}
+        self.ranges = ranges or {}
         self.alerts = alerts or []
         self.states = states if states is not None else [container()]
         self.docker_up = docker_up
@@ -35,6 +39,15 @@ class FakeSources:
     def query(self, expr):
         self.queries.append(expr)
         return self.samples.get(expr, [])
+
+    def query_range(self, expr):
+        return self.ranges.get(expr, [])
+
+    def query_range_series(self, expr):
+        if expr in self.series:
+            return self.series[expr]
+        points = self.ranges.get(expr)
+        return [({}, points)] if points else []
 
     def active_alerts(self):
         return self.alerts

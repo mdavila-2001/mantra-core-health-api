@@ -20,7 +20,7 @@ scrape_configs:
 
   - job_name: node
     static_configs:
-      - targets: ["node-exporter:9100"]
+      - targets: ["host.docker.internal:9100"]
 
   - job_name: cadvisor
     static_configs:
@@ -43,6 +43,22 @@ scrape_configs:
     static_configs:
       - targets: ["grafana:3000"]
 
+  # Traefik de Coolify: lo que entra a cada sitio (pedidos, latencia, códigos).
+  # El router lleva el uuid de Coolify; el bot lo traduce al dominio con las
+  # etiquetas `Host(...)` de Docker. Se descartan las métricas de Go/proceso.
+  - job_name: traefik
+    static_configs:
+      - targets: ["coolify-proxy:8082"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: "traefik_(router|service|entrypoint)_.*|traefik_config_.*|traefik_tls_certs_not_after"
+        action: keep
+
+  # Endpoints de la API, desde sus trazas (OpenTelemetry → spanmetrics).
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8889"]
+
   # Sondas desde adentro del VPS hacia los sitios públicos. Si el VPS entero se
   # cae, estas sondas caen con él: de eso se encarga el latido a Healthchecks.io.
   - job_name: blackbox-http
@@ -51,9 +67,13 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-          - https://test.173.249.39.237.sslip.io/
-          - https://demo.alovidasalud.arauzsoftware.com/
-          - http://173.249.39.237:8000/api/health
+          # Servidor 62.169.18.132 (desde 2026-10-08; el 173.249.39.237 quedó fuera
+          # de servicio el 2026-10-05). app.alovidasalud.com y demo.* se suman cuando
+          # su DNS apunte a este servidor: hoy no responden desde afuera.
+          - https://test.62.169.18.132.sslip.io/
+          - https://dev.62.169.18.132.sslip.io/
+          - https://mockup.62.169.18.132.sslip.io/
+          - http://62.169.18.132:8000/api/health
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
