@@ -39,7 +39,7 @@ Declarar afiliación entre organizaciones. Requiere JWT y los roles o alcances d
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /orgext/affiliations` en `OrgextAffiliationsController_declare`. El controlador delega en `OrgextAffiliationsService.declare`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /orgext/affiliations` en `OrgextAffiliationsController_declare`. El controlador delega en `OrgextAffiliationsService.declare`. Valida el body como `OrganizationExtensionsCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -47,7 +47,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `OrganizationExtensionsCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /orgext/affiliations HTTP/1.1

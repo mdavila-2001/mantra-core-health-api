@@ -2105,7 +2105,7 @@ Contexto declarado en el controlador: Descarga la plantilla del perfil pedido.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /terminology/import-template` en `TerminologyImportTemplateController_descargarPlantilla`. El controlador delega en `ImportTemplateService.generar`. No recibe body. El tipo de retorno estático es `StreamableFile`.
+NestJS resuelve `GET /terminology/import-template` en `TerminologyImportTemplateController_descargarPlantilla`. El controlador delega en `ImportTemplateService.generate`. No recibe body. El tipo de retorno estático es `StreamableFile`.
 
 ### Parámetros
 

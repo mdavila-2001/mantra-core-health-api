@@ -552,12 +552,11 @@ Content-Type: application/json
 | `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `transformationRunId` | No | `string` | formato `uuid` | Corrida de transformación evaluada | `00000000-0000-4000-8000-000000000001` |
 | `evaluatedRecordCount` | Sí | `string` | Sin restricción adicional declarada | Registros evaluados; cadena por ser bigint | `valor-ejemplo` |
-| `findings` | No | `array<QualityFindingDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"healthDataQualityRuleId":"00000000-0000-4000-8000-000000000001","canonicalHealthResourceId":"00000000-0000-4000-8000-000000000001","canonicalResourceVersionId":"00000000-0000-4000-8000-000000000001","fieldPath":"valor-ejemplo","observedValueHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
-| `findings[].healthDataQualityRuleId` | No | `string` | formato `uuid` | Regla que se incumple | `00000000-0000-4000-8000-000000000001` |
-| `findings[].canonicalHealthResourceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `findings[].canonicalResourceVersionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `findings[].fieldPath` | No | `string` | longitud máxima 500 | Campo afectado | `valor-ejemplo` |
-| `findings[].observedValueHash` | No | `string` | longitud máxima 200 | Hash del valor observado; el valor en claro no se guarda | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `findings` | No | `array<LakehouseQualityFindingDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"ruleCode":"CODIGO_EJEMPLO","partitionId":"00000000-0000-4000-8000-000000000001","issueCount":"valor-ejemplo","sampleObjectManifestId":"00000000-0000-4000-8000-000000000001"}]` |
+| `findings[].ruleCode` | No | `string` | longitud máxima 100 | Código de la regla violada | `CODIGO_EJEMPLO` |
+| `findings[].partitionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].issueCount` | No | `string` | Sin restricción adicional declarada | Registros que incumplen; cadena por ser bigint | `valor-ejemplo` |
+| `findings[].sampleObjectManifestId` | No | `string` | formato `uuid` | Muestra para diagnosticar | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -575,11 +574,10 @@ Content-Type: application/json
   "evaluatedRecordCount": "valor-ejemplo",
   "findings": [
     {
-      "healthDataQualityRuleId": "00000000-0000-4000-8000-000000000001",
-      "canonicalHealthResourceId": "00000000-0000-4000-8000-000000000001",
-      "canonicalResourceVersionId": "00000000-0000-4000-8000-000000000001",
-      "fieldPath": "valor-ejemplo",
-      "observedValueHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "ruleCode": "CODIGO_EJEMPLO",
+      "partitionId": "00000000-0000-4000-8000-000000000001",
+      "issueCount": "valor-ejemplo",
+      "sampleObjectManifestId": "00000000-0000-4000-8000-000000000001"
     }
   ]
 }

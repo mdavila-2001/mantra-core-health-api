@@ -622,12 +622,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `pings` | Sí | `array<LocationPingDto>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Batch de pings de alta frecuencia | `[{"latitude":-12.0464,"longitude":-77.0428,"accuracyM":1,"altitudeM":1,"speedMps":1,"headingDeg":1,"batteryPct":1,"network":"CELLULAR","deviceId":"00000000-0000-4000-8000-000000000001","capturedAt":"2026-07-31T12:00:00.000Z"}]` |
-| `pings[].latitude` | Sí | `number` | mínimo -90; máximo 90 | Latitud en grados decimales | `-12.0464` |
-| `pings[].longitude` | Sí | `number` | mínimo -180; máximo 180 | Longitud en grados decimales | `-77.0428` |
-| `pings[].accuracyM` | No | `number` | mínimo 0 | Precisión horizontal (m) | `1` |
+| `pings` | Sí | `array<GeoLocationPingDto>` | mínimo 1 elemento(s); máximo 1000 elemento(s) | Batch de pings de alta frecuencia | `[{"latitude":-12.0464,"longitude":-77.0428,"accuracyM":1,"altitudeM":1,"speedMps":1,"headingDeg":1,"batteryPct":1,"network":"CELLULAR","deviceId":"00000000-0000-4000-8000-000000000001","capturedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `pings[].latitude` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `-12.0464` |
+| `pings[].longitude` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `-77.0428` |
+| `pings[].accuracyM` | No | `number` | Sin restricción adicional declarada | Precisión horizontal (m) | `1` |
 | `pings[].altitudeM` | No | `number` | Sin restricción adicional declarada | Altitud (m) | `1` |
-| `pings[].speedMps` | No | `number` | mínimo 0 | Velocidad (m/s) | `1` |
+| `pings[].speedMps` | No | `number` | Sin restricción adicional declarada | Velocidad (m/s) | `1` |
 | `pings[].headingDeg` | No | `number` | Sin restricción adicional declarada | Rumbo (grados) | `1` |
 | `pings[].batteryPct` | No | `number` | mínimo 0; máximo 100 | Batería (%) | `1` |
 | `pings[].network` | No | `string` | valores: `CELLULAR`, `WIFI` | Red de captura | `CELLULAR` |

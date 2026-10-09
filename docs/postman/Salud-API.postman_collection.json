@@ -52683,7 +52683,7 @@
             "description": "Una regla `blocking` incumplida pone el dataset en cuarentena.\n\n`POST /lakehouse/datasets/{id}/quality-runs`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `LakehouseController_runQualityCheck`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"evaluatedRecordCount\": \"evaluatedRecordCount-ejemplo\",\n  \"findings\": [\n    {\n      \"healthDataQualityRuleId\": \"<healthDataQualityRuleId: uuid existente>\",\n      \"canonicalHealthResourceId\": \"<canonicalHealthResourceId: uuid existente>\",\n      \"canonicalResourceVersionId\": \"<canonicalResourceVersionId: uuid existente>\",\n      \"fieldPath\": \"fieldPath-ejemplo\",\n      \"observedValueHash\": \"observedValueHash-ejemplo\"\n    }\n  ]\n}",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"evaluatedRecordCount\": \"evaluatedRecordCount-ejemplo\",\n  \"findings\": [\n    {\n      \"ruleCode\": \"ruleCode-ejemplo\",\n      \"partitionId\": \"<partitionId: uuid existente>\",\n      \"issueCount\": \"issueCount-ejemplo\",\n      \"sampleObjectManifestId\": \"<sampleObjectManifestId: uuid existente>\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -71637,7 +71637,7 @@
                 "description": "El sujeto sale de la sesión: no hay forma de escribir el historial de otro.\n\n`POST /profiles/practitioners/me/affiliations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_addOwnAffiliation`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"primaryTenantId\": \"<primaryTenantId: uuid existente>\",\n  \"participatingTenantId\": \"<participatingTenantId: uuid existente>\",\n  \"healthcareServiceId\": \"{{healthcareServiceId}}\",\n  \"contractReference\": \"contractReference-ejemplo\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"organizationName\": \"Hospital Obrero N.º 1\",\n  \"roleTitle\": \"Médico de planta\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-01-01\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -71834,7 +71834,7 @@
                 "description": "Mismas reglas que el alta propia: no repite un vínculo ya declarado y respeta el estado inicial según la sede.\n\n`POST /profiles/practitioners/{profileId}/affiliations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_addAffiliationFor`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"primaryTenantId\": \"<primaryTenantId: uuid existente>\",\n  \"participatingTenantId\": \"<participatingTenantId: uuid existente>\",\n  \"healthcareServiceId\": \"{{healthcareServiceId}}\",\n  \"contractReference\": \"contractReference-ejemplo\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"organizationName\": \"Hospital Obrero N.º 1\",\n  \"roleTitle\": \"Médico de planta\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-01-01\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -82893,7 +82893,7 @@
                 "description": "Asociar una encuesta a una consulta o servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /surveys/assignments`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `SurveysAssignmentsController_createAssignment`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"fieldId\": \"{{fieldId}}\",\n  \"targetResourceConceptId\": \"<targetResourceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"branchId\": \"{{branchId}}\",\n  \"required\": false,\n  \"visible\": true,\n  \"editable\": true,\n  \"ordinal\": 1\n}",
+                  "raw": "{\n  \"surveyVersionId\": \"<surveyVersionId: uuid existente>\",\n  \"targetType\": \"APPOINTMENT\",\n  \"targetId\": \"{{targetId}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -89616,7 +89616,7 @@
             "description": "Exige el consentimiento vigente que ampara el registro del sujeto.\n\n`POST /ts/location/pings/batch-ingest`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `SeriesController_batchIngestLocationPings`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"ingestionId\": \"<ingestionId: uuid existente>\",\n  \"seriesId\": \"seriesId-ejemplo\",\n  \"consentId\": \"{{consentId}}\",\n  \"pings\": [\n    {\n      \"latitude\": -12.0464,\n      \"longitude\": -77.0428,\n      \"accuracyM\": 1,\n      \"altitudeM\": 1,\n      \"speedMps\": 1,\n      \"headingDeg\": 1,\n      \"batteryPct\": 0,\n      \"network\": \"CELLULAR\",\n      \"deviceId\": \"{{deviceId}}\",\n      \"capturedAt\": \"2026-01-01T00:00:00.000Z\"\n    }\n  ]\n}",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"ingestionId\": \"<ingestionId: uuid existente>\",\n  \"seriesId\": \"seriesId-ejemplo\",\n  \"consentId\": \"{{consentId}}\",\n  \"pings\": [\n    {\n      \"time\": \"2026-01-01T00:00:00.000Z\",\n      \"subjectType\": \"subjectType-ejemplo\",\n      \"subjectId\": \"<subjectId: uuid existente>\",\n      \"latitude\": -90,\n      \"longitude\": -180,\n      \"altitudeM\": 1,\n      \"accuracyM\": 0,\n      \"speedMps\": 0,\n      \"geohash\": \"geohash-ejemplo\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

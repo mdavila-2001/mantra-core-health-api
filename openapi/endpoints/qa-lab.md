@@ -603,7 +603,7 @@ Contexto declarado en el controlador: Fase 2 del plan de corrección de workers:
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /internal/qa/schedules/run-due` en `QaLabInternalController_runDueSchedules`. El controlador delega en `QaCatalogService.runDueSchedules`. Valida el body como `RunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
+NestJS resuelve `POST /internal/qa/schedules/run-due` en `QaLabInternalController_runDueSchedules`. El controlador delega en `QaCatalogService.runDueSchedules`. Valida el body como `QaLabRunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
 
 ### Parámetros
 
@@ -611,7 +611,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `RunDueSchedulesDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `QaLabRunDueSchedulesDto`; los campos opcionales se omiten.
 
 ```http
 POST /internal/qa/schedules/run-due HTTP/1.1
