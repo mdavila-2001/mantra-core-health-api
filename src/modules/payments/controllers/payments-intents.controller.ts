@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   PaymentsIntentsService,
   PaymentsTransactionsService,
@@ -46,6 +51,11 @@ export class PaymentsIntentsController {
   ) {}
 
   /** UC-42-01. */
+  @Audited({
+    action: 'PAYMENT_INTENT_CREATED',
+    entity: 'payment_intent',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('PAYMENTS_ADMIN', 'CASHIER')
   @HttpCode(HttpStatus.CREATED)
@@ -62,6 +72,11 @@ export class PaymentsIntentsController {
   }
 
   /** UC-42-03. */
+  @Audited({
+    action: 'PAYMENT_FX_RATE_LOCKED',
+    entity: 'payment_intent',
+    entityId: 'param:id',
+  })
   @Post(':id/fx-lock')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -75,6 +90,11 @@ export class PaymentsIntentsController {
   }
 
   /** UC-42-04. */
+  @Audited({
+    action: 'PAYMENT_RISK_ASSESSED',
+    entity: 'payment_intent',
+    entityId: 'param:id',
+  })
   @Post(':id/risk-assessment')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -88,6 +108,11 @@ export class PaymentsIntentsController {
   }
 
   /** UC-42-05. */
+  @Audited({
+    action: 'PAYMENT_TRANSACTION_PROCESSED',
+    entity: 'payment_transaction',
+    entityId: 'result.id',
+  })
   @Post(':id/transactions')
   @Roles('PAYMENTS_ADMIN', 'CASHIER')
   @HttpCode(HttpStatus.CREATED)
@@ -103,6 +128,11 @@ export class PaymentsIntentsController {
   }
 
   /** UC-42-11. */
+  @Audited({
+    action: 'PAYMENT_SPLIT_ADDED',
+    entity: 'payment_split',
+    entityId: 'result.id',
+  })
   @Post(':id/splits')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)

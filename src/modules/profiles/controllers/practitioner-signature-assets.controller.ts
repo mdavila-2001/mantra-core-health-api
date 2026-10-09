@@ -5,7 +5,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { PractitionerSignatureAssetsService } from '../services/practitioner-signature-assets.service';
 import {
   PractitionerSignatureAssetsDto,
@@ -27,6 +27,11 @@ export class PractitionerSignatureAssetsController {
     return this.assets.getOwn(actor);
   }
 
+  @Audited({
+    action: 'PRACTITIONER_SIGNATURE_ASSETS_SET',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Put()
   @ApiOperation({
     summary: 'Guardar o quitar las imágenes de firma y sello propias',

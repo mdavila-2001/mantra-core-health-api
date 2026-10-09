@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TreatmentInformedConsentsService } from '../services';
 import {
   CreateTreatmentInformedConsentDto,
@@ -22,6 +27,11 @@ export class TreatmentInformedConsentsController {
   ) {}
 
   /** UC-07-08. */
+  @Audited({
+    action: 'TREATMENT_INFORMED_CONSENT_SIGNED',
+    entity: 'treatment_informed_consent',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -19,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalDatePipe,
   ParseOptionalLimitPipe,
@@ -158,6 +159,11 @@ export class SchedulingController {
   }
 
   /** UC-41-01. */
+  @Audited({
+    action: 'SCHEDULE_RESOURCE_CREATED',
+    entity: 'schedulable_resource',
+    entityId: 'result.id',
+  })
   @Post('resources')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
   // recurso apunte a SU perfil (`assertMayCreateResource` /
@@ -175,6 +181,11 @@ export class SchedulingController {
   }
 
   /** UC-41-01. */
+  @Audited({
+    action: 'BOOKING_POLICY_CREATED',
+    entity: 'booking_policy',
+    entityId: 'result.id',
+  })
   @Post('booking-policies')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
   // recurso apunte a SU perfil (`assertMayCreateResource` /
@@ -192,6 +203,11 @@ export class SchedulingController {
   }
 
   /** UC-41-02. */
+  @Audited({
+    action: 'SCHEDULE_TEMPLATE_CREATED',
+    entity: 'schedule_template',
+    entityId: 'result.id',
+  })
   @Post('resources/:id/templates')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
   // recurso apunte a SU perfil (`assertMayCreateResource` /
@@ -239,6 +255,11 @@ export class SchedulingController {
    * campo: es la contraparte exacta de `retire`, y las dos se leen juntas en el
    * mismo controlador.
    */
+  @Audited({
+    action: 'SCHEDULE_TEMPLATE_REACTIVATED',
+    entity: 'schedule_template',
+    entityId: 'param:id',
+  })
   @Post('templates/:id/reactivate')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -262,6 +283,11 @@ export class SchedulingController {
    * omitir un campo lo conserva. Si `rules` viene, reemplaza el conjunto
    * entero — no hay «agregar una franja» sola.
    */
+  @Audited({
+    action: 'SCHEDULE_TEMPLATE_UPDATED',
+    entity: 'schedule_template',
+    entityId: 'param:id',
+  })
   @Patch('templates/:id')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @ApiOperation({
@@ -288,6 +314,11 @@ export class SchedulingController {
    * Con citas comprometidas **también retira** (M4 · H1.S2.M2): conserva sus
    * cupos, no toca ninguna cita, y devuelve cuántas siguen vivas y sus ids.
    */
+  @Audited({
+    action: 'SCHEDULE_TEMPLATE_RETIRED',
+    entity: 'schedule_template',
+    entityId: 'param:id',
+  })
   @Delete('templates/:id')
   // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
   // sea del actor con `assertActorResource`.
@@ -305,6 +336,11 @@ export class SchedulingController {
   }
 
   /** UC-41-03. */
+  @Audited({
+    action: 'SCHEDULE_SLOTS_GENERATED',
+    entity: 'schedule_template',
+    entityId: 'param:id',
+  })
   @Post('templates/:id/generate-slots')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
   // recurso apunte a SU perfil (`assertMayCreateResource` /
@@ -379,6 +415,11 @@ export class SchedulingController {
    * cuáles. Cancelar el turno de alguien exige motivo y avisa a esa persona;
    * hacerlo de arrastre sería decidir por quien está esperando.
    */
+  @Audited({
+    action: 'SCHEDULE_SLOTS_CLOSED',
+    entity: 'schedulable_resource',
+    entityId: 'param:id',
+  })
   @Post('resources/:id/close-slots')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -406,6 +447,11 @@ export class SchedulingController {
    * cita del mismo profesional, no se mueve ninguno. La colisión la rechaza la
    * base con `ex_appointments_practitioner_time`, no este código.
    */
+  @Audited({
+    action: 'SCHEDULE_SLOTS_SHIFTED',
+    entity: 'schedulable_resource',
+    entityId: 'param:id',
+  })
   @Post('resources/:id/shift-slots')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -467,6 +513,11 @@ export class SchedulingController {
   }
 
   /** UC-41-04. */
+  @Audited({
+    action: 'SCHEDULE_EXCEPTION_CREATED',
+    entity: 'availability_exception',
+    entityId: 'result.id',
+  })
   @Post('resources/:id/exceptions')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -494,6 +545,11 @@ export class SchedulingController {
    * El módulo queda con una sola regla: **los cupos sólo los crea publicar el
    * horario.**
    */
+  @Audited({
+    action: 'SCHEDULE_EXCEPTION_UPDATED',
+    entity: 'availability_exception',
+    entityId: 'param:id',
+  })
   @Patch('exceptions/:id')
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -517,6 +573,11 @@ export class SchedulingController {
    * plantilla si corresponde. Es la semántica menos sorprendente y está
    * documentada en el servicio.
    */
+  @Audited({
+    action: 'SCHEDULE_EXCEPTION_REMOVED',
+    entity: 'availability_exception',
+    entityId: 'param:id',
+  })
   @Delete('exceptions/:id')
   // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
   // la excepción sea del actor (`assertActorResource`).
@@ -542,6 +603,11 @@ export class SchedulingController {
    * paciente tomaba. Ésta nace CONFIRMADA (ya se acordó en persona), con
    * campana al paciente y la salida de «pedir cambio».
    */
+  @Audited({
+    action: 'DIRECT_APPOINTMENT_CREATED',
+    entity: 'appointment',
+    entityId: 'result.id',
+  })
   @Post('appointments/direct')
   // El profesional sólo en SU agenda (el servicio lo verifica); quien
   // administra agendas, en cualquiera.
@@ -571,6 +637,11 @@ export class SchedulingController {
    * `GET /profiles/patients?nationalId=`); 422 si el horario choca con otro
    * turno del profesional o del paciente.
    */
+  @Audited({
+    action: 'WALK_IN_APPOINTMENT_CREATED',
+    entity: 'appointment',
+    entityId: 'result.id',
+  })
   @Post('appointments/walk-in')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -587,6 +658,11 @@ export class SchedulingController {
   }
 
   /** UC-41-05. */
+  @Audited({
+    action: 'SLOT_HOLD_PLACED',
+    entity: 'slot_hold',
+    entityId: 'result.id',
+  })
   @Post('slots/:id/holds')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -604,6 +680,11 @@ export class SchedulingController {
   }
 
   /** UC-41-06. */
+  @Audited({
+    action: 'BOOKING_CONFIRMED',
+    entity: 'appointment_booking',
+    entityId: 'result.id',
+  })
   @Post('holds/:holdToken/confirm')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -628,6 +709,11 @@ export class SchedulingController {
    * distintos, y una bandera que cambia quién puede hacer qué es una bandera que
    * tarde o temprano llega en `true` desde donde no debe.
    */
+  @Audited({
+    action: 'BOOKING_REQUESTED',
+    entity: 'appointment_booking',
+    entityId: 'result.id',
+  })
   @Post('holds/:holdToken/request')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -645,6 +731,11 @@ export class SchedulingController {
   }
 
   /** UC-41-11. */
+  @Audited({
+    action: 'WAITLIST_ENTRY_ENROLLED',
+    entity: 'waitlist_entry',
+    entityId: 'result.id',
+  })
   @Post('waitlist')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
@@ -720,6 +811,11 @@ export class SchedulingController {
    * no de un turno suelto— y por eso cuelga del recurso. Alcanza a las citas
    * vigentes de la ventana informada; por omisión, de ahora al fin del día.
    */
+  @Audited({
+    action: 'SCHEDULE_RESOURCE_DELAYED',
+    entity: 'schedulable_resource',
+    entityId: 'param:id',
+  })
   @Post('resources/:id/delay')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)

@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -60,6 +61,11 @@ export class DelegatedPermissionSetsController {
   }
 
   /** UC-29-02: publica el set (versión 1). */
+  @Audited({
+    action: 'PERMISSION_SET_CREATED',
+    entity: 'delegated_permission_set',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +78,11 @@ export class DelegatedPermissionSetsController {
   }
 
   /** UC-29-02: publica una nueva versión del set. */
+  @Audited({
+    action: 'PERMISSION_SET_VERSION_PUBLISHED',
+    entity: 'delegated_permission_set_item',
+    entityId: 'result.id',
+  })
   @Post(':id/versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

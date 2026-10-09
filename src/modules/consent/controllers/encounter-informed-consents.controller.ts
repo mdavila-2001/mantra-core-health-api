@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { EncounterInformedConsentsService } from '../services';
 import {
   MyTreatmentConsentListDto,
@@ -34,6 +39,11 @@ export class EncounterInformedConsentsController {
   constructor(private readonly service: EncounterInformedConsentsService) {}
 
   /** UC-07-08 desde la consulta. */
+  @Audited({
+    action: 'ENCOUNTER_INFORMED_CONSENT_REGISTERED',
+    entity: 'treatment_informed_consent',
+    entityId: 'result.id',
+  })
   @Post(':encounterId/informed-consent')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

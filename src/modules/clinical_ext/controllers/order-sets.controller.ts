@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrderSetsService } from '../services';
 import {
   CreateOrderSetDto,
@@ -33,6 +38,11 @@ export class OrderSetsController {
   constructor(private readonly orderSetsService: OrderSetsService) {}
 
   /** Crea una plantilla de órdenes (precondición de UC-18-06). */
+  @Audited({
+    action: 'ORDER_SET_CREATED',
+    entity: 'order_set',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -47,6 +57,11 @@ export class OrderSetsController {
   }
 
   /** UC-18-06. */
+  @Audited({
+    action: 'ORDER_SET_APPLIED',
+    entity: 'order_set',
+    entityId: 'param:id',
+  })
   @Post(':id/apply')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Aplicar un order set (fan-out de órdenes)' })

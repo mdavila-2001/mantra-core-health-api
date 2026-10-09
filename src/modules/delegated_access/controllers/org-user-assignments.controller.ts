@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrgUserAssignmentsService } from '../services';
 import {
   CreateOrgUserAssignmentDto,
@@ -31,6 +36,11 @@ export class OrgUserAssignmentsController {
   constructor(private readonly service: OrgUserAssignmentsService) {}
 
   /** UC-29-01. */
+  @Audited({
+    action: 'ORG_USER_ASSIGNMENT_CREATED',
+    entity: 'organization_user_assignment',
+    entityId: 'result.id',
+  })
   @Post('org/:tenantMembershipId/user-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -46,6 +56,11 @@ export class OrgUserAssignmentsController {
   }
 
   /** UC-29-10. */
+  @Audited({
+    action: 'ORG_USER_ASSIGNMENT_UPDATED',
+    entity: 'organization_user_assignment',
+    entityId: 'param:id',
+  })
   @Patch('org/user-assignments/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

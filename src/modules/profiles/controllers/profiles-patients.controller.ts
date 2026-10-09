@@ -21,10 +21,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ProfilesPatientsService } from '../services';
 import {
@@ -134,6 +135,11 @@ export class ProfilesPatientsController {
    * @param actor - Usuario autenticado, que es también el sujeto.
    * @returns El perfil releído, ya actualizado.
    */
+  @Audited({
+    action: 'PATIENT_PROFILE_UPDATED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Patch('patients/me')
   @ApiOperation({ summary: 'Editar los propios datos de filiación' })
   @ApiOkResponse({
@@ -161,6 +167,11 @@ export class ProfilesPatientsController {
    * @param actor - Usuario autenticado, que es también el sujeto.
    * @returns El perfil releído, ya con su foto.
    */
+  @Audited({
+    action: 'PATIENT_PHOTO_SET',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Put('patients/me/photo')
   @ApiOperation({ summary: 'Fijar la propia foto de perfil' })
   setOwnPhoto(
@@ -178,6 +189,11 @@ export class ProfilesPatientsController {
    * @param actor - Usuario autenticado, que es también el sujeto.
    * @returns El perfil releído, ya sin foto.
    */
+  @Audited({
+    action: 'PATIENT_PHOTO_REMOVED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Delete('patients/me/photo')
   @ApiOperation({ summary: 'Quitar la propia foto de perfil' })
   removeOwnPhoto(
@@ -222,6 +238,11 @@ export class ProfilesPatientsController {
    * @param actor - Usuario autenticado, que pasa a representarlo.
    * @returns El dependiente recién creado.
    */
+  @Audited({
+    action: 'PATIENT_DEPENDENT_REGISTERED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Post('patients/me/dependents')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -345,6 +366,11 @@ export class ProfilesPatientsController {
    * @param actor - Quien pregunta; decide el alcance y si necesita criterio.
    * @returns Página de pacientes.
    */
+  @Audited({
+    action: 'PATIENTS_SEARCHED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Post('patients/search')
   @HttpCode(HttpStatus.OK)
   @Roles('SECURITY_ADMIN', 'SUPERADMIN', 'CLINICIAN', 'PRACTITIONER')
@@ -400,6 +426,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-01. */
+  @Audited({
+    action: 'PATIENT_REGISTERED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Post('patients')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -412,6 +443,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-02. */
+  @Audited({
+    action: 'PERSON_ACCOUNT_LINKED',
+    entity: 'person',
+    entityId: 'param:personId',
+  })
   @Post('persons/:personId/account-links')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -425,6 +461,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-07. */
+  @Audited({
+    action: 'PATIENT_IDENTITY_LINK_ADDED',
+    entity: 'patient_profile',
+    entityId: 'param:profileId',
+  })
   @Post('patients/:profileId/identity-links')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -438,6 +479,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-08. */
+  @Audited({
+    action: 'PATIENTS_MERGED',
+    entity: 'patient_profile',
+    entityId: 'result.id',
+  })
   @Post('patients/merge')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -450,6 +496,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-09. */
+  @Audited({
+    action: 'PATIENT_MERGE_REVERSED',
+    entity: 'patient_merge_event',
+    entityId: 'param:eventId',
+  })
   @Post('patients/merge/:eventId/reverse')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -463,6 +514,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-10. */
+  @Audited({
+    action: 'PATIENT_RELATED_PERSON_ADDED',
+    entity: 'patient_profile',
+    entityId: 'param:profileId',
+  })
   @Post('patients/:profileId/related-persons')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -477,6 +533,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-11. */
+  @Audited({
+    action: 'PORTAL_PROXY_GRANTED',
+    entity: 'patient_profile',
+    entityId: 'param:profileId',
+  })
   @Post('patients/:profileId/portal-proxies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -490,6 +551,11 @@ export class ProfilesPatientsController {
   }
 
   /** UC-05-12. */
+  @Audited({
+    action: 'PERSON_DECEASED',
+    entity: 'person',
+    entityId: 'param:personId',
+  })
   @Post('persons/:personId/decease')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

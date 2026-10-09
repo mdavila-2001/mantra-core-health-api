@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityManualReviewService } from '../services';
 import { ReviewDecisionDto, ReviewDecisionResponseDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class IdentityManualReviewController {
   constructor(private readonly reviewService: IdentityManualReviewService) {}
 
   /** UC-27-09. */
+  @Audited({
+    action: 'VERIFICATION_MANUAL_REVIEW_DECIDED',
+    entity: 'identity_manual_review_case',
+    entityId: 'param:id',
+  })
   @Post(':id/decision')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

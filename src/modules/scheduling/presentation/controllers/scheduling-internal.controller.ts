@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../../../../common';
+import { Audited, Roles } from '../../../../common';
 import {
   SchedulingBookingsService,
   SchedulingWaitlistService,
@@ -44,6 +44,11 @@ export class SchedulingInternalController {
   ) {}
 
   /** UC-41-07. */
+  @Audited({
+    action: 'SLOT_HOLDS_EXPIRED',
+    entity: 'slot_hold',
+    entityId: 'result.id',
+  })
   @Post('expire-holds')
   @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
@@ -74,6 +79,11 @@ export class SchedulingInternalController {
   }
 
   /** UC-41-12. */
+  @Audited({
+    action: 'WAITLIST_PROMOTED',
+    entity: 'bookable_slot',
+    entityId: 'param:slotId',
+  })
   @Post('promote-waitlist/:slotId')
   @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
@@ -89,6 +99,11 @@ export class SchedulingInternalController {
   }
 
   /** UC-41-14. */
+  @Audited({
+    action: 'BOOKING_REMINDERS_DISPATCHED',
+    entity: 'appointment_reminder',
+    entityId: 'result.id',
+  })
   @Post('dispatch-reminders')
   @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
