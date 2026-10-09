@@ -73,6 +73,7 @@ export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCod
       if (wd.files.length) s.wikidata.qidWithImageFiles++;
     }
     if (wd?.rejectReason) inc(s.wikidata.rejectedByReason, wd.rejectReason);
+    if (icd10cm?.codes.has(term.code)) s.icd10cm.termsWithCodeInTabular++;
 
     if (article) {
       s.articles.total++;
@@ -94,7 +95,6 @@ export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCod
       const bridged = article.sections.filter((x) => /vía puente Wikidata/.test(x.locator));
       if (bridged.length) s.bridge.termsWithBridgedText++;
       if (bridged.length && bridged.length === article.sections.filter((x) => x.source !== 'icd10cm-tabular').length && article.sections.some((x) => x.source !== 'icd10cm-tabular')) s.bridge.termsTextOnlyFromBridge++;
-      if (icd10cm?.codes.has(term.code)) s.icd10cm.termsWithCodeInTabular++;
       if (article.sections.some((x) => x.source === 'icd10cm-tabular')) {
         s.icd10cm.termsWithNotes++;
         if (article.sections.every((x) => x.source === 'icd10cm-tabular')) s.icd10cm.termsTextOnlyFromTabular++;

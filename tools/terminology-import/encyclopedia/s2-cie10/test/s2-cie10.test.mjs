@@ -20,6 +20,7 @@ import { dosePattern, imageHostOk, pickImage, sectionProblem, stripTracking } fr
 import { frequencyOf, parseBabelon, parseHpJson, parseHpoa, phenotypeItems } from '../lib/hpo.mjs';
 import { computeBridges } from '../lib/bridge.mjs';
 import { corroborates, resolveIdentities } from '../lib/identity.mjs';
+import { noteItems, parseTabular } from '../lib/icd10cm.mjs';
 import { icdSystemsFor, indexIcd10 as mondoIndex, parseMondo, toMondoConcept } from '../lib/mondo.mjs';
 import { indexIcd10 as orphaIndex, parseAges, parseHeader, parsePrevalence, parseProduct1 } from '../lib/orphanet.mjs';
 import { commonsFileName, flattenBindings, parseCommonsInfo, parseMeshBindings } from '../lib/remote.mjs';
@@ -204,7 +205,7 @@ test('Identidad: un concepto de la fuente que corresponde a dos términos es un 
 // --- Guardas ----------------------------------------------------------------------------------------
 
 test('Guarda de dosis: cantidades y palabras de posología', () => {
-  for (const t of ['Se administra 5 mg diarios', 'dosis de 2,5 g', 'Posología habitual', '1.1 mg', 'high dose']) assert.ok(dosePattern(t), t);
+  for (const t of ['Se administra 5 mg diarios', 'dosis de 2,5 g', 'Posología habitual', '1.1 mg', 'high dose', 'dosages vary']) assert.ok(dosePattern(t), t);
   for (const t of ['sweat chloride concentration of 60 mmol/L or greater', 'Autosomal recessive disorder', 'ORPHA:586', 'grupo 5g-2']) {
     assert.equal(dosePattern(t), t === 'grupo 5g-2' ? '5g' : null, t);
   }
@@ -444,4 +445,16 @@ test('Artículo: el texto vía puente queda marcado en locator e identity y nunc
   for (const s of article.sections.filter((x) => ['orphanet-es', 'mondo'].includes(x.source))) assert.match(s.locator, /vía puente Wikidata Q1/);
   assert.equal(article.identity.corroborated, false);
   assert.ok(article.identity.basis.filter((b) => b.via === 'wikidata-bridge').length >= 2);
+});
+
+// --- ICD-10-CM Tabular (recorte real de icd-10-cm-tabular-2025.xml: E84 y J18) -------------------------
+
+test('ICD-10-CM: notas por código, solo las de la categoría y no las de sus subcódigos', () => {
+  const { version, codes } = parseTabular(fx('icd10cm-tabular.sample.xml'));
+  assert.equal(version, '2025');
+  assert.equal(codes.get('E84').title, 'Cystic fibrosis');
+  assert.deepEqual(noteItems(codes.get('E84')), ['Incluye: mucoviscidosis', 'Codifique también: exocrine pancreatic insufficiency (K86.81)']);
+  assert.ok(codes.has('E84.0') && codes.has('J18.9'), 'los subcódigos anidados también se leen');
+  assert.equal(noteItems(codes.get('E84.0')).includes('Incluye: mucoviscidosis'), false);
+  assert.ok(noteItems(codes.get('J18')).includes('Excluye 1: congenital pneumonia (P23.0)'));
 });

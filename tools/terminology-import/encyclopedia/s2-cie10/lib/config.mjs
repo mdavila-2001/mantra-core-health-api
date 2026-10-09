@@ -111,8 +111,8 @@ export const SOURCES = Object.freeze({
   },
   'icd10cm-tabular': {
     name: 'ICD-10-CM Tabular List (NCHS/CDC)',
-    license: 'Obra del gobierno de EE. UU. (NCHS/CDC); ICD-10-CM de uso público',
-    licenseUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html',
+    license: 'NCHS/CDC, ICD-10-CM Tabular List: contenido de CDC de dominio público según su política general (atribución al NCHS; sin alterar el contenido; disponible gratis en cdc.gov)',
+    licenseUrl: 'https://www.cdc.gov/other/agencymaterials.html',
     homepage: 'https://www.cdc.gov/nchs/icd/icd-10-cm/',
     status: 'conditional',
   },
