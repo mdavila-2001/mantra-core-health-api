@@ -49,3 +49,55 @@ describe('UpdateOwnPractitionerProfileDto — workEmail', () => {
     },
   );
 });
+
+/**
+ * `languages` (informe B, C13): la pantalla de edición del perfil ya mandaba
+ * la lista y el DTO no la declaraba, así que `forbidNonWhitelisted` respondía
+ * 400. Mismas tres columnas que `profiles.practitioner_languages`.
+ */
+describe('UpdateOwnPractitionerProfileDto — languages', () => {
+  const ESPANOL = '22222222-2222-4222-8222-222222222222';
+
+  it('acepta la forma que manda la pantalla', async () => {
+    expect(
+      await propertiesWithError({
+        languages: [
+          {
+            languageConceptId: ESPANOL,
+            proficiencyConceptId: '44444444-4444-4444-8444-444444444444',
+            clinicalInterpretationAllowed: true,
+          },
+          { languageConceptId: ESPANOL, clinicalInterpretationAllowed: false },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('acepta la lista vacía: es como se quitan todos', async () => {
+    expect(await propertiesWithError({ languages: [] })).toEqual([]);
+  });
+
+  it.each([
+    [{ languageConceptId: 'es', clinicalInterpretationAllowed: true }],
+    [{ languageConceptId: ESPANOL }],
+    [
+      {
+        languageConceptId: ESPANOL,
+        clinicalInterpretationAllowed: true,
+        level: 'C1',
+      },
+    ],
+  ])('rechaza el elemento %p', async (item) => {
+    expect(await propertiesWithError({ languages: [item] })).toEqual([
+      'languages',
+    ]);
+  });
+
+  it('rechaza más de 20 idiomas', async () => {
+    const languages = Array.from({ length: 21 }, () => ({
+      languageConceptId: ESPANOL,
+      clinicalInterpretationAllowed: false,
+    }));
+    expect(await propertiesWithError({ languages })).toEqual(['languages']);
+  });
+});
