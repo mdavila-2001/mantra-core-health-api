@@ -48,20 +48,20 @@ import {
 } from '../../presentation/dto';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import { avisoDeHorarioMovido } from '../../domain/notices/agenda-notices';
+import { scheduleMovedNotice } from '../../domain/notices/agenda-notices';
 import { SchedulingNoticeRepository } from '../../infrastructure/repositories/scheduling-notice.repository';
 import {
   AGENDA_NOTICE_PORT,
   type AgendaNoticePort,
 } from '../ports/agenda-notice.port';
-import { diasLocalesQueCoinciden, horaLocalAUtc } from '../../domain/time/scheduling-time';
-import type { DiaLocal } from '../../domain/time/scheduling-time';
+import { matchingLocalDays, localTimeToUtc } from '../../domain/time/scheduling-time';
+import type { LocalDay } from '../../domain/time/scheduling-time';
 
 /**
  * Roles que administran el catálogo de agendas de terceros por oficio.
  *
  * Un `PRACTITIONER` NO está acá a propósito: puede publicar y operar **su
- * propia** agenda —eso decide `esSuPerfil`—, nunca la de otro. Antes ni eso:
+ * propia** agenda —eso decide `isOwnProfile`—, nunca la de otro. Antes ni eso:
  * toda la cadena exigía `SCHEDULING_ADMIN`, así que un profesional recién
  * registrado no tenía forma de volverse reservable — el asistente de alta de
  * agenda moría con 403 en el primer paso, y la única vía era pedirle a un
@@ -70,12 +70,12 @@ import type { DiaLocal } from '../../domain/time/scheduling-time';
  *
  * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín: excluirlo
  * acá le negaría en el servicio lo que el guard ya le concedió — mismo criterio
- * que `ROLES_DE_AGENDA` en `scheduling-bookings.service.ts`. Sin él, el admin
+ * que `AGENDA_OPERATOR_ROLES` en `scheduling-bookings.service.ts`. Sin él, el admin
  * de arranque (sin perfil profesional en el token) caía al camino de
  * autoservicio, que exige `hpid`, y recibía 403 en toda la cadena
  * recurso → políticas → plantillas → cupos.
  */
-const ROLES_QUE_ADMINISTRAN_CATALOGO: readonly string[] = [
+const CATALOG_ADMIN_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SUPERADMIN',
 ];
@@ -84,29 +84,29 @@ const ROLES_QUE_ADMINISTRAN_CATALOGO: readonly string[] = [
  * Mismas dos formas que acepta `scheduling-bookings.service.ts`: la tabla real
  * y el alias con el que llegaron los recursos sembrados.
  */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
 
 /** El modo de una franja a su concepto. Ausente ≡ sin concepto (sólo consultas). */
-function modoDeFranja(modo: RuleBookingMode | undefined): string | undefined {
-  if (modo === undefined) return undefined;
+function bandMode(mode: RuleBookingMode | undefined): string | undefined {
+  if (mode === undefined) return undefined;
   return {
     CONSULTATIONS: SCHED.RULE_MODE_CONSULTATIONS,
     SERVICES: SCHED.RULE_MODE_SERVICES,
     MIXED: SCHED.RULE_MODE_MIXED,
-  }[modo];
+  }[mode];
 }
 
 /** Y de vuelta: el concepto guardado, a lo que entiende el cliente. */
-function modoDelConcepto(conceptId: string): RuleBookingMode | undefined {
-  const porConcepto: Record<string, RuleBookingMode> = {
+function modeOfConcept(conceptId: string): RuleBookingMode | undefined {
+  const byConcept: Record<string, RuleBookingMode> = {
     [SCHED.RULE_MODE_CONSULTATIONS]: 'CONSULTATIONS',
     [SCHED.RULE_MODE_SERVICES]: 'SERVICES',
     [SCHED.RULE_MODE_MIXED]: 'MIXED',
   };
-  return porConcepto[conceptId];
+  return byConcept[conceptId];
 }
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
@@ -182,7 +182,7 @@ const EXCEPTION_TYPE_LABEL: Readonly<Record<ExceptionType, string>> = {
  * explica sola, y dejarla pasar vacía convertiría el catálogo en una casilla
  * de escape silenciosa.
  */
-const MOTIVO_QUE_EXIGE_TEXTO: ExceptionType = 'OTHER';
+const REASON_REQUIRING_TEXT: ExceptionType = 'OTHER';
 
 const DEFAULT_SLOT_MINUTES = 30;
 const DEFAULT_SLOT_CAPACITY = 1;
@@ -201,7 +201,7 @@ const DEFAULT_SLOT_CAPACITY = 1;
  * uno, así que el rango tiene que dejar pasar cualquiera. Un año 9999 es más
  * honesto que un `undefined` que obligaría a que la consulta tenga dos formas.
  */
-const FIN_DE_LOS_TIEMPOS = new Date('9999-12-31T00:00:00.000Z');
+const END_OF_TIME = new Date('9999-12-31T00:00:00.000Z');
 
 const ACTIVE_BOOKING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
@@ -215,7 +215,7 @@ const ACTIVE_BOOKING_STATES: readonly string[] = [
  * una lista de doscientos ids no ayuda a nadie. El total viaja aparte, así que
  * la pantalla puede decir «y 190 más».
  */
-const TOPE_DE_CITAS_EN_EL_AVISO = 10;
+const MAX_BOOKINGS_IN_NOTICE = 10;
 /** Tope de slots por ejecución: evita que una ventana enorme genere un lote inmanejable. */
 const MAX_SLOTS_PER_RUN = 2000;
 
@@ -236,8 +236,8 @@ export class SchedulingCatalogService {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly logger: PinoLogger,
-    private readonly vinculos: PractitionerAffiliationGateService,
-    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly affiliations: PractitionerAffiliationGateService,
+    private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly noticeRepo: SchedulingNoticeRepository,
     @Inject(AGENDA_NOTICE_PORT)
     private readonly notices: AgendaNoticePort,
@@ -250,8 +250,8 @@ export class SchedulingCatalogService {
     dto: CreateResourceDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceResponseDto> {
-    this.assertPuedeCrearRecurso(dto, actor);
-    await this.assertVinculoConLaOrganizacion(dto.tenantId, actor);
+    this.assertMayCreateResource(dto, actor);
+    await this.assertAffiliationWithOrganization(dto.tenantId, actor);
     this.logger.info(
       { operation: 'scheduling.resource.create', tenantId: dto.tenantId },
       'Creating schedulable resource',
@@ -293,7 +293,7 @@ export class SchedulingCatalogService {
       'Creating booking policy',
     );
 
-    this.assertTenantDelActor(dto.tenantId, actor);
+    this.assertActorTenant(dto.tenantId, actor);
 
     const duplicate = await this.catalogRepo.findPolicyByCode(
       this.em,
@@ -359,7 +359,7 @@ export class SchedulingCatalogService {
       // Con el redondeo hacia adelante una franja siempre da al menos uno —el
       // último se completa aunque pase la hora de fin—, salvo que ese turno
       // pise la franja siguiente del mismo día.
-      assertPrimerTurnoEntra(
+      assertFirstSlotFits(
         rule,
         dto.rules,
         rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
@@ -373,8 +373,8 @@ export class SchedulingCatalogService {
           resourceId,
         });
       }
-      this.assertRecursoDelActor(resource, actor);
-      await this.assertSinSolapeConSusOtrasAgendas(tx, resource, dto);
+      this.assertActorResource(resource, actor);
+      await this.assertNoOverlapWithOtherAgendas(tx, resource, dto);
 
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
@@ -412,7 +412,7 @@ export class SchedulingCatalogService {
           // como cero al generar. Escribir un cero que nadie declaró borraría
           // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
           gapMinutes: rule.gapMinutes,
-          bookingModeConceptId: modoDeFranja(rule.bookingMode),
+          bookingModeConceptId: bandMode(rule.bookingMode),
           actorUserId: actor.id,
         });
       }
@@ -486,7 +486,7 @@ export class SchedulingCatalogService {
           resourceId: template.resourceId,
         });
       }
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
 
       if (dto.name !== undefined) template.name = dto.name;
       if (dto.slotMinutes !== undefined) {
@@ -505,7 +505,7 @@ export class SchedulingCatalogService {
       ).length;
 
       if (dto.rules !== undefined) {
-        const slotMinutesEfectivo =
+        const effectiveSlotMinutes =
           dto.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
 
         for (const rule of dto.rules) {
@@ -515,10 +515,10 @@ export class SchedulingCatalogService {
               { dayOfWeek: rule.dayOfWeek },
             );
           }
-          assertPrimerTurnoEntra(
+          assertFirstSlotFits(
             rule,
             dto.rules,
-            rule.slotMinutes ?? slotMinutesEfectivo,
+            rule.slotMinutes ?? effectiveSlotMinutes,
           );
         }
 
@@ -529,10 +529,10 @@ export class SchedulingCatalogService {
             dayOfWeek: rule.dayOfWeek,
             startTime: rule.startTime,
             endTime: rule.endTime,
-            slotMinutes: rule.slotMinutes ?? slotMinutesEfectivo,
+            slotMinutes: rule.slotMinutes ?? effectiveSlotMinutes,
             capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
             gapMinutes: rule.gapMinutes,
-            bookingModeConceptId: modoDeFranja(rule.bookingMode),
+            bookingModeConceptId: bandMode(rule.bookingMode),
             actorUserId: actor.id,
           });
         }
@@ -696,7 +696,7 @@ export class SchedulingCatalogService {
     actor: AuthenticatedUser,
   ): Promise<CloseSlotsResponseDto> {
     if (
-      dto.exceptionType === MOTIVO_QUE_EXIGE_TEXTO &&
+      dto.exceptionType === REASON_REQUIRING_TEXT &&
       (dto.reason === undefined || dto.reason.trim() === '')
     ) {
       throw new PreconditionFailedException(
@@ -721,67 +721,67 @@ export class SchedulingCatalogService {
           resourceId,
         });
       }
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
 
-      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+      const slots = await this.catalogRepo.findSlotsOfResourceForUpdate(
         tx,
         resourceId,
         new Date(0),
-        FIN_DE_LOS_TIEMPOS,
+        END_OF_TIME,
         dto.slotIds,
       );
-      if (cupos.length === 0) {
+      if (slots.length === 0) {
         throw new ResourceNotFoundException(
           'Ninguno de esos cupos es de esta agenda',
           { resourceId, slotIds: dto.slotIds },
         );
       }
 
-      const conPaciente = await this.catalogRepo.findBookingsOfSlots(
+      const withPatient = await this.catalogRepo.findBookingsOfSlots(
         tx,
-        cupos.map((c) => c.id),
+        slots.map((c) => c.id),
         ACTIVE_BOOKING_STATES,
       );
-      if (conPaciente.length > 0) {
+      if (withPatient.length > 0) {
         throw new ConflictException(
           'Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos',
           {
             // Los ids y no los nombres: quien recibe esto es la pantalla, que
             // ya sabe pedir cada cita con su permiso.
-            bookingIds: conPaciente.map((b) => b.id),
+            bookingIds: withPatient.map((b) => b.id),
           },
         );
       }
 
-      const desde = cupos.reduce(
+      const from = slots.reduce(
         (min, c) => (c.startAt < min ? c.startAt : min),
-        cupos[0].startAt,
+        slots[0].startAt,
       );
-      const hasta = cupos.reduce((max, c) => {
-        const fin = c.endAt ?? c.startAt;
-        return fin > max ? fin : max;
-      }, cupos[0].endAt ?? cupos[0].startAt);
+      const to = slots.reduce((max, c) => {
+        const end = c.endAt ?? c.startAt;
+        return end > max ? end : max;
+      }, slots[0].endAt ?? slots[0].startAt);
 
-      for (const cupo of cupos) {
-        cupo.statusConceptId = CONCEPTS.SLOT_BLOCKED;
-        touch(cupo, actor.id);
+      for (const slot of slots) {
+        slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        touch(slot, actor.id);
       }
 
       const exception = this.catalogRepo.createException(tx, {
         resourceId,
         exceptionTypeConceptId: EXCEPTION_TYPE_CONCEPT[dto.exceptionType],
-        startAt: desde,
-        endAt: hasta,
+        startAt: from,
+        endAt: to,
         reason: dto.reason,
         isAvailable: false,
         actorUserId: actor.id,
       });
 
       return {
-        closedSlots: cupos.length,
+        closedSlots: slots.length,
         exceptionId: exception.id,
-        from: desde.toISOString(),
-        to: hasta.toISOString(),
+        from: from.toISOString(),
+        to: to.toISOString(),
       };
     });
   }
@@ -815,33 +815,33 @@ export class SchedulingCatalogService {
       'Shifting slots',
     );
 
-    const movidos = await this.em.transactional(async (tx) => {
+    const moved = await this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
         throw new ResourceNotFoundException('Recurso no encontrado', {
           resourceId,
         });
       }
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
 
-      const cupos = await this.catalogRepo.findSlotsOfResourceForUpdate(
+      const slots = await this.catalogRepo.findSlotsOfResourceForUpdate(
         tx,
         resourceId,
         from,
         to,
         dto.slotIds,
       );
-      if (cupos.length === 0) {
-        return { ids: [] as string[], desplazados: 0 };
+      if (slots.length === 0) {
+        return { ids: [] as string[], displaced: 0 };
       }
 
       const ms = dto.shiftMinutes * 60_000;
-      for (const cupo of cupos) {
-        cupo.startAt = new Date(cupo.startAt.getTime() + ms);
-        if (cupo.endAt !== undefined && cupo.endAt !== null) {
-          cupo.endAt = new Date(cupo.endAt.getTime() + ms);
+      for (const slot of slots) {
+        slot.startAt = new Date(slot.startAt.getTime() + ms);
+        if (slot.endAt !== undefined && slot.endAt !== null) {
+          slot.endAt = new Date(slot.endAt.getTime() + ms);
         }
-        touch(cupo, actor.id);
+        touch(slot, actor.id);
       }
 
       // El `flush` explícito acá y no al cerrar: si el horario nuevo pisa otra
@@ -849,17 +849,17 @@ export class SchedulingCatalogService {
       // sea de todos los cupos y no de algunos.
       await tx.flush();
 
-      return { ids: cupos.map((c) => c.id), desplazados: cupos.length };
+      return { ids: slots.map((c) => c.id), displaced: slots.length };
     });
 
-    const avisados = await this.avisarDelMovimiento(
-      movidos.ids,
+    const notified = await this.notifyOfMove(
+      moved.ids,
       dto.shiftMinutes,
     );
 
     return {
-      movedSlots: movidos.desplazados,
-      notified: avisados,
+      movedSlots: moved.displaced,
+      notified: notified,
       shiftMinutes: dto.shiftMinutes,
     };
   }
@@ -874,46 +874,46 @@ export class SchedulingCatalogService {
    * Un fallo al avisar no rompe la operación: se registra y sigue. La persona
    * ve el horario nuevo al entrar aunque el mensaje se haya perdido.
    */
-  private async avisarDelMovimiento(
+  private async notifyOfMove(
     slotIds: readonly string[],
-    minutos: number,
+    minutes: number,
   ): Promise<number> {
     if (slotIds.length === 0) return 0;
 
     const em = this.em.fork();
-    const citas = await this.catalogRepo.findBookingsOfSlots(
+    const bookings = await this.catalogRepo.findBookingsOfSlots(
       em,
       slotIds,
       ACTIVE_BOOKING_STATES,
     );
 
-    let avisados = 0;
-    for (const cita of citas) {
+    let notified = 0;
+    for (const booking of bookings) {
       try {
-        const snapshot = await this.noticeRepo.describeBooking(em, cita.id);
+        const snapshot = await this.noticeRepo.describeBooking(em, booking.id);
         if (snapshot === null) continue;
-        const cuenta = await this.noticeRepo.findAccountForProfile(
+        const account = await this.noticeRepo.findAccountForProfile(
           em,
-          cita.patientProfileId,
+          booking.patientProfileId,
         );
-        if (cuenta === null) continue;
+        if (account === null) continue;
 
         await this.notices.emit(
-          avisoDeHorarioMovido(snapshot, minutos, cuenta),
+          scheduleMovedNotice(snapshot, minutes, account),
         );
-        avisados += 1;
+        notified += 1;
       } catch (error: unknown) {
         this.logger.warn(
           {
             operation: 'scheduling.slots.shift.notice',
-            bookingId: cita.id,
+            bookingId: booking.id,
             error,
           },
           'No se pudo avisar del movimiento de horario',
         );
       }
     }
-    return avisados;
+    return notified;
   }
 
   async reactivateTemplate(
@@ -943,7 +943,7 @@ export class SchedulingCatalogService {
           { resourceId: template.resourceId },
         );
       }
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
 
       // Reactivar lo que ya está vigente no es un error del que haya que
       // avisar: es que alguien tocó dos veces. Se responde lo mismo.
@@ -1000,13 +1000,13 @@ export class SchedulingCatalogService {
           },
         );
       }
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
 
-      const citas = await this.catalogRepo.findBookingsOfTemplate(
+      const bookings = await this.catalogRepo.findBookingsOfTemplate(
         tx,
         templateId,
         ACTIVE_BOOKING_STATES,
-        TOPE_DE_CITAS_EN_EL_AVISO,
+        MAX_BOOKINGS_IN_NOTICE,
       );
 
       // M4 · H1.S2.M2: las citas VIVAS ya no frenan el retiro. Un médico en
@@ -1016,7 +1016,7 @@ export class SchedulingCatalogService {
       // se suelta ni se borra. Lo que cambia es que ahora corre, y la
       // respuesta dice cuáles citas siguen vivas para que la pantalla las
       // muestre. Contrato fijado por el CA del encargo de M4 (2026-09-26).
-      const retiro = await this.catalogRepo.retireTemplate(
+      const withdrawal = await this.catalogRepo.retireTemplate(
         tx,
         templateId,
         CONCEPTS.TEMPLATE_RETIRED,
@@ -1024,18 +1024,18 @@ export class SchedulingCatalogService {
       );
 
       // Con citas vivas, la muestra que devuelve el repositorio es de VIVAS.
-      const vivas = citas.live > 0 ? citas.sample : [];
+      const live = bookings.live > 0 ? bookings.sample : [];
       return {
         id: templateId,
         statusConceptId: CONCEPTS.TEMPLATE_RETIRED,
-        releasedSlots: retiro.releasedSlots,
-        keptSlots: retiro.keptSlots,
-        liveBookings: citas.live,
+        releasedSlots: withdrawal.releasedSlots,
+        keptSlots: withdrawal.keptSlots,
+        liveBookings: bookings.live,
         // Los ids y no los nombres: quien recibe esto es la pantalla, que
         // ya sabe pedir cada cita con su permiso. Mandar nombres acá
         // filtraría pacientes a cualquiera que administre agendas.
-        liveBookingIds: vivas.map((booking) => booking.id),
-        truncated: citas.live > vivas.length,
+        liveBookingIds: live.map((booking) => booking.id),
+        truncated: bookings.live > live.length,
       };
     });
   }
@@ -1082,16 +1082,16 @@ export class SchedulingCatalogService {
         tx,
         template.resourceId,
       );
-      const zona = resource?.timeZone ?? 'UTC';
-      if (resource) this.assertRecursoDelActor(resource, actor);
+      const zone = resource?.timeZone ?? 'UTC';
+      if (resource) this.assertActorResource(resource, actor);
 
       // REGLA MADRE (AG-1): los cupos que caerían sobre un compromiso del
       // profesional no se generan. Se cargan UNA vez para toda la ventana —
       // consultar por cupo sería un viaje a la base por cada media hora—.
-      const compromisos =
+      const commitments =
         resource &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
-          ? await this.tiempoProfesional.compromisos(
+        PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+          ? await this.professionalTime.commitments(
               tx,
               resource.resourceRefId,
               from,
@@ -1130,32 +1130,32 @@ export class SchedulingCatalogService {
         // separarla de la siguiente, que es justo lo contrario de lo que el
         // respiro existe para hacer.
         const gapMinutes = rule.gapMinutes ?? 0;
-        const pasoMinutes = slotMinutes + gapMinutes;
+        const stepMinutes = slotMinutes + gapMinutes;
 
         // Redondeo hacia adelante (propietario, 2026-10-04): el último turno
         // se COMPLETA aunque pase la hora de fin —cada hora le cuesta dinero al
         // médico, y cortarlo le regalaba el tramo final—. El único tope es la
         // franja siguiente del mismo día: el turno extendido no la pisa.
-        const siguiente = inicioDeLaFranjaSiguiente(rule, rules);
+        const next = nextBandStart(rule, rules);
 
-        for (const day of diasLocalesQueCoinciden(
+        for (const day of matchingLocalDays(
           from,
           to,
           rule.dayOfWeek,
-          zona,
+          zone,
         )) {
-          const dayStart = horaLocalAUtc(day, rule.startTime, zona);
-          const dayEnd = horaLocalAUtc(day, rule.endTime, zona);
-          const tope =
-            siguiente === null ? null : horaLocalAUtc(day, siguiente, zona);
+          const dayStart = localTimeToUtc(day, rule.startTime, zone);
+          const dayEnd = localTimeToUtc(day, rule.endTime, zone);
+          const cap =
+            next === null ? null : localTimeToUtc(day, next, zone);
 
           for (
             let cursor = dayStart;
             cursor < dayEnd;
-            cursor = new Date(cursor.getTime() + pasoMinutes * 60_000)
+            cursor = new Date(cursor.getTime() + stepMinutes * 60_000)
           ) {
             const end = new Date(cursor.getTime() + slotMinutes * 60_000);
-            if (tope !== null && end > tope) break;
+            if (cap !== null && end > cap) break;
             // El barrido de días locales se ensancha un día por lado, porque un
             // día de la sede puede empezar antes de `from` o terminar después de
             // `to`. Acá se recorta a lo que se pidió: sin esto, una ventana de
@@ -1170,9 +1170,9 @@ export class SchedulingCatalogService {
             // El cupo que pisa un compromiso se SALTEA, no aborta la corrida:
             // la cirugía del jueves no puede impedir generar el resto del mes.
             if (
-              compromisos.some(
-                (compromiso: { startAt: Date; endAt: Date }) =>
-                  compromiso.startAt < end && compromiso.endAt > cursor,
+              commitments.some(
+                (commitment: { startAt: Date; endAt: Date }) =>
+                  commitment.startAt < end && commitment.endAt > cursor,
               )
             ) {
               omittedByCommitments += 1;
@@ -1257,7 +1257,7 @@ export class SchedulingCatalogService {
         type,
         conceptId: EXCEPTION_TYPE_CONCEPT[type],
         label: EXCEPTION_TYPE_LABEL[type],
-        requiresText: type === MOTIVO_QUE_EXIGE_TEXTO,
+        requiresText: type === REASON_REQUIRING_TEXT,
         // `EXTRA` no bloquea: abre disponibilidad fuera del patrón. Viaja en la
         // misma lista porque es una excepción más, pero la pantalla necesita
         // distinguirlo para no ofrecerlo donde se espera un bloqueo.
@@ -1274,7 +1274,7 @@ export class SchedulingCatalogService {
     // «Otro» sin explicación no dice nada. Se comprueba en el servidor y no
     // sólo en el formulario: la regla es del catálogo, no de la pantalla.
     if (
-      dto.exceptionType === MOTIVO_QUE_EXIGE_TEXTO &&
+      dto.exceptionType === REASON_REQUIRING_TEXT &&
       (dto.reason === undefined || dto.reason.trim() === '')
     ) {
       throw new PreconditionFailedException(
@@ -1322,24 +1322,24 @@ export class SchedulingCatalogService {
       // Una reunión que pisa OTRA reunión es inofensiva y no se valida.
       if (
         !isAvailable &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+        PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
       ) {
-        const confirmadas = await this.tiempoProfesional.citasConfirmadas(
+        const confirmed = await this.professionalTime.confirmedBookings(
           tx,
           resource.resourceRefId,
           startAt,
           endAt,
         );
-        if (confirmadas.length > 0) {
-          const primera = confirmadas[0];
+        if (confirmed.length > 0) {
+          const first = confirmed[0];
           throw new PreconditionFailedException(
             `Tiene una cita confirmada en ese rato${
-              primera.resourceName ? ` en «${primera.resourceName}»` : ''
+              first.resourceName ? ` en «${first.resourceName}»` : ''
             }. Reprográmela primero o elija otro horario.`,
             {
-              bookingId: primera.id,
-              startAt: primera.startAt,
-              endAt: primera.endAt,
+              bookingId: first.id,
+              startAt: first.startAt,
+              endAt: first.endAt,
             },
           );
         }
@@ -1431,7 +1431,7 @@ export class SchedulingCatalogService {
       options.to,
       {
         onlyAvailable: options.onlyAvailable,
-        ahora: new Date(),
+        now: new Date(),
         limit: options.limit + 1,
         // Lo que se ofrece tiene que poder pedirse: un cupo bloqueado por una
         // excepción (AG-3) o retirado por una cita puntual (AG-2) conserva su
@@ -1468,9 +1468,9 @@ export class SchedulingCatalogService {
 
   /** Días del rango que caen en el día de la semana de la regla. */
   /** Si el actor administra agendas ajenas por oficio. */
-  private esAdministradorDeCatalogo(actor: AuthenticatedUser): boolean {
-    return actor.roles.some((rol) =>
-      ROLES_QUE_ADMINISTRAN_CATALOGO.includes(rol),
+  private isCatalogAdmin(actor: AuthenticatedUser): boolean {
+    return actor.roles.some((role) =>
+      CATALOG_ADMIN_ROLES.includes(role),
     );
   }
 
@@ -1529,67 +1529,67 @@ export class SchedulingCatalogService {
    * vencidas: una cuyo `validTo` ya pasó no puede chocar con nada que se
    * publique hoy, y hacerla chocar dejaría trabado a quien cambió de sede.
    */
-  private async assertSinSolapeConSusOtrasAgendas(
+  private async assertNoOverlapWithOtherAgendas(
     tx: EntityManager,
     resource: SchedulableResources,
     dto: CreateTemplateDto,
   ): Promise<void> {
-    const semana = semanaDeReferencia(
+    const week = referenceWeek(
       dto.validFrom ? new Date(dto.validFrom) : new Date(),
     );
-    const zonaPropia = resource.timeZone ?? 'UTC';
+    const ownZone = resource.timeZone ?? 'UTC';
 
-    const nuevas = dto.rules.map((rule) => ({
-      etiqueta: etiquetaDeFranja(rule),
-      ...intervaloEnSemana(
-        semana,
+    const newOnes = dto.rules.map((rule) => ({
+      label: bandLabel(rule),
+      ...intervalInWeek(
+        week,
         rule.dayOfWeek,
         rule.startTime,
         rule.endTime,
-        zonaPropia,
+        ownZone,
       ),
     }));
 
     // Primero contra sí mismas: dos franjas del mismo envío que se pisan son el
     // caso más frecuente, y detectarlo no cuesta una consulta.
-    for (let i = 0; i < nuevas.length; i += 1) {
-      for (let j = i + 1; j < nuevas.length; j += 1) {
-        if (seSolapan(nuevas[i], nuevas[j])) {
+    for (let i = 0; i < newOnes.length; i += 1) {
+      for (let j = i + 1; j < newOnes.length; j += 1) {
+        if (overlap(newOnes[i], newOnes[j])) {
           throw new PreconditionFailedException(
             'Dos franjas de esta agenda se solapan entre sí',
-            { nueva: nuevas[i].etiqueta, existente: nuevas[j].etiqueta },
+            { nueva: newOnes[i].label, existente: newOnes[j].label },
           );
         }
       }
     }
 
-    if (!TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
+    if (!PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)) {
       return;
     }
 
-    const ajenas = await this.catalogRepo.findRulesByResourceOwner(
+    const foreignOnes = await this.catalogRepo.findRulesByResourceOwner(
       tx,
       resource.resourceRefId,
       CONCEPTS.TEMPLATE_PUBLISHED,
       resource.id,
     );
 
-    for (const otra of ajenas) {
-      if (estaVencida(otra.validTo, semana.inicio)) continue;
+    for (const other of foreignOnes) {
+      if (isExpired(other.validTo, week.start)) continue;
 
-      const existente = {
-        etiqueta: etiquetaDeFranja(otra.rule),
-        ...intervaloEnSemana(
-          semana,
-          otra.rule.dayOfWeek,
-          otra.rule.startTime,
-          otra.rule.endTime,
-          otra.timeZone ?? 'UTC',
+      const existing = {
+        label: bandLabel(other.rule),
+        ...intervalInWeek(
+          week,
+          other.rule.dayOfWeek,
+          other.rule.startTime,
+          other.rule.endTime,
+          other.timeZone ?? 'UTC',
         ),
       };
 
-      const choque = nuevas.find((nueva) => seSolapan(nueva, existente));
-      if (choque) {
+      const clash = newOnes.find((newOne) => overlap(newOne, existing));
+      if (clash) {
         // El mensaje dice CUÁL agenda y CUÁNDO, no sólo que hay un choque.
         // Antes era «Ya tenés una agenda publicada que se superpone con esa
         // franja» y el detalle viajaba en `details`, que el traductor de
@@ -1597,39 +1597,39 @@ export class SchedulingCatalogService {
         // y no tenía forma de saber contra qué. Con varias agendas por
         // médico en los datos sembrados, eso es un callejón sin salida.
         throw new PreconditionFailedException(
-          `Ya tiene «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +
+          `Ya tiene «${other.resourceName}» el ${existing.label}, que se cruza con este ` +
             'horario. Cambie el horario o el día, o edite esa otra agenda.',
           {
-            dayOfWeek: otra.rule.dayOfWeek,
-            nueva: choque.etiqueta,
-            existente: existente.etiqueta,
-            agenda: otra.resourceName,
+            dayOfWeek: other.rule.dayOfWeek,
+            nueva: clash.label,
+            existente: existing.label,
+            agenda: other.resourceName,
           },
         );
       }
     }
   }
 
-  private assertPuedeCrearRecurso(
+  private assertMayCreateResource(
     dto: CreateResourceDto,
     actor: AuthenticatedUser,
   ): void {
-    if (this.esAdministradorDeCatalogo(actor)) return;
+    if (this.isCatalogAdmin(actor)) return;
 
-    const esSuPerfil =
+    const isOwnProfile =
       dto.resourceType === 'PRACTITIONER' &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(
+      PRACTITIONER_PROFILE_TABLES.includes(
         canonicalRefType(dto.resourceRefType),
       ) &&
       actor.practitionerProfileId !== undefined &&
       dto.resourceRefId === actor.practitionerProfileId;
-    if (!esSuPerfil) {
+    if (!isOwnProfile) {
       throw new ForbiddenException(
         'Un profesional solo puede publicar su propia agenda: el recurso debe ' +
           'apuntar a su perfil profesional.',
       );
     }
-    this.assertTenantDelActor(dto.tenantId, actor);
+    this.assertActorTenant(dto.tenantId, actor);
   }
 
   /**
@@ -1642,7 +1642,7 @@ export class SchedulingCatalogService {
    * clínicas privadas o centros que atiende» (3.2)—, y esto es lo que decide en
    * cuáles puede hacerlo: **pertenecer a la organización**, aprobado por ella.
    *
-   * `assertPuedeCrearRecurso` ya comprueba dos cosas distintas de ésta: que la
+   * `assertMayCreateResource` ya comprueba dos cosas distintas de ésta: que la
    * agenda sea del propio perfil, y que el tenant esté entre los del token. Lo
    * segundo dice «tenés acceso a esa organización»; esto dice «esa organización
    * te aceptó como profesional suyo», que no es lo mismo: una secretaria
@@ -1731,7 +1731,7 @@ export class SchedulingCatalogService {
         tx,
         exception.resourceId,
       );
-      if (resource) this.assertRecursoDelActor(resource, actor);
+      if (resource) this.assertActorResource(resource, actor);
 
       const startAt =
         dto.startAt === undefined ? exception.startAt : new Date(dto.startAt);
@@ -1747,19 +1747,19 @@ export class SchedulingCatalogService {
       // «Otro» sigue exigiendo explicación, y se mira el motivo QUE VA A
       // QUEDAR: cambiar el tipo a «Otro» sin tocar el texto dejaría un bloqueo
       // sin explicar por la puerta de atrás.
-      const tipoFinal = dto.exceptionType;
-      const textoFinal = dto.reason ?? exception.reason;
+      const finalType = dto.exceptionType;
+      const finalText = dto.reason ?? exception.reason;
       if (
-        tipoFinal === MOTIVO_QUE_EXIGE_TEXTO &&
-        (textoFinal === undefined || textoFinal.trim() === '')
+        finalType === REASON_REQUIRING_TEXT &&
+        (finalText === undefined || finalText.trim() === '')
       ) {
         throw new PreconditionFailedException(
           'Eligió «Otro» como motivo: escriba cuál es',
-          { exceptionType: tipoFinal },
+          { exceptionType: finalType },
         );
       }
 
-      const creció =
+      const grew =
         startAt < exception.startAt ||
         (endAt !== undefined &&
           endAt !== null &&
@@ -1767,8 +1767,8 @@ export class SchedulingCatalogService {
           exception.endAt !== null &&
           endAt > exception.endAt);
 
-      if (tipoFinal !== undefined) {
-        exception.exceptionTypeConceptId = EXCEPTION_TYPE_CONCEPT[tipoFinal];
+      if (finalType !== undefined) {
+        exception.exceptionTypeConceptId = EXCEPTION_TYPE_CONCEPT[finalType];
       }
       if (dto.reason !== undefined) exception.reason = dto.reason;
       exception.startAt = startAt;
@@ -1776,16 +1776,16 @@ export class SchedulingCatalogService {
       touch(exception, actor.id);
 
       let blockedSlots = 0;
-      if (creció && exception.isAvailable !== true) {
-        const alcanzados = await this.catalogRepo.findOpenSlotsInWindow(
+      if (grew && exception.isAvailable !== true) {
+        const reached = await this.catalogRepo.findOpenSlotsInWindow(
           tx,
           exception.resourceId,
           startAt,
           endAt ?? startAt,
         );
-        for (const slot of alcanzados) {
-          const intacto = slot.remainingCapacity === slot.capacity;
-          if (slot.statusConceptId === CONCEPTS.SLOT_OPEN && intacto) {
+        for (const slot of reached) {
+          const untouched = slot.remainingCapacity === slot.capacity;
+          if (slot.statusConceptId === CONCEPTS.SLOT_OPEN && untouched) {
             slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
             touch(slot, actor.id);
             blockedSlots += 1;
@@ -1826,7 +1826,7 @@ export class SchedulingCatalogService {
         tx,
         exception.resourceId,
       );
-      if (resource) this.assertRecursoDelActor(resource, actor);
+      if (resource) this.assertActorResource(resource, actor);
 
       this.logger.info(
         { operation: 'scheduling.exception.remove', exceptionId },
@@ -1836,13 +1836,13 @@ export class SchedulingCatalogService {
     });
   }
 
-  private async assertVinculoConLaOrganizacion(
+  private async assertAffiliationWithOrganization(
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.esAdministradorDeCatalogo(actor)) return;
+    if (this.isCatalogAdmin(actor)) return;
 
-    const veredicto = await this.vinculos.evaluar(tenantId, actor);
+    const verdict = await this.affiliations.evaluate(tenantId, actor);
 
     // `ausente` NO es una negativa: significa que nadie dijo nada sobre esta
     // organización. Quien llega hasta acá ya pasó el aislamiento de tenant, o
@@ -1853,20 +1853,20 @@ export class SchedulingCatalogService {
     // **su propio consultorio**, porque su único vínculo con sede apuntaba a
     // otra organización. Se encontró ejecutándolo, no leyéndolo.
     if (
-      veredicto === 'sin-vinculos' ||
-      veredicto === 'aprobado' ||
-      veredicto === 'ausente'
+      verdict === 'sin-vinculos' ||
+      verdict === 'aprobado' ||
+      verdict === 'ausente'
     ) {
       return;
     }
 
     throw new PreconditionFailedException(
-      veredicto === 'pendiente'
+      verdict === 'pendiente'
         ? 'Su vínculo con esta organización todavía está pendiente de ' +
             'aprobación. Cuando la acepten va a poder publicar su agenda acá.'
         : 'Su vínculo con esta organización no está vigente, así que no puede ' +
             'publicar agenda acá. Hable con ellos para reactivarlo.',
-      { tenantId, vinculo: veredicto },
+      { tenantId, vinculo: verdict },
     );
   }
 
@@ -1904,63 +1904,63 @@ export class SchedulingCatalogService {
         resourceId,
       });
     }
-    this.assertRecursoDelActor(resource, actor);
+    this.assertActorResource(resource, actor);
 
-    const plantillas = await this.catalogRepo.findTemplatesByResource(
+    const templates = await this.catalogRepo.findTemplatesByResource(
       em,
       resourceId,
     );
-    const franjas = await this.catalogRepo.findRulesByTemplates(
+    const bands = await this.catalogRepo.findRulesByTemplates(
       em,
-      plantillas.map((plantilla) => plantilla.id),
+      templates.map((template) => template.id),
     );
 
     // Se agrupan en memoria porque ya vinieron todas en una consulta: volver a
     // filtrar por plantilla sería una consulta por fila.
-    const porPlantilla = new Map<string, TemplateRuleDto[]>();
-    for (const franja of franjas) {
-      const lista = porPlantilla.get(franja.scheduleTemplateId) ?? [];
-      lista.push({
-        dayOfWeek: franja.dayOfWeek,
-        startTime: franja.startTime,
-        endTime: franja.endTime,
+    const byTemplate = new Map<string, TemplateRuleDto[]>();
+    for (const band of bands) {
+      const list = byTemplate.get(band.scheduleTemplateId) ?? [];
+      list.push({
+        dayOfWeek: band.dayOfWeek,
+        startTime: band.startTime,
+        endTime: band.endTime,
         // `== null` a propósito: una columna anulable que nadie completó
         // vuelve de MikroORM como `null`, no como `undefined`, y compararla
         // contra `undefined` la deja pasar. Es el mismo defecto que en el paso
         // de la foto del alta (#165), encontrado igual: probando contra la base
         // y no leyendo el diff.
-        ...(franja.slotMinutes == null
+        ...(band.slotMinutes == null
           ? {}
-          : { slotMinutes: franja.slotMinutes }),
-        ...(franja.capacityPerSlot == null
+          : { slotMinutes: band.slotMinutes }),
+        ...(band.capacityPerSlot == null
           ? {}
-          : { capacityPerSlot: franja.capacityPerSlot }),
-        ...(franja.gapMinutes == null ? {} : { gapMinutes: franja.gapMinutes }),
-        ...(franja.bookingModeConceptId == null
+          : { capacityPerSlot: band.capacityPerSlot }),
+        ...(band.gapMinutes == null ? {} : { gapMinutes: band.gapMinutes }),
+        ...(band.bookingModeConceptId == null
           ? {}
-          : { bookingMode: modoDelConcepto(franja.bookingModeConceptId) }),
+          : { bookingMode: modeOfConcept(band.bookingModeConceptId) }),
       });
-      porPlantilla.set(franja.scheduleTemplateId, lista);
+      byTemplate.set(band.scheduleTemplateId, list);
     }
 
-    const items = plantillas.map((plantilla) => ({
-      id: plantilla.id,
-      name: plantilla.name,
-      rules: porPlantilla.get(plantilla.id) ?? [],
-      ...(plantilla.slotMinutes == null
+    const items = templates.map((template) => ({
+      id: template.id,
+      name: template.name,
+      rules: byTemplate.get(template.id) ?? [],
+      ...(template.slotMinutes == null
         ? {}
-        : { slotMinutes: plantilla.slotMinutes }),
-      ...(plantilla.validFrom == null
+        : { slotMinutes: template.slotMinutes }),
+      ...(template.validFrom == null
         ? {}
-        : { validFrom: plantilla.validFrom.toISOString() }),
-      ...(plantilla.validTo == null
+        : { validFrom: template.validFrom.toISOString() }),
+      ...(template.validTo == null
         ? {}
-        : { validTo: plantilla.validTo.toISOString() }),
-      ...(plantilla.bookingPolicyId == null
+        : { validTo: template.validTo.toISOString() }),
+      ...(template.bookingPolicyId == null
         ? {}
-        : { bookingPolicyId: plantilla.bookingPolicyId }),
-      statusConceptId: plantilla.statusConceptId,
-      retired: plantilla.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
+        : { bookingPolicyId: template.bookingPolicyId }),
+      statusConceptId: template.statusConceptId,
+      retired: template.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
     }));
 
     return { items, count: items.length };
@@ -2007,35 +2007,35 @@ export class SchedulingCatalogService {
     // libre. Un paciente ve el motivo catalogado y NUNCA el texto libre, y sólo
     // de un médico con el que tiene cita — la misma regla con la que se
     // resuelve qué historial ve.
-    const esDelActor = this.puedeAdministrarRecurso(resource, actor);
-    let puedeLeer = esDelActor;
-    if (!puedeLeer && actor.patientProfileId !== undefined) {
-      puedeLeer = await this.catalogRepo.patientHasBookingWithResource(
+    const isActors = this.mayAdministerResource(resource, actor);
+    let mayRead = isActors;
+    if (!mayRead && actor.patientProfileId !== undefined) {
+      mayRead = await this.catalogRepo.patientHasBookingWithResource(
         em,
         resourceId,
         actor.patientProfileId,
       );
     }
-    if (!puedeLeer) {
+    if (!mayRead) {
       throw new ForbiddenException('No puede ver los bloqueos de esta agenda');
     }
 
-    const filas = await this.catalogRepo.findExceptionsByResourceInRange(
+    const rows = await this.catalogRepo.findExceptionsByResourceInRange(
       em,
       resourceId,
       from,
       to,
     );
 
-    const items = filas.map((fila) => ({
-      id: fila.id,
-      exceptionTypeConceptId: fila.exceptionTypeConceptId,
-      startAt: fila.startAt.toISOString(),
-      endAt: fila.endAt.toISOString(),
+    const items = rows.map((row) => ({
+      id: row.id,
+      exceptionTypeConceptId: row.exceptionTypeConceptId,
+      startAt: row.startAt.toISOString(),
+      endAt: row.endAt.toISOString(),
       // El motivo catalogado viaja para todos: es una etiqueta de una lista
       // cerrada —«Vacaciones», «Congreso»— y no puede contener nada que el
       // profesional no haya elegido a propósito.
-      reasonLabel: this.etiquetaDeMotivo(fila.exceptionTypeConceptId),
+      reasonLabel: this.reasonLabel(row.exceptionTypeConceptId),
       // El texto libre, en cambio, SÓLO para quien administra la agenda. Es lo
       // que el médico escribe cuando elige «Otro», y ahí puede aparecer
       // cualquier cosa: «cirugía de la Sra. Pérez» son datos clínicos de un
@@ -2043,8 +2043,8 @@ export class SchedulingCatalogService {
       //
       // `== null` y no `=== undefined`: una columna anulable sin completar
       // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
-      ...(esDelActor && fila.reason != null ? { reason: fila.reason } : {}),
-      ...(fila.isAvailable == null ? {} : { isAvailable: fila.isAvailable }),
+      ...(isActors && row.reason != null ? { reason: row.reason } : {}),
+      ...(row.isAvailable == null ? {} : { isAvailable: row.isAvailable }),
     }));
 
     return { items, count: items.length };
@@ -2056,42 +2056,42 @@ export class SchedulingCatalogService {
    * El mapa va en la otra dirección que {@link EXCEPTION_TYPE_CONCEPT}: la fila
    * guarda el uuid y la pantalla necesita la palabra.
    */
-  private etiquetaDeMotivo(conceptId: string): string {
-    const tipo = EXCEPTION_TYPES.find(
+  private reasonLabel(conceptId: string): string {
+    const type = EXCEPTION_TYPES.find(
       (t) => EXCEPTION_TYPE_CONCEPT[t] === conceptId,
     );
     // Un concepto que no está en el catálogo es un dato viejo o sembrado por
     // fuera. Se dice «Bloqueado» en vez de mostrar un uuid o romper la lectura.
-    return tipo === undefined ? 'Bloqueado' : EXCEPTION_TYPE_LABEL[tipo];
+    return type === undefined ? 'Bloqueado' : EXCEPTION_TYPE_LABEL[type];
   }
 
   /**
-   * Si el actor administra este recurso. Es {@link assertRecursoDelActor} sin
+   * Si el actor administra este recurso. Es {@link assertActorResource} sin
    * lanzar, para los casos en que «no» no es un error sino menos detalle.
    */
-  private puedeAdministrarRecurso(
+  private mayAdministerResource(
     resource: { resourceRefType: string; resourceRefId: string },
     actor: AuthenticatedUser,
   ): boolean {
     try {
-      this.assertRecursoDelActor(resource, actor);
+      this.assertActorResource(resource, actor);
       return true;
     } catch {
       return false;
     }
   }
 
-  private assertRecursoDelActor(
+  private assertActorResource(
     resource: { resourceRefType: string; resourceRefId: string },
     actor: AuthenticatedUser,
   ): void {
-    if (this.esAdministradorDeCatalogo(actor)) return;
+    if (this.isCatalogAdmin(actor)) return;
 
-    const esSuAgenda =
+    const isOwnAgenda =
       actor.practitionerProfileId !== undefined &&
       resource.resourceRefId === actor.practitionerProfileId &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType);
-    if (!esSuAgenda) {
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
+    if (!isOwnAgenda) {
       throw new ForbiddenException(
         'Esta agenda es de otro profesional: solo la administra quien atiende ' +
           'en ella.',
@@ -2107,11 +2107,11 @@ export class SchedulingCatalogService {
    * uno del que no es miembro — donde su agenda existiría pero jamás se
    * listaría, que es una forma silenciosa de no existir.
    */
-  private assertTenantDelActor(
+  private assertActorTenant(
     tenantId: string,
     actor: AuthenticatedUser,
   ): void {
-    if (this.esAdministradorDeCatalogo(actor)) return;
+    if (this.isCatalogAdmin(actor)) return;
     if (!actor.tenantIds?.includes(tenantId)) {
       throw new ForbiddenException(
         'El tenant indicado no es uno de los del actor.',
@@ -2140,19 +2140,19 @@ export class SchedulingCatalogService {
  * ambigüedad. Las filas anteriores se siguen tolerando en lectura hasta que se
  * regeneren los seeds.
  */
-const ALIAS_DE_TABLA: Readonly<Record<string, string>> = {
+const TABLE_ALIAS: Readonly<Record<string, string>> = {
   practitioner_profiles: 'health_practitioner_profiles',
 };
 
 function canonicalRefType(refType: string): string {
-  return ALIAS_DE_TABLA[refType] ?? refType;
+  return TABLE_ALIAS[refType] ?? refType;
 }
 
 /** Milisegundos de un día del calendario. */
-const UN_DIA_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Los siete días de la semana, para nombrar la franja que choca. */
-const NOMBRE_DEL_DIA: readonly string[] = [
+const DAY_NAME: readonly string[] = [
   'domingo',
   'lunes',
   'martes',
@@ -2169,11 +2169,11 @@ const NOMBRE_DEL_DIA: readonly string[] = [
  * de pared de zonas distintas no se pueden comparar sin aterrizarlas en un
  * instante. Esta es esa tierra: siete fechas reales, una por día de la semana.
  */
-interface SemanaDeReferencia {
+interface ReferenceWeek {
   /** Fecha del calendario de cada día de la semana, indexada 0 = domingo. */
-  readonly fechas: readonly DiaLocal[];
+  readonly dates: readonly LocalDay[];
   /** Domingo de la semana, como instante, para descartar plantillas vencidas. */
-  readonly inicio: Date;
+  readonly start: Date;
 }
 
 /**
@@ -2183,49 +2183,49 @@ interface SemanaDeReferencia {
  * ellas es que sean siete días consecutivos con el día de semana correcto: la
  * zona entra después, al convertir cada hora de pared sobre esas fechas.
  *
- * @param desde - Instante de referencia.
+ * @param from - Instante de referencia.
  * @returns Las siete fechas de esa semana y su domingo.
  */
-function semanaDeReferencia(desde: Date): SemanaDeReferencia {
+function referenceWeek(from: Date): ReferenceWeek {
   const base = Date.UTC(
-    desde.getUTCFullYear(),
-    desde.getUTCMonth(),
-    desde.getUTCDate(),
+    from.getUTCFullYear(),
+    from.getUTCMonth(),
+    from.getUTCDate(),
   );
-  const domingo = base - new Date(base).getUTCDay() * UN_DIA_MS;
+  const sunday = base - new Date(base).getUTCDay() * ONE_DAY_MS;
 
-  const fechas = Array.from({ length: 7 }, (_, indice) => {
-    const fecha = new Date(domingo + indice * UN_DIA_MS);
+  const dates = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(sunday + index * ONE_DAY_MS);
     return {
-      year: fecha.getUTCFullYear(),
-      month: fecha.getUTCMonth() + 1,
-      day: fecha.getUTCDate(),
+      year: date.getUTCFullYear(),
+      month: date.getUTCMonth() + 1,
+      day: date.getUTCDate(),
     };
   });
 
-  return { fechas, inicio: new Date(domingo) };
+  return { dates: dates, start: new Date(sunday) };
 }
 
 /**
  * Proyecta una franja semanal sobre la semana de referencia.
  *
- * @param semana - Semana sobre la que aterrizar.
- * @param diaSemana - Día de la regla, 0 = domingo.
- * @param inicio - Hora de pared de comienzo.
- * @param fin - Hora de pared de fin.
- * @param zona - Zona de la sede donde esa hora de pared se lee.
+ * @param week - Semana sobre la que aterrizar.
+ * @param weekday - Día de la regla, 0 = domingo.
+ * @param start - Hora de pared de comienzo.
+ * @param end - Hora de pared de fin.
+ * @param zone - Zona de la sede donde esa hora de pared se lee.
  */
-function intervaloEnSemana(
-  semana: SemanaDeReferencia,
-  diaSemana: number,
-  inicio: string,
-  fin: string,
-  zona: string,
-): { desde: number; hasta: number } {
-  const fecha = semana.fechas[((diaSemana % 7) + 7) % 7];
+function intervalInWeek(
+  week: ReferenceWeek,
+  weekday: number,
+  start: string,
+  end: string,
+  zone: string,
+): { from: number; to: number } {
+  const date = week.dates[((weekday % 7) + 7) % 7];
   return {
-    desde: horaLocalAUtc(fecha, inicio, zona).getTime(),
-    hasta: horaLocalAUtc(fecha, fin, zona).getTime(),
+    from: localTimeToUtc(date, start, zone).getTime(),
+    to: localTimeToUtc(date, end, zone).getTime(),
   };
 }
 
@@ -2235,16 +2235,16 @@ function intervaloEnSemana(
  * Los extremos no cuentan: terminar a las 12:00 en una sede y empezar a las
  * 12:00 en otra no es estar en dos lados a la vez.
  */
-function seSolapan(
-  a: { desde: number; hasta: number },
-  b: { desde: number; hasta: number },
+function overlap(
+  a: { from: number; to: number },
+  b: { from: number; to: number },
 ): boolean {
-  return a.desde < b.hasta && b.desde < a.hasta;
+  return a.from < b.to && b.from < a.to;
 }
 
 /** Los minutos desde medianoche de un `HH:MM` o `HH:MM:SS`. */
 /** Lo mínimo de una franja que el redondeo necesita mirar. */
-interface FranjaDelDia {
+interface DayBand {
   dayOfWeek: number;
   startTime: string;
   endTime: string;
@@ -2255,18 +2255,18 @@ interface FranjaDelDia {
  * última. Es el tope del redondeo hacia adelante: el último turno se completa
  * pasando la hora de fin, pero no puede pisar la franja de la tarde.
  */
-export function inicioDeLaFranjaSiguiente(
-  franja: FranjaDelDia,
-  franjas: readonly FranjaDelDia[],
+export function nextBandStart(
+  band: DayBand,
+  bands: readonly DayBand[],
 ): string | null {
-  const posteriores = franjas
+  const later = bands
     .filter(
-      (otra) =>
-        otra.dayOfWeek === franja.dayOfWeek && otra.startTime >= franja.endTime,
+      (other) =>
+        other.dayOfWeek === band.dayOfWeek && other.startTime >= band.endTime,
     )
-    .map((otra) => otra.startTime)
+    .map((other) => other.startTime)
     .sort();
-  return posteriores[0] ?? null;
+  return later[0] ?? null;
 }
 
 /**
@@ -2275,35 +2275,35 @@ export function inicioDeLaFranjaSiguiente(
  * Con el redondeo hacia adelante eso sólo pasa cuando el turno, completo,
  * pisaría la franja siguiente del mismo día.
  */
-function assertPrimerTurnoEntra(
-  franja: FranjaDelDia,
-  franjas: readonly FranjaDelDia[],
+function assertFirstSlotFits(
+  band: DayBand,
+  bands: readonly DayBand[],
   slotMinutes: number,
 ): void {
-  const siguiente = inicioDeLaFranjaSiguiente(franja, franjas);
-  if (siguiente === null) return;
-  const finDelPrimero = minutosDelDia(franja.startTime) + slotMinutes;
-  if (finDelPrimero > minutosDelDia(siguiente)) {
+  const next = nextBandStart(band, bands);
+  if (next === null) return;
+  const firstEnd = minutesOfDay(band.startTime) + slotMinutes;
+  if (firstEnd > minutesOfDay(next)) {
     throw new PreconditionFailedException(
-      `La cita de ${slotMinutes} min que empieza a las ${franja.startTime} pisaría la franja de las ${siguiente}`,
-      { dayOfWeek: franja.dayOfWeek, slotMinutes, siguiente },
+      `La cita de ${slotMinutes} min que empieza a las ${band.startTime} pisaría la franja de las ${next}`,
+      { dayOfWeek: band.dayOfWeek, slotMinutes, siguiente: next },
     );
   }
 }
 
-function minutosDelDia(hhmm: string): number {
+function minutesOfDay(hhmm: string): number {
   const [h, m] = hhmm.split(':');
   return Number(h) * 60 + Number(m ?? 0);
 }
 
 /** Cómo se nombra una franja cuando hay que decir con cuál choca. */
-function etiquetaDeFranja(rule: {
+function bandLabel(rule: {
   dayOfWeek: number;
   startTime: string;
   endTime: string;
 }): string {
-  const dia = NOMBRE_DEL_DIA[((rule.dayOfWeek % 7) + 7) % 7] ?? '?';
-  return `${dia} ${rule.startTime}–${rule.endTime}`;
+  const day = DAY_NAME[((rule.dayOfWeek % 7) + 7) % 7] ?? '?';
+  return `${day} ${rule.startTime}–${rule.endTime}`;
 }
 
 /**
@@ -2312,8 +2312,8 @@ function etiquetaDeFranja(rule: {
  * Una plantilla vencida no puede chocar con nada que se publique hoy, y
  * hacerla chocar dejaría trabado a quien cambió de sede el mes pasado.
  */
-function estaVencida(validTo: Date | undefined, inicioSemana: Date): boolean {
+function isExpired(validTo: Date | undefined, weekStart: Date): boolean {
   return validTo !== undefined && validTo !== null
-    ? validTo.getTime() < inicioSemana.getTime()
+    ? validTo.getTime() < weekStart.getTime()
     : false;
 }

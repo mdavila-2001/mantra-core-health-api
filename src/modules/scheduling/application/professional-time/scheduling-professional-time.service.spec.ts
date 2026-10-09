@@ -15,7 +15,7 @@ import { SCHED } from '../../domain/scheduling.concepts';
 const HP = 'aaaaaaaa-0000-0000-0000-0000000000hp';
 
 /** Un compromiso confirmado, con lo que la consulta devuelve. */
-function compromiso(over: Record<string, unknown> = {}) {
+function commitment(over: Record<string, unknown> = {}) {
   return {
     id: 'bk-1',
     startAt: new Date('2026-09-03T14:00:00Z'),
@@ -49,7 +49,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
   it('bloquea el calendario del profesional con un advisory lock transaccional', async () => {
     const d = build();
 
-    await d.service.bloquearAgendaDeProfesional(d.em as any, HP);
+    await d.service.lockPractitionerAgenda(d.em as any, HP);
 
     expect(d.execute).toHaveBeenCalledWith(
       expect.stringContaining('pg_advisory_xact_lock'),
@@ -60,7 +60,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
   it('con el rango libre no dice nada', async () => {
     const d = build();
 
-    await d.service.assertRangoLibre(
+    await d.service.assertRangeFree(
       d.em as any,
       HP,
       new Date('2026-09-03T15:00:00Z'),
@@ -75,11 +75,11 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     // consultorio A, y el sistema dejaba confirmar 14:15–14:45 en el B.
     const d = build();
     d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
-      compromiso(),
+      commitment(),
     ]);
 
     await expect(
-      d.service.assertRangoLibre(
+      d.service.assertRangeFree(
         d.em as any,
         HP,
         new Date('2026-09-03T14:15:00Z'),
@@ -94,11 +94,11 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     // consulta de las 14:00 haría buscar un choque que no se ve.
     const d = build();
     d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
-      compromiso(),
+      commitment(),
     ]);
 
     await expect(
-      d.service.assertRangoLibre(
+      d.service.assertRangeFree(
         d.em as any,
         HP,
         new Date('2026-09-03T14:00:00Z'),
@@ -110,12 +110,12 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
   it('sin nombre del paciente el mensaje degrada, no se rompe', async () => {
     const d = build();
     d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
-      compromiso({ patientProfileId: 'pp-sin-nombre' }),
+      commitment({ patientProfileId: 'pp-sin-nombre' }),
     ]);
     d.bookingsRepo.findPatientNames.mockResolvedValue(new Map());
 
     await expect(
-      d.service.assertRangoLibre(
+      d.service.assertRangeFree(
         d.em as any,
         HP,
         new Date('2026-09-03T14:00:00Z'),
@@ -129,7 +129,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     // su propia versión anterior.
     const d = build();
 
-    await d.service.assertRangoLibre(
+    await d.service.assertRangeFree(
       d.em as any,
       HP,
       new Date('2026-09-03T14:00:00Z'),
@@ -137,9 +137,9 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
       'bk-propia',
     );
 
-    const llamada =
+    const call =
       d.bookingsRepo.findProfessionalCommitmentsOverlapping.mock.calls[0];
-    expect(llamada[5]).toBe('bk-propia');
+    expect(call[5]).toBe('bk-propia');
   });
 
   it('cuentan confirmada, con paciente adentro y en curso, no lo pendiente', async () => {
@@ -148,30 +148,30 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     // con pedidos que quizá nadie acepte.
     const d = build();
 
-    await d.service.compromisos(
+    await d.service.commitments(
       {} as any,
       HP,
       new Date('2026-09-03T14:00:00Z'),
       new Date('2026-09-03T15:00:00Z'),
     );
 
-    const estados =
+    const states =
       d.bookingsRepo.findProfessionalCommitmentsOverlapping.mock.calls[0][4];
-    expect(estados).toHaveLength(3);
-    expect(estados).toContain(SCHED.BOOKING_IN_PROGRESS);
+    expect(states).toHaveLength(3);
+    expect(states).toContain(SCHED.BOOKING_IN_PROGRESS);
   });
 
   it('una consulta en curso compromete el tiempo del profesional', async () => {
     // La #3.3 (turno de mostrador WALK_IN) chocaba con la base en vez de con
     // la regla madre: una reserva IN_PROGRESS —el paciente ya está adentro—
-    // no contaba como compromiso y `assertRangoLibre` la dejaba pasar.
+    // no contaba como compromiso y `assertRangeFree` la dejaba pasar.
     const d = build();
     d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
-      compromiso({ statusConceptId: SCHED.BOOKING_IN_PROGRESS }),
+      commitment({ statusConceptId: SCHED.BOOKING_IN_PROGRESS }),
     ]);
 
     await expect(
-      d.service.assertRangoLibre(
+      d.service.assertRangeFree(
         d.em as any,
         HP,
         new Date('2026-09-03T14:15:00Z'),
@@ -196,7 +196,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
     ]);
 
     await expect(
-      d.service.assertRangoLibre(
+      d.service.assertRangeFree(
         d.em as any,
         HP,
         new Date('2026-09-03T17:00:00Z'),
@@ -208,7 +208,7 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
   it('los compromisos mezclan citas y tiempo ocupado, ordenados', async () => {
     const d = build();
     d.bookingsRepo.findProfessionalCommitmentsOverlapping.mockResolvedValue([
-      compromiso({
+      commitment({
         startAt: new Date('2026-09-03T16:00:00Z'),
         endAt: new Date('2026-09-03T16:30:00Z'),
       }),
@@ -224,13 +224,13 @@ describe('SchedulingProfessionalTimeService — la regla madre (AG-1)', () => {
       },
     ]);
 
-    const lista = await d.service.compromisos(
+    const list = await d.service.commitments(
       {} as any,
       HP,
       new Date('2026-09-03T14:00:00Z'),
       new Date('2026-09-03T18:00:00Z'),
     );
 
-    expect(lista.map((c) => c.kind)).toEqual(['ocupado', 'cita']);
+    expect(list.map((c) => c.kind)).toEqual(['ocupado', 'cita']);
   });
 });

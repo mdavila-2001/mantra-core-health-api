@@ -23,13 +23,13 @@ import type {
 import type { ServiceCatalog } from '../../../billing/entities';
 
 /** Quién administra las agendas de otros por oficio. */
-const ROLES_QUE_ADMINISTRAN_AGENDAS: readonly string[] = [
+const AGENDA_ADMIN_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SUPERADMIN',
 ];
 
 /** Modalidad de atención, a su concepto de `clinical`. */
-export const CONCEPTO_DE_MODALIDAD: Readonly<
+export const CONCEPT_OF_MODALITY: Readonly<
   Record<AppointmentChannel, string>
 > = {
   PRESENCIAL: CLIN.APPOINTMENT_CHANNEL_IN_PERSON,
@@ -38,9 +38,9 @@ export const CONCEPTO_DE_MODALIDAD: Readonly<
 };
 
 /** Y de vuelta: el concepto guardado, a lo que el cliente entiende. */
-const MODALIDAD_DEL_CONCEPTO: ReadonlyMap<string, AppointmentChannel> = new Map(
-  (Object.entries(CONCEPTO_DE_MODALIDAD) as [AppointmentChannel, string][]).map(
-    ([modalidad, concepto]) => [concepto, modalidad],
+const MODALITY_OF_CONCEPT: ReadonlyMap<string, AppointmentChannel> = new Map(
+  (Object.entries(CONCEPT_OF_MODALITY) as [AppointmentChannel, string][]).map(
+    ([modality, concept]) => [concept, modality],
   ),
 );
 
@@ -74,11 +74,11 @@ export class SchedulingServiceOfferingsService {
     dto: CreateServiceOfferingDto,
     actor: AuthenticatedUser,
   ): Promise<ServiceOfferingDto> {
-    const practitionerProfileId = this.duenoDeLaOferta(
+    const practitionerProfileId = this.offeringOwner(
       actor,
       dto.practitionerProfileId,
     );
-    validarDuraciones(dto.minDurationMinutes, dto.maxDurationMinutes);
+    validateDurations(dto.minDurationMinutes, dto.maxDurationMinutes);
 
     this.logger.info(
       {
@@ -90,35 +90,35 @@ export class SchedulingServiceOfferingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const servicio = await this.repo.findCatalogItem(
+      const service = await this.repo.findCatalogItem(
         tx,
         dto.serviceCatalogId,
       );
-      await this.assertServicioAlcanzable(
-        servicio,
+      await this.assertServiceReachable(
+        service,
         practitionerProfileId,
         dto.serviceCatalogId,
       );
-      if (servicio === null || !servicio.isActive) {
+      if (service === null || !service.isActive) {
         throw new PreconditionFailedException(
           'Ese servicio está inactivo en el catálogo.',
           { serviceCatalogId: dto.serviceCatalogId },
         );
       }
 
-      const existente = await this.repo.findOfferingOf(
+      const existing = await this.repo.findOfferingOf(
         tx,
         practitionerProfileId,
         dto.serviceCatalogId,
       );
-      if (existente !== null) {
+      if (existing !== null) {
         throw new ConflictException(
           'Ya ofrece ese servicio. Edite la oferta que ya tiene.',
-          { offeringId: existente.id },
+          { offeringId: existing.id },
         );
       }
 
-      const oferta = this.repo.createOffering(tx, {
+      const offering = this.repo.createOffering(tx, {
         practitionerProfileId,
         serviceCatalogId: dto.serviceCatalogId,
         minDurationMinutes: dto.minDurationMinutes,
@@ -130,12 +130,12 @@ export class SchedulingServiceOfferingsService {
         channelConceptId:
           dto.channel === undefined
             ? undefined
-            : CONCEPTO_DE_MODALIDAD[dto.channel],
+            : CONCEPT_OF_MODALITY[dto.channel],
         statusConceptId: SCHED.OFFERING_ACTIVE,
         actorUserId: actor.id,
       });
       await tx.flush();
-      return aDto(oferta, servicio);
+      return aDto(offering, service);
     });
   }
 
@@ -146,41 +146,41 @@ export class SchedulingServiceOfferingsService {
     actor: AuthenticatedUser,
   ): Promise<ServiceOfferingDto> {
     return this.em.transactional(async (tx) => {
-      const oferta = await this.repo.findOfferingById(tx, id);
-      if (oferta === null) {
+      const offering = await this.repo.findOfferingById(tx, id);
+      if (offering === null) {
         throw new ResourceNotFoundException('Oferta no encontrada', { id });
       }
-      this.assertEsSuya(oferta, actor);
+      this.assertIsOwn(offering, actor);
 
-      const min = dto.minDurationMinutes ?? oferta.minDurationMinutes;
-      const max = dto.maxDurationMinutes ?? oferta.maxDurationMinutes;
-      validarDuraciones(min, max);
+      const min = dto.minDurationMinutes ?? offering.minDurationMinutes;
+      const max = dto.maxDurationMinutes ?? offering.maxDurationMinutes;
+      validateDurations(min, max);
 
-      oferta.minDurationMinutes = min;
-      oferta.maxDurationMinutes = max;
-      if (dto.prepMinutes !== undefined) oferta.prepMinutes = dto.prepMinutes;
+      offering.minDurationMinutes = min;
+      offering.maxDurationMinutes = max;
+      if (dto.prepMinutes !== undefined) offering.prepMinutes = dto.prepMinutes;
       if (dto.cleanupMinutes !== undefined)
-        oferta.cleanupMinutes = dto.cleanupMinutes;
+        offering.cleanupMinutes = dto.cleanupMinutes;
       if (dto.isPatientBookable !== undefined)
-        oferta.isPatientBookable = dto.isPatientBookable;
+        offering.isPatientBookable = dto.isPatientBookable;
       if (dto.requiresApproval !== undefined)
-        oferta.requiresApproval = dto.requiresApproval;
+        offering.requiresApproval = dto.requiresApproval;
       if (dto.channel !== undefined) {
-        oferta.channelConceptId = CONCEPTO_DE_MODALIDAD[dto.channel];
+        offering.channelConceptId = CONCEPT_OF_MODALITY[dto.channel];
       }
       if (dto.isActive !== undefined) {
-        oferta.statusConceptId = dto.isActive
+        offering.statusConceptId = dto.isActive
           ? SCHED.OFFERING_ACTIVE
           : SCHED.OFFERING_INACTIVE;
       }
-      touch(oferta, actor.id);
+      touch(offering, actor.id);
       await tx.flush();
 
-      const servicio = await this.repo.findCatalogItem(
+      const service = await this.repo.findCatalogItem(
         tx,
-        oferta.serviceCatalogId,
+        offering.serviceCatalogId,
       );
-      return aDto(oferta, servicio);
+      return aDto(offering, service);
     });
   }
 
@@ -195,60 +195,60 @@ export class SchedulingServiceOfferingsService {
     practitionerProfileId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<ServiceOfferingListDto> {
-    const objetivo = practitionerProfileId ?? actor.practitionerProfileId;
-    if (objetivo === undefined) {
+    const goal = practitionerProfileId ?? actor.practitionerProfileId;
+    if (goal === undefined) {
       throw new PreconditionFailedException(
         'Indique de qué profesional quiere ver los servicios.',
         {},
       );
     }
-    const veTodo = this.puedeVerTodo(actor, objetivo);
+    const seesAll = this.maySeeAll(actor, goal);
 
     return this.em.transactional(async (tx) => {
-      const ofertas = await this.repo.listOfferings(
+      const offerings = await this.repo.listOfferings(
         tx,
-        objetivo,
-        veTodo
+        goal,
+        seesAll
           ? {}
-          : { statusConceptId: SCHED.OFFERING_ACTIVE, soloReservables: true },
+          : { statusConceptId: SCHED.OFFERING_ACTIVE, onlyBookable: true },
       );
-      const catalogo = await this.repo.findCatalogItems(
+      const catalog = await this.repo.findCatalogItems(
         tx,
-        ofertas.map((oferta) => oferta.serviceCatalogId),
+        offerings.map((offering) => offering.serviceCatalogId),
       );
-      const porId = new Map(
-        catalogo.map((servicio) => [servicio.id, servicio]),
+      const byId = new Map(
+        catalog.map((service) => [service.id, service]),
       );
       return {
-        items: ofertas
-          .map((oferta) =>
-            aDto(oferta, porId.get(oferta.serviceCatalogId) ?? null),
+        items: offerings
+          .map((offering) =>
+            aDto(offering, byId.get(offering.serviceCatalogId) ?? null),
           )
           // Un servicio que el catálogo apagó no se ofrece aunque la oferta siga viva.
-          .filter((oferta) => veTodo || oferta.isActive),
+          .filter((offering) => seesAll || offering.isActive),
       };
     });
   }
 
   /** Quién es el profesional dueño de la oferta que se está creando. */
-  private duenoDeLaOferta(actor: AuthenticatedUser, pedido?: string): string {
-    const administra = actor.roles.some((rol) =>
-      ROLES_QUE_ADMINISTRAN_AGENDAS.includes(rol),
+  private offeringOwner(actor: AuthenticatedUser, requested?: string): string {
+    const administers = actor.roles.some((role) =>
+      AGENDA_ADMIN_ROLES.includes(role),
     );
-    const propio = actor.practitionerProfileId;
+    const own = actor.practitionerProfileId;
 
     // Pidió una oferta para OTRO profesional: sólo quien administra agendas puede.
-    if (pedido !== undefined && pedido !== propio) {
-      if (!administra) {
+    if (requested !== undefined && requested !== own) {
+      if (!administers) {
         throw new ForbiddenException('Sólo puede crear ofertas para usted.');
       }
-      return pedido;
+      return requested;
     }
     // Sin pedido explícito la oferta es de quien atiende. Hay quien atiende Y
     // administra agendas (el consultorio propio): exigirle su propio id sería
     // pedirle un dato que el servidor ya tiene.
-    if (propio !== undefined) return propio;
-    if (administra) {
+    if (own !== undefined) return own;
+    if (administers) {
       throw new PreconditionFailedException(
         'Indique de qué profesional es la oferta.',
         {},
@@ -257,54 +257,54 @@ export class SchedulingServiceOfferingsService {
     throw new ForbiddenException('Sólo un profesional ofrece servicios.');
   }
 
-  private assertEsSuya(
-    oferta: PractitionerServiceOfferings,
+  private assertIsOwn(
+    offering: PractitionerServiceOfferings,
     actor: AuthenticatedUser,
   ): void {
-    const administra = actor.roles.some((rol) =>
-      ROLES_QUE_ADMINISTRAN_AGENDAS.includes(rol),
+    const administers = actor.roles.some((role) =>
+      AGENDA_ADMIN_ROLES.includes(role),
     );
     if (
-      administra ||
-      actor.practitionerProfileId === oferta.practitionerProfileId
+      administers ||
+      actor.practitionerProfileId === offering.practitionerProfileId
     ) {
       return;
     }
     // 404 y no 403: una oferta ajena no se distingue de una inexistente.
     throw new ResourceNotFoundException('Oferta no encontrada', {
-      id: oferta.id,
+      id: offering.id,
     });
   }
 
-  private puedeVerTodo(actor: AuthenticatedUser, objetivo: string): boolean {
+  private maySeeAll(actor: AuthenticatedUser, goal: string): boolean {
     return (
-      actor.practitionerProfileId === objetivo ||
-      actor.roles.some((rol) => ROLES_QUE_ADMINISTRAN_AGENDAS.includes(rol))
+      actor.practitionerProfileId === goal ||
+      actor.roles.some((role) => AGENDA_ADMIN_ROLES.includes(role))
     );
   }
 
   /** El servicio tiene que existir y ser de una práctica donde el profesional atiende. */
-  private async assertServicioAlcanzable(
-    servicio: ServiceCatalog | null,
+  private async assertServiceReachable(
+    service: ServiceCatalog | null,
     practitionerProfileId: string,
     serviceCatalogId: string,
   ): Promise<void> {
-    const noEncontrado = new ResourceNotFoundException(
+    const notFound = new ResourceNotFoundException(
       'Servicio no encontrado',
       {
         serviceCatalogId,
       },
     );
-    if (servicio === null) throw noEncontrado;
-    const propias =
+    if (service === null) throw notFound;
+    const ownOnes =
       await this.practiceLookup.findActivePracticeIdsForPractitioner(
         practitionerProfileId,
       );
-    if (!propias.includes(servicio.practiceId)) throw noEncontrado;
+    if (!ownOnes.includes(service.practiceId)) throw notFound;
   }
 }
 
-function validarDuraciones(min: number, max: number): void {
+function validateDurations(min: number, max: number): void {
   if (min > max) {
     throw new PreconditionFailedException(
       'La duración mínima no puede ser mayor que la máxima.',
@@ -314,31 +314,31 @@ function validarDuraciones(min: number, max: number): void {
 }
 
 function aDto(
-  oferta: PractitionerServiceOfferings,
-  servicio: ServiceCatalog | null,
+  offering: PractitionerServiceOfferings,
+  service: ServiceCatalog | null,
 ): ServiceOfferingDto {
   return {
-    id: oferta.id,
-    practitionerProfileId: oferta.practitionerProfileId,
-    serviceCatalogId: oferta.serviceCatalogId,
-    serviceCode: servicio?.code ?? '',
-    serviceName: servicio?.name ?? '',
-    price: servicio?.defaultPrice ?? '0.00',
-    currencyConceptId: servicio?.currencyConceptId ?? undefined,
-    minDurationMinutes: oferta.minDurationMinutes,
-    maxDurationMinutes: oferta.maxDurationMinutes,
-    prepMinutes: oferta.prepMinutes ?? 0,
-    cleanupMinutes: oferta.cleanupMinutes ?? 0,
-    isPatientBookable: oferta.isPatientBookable,
-    requiresApproval: oferta.requiresApproval,
+    id: offering.id,
+    practitionerProfileId: offering.practitionerProfileId,
+    serviceCatalogId: offering.serviceCatalogId,
+    serviceCode: service?.code ?? '',
+    serviceName: service?.name ?? '',
+    price: service?.defaultPrice ?? '0.00',
+    currencyConceptId: service?.currencyConceptId ?? undefined,
+    minDurationMinutes: offering.minDurationMinutes,
+    maxDurationMinutes: offering.maxDurationMinutes,
+    prepMinutes: offering.prepMinutes ?? 0,
+    cleanupMinutes: offering.cleanupMinutes ?? 0,
+    isPatientBookable: offering.isPatientBookable,
+    requiresApproval: offering.requiresApproval,
     channel:
-      oferta.channelConceptId === undefined
+      offering.channelConceptId === undefined
         ? undefined
-        : MODALIDAD_DEL_CONCEPTO.get(oferta.channelConceptId),
+        : MODALITY_OF_CONCEPT.get(offering.channelConceptId),
     isActive:
-      oferta.statusConceptId === SCHED.OFFERING_ACTIVE &&
-      (servicio?.isActive ?? true),
+      offering.statusConceptId === SCHED.OFFERING_ACTIVE &&
+      (service?.isActive ?? true),
   };
 }
 
-export { aDto as ofertaADto };
+export { aDto as offeringToDto };

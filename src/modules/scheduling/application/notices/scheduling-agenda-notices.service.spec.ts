@@ -10,22 +10,22 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingAgendaNoticesService } from './scheduling-agenda-notices.service';
 
-const CUPO = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+const SLOT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
-const cupo = {
-  slotId: CUPO,
+const slot = {
+  slotId: SLOT,
   resourceId: 'recurso-1',
   startAt: new Date('2026-08-20T14:00:00.000Z'),
   endAt: new Date('2026-08-20T14:30:00.000Z'),
   resourceLabel: 'Dra. Rivas',
 };
 
-const cita = {
+const booking = {
   bookingId: 'booking-1',
   tenantId: 'tenant-1',
   patientProfileId: 'paciente-1',
   resourceId: 'recurso-1',
-  slotId: CUPO,
+  slotId: SLOT,
   startAt: new Date('2026-08-20T14:00:00.000Z'),
   resourceLabel: 'Dra. Rivas',
 };
@@ -40,8 +40,8 @@ function build() {
   em.fork = mockFn(() => em);
 
   const noticeRepo = {
-    describeSlot: mockFn().mockResolvedValue(cupo),
-    describeBooking: mockFn().mockResolvedValue(cita),
+    describeSlot: mockFn().mockResolvedValue(slot),
+    describeBooking: mockFn().mockResolvedValue(booking),
     findWaitlistPatients: mockFn().mockResolvedValue([
       { id: 'entry-1', patientProfileId: 'paciente-1', tenantId: 'tenant-1' },
       { id: 'entry-2', patientProfileId: 'paciente-2', tenantId: 'tenant-1' },
@@ -52,8 +52,8 @@ function build() {
   };
   const notices = {
     emit: mockFn().mockResolvedValue({ delivered: true }),
-    emitMany: mockFn(async (avisos: any[]) =>
-      avisos.map(() => ({ delivered: true })),
+    emitMany: mockFn(async (noticeList: any[]) =>
+      noticeList.map(() => ({ delivered: true })),
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -72,23 +72,23 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
     it('avisa a cada candidato promovido, con el nombre de la agenda', async () => {
       const d = build();
 
-      const entregados = await d.service.avisarCupoLiberado(CUPO, [
+      const delivered = await d.service.notifySlotReleased(SLOT, [
         'entry-1',
         'entry-2',
       ]);
 
-      const avisos = d.notices.emitMany.mock.calls[0][0];
-      expect(avisos).toHaveLength(2);
-      expect(avisos[0].kind).toBe('SLOT_RELEASED');
-      expect(avisos[0].recipient.patientProfileId).toBe('paciente-1');
-      expect(avisos[1].recipient.patientProfileId).toBe('paciente-2');
-      expect(avisos[0].bodyText).toContain('Dra. Rivas');
-      expect(entregados).toBe(2);
+      const notices = d.notices.emitMany.mock.calls[0][0];
+      expect(notices).toHaveLength(2);
+      expect(notices[0].kind).toBe('SLOT_RELEASED');
+      expect(notices[0].recipient.patientProfileId).toBe('paciente-1');
+      expect(notices[1].recipient.patientProfileId).toBe('paciente-2');
+      expect(notices[0].bodyText).toContain('Dra. Rivas');
+      expect(delivered).toBe(2);
     });
 
     it('sin candidatos no molesta a nadie ni consulta el cupo', async () => {
       const d = build();
-      expect(await d.service.avisarCupoLiberado(CUPO, [])).toBe(0);
+      expect(await d.service.notifySlotReleased(SLOT, [])).toBe(0);
       expect(d.noticeRepo.describeSlot).not.toHaveBeenCalled();
     });
 
@@ -96,7 +96,7 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
       const d = build();
       d.noticeRepo.describeSlot.mockResolvedValue(null);
 
-      expect(await d.service.avisarCupoLiberado(CUPO, ['entry-1'])).toBe(0);
+      expect(await d.service.notifySlotReleased(SLOT, ['entry-1'])).toBe(0);
       expect(d.notices.emitMany).not.toHaveBeenCalled();
       expect(d.logger.warn).toHaveBeenCalled();
     });
@@ -106,13 +106,13 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
     it('entrega por el canal in-app el recordatorio de cada cita', async () => {
       const d = build();
 
-      const entregados = await d.service.avisarRecordatorios(['rem-1']);
+      const delivered = await d.service.notifyReminders(['rem-1']);
 
-      const avisos = d.notices.emitMany.mock.calls[0][0];
-      expect(avisos[0].kind).toBe('APPOINTMENT_REMINDER');
-      expect(avisos[0].payload.offsetMinutes).toBe(1440);
-      expect(avisos[0].bodyText).toContain('Dra. Rivas');
-      expect(entregados).toBe(1);
+      const notices = d.notices.emitMany.mock.calls[0][0];
+      expect(notices[0].kind).toBe('APPOINTMENT_REMINDER');
+      expect(notices[0].payload.offsetMinutes).toBe(1440);
+      expect(notices[0].bodyText).toContain('Dra. Rivas');
+      expect(delivered).toBe(1);
     });
 
     it('un recordatorio cuya cita ya no está no rompe el lote', async () => {
@@ -122,21 +122,21 @@ describe('SchedulingAgendaNoticesService (P8 · avisos del worker)', () => {
         { reminderId: 'rem-2', bookingId: 'borrada', offsetMinutes: 120 },
       ]);
       d.noticeRepo.describeBooking
-        .mockResolvedValueOnce(cita)
+        .mockResolvedValueOnce(booking)
         .mockResolvedValueOnce(null);
 
-      const entregados = await d.service.avisarRecordatorios([
+      const delivered = await d.service.notifyReminders([
         'rem-1',
         'rem-2',
       ]);
 
       expect(d.notices.emitMany.mock.calls[0][0]).toHaveLength(1);
-      expect(entregados).toBe(1);
+      expect(delivered).toBe(1);
     });
 
     it('sin recordatorios no consulta nada', async () => {
       const d = build();
-      expect(await d.service.avisarRecordatorios([])).toBe(0);
+      expect(await d.service.notifyReminders([])).toBe(0);
       expect(d.noticeRepo.findBookingIdsForReminders).not.toHaveBeenCalled();
     });
   });

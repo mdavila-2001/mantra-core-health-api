@@ -14,7 +14,7 @@ import { SEED } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import type { AgendaNotice } from '../../application/ports/agenda-notice.port';
 
-const aviso: AgendaNotice = {
+const notice: AgendaNotice = {
   kind: 'PRACTITIONER_DELAY',
   recipient: { patientProfileId: 'perfil-1' },
   tenantId: 'tenant-1',
@@ -78,7 +78,7 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
   it('escribe la bandeja in-app del paciente y devuelve su id', async () => {
     const d = build();
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
     const [dto, actor] = d.notifications.createRequest.mock.calls[0];
     expect(dto.channelId).toBe(MESSAGING_SEED.inAppChannelId);
@@ -88,12 +88,12 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
     // Sin actor humano detrás, la solicitud se firma con la cuenta de servicio.
     expect(actor.id).toBe(SEED.systemWorkerUserId);
 
-    const [, entrega] = d.notifications.deliverNotification.mock.calls[0];
-    expect(entrega.outcome).toBe('SENT');
-    expect(entrega.subject).toBe(aviso.subject);
-    expect(entrega.bodyText).toBe(aviso.bodyText);
+    const [, delivery] = d.notifications.deliverNotification.mock.calls[0];
+    expect(delivery.outcome).toBe('SENT');
+    expect(delivery.subject).toBe(notice.subject);
+    expect(delivery.bodyText).toBe(notice.bodyText);
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       delivered: true,
       notificationRequestId: 'request-1',
       inAppNotificationId: 'inapp-1',
@@ -104,17 +104,17 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
   it('encola además el correo, contra el canal EMAIL y con la dirección de la cuenta', async () => {
     const d = build();
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
     expect(d.notifications.createRequest).toHaveBeenCalledTimes(2);
-    const [correo] = d.notifications.createRequest.mock.calls[1];
-    expect(correo.channelId).toBe(MESSAGING_SEED.emailChannelId);
-    expect(correo.recipientAddress).toBe('paciente@example.test');
-    expect(correo.recipientUserId).toBe('user-paciente');
-    expect(correo.categoryConceptId).toBe(SCHED.NOTICE_PRACTITIONER_DELAY);
-    expect(correo.payloadJson.subject).toBe(aviso.subject);
-    expect(correo.payloadJson.bodyText).toBe(aviso.bodyText);
-    expect(resultado.emailRequestId).toBe('request-1');
+    const [email] = d.notifications.createRequest.mock.calls[1];
+    expect(email.channelId).toBe(MESSAGING_SEED.emailChannelId);
+    expect(email.recipientAddress).toBe('paciente@example.test');
+    expect(email.recipientUserId).toBe('user-paciente');
+    expect(email.categoryConceptId).toBe(SCHED.NOTICE_PRACTITIONER_DELAY);
+    expect(email.payloadJson.subject).toBe(notice.subject);
+    expect(email.payloadJson.bodyText).toBe(notice.bodyText);
+    expect(result.emailRequestId).toBe('request-1');
 
     // El correo lo manda el worker contra el proveedor real: acá sólo se
     // encola. Entregarlo desde el backend sería inventar un envío que nadie
@@ -125,27 +125,27 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
   it('la clave de rebote del correo lleva su propio espacio de nombres', async () => {
     const d = build();
 
-    await d.adapter.emit({ ...aviso, debounceKey: 'demora:booking-1' });
+    await d.adapter.emit({ ...notice, debounceKey: 'demora:booking-1' });
 
     const [inApp] = d.notifications.createRequest.mock.calls[0];
-    const [correo] = d.notifications.createRequest.mock.calls[1];
+    const [email] = d.notifications.createRequest.mock.calls[1];
     expect(inApp.debounceKey).toBe('demora:booking-1');
     // Sin sufijo, `findLiveRequestByDebounceKey` —que no filtra por canal—
     // rebotaría el correo contra la solicitud in-app y el correo no saldría
     // nunca.
-    expect(correo.debounceKey).toBe('demora:booking-1:email');
+    expect(email.debounceKey).toBe('demora:booking-1:email');
   });
 
   it('una cuenta sin correo declarado recibe la campana igual', async () => {
     const d = build();
     d.noticeRepo.findEmailForUser.mockResolvedValue(null);
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(true);
-    expect(resultado.inAppNotificationId).toBe('inapp-1');
-    expect(resultado.emailRequestId).toBeUndefined();
-    expect(resultado.emailSkippedReason).toMatch(/no declaró correo/i);
+    expect(result.delivered).toBe(true);
+    expect(result.inAppNotificationId).toBe('inapp-1');
+    expect(result.emailRequestId).toBeUndefined();
+    expect(result.emailSkippedReason).toMatch(/no declaró correo/i);
     expect(d.notifications.createRequest).toHaveBeenCalledTimes(1);
   });
 
@@ -155,11 +155,11 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       new Error('mensajería caída'),
     );
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(true);
-    expect(resultado.inAppNotificationId).toBe('inapp-1');
-    expect(resultado.emailSkippedReason).toMatch(/no se pudo encolar/i);
+    expect(result.delivered).toBe(true);
+    expect(result.inAppNotificationId).toBe('inapp-1');
+    expect(result.emailSkippedReason).toMatch(/no se pudo encolar/i);
     // Un fallo del correo es un aviso, no un error de la operación: se avisa
     // en `warn` y no en `error`, que es el que reserva el camino de `emit`.
     expect(d.logger.warn).toHaveBeenCalled();
@@ -183,13 +183,13 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
         debounced: false,
       });
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(false);
-    expect(resultado.skippedReason).toBe(
+    expect(result.delivered).toBe(false);
+    expect(result.skippedReason).toBe(
       'El destinatario no acepta este canal',
     );
-    expect(resultado.emailRequestId).toBe('request-email');
+    expect(result.emailRequestId).toBe('request-email');
     expect(d.notifications.createRequest).toHaveBeenCalledTimes(2);
   });
 
@@ -210,23 +210,23 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
         debounced: false,
       });
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(true);
+    expect(result.delivered).toBe(true);
     // Queda el id: la fila existe y es la prueba de que se respetó la
     // preferencia. Dejar de escribirla haría imposible demostrarlo después.
-    expect(resultado.emailRequestId).toBe('request-email');
-    expect(resultado.emailSkippedReason).toMatch(/SCHEDULING/);
+    expect(result.emailRequestId).toBe('request-email');
+    expect(result.emailSkippedReason).toMatch(/SCHEDULING/);
   });
 
   it('un paciente sin cuenta de portal no es un error: es un aviso que no se entrega', async () => {
     const d = build();
     d.noticeRepo.findAccountForProfile.mockResolvedValue(null);
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(false);
-    expect(resultado.skippedReason).toMatch(/cuenta de portal/i);
+    expect(result.delivered).toBe(false);
+    expect(result.skippedReason).toMatch(/cuenta de portal/i);
     expect(d.notifications.createRequest).not.toHaveBeenCalled();
   });
 
@@ -240,10 +240,10 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       debounced: false,
     });
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(false);
-    expect(resultado.skippedReason).toBe(
+    expect(result.delivered).toBe(false);
+    expect(result.skippedReason).toBe(
       'El destinatario no acepta este canal',
     );
     expect(d.notifications.deliverNotification).not.toHaveBeenCalled();
@@ -258,16 +258,16 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       debounced: true,
     });
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(false);
+    expect(result.delivered).toBe(false);
     expect(d.notifications.deliverNotification).not.toHaveBeenCalled();
   });
 
   it('cuando el destinatario ya viene por cuenta, no busca perfil', async () => {
     const d = build();
 
-    await d.adapter.emit({ ...aviso, recipient: { userId: 'user-medico' } });
+    await d.adapter.emit({ ...notice, recipient: { userId: 'user-medico' } });
 
     expect(d.noticeRepo.findAccountForProfile).not.toHaveBeenCalled();
     expect(d.notifications.createRequest.mock.calls[0][0].recipientUserId).toBe(
@@ -281,52 +281,52 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       new Error('el canal no está configurado'),
     );
 
-    const resultado = await d.adapter.emit(aviso);
+    const result = await d.adapter.emit(notice);
 
-    expect(resultado.delivered).toBe(false);
-    expect(resultado.skippedReason).toMatch(/falló/i);
+    expect(result.delivered).toBe(false);
+    expect(result.skippedReason).toMatch(/falló/i);
     expect(d.logger.error).toHaveBeenCalled();
   });
 
   it('el correo lleva un enlace real a la app cuando el aviso trae ruta', async () => {
     const d = build();
 
-    await d.adapter.emit(aviso);
+    await d.adapter.emit(notice);
 
-    const [correo] = d.notifications.createRequest.mock.calls[1];
-    expect(correo.payloadJson.bodyHtml).toContain(
+    const [email] = d.notifications.createRequest.mock.calls[1];
+    expect(email.payloadJson.bodyHtml).toContain(
       'http://localhost:4200/my-account/appointments?turno=booking-1',
     );
-    expect(correo.payloadJson.bodyHtml).toContain('<a href=');
+    expect(email.payloadJson.bodyHtml).toContain('<a href=');
   });
 
   it('sin ruta en el aviso, el correo no lleva bodyHtml (no hay a dónde llevar)', async () => {
     const d = build();
 
-    await d.adapter.emit({ ...aviso, payload: undefined });
+    await d.adapter.emit({ ...notice, payload: undefined });
 
-    const [correo] = d.notifications.createRequest.mock.calls[1];
-    expect(correo.payloadJson.bodyHtml).toBeUndefined();
+    const [email] = d.notifications.createRequest.mock.calls[1];
+    expect(email.payloadJson.bodyHtml).toBeUndefined();
   });
 
   it('BOOKING_STATE_CHANGED también avisa por el chat de SupportAdmin', async () => {
     const d = build();
-    const cambio: AgendaNotice = {
-      ...aviso,
+    const change: AgendaNotice = {
+      ...notice,
       kind: 'BOOKING_STATE_CHANGED',
       recipient: { userId: 'user-medico' },
     };
 
-    const resultado = await d.adapter.emit(cambio);
+    const result = await d.adapter.emit(change);
 
-    expect(d.supportAdmin.notify).toHaveBeenCalledWith(cambio, 'user-medico');
-    expect(resultado.chatDelivered).toBe(true);
+    expect(d.supportAdmin.notify).toHaveBeenCalledWith(change, 'user-medico');
+    expect(result.chatDelivered).toBe(true);
   });
 
   it('los avisos que la ficha no pide por chat (demora, recordatorio, cupo) no tocan SupportAdmin', async () => {
     const d = build();
 
-    await d.adapter.emit(aviso); // PRACTITIONER_DELAY
+    await d.adapter.emit(notice); // PRACTITIONER_DELAY
 
     expect(d.supportAdmin.notify).not.toHaveBeenCalled();
   });
@@ -337,17 +337,17 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
       chatDelivered: false,
       chatSkippedReason: 'No se pudo entregar el aviso por chat',
     });
-    const cambio: AgendaNotice = {
-      ...aviso,
+    const change: AgendaNotice = {
+      ...notice,
       kind: 'BOOKING_STATE_CHANGED',
       recipient: { userId: 'user-medico' },
     };
 
-    const resultado = await d.adapter.emit(cambio);
+    const result = await d.adapter.emit(change);
 
-    expect(resultado.delivered).toBe(true);
-    expect(resultado.chatDelivered).toBe(false);
-    expect(resultado.chatSkippedReason).toMatch(/no se pudo entregar/i);
+    expect(result.delivered).toBe(true);
+    expect(result.chatDelivered).toBe(false);
+    expect(result.chatSkippedReason).toMatch(/no se pudo entregar/i);
   });
 
   it('un lote sigue adelante aunque uno falle', async () => {
@@ -361,10 +361,10 @@ describe('MessagingAgendaNoticeAdapter (P8)', () => {
         debounced: false,
       });
 
-    const resultados = await d.adapter.emitMany([aviso, aviso]);
+    const results = await d.adapter.emitMany([notice, notice]);
 
-    expect(resultados).toHaveLength(2);
-    expect(resultados[0].delivered).toBe(false);
-    expect(resultados[1].delivered).toBe(true);
+    expect(results).toHaveLength(2);
+    expect(results[0].delivered).toBe(false);
+    expect(results[1].delivered).toBe(true);
   });
 });

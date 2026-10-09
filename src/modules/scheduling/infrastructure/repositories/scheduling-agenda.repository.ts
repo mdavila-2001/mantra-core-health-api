@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager, FilterQuery } from '@mikro-orm/postgresql';
 import { BookableSlots, SchedulableResources } from '../../entities';
-import { inicioDeLoReservable } from '../../domain/time/scheduling-time';
+import { bookableStart } from '../../domain/time/scheduling-time';
 
 /** Filtro de `GET /scheduling/resources`. */
 export interface ListResourcesFilter {
@@ -50,7 +50,7 @@ export interface ListSlotsFilter {
    * `onlyAvailable`. Lo aporta el servicio para que la consulta no dependa de
    * un reloj escondido.
    */
-  ahora?: Date;
+  now?: Date;
   /**
    * Identificador del concepto de cupo abierto, cuando `onlyAvailable`.
    */
@@ -110,13 +110,13 @@ export class SchedulingAgendaRepository {
     filter: ListSlotsFilter,
     limit: number,
   ): Promise<BookableSlots[]> {
-    const desde =
-      filter.onlyAvailable && filter.ahora
-        ? inicioDeLoReservable(filter.from, filter.ahora)
+    const from =
+      filter.onlyAvailable && filter.now
+        ? bookableStart(filter.from, filter.now)
         : filter.from;
 
     const where: FilterQuery<BookableSlots> = {
-      startAt: { $gte: desde, $lt: filter.to },
+      startAt: { $gte: from, $lt: filter.to },
     };
     if (filter.resourceId) where.resourceId = filter.resourceId;
     if (filter.scheduleTemplateId) {

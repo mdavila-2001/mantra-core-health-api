@@ -12,14 +12,14 @@ import { SCHED } from '../../domain/scheduling.concepts';
  * compromete —es una pregunta sin responder, y la política de #186 la
  * desplaza, no la protege—.
  */
-const ESTADOS_QUE_COMPROMETEN: readonly string[] = [
+const COMMITTING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
   SCHED.BOOKING_IN_PROGRESS,
 ];
 
 /** Un rato ya comprometido del profesional, con lo que hay que contar de él. */
-export interface CompromisoDelProfesional {
+export interface PractitionerCommitment {
   readonly id: string;
   readonly startAt: Date;
   readonly endAt: Date;
@@ -55,7 +55,7 @@ export interface CompromisoDelProfesional {
  * ## Punto de extensión declarado
  *
  * El «tiempo ocupado» de AG-3 (reuniones, guardias — excepciones con rango
- * horario) entra acá cuando exista: {@link compromisos} es el único lugar que
+ * horario) entra acá cuando exista: {@link commitments} es el único lugar que
  * habrá que tocar.
  */
 @Injectable()
@@ -80,7 +80,7 @@ export class SchedulingProfessionalTimeService {
    * @param em - Contexto transaccional activo.
    * @param practitionerProfileId - Profesional cuyo calendario se bloqueará.
    */
-  async bloquearAgendaDeProfesional(
+  async lockPractitionerAgenda(
     em: EntityManager,
     practitionerProfileId: string,
   ): Promise<void> {
@@ -97,23 +97,23 @@ export class SchedulingProfessionalTimeService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional.
-   * @param desde - Inicio del rango.
-   * @param hasta - Fin del rango.
-   * @param excepto - Reserva que no se compara consigo misma (reprogramación).
+   * @param from - Inicio del rango.
+   * @param to - Fin del rango.
+   * @param except - Reserva que no se compara consigo misma (reprogramación).
    * @returns Los compromisos que se cruzan, del más próximo al más lejano.
    */
-  async compromisos(
+  async commitments(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    excepto?: string,
-  ): Promise<CompromisoDelProfesional[]> {
-    const [citas, ocupados] = await Promise.all([
-      this.citasConfirmadas(em, practitionerProfileId, desde, hasta, excepto),
-      this.tiempoOcupado(em, practitionerProfileId, desde, hasta),
+    from: Date,
+    to: Date,
+    except?: string,
+  ): Promise<PractitionerCommitment[]> {
+    const [bookings, busyOnes] = await Promise.all([
+      this.confirmedBookings(em, practitionerProfileId, from, to, except),
+      this.busyTime(em, practitionerProfileId, from, to),
     ]);
-    return [...citas, ...ocupados].sort(
+    return [...bookings, ...busyOnes].sort(
       (a, b) => a.startAt.getTime() - b.startAt.getTime(),
     );
   }
@@ -127,35 +127,35 @@ export class SchedulingProfessionalTimeService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional.
-   * @param desde - Inicio del rango.
-   * @param hasta - Fin del rango.
-   * @param excepto - Reserva que no se compara consigo misma.
+   * @param from - Inicio del rango.
+   * @param to - Fin del rango.
+   * @param except - Reserva que no se compara consigo misma.
    * @returns Las citas que se cruzan.
    */
-  async citasConfirmadas(
+  async confirmedBookings(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    excepto?: string,
-  ): Promise<CompromisoDelProfesional[]> {
-    const filas =
+    from: Date,
+    to: Date,
+    except?: string,
+  ): Promise<PractitionerCommitment[]> {
+    const rows =
       await this.bookingsRepo.findProfessionalCommitmentsOverlapping(
         em,
         practitionerProfileId,
-        desde,
-        hasta,
-        ESTADOS_QUE_COMPROMETEN,
-        excepto,
+        from,
+        to,
+        COMMITTING_STATES,
+        except,
       );
-    return filas.map((fila) => ({
-      id: fila.id,
-      startAt: fila.startAt,
-      endAt: fila.endAt,
-      resourceName: fila.resourceName,
-      timeZone: fila.timeZone,
+    return rows.map((row) => ({
+      id: row.id,
+      startAt: row.startAt,
+      endAt: row.endAt,
+      resourceName: row.resourceName,
+      timeZone: row.timeZone,
       kind: 'cita' as const,
-      patientProfileId: fila.patientProfileId,
+      patientProfileId: row.patientProfileId,
       reason: null,
     }));
   }
@@ -165,35 +165,35 @@ export class SchedulingProfessionalTimeService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional.
-   * @param desde - Inicio del rango.
-   * @param hasta - Fin del rango.
-   * @param excepto - Excepción que no se compara consigo misma.
+   * @param from - Inicio del rango.
+   * @param to - Fin del rango.
+   * @param except - Excepción que no se compara consigo misma.
    * @returns Los ratos ocupados que se cruzan.
    */
-  async tiempoOcupado(
+  async busyTime(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    excepto?: string,
-  ): Promise<CompromisoDelProfesional[]> {
-    const filas =
+    from: Date,
+    to: Date,
+    except?: string,
+  ): Promise<PractitionerCommitment[]> {
+    const rows =
       await this.bookingsRepo.findProfessionalBusyExceptionsOverlapping(
         em,
         practitionerProfileId,
-        desde,
-        hasta,
-        excepto,
+        from,
+        to,
+        except,
       );
-    return filas.map((fila) => ({
-      id: fila.id,
-      startAt: fila.startAt,
-      endAt: fila.endAt,
-      resourceName: fila.resourceName,
-      timeZone: fila.timeZone,
+    return rows.map((row) => ({
+      id: row.id,
+      startAt: row.startAt,
+      endAt: row.endAt,
+      resourceName: row.resourceName,
+      timeZone: row.timeZone,
       kind: 'ocupado' as const,
       patientProfileId: null,
-      reason: fila.reason,
+      reason: row.reason,
     }));
   }
 
@@ -206,59 +206,59 @@ export class SchedulingProfessionalTimeService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional.
-   * @param desde - Inicio del rango que se quiere ocupar.
-   * @param hasta - Fin del rango.
-   * @param excepto - Reserva que no se compara consigo misma, si aplica.
+   * @param from - Inicio del rango que se quiere ocupar.
+   * @param to - Fin del rango.
+   * @param except - Reserva que no se compara consigo misma, si aplica.
    * @throws PreconditionFailedException si hay un compromiso en el medio.
    */
-  async assertRangoLibre(
+  async assertRangeFree(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    excepto?: string,
+    from: Date,
+    to: Date,
+    except?: string,
   ): Promise<void> {
     // El lock y la lectura pertenecen a la misma transacción. Sin él dos
     // aceptaciones simultáneas pueden ver el mismo calendario libre y ambas
     // insertar, incluso cuando cada una hace la validación correcta.
-    await this.bloquearAgendaDeProfesional(em, practitionerProfileId);
+    await this.lockPractitionerAgenda(em, practitionerProfileId);
 
-    const ocupado = await this.compromisos(
+    const busy = await this.commitments(
       em,
       practitionerProfileId,
-      desde,
-      hasta,
-      excepto,
+      from,
+      to,
+      except,
     );
-    if (ocupado.length === 0) return;
+    if (busy.length === 0) return;
 
-    const primero = ocupado[0];
-    let quien = 'una cita';
-    if (primero.kind === 'ocupado') {
+    const first = busy[0];
+    let who = 'una cita';
+    if (first.kind === 'ocupado') {
       // El tiempo ocupado se cuenta por su rótulo: «Reunión de equipo» le dice
       // al doctor exactamente contra qué chocó.
-      quien = primero.reason ? `«${primero.reason}»` : 'un rato ocupado';
-    } else if (primero.patientProfileId) {
-      const nombres = await this.bookingsRepo.findPatientNames(em, [
-        primero.patientProfileId,
+      who = first.reason ? `«${first.reason}»` : 'un rato ocupado';
+    } else if (first.patientProfileId) {
+      const names = await this.bookingsRepo.findPatientNames(em, [
+        first.patientProfileId,
       ]);
-      const paciente = nombres.get(primero.patientProfileId);
-      if (paciente) quien = `a ${paciente}`;
+      const patient = names.get(first.patientProfileId);
+      if (patient) who = `a ${patient}`;
     }
 
     throw new PreconditionFailedException(
-      `El profesional ya tiene ${quien} de ${horaLocal(
-        primero.startAt,
-        primero.timeZone,
-      )} a ${horaLocal(
-        primero.endAt,
-        primero.timeZone,
-      )}${primero.resourceName ? ` en «${primero.resourceName}»` : ''}. No puede estar en dos lugares a la vez.`,
+      `El profesional ya tiene ${who} de ${localTime(
+        first.startAt,
+        first.timeZone,
+      )} a ${localTime(
+        first.endAt,
+        first.timeZone,
+      )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez.`,
       {
-        bookingId: primero.id,
-        startAt: primero.startAt,
-        endAt: primero.endAt,
-        resourceName: primero.resourceName,
+        bookingId: first.id,
+        startAt: first.startAt,
+        endAt: first.endAt,
+        resourceName: first.resourceName,
       },
     );
   }
@@ -271,15 +271,15 @@ export class SchedulingProfessionalTimeService {
  * de las 14:00 en La Paz, y el médico buscaría un choque que no ve. Sin zona
  * declarada se cae a UTC, que es lo que el resto del módulo hace.
  *
- * @param instante - El momento, como está guardado.
+ * @param instant - El momento, como está guardado.
  * @param timeZone - La zona de la sede, si la declaró.
  * @returns `HH:mm` en la zona de la sede.
  */
-function horaLocal(instante: Date, timeZone: string | null): string {
+function localTime(instant: Date, timeZone: string | null): string {
   return new Intl.DateTimeFormat('es-BO', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
     timeZone: timeZone ?? 'UTC',
-  }).format(instante);
+  }).format(instant);
 }

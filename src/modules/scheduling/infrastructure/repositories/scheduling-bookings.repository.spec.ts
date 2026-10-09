@@ -20,32 +20,32 @@ import { SchedulingBookingsRepository } from './scheduling-bookings.repository';
  * techo de este carril sin base es `TESTED`).
  */
 describe('SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping', () => {
-  const DESDE = new Date('2026-10-01T13:00:00.000Z');
-  const HASTA = new Date('2026-10-01T13:30:00.000Z');
+  const FROM = new Date('2026-10-01T13:00:00.000Z');
+  const TO = new Date('2026-10-01T13:30:00.000Z');
 
-  function conConexion(filas: unknown[] = []) {
-    const execute = mockFn().mockResolvedValue(filas);
+  function withConnection(rows: unknown[] = []) {
+    const execute = mockFn().mockResolvedValue(rows);
     const em = { getConnection: mockFn(() => ({ execute })) };
     return { em, execute, repo: new SchedulingBookingsRepository() };
   }
 
   /** El SQL con el que se llamó a la base, sin saltos de línea de más. */
-  function sqlDe(execute: any): string {
+  function sqlOf(execute: any): string {
     return String(execute.mock.calls[0][0]).replace(/\s+/g, ' ');
   }
 
   it('atribuye cada cita al recurso de SU CUPO, no a la columna nulable de la cita', async () => {
-    const { em, execute, repo } = conConexion();
+    const { em, execute, repo } = withConnection();
 
     await repo.findProfessionalCommitmentsOverlapping(
       em as any,
       'hp-1',
-      DESDE,
-      HASTA,
+      FROM,
+      TO,
       ['BOOKING_CONFIRMED'],
     );
 
-    const sql = sqlDe(execute);
+    const sql = sqlOf(execute);
     expect(sql).toContain(
       'JOIN scheduling.schedulable_resources r ON r.id = s.resource_id',
     );
@@ -53,42 +53,42 @@ describe('SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping
   });
 
   it('sigue comparando rangos por el cupo, con bordes estrictos (tocarse no es pisarse)', async () => {
-    const { em, execute, repo } = conConexion();
+    const { em, execute, repo } = withConnection();
 
     await repo.findProfessionalCommitmentsOverlapping(
       em as any,
       'hp-1',
-      DESDE,
-      HASTA,
+      FROM,
+      TO,
       ['BOOKING_CONFIRMED'],
       'booking-propia',
     );
 
-    const sql = sqlDe(execute);
+    const sql = sqlOf(execute);
     expect(sql).toContain('s.start_at < ?');
     expect(sql).toContain('s.end_at > ?');
     expect(execute.mock.calls[0][1]).toEqual([
       'hp-1',
       ['BOOKING_CONFIRMED'],
-      HASTA,
-      DESDE,
+      TO,
+      FROM,
       'booking-propia',
       'booking-propia',
     ]);
   });
 
   it('sin estados que comprometan no consulta la base', async () => {
-    const { em, execute, repo } = conConexion();
+    const { em, execute, repo } = withConnection();
 
-    const filas = await repo.findProfessionalCommitmentsOverlapping(
+    const rows = await repo.findProfessionalCommitmentsOverlapping(
       em as any,
       'hp-1',
-      DESDE,
-      HASTA,
+      FROM,
+      TO,
       [],
     );
 
-    expect(filas).toEqual([]);
+    expect(rows).toEqual([]);
     expect(execute).not.toHaveBeenCalled();
   });
 });

@@ -5,22 +5,22 @@ import { SchedulingServiceOfferingsService } from './scheduling-service-offering
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const MEDICO = '22222222-2222-4222-8222-222222222222';
-const OTRO_MEDICO = '99999999-9999-4999-8999-999999999999';
-const CATALOGO = '11111111-1111-4111-8111-111111111111';
-const PRACTICA = '77777777-7777-4777-8777-777777777777';
+const PRACTITIONER_ACTOR = '22222222-2222-4222-8222-222222222222';
+const OTHER_PRACTITIONER = '99999999-9999-4999-8999-999999999999';
+const CATALOG = '11111111-1111-4111-8111-111111111111';
+const PRACTICE = '77777777-7777-4777-8777-777777777777';
 
-const medico = {
+const practitioner = {
   id: 'u-med',
   roles: ['PRACTITIONER'],
-  practitionerProfileId: MEDICO,
+  practitionerProfileId: PRACTITIONER_ACTOR,
 } as any;
-const paciente = { id: 'u-pac', roles: ['PATIENT'] } as any;
+const patient = { id: 'u-pac', roles: ['PATIENT'] } as any;
 const admin = { id: 'u-adm', roles: ['SCHEDULING_ADMIN'] } as any;
 
-const servicio = (over: Record<string, unknown> = {}) => ({
-  id: CATALOGO,
-  practiceId: PRACTICA,
+const serviceRow = (over: Record<string, unknown> = {}) => ({
+  id: CATALOG,
+  practiceId: PRACTICE,
   code: 'NEBU',
   name: 'Nebulización',
   defaultPrice: '80.00',
@@ -30,7 +30,7 @@ const servicio = (over: Record<string, unknown> = {}) => ({
 });
 
 const dto = {
-  serviceCatalogId: CATALOGO,
+  serviceCatalogId: CATALOG,
   minDurationMinutes: 30,
   maxDurationMinutes: 45,
 };
@@ -39,8 +39,8 @@ function build() {
   const tx = { flush: mockFn(async () => undefined) };
   const em = { transactional: mockFn(async (fn: any) => fn(tx)) };
   const repo = {
-    findCatalogItem: mockFn(async () => servicio()),
-    findCatalogItems: mockFn(async () => [servicio()]),
+    findCatalogItem: mockFn(async () => serviceRow()),
+    findCatalogItems: mockFn(async () => [serviceRow()]),
     findOfferingOf: mockFn(async () => null),
     findOfferingById: mockFn(),
     listOfferings: mockFn(async () => []),
@@ -50,7 +50,7 @@ function build() {
     })),
   };
   const practiceLookup = {
-    findActivePracticeIdsForPractitioner: mockFn(async () => [PRACTICA]),
+    findActivePracticeIdsForPractitioner: mockFn(async () => [PRACTICE]),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new SchedulingServiceOfferingsService(
@@ -67,12 +67,12 @@ describe('SchedulingServiceOfferingsService', () => {
     it('crea la oferta del propio profesional, activa y con los valores por defecto', async () => {
       const d = build();
 
-      const res = await d.service.create(dto, medico);
+      const res = await d.service.create(dto, practitioner);
 
-      const guardado = d.repo.createOffering.mock.calls[0][1];
-      expect(guardado).toMatchObject({
-        practitionerProfileId: MEDICO,
-        serviceCatalogId: CATALOGO,
+      const stored = d.repo.createOffering.mock.calls[0][1];
+      expect(stored).toMatchObject({
+        practitionerProfileId: PRACTITIONER_ACTOR,
+        serviceCatalogId: CATALOG,
         minDurationMinutes: 30,
         maxDurationMinutes: 45,
         isPatientBookable: true,
@@ -91,7 +91,7 @@ describe('SchedulingServiceOfferingsService', () => {
 
       const res = await d.service.create(
         { ...dto, channel: 'TELECONSULTA' },
-        medico,
+        practitioner,
       );
 
       expect(d.repo.createOffering.mock.calls[0][1].channelConceptId).toBe(
@@ -105,7 +105,7 @@ describe('SchedulingServiceOfferingsService', () => {
       await expect(
         d.service.create(
           { ...dto, minDurationMinutes: 60, maxDurationMinutes: 45 },
-          medico,
+          practitioner,
         ),
       ).rejects.toThrow(/mínima no puede ser mayor/);
       expect(d.repo.createOffering).not.toHaveBeenCalled();
@@ -117,7 +117,7 @@ describe('SchedulingServiceOfferingsService', () => {
         'otra-practica',
       ]);
 
-      await expect(d.service.create(dto, medico)).rejects.toThrow(
+      await expect(d.service.create(dto, practitioner)).rejects.toThrow(
         /Servicio no encontrado/,
       );
     });
@@ -126,21 +126,21 @@ describe('SchedulingServiceOfferingsService', () => {
       const d = build();
       d.repo.findOfferingOf.mockResolvedValue({ id: 'ya-existe' });
 
-      await expect(d.service.create(dto, medico)).rejects.toThrow(
+      await expect(d.service.create(dto, practitioner)).rejects.toThrow(
         /Ya ofrece ese servicio/,
       );
     });
 
     it('un servicio apagado en el catálogo no se puede ofrecer', async () => {
       const d = build();
-      d.repo.findCatalogItem.mockResolvedValue(servicio({ isActive: false }));
+      d.repo.findCatalogItem.mockResolvedValue(serviceRow({ isActive: false }));
 
-      await expect(d.service.create(dto, medico)).rejects.toThrow(/inactivo/);
+      await expect(d.service.create(dto, practitioner)).rejects.toThrow(/inactivo/);
     });
 
     it('un paciente no ofrece servicios', async () => {
       const d = build();
-      await expect(d.service.create(dto, paciente)).rejects.toThrow(
+      await expect(d.service.create(dto, patient)).rejects.toThrow(
         /Sólo un profesional/,
       );
     });
@@ -149,20 +149,20 @@ describe('SchedulingServiceOfferingsService', () => {
       const d = build();
       await expect(
         d.service.create(
-          { ...dto, practitionerProfileId: OTRO_MEDICO },
-          medico,
+          { ...dto, practitionerProfileId: OTHER_PRACTITIONER },
+          practitioner,
         ),
       ).rejects.toThrow(/para usted/);
     });
 
     it('quien atiende Y administra agendas crea la suya sin repetir su propio id', async () => {
       const d = build();
-      const ambas = { ...medico, roles: ['PRACTITIONER', 'SCHEDULING_ADMIN'] };
+      const both = { ...practitioner, roles: ['PRACTITIONER', 'SCHEDULING_ADMIN'] };
 
-      await d.service.create(dto, ambas);
+      await d.service.create(dto, both);
 
       expect(d.repo.createOffering.mock.calls[0][1].practitionerProfileId).toBe(
-        MEDICO,
+        PRACTITIONER_ACTOR,
       );
     });
 
@@ -173,20 +173,20 @@ describe('SchedulingServiceOfferingsService', () => {
       );
 
       await d.service.create(
-        { ...dto, practitionerProfileId: OTRO_MEDICO },
+        { ...dto, practitionerProfileId: OTHER_PRACTITIONER },
         admin,
       );
       expect(d.repo.createOffering.mock.calls[0][1].practitionerProfileId).toBe(
-        OTRO_MEDICO,
+        OTHER_PRACTITIONER,
       );
     });
   });
 
   describe('update', () => {
-    const existente = () => ({
+    const existing = () => ({
       id: 'oferta-1',
-      practitionerProfileId: MEDICO,
-      serviceCatalogId: CATALOGO,
+      practitionerProfileId: PRACTITIONER_ACTOR,
+      serviceCatalogId: CATALOG,
       minDurationMinutes: 30,
       maxDurationMinutes: 45,
       isPatientBookable: true,
@@ -196,46 +196,46 @@ describe('SchedulingServiceOfferingsService', () => {
 
     it('cambia las duraciones validando contra el valor que ya tenía', async () => {
       const d = build();
-      d.repo.findOfferingById.mockResolvedValue(existente());
+      d.repo.findOfferingById.mockResolvedValue(existing());
 
       // Sólo sube el mínimo por encima del máximo guardado: tiene que fallar.
       await expect(
-        d.service.update('oferta-1', { minDurationMinutes: 50 }, medico),
+        d.service.update('oferta-1', { minDurationMinutes: 50 }, practitioner),
       ).rejects.toThrow(/mínima no puede ser mayor/);
     });
 
     it('apagarla la deja inactiva sin borrarla', async () => {
       const d = build();
-      const oferta = existente();
-      d.repo.findOfferingById.mockResolvedValue(oferta);
+      const offering = existing();
+      d.repo.findOfferingById.mockResolvedValue(offering);
 
       const res = await d.service.update(
         'oferta-1',
         { isActive: false },
-        medico,
+        practitioner,
       );
 
-      expect(oferta.statusConceptId).toBe(SCHED.OFFERING_INACTIVE);
+      expect(offering.statusConceptId).toBe(SCHED.OFFERING_INACTIVE);
       expect(res.isActive).toBe(false);
     });
 
     it('la oferta de otro profesional responde 404, no 403', async () => {
       const d = build();
       d.repo.findOfferingById.mockResolvedValue({
-        ...existente(),
-        practitionerProfileId: OTRO_MEDICO,
+        ...existing(),
+        practitionerProfileId: OTHER_PRACTITIONER,
       });
 
       await expect(
-        d.service.update('oferta-1', { requiresApproval: true }, medico),
+        d.service.update('oferta-1', { requiresApproval: true }, practitioner),
       ).rejects.toThrow(/Oferta no encontrada/);
     });
 
     it('quien administra agendas sí puede editar la de otro', async () => {
       const d = build();
       d.repo.findOfferingById.mockResolvedValue({
-        ...existente(),
-        practitionerProfileId: OTRO_MEDICO,
+        ...existing(),
+        practitionerProfileId: OTHER_PRACTITIONER,
       });
 
       const res = await d.service.update(
@@ -252,20 +252,20 @@ describe('SchedulingServiceOfferingsService', () => {
     it('un paciente pide sólo lo activo y reservable', async () => {
       const d = build();
 
-      await d.service.list(MEDICO, paciente);
+      await d.service.list(PRACTITIONER_ACTOR, patient);
 
-      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, MEDICO, {
+      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, PRACTITIONER_ACTOR, {
         statusConceptId: SCHED.OFFERING_ACTIVE,
-        soloReservables: true,
+        onlyBookable: true,
       });
     });
 
     it('el dueño ve todo lo suyo, apagado incluido', async () => {
       const d = build();
 
-      await d.service.list(undefined, medico);
+      await d.service.list(undefined, practitioner);
 
-      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, MEDICO, {});
+      expect(d.repo.listOfferings).toHaveBeenCalledWith(d.tx, PRACTITIONER_ACTOR, {});
     });
 
     it('un servicio que el catálogo apagó no se muestra a un paciente aunque la oferta siga viva', async () => {
@@ -273,8 +273,8 @@ describe('SchedulingServiceOfferingsService', () => {
       d.repo.listOfferings.mockResolvedValue([
         {
           id: 'oferta-1',
-          practitionerProfileId: MEDICO,
-          serviceCatalogId: CATALOGO,
+          practitionerProfileId: PRACTITIONER_ACTOR,
+          serviceCatalogId: CATALOG,
           minDurationMinutes: 30,
           maxDurationMinutes: 45,
           isPatientBookable: true,
@@ -283,17 +283,17 @@ describe('SchedulingServiceOfferingsService', () => {
         },
       ]);
       d.repo.findCatalogItems.mockResolvedValue([
-        servicio({ isActive: false }),
+        serviceRow({ isActive: false }),
       ]);
 
-      const res = await d.service.list(MEDICO, paciente);
+      const res = await d.service.list(PRACTITIONER_ACTOR, patient);
 
       expect(res.items).toEqual([]);
     });
 
     it('un paciente que no dice de qué profesional recibe 422', async () => {
       const d = build();
-      await expect(d.service.list(undefined, paciente)).rejects.toThrow(
+      await expect(d.service.list(undefined, patient)).rejects.toThrow(
         /de qué profesional/,
       );
     });

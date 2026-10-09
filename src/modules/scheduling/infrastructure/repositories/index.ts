@@ -36,6 +36,6 @@ export type {
 export { SchedulingOfferingsRepository } from './scheduling-offerings.repository';
 export type {
   CreateOfferingData,
-  RetencionViva,
-  TramoDeServicioVivo,
+  LiveHold,
+  LiveServiceSpan,
 } from './scheduling-offerings.repository';

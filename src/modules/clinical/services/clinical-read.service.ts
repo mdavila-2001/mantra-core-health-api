@@ -5,7 +5,7 @@ import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
-import { diaLocalDe } from '../../scheduling/domain/time/scheduling-time';
+import { localDayOf } from '../../scheduling/domain/time/scheduling-time';
 import {
   AllergyIntolerancesRepository,
   // BR-14 (CL-11): lectura de reacciones de alergia, independiente del
@@ -431,7 +431,7 @@ export class ClinicalReadService {
     patientProfileId: string,
   ): Promise<boolean> {
     if (
-      await this.bookingsRepo.tieneConsultaEnCurso(
+      await this.bookingsRepo.hasConsultationInProgress(
         em,
         practitionerProfileId,
         patientProfileId,
@@ -514,7 +514,7 @@ export class ClinicalReadService {
     patientProfileId: string,
   ): Promise<boolean> {
     const ahora = new Date();
-    const reservations = await this.bookingsRepo.findConfirmadasConPacienteEntre(
+    const reservations = await this.bookingsRepo.findConfirmedWithPatientBetween(
       em,
       practitionerProfileId,
       patientProfileId,
@@ -525,8 +525,8 @@ export class ClinicalReadService {
 
     return reservations.some((reservation) => {
       const zone = reservation.timeZone ?? DEFAULT_ZONE;
-      const hoy = diaLocalDe(ahora, zone);
-      const day = diaLocalDe(reservation.startAt, zone);
+      const hoy = localDayOf(ahora, zone);
+      const day = localDayOf(reservation.startAt, zone);
       return (
         day.year === hoy.year && day.month === hoy.month && day.day === hoy.day
       );

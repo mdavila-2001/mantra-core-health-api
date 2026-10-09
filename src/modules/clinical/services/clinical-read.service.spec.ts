@@ -91,10 +91,10 @@ function build() {
   const bookingsRepo = {
     // Sin ventana de fechas a propósito: una consulta en curso no se pregunta
     // por el calendario.
-    tieneConsultaEnCurso: mockFn((_em: unknown, pro: string, pac: string) =>
+    hasConsultationInProgress: mockFn((_em: unknown, pro: string, pac: string) =>
       Promise.resolve(inCourse.has(clave(pro, pac))),
     ),
-    findConfirmadasConPacienteEntre: mockFn(
+    findConfirmedWithPatientBetween: mockFn(
       (
         _em: unknown,
         practitionerProfileId: string,
@@ -904,7 +904,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
   });
 
   it('el camino barato va primero: con consulta en curso no se consulta la agenda', async () => {
-    // No es cosmético: `findConfirmadasConPacienteEntre` trae una ventana de 96
+    // No es cosmético: `findConfirmedWithPatientBetween` trae una ventana de 96
     // horas y compara zona por zona. Si la respuesta ya se sabe, no se paga.
     const c = build();
     c.darDeAltaProfesional(MEDICO);
@@ -917,7 +917,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     );
 
     expect(
-      c.bookingsRepo.findConfirmadasConPacienteEntre,
+      c.bookingsRepo.findConfirmedWithPatientBetween,
     ).not.toHaveBeenCalled();
   });
 
@@ -928,7 +928,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'SUPERADMIN')),
     ).resolves.toBeUndefined();
     expect(
-      c.bookingsRepo.findConfirmadasConPacienteEntre,
+      c.bookingsRepo.findConfirmedWithPatientBetween,
     ).not.toHaveBeenCalled();
   });
 

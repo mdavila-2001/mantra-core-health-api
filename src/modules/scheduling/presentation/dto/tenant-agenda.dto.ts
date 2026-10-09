@@ -16,10 +16,10 @@ import {
  * semana, y quien pide un año no está mirando una agenda sino descargando una
  * base. El tope obliga a que ese uso sea explícito y paginado.
  */
-export const MAX_RANGO_AGENDA_DIAS = 31;
+export const MAX_AGENDA_RANGE_DAYS = 31;
 
 /** Tope de citas por respuesta. */
-export const MAX_CITAS_POR_PAGINA = 500;
+export const MAX_BOOKINGS_PER_PAGE = 500;
 
 /** Filtros de `GET /tenants/{tenantId}/agenda`. */
 export class TenantAgendaQueryDto {
@@ -45,12 +45,12 @@ export class TenantAgendaQueryDto {
   practitionerProfileId?: string;
 
   /** Tope de citas. */
-  @ApiPropertyOptional({ minimum: 1, maximum: MAX_CITAS_POR_PAGINA })
+  @ApiPropertyOptional({ minimum: 1, maximum: MAX_BOOKINGS_PER_PAGE })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(MAX_CITAS_POR_PAGINA)
+  @Max(MAX_BOOKINGS_PER_PAGE)
   limit?: number;
 }
 

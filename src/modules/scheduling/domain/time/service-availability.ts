@@ -23,23 +23,23 @@
  */
 
 /** Un rato de tiempo, medido en instantes UTC. */
-export interface Intervalo {
+export interface Interval {
   readonly startAt: Date;
   readonly endAt: Date;
 }
 
 /** Un intervalo con identidad, para decidir sobre él (p. ej. un cupo de consulta). */
-export interface IntervaloConId extends Intervalo {
+export interface IntervalWithId extends Interval {
   readonly id: string;
 }
 
-const MS_POR_MINUTO = 60_000;
+const MS_PER_MINUTE = 60_000;
 
 /** Tope de horarios que se ofrecen por consulta: una pantalla, no un volcado. */
-export const MAX_HORARIOS_OFRECIDOS = 200;
+export const MAX_OFFERED_TIMES = 200;
 
 /** Cada cuántos minutos se ofrece un inicio cuando nadie declaró otro paso. */
-export const PASO_DE_INICIOS_MINUTOS = 15;
+export const START_STEP_MINUTES = 15;
 
 /**
  * Une los intervalos que se tocan o se pisan, ordenados por inicio.
@@ -47,25 +47,25 @@ export const PASO_DE_INICIOS_MINUTOS = 15;
  * Dos intervalos que se tocan en un punto (uno termina cuando empieza el otro) se
  * funden: para restar tiempo ocupado da igual y evita fragmentos de largo cero.
  */
-export function unirIntervalos(intervalos: readonly Intervalo[]): Intervalo[] {
-  const ordenados = [...intervalos]
+export function mergeIntervals(intervals: readonly Interval[]): Interval[] {
+  const sorted = [...intervals]
     .filter((i) => i.endAt.getTime() > i.startAt.getTime())
     .sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
-  const unidos: Intervalo[] = [];
-  for (const actual of ordenados) {
-    const ultimo = unidos[unidos.length - 1];
-    if (ultimo && actual.startAt.getTime() <= ultimo.endAt.getTime()) {
-      if (actual.endAt.getTime() > ultimo.endAt.getTime()) {
-        unidos[unidos.length - 1] = {
-          startAt: ultimo.startAt,
+  const merged: Interval[] = [];
+  for (const actual of sorted) {
+    const last = merged[merged.length - 1];
+    if (last && actual.startAt.getTime() <= last.endAt.getTime()) {
+      if (actual.endAt.getTime() > last.endAt.getTime()) {
+        merged[merged.length - 1] = {
+          startAt: last.startAt,
           endAt: actual.endAt,
         };
       }
       continue;
     }
-    unidos.push({ startAt: actual.startAt, endAt: actual.endAt });
+    merged.push({ startAt: actual.startAt, endAt: actual.endAt });
   }
-  return unidos;
+  return merged;
 }
 
 /**
@@ -73,35 +73,35 @@ export function unirIntervalos(intervalos: readonly Intervalo[]): Intervalo[] {
  *
  * @returns Intervalos libres, ordenados y sin solaparse.
  */
-export function restarIntervalos(
-  franjas: readonly Intervalo[],
-  ocupado: readonly Intervalo[],
-): Intervalo[] {
-  const bloqueos = unirIntervalos(ocupado);
-  const libres: Intervalo[] = [];
-  for (const franja of unirIntervalos(franjas)) {
-    let cursor = franja.startAt.getTime();
-    const fin = franja.endAt.getTime();
-    for (const bloqueo of bloqueos) {
-      const desde = bloqueo.startAt.getTime();
-      const hasta = bloqueo.endAt.getTime();
-      if (hasta <= cursor) continue;
-      if (desde >= fin) break;
-      if (desde > cursor) {
-        libres.push({ startAt: new Date(cursor), endAt: new Date(desde) });
+export function subtractIntervals(
+  bands: readonly Interval[],
+  busy: readonly Interval[],
+): Interval[] {
+  const blocks = mergeIntervals(busy);
+  const freeOnes: Interval[] = [];
+  for (const band of mergeIntervals(bands)) {
+    let cursor = band.startAt.getTime();
+    const end = band.endAt.getTime();
+    for (const block of blocks) {
+      const from = block.startAt.getTime();
+      const to = block.endAt.getTime();
+      if (to <= cursor) continue;
+      if (from >= end) break;
+      if (from > cursor) {
+        freeOnes.push({ startAt: new Date(cursor), endAt: new Date(from) });
       }
-      cursor = Math.max(cursor, hasta);
-      if (cursor >= fin) break;
+      cursor = Math.max(cursor, to);
+      if (cursor >= end) break;
     }
-    if (cursor < fin) {
-      libres.push({ startAt: new Date(cursor), endAt: new Date(fin) });
+    if (cursor < end) {
+      freeOnes.push({ startAt: new Date(cursor), endAt: new Date(end) });
     }
   }
-  return libres;
+  return freeOnes;
 }
 
 /** Lo que hace falta saber de una oferta para encontrarle lugar. */
-export interface DuracionDelServicio {
+export interface ServiceDuration {
   /** Lo que se reserva y compromete: el techo declarado por el profesional. */
   readonly maxDurationMinutes: number;
   /** Lo mínimo que puede tardar; sólo informa al paciente («30–45 min»). */
@@ -111,7 +111,7 @@ export interface DuracionDelServicio {
 }
 
 /** Un inicio posible para el servicio. */
-export interface HorarioDeServicio {
+export interface ServiceTime {
   /** Cuándo empieza la atención. */
   readonly startAt: Date;
   /** Hasta cuándo se reserva: `startAt + máximo`. */
@@ -119,65 +119,65 @@ export interface HorarioDeServicio {
   /** Cuándo podría terminar como pronto: `startAt + mínimo`. */
   readonly endAtMin: Date;
   /** Todo lo que el turno ocupa, con preparación y limpieza. */
-  readonly ocupaDesde: Date;
-  readonly ocupaHasta: Date;
+  readonly occupiesFrom: Date;
+  readonly occupiesTo: Date;
 }
 
-export interface EntradaDeHorarios {
+export interface TimesInput {
   /** Franjas que admiten servicios, ya en UTC. */
-  readonly franjas: readonly Intervalo[];
+  readonly bands: readonly Interval[];
   /** Citas confirmadas, retenciones activas, tiempo ocupado y ausencias. */
-  readonly ocupado: readonly Intervalo[];
-  readonly servicio: DuracionDelServicio;
+  readonly busy: readonly Interval[];
+  readonly service: ServiceDuration;
   /** Primer instante ofrecible: ahora más el aviso mínimo de la política. */
-  readonly noAntesDe: Date;
+  readonly notBefore: Date;
   /** Último instante ofrecible: ahora más los días de anticipación. */
-  readonly noDespuesDe: Date;
+  readonly notAfter: Date;
   /** Cada cuántos minutos se ofrece un inicio dentro de un hueco. */
-  readonly pasoMinutos?: number;
-  readonly limite?: number;
+  readonly stepMinutes?: number;
+  readonly limit?: number;
 }
 
 /**
  * Los inicios donde cabe el servicio.
  *
  * En cada hueco libre el primer inicio es **justo después del compromiso anterior**
- * (más la preparación) y de ahí se avanza de `pasoMinutos` en `pasoMinutos`. Anclar
+ * (más la preparación) y de ahí se avanza de `stepMinutes` en `stepMinutes`. Anclar
  * al hueco en vez de a la hora del reloj es lo que evita los huecos muertos: si un
  * paciente termina a las 10:07, el siguiente servicio puede empezar a las 10:07 y no
  * recién a las 10:15.
  *
  * @throws RangeError con una duración, un paso o un colchón que no tiene sentido.
  */
-export function proponerHorariosDeServicio(
-  entrada: EntradaDeHorarios,
-): HorarioDeServicio[] {
-  const { servicio } = entrada;
-  const prep = servicio.prepMinutes ?? 0;
-  const limpieza = servicio.cleanupMinutes ?? 0;
-  const paso = entrada.pasoMinutos ?? PASO_DE_INICIOS_MINUTOS;
-  const limite = entrada.limite ?? MAX_HORARIOS_OFRECIDOS;
-  validar(servicio, prep, limpieza, paso);
+export function proposeServiceTimes(
+  input: TimesInput,
+): ServiceTime[] {
+  const { service: service } = input;
+  const prep = service.prepMinutes ?? 0;
+  const cleanup = service.cleanupMinutes ?? 0;
+  const step = input.stepMinutes ?? START_STEP_MINUTES;
+  const limit = input.limit ?? MAX_OFFERED_TIMES;
+  validate(service, prep, cleanup, step);
 
-  const ocupaMs =
-    (prep + servicio.maxDurationMinutes + limpieza) * MS_POR_MINUTO;
-  const libres = restarIntervalos(entrada.franjas, entrada.ocupado);
-  const horarios: HorarioDeServicio[] = [];
+  const occupiesMs =
+    (prep + service.maxDurationMinutes + cleanup) * MS_PER_MINUTE;
+  const freeOnes = subtractIntervals(input.bands, input.busy);
+  const times: ServiceTime[] = [];
 
-  for (const hueco of libres) {
+  for (const gap of freeOnes) {
     for (
-      let ocupaDesde = hueco.startAt.getTime();
-      ocupaDesde + ocupaMs <= hueco.endAt.getTime();
-      ocupaDesde += paso * MS_POR_MINUTO
+      let occupiesFrom = gap.startAt.getTime();
+      occupiesFrom + occupiesMs <= gap.endAt.getTime();
+      occupiesFrom += step * MS_PER_MINUTE
     ) {
-      const inicio = ocupaDesde + prep * MS_POR_MINUTO;
-      if (inicio < entrada.noAntesDe.getTime()) continue;
-      if (inicio > entrada.noDespuesDe.getTime()) break;
-      horarios.push(armar(inicio, ocupaDesde, ocupaDesde + ocupaMs, servicio));
-      if (horarios.length >= limite) return horarios;
+      const start = occupiesFrom + prep * MS_PER_MINUTE;
+      if (start < input.notBefore.getTime()) continue;
+      if (start > input.notAfter.getTime()) break;
+      times.push(assemble(start, occupiesFrom, occupiesFrom + occupiesMs, service));
+      if (times.length >= limit) return times;
     }
   }
-  return horarios;
+  return times;
 }
 
 /**
@@ -187,22 +187,22 @@ export function proponerHorariosDeServicio(
  * los horarios hace minutos, y es la **única** que cuenta, porque corre bajo el
  * candado del profesional.
  */
-export function cabeElServicio(
-  franjas: readonly Intervalo[],
-  ocupado: readonly Intervalo[],
-  servicio: DuracionDelServicio,
+export function serviceFits(
+  bands: readonly Interval[],
+  busy: readonly Interval[],
+  service: ServiceDuration,
   startAt: Date,
 ): boolean {
-  const prep = servicio.prepMinutes ?? 0;
-  const limpieza = servicio.cleanupMinutes ?? 0;
-  validar(servicio, prep, limpieza, PASO_DE_INICIOS_MINUTOS);
-  const desde = startAt.getTime() - prep * MS_POR_MINUTO;
-  const hasta =
+  const prep = service.prepMinutes ?? 0;
+  const cleanup = service.cleanupMinutes ?? 0;
+  validate(service, prep, cleanup, START_STEP_MINUTES);
+  const from = startAt.getTime() - prep * MS_PER_MINUTE;
+  const to =
     startAt.getTime() +
-    (servicio.maxDurationMinutes + limpieza) * MS_POR_MINUTO;
-  return restarIntervalos(franjas, ocupado).some(
-    (libre) =>
-      libre.startAt.getTime() <= desde && libre.endAt.getTime() >= hasta,
+    (service.maxDurationMinutes + cleanup) * MS_PER_MINUTE;
+  return subtractIntervals(bands, busy).some(
+    (free) =>
+      free.startAt.getTime() <= from && free.endAt.getTime() >= to,
   );
 }
 
@@ -213,65 +213,65 @@ export function cabeElServicio(
  * pisando otro servicio dejaría ofrecer un horario que no existe. Se llama al
  * vencer una retención, al cancelar y al terminar antes.
  *
- * @param retraidos - Cupos de consulta en estado retraído.
- * @param ocupado - Lo que sigue comprometido, con preparación y limpieza ya contadas.
+ * @param retracted - Cupos de consulta en estado retraído.
+ * @param busy - Lo que sigue comprometido, con preparación y limpieza ya contadas.
  * @returns Los ids que pueden reabrirse.
  */
-export function cuposQueSePuedenReabrir(
-  retraidos: readonly IntervaloConId[],
-  ocupado: readonly Intervalo[],
+export function slotsThatCanReopen(
+  retracted: readonly IntervalWithId[],
+  busy: readonly Interval[],
 ): string[] {
-  const bloqueos = unirIntervalos(ocupado);
-  return retraidos
+  const blocks = mergeIntervals(busy);
+  return retracted
     .filter(
-      (cupo) =>
-        !bloqueos.some(
+      (slot) =>
+        !blocks.some(
           (b) =>
-            b.startAt.getTime() < cupo.endAt.getTime() &&
-            b.endAt.getTime() > cupo.startAt.getTime(),
+            b.startAt.getTime() < slot.endAt.getTime() &&
+            b.endAt.getTime() > slot.startAt.getTime(),
         ),
     )
-    .map((cupo) => cupo.id);
+    .map((slot) => slot.id);
 }
 
 /** El tramo que ocupa un turno ya acordado, con sus colchones. */
-export function tramoOcupado(
+export function busySpan(
   startAt: Date,
   endAtMax: Date,
-  servicio: Pick<DuracionDelServicio, 'prepMinutes' | 'cleanupMinutes'>,
-): Intervalo {
+  service: Pick<ServiceDuration, 'prepMinutes' | 'cleanupMinutes'>,
+): Interval {
   return {
     startAt: new Date(
-      startAt.getTime() - (servicio.prepMinutes ?? 0) * MS_POR_MINUTO,
+      startAt.getTime() - (service.prepMinutes ?? 0) * MS_PER_MINUTE,
     ),
     endAt: new Date(
-      endAtMax.getTime() + (servicio.cleanupMinutes ?? 0) * MS_POR_MINUTO,
+      endAtMax.getTime() + (service.cleanupMinutes ?? 0) * MS_PER_MINUTE,
     ),
   };
 }
 
-function armar(
-  inicio: number,
-  ocupaDesde: number,
-  ocupaHasta: number,
-  servicio: DuracionDelServicio,
-): HorarioDeServicio {
+function assemble(
+  start: number,
+  occupiesFrom: number,
+  occupiesTo: number,
+  service: ServiceDuration,
+): ServiceTime {
   return {
-    startAt: new Date(inicio),
-    endAtMax: new Date(inicio + servicio.maxDurationMinutes * MS_POR_MINUTO),
-    endAtMin: new Date(inicio + servicio.minDurationMinutes * MS_POR_MINUTO),
-    ocupaDesde: new Date(ocupaDesde),
-    ocupaHasta: new Date(ocupaHasta),
+    startAt: new Date(start),
+    endAtMax: new Date(start + service.maxDurationMinutes * MS_PER_MINUTE),
+    endAtMin: new Date(start + service.minDurationMinutes * MS_PER_MINUTE),
+    occupiesFrom: new Date(occupiesFrom),
+    occupiesTo: new Date(occupiesTo),
   };
 }
 
-function validar(
-  servicio: DuracionDelServicio,
+function validate(
+  service: ServiceDuration,
   prep: number,
-  limpieza: number,
-  paso: number,
+  cleanup: number,
+  step: number,
 ): void {
-  const { minDurationMinutes: min, maxDurationMinutes: max } = servicio;
+  const { minDurationMinutes: min, maxDurationMinutes: max } = service;
   if (
     !Number.isInteger(min) ||
     !Number.isInteger(max) ||
@@ -282,14 +282,14 @@ function validar(
       `Duración inválida: mínimo ${min} y máximo ${max} (0 < mín ≤ máx)`,
     );
   }
-  if (prep < 0 || limpieza < 0) {
+  if (prep < 0 || cleanup < 0) {
     throw new RangeError(
       'La preparación y la limpieza no pueden ser negativas',
     );
   }
-  if (!Number.isInteger(paso) || paso <= 0) {
+  if (!Number.isInteger(step) || step <= 0) {
     throw new RangeError(
-      `El paso de inicios debe ser un entero positivo: ${paso}`,
+      `El paso de inicios debe ser un entero positivo: ${step}`,
     );
   }
 }

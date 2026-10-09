@@ -27,53 +27,53 @@ import { SchedulingCatalogRepository } from './scheduling-catalog.repository';
  * conserva.
  */
 describe('SchedulingCatalogRepository · retireTemplate', () => {
-  function conBase(opciones: {
-    cupos: string[];
-    conCita?: string[];
-    reprogramaciones?: Array<{ fromSlotId: string; toSlotId: string }>;
+  function withBase(options: {
+    slots: string[];
+    withAppointment?: string[];
+    reschedules?: Array<{ fromSlotId: string; toSlotId: string }>;
   }) {
-    const plantilla = { id: 'tpl-1', statusConceptId: 'TPL_PUBLISHED' };
+    const template = { id: 'tpl-1', statusConceptId: 'TPL_PUBLISHED' };
     const em = {
-      find: mockFn(async (entidad: unknown, where: any) => {
-        if (entidad === BookableSlots) {
-          return opciones.cupos.map((id) => ({ id }));
+      find: mockFn(async (entity: unknown, where: any) => {
+        if (entity === BookableSlots) {
+          return options.slots.map((id) => ({ id }));
         }
-        if (entidad === AppointmentBookings) {
-          return (opciones.conCita ?? []).map((bookableSlotId) => ({
+        if (entity === AppointmentBookings) {
+          return (options.withAppointment ?? []).map((bookableSlotId) => ({
             bookableSlotId,
           }));
         }
-        if (entidad === BookingReschedules) {
+        if (entity === BookingReschedules) {
           const ids: string[] = where.$or[0].fromSlotId.$in;
-          return (opciones.reprogramaciones ?? []).filter(
+          return (options.reschedules ?? []).filter(
             (r) => ids.includes(r.fromSlotId) || ids.includes(r.toSlotId),
           );
         }
         return [];
       }),
       nativeDelete: mockFn(
-        async (_entidad: unknown, where: any) => where.id?.$in?.length ?? 0,
+        async (_entity: unknown, where: any) => where.id?.$in?.length ?? 0,
       ),
-      findOne: mockFn(async (entidad: unknown) =>
-        entidad === ScheduleTemplates ? plantilla : null,
+      findOne: mockFn(async (entity: unknown) =>
+        entity === ScheduleTemplates ? template : null,
       ),
     };
-    return { em, plantilla, repo: new SchedulingCatalogRepository() };
+    return { em, template: template, repo: new SchedulingCatalogRepository() };
   }
 
   /** Los ids de cupo que se mandaron a borrar. */
-  function borrados(em: any): string[] {
-    const llamada = em.nativeDelete.mock.calls.find(
-      ([entidad]: [unknown]) => entidad === BookableSlots,
+  function deleted(em: any): string[] {
+    const call = em.nativeDelete.mock.calls.find(
+      ([entity]: [unknown]) => entity === BookableSlots,
     );
-    return llamada ? llamada[1].id.$in : [];
+    return call ? call[1].id.$in : [];
   }
 
   it('conserva el cupo del que se reprogramó una cita, aunque ya no tenga cita', async () => {
-    const { em, repo } = conBase({
-      cupos: ['s-origen', 's-libre', 's-con-cita'],
-      conCita: ['s-con-cita'],
-      reprogramaciones: [{ fromSlotId: 's-origen', toSlotId: 's-otro' }],
+    const { em, repo } = withBase({
+      slots: ['s-origen', 's-libre', 's-con-cita'],
+      withAppointment: ['s-con-cita'],
+      reschedules: [{ fromSlotId: 's-origen', toSlotId: 's-otro' }],
     });
 
     const res = await repo.retireTemplate(
@@ -83,23 +83,23 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
       'u-1',
     );
 
-    expect(borrados(em)).toEqual(['s-libre']);
+    expect(deleted(em)).toEqual(['s-libre']);
     expect(res).toEqual({ releasedSlots: 1, keptSlots: 2 });
   });
 
   it('conserva también el cupo DESTINO de una reprogramación', async () => {
-    const { em, repo } = conBase({
-      cupos: ['s-destino', 's-libre'],
-      reprogramaciones: [{ fromSlotId: 's-afuera', toSlotId: 's-destino' }],
+    const { em, repo } = withBase({
+      slots: ['s-destino', 's-libre'],
+      reschedules: [{ fromSlotId: 's-afuera', toSlotId: 's-destino' }],
     });
 
     await repo.retireTemplate(em as any, 'tpl-1', 'TPL_RETIRED', 'u-1');
 
-    expect(borrados(em)).toEqual(['s-libre']);
+    expect(deleted(em)).toEqual(['s-libre']);
   });
 
   it('sin citas ni reprogramaciones suelta todos los cupos y sus holds', async () => {
-    const { em, plantilla, repo } = conBase({ cupos: ['s-1', 's-2'] });
+    const { em, template, repo } = withBase({ slots: ['s-1', 's-2'] });
 
     const res = await repo.retireTemplate(
       em as any,
@@ -111,16 +111,16 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
     expect(em.nativeDelete).toHaveBeenCalledWith(SlotHolds, {
       bookableSlotId: { $in: ['s-1', 's-2'] },
     });
-    expect(borrados(em)).toEqual(['s-1', 's-2']);
+    expect(deleted(em)).toEqual(['s-1', 's-2']);
     expect(res).toEqual({ releasedSlots: 2, keptSlots: 0 });
-    expect(plantilla.statusConceptId).toBe('TPL_RETIRED');
+    expect(template.statusConceptId).toBe('TPL_RETIRED');
   });
 
   it('si todos los cupos tienen historia no borra nada', async () => {
-    const { em, repo } = conBase({
-      cupos: ['s-1', 's-2'],
-      conCita: ['s-1'],
-      reprogramaciones: [{ fromSlotId: 's-2', toSlotId: 's-9' }],
+    const { em, repo } = withBase({
+      slots: ['s-1', 's-2'],
+      withAppointment: ['s-1'],
+      reschedules: [{ fromSlotId: 's-2', toSlotId: 's-9' }],
     });
 
     const res = await repo.retireTemplate(

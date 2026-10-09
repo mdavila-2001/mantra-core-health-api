@@ -44,7 +44,7 @@ const DEFAULT_LIST_LIMIT = 50;
  * compartirla es deliberado por ahora — son dos servicios y una constante de
  * cuatro líneas—, pero si aparece un tercero conviene subirla al módulo.
  */
-const ROLES_DE_AGENDA: readonly string[] = [
+const AGENDA_OPERATOR_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SCHEDULING_AGENT',
   'SUPERADMIN',
@@ -74,7 +74,7 @@ export class SchedulingWaitlistService {
     // P8: el servicio declara **a quién** avisar; con qué texto y a qué cuenta
     // lo resuelve el colaborador, que es quien puede leer entidades sin romper
     // la migración a puertos de este módulo.
-    private readonly avisos: SchedulingAgendaNoticesService,
+    private readonly notices: SchedulingAgendaNoticesService,
     private readonly logger: PinoLogger,
     // B.1 — quién puede actuar por un paciente. La regla vive en `profiles`;
     // acá sólo se consulta, igual que en el servicio de reservas.
@@ -99,7 +99,7 @@ export class SchedulingWaitlistService {
     // Anotarse en la lista de espera de otro no tenía ninguna comprobación: con
     // el uuid de un perfil ajeno, cualquiera lo metía en la cola de una agenda y
     // le disparaba avisos. Va antes de abrir la transacción.
-    await this.assertPuedeVerAlPaciente(dto.patientProfileId, actor);
+    await this.assertMaySeePatient(dto.patientProfileId, actor);
 
     const priority = dto.priority ?? DEFAULT_PRIORITY;
     return this.session.transaction('enroll', async (_em, transaction) => {
@@ -136,14 +136,14 @@ export class SchedulingWaitlistService {
     query: ListWaitlistQueryDto,
     actor: AuthenticatedUser,
   ): Promise<ListWaitlistResponseDto> {
-    await this.assertPuedeVerAlPaciente(query.patientProfileId, actor);
+    await this.assertMaySeePatient(query.patientProfileId, actor);
 
-    const estados =
+    const states =
       query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
 
     const items = await this.reader.findEntriesForPatient(
       query.patientProfileId,
-      estados,
+      states,
       query.limit ?? DEFAULT_LIST_LIMIT,
     );
 
@@ -172,14 +172,14 @@ export class SchedulingWaitlistService {
     query: ListResourceWaitlistQueryDto,
     actor: AuthenticatedUser,
   ): Promise<ListWaitlistResponseDto> {
-    await this.assertOperaLaAgenda(resourceId, actor);
+    await this.assertOperatesAgenda(resourceId, actor);
 
-    const estados =
+    const states =
       query.includeClosed === 'true' ? undefined : [CONCEPTS.WAITLIST_ACTIVE];
 
     const items = await this.reader.findEntriesForResource(
       resourceId,
-      estados,
+      states,
       query.limit ?? DEFAULT_LIST_LIMIT,
     );
 
@@ -230,11 +230,11 @@ export class SchedulingWaitlistService {
    * sólo lo suyo. Un profesional que quiera saber quién espera **su** agenda no
    * pasa por acá: para eso está `listForResource`, que autoriza por el recurso.
    */
-  private async assertPuedeVerAlPaciente(
+  private async assertMaySeePatient(
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
     if (actor.patientProfileId === patientProfileId) return;
     // Quien lo representa (B.1): la madre que anota a su hijo en la cola tiene
     // que poder verla. Se pregunta al final y sólo si hizo falta, para no pagar
@@ -251,21 +251,21 @@ export class SchedulingWaitlistService {
   /**
    * Comprueba que quien pregunta atiende en esa agenda.
    *
-   * Misma regla que la demora (`SchedulingDelayService.assertOperaLaAgenda`) y
+   * Misma regla que la demora (`SchedulingDelayService.assertOperatesAgenda`) y
    * por el mismo motivo: la lista de espera de una agenda dice quién quiere
    * turno con **ese** profesional, y eso lo ve quien atiende ahí.
    */
-  private async assertOperaLaAgenda(
+  private async assertOperatesAgenda(
     resourceId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
 
-    const profesional = await this.reader.findResourcePractitioner(resourceId);
+    const practitioner = await this.reader.findResourcePractitioner(resourceId);
     if (
-      profesional !== null &&
+      practitioner !== null &&
       actor.practitionerProfileId !== undefined &&
-      profesional === actor.practitionerProfileId
+      practitioner === actor.practitionerProfileId
     ) {
       return;
     }
@@ -286,7 +286,7 @@ export class SchedulingWaitlistService {
     slotId: string,
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    const promocion = await this.session.transaction(
+    const promotion = await this.session.transaction(
       'promoteWaitlist',
       async (_em, transaction) => {
         const context = { transaction };
@@ -333,17 +333,17 @@ export class SchedulingWaitlistService {
     // P8 · aviso (1): «se liberó un horario con …». Hasta acá la promoción
     // marcaba al candidato y no se lo decía a nadie — el cupo liberado existía
     // en la base y no en la app de quien lo estaba esperando.
-    const avisados = await this.avisos.avisarCupoLiberado(
+    const notified = await this.notices.notifySlotReleased(
       slotId,
-      promocion.promotedIds,
+      promotion.promotedIds,
     );
 
     return {
-      processed: promocion.processed,
+      processed: promotion.processed,
       detail:
-        promocion.processed === 0
+        promotion.processed === 0
           ? 'El slot no tenía candidatos que promover'
-          : `Candidatos promovidos y avisados (${avisados} de ${promocion.processed}); la reserva la confirma el paciente`,
+          : `Candidatos promovidos y avisados (${notified} de ${promotion.processed}); la reserva la confirma el paciente`,
     };
   }
 
@@ -432,7 +432,7 @@ export class SchedulingWaitlistService {
   async dispatchReminders(
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    const despacho = await this.session.transaction(
+    const dispatch = await this.session.transaction(
       'dispatchReminders',
       async (_em, transaction) => {
         const context = { transaction };
@@ -467,16 +467,16 @@ export class SchedulingWaitlistService {
     // P8 · aviso (3): la entrega in-app. El comentario anterior decía «la
     // entrega la ejecuta messaging (35)», y era cierto salvo que nadie la
     // pedía: el recordatorio se marcaba enviado y no salía por ningún canal.
-    const avisados = await this.avisos.avisarRecordatorios(
-      despacho.dispatchedIds,
+    const notified = await this.notices.notifyReminders(
+      dispatch.dispatchedIds,
     );
 
     return {
-      processed: despacho.processed,
+      processed: dispatch.processed,
       detail:
-        despacho.processed === 0
+        dispatch.processed === 0
           ? 'No había recordatorios vencidos'
-          : `Recordatorios despachados y entregados por el canal in-app (${avisados} de ${despacho.processed})`,
+          : `Recordatorios despachados y entregados por el canal in-app (${notified} de ${dispatch.processed})`,
     };
   }
 }

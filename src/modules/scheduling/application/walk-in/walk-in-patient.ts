@@ -80,11 +80,11 @@ export async function createWalkInPatient(
   tx: EntityManager,
   data: WalkInPatientData,
 ): Promise<WalkInPatientResult> {
-  const duplicado = await repos.identifiers.findActiveDuplicate(tx, {
+  const duplicate = await repos.identifiers.findActiveDuplicate(tx, {
     typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
     value: data.nationalId,
   });
-  if (duplicado) {
+  if (duplicate) {
     throw new ConflictException(
       'Ya existe un paciente con ese documento de identidad. Búsquelo con ' +
         'GET /profiles/patients?nationalId= en vez de registrarlo de nuevo.',

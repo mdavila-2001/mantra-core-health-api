@@ -17,7 +17,7 @@ import {
   SchedulingCatalogRepository,
 } from '../../infrastructure/repositories';
 import { PractitionerAffiliationGateService } from '../affiliation/practitioner-affiliation-gate.service';
-import { puedeVerElMotivoDeLaCita } from '../../domain/booking/booking-reason-visibility.policy';
+import { canSeeBookingReason } from '../../domain/booking/booking-reason-visibility.policy';
 import { SchedulingProfessionalTimeService } from '../professional-time/scheduling-professional-time.service';
 import { SchedulingWaitlistService } from '../waitlist/scheduling-waitlist.service';
 import { SchedulingServiceAgendaService } from '../service-offerings/scheduling-service-agenda.service';
@@ -28,7 +28,7 @@ import {
 // Escritura cross-dominio acotada a la confirmación, como la lectura de
 // `directory` que hace `iam` al emitir un token: al confirmar una reserva nace
 // su cita clínica, porque son la misma cosa vista desde dos módulos. Ver
-// `crearCitaClinica`.
+// `createClinicalAppointment`.
 import type { Appointments } from '../../../clinical/entities';
 import {
   AppointmentsRepository,
@@ -55,10 +55,10 @@ import {
   type AgendaNoticePort,
 } from '../ports/agenda-notice.port';
 import {
-  avisoDeCambioDeCita,
-  avisoDeSolicitudAlPaciente,
-  avisoDeSolicitudAlProfesional,
-  type CambioDeCita,
+  bookingChangeNotice,
+  requestNoticeForPatient,
+  requestNoticeForPractitioner,
+  type BookingChange,
 } from '../../domain/notices/agenda-notices';
 import { isValidBookingTransition } from '../../domain/booking/booking-state-machine';
 import {
@@ -141,7 +141,7 @@ const APPOINTMENT_CHANNEL_CONCEPT: Readonly<
  * sin explicación se siente como un plantón, y acá la explicación existe —otro
  * médico le dijo que sí primero—.
  */
-const MOTIVO_DESPLAZADA =
+const DISPLACED_REASON =
   'Se canceló automáticamente: le confirmaron otra cita a la misma hora.';
 
 /**
@@ -149,7 +149,7 @@ const MOTIVO_DESPLAZADA =
  *
  * Son las que una aceptación ajena puede desplazar: todavía no las comprometió
  * nadie. Una confirmada NO entra acá a propósito — ver
- * {@link SchedulingBookingsService.cancelarPendientesQueChocan}.
+ * {@link SchedulingBookingsService.cancelConflictingPending}.
  */
 const PENDING_BOOKING_STATES: readonly string[] = [
   SCHED.BOOKING_REQUESTED,
@@ -182,7 +182,7 @@ const PENDING_DECISION_STATES: readonly string[] = [
 ];
 
 /** P42: cómo se proyectan los dos lados del vínculo de reconsulta de una cita. */
-interface VinculosDeReconsulta {
+interface FollowUpLinks {
   /** La consulta de origen, o `null` si la cita no es una reconsulta. */
   followUpOf: (booking: AppointmentBookings) => BookingFollowUpOriginDto | null;
   /** La reconsulta viva que salió de la cita, o `null`. */
@@ -206,7 +206,7 @@ const VISIBLE_BOOKING_STATES: readonly string[] = [
  * para decidir a quién atribuir un cambio (`actorKind`), no para autorizar: eso
  * ya lo hizo el guard antes de llegar acá.
  */
-const ROLES_DEL_PRESTADOR: readonly string[] = [
+const PROVIDER_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SCHEDULING_AGENT',
   'PRACTITIONER',
@@ -220,12 +220,12 @@ const ROLES_DEL_PRESTADOR: readonly string[] = [
  * Es el oficio de quien atiende el mostrador y de quien administra la agenda de
  * la organización: repartir turnos entre todos los consultorios. Un profesional
  * NO está acá a propósito — opera las citas de su recurso, y eso lo comprueba
- * `cargarParaOperar` contra el perfil de su token, no contra su rol.
+ * `loadForOperation` contra el perfil de su token, no contra su rol.
  *
  * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín: excluirlo
  * acá le negaría en el servicio lo que el guard ya le concedió.
  */
-export const ROLES_DE_AGENDA: readonly string[] = [
+export const AGENDA_OPERATOR_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SCHEDULING_AGENT',
   'SUPERADMIN',
@@ -259,7 +259,7 @@ const DEFAULT_CANCELLATION_WINDOW_MINUTES = 24 * 60;
  * El fallo es benigno: si ninguno coincide, la cita queda sin profesional, que
  * es lo correcto para una sala o un equipo.
  */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
@@ -316,7 +316,7 @@ const PAYMENT_STATE_LABEL: Readonly<Record<PaymentState, string>> = {
  * cobro legítimo. Está anotado como pregunta abierta: si el propietario dice
  * que no, se agrega acá y las pruebas lo dicen enseguida.
  */
-const ESTADOS_SIN_PAGO: readonly string[] = [CONCEPTS.BOOKING_CANCELLED];
+const STATES_WITHOUT_PAYMENT: readonly string[] = [CONCEPTS.BOOKING_CANCELLED];
 
 /**
  * La copia congelada de un servicio reservado, a lo que ve el cliente.
@@ -325,7 +325,7 @@ const ESTADOS_SIN_PAGO: readonly string[] = [CONCEPTS.BOOKING_CANCELLED];
  * tal cual, para que una clave que mañana se agregue al snapshot no salga por
  * la API sin que nadie lo haya decidido.
  */
-function proyectarServicioReservado(snapshot: unknown): BookingServiceDto {
+function projectBookedService(snapshot: unknown): BookingServiceDto {
   const s = snapshot as Partial<{
     offeringId: string;
     serviceName: string;
@@ -355,17 +355,17 @@ function proyectarServicioReservado(snapshot: unknown): BookingServiceDto {
  * tiene por qué conocer los uuid de terminología, y si los conociera acabaría
  * comparándolos a mano en el front.
  */
-function proyectarEstadoDePago(
-  fila: AppointmentPaymentStates,
+function projectPaymentState(
+  row: AppointmentPaymentStates,
 ): PaymentStateDto {
-  const state = PAYMENT_CONCEPT_STATE[fila.statusConceptId];
+  const state = PAYMENT_CONCEPT_STATE[row.statusConceptId];
   return {
     state,
     label: PAYMENT_STATE_LABEL[state],
-    conceptId: fila.statusConceptId,
-    insuranceUsed: fila.insuranceUsed,
-    markedByUserId: fila.markedByUserId,
-    markedAt: fila.markedAt.toISOString(),
+    conceptId: row.statusConceptId,
+    insuranceUsed: row.insuranceUsed,
+    markedByUserId: row.markedByUserId,
+    markedAt: row.markedAt.toISOString(),
   };
 }
 
@@ -393,8 +393,8 @@ export class SchedulingBookingsService {
     @Inject(AGENDA_NOTICE_PORT)
     private readonly notices: AgendaNoticePort,
     private readonly logger: PinoLogger,
-    private readonly vinculos: PractitionerAffiliationGateService,
-    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly affiliations: PractitionerAffiliationGateService,
+    private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly coverageRepo: CoverageRepository,
     // La lista de espera del cupo que una cancelación libera. Se inyecta el
     // servicio y no su puerto: promover es un caso de uso completo —abre su
@@ -438,9 +438,9 @@ export class SchedulingBookingsService {
    * @param actor - Quien pide, si hay sesión.
    * @returns `true` si es una cuenta de paciente sin más oficio.
    */
-  private esUnPaciente(actor?: AuthenticatedUser): boolean {
+  private isPatientActor(actor?: AuthenticatedUser): boolean {
     if (!actor) return false;
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return false;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return false;
     return actor.practitionerProfileId === undefined;
   }
 
@@ -456,12 +456,12 @@ export class SchedulingBookingsService {
    * @param em - Transacción activa, si la hay.
    * @throws ForbiddenException si es una cuenta de paciente sin título sobre él.
    */
-  private async assertPuedeActuarPorElPaciente(
+  private async assertMayActForPatient(
     patientProfileId: string,
     actor: AuthenticatedUser,
     em?: EntityManager,
   ): Promise<void> {
-    if (!this.esUnPaciente(actor)) return;
+    if (!this.isPatientActor(actor)) return;
     await this.representation.assertMayActForPatient(
       patientProfileId,
       actor,
@@ -491,7 +491,7 @@ export class SchedulingBookingsService {
     // sostener el `FOR UPDATE` del cupo mientras tanto serializaría a todos los
     // que piden ese mismo horario detrás de una consulta que no es del cupo.
     if (dto.patientProfileId !== undefined) {
-      await this.assertPuedeActuarPorElPaciente(dto.patientProfileId, actor);
+      await this.assertMayActForPatient(dto.patientProfileId, actor);
     }
 
     return this.em.transactional(async (tx) => {
@@ -527,22 +527,22 @@ export class SchedulingBookingsService {
       // (A-02). Es 422 y no 404 a propósito —el cupo existe, lo que no existe
       // es la posibilidad— y el mensaje lo dice en palabras, porque lo lee un
       // paciente.
-      const ahora = Date.now();
-      const minutosDeAviso = policy?.minNoticeMinutes ?? 0;
-      const yaPaso = slot.startAt.getTime() <= ahora;
-      const demasiadoSobreLaHora =
-        slot.startAt.getTime() <= ahora + minutosDeAviso * 60_000;
+      const now = Date.now();
+      const noticeMinutes = policy?.minNoticeMinutes ?? 0;
+      const alreadyPassed = slot.startAt.getTime() <= now;
+      const tooCloseToStart =
+        slot.startAt.getTime() <= now + noticeMinutes * 60_000;
 
-      if (yaPaso || demasiadoSobreLaHora) {
+      if (alreadyPassed || tooCloseToStart) {
         // Dos motivos distintos merecen dos frases distintas: a quien pide un
         // turno de la semana pasada no se le habla de anticipación mínima, y a
         // quien llega diez minutos tarde para una regla de treinta no se le
         // dice que «ya pasó» cuando todavía no pasó.
         throw new PreconditionFailedException(
-          yaPaso
+          alreadyPassed
             ? 'Ese horario ya pasó.'
-            : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${minutosDeAviso} minutos de anticipación.`,
-          { slotId, startAt: slot.startAt.toISOString(), minutosDeAviso },
+            : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${noticeMinutes} minutos de anticipación.`,
+          { slotId, startAt: slot.startAt.toISOString(), minutosDeAviso: noticeMinutes },
         );
       }
 
@@ -614,7 +614,7 @@ export class SchedulingBookingsService {
       'Confirming booking from hold',
     );
 
-    return this.materializarReserva(
+    return this.materializeBooking(
       holdToken,
       {
         tenantId: dto.tenantId,
@@ -660,7 +660,7 @@ export class SchedulingBookingsService {
       'Requesting booking from hold',
     );
 
-    const resultado = await this.materializarReserva(
+    const result = await this.materializeBooking(
       holdToken,
       {
         tenantId: dto.tenantId,
@@ -676,8 +676,8 @@ export class SchedulingBookingsService {
 
     // Fuera de la transacción, como todos los avisos: que no salga la campana
     // no puede deshacer una solicitud que ya existe.
-    await this.avisarSolicitud(resultado.id);
-    return resultado;
+    await this.notifyRequest(result.id);
+    return result;
   }
 
   /**
@@ -685,7 +685,7 @@ export class SchedulingBookingsService {
    *
    * ## Por qué a las dos y no a la contraparte
    *
-   * {@link avisarCambio} avisa a quien **no** actuó, y para aceptar, mover o
+   * {@link notifyChange} avisa a quien **no** actuó, y para aceptar, mover o
    * cancelar eso es correcto: quien lo hizo ya lo sabe. Pero pedir un turno no
    * es un cambio de estado que le ocurre a alguien: es el comienzo de una
    * espera. El profesional necesita enterarse de que hay algo que responder, y
@@ -697,25 +697,25 @@ export class SchedulingBookingsService {
    *
    * ## Por qué no lanza
    *
-   * Igual que {@link avisarCambio}: corre después de que la transacción cerró.
+   * Igual que {@link notifyChange}: corre después de que la transacción cerró.
    * Un fallo del canal se registra y se descarta; la reserva ya existe.
    *
    * @param bookingId - La cita recién solicitada.
    */
-  private async avisarSolicitud(bookingId: string): Promise<void> {
+  private async notifyRequest(bookingId: string): Promise<void> {
     const em = this.em.fork();
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
     // El del paciente sale siempre: su perfil es el dueño de la reserva, así
     // que siempre hay a quién dirigirlo.
-    const avisos: AgendaNotice[] = [avisoDeSolicitudAlPaciente(booking)];
+    const notices: AgendaNotice[] = [requestNoticeForPatient(booking)];
 
-    const profesional = await this.noticeRepo.findResourceAccount(
+    const practitioner = await this.noticeRepo.findResourceAccount(
       em,
       booking.resourceId,
     );
-    if (profesional === null) {
+    if (practitioner === null) {
       // Un recurso que no es de un profesional —una sala, un equipo— no tiene a
       // quién avisarle. No es un fallo: es que no hay segundo destinatario, y
       // el acuse del paciente sale igual.
@@ -724,20 +724,20 @@ export class SchedulingBookingsService {
         'El recurso de la solicitud no tiene profesional al que avisar',
       );
     } else {
-      const paciente = await this.noticeRepo.findDisplayNameForProfile(
+      const patient = await this.noticeRepo.findDisplayNameForProfile(
         em,
         booking.patientProfileId,
       );
-      avisos.push(
-        avisoDeSolicitudAlProfesional(
+      notices.push(
+        requestNoticeForPractitioner(
           booking,
-          paciente ?? undefined,
-          profesional,
+          patient ?? undefined,
+          practitioner,
         ),
       );
     }
 
-    await this.notices.emitMany(avisos);
+    await this.notices.emitMany(notices);
   }
 
   /**
@@ -748,7 +748,7 @@ export class SchedulingBookingsService {
    * clínica y liberan el mismo cupo si algo falla. Lo único que las distingue es
    * el estado con el que la cita nace y si ya hay compromiso (`confirmedAt`).
    */
-  private async materializarReserva(
+  private async materializeBooking(
     holdToken: string,
     plan: {
       /** Organización dueña de la cita. */
@@ -774,7 +774,7 @@ export class SchedulingBookingsService {
     // puede haberse tomado sin declarar paciente —el cuerpo lo trae recién
     // acá—, así que comprobarlo sólo al retener dejaría la puerta abierta.
     // Cubre a la vez confirmar y solicitar, que es por lo que vive acá.
-    await this.assertPuedeActuarPorElPaciente(plan.patientProfileId, actor);
+    await this.assertMayActForPatient(plan.patientProfileId, actor);
 
     return this.em.transactional(async (tx) => {
       const hold = await this.bookingsRepo.findHoldByTokenForUpdate(
@@ -828,7 +828,7 @@ export class SchedulingBookingsService {
       // confirmado, el paciente ya tiene dónde estar. Reservar otro encima es
       // comprometerse a estar en dos lugares a la vez, y el que se queda
       // esperando es el médico.
-      const yaComprometido =
+      const alreadyCommitted =
         await this.bookingsRepo.findPatientBookingsOverlapping(
           tx,
           plan.patientProfileId,
@@ -836,15 +836,15 @@ export class SchedulingBookingsService {
           slot.endAt ?? slot.startAt,
           ACTIVE_BOOKING_STATES,
         );
-      if (yaComprometido.length > 0) {
-        const choque = yaComprometido[0];
+      if (alreadyCommitted.length > 0) {
+        const clash = alreadyCommitted[0];
         throw new PreconditionFailedException(
           `Ya tiene una cita confirmada ese día a esa hora${
-            choque.resourceName ? ` en «${choque.resourceName}»` : ''
+            clash.resourceName ? ` en «${clash.resourceName}»` : ''
           }. Cancélelo primero si quiere cambiarlo por éste.`,
           {
-            bookingId: choque.id,
-            startAt: choque.startAt,
+            bookingId: clash.id,
+            startAt: clash.startAt,
           },
         );
       }
@@ -869,9 +869,9 @@ export class SchedulingBookingsService {
       // lugares a la vez (comprobado ejecutando, no leyendo).
       if (
         resource &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+        PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
       ) {
-        await this.tiempoProfesional.assertRangoLibre(
+        await this.professionalTime.assertRangeFree(
           tx,
           resource.resourceRefId,
           slot.startAt,
@@ -882,14 +882,14 @@ export class SchedulingBookingsService {
       // v4.2.40 — si el cupo es de un servicio, la oferta manda: de ella salen la
       // modalidad, lo que el paciente aceptó y si la reserva espera aprobación. Se
       // lee del CUPO y no del pedido del cliente: el navegador no decide el precio.
-      const delServicio = slot.practitionerServiceOfferingId
-        ? await this.serviceAgenda.ofertaDelCupo(
+      const ofService = slot.practitionerServiceOfferingId
+        ? await this.serviceAgenda.offeringOfSlot(
             tx,
             slot.practitionerServiceOfferingId,
           )
         : null;
-      const efectivo = delServicio
-        ? this.planDeServicio(plan, delServicio.oferta.requiresApproval)
+      const effective = ofService
+        ? this.planForService(plan, ofService.offering.requiresApproval)
         : plan;
 
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
@@ -907,7 +907,7 @@ export class SchedulingBookingsService {
       // La cita clínica que respalda la reserva. Se crea **antes** para poder
       // enlazarla: `appointment_id` es una columna uuid suelta, así que el orden
       // lo garantiza esto y no la unidad de trabajo.
-      const appointment = this.crearCitaClinica(tx, {
+      const appointment = this.createClinicalAppointment(tx, {
         tenantId: plan.tenantId,
         patientProfileId: plan.patientProfileId,
         resourceRefType: resource?.resourceRefType,
@@ -915,13 +915,13 @@ export class SchedulingBookingsService {
         startAt: slot.startAt,
         endAt: slot.endAt,
         reasonText: plan.reasonText,
-        statusConceptId: efectivo.appointmentStatusConceptId,
-        ...(delServicio
+        statusConceptId: effective.appointmentStatusConceptId,
+        ...(ofService
           ? {
               typeConceptId: CLIN.ACTIVITY_PROCEDURE,
-              ...(delServicio.oferta.channelConceptId === undefined
+              ...(ofService.offering.channelConceptId === undefined
                 ? {}
-                : { channelConceptId: delServicio.oferta.channelConceptId }),
+                : { channelConceptId: ofService.offering.channelConceptId }),
             }
           : {}),
         actorUserId: actor.id,
@@ -942,14 +942,14 @@ export class SchedulingBookingsService {
         serviceConceptId: slot.serviceConceptId,
         bookingChannelConceptId: CHANNEL_CONCEPT[plan.channel],
         bookedByUserId: actor.id,
-        statusConceptId: efectivo.statusConceptId,
-        confirmedAt: efectivo.confirmedAt,
+        statusConceptId: effective.statusConceptId,
+        confirmedAt: effective.confirmedAt,
         bookingPolicyId: policy?.id,
         cancellationPolicySnapshot,
-        ...(delServicio
+        ...(ofService
           ? {
-              practitionerServiceOfferingId: delServicio.oferta.id,
-              serviceSnapshot: this.congelarServicio(delServicio, slot),
+              practitionerServiceOfferingId: ofService.offering.id,
+              serviceSnapshot: this.freezeService(ofService, slot),
             }
           : {}),
         reasonText: plan.reasonText,
@@ -970,7 +970,7 @@ export class SchedulingBookingsService {
       touch(slot, actor.id);
 
       // Los recordatorios se programan junto con la cita (UC-41-13 va incluido aquí).
-      const offsets = efectivo.reminderOffsetsMinutes;
+      const offsets = effective.reminderOffsetsMinutes;
       for (const offset of offsets) {
         this.bookingsRepo.createReminder(tx, {
           bookingId: booking.id,
@@ -985,7 +985,7 @@ export class SchedulingBookingsService {
       return {
         id: booking.id,
         bookableSlotId: hold.bookableSlotId,
-        statusConceptId: efectivo.statusConceptId,
+        statusConceptId: effective.statusConceptId,
         remindersScheduled: offsets.length,
       };
     });
@@ -1039,9 +1039,9 @@ export class SchedulingBookingsService {
     );
 
     const { booking, slot, retractedSlots } = await this.em.transactional(
-      (tx) => this.crearCitaDirectaEnTransaccion(tx, dto, actor),
+      (tx) => this.createDirectAppointmentInTransaction(tx, dto, actor),
     );
-    const resultado: DirectAppointmentResponseDto = {
+    const result: DirectAppointmentResponseDto = {
       bookingId: booking.id,
       bookableSlotId: slot.id,
       statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
@@ -1050,13 +1050,13 @@ export class SchedulingBookingsService {
 
     // Fuera de la transacción, como todos los avisos: que no salga la campana
     // no puede deshacer una cita que ya existe.
-    await this.avisarCambio(
-      resultado.bookingId,
+    await this.notifyChange(
+      result.bookingId,
       'ASSIGNED',
       dto.reasonText,
       'PROVIDER',
     );
-    return resultado;
+    return result;
   }
 
   /**
@@ -1079,86 +1079,86 @@ export class SchedulingBookingsService {
    * @param tx - Transacción de la cita directa.
    * @param dto - Cuerpo con `followUpOf`.
    * @param startAt - Inicio pedido, ya parseado.
-   * @param esSuAgenda - Si el recurso es la agenda del profesional de la sesión.
+   * @param isOwnAgenda - Si el recurso es la agenda del profesional de la sesión.
    * @returns La cita de origen (bloqueada) y el encuentro que la atendió.
    */
-  private async validarReconsulta(
+  private async validateFollowUp(
     tx: EntityManager,
     dto: CreateDirectAppointmentDto,
     startAt: Date,
-    esSuAgenda: boolean,
+    isOwnAgenda: boolean,
   ): Promise<{
-    origen: AppointmentBookings;
-    encuentroDeOrigen: string | null;
+    origin: AppointmentBookings;
+    originEncounterId: string | null;
   }> {
-    const pedido = dto.followUpOf!;
-    if (!esSuAgenda) {
+    const requested = dto.followUpOf!;
+    if (!isOwnAgenda) {
       throw new ForbiddenException(
         'La reconsulta se agenda en su propia agenda, no en la de otro profesional.',
       );
     }
 
-    const origen = await this.bookingsRepo.findBookingByIdForUpdate(
+    const originBooking = await this.bookingsRepo.findBookingByIdForUpdate(
       tx,
-      pedido.bookingId,
+      requested.bookingId,
     );
-    if (!origen) {
+    if (!originBooking) {
       throw new ResourceNotFoundException(
         'La cita de la que sale esta reconsulta no existe',
-        { bookingId: pedido.bookingId },
+        { bookingId: requested.bookingId },
       );
     }
-    if (origen.patientProfileId !== dto.patientProfileId) {
+    if (originBooking.patientProfileId !== dto.patientProfileId) {
       throw new PreconditionFailedException(
         'La reconsulta es para el paciente de la cita de origen',
-        { bookingId: origen.id, reason: 'FOLLOW_UP_PATIENT_MISMATCH' },
+        { bookingId: originBooking.id, reason: 'FOLLOW_UP_PATIENT_MISMATCH' },
       );
     }
-    const ahora = new Date();
-    if (startAt.getTime() <= ahora.getTime()) {
+    const now = new Date();
+    if (startAt.getTime() <= now.getTime()) {
       throw new PreconditionFailedException(
         'Una reconsulta se agenda para más adelante',
         { startAt: dto.startAt, reason: 'FOLLOW_UP_NOT_FUTURE' },
       );
     }
 
-    const vivas = await this.bookingsRepo.findFollowUpsOf(
+    const live = await this.bookingsRepo.findFollowUpsOf(
       tx,
-      [origen.id],
+      [originBooking.id],
       VISIBLE_BOOKING_STATES,
     );
-    const porVenir = vivas.find(
-      ({ slot }) => slot !== null && slot.startAt.getTime() > ahora.getTime(),
+    const upcoming = live.find(
+      ({ slot }) => slot !== null && slot.startAt.getTime() > now.getTime(),
     );
-    if (porVenir) {
+    if (upcoming) {
       throw new ConflictException(
         'Esta consulta ya tiene una reconsulta agendada',
         {
-          bookingId: porVenir.booking.id,
-          startAt: porVenir.slot!.startAt.toISOString(),
+          bookingId: upcoming.booking.id,
+          startAt: upcoming.slot!.startAt.toISOString(),
         },
       );
     }
 
     // El encuentro de origen lo dice la base (cita → encuentro), no el
     // cliente: es contra él que se valida el formulario (P43).
-    const encuentroDeOrigen =
-      origen.appointmentId == null
+    const originEncounterId =
+      originBooking.appointmentId == null
         ? null
         : ((
             await this.encountersRepo.findLatestIdsByAppointmentIds(tx, [
-              origen.appointmentId,
+              originBooking.appointmentId,
             ])
-          ).get(origen.appointmentId) ?? null);
+          ).get(originBooking.appointmentId) ?? null);
 
-    if (pedido.formInstanceId !== undefined) {
+    if (requested.formInstanceId !== undefined) {
       await this.formOrigin.assertUsableOrigin(
         tx,
-        pedido.formInstanceId,
-        encuentroDeOrigen,
+        requested.formInstanceId,
+        originEncounterId,
       );
     }
-    return { origen, encuentroDeOrigen };
+    return { origin: originBooking, originEncounterId: originEncounterId };
   }
 
   /**
@@ -1178,15 +1178,15 @@ export class SchedulingBookingsService {
    * @param tx - Contexto transaccional ya abierto por el llamador.
    * @param dto - Paciente, agenda, inicio, duración y motivo.
    * @param actor - El doctor (su propia agenda) o quien administra agendas.
-   * @param opciones - Canal de reserva a grabar; por defecto `DESK`.
+   * @param options - Canal de reserva a grabar; por defecto `DESK`.
    * @returns La reserva confirmada, el cupo, la cita clínica y cuántos cupos
    *   ofrecidos retiró.
    */
-  async crearCitaDirectaEnTransaccion(
+  async createDirectAppointmentInTransaction(
     tx: EntityManager,
     dto: CreateDirectAppointmentDto,
     actor: AuthenticatedUser,
-    opciones?: { bookingChannel?: 'DESK' | 'WALK_IN' },
+    options?: { bookingChannel?: 'DESK' | 'WALK_IN' },
   ): Promise<{
     booking: AppointmentBookings;
     slot: BookableSlots;
@@ -1206,15 +1206,15 @@ export class SchedulingBookingsService {
       });
     }
 
-    this.assertRecursoEnTenantActivo(resource.tenantId, actor);
+    this.assertResourceInActiveTenant(resource.tenantId, actor);
 
     // La agenda tiene que ser SUYA (o el actor administra agendas por
     // oficio): mismo criterio de titularidad que operar una reserva.
-    const esSuAgenda =
+    const isOwnAgenda =
       actor.practitionerProfileId !== undefined &&
       resource.resourceRefId === actor.practitionerProfileId &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType);
-    if (!this.operaCualquierAgenda(actor) && !esSuAgenda) {
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
+    if (!this.operatesAnyAgenda(actor) && !isOwnAgenda) {
       throw new ForbiddenException(
         'Un profesional solo puede asignar citas en su propia agenda.',
       );
@@ -1222,21 +1222,21 @@ export class SchedulingBookingsService {
 
     // P42 · La reconsulta: sus cuatro rechazos corren SÓLO cuando viene
     // `followUpOf`; sin él la cita puntual sigue exactamente como antes.
-    const reconsulta =
+    const followUp =
       dto.followUpOf === undefined
         ? undefined
-        : await this.validarReconsulta(tx, dto, startAt, esSuAgenda);
+        : await this.validateFollowUp(tx, dto, startAt, isOwnAgenda);
 
     // El gating del vínculo, heredado: comprometer un turno en una
     // organización exige que el vínculo siga vigente — misma regla que
     // aceptar.
-    await this.assertVinculoVigente(resource.tenantId, actor);
+    await this.assertAffiliationCurrent(resource.tenantId, actor);
 
     // Anti-abuso mínimo: el paciente tiene que existir.
-    const nombres = await this.bookingsRepo.findPatientNames(tx, [
+    const names = await this.bookingsRepo.findPatientNames(tx, [
       dto.patientProfileId,
     ]);
-    if (!nombres.has(dto.patientProfileId)) {
+    if (!names.has(dto.patientProfileId)) {
       throw new ResourceNotFoundException('Paciente no encontrado', {
         patientProfileId: dto.patientProfileId,
       });
@@ -1244,8 +1244,8 @@ export class SchedulingBookingsService {
 
     // REGLA MADRE: nada se asigna sobre tiempo ya comprometido del
     // profesional, en ninguna de sus sedes.
-    if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
-      await this.tiempoProfesional.assertRangoLibre(
+    if (PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)) {
+      await this.professionalTime.assertRangeFree(
         tx,
         resource.resourceRefId,
         startAt,
@@ -1255,7 +1255,7 @@ export class SchedulingBookingsService {
 
     // Y el tiempo del PACIENTE también: la regla 1 vale igual cuando quien
     // agenda es el doctor — el paciente tampoco puede estar en dos lugares.
-    const yaComprometido =
+    const alreadyCommitted =
       await this.bookingsRepo.findPatientBookingsOverlapping(
         tx,
         dto.patientProfileId,
@@ -1263,32 +1263,32 @@ export class SchedulingBookingsService {
         endAt,
         ACTIVE_BOOKING_STATES,
       );
-    if (yaComprometido.length > 0) {
-      const choque = yaComprometido[0];
+    if (alreadyCommitted.length > 0) {
+      const clash = alreadyCommitted[0];
       throw new PreconditionFailedException(
         `El paciente ya tiene una cita confirmada en ese rato${
-          choque.resourceName ? ` en «${choque.resourceName}»` : ''
+          clash.resourceName ? ` en «${clash.resourceName}»` : ''
         }.`,
-        { bookingId: choque.id, startAt: choque.startAt },
+        { bookingId: clash.id, startAt: clash.startAt },
       );
     }
 
     // La retracción: los cupos libres del profesional que este rato pisa se
     // retiran acá mismo, en cualquiera de sus sedes.
     let retractedSlots = 0;
-    if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
-      const libres = await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
+    if (PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)) {
+      const freeOnes = await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
         tx,
         resource.resourceRefId,
         startAt,
         endAt,
         CONCEPTS.SLOT_OPEN,
       );
-      for (const libre of libres) {
+      for (const free of freeOnes) {
         // Retraído y no bloqueado: al bloqueado nadie lo devuelve, y al retraído sí
-        // cuando esta cita se cancela (ver `descartarCupoPuntual`).
-        libre.statusConceptId = SCHED.SLOT_RETRACTED;
-        touch(libre, actor.id);
+        // cuando esta cita se cancela (ver `discardOneOffSlot`).
+        free.statusConceptId = SCHED.SLOT_RETRACTED;
+        touch(free, actor.id);
         retractedSlots += 1;
       }
     }
@@ -1308,7 +1308,7 @@ export class SchedulingBookingsService {
     await tx.flush();
 
     // La cita clínica que la respalda, ya reservada.
-    const appointment = this.crearCitaClinica(tx, {
+    const appointment = this.createClinicalAppointment(tx, {
       tenantId: resource.tenantId,
       patientProfileId: dto.patientProfileId,
       resourceRefType: resource.resourceRefType,
@@ -1322,7 +1322,7 @@ export class SchedulingBookingsService {
         ? {}
         : { channelConceptId: APPOINTMENT_CHANNEL_CONCEPT[dto.channel] }),
       // P42: la reconsulta se clasifica como tal; el resto, como hasta hoy.
-      ...(reconsulta === undefined
+      ...(followUp === undefined
         ? {}
         : { typeConceptId: CLIN.ACTIVITY_FOLLOW_UP }),
       actorUserId: actor.id,
@@ -1337,7 +1337,7 @@ export class SchedulingBookingsService {
       bookableSlotId: slot.id,
       resourceId: resource.id,
       bookingChannelConceptId:
-        CHANNEL_CONCEPT[opciones?.bookingChannel ?? 'DESK'],
+        CHANNEL_CONCEPT[options?.bookingChannel ?? 'DESK'],
       bookedByUserId: actor.id,
       statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
       confirmedAt,
@@ -1349,10 +1349,10 @@ export class SchedulingBookingsService {
         capturedAt: new Date().toISOString(),
       },
       reasonText: dto.reasonText,
-      ...(reconsulta === undefined
+      ...(followUp === undefined
         ? {}
         : {
-            followUpOfBookingId: reconsulta.origen.id,
+            followUpOfBookingId: followUp.origin.id,
             formInstanceId: dto.followUpOf?.formInstanceId,
           }),
       actorUserId: actor.id,
@@ -1413,7 +1413,7 @@ export class SchedulingBookingsService {
         if (slot.practitionerServiceOfferingId) {
           // El cupo de un servicio nació para esta retención: no se reofrece, muere
           // con ella y devuelve las consultas que había retraído.
-          await this.descartarCupoPuntual(tx, slot, undefined);
+          await this.discardOneOffSlot(tx, slot, undefined);
           continue;
         }
         if (slot.statusConceptId === CONCEPTS.SLOT_HELD) {
@@ -1449,7 +1449,7 @@ export class SchedulingBookingsService {
     dto: RescheduleBookingDto,
     actor: AuthenticatedUser,
   ): Promise<RescheduleResponseDto> {
-    const motivo = requireReason(dto.reasonText, 'reprogramar la cita');
+    const reason = requireReason(dto.reasonText, 'reprogramar la cita');
 
     this.logger.info(
       {
@@ -1460,7 +1460,7 @@ export class SchedulingBookingsService {
       'Rescheduling booking',
     );
 
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
         bookingId,
@@ -1471,9 +1471,9 @@ export class SchedulingBookingsService {
         });
       }
 
-      // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelarYAvisar` —
+      // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelAndNotify` —
       // reprogramar no comprobaba que el actor fuera el paciente titular.
-      await this.assertPuedeActuarPorElPaciente(
+      await this.assertMayActForPatient(
         booking.patientProfileId,
         actor,
         tx,
@@ -1489,7 +1489,7 @@ export class SchedulingBookingsService {
       }
 
       const fromSlotId = booking.bookableSlotId;
-      await this.assertNoEsUnServicio(tx, fromSlotId, 'reprogramar');
+      await this.assertNotAService(tx, fromSlotId, 'reprogramar');
       if (fromSlotId === dto.toSlotId) {
         throw new PreconditionFailedException(
           'El slot destino es el mismo que el actual',
@@ -1517,43 +1517,43 @@ export class SchedulingBookingsService {
       // M4 · H1.S1: reprogramar es ocupar un rango nuevo, y era el único
       // camino que lo hacía sin preguntar. Que el cupo destino tenga lugar no
       // dice nada de OTRO cupo cuyo horario se pisa con éste: se corren las
-      // mismas dos reglas que al confirmar (`materializarReserva`), sin que la
+      // mismas dos reglas que al confirmar (`materializeBooking`), sin que la
       // cita se compare consigo misma.
-      const finDestino = target.endAt ?? target.startAt;
-      const choqueDelPaciente =
+      const targetEnd = target.endAt ?? target.startAt;
+      const patientClash =
         await this.bookingsRepo.findPatientBookingsOverlapping(
           tx,
           booking.patientProfileId,
           target.startAt,
-          finDestino,
+          targetEnd,
           ACTIVE_BOOKING_STATES,
           booking.id,
         );
-      if (choqueDelPaciente.length > 0) {
-        const choque = choqueDelPaciente[0];
+      if (patientClash.length > 0) {
+        const clash = patientClash[0];
         throw new PreconditionFailedException(
           `El paciente ya tiene una cita confirmada a esa hora${
-            choque.resourceName ? ` en «${choque.resourceName}»` : ''
+            clash.resourceName ? ` en «${clash.resourceName}»` : ''
           }.`,
           {
-            bookingId: choque.id,
-            startAt: choque.startAt,
+            bookingId: clash.id,
+            startAt: clash.startAt,
           },
         );
       }
-      const recursoDestino = await this.catalogRepo.findResourceById(
+      const targetResource = await this.catalogRepo.findResourceById(
         tx,
         target.resourceId,
       );
       if (
-        recursoDestino &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(recursoDestino.resourceRefType)
+        targetResource &&
+        PRACTITIONER_PROFILE_TABLES.includes(targetResource.resourceRefType)
       ) {
-        await this.tiempoProfesional.assertRangoLibre(
+        await this.professionalTime.assertRangeFree(
           tx,
-          recursoDestino.resourceRefId,
+          targetResource.resourceRefId,
           target.startAt,
-          finDestino,
+          targetEnd,
           booking.id,
         );
       }
@@ -1595,7 +1595,7 @@ export class SchedulingBookingsService {
           bookingId,
           fromSlotId,
           toSlotId: dto.toSlotId,
-          reasonText: motivo,
+          reasonText: reason,
           actorKind: this.actorKind(actor),
         } satisfies BookingTransitionSnapshot,
         changedByUserId: actor.id,
@@ -1605,13 +1605,13 @@ export class SchedulingBookingsService {
     });
 
     // Con el motivo (P8): el aviso dice el horario nuevo y por qué se movió.
-    await this.avisarCambio(
+    await this.notifyChange(
       bookingId,
       'RESCHEDULED',
-      motivo,
+      reason,
       this.actorKind(actor),
     );
-    return resultado;
+    return result;
   }
 
   /**
@@ -1631,7 +1631,7 @@ export class SchedulingBookingsService {
     dto: CancelBookingDto,
     actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
-    return this.cancelarYAvisar(bookingId, dto, actor, 'CANCELLED');
+    return this.cancelAndNotify(bookingId, dto, actor, 'CANCELLED');
   }
 
   /**
@@ -1644,13 +1644,13 @@ export class SchedulingBookingsService {
    * solicitud». Compartir el camino y separar el aviso es lo que evita que un
    * rechazo llegue con el texto de una cancelación.
    */
-  private async cancelarYAvisar(
+  private async cancelAndNotify(
     bookingId: string,
     dto: CancelBookingDto,
     actor: AuthenticatedUser,
-    cambio: CambioDeCita,
+    change: BookingChange,
   ): Promise<CancelBookingResponseDto> {
-    const motivo = requireReason(dto.reasonText, 'cancelar la cita');
+    const reason = requireReason(dto.reasonText, 'cancelar la cita');
 
     this.logger.info(
       {
@@ -1664,9 +1664,9 @@ export class SchedulingBookingsService {
     // El cupo que la cancelación devuelve a la oferta, para promover la lista de
     // espera una vez confirmada. Se anota acá y no se devuelve en el DTO: es un
     // detalle interno del caso de uso, no algo que el cliente deba conocer.
-    let cupoLiberado: string | null = null;
+    let releasedSlotId: string | null = null;
 
-    const resultado = await this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
         bookingId,
@@ -1682,7 +1682,7 @@ export class SchedulingBookingsService {
       // autoriza a cualquier cuenta de paciente, no sólo a la titular. Mismo
       // método que ya usan `placeHold`, la confirmación del hold y `enroll` de
       // la lista de espera: es un no-op para quien opera la agenda.
-      await this.assertPuedeActuarPorElPaciente(
+      await this.assertMayActForPatient(
         booking.patientProfileId,
         actor,
         tx,
@@ -1751,17 +1751,17 @@ export class SchedulingBookingsService {
       // ventana: la regla protege el hueco del consultorio, y el hueco es el
       // mismo lo pida quien lo pida. Se pregunta por el apoderamiento sólo si no
       // es el titular, para no pagar una consulta en el caso normal.
-      const esElPacienteTitular =
+      const isHolderPatient =
         (actor.patientProfileId !== undefined &&
           actor.patientProfileId === booking.patientProfileId) ||
-        (this.esUnPaciente(actor) &&
+        (this.isPatientActor(actor) &&
           (await this.representation.representsPatient(
             booking.patientProfileId,
             actor,
             tx,
           )));
 
-      if (esElPacienteTitular && withinWindow && !isNoShow) {
+      if (isHolderPatient && withinWindow && !isNoShow) {
         throw new PreconditionFailedException(
           `Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio.`,
           {
@@ -1805,7 +1805,7 @@ export class SchedulingBookingsService {
         bookingId: booking.id,
         fromStateConceptId: fromState,
         toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
-        reasonText: motivo,
+        reasonText: reason,
         actorKind: dto.cancelledBy,
       });
 
@@ -1822,13 +1822,13 @@ export class SchedulingBookingsService {
           //
           // Y se devuelven las consultas que retrajo: antes quedaban bloqueadas
           // para siempre, aunque el rato que las pisaba ya estuviera libre.
-          await this.descartarCupoPuntual(tx, slot, actor.id);
+          await this.discardOneOffSlot(tx, slot, actor.id);
         } else if (slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
           // Sólo el cupo que vuelve a ofrecerse: el de una cita puntual queda
           // bloqueado arriba —nunca estuvo ofrecido— y promover sobre él le
           // avisaría a alguien de un horario que no puede reservar.
-          cupoLiberado = slot.id;
+          releasedSlotId = slot.id;
         }
         touch(slot, actor.id);
         capacityReleased = true;
@@ -1837,9 +1837,9 @@ export class SchedulingBookingsService {
       return { bookingId, feeAmount, capacityReleased };
     });
 
-    await this.avisarCambio(bookingId, cambio, motivo, dto.cancelledBy);
-    await this.promoverListaDeEspera(cupoLiberado);
-    return resultado;
+    await this.notifyChange(bookingId, change, reason, dto.cancelledBy);
+    await this.promoteWaitlistFor(releasedSlotId);
+    return result;
   }
 
   /**
@@ -1865,17 +1865,17 @@ export class SchedulingBookingsService {
    * no puede convertir una cancelación exitosa en un error para quien canceló;
    * el cupo queda libre igual y el worker lo va a encontrar.
    */
-  private async promoverListaDeEspera(slotId: string | null): Promise<void> {
+  private async promoteWaitlistFor(slotId: string | null): Promise<void> {
     if (slotId === null) return;
 
     try {
-      const resultado = await this.waitlist.promoteWaitlist(slotId);
-      if (resultado.processed > 0) {
+      const result = await this.waitlist.promoteWaitlist(slotId);
+      if (result.processed > 0) {
         this.logger.info(
           {
             operation: 'scheduling.booking.cancel.promote-waitlist',
             slotId,
-            promoted: resultado.processed,
+            promoted: result.processed,
           },
           'Promoted waitlist candidates for the freed slot',
         );
@@ -1944,9 +1944,9 @@ export class SchedulingBookingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const booking = await this.loadForOperation(tx, bookingId, actor);
 
-      if (ESTADOS_SIN_PAGO.includes(booking.statusConceptId)) {
+      if (STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)) {
         // El mensaje dice POR QUÉ y no sólo que no se puede: quien lo lee está
         // mirando una cita que alguien canceló y necesita entender que el
         // problema no es su permiso.
@@ -1956,38 +1956,38 @@ export class SchedulingBookingsService {
         );
       }
 
-      const conceptoNuevo = PAYMENT_STATE_CONCEPT[dto.state];
-      const usoSeguro = dto.insuranceUsed ?? false;
-      const ahora = new Date();
+      const newConcept = PAYMENT_STATE_CONCEPT[dto.state];
+      const insuranceUsed = dto.insuranceUsed ?? false;
+      const now = new Date();
 
-      const existente = await this.bookingsRepo.findPaymentStateForUpdate(
+      const existing = await this.bookingsRepo.findPaymentStateForUpdate(
         tx,
         bookingId,
       );
-      const conceptoAnterior = existente?.statusConceptId ?? null;
+      const previousConcept = existing?.statusConceptId ?? null;
 
-      let fila: AppointmentPaymentStates;
-      if (existente) {
-        existente.statusConceptId = conceptoNuevo;
-        existente.insuranceUsed = usoSeguro;
-        existente.markedByUserId = actor.id;
-        existente.markedAt = ahora;
-        touch(existente, actor.id);
-        fila = existente;
+      let row: AppointmentPaymentStates;
+      if (existing) {
+        existing.statusConceptId = newConcept;
+        existing.insuranceUsed = insuranceUsed;
+        existing.markedByUserId = actor.id;
+        existing.markedAt = now;
+        touch(existing, actor.id);
+        row = existing;
       } else {
-        fila = tx.create(AppointmentPaymentStates, {
+        row = tx.create(AppointmentPaymentStates, {
           id: randomUUID(),
           tenantId: booking.tenantId,
           appointmentBookingId: booking.id,
-          statusConceptId: conceptoNuevo,
-          insuranceUsed: usoSeguro,
+          statusConceptId: newConcept,
+          insuranceUsed: insuranceUsed,
           markedByUserId: actor.id,
-          markedAt: ahora,
+          markedAt: now,
           // `createdBy` ya pone createdAt y updatedAt con el mismo instante.
-          ...createdBy(actor.id, ahora),
+          ...createdBy(actor.id, now),
           rowVersion: 1,
         });
-        tx.persist(fila);
+        tx.persist(row);
       }
 
       // La huella. Sin esto, volver a «pendiente» borraría que alguna vez
@@ -1997,14 +1997,14 @@ export class SchedulingBookingsService {
         operationConceptId: SCHED.HISTORY_OP_PAYMENT_MARKED,
         dataSnapshot: {
           bookingId: booking.id,
-          fromPaymentConceptId: conceptoAnterior,
-          toPaymentConceptId: conceptoNuevo,
-          insuranceUsed: usoSeguro,
+          fromPaymentConceptId: previousConcept,
+          toPaymentConceptId: newConcept,
+          insuranceUsed: insuranceUsed,
         },
         changedByUserId: actor.id,
       });
 
-      return proyectarEstadoDePago(fila);
+      return projectPaymentState(row);
     });
   }
 
@@ -2019,9 +2019,9 @@ export class SchedulingBookingsService {
     bookingId: string,
     actor: AuthenticatedUser,
   ): Promise<PaymentStateDto | null> {
-    const booking = await this.cargarParaOperar(this.em, bookingId, actor);
-    const fila = await this.bookingsRepo.findPaymentState(this.em, booking.id);
-    return fila ? proyectarEstadoDePago(fila) : null;
+    const booking = await this.loadForOperation(this.em, bookingId, actor);
+    const row = await this.bookingsRepo.findPaymentState(this.em, booking.id);
+    return row ? projectPaymentState(row) : null;
   }
 
   /**
@@ -2042,9 +2042,9 @@ export class SchedulingBookingsService {
       'Accepting booking request',
     );
 
-    const resultado = await this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
-      await this.assertVinculoVigente(booking.tenantId, actor);
+    const result = await this.em.transactional(async (tx) => {
+      const booking = await this.loadForOperation(tx, bookingId, actor);
+      await this.assertAffiliationCurrent(booking.tenantId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
 
@@ -2052,23 +2052,23 @@ export class SchedulingBookingsService {
       // profesional, así que hay que mirar TODAS sus agendas antes — no sólo
       // ésta. La propia reserva se excluye: aceptarse no es chocar consigo
       // misma.
-      const recursoDeLaCita = booking.resourceId
+      const bookingResource = booking.resourceId
         ? await this.catalogRepo.findResourceById(tx, booking.resourceId)
         : null;
       if (
-        recursoDeLaCita &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(recursoDeLaCita.resourceRefType)
+        bookingResource &&
+        PRACTITIONER_PROFILE_TABLES.includes(bookingResource.resourceRefType)
       ) {
-        const slotDeLaCita = await this.bookingsRepo.findSlotById(
+        const bookingSlot = await this.bookingsRepo.findSlotById(
           tx,
           booking.bookableSlotId,
         );
-        if (slotDeLaCita) {
-          await this.tiempoProfesional.assertRangoLibre(
+        if (bookingSlot) {
+          await this.professionalTime.assertRangeFree(
             tx,
-            recursoDeLaCita.resourceRefId,
-            slotDeLaCita.startAt,
-            slotDeLaCita.endAt ?? slotDeLaCita.startAt,
+            bookingResource.resourceRefId,
+            bookingSlot.startAt,
+            bookingSlot.endAt ?? bookingSlot.startAt,
             booking.id,
           );
         }
@@ -2078,7 +2078,7 @@ export class SchedulingBookingsService {
       booking.statusConceptId = CONCEPTS.BOOKING_CONFIRMED;
       booking.confirmedAt = confirmedAt;
       touch(booking, actor.id);
-      await this.sincronizarCitaClinica(
+      await this.syncClinicalAppointment(
         tx,
         booking,
         CLIN.APPOINTMENT_BOOKED,
@@ -2116,7 +2116,7 @@ export class SchedulingBookingsService {
       }
 
       // REGLA 2: aceptar una desplaza a las otras que chocan.
-      const desplazadas = await this.cancelarPendientesQueChocan(
+      const desplazadas = await this.cancelConflictingPending(
         tx,
         booking,
         actor,
@@ -2132,14 +2132,14 @@ export class SchedulingBookingsService {
 
     // Fuera de la transacción a propósito (P8): un aviso que falla no puede
     // deshacer una cita que ya se confirmó. Ver `ports/agenda-notice.port.ts`.
-    await this.avisarCambio(bookingId, 'ACCEPTED', undefined, 'PROVIDER');
+    await this.notifyChange(bookingId, 'ACCEPTED', undefined, 'PROVIDER');
     // Y un aviso por cada solicitud que este «sí» dejó sin efecto: el
     // paciente las pidió y tiene que enterarse de que ya no van, aunque él
     // no haya hecho nada. Uno por uno, porque cada una es de otro médico.
-    for (const id of resultado.desplazadas) {
-      await this.avisarCambio(id, 'CANCELLED', MOTIVO_DESPLAZADA, 'PROVIDER');
+    for (const id of result.desplazadas) {
+      await this.notifyChange(id, 'CANCELLED', DISPLACED_REASON, 'PROVIDER');
     }
-    return resultado;
+    return result;
   }
 
   /**
@@ -2168,39 +2168,39 @@ export class SchedulingBookingsService {
    * siguiente paciente por una cita que ya no va a existir.
    *
    * @param tx - Transacción en curso; va dentro de la misma que confirma.
-   * @param aceptada - La cita que se acaba de confirmar.
+   * @param accepted - La cita que se acaba de confirmar.
    * @param actor - Quien aceptó.
    * @returns Los identificadores de las que se cancelaron.
    */
-  private async cancelarPendientesQueChocan(
+  private async cancelConflictingPending(
     tx: EntityManager,
-    aceptada: AppointmentBookings,
+    accepted: AppointmentBookings,
     actor: AuthenticatedUser,
   ): Promise<string[]> {
     const slot = await this.bookingsRepo.findSlotById(
       tx,
-      aceptada.bookableSlotId,
+      accepted.bookableSlotId,
     );
     if (!slot) return [];
 
-    const chocan = await this.bookingsRepo.findPatientBookingsOverlapping(
+    const clashing = await this.bookingsRepo.findPatientBookingsOverlapping(
       tx,
-      aceptada.patientProfileId,
+      accepted.patientProfileId,
       slot.startAt,
       slot.endAt ?? slot.startAt,
       PENDING_BOOKING_STATES,
-      aceptada.id,
+      accepted.id,
     );
 
-    const canceladas: string[] = [];
-    for (const otra of chocan) {
+    const cancelled: string[] = [];
+    for (const other of clashing) {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
-        otra.id,
+        other.id,
       );
       if (!booking) continue;
 
-      const previo = booking.statusConceptId;
+      const previous = booking.statusConceptId;
       this.bookingsRepo.createCancellation(tx, {
         bookingId: booking.id,
         reasonConceptId: CONCEPTS.CANCEL_BY_PROVIDER,
@@ -2215,33 +2215,33 @@ export class SchedulingBookingsService {
       touch(booking, actor.id);
       await this.recordTransition(tx, booking, actor, {
         bookingId: booking.id,
-        fromStateConceptId: previo,
+        fromStateConceptId: previous,
         toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
-        reasonText: MOTIVO_DESPLAZADA,
+        reasonText: DISPLACED_REASON,
         actorKind: 'PROVIDER',
       });
 
       // El cupo vuelve a estar libre: lo retenía una solicitud que ya no va.
-      const suSlot = await this.bookingsRepo.findSlotForUpdate(
+      const ownSlot = await this.bookingsRepo.findSlotForUpdate(
         tx,
         booking.bookableSlotId,
       );
-      if (suSlot) {
-        suSlot.remainingCapacity += 1;
-        if (suSlot.practitionerServiceOfferingId) {
-          await this.descartarCupoPuntual(tx, suSlot, actor.id);
+      if (ownSlot) {
+        ownSlot.remainingCapacity += 1;
+        if (ownSlot.practitionerServiceOfferingId) {
+          await this.discardOneOffSlot(tx, ownSlot, actor.id);
         } else {
-          if (suSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
-            suSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+          if (ownSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
+            ownSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
           }
-          touch(suSlot, actor.id);
+          touch(ownSlot, actor.id);
         }
       }
 
-      canceladas.push(booking.id);
+      cancelled.push(booking.id);
     }
 
-    return canceladas;
+    return cancelled;
   }
 
   /**
@@ -2264,7 +2264,7 @@ export class SchedulingBookingsService {
       'Rejecting booking request',
     );
 
-    return this.cancelarYAvisar(
+    return this.cancelAndNotify(
       bookingId,
       { cancelledBy: 'PROVIDER', reasonText: dto.reasonText },
       actor,
@@ -2299,7 +2299,7 @@ export class SchedulingBookingsService {
     dto: RequestBookingInfoDto,
     actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
-    const motivo = requireReason(dto.reasonText, 'pedir documentación');
+    const reason = requireReason(dto.reasonText, 'pedir documentación');
 
     this.logger.info(
       {
@@ -2311,11 +2311,11 @@ export class SchedulingBookingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const booking = await this.loadForOperation(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
-      this.asegurarPendiente(fromState, bookingId);
+      this.assertPending(fromState, bookingId);
 
-      const ocurrioEn = new Date();
+      const occurredAt = new Date();
       if (fromState !== SCHED.BOOKING_PENDING_CONFIRMATION) {
         this.assertTransition(fromState, SCHED.BOOKING_PENDING_CONFIRMATION);
         booking.statusConceptId = SCHED.BOOKING_PENDING_CONFIRMATION;
@@ -2326,7 +2326,7 @@ export class SchedulingBookingsService {
         bookingId: booking.id,
         fromStateConceptId: fromState,
         toStateConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
-        reasonText: motivo,
+        reasonText: reason,
         actorKind: 'PROVIDER',
         infoRequested: dto.infoRequested,
       });
@@ -2334,7 +2334,7 @@ export class SchedulingBookingsService {
       return {
         bookingId: booking.id,
         statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
-        occurredAt: ocurrioEn.toISOString(),
+        occurredAt: occurredAt.toISOString(),
         // Pedir documentación no acepta la solicitud, así que no puede chocar
         // con ninguna otra ni desplazarla: la lista va vacía a propósito, igual
         // que en las demás operaciones que dejan la cita pendiente.
@@ -2364,7 +2364,7 @@ export class SchedulingBookingsService {
     dto: ProposeScheduleDto,
     actor: AuthenticatedUser,
   ): Promise<ProposeScheduleResponseDto> {
-    const motivo = requireReason(dto.reasonText, 'proponer otro horario');
+    const reason = requireReason(dto.reasonText, 'proponer otro horario');
 
     this.logger.info(
       {
@@ -2376,51 +2376,51 @@ export class SchedulingBookingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const booking = await this.loadForOperation(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
-      this.asegurarPendiente(fromState, bookingId);
+      this.assertPending(fromState, bookingId);
 
-      const origenId = booking.bookableSlotId;
-      await this.assertNoEsUnServicio(
+      const originId = booking.bookableSlotId;
+      await this.assertNotAService(
         tx,
-        origenId,
+        originId,
         'proponer otro horario para',
       );
-      if (dto.proposedSlotId === origenId) {
+      if (dto.proposedSlotId === originId) {
         throw new PreconditionFailedException(
           'El horario propuesto es el que ya tiene la solicitud',
           { bookingId },
         );
       }
 
-      const destino = await this.bookingsRepo.findSlotForUpdate(
+      const target = await this.bookingsRepo.findSlotForUpdate(
         tx,
         dto.proposedSlotId,
       );
-      if (!destino) {
+      if (!target) {
         throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
           slotId: dto.proposedSlotId,
         });
       }
-      if (destino.remainingCapacity <= 0) {
+      if (target.remainingCapacity <= 0) {
         throw new ConflictException('El cupo propuesto no tiene lugar', {
           slotId: dto.proposedSlotId,
         });
       }
 
-      const origen = await this.bookingsRepo.findSlotForUpdate(tx, origenId);
-      if (origen) {
-        origen.remainingCapacity += 1;
-        if (origen.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
-          origen.statusConceptId = CONCEPTS.SLOT_OPEN;
+      const originBooking = await this.bookingsRepo.findSlotForUpdate(tx, originId);
+      if (originBooking) {
+        originBooking.remainingCapacity += 1;
+        if (originBooking.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
+          originBooking.statusConceptId = CONCEPTS.SLOT_OPEN;
         }
-        touch(origen, actor.id);
+        touch(originBooking, actor.id);
       }
-      destino.remainingCapacity -= 1;
-      if (destino.remainingCapacity === 0) {
-        destino.statusConceptId = CONCEPTS.SLOT_HELD;
+      target.remainingCapacity -= 1;
+      if (target.remainingCapacity === 0) {
+        target.statusConceptId = CONCEPTS.SLOT_HELD;
       }
-      touch(destino, actor.id);
+      touch(target, actor.id);
 
       booking.bookableSlotId = dto.proposedSlotId;
       if (fromState !== SCHED.BOOKING_PENDING_CONFIRMATION) {
@@ -2431,7 +2431,7 @@ export class SchedulingBookingsService {
 
       this.bookingsRepo.recordReschedule(tx, {
         bookingId,
-        fromSlotId: origenId,
+        fromSlotId: originId,
         toSlotId: dto.proposedSlotId,
         rescheduledByUserId: actor.id,
         occurredAt: new Date(),
@@ -2440,16 +2440,16 @@ export class SchedulingBookingsService {
         bookingId: booking.id,
         fromStateConceptId: fromState,
         toStateConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
-        fromSlotId: origenId,
+        fromSlotId: originId,
         toSlotId: dto.proposedSlotId,
-        reasonText: motivo,
+        reasonText: reason,
         actorKind: 'PROVIDER',
       });
 
       return {
         bookingId,
         statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
-        fromSlotId: origenId,
+        fromSlotId: originId,
         toSlotId: dto.proposedSlotId,
       };
     });
@@ -2465,7 +2465,7 @@ export class SchedulingBookingsService {
    * @param fromState - Estado en el que está la reserva.
    * @param bookingId - Reserva evaluada, para el detalle del error.
    */
-  private asegurarPendiente(fromState: string, bookingId: string): void {
+  private assertPending(fromState: string, bookingId: string): void {
     if (!PENDING_DECISION_STATES.includes(fromState)) {
       throw new PreconditionFailedException(
         'Sólo se opera así sobre una solicitud pendiente',
@@ -2492,13 +2492,13 @@ export class SchedulingBookingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const booking = await this.loadForOperation(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, SCHED.BOOKING_IN_PROGRESS);
 
       booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
       touch(booking, actor.id);
-      await this.sincronizarCitaClinica(
+      await this.syncClinicalAppointment(
         tx,
         booking,
         CLIN.APPOINTMENT_CHECKED_IN,
@@ -2533,7 +2533,7 @@ export class SchedulingBookingsService {
    * @param booking - La reserva recién confirmada, en estado `CONFIRMED`.
    * @param actor - Quien opera.
    */
-  async iniciarEnTransaccion(
+  async startInTransaction(
     tx: EntityManager,
     booking: AppointmentBookings,
     actor: AuthenticatedUser,
@@ -2543,7 +2543,7 @@ export class SchedulingBookingsService {
 
     booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
     touch(booking, actor.id);
-    await this.sincronizarCitaClinica(
+    await this.syncClinicalAppointment(
       tx,
       booking,
       CLIN.APPOINTMENT_CHECKED_IN,
@@ -2575,14 +2575,14 @@ export class SchedulingBookingsService {
     );
 
     return this.em.transactional(async (tx) => {
-      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const booking = await this.loadForOperation(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, SCHED.BOOKING_COMPLETED);
 
       booking.statusConceptId = SCHED.BOOKING_COMPLETED;
       touch(booking, actor.id);
-      await this.liberarSobranteDelServicio(tx, booking, actor.id);
-      await this.sincronizarCitaClinica(
+      await this.releaseServiceLeftover(tx, booking, actor.id);
+      await this.syncClinicalAppointment(
         tx,
         booking,
         CLIN.APPOINTMENT_FULFILLED,
@@ -2703,7 +2703,7 @@ export class SchedulingBookingsService {
    * @throws ResourceNotFoundException si la cita no existe.
    * @throws ForbiddenActionException si la cita no es de quien la opera.
    */
-  private async cargarParaOperar(
+  private async loadForOperation(
     tx: EntityManager,
     bookingId: string,
     actor: AuthenticatedUser,
@@ -2716,20 +2716,20 @@ export class SchedulingBookingsService {
       throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
     }
 
-    if (this.operaCualquierAgenda(actor)) {
+    if (this.operatesAnyAgenda(actor)) {
       return booking;
     }
 
-    const recurso = booking.resourceId
+    const resource = booking.resourceId
       ? await this.catalogRepo.findResourceById(tx, booking.resourceId)
       : null;
-    const esSuAgenda =
+    const isOwnAgenda =
       actor.practitionerProfileId !== undefined &&
-      recurso !== null &&
-      recurso.resourceRefId === actor.practitionerProfileId &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
+      resource !== null &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
 
-    if (!esSuAgenda) {
+    if (!isOwnAgenda) {
       // Mismo mecanismo que usa `community` para «este perfil no es tuyo»: el
       // `ForbiddenException` de Nest, que el filtro traduce a 403 FORBIDDEN.
       throw new ForbiddenException(
@@ -2755,38 +2755,38 @@ export class SchedulingBookingsService {
    * el nuevo. Un fallo del canal se registra y se descarta: la regla del README
    * es que emitir jamás rompa una reserva. Ver `ports/agenda-notice.port.ts`.
    */
-  private async avisarCambio(
+  private async notifyChange(
     bookingId: string,
-    cambio: CambioDeCita,
-    motivo: string | undefined,
+    change: BookingChange,
+    reason: string | undefined,
     actorKind: BookingActorKind,
   ): Promise<void> {
     const em = this.em.fork();
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) return;
 
-    const alProfesional = actorKind === 'PATIENT';
-    const destinatario = alProfesional
+    const toPractitioner = actorKind === 'PATIENT';
+    const recipient = toPractitioner
       ? await this.noticeRepo.findResourceAccount(em, booking.resourceId)
       : null;
 
-    if (alProfesional && destinatario === null) {
+    if (toPractitioner && recipient === null) {
       // Un recurso que no es de un profesional —una sala, un equipo— no tiene a
       // quién avisarle. No es un fallo: es que no hay destinatario.
       this.logger.info(
-        { operation: 'scheduling.notice.change', bookingId, cambio },
+        { operation: 'scheduling.notice.change', bookingId, cambio: change },
         'El recurso de la cita no tiene profesional al que avisar',
       );
       return;
     }
 
     await this.notices.emit(
-      avisoDeCambioDeCita(
+      bookingChangeNotice(
         booking,
-        cambio,
-        motivo,
-        alProfesional
-          ? { userId: destinatario as string }
+        change,
+        reason,
+        toPractitioner
+          ? { userId: recipient as string }
           : { patientProfileId: booking.patientProfileId },
       ),
     );
@@ -2821,23 +2821,23 @@ export class SchedulingBookingsService {
    * @param actor - Quien acepta.
    * @throws PreconditionFailedException si el vínculo no está vigente.
    */
-  private async assertVinculoVigente(
+  private async assertAffiliationCurrent(
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.operaCualquierAgenda(actor)) return;
+    if (this.operatesAnyAgenda(actor)) return;
 
-    const veredicto = await this.vinculos.evaluar(tenantId, actor);
-    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
+    const verdict = await this.affiliations.evaluate(tenantId, actor);
+    if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;
 
     throw new PreconditionFailedException(
-      veredicto === 'pendiente'
+      verdict === 'pendiente'
         ? 'Su vínculo con esta organización todavía está pendiente de ' +
             'aprobación, así que todavía no puede comprometer citas suyas.'
         : 'Su vínculo con esta organización ya no está vigente, así que no ' +
             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +
             'en pie: hable con la organización para reactivarlo.',
-      { tenantId, vinculo: veredicto },
+      { tenantId, vinculo: verdict },
     );
   }
 
@@ -2853,18 +2853,18 @@ export class SchedulingBookingsService {
    * Sin contexto ni membresía comprobable se rechaza; `SUPERADMIN` mantiene su
    * alcance de plataforma.
    */
-  private assertRecursoEnTenantActivo(
+  private assertResourceInActiveTenant(
     resourceTenantId: string,
     actor: AuthenticatedUser,
   ): void {
     if (actor.roles.includes('SUPERADMIN')) return;
 
     const activeTenantId = getCurrentTenantId();
-    const perteneceAlAlcance = activeTenantId
+    const withinScope = activeTenantId
       ? activeTenantId === resourceTenantId
       : actor.tenantIds?.includes(resourceTenantId) === true;
 
-    if (!perteneceAlAlcance) {
+    if (!withinScope) {
       throw new ForbiddenException(
         'La agenda indicada pertenece a otra organización.',
       );
@@ -2881,17 +2881,17 @@ export class SchedulingBookingsService {
    * criterio clínico. Si la requiere, o si quien reserva ya traía un plan
    * confirmado (el mostrador), se respeta lo que había.
    */
-  private planDeServicio<
+  private planForService<
     P extends {
       statusConceptId: string;
       appointmentStatusConceptId: string;
       confirmedAt?: Date;
       reminderOffsetsMinutes: readonly number[];
     },
-  >(plan: P, requiereAprobacion: boolean): P {
-    const esSolicitud =
+  >(plan: P, requiresApproval: boolean): P {
+    const isRequest =
       plan.statusConceptId === SCHED.BOOKING_PENDING_CONFIRMATION;
-    if (!esSolicitud || requiereAprobacion) return plan;
+    if (!isRequest || requiresApproval) return plan;
     return {
       ...plan,
       statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
@@ -2902,25 +2902,25 @@ export class SchedulingBookingsService {
   }
 
   /** Lo que el paciente aceptó, congelado: un cambio posterior de la oferta no lo reescribe. */
-  private congelarServicio(
-    delServicio: NonNullable<
-      Awaited<ReturnType<SchedulingServiceAgendaService['ofertaDelCupo']>>
+  private freezeService(
+    ofService: NonNullable<
+      Awaited<ReturnType<SchedulingServiceAgendaService['offeringOfSlot']>>
     >,
     slot: BookableSlots,
   ): Record<string, unknown> {
-    const { oferta, catalogo } = delServicio;
+    const { offering: offering, catalog: catalog } = ofService;
     return {
-      offeringId: oferta.id,
-      serviceCatalogId: oferta.serviceCatalogId,
-      serviceCode: catalogo?.code,
-      serviceName: catalogo?.name,
-      price: catalogo?.defaultPrice,
-      currencyConceptId: catalogo?.currencyConceptId,
-      minDurationMinutes: oferta.minDurationMinutes,
-      maxDurationMinutes: oferta.maxDurationMinutes,
-      prepMinutes: oferta.prepMinutes ?? 0,
-      cleanupMinutes: oferta.cleanupMinutes ?? 0,
-      requiresApproval: oferta.requiresApproval,
+      offeringId: offering.id,
+      serviceCatalogId: offering.serviceCatalogId,
+      serviceCode: catalog?.code,
+      serviceName: catalog?.name,
+      price: catalog?.defaultPrice,
+      currencyConceptId: catalog?.currencyConceptId,
+      minDurationMinutes: offering.minDurationMinutes,
+      maxDurationMinutes: offering.maxDurationMinutes,
+      prepMinutes: offering.prepMinutes ?? 0,
+      cleanupMinutes: offering.cleanupMinutes ?? 0,
+      requiresApproval: offering.requiresApproval,
       startAt: slot.startAt.toISOString(),
       endAt: slot.endAt?.toISOString(),
       capturedAt: new Date().toISOString(),
@@ -2939,7 +2939,7 @@ export class SchedulingBookingsService {
    * cancelación sigue sólo en la unidad de trabajo, esa lectura todavía vería la
    * reserva viva y no reabriría nada.
    */
-  private async descartarCupoPuntual(
+  private async discardOneOffSlot(
     tx: EntityManager,
     slot: BookableSlots,
     actorUserId: string | undefined,
@@ -2947,16 +2947,16 @@ export class SchedulingBookingsService {
     slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
     touch(slot, actorUserId);
     await tx.flush();
-    await this.reabrirConsultasRetraidasDe(tx, slot, actorUserId);
+    await this.reopenRetractedConsultationsOf(tx, slot, actorUserId);
   }
 
   /** Devuelve las consultas retraídas que el rango de este cupo ya no pisa. */
-  private async reabrirConsultasRetraidasDe(
+  private async reopenRetractedConsultationsOf(
     tx: EntityManager,
     slot: BookableSlots,
     actorUserId: string | undefined,
   ): Promise<void> {
-    await this.serviceAgenda.reabrirTramo(
+    await this.serviceAgenda.reopenSpan(
       tx,
       slot,
       slot.startAt,
@@ -2973,7 +2973,7 @@ export class SchedulingBookingsService {
    * a estar disponible —y las consultas que ese tiempo pisaba, a ofrecerse—. Sólo
    * aplica a cupos de servicio: el de una consulta mide lo que la plantilla dijo.
    */
-  private async liberarSobranteDelServicio(
+  private async releaseServiceLeftover(
     tx: EntityManager,
     booking: AppointmentBookings,
     actorUserId: string | undefined,
@@ -2984,42 +2984,42 @@ export class SchedulingBookingsService {
     );
     if (!slot?.practitionerServiceOfferingId || !slot.endAt) return;
 
-    const ahora = new Date();
-    const terminaAntes =
-      ahora.getTime() > slot.startAt.getTime() &&
-      ahora.getTime() < slot.endAt.getTime();
-    if (!terminaAntes) return;
+    const now = new Date();
+    const endsEarly =
+      now.getTime() > slot.startAt.getTime() &&
+      now.getTime() < slot.endAt.getTime();
+    if (!endsEarly) return;
 
-    const finReservado = slot.endAt;
-    slot.endAt = ahora;
+    const reservedEnd = slot.endAt;
+    slot.endAt = now;
     touch(slot, actorUserId);
     await tx.flush();
-    await this.serviceAgenda.reabrirTramo(
+    await this.serviceAgenda.reopenSpan(
       tx,
       slot,
-      ahora,
-      finReservado,
+      now,
+      reservedEnd,
       actorUserId,
     );
   }
 
   /** Un servicio no se mueve de horario: se cancela y se pide otro. */
-  private async assertNoEsUnServicio(
+  private async assertNotAService(
     tx: EntityManager,
     slotId: string,
-    accion: string,
+    action: string,
   ): Promise<void> {
     const slot = await this.bookingsRepo.findSlotById(tx, slotId);
     if (slot?.practitionerServiceOfferingId) {
       throw new PreconditionFailedException(
-        `Todavía no se puede ${accion} un servicio: cancele la reserva y pida otro horario.`,
+        `Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario.`,
         { slotId },
       );
     }
   }
 
-  private operaCualquierAgenda(actor: AuthenticatedUser): boolean {
-    return actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol));
+  private operatesAnyAgenda(actor: AuthenticatedUser): boolean {
+    return actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role));
   }
 
   /**
@@ -3033,7 +3033,7 @@ export class SchedulingBookingsService {
    * Si la reserva no tiene cita clínica detrás no hace nada: pasa con las
    * reservas anteriores a que existiera ese vínculo, y no es un error.
    */
-  private async sincronizarCitaClinica(
+  private async syncClinicalAppointment(
     tx: EntityManager,
     booking: AppointmentBookings,
     statusConceptId: string,
@@ -3042,15 +3042,15 @@ export class SchedulingBookingsService {
     if (booking.appointmentId === undefined) {
       return;
     }
-    const cita = await this.appointmentsRepo.findById(
+    const clinicalAppointment = await this.appointmentsRepo.findById(
       tx,
       booking.appointmentId,
     );
-    if (!cita) {
+    if (!clinicalAppointment) {
       return;
     }
-    cita.statusConceptId = statusConceptId;
-    touch(cita, actor.id);
+    clinicalAppointment.statusConceptId = statusConceptId;
+    touch(clinicalAppointment, actor.id);
   }
 
   /**
@@ -3063,10 +3063,10 @@ export class SchedulingBookingsService {
    * paciente «lo cancelaste vos» cuando no fue así es peor que lo contrario.
    */
   private actorKind(actor: AuthenticatedUser): BookingActorKind {
-    const esDelPrestador = actor.roles.some((rol) =>
-      ROLES_DEL_PRESTADOR.includes(rol),
+    const isProviderSide = actor.roles.some((role) =>
+      PROVIDER_ROLES.includes(role),
     );
-    return esDelPrestador ? 'PROVIDER' : 'PATIENT';
+    return isProviderSide ? 'PROVIDER' : 'PATIENT';
   }
 
   /**
@@ -3109,9 +3109,9 @@ export class SchedulingBookingsService {
     // Una cuenta de paciente sólo lista lo suyo y lo de quienes representa. Sin
     // esto, el filtro por paciente era una enumeración de la agenda ajena a
     // quien supiera un uuid: los turnos de alguien dicen a qué médico va y por
-    // qué. No alcanza a quien atiende ni al mostrador — ver `esUnPaciente`.
+    // qué. No alcanza a quien atiende ni al mostrador — ver `isPatientActor`.
     if (filters.patientProfileId && actor) {
-      await this.assertPuedeActuarPorElPaciente(
+      await this.assertMayActForPatient(
         filters.patientProfileId,
         actor,
       );
@@ -3151,24 +3151,24 @@ export class SchedulingBookingsService {
 
     // Los motivos de la página, en **una** consulta (corrección #14): pedir el
     // historial cita por cita convertiría un listado de 100 en 101 consultas.
-    const motivos = await this.historyRepo.latestBySource(
+    const reasons = await this.historyRepo.latestBySource(
       em,
       'appointment_bookings',
       page.map(({ booking }) => booking.id),
-      tieneMotivo,
+      hasReason,
     );
     // Segunda pasada sobre el mismo historial, con otro predicado: la demora
     // (P8) no es un motivo de cambio de estado y `latestBySource` devuelve una
     // revisión por agregado, así que pedir las dos cosas juntas dejaría fuera
     // la que llegó antes.
-    const demoras = await this.historyRepo.latestBySource(
+    const delays = await this.historyRepo.latestBySource(
       em,
       'appointment_bookings',
       page.map(({ booking }) => booking.id),
-      esDemora,
+      isDelay,
     );
 
-    const origenes = await this.bookingsRepo.latestRescheduleOrigins(
+    const origins = await this.bookingsRepo.latestRescheduleOrigins(
       em,
       page.map(({ booking }) => booking.id),
     );
@@ -3176,7 +3176,7 @@ export class SchedulingBookingsService {
     // Los recursos de la página, en lote y sólo si el actor es un profesional:
     // es lo único que puede convertir «esta cita es de alguien» en «esta cita
     // es MÍA» para decidir el motivo. Un paciente no los necesita.
-    const duenosDeAgenda = new Map<string, string>();
+    const agendaOwners = new Map<string, string>();
     if (actor?.practitionerProfileId !== undefined) {
       const ids = [
         ...new Set(
@@ -3186,42 +3186,42 @@ export class SchedulingBookingsService {
         ),
       ];
       for (const id of ids) {
-        const recurso = await this.catalogRepo.findResourceById(em, id);
-        if (recurso) duenosDeAgenda.set(id, recurso.resourceRefId);
+        const resource = await this.catalogRepo.findResourceById(em, id);
+        if (resource) agendaOwners.set(id, resource.resourceRefId);
       }
     }
 
     // La tipología de la página, en lote. Sólo las citas que llegaron a tener
     // contraparte clínica la tienen: una reserva sin confirmar no crea
     // `clinical.appointments`, así que su id no entra en la consulta.
-    const idsDeCitas = [
+    const appointmentIds = [
       ...new Set(
         page
           .map(({ booking }) => booking.appointmentId)
           .filter((id): id is string => id != null),
       ),
     ];
-    const tipos = await this.appointmentsRepo.findTypesByIds(em, idsDeCitas);
+    const types = await this.appointmentsRepo.findTypesByIds(em, appointmentIds);
 
     // El encuentro clínico de cada cita, en lote (subtarea 4.3): mismos ids
     // que la tipología, misma razón — cien consultas más por página, no.
-    const encuentros = await this.encountersRepo.findLatestIdsByAppointmentIds(
+    const encounters = await this.encountersRepo.findLatestIdsByAppointmentIds(
       em,
-      idsDeCitas,
+      appointmentIds,
     );
 
     // A quiénes representa el actor, una vez para toda la página (B.1). Decide
     // si el motivo de consulta de la cita de un dependiente se le muestra a
     // quien lo pidió. Sólo se pregunta a una cuenta de paciente: al mostrador y
     // a quien atiende el motivo ya se les decide por otro camino.
-    const pacientesRepresentados = this.esUnPaciente(actor)
+    const representedPatients = this.isPatientActor(actor)
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 
     // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
     // no es profesional ni titular, la proyección los descartaría igual y la
     // consulta sería trabajo tirado.
-    const nombres =
+    const names =
       actor?.practitionerProfileId !== undefined ||
       actor?.patientProfileId !== undefined
         ? await this.bookingsRepo.findPatientNames(em, [
@@ -3231,7 +3231,7 @@ export class SchedulingBookingsService {
 
     // El estado de pago de la página, en lote (TAREA-13 punto 5). Una consulta
     // para toda la página, no una por fila.
-    const pagos = await this.bookingsRepo.findPaymentStatesForBookings(
+    const payments = await this.bookingsRepo.findPaymentStatesForBookings(
       em,
       page.map(({ booking }) => booking.id),
     );
@@ -3239,7 +3239,7 @@ export class SchedulingBookingsService {
     // La aseguradora de cada paciente, en lote (ALV-021). Sólo se pide para
     // quien de todos modos va a poder ver el nombre del paciente: es el mismo
     // dato de privacidad, y pedirla para el resto sería trabajo tirado.
-    const aseguradoras =
+    const carriers =
       actor?.practitionerProfileId !== undefined ||
       actor?.patientProfileId !== undefined
         ? await this.coverageRepo.findActiveCarriersByPatients(em, [
@@ -3250,14 +3250,14 @@ export class SchedulingBookingsService {
     // La solicitud de seguro de cada cita, en lote y con la misma compuerta
     // que la aseguradora: es otro dato del paciente, y pedirlo para quien no lo
     // va a ver sería trabajo tirado. Tres consultas fijas por página.
-    const solicitudes =
+    const requests =
       actor?.practitionerProfileId !== undefined ||
       actor?.patientProfileId !== undefined
-        ? await this.solicitudesDeSeguroPorCita(em, idsDeCitas)
+        ? await this.insuranceClaimsByAppointment(em, appointmentIds)
         : new Map<string, BookingInsuranceClaimDto>();
 
     // P42: los dos lados del vínculo de reconsulta, en lote para la página.
-    const reconsultas = await this.vinculosDeReconsulta(
+    const followUps = await this.followUpLinks(
       em,
       page.map(({ booking }) => booking),
     );
@@ -3267,25 +3267,25 @@ export class SchedulingBookingsService {
         this.aBookingItem(
           booking,
           slot,
-          motivos.get(booking.id),
-          demoras.get(booking.id),
+          reasons.get(booking.id),
+          delays.get(booking.id),
           actor,
           booking.resourceId
-            ? duenosDeAgenda.get(booking.resourceId)
+            ? agendaOwners.get(booking.resourceId)
             : undefined,
-          origenes.get(booking.id),
-          nombres.get(booking.patientProfileId),
+          origins.get(booking.id),
+          names.get(booking.patientProfileId),
           booking.appointmentId == null
             ? undefined
-            : tipos.get(booking.appointmentId),
-          pagos.get(booking.id),
-          aseguradoras,
+            : types.get(booking.appointmentId),
+          payments.get(booking.id),
+          carriers,
           booking.appointmentId == null
             ? undefined
-            : encuentros.get(booking.appointmentId),
-          solicitudes,
-          pacientesRepresentados,
-          reconsultas,
+            : encounters.get(booking.appointmentId),
+          requests,
+          representedPatients,
+          followUps,
         ),
       ),
       count: page.length,
@@ -3313,49 +3313,49 @@ export class SchedulingBookingsService {
     const slot = booking.bookableSlotId
       ? await this.bookingsRepo.findSlotById(em, booking.bookableSlotId)
       : null;
-    const motivos = await this.historyRepo.latestBySource(
+    const reasons = await this.historyRepo.latestBySource(
       em,
       'appointment_bookings',
       [booking.id],
-      tieneMotivo,
+      hasReason,
     );
-    const demoras = await this.historyRepo.latestBySource(
+    const delays = await this.historyRepo.latestBySource(
       em,
       'appointment_bookings',
       [booking.id],
-      esDemora,
+      isDelay,
     );
 
-    const origenes = await this.bookingsRepo.latestRescheduleOrigins(em, [
+    const origins = await this.bookingsRepo.latestRescheduleOrigins(em, [
       booking.id,
     ]);
 
     // Sólo se busca el recurso si hace falta para decidir el motivo: un
     // paciente titular ya tiene permiso sin mirar la agenda.
-    const recurso =
+    const resource =
       booking.resourceId && actor?.practitionerProfileId !== undefined
         ? await this.catalogRepo.findResourceById(em, booking.resourceId)
         : null;
 
     // H3.S1.M1 (BOLA/IDOR de lectura): el detalle no comprobaba de quién era
     // la cita — devolvía nombre, motivo y horario a cualquier cuenta con rol
-    // de agenda. Mismo criterio que `cargarParaOperar`: el paciente titular o
+    // de agenda. Mismo criterio que `loadForOperation`: el paciente titular o
     // su representante, quien opera cualquier agenda (`SCHEDULING_ADMIN`,
     // `SCHEDULING_AGENT`, `SUPERADMIN`), o quien atiende exactamente en ese
     // recurso. Reusa el `recurso` de arriba: no agrega una consulta nueva.
-    if (this.esUnPaciente(actor)) {
-      await this.assertPuedeActuarPorElPaciente(
+    if (this.isPatientActor(actor)) {
+      await this.assertMayActForPatient(
         booking.patientProfileId,
         actor!,
         em,
       );
-    } else if (actor && !this.operaCualquierAgenda(actor)) {
-      const esSuAgenda =
+    } else if (actor && !this.operatesAnyAgenda(actor)) {
+      const isOwnAgenda =
         actor.practitionerProfileId !== undefined &&
-        recurso !== null &&
-        recurso.resourceRefId === actor.practitionerProfileId &&
-        TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
-      if (!esSuAgenda) {
+        resource !== null &&
+        resource.resourceRefId === actor.practitionerProfileId &&
+        PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
+      if (!isOwnAgenda) {
         throw new ForbiddenException(
           'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
         );
@@ -3365,7 +3365,7 @@ export class SchedulingBookingsService {
     // El detalle tiene que decir exactamente lo mismo que el listado, así que
     // la tipología también se resuelve acá. Una sola cita: el lote de uno es la
     // misma consulta.
-    const tipos =
+    const types =
       booking.appointmentId == null
         ? new Map<string, string>()
         : await this.appointmentsRepo.findTypesByIds(em, [
@@ -3373,7 +3373,7 @@ export class SchedulingBookingsService {
           ]);
 
     // El encuentro de la cita, mismo criterio (subtarea 4.3): lote de uno.
-    const encuentros =
+    const encounters =
       booking.appointmentId == null
         ? new Map<string, string>()
         : await this.encountersRepo.findLatestIdsByAppointmentIds(em, [
@@ -3382,31 +3382,31 @@ export class SchedulingBookingsService {
 
     // El detalle dice lo mismo que el listado también en esto: quien representa
     // al paciente ve el motivo que él mismo escribió al pedir el turno.
-    const pacientesRepresentados = this.esUnPaciente(actor)
+    const representedPatients = this.isPatientActor(actor)
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 
     return this.aBookingItem(
       booking,
       slot,
-      motivos.get(booking.id),
-      demoras.get(booking.id),
+      reasons.get(booking.id),
+      delays.get(booking.id),
       actor,
-      recurso?.resourceRefId,
-      origenes.get(booking.id),
+      resource?.resourceRefId,
+      origins.get(booking.id),
       undefined,
       booking.appointmentId == null
         ? undefined
-        : tipos.get(booking.appointmentId),
+        : types.get(booking.appointmentId),
       undefined,
       undefined,
       booking.appointmentId == null
         ? undefined
-        : encuentros.get(booking.appointmentId),
+        : encounters.get(booking.appointmentId),
       undefined,
-      pacientesRepresentados,
+      representedPatients,
       // P42: el detalle dice lo mismo que el listado; lote de uno.
-      await this.vinculosDeReconsulta(em, [booking]),
+      await this.followUpLinks(em, [booking]),
     );
   }
 
@@ -3431,64 +3431,64 @@ export class SchedulingBookingsService {
    * @param bookings - Citas a proyectar.
    * @returns Dos funciones de proyección por cita.
    */
-  private async vinculosDeReconsulta(
+  private async followUpLinks(
     em: EntityManager,
     bookings: readonly AppointmentBookings[],
-  ): Promise<VinculosDeReconsulta> {
-    const idsDeOrigen = [
+  ): Promise<FollowUpLinks> {
+    const originIds = [
       ...new Set(
         bookings
           .map((b) => b.followUpOfBookingId)
           .filter((id): id is string => id != null),
       ),
     ];
-    const origenes = await this.bookingsRepo.findBookingsWithSlotsByIds(
+    const origins = await this.bookingsRepo.findBookingsWithSlotsByIds(
       em,
-      idsDeOrigen,
+      originIds,
     );
-    const origenPorId = new Map(origenes.map((o) => [o.booking.id, o]));
-    const citasDeOrigen = [
+    const originById = new Map(origins.map((o) => [o.booking.id, o]));
+    const originAppointments = [
       ...new Set(
-        origenes
+        origins
           .map(({ booking }) => booking.appointmentId)
           .filter((id): id is string => id != null),
       ),
     ];
-    const encuentros = await this.encountersRepo.findLatestIdsByAppointmentIds(
+    const encounters = await this.encountersRepo.findLatestIdsByAppointmentIds(
       em,
-      citasDeOrigen,
+      originAppointments,
     );
 
-    const hijas = await this.bookingsRepo.findFollowUpsOf(
+    const children = await this.bookingsRepo.findFollowUpsOf(
       em,
       bookings.map((b) => b.id),
       VISIBLE_BOOKING_STATES,
     );
     // Vienen de la más reciente a la más antigua: la primera por origen gana.
-    const reconsultaPorOrigen = new Map<string, string>();
-    for (const { booking } of hijas) {
-      const origen = booking.followUpOfBookingId;
-      if (origen != null && !reconsultaPorOrigen.has(origen)) {
-        reconsultaPorOrigen.set(origen, booking.id);
+    const followUpByOrigin = new Map<string, string>();
+    for (const { booking } of children) {
+      const originBooking = booking.followUpOfBookingId;
+      if (originBooking != null && !followUpByOrigin.has(originBooking)) {
+        followUpByOrigin.set(originBooking, booking.id);
       }
     }
 
     return {
       followUpOf: (booking) => {
         if (booking.followUpOfBookingId == null) return null;
-        const origen = origenPorId.get(booking.followUpOfBookingId);
-        const cita = origen?.booking.appointmentId;
+        const originBooking = originById.get(booking.followUpOfBookingId);
+        const originAppointmentId = originBooking?.booking.appointmentId;
         return {
           bookingId: booking.followUpOfBookingId,
-          encounterId: cita == null ? null : (encuentros.get(cita) ?? null),
-          startAt: origen?.slot?.startAt ?? null,
+          encounterId: originAppointmentId == null ? null : (encounters.get(originAppointmentId) ?? null),
+          startAt: originBooking?.slot?.startAt ?? null,
           ...(booking.formInstanceId == null
             ? {}
             : { formInstanceId: booking.formInstanceId }),
         };
       },
       followUpBookingId: (booking) =>
-        reconsultaPorOrigen.get(booking.id) ?? null,
+        followUpByOrigin.get(booking.id) ?? null,
     };
   }
 
@@ -3506,61 +3506,61 @@ export class SchedulingBookingsService {
    * ausencia a `null`.
    *
    * @param em - Contexto de persistencia.
-   * @param idsDeCitas - Citas clínicas de la página, sin repetidos.
+   * @param appointmentIds - Citas clínicas de la página, sin repetidos.
    * @returns Mapa `appointmentId` → resumen de la solicitud.
    */
-  private async solicitudesDeSeguroPorCita(
+  private async insuranceClaimsByAppointment(
     em: EntityManager,
-    idsDeCitas: readonly string[],
+    appointmentIds: readonly string[],
   ): Promise<Map<string, BookingInsuranceClaimDto>> {
-    const porCita = new Map<string, BookingInsuranceClaimDto>();
-    if (idsDeCitas.length === 0) return porCita;
+    const byAppointment = new Map<string, BookingInsuranceClaimDto>();
+    if (appointmentIds.length === 0) return byAppointment;
 
-    const encuentrosPorCita = await this.encountersRepo.findIdsByAppointmentIds(
+    const encountersByAppointment = await this.encountersRepo.findIdsByAppointmentIds(
       em,
-      idsDeCitas,
+      appointmentIds,
     );
-    const citaPorEncuentro = new Map<string, string>();
-    for (const [cita, encuentros] of encuentrosPorCita) {
-      for (const encuentro of encuentros) {
-        citaPorEncuentro.set(encuentro, cita);
+    const appointmentByEncounter = new Map<string, string>();
+    for (const [booking, encounters] of encountersByAppointment) {
+      for (const encounter of encounters) {
+        appointmentByEncounter.set(encounter, booking);
       }
     }
-    if (citaPorEncuentro.size === 0) return porCita;
+    if (appointmentByEncounter.size === 0) return byAppointment;
 
-    const resumenes = await this.claimReadRepo.findSummariesByEncounterIds(em, [
-      ...citaPorEncuentro.keys(),
+    const summaries = await this.claimReadRepo.findSummariesByEncounterIds(em, [
+      ...appointmentByEncounter.keys(),
     ]);
-    for (const resumen of resumenes) {
-      const cita = citaPorEncuentro.get(resumen.encounterId);
-      if (cita === undefined || porCita.has(cita)) continue;
-      porCita.set(cita, {
-        id: resumen.id,
-        claimIdentifier: resumen.claimIdentifier,
-        statusCode: resumen.statusCode,
-        statusDisplay: resumen.statusDisplay,
-        submittedAt: resumen.submittedAt?.toISOString() ?? null,
+    for (const summary of summaries) {
+      const booking = appointmentByEncounter.get(summary.encounterId);
+      if (booking === undefined || byAppointment.has(booking)) continue;
+      byAppointment.set(booking, {
+        id: summary.id,
+        claimIdentifier: summary.claimIdentifier,
+        statusCode: summary.statusCode,
+        statusDisplay: summary.statusDisplay,
+        submittedAt: summary.submittedAt?.toISOString() ?? null,
       });
     }
-    return porCita;
+    return byAppointment;
   }
 
   private aBookingItem(
     booking: AppointmentBookings,
     slot: { startAt: Date; endAt?: Date } | null,
-    motivo: HistoryRevision | undefined,
-    demora?: HistoryRevision,
+    reason: HistoryRevision | undefined,
+    delay?: HistoryRevision,
     actor?: AuthenticatedUser,
-    profesionalDeLaAgenda?: string,
-    reprogramadaDesde?: Date,
-    nombreDelPaciente?: string,
-    tipoDeLaCita?: string,
-    estadoDePago?: AppointmentPaymentStates,
-    aseguradoraPorPaciente?: Map<string, string>,
-    encuentroDeLaCita?: string,
-    solicitudPorCita?: Map<string, BookingInsuranceClaimDto>,
-    pacientesRepresentados?: ReadonlySet<string>,
-    reconsultas?: VinculosDeReconsulta,
+    agendaPractitioner?: string,
+    rescheduledFrom?: Date,
+    patientName?: string,
+    appointmentType?: string,
+    paymentState?: AppointmentPaymentStates,
+    carrierByPatient?: Map<string, string>,
+    appointmentEncounter?: string,
+    claimByAppointment?: Map<string, BookingInsuranceClaimDto>,
+    representedPatients?: ReadonlySet<string>,
+    followUps?: FollowUpLinks,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -3575,12 +3575,12 @@ export class SchedulingBookingsService {
       // Siempre presente, igual que `appointmentId`: `null` es «sin cita» o
       // «cita sin encuentro» — el frente cruza este id con
       // `ChartNote.encounterId` sin estimar por fecha.
-      encounterId: encuentroDeLaCita ?? null,
+      encounterId: appointmentEncounter ?? null,
       // Se OMITE cuando nadie lo marcó, y no viaja como «pendiente»: pendiente
       // de pago es una afirmación que alguien firmó, y la ausencia es que del
       // pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`.
-      ...(estadoDePago
-        ? { paymentState: proyectarEstadoDePago(estadoDePago) }
+      ...(paymentState
+        ? { paymentState: projectPaymentState(paymentState) }
         : {}),
       startAt: slot?.startAt ?? null,
       endAt: slot?.endAt ?? null,
@@ -3592,11 +3592,11 @@ export class SchedulingBookingsService {
       // El motivo de consulta se omite salvo para el titular y su médico. Se
       // omite, no se vacía: un `''` diría «no escribió motivo», que es una
       // afirmación distinta y falsa.
-      ...(puedeVerElMotivoDeLaCita(
+      ...(canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
         ? { reasonText: booking.reasonText }
         : {}),
@@ -3604,46 +3604,46 @@ export class SchedulingBookingsService {
       // profesional que atiende, no la vista de la organización. El médico
       // necesita saber a quién espera —es el pedido explícito del registro del
       // cliente— y la organización ya opera con el identificador.
-      ...(nombreDelPaciente !== undefined &&
-      puedeVerElMotivoDeLaCita(
+      ...(patientName !== undefined &&
+      canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
-        ? { patientName: nombreDelPaciente }
+        ? { patientName: patientName }
         : {}),
       // ALV-021: misma compuerta que el nombre. `null` es «se buscó y no
       // tiene» —Particular—; el campo entero se omite cuando quien mira no
       // puede ver al paciente, que es una pregunta distinta.
-      ...(aseguradoraPorPaciente !== undefined &&
-      puedeVerElMotivoDeLaCita(
+      ...(carrierByPatient !== undefined &&
+      canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
         ? {
             insuranceCarrierName:
-              aseguradoraPorPaciente.get(booking.patientProfileId) ?? null,
+              carrierByPatient.get(booking.patientProfileId) ?? null,
           }
         : {}),
       // La solicitud de seguro de la cita, con la misma compuerta y el mismo
       // trato del `null` que la aseguradora: `null` es «se buscó y no hay»
       // —también cuando la reserva todavía no tiene cita clínica, que no puede
       // tener solicitud—; ausente es «quien mira no puede verlo».
-      ...(solicitudPorCita !== undefined &&
-      puedeVerElMotivoDeLaCita(
+      ...(claimByAppointment !== undefined &&
+      canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
         ? {
             insuranceClaim:
               booking.appointmentId == null
                 ? null
-                : (solicitudPorCita.get(booking.appointmentId) ?? null),
+                : (claimByAppointment.get(booking.appointmentId) ?? null),
           }
         : {}),
       // La tipología viaja siempre que exista: no es dato clínico —es qué
@@ -3654,33 +3654,33 @@ export class SchedulingBookingsService {
       // P42: el vínculo de reconsulta, con la misma compuerta que el nombre y
       // el motivo. Ausente = «no te corresponde verlo»; `null` = «se buscó y
       // no hay».
-      ...(reconsultas !== undefined &&
-      puedeVerElMotivoDeLaCita(
+      ...(followUps !== undefined &&
+      canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
         ? {
-            followUpOf: reconsultas.followUpOf(booking),
-            followUpBookingId: reconsultas.followUpBookingId(booking),
+            followUpOf: followUps.followUpOf(booking),
+            followUpBookingId: followUps.followUpBookingId(booking),
           }
         : {}),
       // v4.2.40: el servicio que se reservó, de la copia congelada. Misma compuerta
       // que el motivo: el nombre de un servicio puede revelar un dato de salud.
       ...(booking.serviceSnapshot != null &&
-      puedeVerElMotivoDeLaCita(
+      canSeeBookingReason(
         booking,
         actor,
-        profesionalDeLaAgenda,
-        pacientesRepresentados,
+        agendaPractitioner,
+        representedPatients,
       )
-        ? { service: proyectarServicioReservado(booking.serviceSnapshot) }
+        ? { service: projectBookedService(booking.serviceSnapshot) }
         : {}),
-      ...(tipoDeLaCita === undefined ? {} : { typeConceptId: tipoDeLaCita }),
-      ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
-      statusReason: aStatusReason(motivo),
-      delayNotice: aDelayNotice(demora),
+      ...(appointmentType === undefined ? {} : { typeConceptId: appointmentType }),
+      ...(rescheduledFrom ? { rescheduledFrom: rescheduledFrom } : {}),
+      statusReason: aStatusReason(reason),
+      delayNotice: aDelayNotice(delay),
       createdAt: booking.createdAt,
     };
   }
@@ -3713,12 +3713,12 @@ export class SchedulingBookingsService {
    * rota y un dato falso.
    *
    * @param tx - Transacción de la confirmación; la cita nace o no nace con ella.
-   * @param datos - Lo que la reserva sabe del turno.
+   * @param data - Lo que la reserva sabe del turno.
    * @returns La cita creada, para enlazarla desde la reserva.
    */
-  private crearCitaClinica(
+  private createClinicalAppointment(
     tx: EntityManager,
-    datos: {
+    data: {
       tenantId: string;
       patientProfileId: string;
       resourceRefType?: string;
@@ -3739,31 +3739,31 @@ export class SchedulingBookingsService {
       actorUserId?: string;
     },
   ): Appointments {
-    const esDeProfesional =
-      datos.resourceRefType !== undefined &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(datos.resourceRefType);
+    const isPractitionerResource =
+      data.resourceRefType !== undefined &&
+      PRACTITIONER_PROFILE_TABLES.includes(data.resourceRefType);
 
     return this.appointmentsRepo.create(tx, {
-      patientProfileId: datos.patientProfileId,
-      tenantId: datos.tenantId,
-      ...(esDeProfesional && datos.resourceRefId !== undefined
-        ? { practitionerProfileId: datos.resourceRefId }
+      patientProfileId: data.patientProfileId,
+      tenantId: data.tenantId,
+      ...(isPractitionerResource && data.resourceRefId !== undefined
+        ? { practitionerProfileId: data.resourceRefId }
         : {}),
-      statusConceptId: datos.statusConceptId,
-      startAt: datos.startAt,
-      ...(datos.endAt === undefined ? {} : { endAt: datos.endAt }),
-      ...(datos.reasonText === undefined
+      statusConceptId: data.statusConceptId,
+      startAt: data.startAt,
+      ...(data.endAt === undefined ? {} : { endAt: data.endAt }),
+      ...(data.reasonText === undefined
         ? {}
-        : { reasonText: datos.reasonText }),
-      ...(datos.channelConceptId === undefined
+        : { reasonText: data.reasonText }),
+      ...(data.channelConceptId === undefined
         ? {}
-        : { channelConceptId: datos.channelConceptId }),
-      ...(datos.typeConceptId === undefined
+        : { channelConceptId: data.channelConceptId }),
+      ...(data.typeConceptId === undefined
         ? {}
-        : { typeConceptId: datos.typeConceptId }),
-      ...(datos.actorUserId === undefined
+        : { typeConceptId: data.typeConceptId }),
+      ...(data.actorUserId === undefined
         ? {}
-        : { actorUserId: datos.actorUserId }),
+        : { actorUserId: data.actorUserId }),
     });
   }
 
@@ -3783,7 +3783,7 @@ export class SchedulingBookingsService {
  * antes de la corrección #14 tiene snapshot sin motivo y eso es normal, no un
  * error.
  */
-function leerSnapshot(
+function readSnapshot(
   revision: HistoryRevision,
 ): BookingTransitionSnapshot | null {
   const snapshot: unknown = revision.dataSnapshot;
@@ -3794,9 +3794,9 @@ function leerSnapshot(
 }
 
 /** Si la revisión explica el cambio: es la que se le muestra a la otra parte. */
-function tieneMotivo(revision: HistoryRevision): boolean {
-  const motivo = leerSnapshot(revision)?.reasonText;
-  return typeof motivo === 'string' && motivo.trim().length > 0;
+function hasReason(revision: HistoryRevision): boolean {
+  const reason = readSnapshot(revision)?.reasonText;
+  return typeof reason === 'string' && reason.trim().length > 0;
 }
 
 /**
@@ -3806,9 +3806,9 @@ function tieneMotivo(revision: HistoryRevision): boolean {
  * predicado sólo ve el snapshot; los minutos son, además, lo único sin lo cual
  * la demora no se puede mostrar.
  */
-function esDemora(revision: HistoryRevision): boolean {
-  const minutos = leerSnapshot(revision)?.delayMinutes;
-  return typeof minutos === 'number' && minutos > 0;
+function isDelay(revision: HistoryRevision): boolean {
+  const minutes = readSnapshot(revision)?.delayMinutes;
+  return typeof minutes === 'number' && minutes > 0;
 }
 
 /**
@@ -3821,15 +3821,15 @@ function aDelayNotice(
   revision: HistoryRevision | undefined,
 ): BookingDelayNoticeDto | undefined {
   if (!revision) return undefined;
-  const snapshot = leerSnapshot(revision);
-  const minutos = snapshot?.delayMinutes;
-  if (typeof minutos !== 'number' || minutos <= 0) return undefined;
+  const snapshot = readSnapshot(revision);
+  const minutes = snapshot?.delayMinutes;
+  if (typeof minutes !== 'number' || minutes <= 0) return undefined;
 
-  const mensaje = snapshot?.reasonText;
+  const message = snapshot?.reasonText;
   return {
-    delayMinutes: minutos,
-    ...(typeof mensaje === 'string' && mensaje.trim().length > 0
-      ? { message: mensaje }
+    delayMinutes: minutes,
+    ...(typeof message === 'string' && message.trim().length > 0
+      ? { message: message }
       : {}),
     announcedAt: revision.recordedAt,
   };
@@ -3846,14 +3846,14 @@ function aStatusReason(
   revision: HistoryRevision | undefined,
 ): BookingStatusReasonDto | undefined {
   if (!revision) return undefined;
-  const snapshot = leerSnapshot(revision);
-  const motivo = snapshot?.reasonText;
-  if (typeof motivo !== 'string' || motivo.trim().length === 0) {
+  const snapshot = readSnapshot(revision);
+  const reason = snapshot?.reasonText;
+  if (typeof reason !== 'string' || reason.trim().length === 0) {
     return undefined;
   }
 
   return {
-    reasonText: motivo,
+    reasonText: reason,
     ...(snapshot?.actorKind === undefined
       ? {}
       : { actorKind: snapshot.actorKind }),

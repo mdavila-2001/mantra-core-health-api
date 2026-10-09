@@ -160,8 +160,8 @@ export class SchedulingController {
   /** UC-41-01. */
   @Post('resources')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
-  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
-  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // recurso apunte a SU perfil (`assertMayCreateResource` /
+  // `assertActorResource`) y que el tenant sea uno de los suyos. Sin esta
   // apertura, un profesional recién registrado no tenía forma de volverse
   // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
@@ -177,8 +177,8 @@ export class SchedulingController {
   /** UC-41-01. */
   @Post('booking-policies')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
-  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
-  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // recurso apunte a SU perfil (`assertMayCreateResource` /
+  // `assertActorResource`) y que el tenant sea uno de los suyos. Sin esta
   // apertura, un profesional recién registrado no tenía forma de volverse
   // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
@@ -194,8 +194,8 @@ export class SchedulingController {
   /** UC-41-02. */
   @Post('resources/:id/templates')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
-  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
-  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // recurso apunte a SU perfil (`assertMayCreateResource` /
+  // `assertActorResource`) y que el tenant sea uno de los suyos. Sin esta
   // apertura, un profesional recién registrado no tenía forma de volverse
   // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
@@ -222,7 +222,7 @@ export class SchedulingController {
    */
   @Get('resources/:id/templates')
   // Mismo alcance que el POST: el servicio verifica que el recurso sea del
-  // actor (`assertRecursoDelActor`), así que un profesional sólo lee las suyas.
+  // actor (`assertActorResource`), así que un profesional sólo lee las suyas.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @ApiOperation({ summary: 'Listar las plantillas de agenda de un recurso' })
   listTemplates(
@@ -290,7 +290,7 @@ export class SchedulingController {
    */
   @Delete('templates/:id')
   // Mismo alcance que publicar y generar: el servicio comprueba que el recurso
-  // sea del actor con `assertRecursoDelActor`.
+  // sea del actor con `assertActorResource`.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @ApiOperation({
     summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
@@ -307,8 +307,8 @@ export class SchedulingController {
   /** UC-41-03. */
   @Post('templates/:id/generate-slots')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
-  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
-  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // recurso apunte a SU perfil (`assertMayCreateResource` /
+  // `assertActorResource`) y que el tenant sea uno de los suyos. Sin esta
   // apertura, un profesional recién registrado no tenía forma de volverse
   // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
@@ -519,7 +519,7 @@ export class SchedulingController {
    */
   @Delete('exceptions/:id')
   // Mismo alcance que el POST hermano: el servicio verifica que el recurso de
-  // la excepción sea del actor (`assertRecursoDelActor`).
+  // la excepción sea del actor (`assertActorResource`).
   @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({

@@ -14,21 +14,21 @@ import { SchedulingBookingsRepository } from '../../infrastructure/repositories'
 import { SchedulingAgendaRepository } from '../../infrastructure/repositories';
 import { SchedulableResources } from '../../entities';
 import {
-  MAX_CITAS_POR_PAGINA,
-  MAX_RANGO_AGENDA_DIAS,
+  MAX_BOOKINGS_PER_PAGE,
+  MAX_AGENDA_RANGE_DAYS,
   type TenantAgendaQueryDto,
   type TenantAgendaItemDto,
   type TenantAgendaResponseDto,
 } from '../../presentation/dto';
 
 /** Milisegundos de un día. */
-const UN_DIA_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Tope por omisión cuando el cliente no pide uno. */
-const LIMITE_POR_OMISION = 200;
+const DEFAULT_PAGE_LIMIT = 200;
 
 /** Las dos formas de `resourceRefType` que apuntan a un perfil profesional. */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
@@ -86,7 +86,7 @@ export class SchedulingTenantAgendaService {
    * @param actor - Quien mira; tiene que pertenecer a esa organización.
    * @returns Sus citas, en orden cronológico y sin motivo de consulta.
    */
-  async listar(
+  async list(
     tenantId: string,
     query: TenantAgendaQueryDto,
     actor: AuthenticatedUser,
@@ -115,9 +115,9 @@ export class SchedulingTenantAgendaService {
         { from: query.from, to: query.to },
       );
     }
-    if (to.getTime() - from.getTime() > MAX_RANGO_AGENDA_DIAS * UN_DIA_MS) {
+    if (to.getTime() - from.getTime() > MAX_AGENDA_RANGE_DAYS * ONE_DAY_MS) {
       throw new PreconditionFailedException(
-        `El rango no puede superar los ${MAX_RANGO_AGENDA_DIAS} días`,
+        `El rango no puede superar los ${MAX_AGENDA_RANGE_DAYS} días`,
         { from: query.from, to: query.to },
       );
     }
@@ -126,33 +126,33 @@ export class SchedulingTenantAgendaService {
     // cosas: rotular la sede de cada cita, y traducir «este profesional» a
     // «sus recursos ACÁ» — que es lo que hace que pedir la agenda de un médico
     // de otra clínica devuelva vacío en vez de sus citas allá.
-    const recursos = await this.agendaRepo.findResources(em, { tenantId });
-    const recursoPorId = new Map(
-      recursos.map((recurso) => [recurso.id, recurso]),
+    const resources = await this.agendaRepo.findResources(em, { tenantId });
+    const resourceById = new Map(
+      resources.map((resource) => [resource.id, resource]),
     );
 
     const resourceIds = query.practitionerProfileId
-      ? recursos
+      ? resources
           .filter(
-            (recurso) =>
-              TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType) &&
-              recurso.resourceRefId === query.practitionerProfileId,
+            (resource) =>
+              PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType) &&
+              resource.resourceRefId === query.practitionerProfileId,
           )
-          .map((recurso) => recurso.id)
+          .map((resource) => resource.id)
       : undefined;
 
     const limit = Math.min(
-      query.limit ?? LIMITE_POR_OMISION,
-      MAX_CITAS_POR_PAGINA,
+      query.limit ?? DEFAULT_PAGE_LIMIT,
+      MAX_BOOKINGS_PER_PAGE,
     );
 
-    const filas = await this.bookingsRepo.findTenantAgenda(
+    const rows = await this.bookingsRepo.findTenantAgenda(
       em,
       { tenantId, from, to, resourceIds },
       limit,
     );
 
-    const items = await this.proyectar(em, filas, recursoPorId);
+    const items = await this.project(em, rows, resourceById);
 
     return { items, truncated: items.length >= limit };
   }
@@ -164,9 +164,9 @@ export class SchedulingTenantAgendaService {
    * decenas de citas, y una consulta por cita convertiría una pantalla en una
    * tormenta de lecturas.
    */
-  private async proyectar(
+  private async project(
     em: EntityManager,
-    filas: readonly {
+    rows: readonly {
       booking: {
         id: string;
         resourceId?: string;
@@ -175,58 +175,58 @@ export class SchedulingTenantAgendaService {
       };
       slot: { startAt: Date; endAt: Date } | null;
     }[],
-    recursoPorId: ReadonlyMap<string, SchedulableResources>,
+    resourceById: ReadonlyMap<string, SchedulableResources>,
   ): Promise<TenantAgendaItemDto[]> {
-    const pacienteIds = [
-      ...new Set(filas.map((fila) => fila.booking.patientProfileId)),
+    const patientIds = [
+      ...new Set(rows.map((row) => row.booking.patientProfileId)),
     ];
 
-    const personas =
-      pacienteIds.length > 0
-        ? await em.find(Persons, { id: { $in: pacienteIds } })
+    const people =
+      patientIds.length > 0
+        ? await em.find(Persons, { id: { $in: patientIds } })
         : [];
     // El nombre del paciente sale de `persons` por el mismo camino que el del
     // profesional: `patient_profiles.profile_id` referencia a `persons(id)`.
-    const nombrePorPersona = new Map(
-      personas
-        .filter((persona) => (persona.displayName ?? '') !== '')
-        .map((persona) => [persona.id, persona.displayName as string]),
+    const nameByPerson = new Map(
+      people
+        .filter((person) => (person.displayName ?? '') !== '')
+        .map((person) => [person.id, person.displayName as string]),
     );
 
-    return filas.map((fila) => {
-      const recurso = fila.booking.resourceId
-        ? (recursoPorId.get(fila.booking.resourceId) ?? null)
+    return rows.map((row) => {
+      const resource = row.booking.resourceId
+        ? (resourceById.get(row.booking.resourceId) ?? null)
         : null;
-      const practitionerProfileId = this.perfilProfesionalDe(
-        fila.booking.resourceId,
-        recursoPorId,
+      const practitionerProfileId = this.practitionerProfileOf(
+        row.booking.resourceId,
+        resourceById,
       );
 
       return {
-        bookingId: fila.booking.id,
-        startAt: fila.slot!.startAt,
-        endAt: fila.slot!.endAt,
-        resourceId: recurso?.id ?? null,
-        resourceName: recurso?.name ?? null,
+        bookingId: row.booking.id,
+        startAt: row.slot!.startAt,
+        endAt: row.slot!.endAt,
+        resourceId: resource?.id ?? null,
+        resourceName: resource?.name ?? null,
         practitionerProfileId,
-        patientProfileId: fila.booking.patientProfileId,
+        patientProfileId: row.booking.patientProfileId,
         patientName:
-          nombrePorPersona.get(fila.booking.patientProfileId) ?? null,
-        statusConceptId: fila.booking.statusConceptId,
+          nameByPerson.get(row.booking.patientProfileId) ?? null,
+        statusConceptId: row.booking.statusConceptId,
       };
     });
   }
 
   /** El perfil profesional detrás de un recurso, si el recurso apunta a uno. */
-  private perfilProfesionalDe(
+  private practitionerProfileOf(
     resourceId: string | undefined,
-    recursoPorId: ReadonlyMap<string, SchedulableResources>,
+    resourceById: ReadonlyMap<string, SchedulableResources>,
   ): string | null {
     if (!resourceId) return null;
-    const recurso = recursoPorId.get(resourceId);
-    if (!recurso) return null;
-    return TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType)
-      ? recurso.resourceRefId
+    const resource = resourceById.get(resourceId);
+    if (!resource) return null;
+    return PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+      ? resource.resourceRefId
       : null;
   }
 }

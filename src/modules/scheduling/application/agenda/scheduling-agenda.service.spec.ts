@@ -13,7 +13,7 @@ import { SchedulingAgendaService } from './scheduling-agenda.service';
 const TENANT = '11111111-1111-1111-1111-111111111111';
 
 /** Una sede ya proyectada, como la devuelve `practice`. */
-const SEDE = {
+const SITE = {
   id: 'site-1',
   name: 'Consultorio Central',
   code: 'CC',
@@ -47,7 +47,7 @@ function build() {
 }
 
 /** Un recurso agendable de profesional, con lo mínimo del contrato. */
-const recurso = (over: Record<string, unknown> = {}): any => ({
+const resource = (over: Record<string, unknown> = {}): any => ({
   id: 'res-1',
   name: 'Dra. Quispe',
   resourceTypeConceptId: 'concept-practitioner',
@@ -62,7 +62,7 @@ describe('SchedulingAgendaService', () => {
     it('resuelve el nombre de la persona detrás del recurso, en lote', async () => {
       const d = build();
       const fork = d.em.fork() as any;
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
       // Los tres saltos de findPractitionerNames: perfil profesional →
       // person_profiles → persons.
       // Los dos saltos de findPractitionerNames: el perfil confirma que el id
@@ -84,7 +84,7 @@ describe('SchedulingAgendaService', () => {
       // mismo criterio: quedarse sin etiqueta linda no puede tirar la agenda.
       const d = build();
       const fork = d.em.fork() as any;
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
       fork.find = mockFn().mockRejectedValue(new Error('se cayó profiles'));
 
       const res = await d.service.listResources({ tenantId: TENANT } as any);
@@ -99,7 +99,7 @@ describe('SchedulingAgendaService', () => {
       const fork = d.em.fork() as any;
       fork.find = mockFn();
       d.agendaRepo.findResources.mockResolvedValue([
-        recurso({ resourceRefType: 'care_spaces', name: 'Consultorio 3' }),
+        resource({ resourceRefType: 'care_spaces', name: 'Consultorio 3' }),
       ]);
 
       const res = await d.service.listResources({ tenantId: TENANT } as any);
@@ -113,9 +113,9 @@ describe('SchedulingAgendaService', () => {
   describe('listResources · dónde atiende cada recurso', () => {
     it('attaches the resolved site to each resource', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
       d.sitesService.resolveSitesForResources.mockResolvedValue(
-        new Map([['prac-1', SEDE]]),
+        new Map([['prac-1', SITE]]),
       );
 
       const res = await d.service.listResources({ tenantId: TENANT } as any);
@@ -124,12 +124,12 @@ describe('SchedulingAgendaService', () => {
         [{ refType: 'health_practitioner_profiles', refId: 'prac-1' }],
         TENANT,
       );
-      expect(res.items[0].site).toEqual(SEDE);
+      expect(res.items[0].site).toEqual(SITE);
     });
 
     it('leaves the site as null when the resource has none', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
 
       const res = await d.service.listResources({ tenantId: TENANT } as any);
 
@@ -141,7 +141,7 @@ describe('SchedulingAgendaService', () => {
 
     it('still lists the agenda when the site lookup fails', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
       d.sitesService.resolveSitesForResources.mockRejectedValue(
         new Error('practice caído'),
       );
@@ -158,8 +158,8 @@ describe('SchedulingAgendaService', () => {
     it('resolves the sites of every resource in a single call', async () => {
       const d = build();
       d.agendaRepo.findResources.mockResolvedValue([
-        recurso(),
-        recurso({
+        resource(),
+        resource({
           id: 'res-2',
           resourceRefType: 'care_spaces',
           resourceRefId: 'space-9',

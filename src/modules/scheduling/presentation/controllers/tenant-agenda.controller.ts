@@ -46,6 +46,6 @@ export class TenantAgendaController {
     @Query() query: TenantAgendaQueryDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TenantAgendaResponseDto> {
-    return this.agenda.listar(tenantId, query, actor);
+    return this.agenda.list(tenantId, query, actor);
   }
 }

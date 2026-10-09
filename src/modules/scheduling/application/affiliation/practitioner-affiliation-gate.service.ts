@@ -12,7 +12,7 @@ import { esEstado } from '../../../profiles/services/profiles-affiliations.servi
  * médico cambia en cada caso. Devolver el veredicto deja que cada consumidor
  * ponga su frase, en vez de pasar una bandera que elija mensaje.
  */
-export type VeredictoDelVinculo =
+export type AffiliationVerdict =
   /** No hay vínculo con sede que mirar: consultorio propio o recién llegado. */
   | 'sin-vinculos'
   /** La organización lo aceptó. */
@@ -79,53 +79,53 @@ export class PractitionerAffiliationGateService {
    * @param actor - Quien pretende actuar en ella.
    * @returns El veredicto; el llamador decide qué hacer con él.
    */
-  async evaluar(
+  async evaluate(
     tenantId: string,
     actor: AuthenticatedUser,
-  ): Promise<VeredictoDelVinculo> {
+  ): Promise<AffiliationVerdict> {
     if (actor.practitionerProfileId === undefined) return 'sin-vinculos';
 
-    const vinculos = await this.em.find(
+    const affiliations = await this.em.find(
       PractitionerAffiliations,
       { practitionerProfileId: actor.practitionerProfileId },
       { fields: ['practiceSiteId', 'statusConceptId', 'organizationName'] },
     );
 
-    const conSede = vinculos.filter(
-      (v): v is (typeof vinculos)[number] & { practiceSiteId: string } =>
+    const withSite = affiliations.filter(
+      (v): v is (typeof affiliations)[number] & { practiceSiteId: string } =>
         v.practiceSiteId !== undefined && v.practiceSiteId !== null,
     );
-    if (conSede.length === 0) return 'sin-vinculos';
+    if (withSite.length === 0) return 'sin-vinculos';
 
     // Una sola consulta para todas las sedes: resolver el tenant de cada una
     // por separado sería N+1 sobre el mismo puente.
-    const tenantPorSede = await this.tenantDeCadaSede(
-      conSede.map((v) => v.practiceSiteId),
+    const tenantBySite = await this.tenantOfEachSite(
+      withSite.map((v) => v.practiceSiteId),
     );
-    const deEstaOrganizacion = conSede.filter(
-      (v) => tenantPorSede.get(v.practiceSiteId) === tenantId,
+    const ofThisOrganization = withSite.filter(
+      (v) => tenantBySite.get(v.practiceSiteId) === tenantId,
     );
-    if (deEstaOrganizacion.length === 0) return 'sin-vinculos';
+    if (ofThisOrganization.length === 0) return 'sin-vinculos';
 
     // `DECLARADO` habilita igual que `APROBADO`: es el médico del hospital
     // público, donde no hay nadie que pueda aprobar. Lo que le falta es el
     // sello de la institución, y eso se dice en pantalla, no bloqueando.
-    const aprobado = deEstaOrganizacion.some(
+    const approved = ofThisOrganization.some(
       (v) =>
         esEstado(v.statusConceptId, 'APROBADO') ||
         esEstado(v.statusConceptId, 'DECLARADO'),
     );
-    if (aprobado) return 'aprobado';
+    if (approved) return 'aprobado';
 
-    const pendiente = deEstaOrganizacion.some((v) =>
+    const pendingVerdict = ofThisOrganization.some((v) =>
       esEstado(v.statusConceptId, 'PENDIENTE'),
     );
-    if (pendiente) return 'pendiente';
+    if (pendingVerdict) return 'pendiente';
 
     // Rechazado o revocado con ESTA organización es una negativa suya, y se
     // distingue de no tener vínculo: lo primero lo dijo alguien, lo segundo no
     // lo dijo nadie.
-    return deEstaOrganizacion.some(
+    return ofThisOrganization.some(
       (v) =>
         esEstado(v.statusConceptId, 'RECHAZADO') ||
         esEstado(v.statusConceptId, 'REVOCADO'),
@@ -150,14 +150,14 @@ export class PractitionerAffiliationGateService {
    * separaría, y entonces el gate y la aprobación disentirían—. El `COALESCE`
    * conserva el camino viejo para las sedes que no declaran administrador.
    *
-   * @param sedes - Ids de sede.
+   * @param sites - Ids de sede.
    * @returns Mapa `sede -> organización que la administra`.
    */
-  private async tenantDeCadaSede(
-    sedes: string[],
+  private async tenantOfEachSite(
+    sites: string[],
   ): Promise<Map<string, string>> {
-    if (sedes.length === 0) return new Map();
-    const filas = await this.em.execute<
+    if (sites.length === 0) return new Map();
+    const rows = await this.em.execute<
       { site_id: string; tenant_id: string }[]
     >(
       `SELECT s.id AS site_id,
@@ -165,8 +165,8 @@ export class PractitionerAffiliationGateService {
          FROM practice.practice_sites s
          JOIN practice.practices p ON p.id = s.practice_id
         WHERE s.id IN (?)`,
-      [sedes],
+      [sites],
     );
-    return new Map(filas.map((fila) => [fila.site_id, fila.tenant_id]));
+    return new Map(rows.map((row) => [row.site_id, row.tenant_id]));
   }
 }

@@ -332,7 +332,7 @@ export class SchedulingBookingsRepository {
     const bookings = await em.find(AppointmentBookings, {
       id: { $in: [...ids] },
     });
-    return this.conSlots(em, bookings);
+    return this.withSlots(em, bookings);
   }
 
   /**
@@ -360,11 +360,11 @@ export class SchedulingBookingsRepository {
       },
       { orderBy: { createdAt: 'DESC' } },
     );
-    return this.conSlots(em, bookings);
+    return this.withSlots(em, bookings);
   }
 
   /** Resuelve el slot de cada cita en una sola consulta. */
-  private async conSlots(
+  private async withSlots(
     em: EntityManager,
     bookings: AppointmentBookings[],
   ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
@@ -435,16 +435,16 @@ export class SchedulingBookingsRepository {
     em: EntityManager,
     bookingIds: readonly string[],
   ): Promise<Map<string, AppointmentPaymentStates>> {
-    const porCita = new Map<string, AppointmentPaymentStates>();
-    if (bookingIds.length === 0) return porCita;
+    const byAppointment = new Map<string, AppointmentPaymentStates>();
+    if (bookingIds.length === 0) return byAppointment;
 
-    const filas = await em.find(AppointmentPaymentStates, {
+    const rows = await em.find(AppointmentPaymentStates, {
       appointmentBookingId: { $in: [...bookingIds] },
     });
-    for (const fila of filas) {
-      porCita.set(fila.appointmentBookingId, fila);
+    for (const row of rows) {
+      byAppointment.set(row.appointmentBookingId, row);
     }
-    return porCita;
+    return byAppointment;
   }
 
   /** El estado de pago, sin bloquear: es la cara de lectura. */
@@ -658,11 +658,11 @@ export class SchedulingBookingsRepository {
         // colarse con fecha desconocida.
         .filter(
           (
-            fila,
-          ): fila is { booking: AppointmentBookings; slot: BookableSlots } =>
-            fila.slot !== null &&
-            fila.slot.startAt >= filters.from &&
-            fila.slot.startAt < filters.to,
+            row,
+          ): row is { booking: AppointmentBookings; slot: BookableSlots } =>
+            row.slot !== null &&
+            row.slot.startAt >= filters.from &&
+            row.slot.startAt < filters.to,
         )
         .sort((a, b) => a.slot.startAt.getTime() - b.slot.startAt.getTime())
         .slice(0, limit)
@@ -781,19 +781,19 @@ export class SchedulingBookingsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Paciente cuyas citas se miran.
-   * @param desde - Inicio de la franja que se quiere ocupar.
-   * @param hasta - Fin de la franja.
-   * @param estados - Estados que cuentan como choque.
-   * @param excepto - Cita que no se compara consigo misma, si aplica.
+   * @param from - Inicio de la franja que se quiere ocupar.
+   * @param to - Fin de la franja.
+   * @param states - Estados que cuentan como choque.
+   * @param except - Cita que no se compara consigo misma, si aplica.
    * @returns Las citas que se cruzan, de la más próxima a la más lejana.
    */
   async findPatientBookingsOverlapping(
     em: EntityManager,
     patientProfileId: string,
-    desde: Date,
-    hasta: Date,
-    estados: readonly string[],
-    excepto?: string,
+    from: Date,
+    to: Date,
+    states: readonly string[],
+    except?: string,
   ): Promise<
     {
       id: string;
@@ -803,7 +803,7 @@ export class SchedulingBookingsRepository {
       resourceName: string | null;
     }[]
   > {
-    if (estados.length === 0) return [];
+    if (states.length === 0) return [];
 
     return em.getConnection().execute(
       `SELECT b.id,
@@ -822,11 +822,11 @@ export class SchedulingBookingsRepository {
         ORDER BY s.start_at ASC`,
       [
         patientProfileId,
-        [...estados],
-        hasta,
-        desde,
-        excepto ?? null,
-        excepto ?? null,
+        [...states],
+        to,
+        from,
+        except ?? null,
+        except ?? null,
       ],
     );
   }
@@ -851,19 +851,19 @@ export class SchedulingBookingsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional cuyos compromisos se miran.
-   * @param desde - Inicio de la franja que se quiere ocupar.
-   * @param hasta - Fin de la franja.
-   * @param estados - Estados que cuentan como compromiso.
-   * @param excepto - Reserva que no se compara consigo misma, si aplica.
+   * @param from - Inicio de la franja que se quiere ocupar.
+   * @param to - Fin de la franja.
+   * @param states - Estados que cuentan como compromiso.
+   * @param except - Reserva que no se compara consigo misma, si aplica.
    * @returns Los compromisos que se cruzan, del más próximo al más lejano.
    */
   async findProfessionalCommitmentsOverlapping(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    estados: readonly string[],
-    excepto?: string,
+    from: Date,
+    to: Date,
+    states: readonly string[],
+    except?: string,
   ): Promise<
     {
       id: string;
@@ -875,9 +875,9 @@ export class SchedulingBookingsRepository {
       patientProfileId: string;
     }[]
   > {
-    if (estados.length === 0) return [];
+    if (states.length === 0) return [];
 
-    const filas: {
+    const rows: {
       id: string;
       startAt: Date | string;
       endAt: Date | string;
@@ -909,11 +909,11 @@ export class SchedulingBookingsRepository {
         ORDER BY s.start_at ASC`,
       [
         practitionerProfileId,
-        [...estados],
-        hasta,
-        desde,
-        excepto ?? null,
-        excepto ?? null,
+        [...states],
+        to,
+        from,
+        except ?? null,
+        except ?? null,
       ],
     );
 
@@ -921,10 +921,10 @@ export class SchedulingBookingsRepository {
     // `Date`; quien formatee la hora con eso revienta con «Invalid time value».
     // Se normaliza acá, que es la frontera con la base — apareció ejecutando el
     // experimento de la regla madre, no leyendo.
-    return filas.map((fila) => ({
-      ...fila,
-      startAt: new Date(fila.startAt),
-      endAt: new Date(fila.endAt),
+    return rows.map((row) => ({
+      ...row,
+      startAt: new Date(row.startAt),
+      endAt: new Date(row.endAt),
     }));
   }
 
@@ -953,7 +953,7 @@ export class SchedulingBookingsRepository {
    * ¿Hay una consulta **ya iniciada** entre ese profesional y ese paciente?
    *
    * Sin ventana de fechas, y ésa es toda la diferencia con
-   * {@link findConfirmadasConPacienteEntre}. Una consulta en curso no se
+   * {@link findConfirmedWithPatientBetween}. Una consulta en curso no se
    * pregunta por el calendario: el estado dice que **está pasando ahora**, y el
    * cupo sólo dice cuándo se pensaba que iba a pasar.
    *
@@ -968,13 +968,13 @@ export class SchedulingBookingsRepository {
    * @param patientProfileId - El paciente cuya historia se pide.
    * @returns `true` si hay al menos una consulta en curso entre los dos.
    */
-  async tieneConsultaEnCurso(
+  async hasConsultationInProgress(
     em: EntityManager,
     practitionerProfileId: string,
     patientProfileId: string,
-    estadoEnCurso: string,
+    inProgressState: string,
   ): Promise<boolean> {
-    const filas: { existe: number }[] = await em.getConnection().execute(
+    const rows: { exists: number }[] = await em.getConnection().execute(
       `SELECT 1 AS "existe"
          FROM scheduling.appointment_bookings b
          JOIN scheduling.schedulable_resources r ON r.id = b.resource_id
@@ -983,22 +983,22 @@ export class SchedulingBookingsRepository {
           AND b.patient_profile_id = ?
           AND b.status_concept_id = ?
         LIMIT 1`,
-      [practitionerProfileId, patientProfileId, estadoEnCurso],
+      [practitionerProfileId, patientProfileId, inProgressState],
     );
-    return filas.length > 0;
+    return rows.length > 0;
   }
 
-  async findConfirmadasConPacienteEntre(
+  async findConfirmedWithPatientBetween(
     em: EntityManager,
     practitionerProfileId: string,
     patientProfileId: string,
-    desde: Date,
-    hasta: Date,
-    estados: readonly string[],
+    from: Date,
+    to: Date,
+    states: readonly string[],
   ): Promise<{ startAt: Date; timeZone: string | null }[]> {
-    if (estados.length === 0) return [];
+    if (states.length === 0) return [];
 
-    const filas: { startAt: Date | string; timeZone: string | null }[] =
+    const rows: { startAt: Date | string; timeZone: string | null }[] =
       await em.getConnection().execute(
         `SELECT s.start_at AS "startAt",
                 r.time_zone AS "timeZone"
@@ -1012,13 +1012,13 @@ export class SchedulingBookingsRepository {
             AND s.start_at >= ?
             AND s.start_at <  ?
           ORDER BY s.start_at ASC`,
-        [practitionerProfileId, patientProfileId, [...estados], desde, hasta],
+        [practitionerProfileId, patientProfileId, [...states], from, to],
       );
 
     // Mismo cuidado que arriba: el driver devuelve los timestamptz como texto.
-    return filas.map((fila) => ({
-      ...fila,
-      startAt: new Date(fila.startAt),
+    return rows.map((row) => ({
+      ...row,
+      startAt: new Date(row.startAt),
     }));
   }
 
@@ -1032,17 +1032,17 @@ export class SchedulingBookingsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param practitionerProfileId - El profesional.
-   * @param desde - Inicio de la franja.
-   * @param hasta - Fin de la franja.
-   * @param excepto - Excepción que no se compara consigo misma, si aplica.
+   * @param from - Inicio de la franja.
+   * @param to - Fin de la franja.
+   * @param except - Excepción que no se compara consigo misma, si aplica.
    * @returns Los ratos ocupados que se cruzan, del más próximo al más lejano.
    */
   async findProfessionalBusyExceptionsOverlapping(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    excepto?: string,
+    from: Date,
+    to: Date,
+    except?: string,
   ): Promise<
     {
       id: string;
@@ -1053,7 +1053,7 @@ export class SchedulingBookingsRepository {
       timeZone: string | null;
     }[]
   > {
-    const filas: {
+    const rows: {
       id: string;
       startAt: Date | string;
       endAt: Date | string;
@@ -1076,15 +1076,15 @@ export class SchedulingBookingsRepository {
           AND e.end_at   > ?
           AND (? IS NULL OR e.id <> ?)
         ORDER BY e.start_at ASC`,
-      [practitionerProfileId, hasta, desde, excepto ?? null, excepto ?? null],
+      [practitionerProfileId, to, from, except ?? null, except ?? null],
     );
 
     // Misma frontera que los compromisos: el SQL crudo trae timestamptz como
     // texto y quien formatee la hora con eso revienta.
-    return filas.map((fila) => ({
-      ...fila,
-      startAt: new Date(fila.startAt),
-      endAt: new Date(fila.endAt),
+    return rows.map((row) => ({
+      ...row,
+      startAt: new Date(row.startAt),
+      endAt: new Date(row.endAt),
     }));
   }
 
@@ -1092,12 +1092,12 @@ export class SchedulingBookingsRepository {
     em: EntityManager,
     patientProfileIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const nombres = new Map<string, string>();
-    if (patientProfileIds.length === 0) return nombres;
+    const names = new Map<string, string>();
+    if (patientProfileIds.length === 0) return names;
 
     // Pasamos el contexto de transacción: el turno de mostrador crea al paciente
     // y la cita en la misma transacción, así que esta consulta debe ver esas filas.
-    const filas = await em
+    const rows = await em
       .getConnection()
       .execute<{ profileId: string; displayName: string }[]>(
         `SELECT pp.profile_id AS "profileId", pe.display_name AS "displayName"
@@ -1110,10 +1110,10 @@ export class SchedulingBookingsRepository {
         em.getTransactionContext(),
       );
 
-    for (const fila of filas) {
-      nombres.set(fila.profileId, fila.displayName);
+    for (const row of rows) {
+      names.set(row.profileId, row.displayName);
     }
-    return nombres;
+    return names;
   }
 
   async latestRescheduleOrigins(
@@ -1122,36 +1122,36 @@ export class SchedulingBookingsRepository {
   ): Promise<Map<string, Date>> {
     if (bookingIds.length === 0) return new Map();
 
-    const filas = await em.find(
+    const rows = await em.find(
       BookingReschedules,
       { bookingId: { $in: [...bookingIds] } },
       { orderBy: { recordedAt: 'DESC' } },
     );
-    if (filas.length === 0) return new Map();
+    if (rows.length === 0) return new Map();
 
     // La primera de cada cita es la más reciente: vienen ordenadas.
-    const ultimaPorCita = new Map<string, BookingReschedules>();
-    for (const fila of filas) {
-      if (!ultimaPorCita.has(fila.bookingId)) {
-        ultimaPorCita.set(fila.bookingId, fila);
+    const latestByAppointment = new Map<string, BookingReschedules>();
+    for (const row of rows) {
+      if (!latestByAppointment.has(row.bookingId)) {
+        latestByAppointment.set(row.bookingId, row);
       }
     }
 
-    const cupos = await em.find(BookableSlots, {
+    const slots = await em.find(BookableSlots, {
       id: {
-        $in: [...new Set([...ultimaPorCita.values()].map((f) => f.fromSlotId))],
+        $in: [...new Set([...latestByAppointment.values()].map((f) => f.fromSlotId))],
       },
     });
-    const inicioPorCupo = new Map(cupos.map((cupo) => [cupo.id, cupo.startAt]));
+    const startBySlot = new Map(slots.map((slot) => [slot.id, slot.startAt]));
 
-    const salida = new Map<string, Date>();
-    for (const [bookingId, fila] of ultimaPorCita) {
-      const inicio = inicioPorCupo.get(fila.fromSlotId);
+    const output = new Map<string, Date>();
+    for (const [bookingId, row] of latestByAppointment) {
+      const start = startBySlot.get(row.fromSlotId);
       // Sin el cupo original no se afirma nada: mejor no decir «reprogramada»
       // que decirlo sin poder decir desde cuándo.
-      if (inicio) salida.set(bookingId, inicio);
+      if (start) output.set(bookingId, start);
     }
-    return salida;
+    return output;
   }
 
   /**

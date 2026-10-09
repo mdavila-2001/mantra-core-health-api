@@ -21,7 +21,7 @@ const SLOT_ID = '11111111-1111-1111-1111-111111111111';
  * candidato contra la hora del turno: un doble sin `startAt` haría pasar la
  * prueba con `undefined` viajando hasta la consulta.
  */
-const INICIO_DEL_CUPO = new Date('2026-10-15T14:00:00.000Z');
+const SLOT_START = new Date('2026-10-15T14:00:00.000Z');
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -62,9 +62,9 @@ function build() {
   // P8: el colaborador que emite los avisos. Por omisión no avisa a nadie —lo
   // que importa acá es que el caso de uso le pase los ids correctos—; las
   // pruebas del aviso viven en su propio archivo.
-  const avisos = {
-    avisarCupoLiberado: mockFn().mockResolvedValue(0),
-    avisarRecordatorios: mockFn().mockResolvedValue(0),
+  const notices = {
+    notifySlotReleased: mockFn().mockResolvedValue(0),
+    notifyReminders: mockFn().mockResolvedValue(0),
   };
 
   // B.1 — quién puede actuar por un paciente. Por omisión no representa a
@@ -80,7 +80,7 @@ function build() {
     session as any,
     reader as any,
     writer as any,
-    avisos as any,
+    notices as any,
     logger as any,
     representation as any,
   );
@@ -90,7 +90,7 @@ function build() {
     transaction,
     reader,
     writer,
-    avisos,
+    notices: notices,
     logger,
     representation,
   };
@@ -143,7 +143,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 3,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
       d.writer.findActiveCandidates.mockResolvedValue([
         { id: 'c1', priority: 5 },
@@ -167,7 +167,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 0,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
 
       const res = await d.service.promoteWaitlist(SLOT_ID);
@@ -182,7 +182,7 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 2,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
       d.writer.findActiveCandidates.mockResolvedValue([]);
       d.writer.markCandidatesFulfilled.mockResolvedValue(0);
@@ -192,7 +192,7 @@ describe('SchedulingWaitlistService', () => {
       expect(d.writer.findActiveCandidates).toHaveBeenCalledWith(
         'res-1',
         CONCEPTS.WAITLIST_ACTIVE,
-        INICIO_DEL_CUPO,
+        SLOT_START,
         2,
         { transaction: d.transaction },
       );
@@ -217,15 +217,15 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 1,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
       d.writer.findActiveCandidates.mockResolvedValue([]);
       d.writer.markCandidatesFulfilled.mockResolvedValue(0);
 
       await d.service.promoteWaitlist(SLOT_ID);
 
-      const [, , horaDelCupo] = d.writer.findActiveCandidates.mock.calls[0];
-      expect(horaDelCupo).toEqual(INICIO_DEL_CUPO);
+      const [, , slotStartTime] = d.writer.findActiveCandidates.mock.calls[0];
+      expect(slotStartTime).toEqual(SLOT_START);
     });
 
     /* P8 · el cupo liberado deja de ser un dato interno --------------------- */
@@ -236,18 +236,18 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 3,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
       d.writer.findActiveCandidates.mockResolvedValue([
         { id: 'c1', priority: 5 },
         { id: 'c2', priority: 1 },
       ]);
       d.writer.markCandidatesFulfilled.mockResolvedValue(2);
-      d.avisos.avisarCupoLiberado.mockResolvedValue(2);
+      d.notices.notifySlotReleased.mockResolvedValue(2);
 
       const res = await d.service.promoteWaitlist(SLOT_ID);
 
-      expect(d.avisos.avisarCupoLiberado).toHaveBeenCalledWith(SLOT_ID, [
+      expect(d.notices.notifySlotReleased).toHaveBeenCalledWith(SLOT_ID, [
         'c1',
         'c2',
       ]);
@@ -260,12 +260,12 @@ describe('SchedulingWaitlistService', () => {
         id: SLOT_ID,
         resourceId: 'res-1',
         remainingCapacity: 0,
-        startAt: INICIO_DEL_CUPO,
+        startAt: SLOT_START,
       });
 
       await d.service.promoteWaitlist(SLOT_ID);
 
-      expect(d.avisos.avisarCupoLiberado).toHaveBeenCalledWith(SLOT_ID, []);
+      expect(d.notices.notifySlotReleased).toHaveBeenCalledWith(SLOT_ID, []);
     });
   });
 
@@ -366,11 +366,11 @@ describe('SchedulingWaitlistService', () => {
       const d = build();
       d.writer.findDueReminders.mockResolvedValue([{ id: 'r1' }, { id: 'r2' }]);
       d.writer.markRemindersSent.mockResolvedValue(2);
-      d.avisos.avisarRecordatorios.mockResolvedValue(2);
+      d.notices.notifyReminders.mockResolvedValue(2);
 
       const res = await d.service.dispatchReminders();
 
-      expect(d.avisos.avisarRecordatorios).toHaveBeenCalledWith(['r1', 'r2']);
+      expect(d.notices.notifyReminders).toHaveBeenCalledWith(['r1', 'r2']);
       expect(res.detail).toMatch(/canal in-app \(2 de 2\)/);
     });
 
@@ -381,14 +381,14 @@ describe('SchedulingWaitlistService', () => {
 
       const res = await d.service.dispatchReminders();
 
-      expect(d.avisos.avisarRecordatorios).toHaveBeenCalledWith([]);
+      expect(d.notices.notifyReminders).toHaveBeenCalledWith([]);
       expect(res.detail).toMatch(/No había recordatorios vencidos/);
     });
   });
 
   describe('listForPatient (UC-41-11, lectura — P8)', () => {
     /** El titular de la lista: mira la suya. */
-    const titular = {
+    const holder = {
       id: 'user-1',
       roles: [] as string[],
       patientProfileId: 'paciente-1',
@@ -399,7 +399,7 @@ describe('SchedulingWaitlistService', () => {
 
       await d.service.listForPatient(
         { patientProfileId: 'paciente-1' },
-        titular,
+        holder,
       );
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
@@ -414,7 +414,7 @@ describe('SchedulingWaitlistService', () => {
 
       await d.service.listForPatient(
         { patientProfileId: 'paciente-1', includeClosed: 'true', limit: 10 },
-        titular,
+        holder,
       );
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
@@ -441,7 +441,7 @@ describe('SchedulingWaitlistService', () => {
 
       const res = await d.service.listForPatient(
         { patientProfileId: 'paciente-1' },
-        titular,
+        holder,
       );
 
       expect(res.items).toHaveLength(1);
@@ -460,14 +460,14 @@ describe('SchedulingWaitlistService', () => {
      */
     it('un paciente no puede leer la lista de espera de otro', async () => {
       const d = build();
-      const otro = {
+      const another = {
         id: 'user-2',
         roles: [],
         patientProfileId: 'paciente-2',
       } as any;
 
       await expect(
-        d.service.listForPatient({ patientProfileId: 'paciente-1' }, otro),
+        d.service.listForPatient({ patientProfileId: 'paciente-1' }, another),
       ).rejects.toThrow(/titular/i);
 
       expect(d.reader.findEntriesForPatient).not.toHaveBeenCalled();
@@ -476,14 +476,14 @@ describe('SchedulingWaitlistService', () => {
     it('el personal de agenda sí puede leer la de cualquiera', async () => {
       // Es su trabajo: quien atiende el mostrador reacomoda turnos ajenos.
       const d = build();
-      const agente = {
+      const agent = {
         id: 'user-3',
         roles: ['SCHEDULING_AGENT'],
       } as any;
 
       await d.service.listForPatient(
         { patientProfileId: 'paciente-1' },
-        agente,
+        agent,
       );
 
       expect(d.reader.findEntriesForPatient).toHaveBeenCalled();
@@ -497,7 +497,7 @@ describe('SchedulingWaitlistService', () => {
    */
   describe('listForResource — quiénes esperan mi agenda (P8)', () => {
     /** La profesional que atiende en `res-1`. */
-    const suya = {
+    const ownActor = {
       id: 'user-9',
       roles: ['PRACTITIONER'],
       practitionerProfileId: 'prof-1',
@@ -520,7 +520,7 @@ describe('SchedulingWaitlistService', () => {
         },
       ]);
 
-      const res = await d.service.listForResource('res-1', {}, suya);
+      const res = await d.service.listForResource('res-1', {}, ownActor);
 
       expect(res.items[0].patientName).toBe('Ana Paz');
       expect(d.reader.findEntriesForResource).toHaveBeenCalledWith(
@@ -535,7 +535,7 @@ describe('SchedulingWaitlistService', () => {
       d.reader.findResourcePractitioner.mockResolvedValue('prof-2');
 
       await expect(
-        d.service.listForResource('res-1', {}, suya),
+        d.service.listForResource('res-1', {}, ownActor),
       ).rejects.toThrow(/otro profesional/i);
 
       expect(d.reader.findEntriesForResource).not.toHaveBeenCalled();
@@ -548,7 +548,7 @@ describe('SchedulingWaitlistService', () => {
       d.reader.findResourcePractitioner.mockResolvedValue(null);
 
       await expect(
-        d.service.listForResource('res-1', {}, suya),
+        d.service.listForResource('res-1', {}, ownActor),
       ).rejects.toThrow(/otro profesional/i);
     });
 
@@ -559,7 +559,7 @@ describe('SchedulingWaitlistService', () => {
       await d.service.listForResource(
         'res-1',
         { includeClosed: 'true', limit: 10 },
-        suya,
+        ownActor,
       );
 
       expect(d.reader.findEntriesForResource).toHaveBeenCalledWith(
@@ -572,7 +572,7 @@ describe('SchedulingWaitlistService', () => {
 
   describe('quién puede anotar y ver la cola (B.1)', () => {
     /** Una cuenta de paciente que no es el titular ni lo representa. */
-    const intruso = {
+    const intruder = {
       id: 'user-intruso',
       roles: ['PATIENT'],
       patientProfileId: 'pat-otro',
@@ -586,7 +586,7 @@ describe('SchedulingWaitlistService', () => {
       await expect(
         d.service.enroll(
           { tenantId: 'ten-1', patientProfileId: 'pat-1' } as any,
-          intruso,
+          intruder,
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.writer.enroll).not.toHaveBeenCalled();
@@ -647,7 +647,7 @@ describe('SchedulingWaitlistService', () => {
       const d = build();
 
       await expect(
-        d.service.listForPatient({ patientProfileId: 'pat-1' } as any, intruso),
+        d.service.listForPatient({ patientProfileId: 'pat-1' } as any, intruder),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });

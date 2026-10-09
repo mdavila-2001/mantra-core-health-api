@@ -13,17 +13,17 @@ import { SchedulingTenantAgendaService } from './scheduling-tenant-agenda.servic
 import { PreconditionFailedException } from '../../../../common';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
-const OTRO_TENANT = '22222222-2222-2222-2222-222222222222';
+const OTHER_TENANT = '22222222-2222-2222-2222-222222222222';
 
 /** Alguien que trabaja en la organización de arriba. */
-const recepcion = {
+const reception = {
   id: 'user-recep',
   roles: ['USER'],
   tenantIds: [TENANT],
 } as any;
 
 /** Una ventana válida de una semana. */
-const SEMANA = {
+const WEEK = {
   from: '2026-08-17T00:00:00.000Z',
   to: '2026-08-24T00:00:00.000Z',
 };
@@ -58,7 +58,7 @@ function build() {
 }
 
 /** Un recurso agendable de la organización. */
-function recurso(overrides: Record<string, unknown> = {}) {
+function resource(overrides: Record<string, unknown> = {}) {
   return {
     id: 'res-1',
     name: 'Consultorio Centro',
@@ -70,7 +70,7 @@ function recurso(overrides: Record<string, unknown> = {}) {
 }
 
 /** Una cita con su cupo resuelto. */
-function cita(overrides: Record<string, unknown> = {}) {
+function booking(overrides: Record<string, unknown> = {}) {
   return {
     booking: {
       id: 'bk-1',
@@ -97,7 +97,7 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       );
 
       await expect(
-        d.service.listar(TENANT, SEMANA as any, recepcion),
+        d.service.list(TENANT, WEEK as any, reception),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -109,13 +109,13 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
     it('el tenant viaja dentro de la consulta, no comprobado después', async () => {
       const d = build();
 
-      await d.service.listar(TENANT, SEMANA as any, recepcion);
+      await d.service.list(TENANT, WEEK as any, reception);
 
-      const [, filtros] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
+      const [, filters] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
         unknown,
         any,
       ];
-      expect(filtros.tenantId).toBe(TENANT);
+      expect(filters.tenantId).toBe(TENANT);
     });
 
     /**
@@ -125,28 +125,28 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
     it('el médico de otra organización devuelve vacío, no sus citas ajenas', async () => {
       const d = build();
       // Los recursos de ESTA organización no incluyen ninguno de ese médico.
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
 
-      const salida = await d.service.listar(
+      const output = await d.service.list(
         TENANT,
-        { ...SEMANA, practitionerProfileId: 'hp-de-otra-clinica' } as any,
-        recepcion,
+        { ...WEEK, practitionerProfileId: 'hp-de-otra-clinica' } as any,
+        reception,
       );
 
-      expect(salida.items).toEqual([]);
+      expect(output.items).toEqual([]);
       // Y la consulta se hizo con una lista de recursos vacía, que el
       // repositorio interpreta como «ninguno» y no como «todos».
-      const [, filtros] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
+      const [, filters] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
         unknown,
         any,
       ];
-      expect(filtros.resourceIds).toEqual([]);
+      expect(filters.resourceIds).toEqual([]);
     });
 
     it('los recursos se buscan siempre acotados a la organización', async () => {
       const d = build();
 
-      await d.service.listar(TENANT, SEMANA as any, recepcion);
+      await d.service.list(TENANT, WEEK as any, reception);
 
       expect(d.agendaRepo.findResources).toHaveBeenCalledWith(d.em, {
         tenantId: TENANT,
@@ -156,22 +156,22 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
     it('filtrar por un médico propio acota a sus recursos de acá', async () => {
       const d = build();
       d.agendaRepo.findResources.mockResolvedValue([
-        recurso(),
-        recurso({ id: 'res-2', resourceRefId: 'hp-1' }),
-        recurso({ id: 'res-ajeno', resourceRefId: 'hp-otro' }),
+        resource(),
+        resource({ id: 'res-2', resourceRefId: 'hp-1' }),
+        resource({ id: 'res-ajeno', resourceRefId: 'hp-otro' }),
       ]);
 
-      await d.service.listar(
+      await d.service.list(
         TENANT,
-        { ...SEMANA, practitionerProfileId: 'hp-1' } as any,
-        recepcion,
+        { ...WEEK, practitionerProfileId: 'hp-1' } as any,
+        reception,
       );
 
-      const [, filtros] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
+      const [, filters] = d.bookingsRepo.findTenantAgenda.mock.calls[0] as [
         unknown,
         any,
       ];
-      expect(filtros.resourceIds).toEqual(['res-1', 'res-2']);
+      expect(filters.resourceIds).toEqual(['res-1', 'res-2']);
     });
   });
 
@@ -180,10 +180,10 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       const d = build();
 
       await expect(
-        d.service.listar(
+        d.service.list(
           TENANT,
-          { from: SEMANA.to, to: SEMANA.from } as any,
-          recepcion,
+          { from: WEEK.to, to: WEEK.from } as any,
+          reception,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -196,13 +196,13 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       const d = build();
 
       await expect(
-        d.service.listar(
+        d.service.list(
           TENANT,
           {
             from: '2026-01-01T00:00:00.000Z',
             to: '2026-06-01T00:00:00.000Z',
           } as any,
-          recepcion,
+          reception,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -211,13 +211,13 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       const d = build();
 
       await expect(
-        d.service.listar(
+        d.service.list(
           TENANT,
           {
             from: '2026-01-01T00:00:00.000Z',
             to: '2026-02-01T00:00:00.000Z',
           } as any,
-          recepcion,
+          reception,
         ),
       ).resolves.toBeDefined();
     });
@@ -226,10 +226,10 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
       const d = build();
 
       await expect(
-        d.service.listar(
+        d.service.list(
           TENANT,
           { from: 'ayer', to: 'mañana' } as any,
-          recepcion,
+          reception,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -242,28 +242,28 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
      */
     it('el motivo de consulta NO viaja en el payload', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
-      d.bookingsRepo.findTenantAgenda.mockResolvedValue([cita()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
+      d.bookingsRepo.findTenantAgenda.mockResolvedValue([booking()]);
 
-      const salida = await d.service.listar(TENANT, SEMANA as any, recepcion);
+      const output = await d.service.list(TENANT, WEEK as any, reception);
 
-      const serializado = JSON.stringify(salida);
-      expect(serializado).not.toContain('Dolor de pecho');
-      expect(serializado).not.toContain('reasonText');
+      const serialized = JSON.stringify(output);
+      expect(serialized).not.toContain('Dolor de pecho');
+      expect(serialized).not.toContain('reasonText');
     });
 
     it('trae lo que hace falta para recibir a alguien', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
-      d.bookingsRepo.findTenantAgenda.mockResolvedValue([cita()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
+      d.bookingsRepo.findTenantAgenda.mockResolvedValue([booking()]);
       d.em.find.mockResolvedValue([
         { id: 'pac-1', displayName: 'Marisol Quispe' },
       ]);
 
-      const salida = await d.service.listar(TENANT, SEMANA as any, recepcion);
+      const output = await d.service.list(TENANT, WEEK as any, reception);
 
-      expect(salida.items).toHaveLength(1);
-      expect(salida.items[0]).toMatchObject({
+      expect(output.items).toHaveLength(1);
+      expect(output.items[0]).toMatchObject({
         bookingId: 'bk-1',
         resourceName: 'Consultorio Centro',
         practitionerProfileId: 'hp-1',
@@ -278,13 +278,13 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
      */
     it('un paciente sin nombre no rompe la agenda', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
-      d.bookingsRepo.findTenantAgenda.mockResolvedValue([cita()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
+      d.bookingsRepo.findTenantAgenda.mockResolvedValue([booking()]);
       d.em.find.mockResolvedValue([]);
 
-      const salida = await d.service.listar(TENANT, SEMANA as any, recepcion);
+      const output = await d.service.list(TENANT, WEEK as any, reception);
 
-      expect(salida.items[0].patientName).toBeNull();
+      expect(output.items[0].patientName).toBeNull();
     });
 
     /**
@@ -294,52 +294,52 @@ describe('SchedulingTenantAgendaService (TP-5)', () => {
      */
     it('declara el recorte cuando la ventana llenó el tope', async () => {
       const d = build();
-      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      d.agendaRepo.findResources.mockResolvedValue([resource()]);
       d.bookingsRepo.findTenantAgenda.mockResolvedValue([
-        cita({ id: 'bk-1' }),
-        cita({ id: 'bk-2' }),
+        booking({ id: 'bk-1' }),
+        booking({ id: 'bk-2' }),
       ]);
 
-      const salida = await d.service.listar(
+      const output = await d.service.list(
         TENANT,
-        { ...SEMANA, limit: 2 } as any,
-        recepcion,
+        { ...WEEK, limit: 2 } as any,
+        reception,
       );
 
-      expect(salida.truncated).toBe(true);
+      expect(output.truncated).toBe(true);
     });
 
     it('una agenda vacía no se declara recortada', async () => {
       const d = build();
 
-      const salida = await d.service.listar(TENANT, SEMANA as any, recepcion);
+      const output = await d.service.list(TENANT, WEEK as any, reception);
 
-      expect(salida.items).toEqual([]);
-      expect(salida.truncated).toBe(false);
+      expect(output.items).toEqual([]);
+      expect(output.truncated).toBe(false);
     });
 
     /** Una sala no es un profesional: no hay perfil que informar. */
     it('una cita en una sala no inventa un profesional', async () => {
       const d = build();
       d.agendaRepo.findResources.mockResolvedValue([
-        recurso({ resourceRefType: 'care_spaces', resourceRefId: 'sala-1' }),
+        resource({ resourceRefType: 'care_spaces', resourceRefId: 'sala-1' }),
       ]);
-      d.bookingsRepo.findTenantAgenda.mockResolvedValue([cita()]);
+      d.bookingsRepo.findTenantAgenda.mockResolvedValue([booking()]);
 
-      const salida = await d.service.listar(TENANT, SEMANA as any, recepcion);
+      const output = await d.service.list(TENANT, WEEK as any, reception);
 
-      expect(salida.items[0].practitionerProfileId).toBeNull();
+      expect(output.items[0].practitionerProfileId).toBeNull();
     });
 
     it('la organización que se consulta es la de la ruta', async () => {
       const d = build();
 
-      await d.service.listar(OTRO_TENANT, SEMANA as any, recepcion);
+      await d.service.list(OTHER_TENANT, WEEK as any, reception);
 
       expect(d.tenantAdmin.assertCanRead).toHaveBeenCalledWith(
         d.em,
-        OTRO_TENANT,
-        recepcion,
+        OTHER_TENANT,
+        reception,
       );
     });
   });

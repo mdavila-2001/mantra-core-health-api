@@ -6,7 +6,7 @@ import { SupportAdminNoticeAdapter } from './support-admin-notice.adapter';
 import { SEED } from '../../../../common';
 import type { AgendaNotice } from '../../application/ports/agenda-notice.port';
 
-const aviso: AgendaNotice = {
+const notice: AgendaNotice = {
   kind: 'BOOKING_STATE_CHANGED',
   recipient: { userId: 'user-medico' },
   tenantId: 'tenant-1',
@@ -54,51 +54,51 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
       .mockResolvedValueOnce('perfil-support-admin')
       .mockResolvedValueOnce('perfil-medico');
 
-    const resultado = await d.adapter.notify(aviso, 'user-medico');
+    const result = await d.adapter.notify(notice, 'user-medico');
 
-    expect(resultado).toEqual({ chatDelivered: true });
+    expect(result).toEqual({ chatDelivered: true });
 
     const [, dataSupportAdmin] = d.profiles.projectOrganization.mock.calls[0];
     expect(dataSupportAdmin.targetId).toBe(SEED.supportAdminUserId);
     expect(dataSupportAdmin.displayName).toBe(SEED.supportAdminDisplayName);
 
-    const [, dataDestinatario] = d.profiles.projectOrganization.mock.calls[1];
-    expect(dataDestinatario.targetId).toBe('user-medico');
-    expect(dataDestinatario.displayName).toBe('Ana Pérez');
+    const [, recipientData] = d.profiles.projectOrganization.mock.calls[1];
+    expect(recipientData.targetId).toBe('user-medico');
+    expect(recipientData.displayName).toBe('Ana Pérez');
 
-    const [dtoConversacion] =
+    const [conversationDto] =
       d.messaging.createSystemDirectConversation.mock.calls[0];
-    expect(dtoConversacion.participantProfileIds).toEqual([
+    expect(conversationDto.participantProfileIds).toEqual([
       'perfil-support-admin',
       'perfil-medico',
     ]);
 
-    const [conversationId, dtoMensaje] = d.messaging.sendMessage.mock.calls[0];
+    const [conversationId, messageDto] = d.messaging.sendMessage.mock.calls[0];
     expect(conversationId).toBe('conv-1');
-    expect(dtoMensaje.senderProfileId).toBe('perfil-support-admin');
-    expect(dtoMensaje.bodyText).toBe(aviso.bodyText);
+    expect(messageDto.senderProfileId).toBe('perfil-support-admin');
+    expect(messageDto.bodyText).toBe(notice.bodyText);
   });
 
   it('firma la conversación y el mensaje con la cuenta de SupportAdmin, no con el worker genérico', async () => {
     const d = build();
 
-    await d.adapter.notify(aviso, 'user-medico');
+    await d.adapter.notify(notice, 'user-medico');
 
-    const [, actorConversacion] =
+    const [, conversationActor] =
       d.messaging.createSystemDirectConversation.mock.calls[0];
-    const [, , actorMensaje] = d.messaging.sendMessage.mock.calls[0];
-    expect(actorConversacion.id).toBe(SEED.supportAdminUserId);
-    expect(actorMensaje.id).toBe(SEED.supportAdminUserId);
+    const [, , messageActor] = d.messaging.sendMessage.mock.calls[0];
+    expect(conversationActor.id).toBe(SEED.supportAdminUserId);
+    expect(messageActor.id).toBe(SEED.supportAdminUserId);
   });
 
   it('un destinatario sin cuenta encontrada igual recibe una vitrina mínima, con un nombre genérico', async () => {
     const d = build();
     d.em.findOne.mockResolvedValue(null);
 
-    await d.adapter.notify(aviso, 'user-medico');
+    await d.adapter.notify(notice, 'user-medico');
 
-    const [, dataDestinatario] = d.profiles.projectOrganization.mock.calls[1];
-    expect(dataDestinatario.displayName).toBe('Usuario');
+    const [, recipientData] = d.profiles.projectOrganization.mock.calls[1];
+    expect(recipientData.displayName).toBe('Usuario');
   });
 
   it('nunca lanza: un chat que no sale no puede tumbar la agenda', async () => {
@@ -107,10 +107,10 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
       new Error('caído'),
     );
 
-    const resultado = await d.adapter.notify(aviso, 'user-medico');
+    const result = await d.adapter.notify(notice, 'user-medico');
 
-    expect(resultado.chatDelivered).toBe(false);
-    expect(resultado.chatSkippedReason).toMatch(/no se pudo entregar/i);
+    expect(result.chatDelivered).toBe(false);
+    expect(result.chatSkippedReason).toMatch(/no se pudo entregar/i);
     expect(d.logger.warn).toHaveBeenCalled();
   });
 });

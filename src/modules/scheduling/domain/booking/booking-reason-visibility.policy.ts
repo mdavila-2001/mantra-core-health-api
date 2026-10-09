@@ -26,18 +26,18 @@ import type { AppointmentBookings } from '../../entities';
  *
  * @param booking - La cita cuyo motivo se quiere mostrar u ocultar.
  * @param actor - Quién pide verla, o `undefined` si no hay sesión que evaluar.
- * @param profesionalDeLaAgenda - El profesional que atiende, si quien proyecta
+ * @param agendaPractitioner - El profesional que atiende, si quien proyecta
  *   ya lo resolvió (la cita no lo guarda: cuelga del recurso).
- * @param pacientesRepresentados - Los pacientes que `actor` representa (B.1),
+ * @param representedPatients - Los pacientes que `actor` representa (B.1),
  *   resuelto una vez por quien proyecta la página, no por cita.
  * @returns `true` si `actor` es el titular, su representante, o el profesional
  *   que atiende.
  */
-export function puedeVerElMotivoDeLaCita(
+export function canSeeBookingReason(
   booking: Pick<AppointmentBookings, 'patientProfileId'>,
   actor?: AuthenticatedUser,
-  profesionalDeLaAgenda?: string,
-  pacientesRepresentados?: ReadonlySet<string>,
+  agendaPractitioner?: string,
+  representedPatients?: ReadonlySet<string>,
 ): boolean {
   if (!actor) return false;
   if (
@@ -50,13 +50,13 @@ export function puedeVerElMotivoDeLaCita(
   // su madre al pedirlo. Ocultárselo le escondería lo que ella misma tipeó.
   // El conjunto lo aporta quien proyecta, que lo pidió una vez para toda la
   // página en vez de una consulta por fila.
-  if (pacientesRepresentados?.has(booking.patientProfileId)) return true;
+  if (representedPatients?.has(booking.patientProfileId)) return true;
   // El profesional que atiende. La cita no lo guarda: cuelga del recurso
   // (`resource_ref_id`), así que lo aporta quien proyecta — que es el único
   // que sabe si ya lo tenía cargado o no vale la pena buscarlo.
   return (
     actor.practitionerProfileId !== undefined &&
-    profesionalDeLaAgenda !== undefined &&
-    actor.practitionerProfileId === profesionalDeLaAgenda
+    agendaPractitioner !== undefined &&
+    actor.practitionerProfileId === agendaPractitioner
   );
 }

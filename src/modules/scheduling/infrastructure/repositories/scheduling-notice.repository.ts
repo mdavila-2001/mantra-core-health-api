@@ -25,7 +25,7 @@ import { PROF } from '../../../profiles/profiles.concepts';
  * de ejemplo—, igual que en `SchedulingBookingsService`. Aceptar uno solo
  * dejaría la mitad de los avisos diciendo «tu profesional» en vez del nombre.
  */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
@@ -177,21 +177,21 @@ export class SchedulingNoticeRepository {
     userId: string,
   ): Promise<string | null> {
     const credentials = await em.find(AuthenticationCredentials, { userId });
-    const porCredencial = credentials
+    const byCredential = credentials
       .map((credential) => credential.externalSubject)
       .find(
         (subject): subject is string =>
           typeof subject === 'string' && subject.includes('@'),
       );
-    if (porCredencial !== undefined) return porCredencial.trim();
+    if (byCredential !== undefined) return byCredential.trim();
 
     const verification = await em.findOne(
       EmailVerifications,
       { userId },
       { orderBy: { createdAt: 'desc' } },
     );
-    const declarado = verification?.email?.trim();
-    return declarado === undefined || declarado === '' ? null : declarado;
+    const declared = verification?.email?.trim();
+    return declared === undefined || declared === '' ? null : declared;
   }
 
   /** Cómo se llama la persona de un perfil, para nombrarla en el aviso. */
@@ -203,11 +203,11 @@ export class SchedulingNoticeRepository {
     if (personId === null) return null;
     const person = await em.findOne(Persons, { id: personId });
     if (!person) return null;
-    const compuesto = [person.name, person.lastName]
-      .filter((parte): parte is string => typeof parte === 'string')
+    const composed = [person.name, person.lastName]
+      .filter((part): part is string => typeof part === 'string')
       .join(' ')
       .trim();
-    return person.displayName ?? (compuesto === '' ? null : compuesto);
+    return person.displayName ?? (composed === '' ? null : composed);
   }
 
   /** La cita con su cupo y el nombre de su agenda. */
@@ -274,17 +274,17 @@ export class SchedulingNoticeRepository {
     const resource = await em.findOne(SchedulableResources, { id: resourceId });
     if (!resource?.practiceId) return {};
 
-    const filas = await em
+    const rows = await em
       .getConnection()
       .execute<{ name: string }[]>(
         `SELECT name FROM practice.practices WHERE id = ? LIMIT 1`,
         [resource.practiceId],
       );
 
-    const nombre = filas[0]?.name;
-    return nombre === undefined || nombre.trim() === ''
+    const practiceName = rows[0]?.name;
+    return practiceName === undefined || practiceName.trim() === ''
       ? {}
-      : { siteLabel: nombre };
+      : { siteLabel: practiceName };
   }
 
   async describeResource(
@@ -295,12 +295,12 @@ export class SchedulingNoticeRepository {
     const resource = await em.findOne(SchedulableResources, { id: resourceId });
     if (!resource) return 'su agenda';
 
-    if (TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
-      const nombre = await this.findDisplayNameForProfile(
+    if (PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)) {
+      const profileName = await this.findDisplayNameForProfile(
         em,
         resource.resourceRefId,
       );
-      if (nombre !== null) return nombre;
+      if (profileName !== null) return profileName;
     }
     return resource.name;
   }
@@ -321,7 +321,7 @@ export class SchedulingNoticeRepository {
     const resource = await em.findOne(SchedulableResources, { id: resourceId });
     if (
       !resource ||
-      !TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)
+      !PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
     ) {
       return null;
     }
@@ -414,20 +414,20 @@ export class SchedulingNoticeRepository {
 
     // El nombre sale de `persons` por el mismo camino que en la agenda de la
     // organización: `patient_profiles.profile_id` referencia a `persons(id)`.
-    const personas = await em.find(Persons, {
+    const people = await em.find(Persons, {
       id: { $in: [...new Set(rows.map((row) => row.patientProfileId))] },
     });
-    const nombrePorPersona = new Map(
-      personas
-        .filter((persona) => (persona.displayName ?? '') !== '')
-        .map((persona) => [persona.id, persona.displayName as string]),
+    const nameByPerson = new Map(
+      people
+        .filter((person) => (person.displayName ?? '') !== '')
+        .map((person) => [person.id, person.displayName as string]),
     );
 
     // Una sola agenda: su rótulo se resuelve una vez, no una por fila.
     const resourceLabel = await this.describeResource(em, resourceId);
 
     return rows.map((row) => {
-      const patientName = nombrePorPersona.get(row.patientProfileId);
+      const patientName = nameByPerson.get(row.patientProfileId);
       return {
         id: row.id,
         tenantId: row.tenantId,
@@ -459,10 +459,10 @@ export class SchedulingNoticeRepository {
     em: EntityManager,
     resourceId: string,
   ): Promise<string | null> {
-    const recurso = await em.findOne(SchedulableResources, { id: resourceId });
-    if (!recurso) return null;
-    return TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType)
-      ? recurso.resourceRefId
+    const resource = await em.findOne(SchedulableResources, { id: resourceId });
+    if (!resource) return null;
+    return PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+      ? resource.resourceRefId
       : null;
   }
 
@@ -488,11 +488,11 @@ export class SchedulingNoticeRepository {
     });
     if (slots.length === 0) return [];
 
-    const porSlot = new Map(slots.map((slot) => [slot.id, slot]));
+    const bySlot = new Map(slots.map((slot) => [slot.id, slot]));
     const bookings = await em.find(
       AppointmentBookings,
       {
-        bookableSlotId: { $in: [...porSlot.keys()] },
+        bookableSlotId: { $in: [...bySlot.keys()] },
         statusConceptId: { $in: [...activeStates] },
       },
       { limit },
@@ -501,7 +501,7 @@ export class SchedulingNoticeRepository {
     const label = await this.describeResource(em, resourceId);
     return bookings
       .map((booking) => {
-        const slot = porSlot.get(booking.bookableSlotId);
+        const slot = bySlot.get(booking.bookableSlotId);
         return {
           bookingId: booking.id,
           tenantId: booking.tenantId,

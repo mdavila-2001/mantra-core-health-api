@@ -128,7 +128,7 @@ export const AGENDA_NOTICE_REASONS: readonly AgendaNoticeReason[] = [
     reasonClass: 'terminal',
     channel: 'email',
     text: 'La cuenta no declaró correo',
-    source: 'messaging-agenda-notice.adapter.ts · encolarCorreo()',
+    source: 'messaging-agenda-notice.adapter.ts · enqueueEmail()',
     meaning: 'No hay dirección. Reintentar no la inventa.',
   },
   {
@@ -136,7 +136,7 @@ export const AGENDA_NOTICE_REASONS: readonly AgendaNoticeReason[] = [
     reasonClass: 'terminal',
     channel: 'email',
     text: 'El destinatario no acepta este aviso por correo',
-    source: 'messaging-agenda-notice.adapter.ts · encolarCorreo(), suprimida',
+    source: 'messaging-agenda-notice.adapter.ts · enqueueEmail(), suprimida',
     meaning: 'Preferencia en contra para el canal de correo.',
   },
   {
@@ -144,7 +144,7 @@ export const AGENDA_NOTICE_REASONS: readonly AgendaNoticeReason[] = [
     reasonClass: 'not-a-failure',
     channel: 'email',
     text: 'Ya había un correo igual sin enviar',
-    source: 'messaging-agenda-notice.adapter.ts · encolarCorreo(), rebotada',
+    source: 'messaging-agenda-notice.adapter.ts · enqueueEmail(), rebotada',
     meaning: 'El mismo rebote que el in-app, sobre el canal de correo.',
   },
   {
@@ -152,7 +152,7 @@ export const AGENDA_NOTICE_REASONS: readonly AgendaNoticeReason[] = [
     reasonClass: 'retryable',
     channel: 'email',
     text: 'No se pudo encolar el correo',
-    source: 'messaging-agenda-notice.adapter.ts · encolarCorreo(), catch',
+    source: 'messaging-agenda-notice.adapter.ts · enqueueEmail(), catch',
     meaning:
       'Falló el encolado. El in-app no se degrada por esto, y el correo se ' +
       'puede reintentar.',
@@ -170,13 +170,13 @@ export const AGENDA_NOTICE_REASONS: readonly AgendaNoticeReason[] = [
 ];
 
 /** Índice por texto. El catálogo es inmutable: se construye una sola vez. */
-const POR_TEXTO = new Map<string, AgendaNoticeReason>(
-  AGENDA_NOTICE_REASONS.map((razon) => [razon.text, razon]),
+const BY_TEXT = new Map<string, AgendaNoticeReason>(
+  AGENDA_NOTICE_REASONS.map((reason) => [reason.text, reason]),
 );
 
 /** Índice por código, para quien ya lo tiene y quiere la ficha. */
-const POR_CODIGO = new Map<string, AgendaNoticeReason>(
-  AGENDA_NOTICE_REASONS.map((razon) => [razon.code, razon]),
+const BY_CODE = new Map<string, AgendaNoticeReason>(
+  AGENDA_NOTICE_REASONS.map((reason) => [reason.code, reason]),
 );
 
 /**
@@ -188,16 +188,16 @@ const POR_CODIGO = new Map<string, AgendaNoticeReason>(
  * nadie catalogó, y tratarlas como lo mismo volvería a mezclar justo lo que
  * este catálogo separa.
  */
-export function razonDeTexto(
-  texto: string | undefined,
+export function reasonByText(
+  text: string | undefined,
 ): AgendaNoticeReason | null {
-  if (texto === undefined) return null;
-  return POR_TEXTO.get(texto) ?? null;
+  if (text === undefined) return null;
+  return BY_TEXT.get(text) ?? null;
 }
 
 /** La ficha de un código, o `null` si no existe. */
-export function razonDeCodigo(codigo: string): AgendaNoticeReason | null {
-  return POR_CODIGO.get(codigo) ?? null;
+export function reasonByCode(code: string): AgendaNoticeReason | null {
+  return BY_CODE.get(code) ?? null;
 }
 
 /**
@@ -206,6 +206,6 @@ export function razonDeCodigo(codigo: string): AgendaNoticeReason | null {
  * Un texto desconocido responde `false`: reintentar a ciegas lo que nadie
  * clasificó es cómo se construye un bucle que nadie pidió.
  */
-export function esReintentable(texto: string | undefined): boolean {
-  return razonDeTexto(texto)?.reasonClass === 'retryable';
+export function isRetryable(text: string | undefined): boolean {
+  return reasonByText(text)?.reasonClass === 'retryable';
 }

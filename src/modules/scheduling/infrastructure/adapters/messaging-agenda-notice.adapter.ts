@@ -16,8 +16,8 @@ import type {
 } from '../../application/ports/agenda-notice.port';
 
 /** Escapa lo que un texto redactado por el sistema puede llevar (nombres) antes de meterlo en HTML. */
-function escaparHtml(texto: string): string {
-  return texto
+function escapeHtml(text: string): string {
+  return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -26,7 +26,7 @@ function escaparHtml(texto: string): string {
 }
 
 /** Categoría de catálogo de cada aviso, para que la preferencia pueda nombrarla. */
-const CATEGORIA: Readonly<Record<AgendaNoticeKind, string>> = {
+const CATEGORY: Readonly<Record<AgendaNoticeKind, string>> = {
   SLOT_RELEASED: SCHED.NOTICE_SLOT_RELEASED,
   PRACTITIONER_DELAY: SCHED.NOTICE_PRACTITIONER_DELAY,
   APPOINTMENT_REMINDER: SCHED.NOTICE_APPOINTMENT_REMINDER,
@@ -41,7 +41,7 @@ const CATEGORIA: Readonly<Record<AgendaNoticeKind, string>> = {
  * mañana. No es una preferencia estética: es el orden en que el worker vacía la
  * cola cuando hay atraso.
  */
-const PRIORIDAD: Readonly<Record<AgendaNoticeKind, number>> = {
+const PRIORITY: Readonly<Record<AgendaNoticeKind, number>> = {
   SLOT_RELEASED: 2,
   PRACTITIONER_DELAY: 2,
   BOOKING_STATE_CHANGED: 4,
@@ -60,7 +60,7 @@ const PRIORIDAD: Readonly<Record<AgendaNoticeKind, number>> = {
  * dos avisos iguales siguen colapsando dentro de su canal, y el correo deja de
  * competir con la campana por la misma clave.
  */
-const REBOTE_CORREO = ':email';
+const EMAIL_BOUNCE = ':email';
 
 /**
  * Emisor de avisos de agenda contra los canales de mensajería (M35).
@@ -116,7 +116,7 @@ const REBOTE_CORREO = ':email';
 @Injectable()
 export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   /** Avisos que además tocan el chat de `SupportAdmin` (TAREA-15, puntos 1 y 3). */
-  private static readonly KINDS_CON_CHAT: ReadonlySet<AgendaNoticeKind> =
+  private static readonly KINDS_WITH_CHAT: ReadonlySet<AgendaNoticeKind> =
     new Set(['BOOKING_STATE_CHANGED']);
 
   private readonly env = loadAgendaNoticesEnv();
@@ -134,7 +134,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   /** Emite un aviso; nunca lanza. */
   async emit(notice: AgendaNotice): Promise<AgendaNoticeResult> {
     try {
-      return await this.entregar(notice);
+      return await this.deliver(notice);
     } catch (error: unknown) {
       // Un aviso que no sale no puede tumbar la operación que lo originó: la
       // cita ya está cancelada/promovida/confirmada y esa transacción cerró.
@@ -165,16 +165,16 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   async emitMany(
     notices: readonly AgendaNotice[],
   ): Promise<AgendaNoticeResult[]> {
-    const resultados: AgendaNoticeResult[] = [];
+    const results: AgendaNoticeResult[] = [];
     for (const notice of notices) {
-      resultados.push(await this.emit(notice));
+      results.push(await this.emit(notice));
     }
-    return resultados;
+    return results;
   }
 
   /** El camino feliz, separado para que {@link emit} sea sólo la red de seguridad. */
-  private async entregar(notice: AgendaNotice): Promise<AgendaNoticeResult> {
-    const recipientUserId = await this.resolverDestinatario(notice);
+  private async deliver(notice: AgendaNotice): Promise<AgendaNoticeResult> {
+    const recipientUserId = await this.resolveRecipient(notice);
     if (recipientUserId === null) {
       this.logger.info(
         {
@@ -197,8 +197,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         channelId: MESSAGING_SEED.inAppChannelId,
         recipientUserId,
         ...(notice.tenantId === undefined ? {} : { tenantId: notice.tenantId }),
-        categoryConceptId: CATEGORIA[notice.kind],
-        priority: PRIORIDAD[notice.kind],
+        categoryConceptId: CATEGORY[notice.kind],
+        priority: PRIORITY[notice.kind],
         payloadJson: {
           kind: notice.kind,
           subject: notice.subject,
@@ -226,8 +226,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         skippedReason:
           request.suppressionReason ??
           'El destinatario no acepta este aviso por el canal in-app',
-        ...(await this.encolarCorreo(notice, recipientUserId, actor)),
-        ...(await this.enviarPorChat(notice, recipientUserId)),
+        ...(await this.enqueueEmail(notice, recipientUserId, actor)),
+        ...(await this.sendByChat(notice, recipientUserId)),
       };
     }
 
@@ -239,7 +239,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         delivered: false,
         notificationRequestId: request.id,
         skippedReason: 'Ya había un aviso igual sin entregar',
-        ...(await this.encolarCorreo(notice, recipientUserId, actor)),
+        ...(await this.enqueueEmail(notice, recipientUserId, actor)),
       };
     }
 
@@ -254,8 +254,8 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
       actor,
     );
 
-    const correo = await this.encolarCorreo(notice, recipientUserId, actor);
-    const chat = await this.enviarPorChat(notice, recipientUserId);
+    const email = await this.enqueueEmail(notice, recipientUserId, actor);
+    const chat = await this.sendByChat(notice, recipientUserId);
 
     return {
       delivered: delivery.inAppNotificationId !== undefined,
@@ -266,7 +266,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
       ...(delivery.inAppNotificationId === undefined
         ? { skippedReason: 'La entrega no produjo bandeja in-app' }
         : {}),
-      ...correo,
+      ...email,
       ...chat,
     };
   }
@@ -280,11 +280,11 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
    * Corre después del in-app y del correo, y no cambia lo que devuelven: es
    * información adicional, no una condición para el resto.
    */
-  private async enviarPorChat(
+  private async sendByChat(
     notice: AgendaNotice,
     recipientUserId: string,
   ): Promise<Pick<AgendaNoticeResult, 'chatDelivered' | 'chatSkippedReason'>> {
-    if (!MessagingAgendaNoticeAdapter.KINDS_CON_CHAT.has(notice.kind)) {
+    if (!MessagingAgendaNoticeAdapter.KINDS_WITH_CHAT.has(notice.kind)) {
       return {};
     }
     return this.supportAdmin.notify(notice, recipientUserId);
@@ -314,21 +314,21 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
    * (`notice.payload.route`), donde la sesión ya autenticada decide. Sin
    * `route` no hay botón que ofrecer y el correo queda sólo con el texto.
    */
-  private cuerpoHtmlDelCorreo(
+  private emailHtmlBody(
     notice: AgendaNotice,
   ): { bodyHtml: string } | Record<string, never> {
     const route = notice.payload?.route;
     if (typeof route !== 'string' || route === '') return {};
 
     const href = `${this.env.webAppBaseUrl}${route}`;
-    const parrafos = escaparHtml(notice.bodyText)
+    const paragraphs = escapeHtml(notice.bodyText)
       .split('\n')
-      .map((linea) => `<p style="margin:0 0 12px">${linea}</p>`)
+      .map((line) => `<p style="margin:0 0 12px">${line}</p>`)
       .join('');
 
     return {
       bodyHtml:
-        `${parrafos}` +
+        `${paragraphs}` +
         `<p style="margin:20px 0">` +
         `<a href="${href}" ` +
         'style="display:inline-block;padding:10px 20px;border-radius:6px;' +
@@ -339,7 +339,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
     };
   }
 
-  private async encolarCorreo(
+  private async enqueueEmail(
     notice: AgendaNotice,
     recipientUserId: string,
     actor: AuthenticatedUser,
@@ -347,11 +347,11 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
     Pick<AgendaNoticeResult, 'emailRequestId' | 'emailSkippedReason'>
   > {
     try {
-      const direccion = await this.noticeRepo.findEmailForUser(
+      const address = await this.noticeRepo.findEmailForUser(
         this.em.fork(),
         recipientUserId,
       );
-      if (direccion === null) {
+      if (address === null) {
         return { emailSkippedReason: 'La cuenta no declaró correo' };
       }
 
@@ -359,22 +359,22 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
         {
           channelId: MESSAGING_SEED.emailChannelId,
           recipientUserId,
-          recipientAddress: direccion,
+          recipientAddress: address,
           ...(notice.tenantId === undefined
             ? {}
             : { tenantId: notice.tenantId }),
-          categoryConceptId: CATEGORIA[notice.kind],
-          priority: PRIORIDAD[notice.kind],
+          categoryConceptId: CATEGORY[notice.kind],
+          priority: PRIORITY[notice.kind],
           payloadJson: {
             kind: notice.kind,
             subject: notice.subject,
             bodyText: notice.bodyText,
-            ...this.cuerpoHtmlDelCorreo(notice),
+            ...this.emailHtmlBody(notice),
             ...(notice.payload ?? {}),
           },
           ...(notice.debounceKey === undefined
             ? {}
-            : { debounceKey: `${notice.debounceKey}${REBOTE_CORREO}` }),
+            : { debounceKey: `${notice.debounceKey}${EMAIL_BOUNCE}` }),
           relatedResourceType: notice.relatedResourceType,
           ...(notice.relatedResourceId === undefined
             ? {}
@@ -413,7 +413,7 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
   }
 
   /** La cuenta a la que va el aviso, venga dada o haya que deducirla del perfil. */
-  private async resolverDestinatario(
+  private async resolveRecipient(
     notice: AgendaNotice,
   ): Promise<string | null> {
     if (notice.recipient.userId !== undefined) return notice.recipient.userId;
@@ -437,4 +437,4 @@ export class MessagingAgendaNoticeAdapter implements AgendaNoticePort {
 }
 
 /** Estado con el que nace un aviso in-app. Re-exportado para las pruebas. */
-export const AVISO_NO_LEIDO = CONCEPTS.INAPP_UNREAD;
+export const NOTICE_UNREAD = CONCEPTS.INAPP_UNREAD;

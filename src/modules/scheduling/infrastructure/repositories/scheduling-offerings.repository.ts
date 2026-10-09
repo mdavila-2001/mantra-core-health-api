@@ -24,14 +24,14 @@ export interface CreateOfferingData {
 }
 
 /** Una retención viva sobre el tiempo de un profesional. */
-export interface RetencionViva {
+export interface LiveHold {
   holdId: string;
   startAt: Date;
   endAt: Date;
 }
 
 /** Un turno de servicio vivo, con los colchones de su oferta. */
-export interface TramoDeServicioVivo {
+export interface LiveServiceSpan {
   slotId: string;
   startAt: Date;
   endAt: Date;
@@ -69,16 +69,16 @@ export class SchedulingOfferingsRepository {
   listOfferings(
     em: EntityManager,
     practitionerProfileId: string,
-    filtro: { statusConceptId?: string; soloReservables?: boolean } = {},
+    filter: { statusConceptId?: string; onlyBookable?: boolean } = {},
   ): Promise<PractitionerServiceOfferings[]> {
     return em.find(
       PractitionerServiceOfferings,
       {
         practitionerProfileId,
-        ...(filtro.statusConceptId === undefined
+        ...(filter.statusConceptId === undefined
           ? {}
-          : { statusConceptId: filtro.statusConceptId }),
-        ...(filtro.soloReservables === true ? { isPatientBookable: true } : {}),
+          : { statusConceptId: filter.statusConceptId }),
+        ...(filter.onlyBookable === true ? { isPatientBookable: true } : {}),
       },
       { orderBy: { createdAt: 'DESC' } },
     );
@@ -140,18 +140,18 @@ export class SchedulingOfferingsRepository {
    * turnos de largo variable, dos pacientes podrían retener rangos que se pisan y
    * enterarse recién al confirmar. Sólo cuentan las que no vencieron.
    *
-   * @param exceptoHoldId - Retención que no se compara consigo misma.
+   * @param exceptHoldId - Retención que no se compara consigo misma.
    */
   async findLiveHoldsOfProfessional(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     activeStatusConceptId: string,
-    ahora: Date,
-    exceptoHoldId?: string,
-  ): Promise<RetencionViva[]> {
-    const filas: {
+    now: Date,
+    exceptHoldId?: string,
+  ): Promise<LiveHold[]> {
+    const rows: {
       holdId: string;
       startAt: Date | string;
       endAt: Date | string;
@@ -170,18 +170,18 @@ export class SchedulingOfferingsRepository {
       [
         practitionerProfileId,
         activeStatusConceptId,
-        ahora,
-        hasta,
-        desde,
-        exceptoHoldId ?? null,
-        exceptoHoldId ?? null,
+        now,
+        to,
+        from,
+        exceptHoldId ?? null,
+        exceptHoldId ?? null,
       ],
     );
     // El driver devuelve los `timestamptz` del SQL crudo como texto.
-    return filas.map((fila) => ({
-      holdId: fila.holdId,
-      startAt: new Date(fila.startAt),
-      endAt: new Date(fila.endAt),
+    return rows.map((row) => ({
+      holdId: row.holdId,
+      startAt: new Date(row.startAt),
+      endAt: new Date(row.endAt),
     }));
   }
 
@@ -193,17 +193,17 @@ export class SchedulingOfferingsRepository {
   async findRetractedSlotsOfProfessional(
     em: EntityManager,
     resourceRefId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     retractedStatusConceptId: string,
   ): Promise<BookableSlots[]> {
-    const recursos = await em.find(SchedulableResources, { resourceRefId });
-    if (recursos.length === 0) return [];
+    const resources = await em.find(SchedulableResources, { resourceRefId });
+    if (resources.length === 0) return [];
     return em.find(BookableSlots, {
-      resourceId: { $in: recursos.map((recurso) => recurso.id) },
+      resourceId: { $in: resources.map((resource) => resource.id) },
       statusConceptId: retractedStatusConceptId,
-      startAt: { $lt: hasta },
-      endAt: { $gt: desde },
+      startAt: { $lt: to },
+      endAt: { $gt: from },
     });
   }
 
@@ -223,16 +223,16 @@ export class SchedulingOfferingsRepository {
   async findLiveServiceSlotsOfProfessional(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     ids: {
       bookedStatusConceptId: string;
       heldStatusConceptId: string;
       activeHoldStatusConceptId: string;
     },
-    ahora: Date,
-  ): Promise<TramoDeServicioVivo[]> {
-    const filas: {
+    now: Date,
+  ): Promise<LiveServiceSpan[]> {
+    const rows: {
       slotId: string;
       startAt: Date | string;
       endAt: Date | string;
@@ -263,20 +263,20 @@ export class SchedulingOfferingsRepository {
               )`,
       [
         practitionerProfileId,
-        hasta,
-        desde,
+        to,
+        from,
         ids.bookedStatusConceptId,
         ids.heldStatusConceptId,
         ids.activeHoldStatusConceptId,
-        ahora,
+        now,
       ],
     );
-    return filas.map((fila) => ({
-      slotId: fila.slotId,
-      startAt: new Date(fila.startAt),
-      endAt: new Date(fila.endAt),
-      prepMinutes: Number(fila.prepMinutes ?? 0),
-      cleanupMinutes: Number(fila.cleanupMinutes ?? 0),
+    return rows.map((row) => ({
+      slotId: row.slotId,
+      startAt: new Date(row.startAt),
+      endAt: new Date(row.endAt),
+      prepMinutes: Number(row.prepMinutes ?? 0),
+      cleanupMinutes: Number(row.cleanupMinutes ?? 0),
     }));
   }
 }

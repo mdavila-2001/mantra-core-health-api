@@ -116,7 +116,7 @@ const PLACEHOLDERS: ReadonlySet<string> = new Set([
  * rango de marcas combinantes escrito a mano es invisible en el editor y
  * cualquier reencodeo del archivo lo rompe en silencio.
  */
-const DIACRITICOS = /[\u0300-\u036f]/g;
+const DIACRITICS = /[\u0300-\u036f]/g;
 
 /**
  * Deja el motivo como se va a guardar: sin espacios de sobra ni saltos de línea
@@ -135,29 +135,29 @@ export function normalizeReason(raw: string): string {
  * que descarta el relleno («na», «prueba», «...»), que un `@MinLength` no ve.
  *
  * @param raw - Lo que llegó en el cuerpo.
- * @param accion - Qué se estaba haciendo, para que el error lo diga.
+ * @param action - Qué se estaba haciendo, para que el error lo diga.
  * @returns El motivo listo para persistir.
  * @throws PreconditionFailedException si está vacío, es demasiado corto o es
  * relleno.
  */
-export function requireReason(raw: string | undefined, accion: string): string {
-  const motivo = normalizeReason(raw ?? '');
+export function requireReason(raw: string | undefined, action: string): string {
+  const reason = normalizeReason(raw ?? '');
 
-  if (motivo.length < MIN_REASON_LENGTH) {
+  if (reason.length < MIN_REASON_LENGTH) {
     throw new PreconditionFailedException(
-      `Indique el motivo para ${accion}: es obligatorio y debe explicar el cambio.`,
+      `Indique el motivo para ${action}: es obligatorio y debe explicar el cambio.`,
       { failureCode: 'REASON_REQUIRED', minLength: MIN_REASON_LENGTH },
     );
   }
 
-  if (esRelleno(motivo)) {
+  if (isPlaceholder(reason)) {
     throw new PreconditionFailedException(
-      `El motivo para ${accion} no puede ser un texto de relleno: escriba la razón real.`,
+      `El motivo para ${action} no puede ser un texto de relleno: escriba la razón real.`,
       { failureCode: 'REASON_PLACEHOLDER' },
     );
   }
 
-  return motivo;
+  return reason;
 }
 
 /**
@@ -166,13 +166,13 @@ export function requireReason(raw: string | undefined, accion: string): string {
  * Además de la lista, cae cualquier motivo de un solo carácter repetido
  * («....», «----», «xxxxx»): son infinitos y no vale la pena enumerarlos.
  */
-function esRelleno(motivo: string): boolean {
-  const plano = motivo.toLowerCase().normalize('NFD').replace(DIACRITICOS, '');
+function isPlaceholder(reason: string): boolean {
+  const plain = reason.toLowerCase().normalize('NFD').replace(DIACRITICS, '');
 
-  if (PLACEHOLDERS.has(plano)) {
+  if (PLACEHOLDERS.has(plain)) {
     return true;
   }
 
-  const sinEspacios = plano.replace(/\s/g, '');
-  return sinEspacios.length > 0 && new Set(sinEspacios).size === 1;
+  const withoutSpaces = plain.replace(/\s/g, '');
+  return withoutSpaces.length > 0 && new Set(withoutSpaces).size === 1;
 }

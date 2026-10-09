@@ -58,8 +58,8 @@ function build() {
     retractedSlots: 0,
   };
   const bookingsService = {
-    crearCitaDirectaEnTransaccion: mockFn().mockResolvedValue(bookingResult),
-    iniciarEnTransaccion: mockFn(async (_tx: any, booking: any) => {
+    createDirectAppointmentInTransaction: mockFn().mockResolvedValue(bookingResult),
+    startInTransaction: mockFn(async (_tx: any, booking: any) => {
       booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
     }),
   };
@@ -70,23 +70,23 @@ function build() {
   };
 
   const personsRepo = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'person-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'person-1', ...data })),
   };
   const personProfilesRepo = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'profile-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'profile-1', ...data })),
   };
   const patientProfilesRepo = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'patient-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'patient-1', ...data })),
   };
   const identifiersRepo = {
     findActiveDuplicate: mockFn().mockResolvedValue(null),
-    create: mockFn((_tx: any, datos: any) => ({ id: 'ident-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'ident-1', ...data })),
   };
   const contactPointsRepo = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'contact-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'contact-1', ...data })),
   };
   const relatedPersonsRepo = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'related-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'related-1', ...data })),
   };
 
   const logger = {
@@ -123,10 +123,10 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
   it('camino feliz: una sola transacción, alta, cita WALK_IN, encuentro y arranque', async () => {
     const { service, em, tx, bookingsService, encountersRepo } = build();
 
-    const resultado = await service.createWalkInAppointment(DTO, actor as any);
+    const result = await service.createWalkInAppointment(DTO, actor as any);
 
     expect(em.transactional.mock.calls).toHaveLength(1);
-    expect(bookingsService.crearCitaDirectaEnTransaccion).toHaveBeenCalledWith(
+    expect(bookingsService.createDirectAppointmentInTransaction).toHaveBeenCalledWith(
       tx,
       // `patient_profiles.profile_id` ES `persons.id`: por eso el paciente que
       // acaba de nacer se identifica por ese mismo valor. `channel` viaja tal
@@ -154,13 +154,13 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
         practitionerProfileId: 'hpid-1',
       }),
     );
-    expect(bookingsService.iniciarEnTransaccion).toHaveBeenCalledWith(
+    expect(bookingsService.startInTransaction).toHaveBeenCalledWith(
       tx,
       expect.objectContaining({ id: 'booking-1' }),
       actor,
     );
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       patientProfileId: 'person-1',
       personId: 'person-1',
       patientCode: expect.stringMatching(/^PAT-/),
@@ -184,13 +184,13 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
     ).rejects.toBeInstanceOf(ConflictException);
 
     expect(
-      bookingsService.crearCitaDirectaEnTransaccion,
+      bookingsService.createDirectAppointmentInTransaction,
     ).not.toHaveBeenCalled();
   });
 
   it('el choque de horario de la cita sale sin crear el encuentro', async () => {
     const { service, bookingsService, encountersRepo } = build();
-    bookingsService.crearCitaDirectaEnTransaccion.mockRejectedValue(
+    bookingsService.createDirectAppointmentInTransaction.mockRejectedValue(
       new PreconditionFailedException('El paciente ya tiene un turno'),
     );
 
@@ -211,6 +211,6 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
       service.createWalkInAppointment(DTO, actor as any),
     ).rejects.toThrow('boom');
 
-    expect(bookingsService.iniciarEnTransaccion).not.toHaveBeenCalled();
+    expect(bookingsService.startInTransaction).not.toHaveBeenCalled();
   });
 });

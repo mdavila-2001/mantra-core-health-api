@@ -147,8 +147,8 @@ export class SupportAdminNoticeAdapter {
     tenantId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<string> {
-    const cuenta = await em.findOne(Users, { id: userId });
-    const nombre = cuenta?.displayName?.trim();
+    const account = await em.findOne(Users, { id: userId });
+    const accountName = account?.displayName?.trim();
     return this.profiles.projectOrganization(em, {
       tenantId: tenantId ?? SEED.tenantId,
       targetId: userId,
@@ -157,7 +157,7 @@ export class SupportAdminNoticeAdapter {
       // — si la persona más tarde arma la suya, `findByTarget` la encuentra a
       // ella primero y esta rama nunca se ejecuta.
       slug: `support-thread-${randomUUID()}`,
-      displayName: nombre === undefined || nombre === '' ? 'Usuario' : nombre,
+      displayName: accountName === undefined || accountName === '' ? 'Usuario' : accountName,
       actorUserId: actor.id,
     });
   }

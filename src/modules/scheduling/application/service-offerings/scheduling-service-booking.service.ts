@@ -22,11 +22,11 @@ import {
   SchedulingOfferingsRepository,
 } from '../../infrastructure/repositories';
 import {
-  cabeElServicio,
-  proponerHorariosDeServicio,
-  tramoOcupado,
-  type DuracionDelServicio,
-  type Intervalo,
+  serviceFits,
+  proposeServiceTimes,
+  busySpan,
+  type ServiceDuration,
+  type Interval,
 } from '../../domain/time/service-availability';
 import type {
   CreateServiceHoldDto,
@@ -40,20 +40,20 @@ import { PractitionerAffiliationGateService } from '../affiliation/practitioner-
 import { SchedulingProfessionalTimeService } from '../professional-time/scheduling-professional-time.service';
 import {
   SchedulingServiceAgendaService,
-  type FranjasDeServicio,
+  type ServiceBands,
 } from './scheduling-service-agenda.service';
-import { ROLES_DE_AGENDA } from '../bookings/scheduling-bookings.service';
+import { AGENDA_OPERATOR_ROLES } from '../bookings/scheduling-bookings.service';
 
-const MS_POR_MINUTO = 60_000;
-const MS_POR_DIA = 24 * 60 * MS_POR_MINUTO;
+const MS_PER_MINUTE = 60_000;
+const MS_PER_DAY = 24 * 60 * MS_PER_MINUTE;
 
 /** Cuántos días se pueden mirar de una vez: una pantalla de calendario, no el año. */
-const MAX_DIAS_DE_CONSULTA = 62;
+const MAX_QUERY_DAYS = 62;
 
 /** Cuánto dura la retención de un turno si ninguna política dice otra cosa. */
-const TTL_DE_RETENCION_SEGUNDOS = 300;
+const HOLD_TTL_SECONDS = 300;
 
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
@@ -84,8 +84,8 @@ export class SchedulingServiceBookingService {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly agenda: SchedulingServiceAgendaService,
-    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
-    private readonly vinculos: PractitionerAffiliationGateService,
+    private readonly professionalTime: SchedulingProfessionalTimeService,
+    private readonly affiliations: PractitionerAffiliationGateService,
     private readonly representation: PatientRepresentationService,
     private readonly logger: PinoLogger,
   ) {
@@ -102,92 +102,92 @@ export class SchedulingServiceBookingService {
     query: ServiceAvailabilityQueryDto,
     actor: AuthenticatedUser,
   ): Promise<ServiceAvailabilityResponseDto> {
-    const ahora = new Date();
-    const desde = new Date(
-      Math.max(new Date(query.from).getTime(), ahora.getTime()),
+    const now = new Date();
+    const from = new Date(
+      Math.max(new Date(query.from).getTime(), now.getTime()),
     );
-    const hasta = new Date(query.to);
-    if (!(hasta.getTime() > desde.getTime())) {
+    const to = new Date(query.to);
+    if (!(to.getTime() > from.getTime())) {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar.',
         { from: query.from, to: query.to },
       );
     }
-    if (hasta.getTime() - desde.getTime() > MAX_DIAS_DE_CONSULTA * MS_POR_DIA) {
+    if (to.getTime() - from.getTime() > MAX_QUERY_DAYS * MS_PER_DAY) {
       throw new PreconditionFailedException(
-        `Se pueden mirar hasta ${MAX_DIAS_DE_CONSULTA} días de una vez.`,
+        `Se pueden mirar hasta ${MAX_QUERY_DAYS} días de una vez.`,
         { from: query.from, to: query.to },
       );
     }
 
     return this.em.transactional(async (tx) => {
-      const oferta = await this.ofertaVisible(tx, query.offeringId, actor);
-      const sedes = (
+      const offering = await this.visibleOffering(tx, query.offeringId, actor);
+      const sites = (
         await this.offeringsRepo.findResourcesOfProfessional(
           tx,
-          oferta.practitionerProfileId,
+          offering.practitionerProfileId,
         )
       ).filter(
-        (sede) =>
-          (query.resourceId === undefined || sede.id === query.resourceId) &&
-          this.sedeEnAlcance(sede, actor),
+        (site) =>
+          (query.resourceId === undefined || site.id === query.resourceId) &&
+          this.siteInScope(site, actor),
       );
 
-      const grupos = await this.agenda.franjasDeServicios(
+      const groups = await this.agenda.bandsOfServices(
         tx,
-        oferta.practitionerProfileId,
-        sedes.map((sede) => ({
-          id: sede.id,
-          name: sede.name,
-          timeZone: sede.timeZone ?? undefined,
+        offering.practitionerProfileId,
+        sites.map((site) => ({
+          id: site.id,
+          name: site.name,
+          timeZone: site.timeZone ?? undefined,
         })),
-        desde,
-        hasta,
+        from,
+        to,
       );
-      const ocupado = await this.agenda.ocupadoDelProfesional(
+      const busy = await this.agenda.practitionerBusyTime(
         tx,
-        oferta.practitionerProfileId,
-        desde,
-        hasta,
-        ahora,
+        offering.practitionerProfileId,
+        from,
+        to,
+        now,
       );
 
-      const servicio = duracionDe(oferta);
+      const service = durationOf(offering);
       const items = new Map<string, ServiceStartDto>();
-      for (const grupo of grupos) {
-        const horarios = proponerHorariosDeServicio({
-          franjas: grupo.franjas,
-          ocupado,
-          servicio,
-          noAntesDe: new Date(
-            ahora.getTime() + grupo.minNoticeMinutes * MS_POR_MINUTO,
+      for (const group of groups) {
+        const times = proposeServiceTimes({
+          bands: group.bands,
+          busy: busy,
+          service: service,
+          notBefore: new Date(
+            now.getTime() + group.minNoticeMinutes * MS_PER_MINUTE,
           ),
-          noDespuesDe:
-            grupo.maxAdvanceDays === undefined
-              ? hasta
+          notAfter:
+            group.maxAdvanceDays === undefined
+              ? to
               : new Date(
                   Math.min(
-                    hasta.getTime(),
-                    ahora.getTime() + grupo.maxAdvanceDays * MS_POR_DIA,
+                    to.getTime(),
+                    now.getTime() + group.maxAdvanceDays * MS_PER_DAY,
                   ),
                 ),
         });
-        for (const horario of horarios) {
-          const clave = `${grupo.resourceId}|${horario.startAt.getTime()}`;
-          if (items.has(clave)) continue;
-          items.set(clave, {
-            resourceId: grupo.resourceId,
-            startAt: horario.startAt.toISOString(),
-            endAtMax: horario.endAtMax.toISOString(),
-            endAtMin: horario.endAtMin.toISOString(),
+        for (const time of times) {
+          const key = `${group.resourceId}|${time.startAt.getTime()}`;
+          if (items.has(key)) continue;
+          items.set(key, {
+            resourceId: group.resourceId,
+            startAt: time.startAt.toISOString(),
+            endAtMax: time.endAtMax.toISOString(),
+            endAtMin: time.endAtMin.toISOString(),
           });
         }
       }
 
       return {
-        offeringId: oferta.id,
-        minDurationMinutes: oferta.minDurationMinutes,
-        maxDurationMinutes: oferta.maxDurationMinutes,
+        offeringId: offering.id,
+        minDurationMinutes: offering.minDurationMinutes,
+        maxDurationMinutes: offering.maxDurationMinutes,
         items: [...items.values()].sort((a, b) =>
           a.startAt.localeCompare(b.startAt),
         ),
@@ -205,7 +205,7 @@ export class SchedulingServiceBookingService {
     dto: CreateServiceHoldDto,
     actor: AuthenticatedUser,
   ): Promise<ServiceHoldResponseDto> {
-    if (dto.patientProfileId !== undefined && this.esUnPaciente(actor)) {
+    if (dto.patientProfileId !== undefined && this.isPatientActor(actor)) {
       await this.representation.assertMayActForPatient(
         dto.patientProfileId,
         actor,
@@ -223,89 +223,89 @@ export class SchedulingServiceBookingService {
     );
 
     return this.em.transactional(async (tx) => {
-      const oferta = await this.ofertaVisible(tx, offeringId, actor);
-      const sede = await this.catalogRepo.findResourceById(tx, dto.resourceId);
-      if (sede === null || !this.esSedeDelProfesional(sede, oferta)) {
+      const offering = await this.visibleOffering(tx, offeringId, actor);
+      const site = await this.catalogRepo.findResourceById(tx, dto.resourceId);
+      if (site === null || !this.isPractitionerSite(site, offering)) {
         throw new ResourceNotFoundException('Agenda no encontrada', {
           resourceId: dto.resourceId,
         });
       }
-      this.assertSedeEnAlcance(sede, actor);
+      this.assertSiteInScope(site, actor);
 
       // El MISMO candado que toma la regla madre: serializa este pedido con cualquier
       // otra decisión sobre el calendario del profesional, en cualquiera de sus sedes.
-      await this.tiempoProfesional.bloquearAgendaDeProfesional(
+      await this.professionalTime.lockPractitionerAgenda(
         tx,
-        oferta.practitionerProfileId,
+        offering.practitionerProfileId,
       );
 
-      const servicio = duracionDe(oferta);
+      const service = durationOf(offering);
       const endAt = new Date(
-        startAt.getTime() + oferta.maxDurationMinutes * MS_POR_MINUTO,
+        startAt.getTime() + offering.maxDurationMinutes * MS_PER_MINUTE,
       );
-      const ahora = new Date();
-      if (startAt.getTime() <= ahora.getTime()) {
+      const now = new Date();
+      if (startAt.getTime() <= now.getTime()) {
         throw new PreconditionFailedException('Ese horario ya pasó.', {
           startAt: startAt.toISOString(),
         });
       }
-      await this.assertVinculoVigente(sede.tenantId, actor);
+      await this.assertAffiliationCurrent(site.tenantId, actor);
 
-      const alrededor = {
-        desde: new Date(startAt.getTime() - MS_POR_DIA),
-        hasta: new Date(endAt.getTime() + MS_POR_DIA),
+      const around = {
+        from: new Date(startAt.getTime() - MS_PER_DAY),
+        to: new Date(endAt.getTime() + MS_PER_DAY),
       };
-      const grupos = (
-        await this.agenda.franjasDeServicios(
+      const groups = (
+        await this.agenda.bandsOfServices(
           tx,
-          oferta.practitionerProfileId,
+          offering.practitionerProfileId,
           [
             {
-              id: sede.id,
-              name: sede.name,
-              timeZone: sede.timeZone ?? undefined,
+              id: site.id,
+              name: site.name,
+              timeZone: site.timeZone ?? undefined,
             },
           ],
-          alrededor.desde,
-          alrededor.hasta,
+          around.from,
+          around.to,
         )
-      ).filter((grupo) => grupo.resourceId === sede.id);
+      ).filter((group) => group.resourceId === site.id);
 
-      const ocupado = await this.agenda.ocupadoDelProfesional(
+      const busy = await this.agenda.practitionerBusyTime(
         tx,
-        oferta.practitionerProfileId,
+        offering.practitionerProfileId,
         startAt,
         endAt,
-        ahora,
+        now,
       );
-      const franjas: Intervalo[] = grupos.flatMap((grupo) => [
-        ...grupo.franjas,
+      const bands: Interval[] = groups.flatMap((group) => [
+        ...group.bands,
       ]);
-      if (!cabeElServicio(franjas, ocupado, servicio, startAt)) {
+      if (!serviceFits(bands, busy, service, startAt)) {
         throw new ConflictException(
           'Ese horario ya no está disponible para este servicio. Elija otro.',
           { offeringId, startAt: startAt.toISOString() },
         );
       }
-      this.assertPolitica(grupos, startAt, endAt, ahora);
+      this.assertPolicy(groups, startAt, endAt, now);
 
-      const catalogo = await this.offeringsRepo.findCatalogItem(
+      const catalog = await this.offeringsRepo.findCatalogItem(
         tx,
-        oferta.serviceCatalogId,
+        offering.serviceCatalogId,
       );
-      const tramo = tramoOcupado(startAt, endAt, servicio);
-      const retractedSlots = await this.agenda.retraer(
+      const span = busySpan(startAt, endAt, service);
+      const retractedSlots = await this.agenda.retract(
         tx,
-        sede.resourceRefId,
-        tramo.startAt,
-        tramo.endAt,
+        site.resourceRefId,
+        span.startAt,
+        span.endAt,
         actor.id,
       );
 
-      const cupo = this.catalogRepo.createSlot(tx, {
-        resourceId: sede.id,
-        serviceConceptId: catalogo?.serviceConceptId ?? undefined,
-        practitionerServiceOfferingId: oferta.id,
+      const slot = this.catalogRepo.createSlot(tx, {
+        resourceId: site.id,
+        serviceConceptId: catalog?.serviceConceptId ?? undefined,
+        practitionerServiceOfferingId: offering.id,
         startAt,
         endAt,
         capacity: 1,
@@ -317,22 +317,22 @@ export class SchedulingServiceBookingService {
 
       const holdToken = randomUUID();
       const hold = this.bookingsRepo.createHold(tx, {
-        bookableSlotId: cupo.id,
+        bookableSlotId: slot.id,
         patientProfileId: dto.patientProfileId,
         heldByUserId: actor.id,
         holdToken,
         statusConceptId: CONCEPTS.HOLD_ACTIVE,
-        expiresAt: new Date(ahora.getTime() + TTL_DE_RETENCION_SEGUNDOS * 1000),
+        expiresAt: new Date(now.getTime() + HOLD_TTL_SECONDS * 1000),
         actorUserId: actor.id,
       });
-      touch(cupo, actor.id);
+      touch(slot, actor.id);
       await tx.flush();
 
       return {
         id: hold.id,
         holdToken,
         expiresAt: hold.expiresAt.toISOString(),
-        bookableSlotId: cupo.id,
+        bookableSlotId: slot.id,
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
         retractedSlots,
@@ -341,36 +341,36 @@ export class SchedulingServiceBookingService {
   }
 
   /** La política de la plantilla que ofrece ese rato: aviso mínimo y anticipación máxima. */
-  private assertPolitica(
-    grupos: readonly FranjasDeServicio[],
+  private assertPolicy(
+    groups: readonly ServiceBands[],
     startAt: Date,
     endAt: Date,
-    ahora: Date,
+    now: Date,
   ): void {
-    const grupo = grupos.find((g) =>
-      g.franjas.some(
-        (franja) =>
-          franja.startAt.getTime() <= startAt.getTime() &&
-          franja.endAt.getTime() >= endAt.getTime(),
+    const group = groups.find((g) =>
+      g.bands.some(
+        (band) =>
+          band.startAt.getTime() <= startAt.getTime() &&
+          band.endAt.getTime() >= endAt.getTime(),
       ),
     );
-    if (grupo === undefined) return;
+    if (group === undefined) return;
     if (
       startAt.getTime() <
-      ahora.getTime() + grupo.minNoticeMinutes * MS_POR_MINUTO
+      now.getTime() + group.minNoticeMinutes * MS_PER_MINUTE
     ) {
       throw new PreconditionFailedException(
-        `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${grupo.minNoticeMinutes} minutos de anticipación.`,
-        { minNoticeMinutes: grupo.minNoticeMinutes },
+        `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${group.minNoticeMinutes} minutos de anticipación.`,
+        { minNoticeMinutes: group.minNoticeMinutes },
       );
     }
     if (
-      grupo.maxAdvanceDays !== undefined &&
-      startAt.getTime() > ahora.getTime() + grupo.maxAdvanceDays * MS_POR_DIA
+      group.maxAdvanceDays !== undefined &&
+      startAt.getTime() > now.getTime() + group.maxAdvanceDays * MS_PER_DAY
     ) {
       throw new PreconditionFailedException(
-        `Sólo se puede pedir con hasta ${grupo.maxAdvanceDays} días de anticipación.`,
-        { maxAdvanceDays: grupo.maxAdvanceDays },
+        `Sólo se puede pedir con hasta ${group.maxAdvanceDays} días de anticipación.`,
+        { maxAdvanceDays: group.maxAdvanceDays },
       );
     }
   }
@@ -381,65 +381,65 @@ export class SchedulingServiceBookingService {
    * Un paciente sólo ve lo activo y reservable. Lo demás responde 404, igual que una
    * oferta inexistente: no se confirma que exista algo que no se puede pedir.
    */
-  private async ofertaVisible(
+  private async visibleOffering(
     tx: EntityManager,
     offeringId: string,
     actor: AuthenticatedUser,
   ): Promise<PractitionerServiceOfferings> {
-    const oferta = await this.offeringsRepo.findOfferingById(tx, offeringId);
-    const noExiste = new ResourceNotFoundException('Servicio no encontrado', {
+    const offering = await this.offeringsRepo.findOfferingById(tx, offeringId);
+    const missing = new ResourceNotFoundException('Servicio no encontrado', {
       offeringId,
     });
-    if (oferta === null) throw noExiste;
+    if (offering === null) throw missing;
 
-    const esDelDueno =
-      actor.practitionerProfileId === oferta.practitionerProfileId;
-    const operaAgendas = actor.roles.some((rol) =>
-      ROLES_DE_AGENDA.includes(rol),
+    const isOwner =
+      actor.practitionerProfileId === offering.practitionerProfileId;
+    const operatesAgendas = actor.roles.some((role) =>
+      AGENDA_OPERATOR_ROLES.includes(role),
     );
-    if (esDelDueno || operaAgendas) return oferta;
+    if (isOwner || operatesAgendas) return offering;
 
     if (
-      oferta.statusConceptId !== SCHED.OFFERING_ACTIVE ||
-      !oferta.isPatientBookable
+      offering.statusConceptId !== SCHED.OFFERING_ACTIVE ||
+      !offering.isPatientBookable
     ) {
-      throw noExiste;
+      throw missing;
     }
-    const catalogo = await this.offeringsRepo.findCatalogItem(
+    const catalog = await this.offeringsRepo.findCatalogItem(
       tx,
-      oferta.serviceCatalogId,
+      offering.serviceCatalogId,
     );
-    if (catalogo === null || !catalogo.isActive) throw noExiste;
-    return oferta;
+    if (catalog === null || !catalog.isActive) throw missing;
+    return offering;
   }
 
-  private esSedeDelProfesional(
-    sede: SchedulableResources,
-    oferta: PractitionerServiceOfferings,
+  private isPractitionerSite(
+    site: SchedulableResources,
+    offering: PractitionerServiceOfferings,
   ): boolean {
     return (
-      sede.resourceRefId === oferta.practitionerProfileId &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(sede.resourceRefType)
+      site.resourceRefId === offering.practitionerProfileId &&
+      PRACTITIONER_PROFILE_TABLES.includes(site.resourceRefType)
     );
   }
 
-  /** Mismo criterio que `assertRecursoEnTenantActivo` de las reservas, sin lanzar. */
-  private sedeEnAlcance(
-    sede: SchedulableResources,
+  /** Mismo criterio que `assertResourceInActiveTenant` de las reservas, sin lanzar. */
+  private siteInScope(
+    site: SchedulableResources,
     actor: AuthenticatedUser,
   ): boolean {
     if (actor.roles.includes('SUPERADMIN')) return true;
-    const activo = getCurrentTenantId();
-    return activo
-      ? activo === sede.tenantId
-      : actor.tenantIds?.includes(sede.tenantId) === true;
+    const active = getCurrentTenantId();
+    return active
+      ? active === site.tenantId
+      : actor.tenantIds?.includes(site.tenantId) === true;
   }
 
-  private assertSedeEnAlcance(
-    sede: SchedulableResources,
+  private assertSiteInScope(
+    site: SchedulableResources,
     actor: AuthenticatedUser,
   ): void {
-    if (!this.sedeEnAlcance(sede, actor)) {
+    if (!this.siteInScope(site, actor)) {
       throw new ForbiddenException(
         'La agenda indicada pertenece a otra organización.',
       );
@@ -447,34 +447,34 @@ export class SchedulingServiceBookingService {
   }
 
   /** ¿Es una cuenta de paciente sin más oficio? Mismo criterio que las reservas. */
-  private esUnPaciente(actor: AuthenticatedUser): boolean {
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return false;
+  private isPatientActor(actor: AuthenticatedUser): boolean {
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return false;
     return actor.practitionerProfileId === undefined;
   }
 
   /** Quien atiende no puede comprometer turnos de una organización que lo desvinculó. */
-  private async assertVinculoVigente(
+  private async assertAffiliationCurrent(
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
     if (actor.practitionerProfileId === undefined) return;
-    const veredicto = await this.vinculos.evaluar(tenantId, actor);
-    if (veredicto === 'sin-vinculos' || veredicto === 'aprobado') return;
+    const verdict = await this.affiliations.evaluate(tenantId, actor);
+    if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;
     throw new PreconditionFailedException(
-      veredicto === 'pendiente'
+      verdict === 'pendiente'
         ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'
         : 'Su vínculo con esta organización ya no está vigente.',
-      { tenantId, vinculo: veredicto },
+      { tenantId, vinculo: verdict },
     );
   }
 }
 
-function duracionDe(oferta: PractitionerServiceOfferings): DuracionDelServicio {
+function durationOf(offering: PractitionerServiceOfferings): ServiceDuration {
   return {
-    minDurationMinutes: oferta.minDurationMinutes,
-    maxDurationMinutes: oferta.maxDurationMinutes,
-    prepMinutes: oferta.prepMinutes ?? 0,
-    cleanupMinutes: oferta.cleanupMinutes ?? 0,
+    minDurationMinutes: offering.minDurationMinutes,
+    maxDurationMinutes: offering.maxDurationMinutes,
+    prepMinutes: offering.prepMinutes ?? 0,
+    cleanupMinutes: offering.cleanupMinutes ?? 0,
   };
 }

@@ -48,7 +48,7 @@ const MAX_WINDOW_MS = MAX_WINDOW_DAYS * 24 * 60 * 60 * 1000;
  * Las dos formas de `resourceRefType` que apuntan a un perfil profesional,
  * las mismas que aceptan bookings y el catálogo.
  */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
@@ -113,13 +113,13 @@ export class SchedulingAgendaService {
     // sede: el selector del paciente pinta todos los recursos juntos. Si la
     // resolución falla, la lista sigue con `practitionerName: null` — el
     // cliente cae al nombre del recurso, que es lo que mostraba siempre.
-    let nombres = new Map<string, string>();
+    let names = new Map<string, string>();
     try {
-      nombres = await findPractitionerNames(
+      names = await findPractitionerNames(
         em,
         resources
           .filter((resource) =>
-            TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType),
+            PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType),
           )
           .map((resource) => resource.resourceRefId),
       );
@@ -134,7 +134,7 @@ export class SchedulingAgendaService {
       this.toResourceItem(
         resource,
         sites.get(resource.resourceRefId) ?? null,
-        nombres.get(resource.resourceRefId) ?? null,
+        names.get(resource.resourceRefId) ?? null,
       ),
     );
     return { items, count: items.length };
@@ -159,7 +159,7 @@ export class SchedulingAgendaService {
         from,
         to,
         onlyAvailable: query.onlyAvailable,
-        ahora: new Date(),
+        now: new Date(),
         openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
       limit,

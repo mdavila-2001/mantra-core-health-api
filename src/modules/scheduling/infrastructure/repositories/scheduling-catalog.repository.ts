@@ -13,7 +13,7 @@ import {
   BookableSlots,
 } from '../../entities';
 import { createdBy, touch } from '../../../../common';
-import { inicioDeLoReservable } from '../../domain/time/scheduling-time';
+import { bookableStart } from '../../domain/time/scheduling-time';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -567,41 +567,41 @@ export class SchedulingCatalogRepository {
       validTo?: Date;
     }[]
   > {
-    const recursos = await em.find(SchedulableResources, { resourceRefId });
-    const suyos = recursos.filter((recurso) => recurso.id !== exceptResourceId);
-    if (suyos.length === 0) return [];
+    const resources = await em.find(SchedulableResources, { resourceRefId });
+    const ownOnes = resources.filter((resource) => resource.id !== exceptResourceId);
+    if (ownOnes.length === 0) return [];
 
-    const plantillas = await em.find(ScheduleTemplates, {
-      resourceId: { $in: suyos.map((recurso) => recurso.id) },
+    const templates = await em.find(ScheduleTemplates, {
+      resourceId: { $in: ownOnes.map((resource) => resource.id) },
       statusConceptId: publishedStatusConceptId,
     });
-    if (plantillas.length === 0) return [];
+    if (templates.length === 0) return [];
 
-    const franjas = await em.find(ScheduleRules, {
-      scheduleTemplateId: { $in: plantillas.map((plantilla) => plantilla.id) },
+    const bands = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((template) => template.id) },
     });
 
-    const recursoPorPlantilla = new Map(
-      plantillas.map((plantilla) => [plantilla.id, plantilla.resourceId]),
+    const resourceByTemplate = new Map(
+      templates.map((template) => [template.id, template.resourceId]),
     );
-    const nombrePorRecurso = new Map(
-      suyos.map((recurso) => [recurso.id, recurso.name]),
+    const nameByResource = new Map(
+      ownOnes.map((resource) => [resource.id, resource.name]),
     );
-    const zonaPorRecurso = new Map(
-      suyos.map((recurso) => [recurso.id, recurso.timeZone]),
+    const zoneByResource = new Map(
+      ownOnes.map((resource) => [resource.id, resource.timeZone]),
     );
-    const vigenciaPorPlantilla = new Map(
-      plantillas.map((plantilla) => [plantilla.id, plantilla.validTo]),
+    const validityByTemplate = new Map(
+      templates.map((template) => [template.id, template.validTo]),
     );
 
-    return franjas.map((rule) => {
-      const resourceId = recursoPorPlantilla.get(rule.scheduleTemplateId) ?? '';
+    return bands.map((rule) => {
+      const resourceId = resourceByTemplate.get(rule.scheduleTemplateId) ?? '';
       return {
         rule,
         resourceId,
-        resourceName: nombrePorRecurso.get(resourceId) ?? '',
-        timeZone: zonaPorRecurso.get(resourceId),
-        validTo: vigenciaPorPlantilla.get(rule.scheduleTemplateId),
+        resourceName: nameByResource.get(resourceId) ?? '',
+        timeZone: zoneByResource.get(resourceId),
+        validTo: validityByTemplate.get(rule.scheduleTemplateId),
       };
     });
   }
@@ -620,26 +620,26 @@ export class SchedulingCatalogRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceRefId - El perfil profesional dueño de los recursos.
-   * @param desde - Inicio del rango.
-   * @param hasta - Fin del rango.
+   * @param from - Inicio del rango.
+   * @param to - Fin del rango.
    * @param openStatusConceptId - El concepto de cupo abierto.
    * @returns Los cupos abiertos e intactos que se cruzan.
    */
   async findOpenSlotsOfProfessionalInWindow(
     em: EntityManager,
     resourceRefId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     openStatusConceptId: string,
   ): Promise<BookableSlots[]> {
-    const recursos = await em.find(SchedulableResources, { resourceRefId });
-    if (recursos.length === 0) return [];
+    const resources = await em.find(SchedulableResources, { resourceRefId });
+    if (resources.length === 0) return [];
 
     const slots = await em.find(BookableSlots, {
-      resourceId: { $in: recursos.map((recurso) => recurso.id) },
+      resourceId: { $in: resources.map((resource) => resource.id) },
       statusConceptId: openStatusConceptId,
-      startAt: { $lt: hasta },
-      endAt: { $gt: desde },
+      startAt: { $lt: to },
+      endAt: { $gt: from },
     });
     return slots.filter((slot) => slot.remainingCapacity === slot.capacity);
   }
@@ -767,22 +767,22 @@ export class SchedulingCatalogRepository {
     // es lo que acota la consulta a los cupos de esta plantilla, y el guardrail
     // de tenant sólo lo reconoce escrito en el literal.
     const slotIds = slots.map((s) => s.id);
-    const enSusCupos = { bookableSlotId: { $in: slotIds } };
-    const total = await em.count(AppointmentBookings, enSusCupos);
+    const inTheirSlots = { bookableSlotId: { $in: slotIds } };
+    const total = await em.count(AppointmentBookings, inTheirSlots);
     if (total === 0) return { total: 0, live: 0, sample: [] };
 
-    const conEstadoVivo = {
+    const withLiveState = {
       bookableSlotId: { $in: slotIds },
       statusConceptId: { $in: [...activeStates] },
     };
-    const live = await em.count(AppointmentBookings, conEstadoVivo);
+    const live = await em.count(AppointmentBookings, withLiveState);
 
     // La muestra prioriza las vivas: son las accionables, y son las que el
     // médico necesita ver nombradas para ir a resolverlas.
     const sample =
       live > 0
-        ? await em.find(AppointmentBookings, conEstadoVivo, { limit })
-        : await em.find(AppointmentBookings, enSusCupos, { limit });
+        ? await em.find(AppointmentBookings, withLiveState, { limit })
+        : await em.find(AppointmentBookings, inTheirSlots, { limit });
     return { total, live, sample };
   }
 
@@ -833,15 +833,15 @@ export class SchedulingCatalogRepository {
   findSlotsOfResourceForUpdate(
     em: EntityManager,
     resourceId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     slotIds?: readonly string[],
   ): Promise<BookableSlots[]> {
     return em.find(
       BookableSlots,
       {
         resourceId,
-        startAt: { $gte: desde, $lt: hasta },
+        startAt: { $gte: from, $lt: to },
         ...(slotIds === undefined ? {} : { id: { $in: [...slotIds] } }),
       },
       { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
@@ -852,12 +852,12 @@ export class SchedulingCatalogRepository {
   async findBookingsOfSlots(
     em: EntityManager,
     slotIds: readonly string[],
-    estados: readonly string[],
+    states: readonly string[],
   ): Promise<AppointmentBookings[]> {
     if (slotIds.length === 0) return [];
     return em.find(AppointmentBookings, {
       bookableSlotId: { $in: [...slotIds] },
-      statusConceptId: { $in: [...estados] },
+      statusConceptId: { $in: [...states] },
     });
   }
 
@@ -867,12 +867,12 @@ export class SchedulingCatalogRepository {
     activeStatusConceptId: string,
     actorUserId: string,
   ): Promise<void> {
-    const plantilla = await em.findOne(ScheduleTemplates, {
+    const template = await em.findOne(ScheduleTemplates, {
       id: scheduleTemplateId,
     });
-    if (plantilla) {
-      plantilla.statusConceptId = activeStatusConceptId;
-      touch(plantilla, actorUserId);
+    if (template) {
+      template.statusConceptId = activeStatusConceptId;
+      touch(template, actorUserId);
     }
   }
 
@@ -882,7 +882,7 @@ export class SchedulingCatalogRepository {
     retiredStatusConceptId: string,
     actorUserId: string,
   ): Promise<{ releasedSlots: number; keptSlots: number }> {
-    const cupos = await em.find(
+    const slots = await em.find(
       BookableSlots,
       { scheduleTemplateId },
       { fields: ['id'] },
@@ -891,9 +891,9 @@ export class SchedulingCatalogRepository {
     let releasedSlots = 0;
     let keptSlots = 0;
 
-    if (cupos.length > 0) {
-      const ids = cupos.map((cupo) => cupo.id);
-      const conHistoria = await em.find(
+    if (slots.length > 0) {
+      const ids = slots.map((slot) => slot.id);
+      const withHistory = await em.find(
         AppointmentBookings,
         { bookableSlotId: { $in: ids } },
         { fields: ['bookableSlotId'] },
@@ -903,36 +903,36 @@ export class SchedulingCatalogRepository {
       // destino: borrarlo rompía `fk_booking_reschedules_from_slot_id` y el
       // retiro entero respondía 422. Es historia igual que una cita: se
       // conserva (defecto destapado al verificar M4 · B10 contra una base real).
-      const reprogramaciones = await em.find(
+      const reschedules = await em.find(
         BookingReschedules,
         {
           $or: [{ fromSlotId: { $in: ids } }, { toSlotId: { $in: ids } }],
         },
         { fields: ['fromSlotId', 'toSlotId'] },
       );
-      const intocables = new Set([
-        ...conHistoria.map((booking) => booking.bookableSlotId),
-        ...reprogramaciones.flatMap((r) => [r.fromSlotId, r.toSlotId]),
+      const untouchable = new Set([
+        ...withHistory.map((booking) => booking.bookableSlotId),
+        ...reschedules.flatMap((r) => [r.fromSlotId, r.toSlotId]),
       ]);
-      const libres = ids.filter((id) => !intocables.has(id));
-      keptSlots = ids.length - libres.length;
+      const freeOnes = ids.filter((id) => !untouchable.has(id));
+      keptSlots = ids.length - freeOnes.length;
 
-      if (libres.length > 0) {
+      if (freeOnes.length > 0) {
         await em.nativeDelete(SlotHolds, {
-          bookableSlotId: { $in: libres },
+          bookableSlotId: { $in: freeOnes },
         });
         releasedSlots = await em.nativeDelete(BookableSlots, {
-          id: { $in: libres },
+          id: { $in: freeOnes },
         });
       }
     }
 
-    const plantilla = await em.findOne(ScheduleTemplates, {
+    const template = await em.findOne(ScheduleTemplates, {
       id: scheduleTemplateId,
     });
-    if (plantilla) {
-      plantilla.statusConceptId = retiredStatusConceptId;
-      touch(plantilla, actorUserId);
+    if (template) {
+      template.statusConceptId = retiredStatusConceptId;
+      touch(template, actorUserId);
     }
 
     return { releasedSlots, keptSlots };
@@ -959,11 +959,11 @@ export class SchedulingCatalogRepository {
     resourceId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const cuantas = await em.count(AppointmentBookings, {
+    const howMany = await em.count(AppointmentBookings, {
       resourceId,
       patientProfileId,
     });
-    return cuantas > 0;
+    return howMany > 0;
   }
 
   findSlotsByTemplateInRange(
@@ -1002,7 +1002,7 @@ export class SchedulingCatalogRepository {
    * un cliente los mostraba, el paciente elegía un horario que iba a fallar.
    *
    * Con `ahora` descarta además los que ya empezaron —un turno de ayer no se
-   * puede pedir—; ver {@link inicioDeLoReservable}.
+   * puede pedir—; ver {@link bookableStart}.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceId - Recurso cuya agenda se consulta.
@@ -1019,19 +1019,19 @@ export class SchedulingCatalogRepository {
     options: {
       onlyAvailable: boolean;
       limit: number;
-      ahora?: Date;
+      now?: Date;
       /** El concepto de «cupo abierto», cuando `onlyAvailable`. */
       openStatusConceptId?: string;
     },
   ): Promise<BookableSlots[]> {
-    const desde =
-      options.onlyAvailable && options.ahora
-        ? inicioDeLoReservable(from, options.ahora)
+    const windowStart =
+      options.onlyAvailable && options.now
+        ? bookableStart(from, options.now)
         : from;
 
     const where: Record<string, unknown> = {
       resourceId,
-      startAt: { $gte: desde, $lt: to },
+      startAt: { $gte: windowStart, $lt: to },
     };
     if (options.onlyAvailable) {
       where.remainingCapacity = { $gt: 0 };

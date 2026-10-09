@@ -13,11 +13,11 @@ import { ESTADO_DEL_VINCULO } from '../../../profiles/services/profiles-affiliat
 import { PROF } from '../../../profiles/profiles.concepts';
 
 const TENANT = '11111111-1111-1111-1111-111111111111';
-const OTRO_TENANT = '22222222-2222-2222-2222-222222222222';
+const OTHER_TENANT = '22222222-2222-2222-2222-222222222222';
 const HPID = '33333333-3333-3333-3333-333333333333';
 
 /** El profesional de la sesión. */
-const profesional = { id: 'user-1', practitionerProfileId: HPID } as any;
+const practitioner = { id: 'user-1', practitionerProfileId: HPID } as any;
 
 /**
  * Arma el servicio con un `EntityManager` doble.
@@ -34,34 +34,34 @@ function build() {
 }
 
 /** Deja al profesional con los vínculos indicados. */
-function conVinculos(
+function withAffiliations(
   d: ReturnType<typeof build>,
-  vinculos: { practiceSiteId: string | null; statusConceptId: string }[],
+  affiliations: { practiceSiteId: string | null; statusConceptId: string }[],
 ): void {
   d.em.find.mockResolvedValue(
-    vinculos.map((v) => ({ ...v, organizationName: 'Hospital' })) as never,
+    affiliations.map((v) => ({ ...v, organizationName: 'Hospital' })) as never,
   );
 }
 
 /** Hace que todas las sedes consultadas pertenezcan a este tenant. */
-function sedesDe(d: ReturnType<typeof build>, tenantId: string): void {
+function sitesOf(d: ReturnType<typeof build>, tenantId: string): void {
   d.em.execute.mockImplementation(async (_sql: string, params: any[]) =>
-    (params[0] as string[]).map((sede) => ({
-      site_id: sede,
+    (params[0] as string[]).map((site) => ({
+      site_id: site,
       tenant_id: tenantId,
     })),
   );
 }
 
 /** Reparte las sedes entre organizaciones, sede por sede. */
-function sedesRepartidas(
+function spreadSites(
   d: ReturnType<typeof build>,
-  porSede: Record<string, string>,
+  bySite: Record<string, string>,
 ): void {
   d.em.execute.mockImplementation(async (_sql: string, params: any[]) =>
     (params[0] as string[])
-      .filter((sede) => porSede[sede] !== undefined)
-      .map((sede) => ({ site_id: sede, tenant_id: porSede[sede] })),
+      .filter((site) => bySite[site] !== undefined)
+      .map((site) => ({ site_id: site, tenant_id: bySite[site] })),
   );
 }
 
@@ -71,11 +71,11 @@ describe('PractitionerAffiliationGateService', () => {
     // agenda de la organización); la regla no le aplica.
     const d = build();
 
-    const veredicto = await d.service.evaluar(TENANT, {
+    const verdict = await d.service.evaluate(TENANT, {
       id: 'user-admin',
     } as any);
 
-    expect(veredicto).toBe('sin-vinculos');
+    expect(verdict).toBe('sin-vinculos');
     expect(d.em.find).not.toHaveBeenCalled();
   });
 
@@ -84,7 +84,7 @@ describe('PractitionerAffiliationGateService', () => {
     // llegado todavía no pertenece a ninguna institución.
     const d = build();
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
   });
 
   it('vinculos de solo texto libre no dicen nada de ningun tenant', async () => {
@@ -93,39 +93,39 @@ describe('PractitionerAffiliationGateService', () => {
     // ésos como negativa dejaría al médico sin publicar ni en su propio
     // consultorio, castigándolo por haber declarado dónde trabaja.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       { practiceSiteId: null, statusConceptId: ESTADO_DEL_VINCULO.APROBADO },
       { practiceSiteId: null, statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE },
     ]);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
     expect(d.em.execute).not.toHaveBeenCalled();
   });
 
   it('con vinculo aprobado a una sede de esa organizacion, aprobado', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('aprobado');
   });
 
   it('con el vinculo todavia sin responder, pendiente', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('pendiente');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('pendiente');
   });
 
   /**
@@ -143,15 +143,15 @@ describe('PractitionerAffiliationGateService', () => {
    */
   it('un vinculo en otra organizacion no dice nada de esta', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, OTRO_TENANT);
+    sitesOf(d, OTHER_TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
   });
 
   /**
@@ -161,16 +161,16 @@ describe('PractitionerAffiliationGateService', () => {
    */
   it('aprobado en la institucion y libre en su propio consultorio', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-caja',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesRepartidas(d, { 'sede-caja': OTRO_TENANT });
+    spreadSites(d, { 'sede-caja': OTHER_TENANT });
 
-    expect(await d.service.evaluar(OTRO_TENANT, profesional)).toBe('aprobado');
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+    expect(await d.service.evaluate(OTHER_TENANT, practitioner)).toBe('aprobado');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
   });
 
   /**
@@ -179,7 +179,7 @@ describe('PractitionerAffiliationGateService', () => {
    */
   it('el pendiente de esta organizacion no lo tapan los aprobados de otras', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-otra',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
@@ -189,19 +189,19 @@ describe('PractitionerAffiliationGateService', () => {
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
       },
     ]);
-    sedesRepartidas(d, {
-      'sede-otra': OTRO_TENANT,
+    spreadSites(d, {
+      'sede-otra': OTHER_TENANT,
       'sede-esta': TENANT,
     });
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('pendiente');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('pendiente');
   });
 
   it('el vinculo aprobado gana sobre el pendiente de la misma organizacion', async () => {
     // Un médico puede haber pedido dos sedes de la misma organización y tener
     // una aprobada: lo que decide es la que ya le dijeron que sí.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
@@ -211,29 +211,29 @@ describe('PractitionerAffiliationGateService', () => {
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('aprobado');
   });
 
   it('un vinculo rechazado da NO-VIGENTE, que es una negativa dicha', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.RECHAZADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('no-vigente');
   });
 
   it('resuelve las sedes en una sola consulta, no una por sede', async () => {
     // Un médico con agenda en cinco hospitales haría cinco viajes a la base en
     // cada publicación.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
@@ -247,9 +247,9 @@ describe('PractitionerAffiliationGateService', () => {
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    await d.service.evaluar(TENANT, profesional);
+    await d.service.evaluate(TENANT, practitioner);
 
     expect(d.em.execute).toHaveBeenCalledTimes(1);
     expect(d.em.execute.mock.calls[0][1]).toEqual([
@@ -262,15 +262,15 @@ describe('PractitionerAffiliationGateService', () => {
     // que exigirle aprobación lo bloquearía para siempre. Lo que le falta es el
     // sello de la institución, y eso se dice en pantalla, no bloqueando.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.DECLARADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('aprobado');
   });
 
   it('reconoce el id VIEJO de aprobado mientras el backfill no corrio', async () => {
@@ -278,40 +278,40 @@ describe('PractitionerAffiliationGateService', () => {
     // anteriores escritos. Si la lectura mirara sólo los nuevos, cada vínculo ya
     // aprobado dejaría de reconocerse y su médico dejaría de poder publicar.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       { practiceSiteId: 'sede-1', statusConceptId: PROF.AFFILIATION_ACTIVE },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('aprobado');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('aprobado');
   });
 
   it('reconoce el id VIEJO de pendiente', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: 'state-pending-viejo',
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
     // El id viejo de pendiente es `CONCEPTS.STATE_PENDING`; con cualquier otro
     // valor el veredicto es «ausente», que es lo correcto: no se inventa.
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('ausente');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('ausente');
   });
 
   it('un vinculo REVOCADO da NO-VIGENTE', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.REVOCADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('no-vigente');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('no-vigente');
   });
 
   it('sin vinculo con ESTA organizacion el veredicto no es una negativa', async () => {
@@ -326,15 +326,15 @@ describe('PractitionerAffiliationGateService', () => {
     // Los dos consumidores dejan pasar `sin-vinculos`; `ausente` lo bloquea
     // en `bookings`, que es exactamente lo que no debe pasarle a este médico.
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, OTRO_TENANT);
+    sitesOf(d, OTHER_TENANT);
 
-    expect(await d.service.evaluar(TENANT, profesional)).toBe('sin-vinculos');
+    expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
   });
 
   /**
@@ -345,17 +345,17 @@ describe('PractitionerAffiliationGateService', () => {
    */
   it('la sede la manda quien la administra, no la práctica que la contiene', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    const veredicto = await d.service.evaluar(TENANT, profesional);
+    const verdict = await d.service.evaluate(TENANT, practitioner);
 
-    expect(veredicto).toBe('aprobado');
+    expect(verdict).toBe('aprobado');
     const [sql] = d.em.execute.mock.calls[0];
     expect(sql).toContain('COALESCE(s.managing_tenant_id, p.tenant_id)');
   });
@@ -367,15 +367,15 @@ describe('PractitionerAffiliationGateService', () => {
    */
   it('el puente dice a que organizacion pertenece cada sede', async () => {
     const d = build();
-    conVinculos(d, [
+    withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
         statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
       },
     ]);
-    sedesDe(d, TENANT);
+    sitesOf(d, TENANT);
 
-    await d.service.evaluar(TENANT, profesional);
+    await d.service.evaluate(TENANT, practitioner);
 
     const [sql] = d.em.execute.mock.calls[0];
     expect(sql).toContain('s.id AS site_id');

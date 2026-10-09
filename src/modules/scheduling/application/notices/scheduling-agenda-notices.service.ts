@@ -8,8 +8,8 @@ import {
   type AgendaNoticePort,
 } from '../ports/agenda-notice.port';
 import {
-  avisoDeCupoLiberado,
-  avisoDeRecordatorio,
+  slotReleasedNotice,
+  reminderNotice,
 } from '../../domain/notices/agenda-notices';
 
 /**
@@ -54,7 +54,7 @@ export class SchedulingAgendaNoticesService {
    * paciente es cada una.
    * @returns Cuántos avisos llegaron efectivamente a una bandeja.
    */
-  async avisarCupoLiberado(
+  async notifySlotReleased(
     slotId: string,
     waitlistEntryIds: readonly string[],
   ): Promise<number> {
@@ -70,29 +70,29 @@ export class SchedulingAgendaNoticesService {
       return 0;
     }
 
-    const candidatos = await this.noticeRepo.findWaitlistPatients(
+    const candidates = await this.noticeRepo.findWaitlistPatients(
       em,
       waitlistEntryIds,
     );
-    const avisos: AgendaNotice[] = candidatos.map((candidato) =>
-      avisoDeCupoLiberado(slot, candidato.patientProfileId, candidato.tenantId),
+    const notices: AgendaNotice[] = candidates.map((candidate) =>
+      slotReleasedNotice(slot, candidate.patientProfileId, candidate.tenantId),
     );
 
-    const resultados = await this.notices.emitMany(avisos);
-    const entregados = resultados.filter(
-      (resultado) => resultado.delivered,
+    const results = await this.notices.emitMany(notices);
+    const delivered = results.filter(
+      (result) => result.delivered,
     ).length;
 
     this.logger.info(
       {
         operation: 'scheduling.notice.slot-released',
         slotId,
-        candidates: candidatos.length,
-        delivered: entregados,
+        candidates: candidates.length,
+        delivered: delivered,
       },
       'Avisos de cupo liberado emitidos',
     );
-    return entregados;
+    return delivered;
   }
 
   /**
@@ -106,38 +106,38 @@ export class SchedulingAgendaNoticesService {
    *
    * @returns Cuántos avisos llegaron efectivamente a una bandeja.
    */
-  async avisarRecordatorios(reminderIds: readonly string[]): Promise<number> {
+  async notifyReminders(reminderIds: readonly string[]): Promise<number> {
     if (reminderIds.length === 0) return 0;
 
     const em = this.em.fork();
-    const recordatorios = await this.noticeRepo.findBookingIdsForReminders(
+    const reminders = await this.noticeRepo.findBookingIdsForReminders(
       em,
       reminderIds,
     );
 
-    const avisos: AgendaNotice[] = [];
-    for (const recordatorio of recordatorios) {
+    const notices: AgendaNotice[] = [];
+    for (const reminder of reminders) {
       const booking = await this.noticeRepo.describeBooking(
         em,
-        recordatorio.bookingId,
+        reminder.bookingId,
       );
       if (!booking) continue;
-      avisos.push(avisoDeRecordatorio(booking, recordatorio.offsetMinutes));
+      notices.push(reminderNotice(booking, reminder.offsetMinutes));
     }
 
-    const resultados = await this.notices.emitMany(avisos);
-    const entregados = resultados.filter(
-      (resultado) => resultado.delivered,
+    const results = await this.notices.emitMany(notices);
+    const delivered = results.filter(
+      (result) => result.delivered,
     ).length;
 
     this.logger.info(
       {
         operation: 'scheduling.notice.reminder',
-        reminders: recordatorios.length,
-        delivered: entregados,
+        reminders: reminders.length,
+        delivered: delivered,
       },
       'Recordatorios entregados por el canal in-app',
     );
-    return entregados;
+    return delivered;
   }
 }

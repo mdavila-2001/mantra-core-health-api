@@ -88,7 +88,7 @@ export class SchedulingWalkInService {
     );
 
     return this.em.transactional(async (tx) => {
-      const paciente = await createWalkInPatient(
+      const patient = await createWalkInPatient(
         {
           persons: this.personsRepo,
           personProfiles: this.personProfilesRepo,
@@ -102,10 +102,10 @@ export class SchedulingWalkInService {
       );
 
       const { booking, slot, appointment, retractedSlots } =
-        await this.bookingsService.crearCitaDirectaEnTransaccion(
+        await this.bookingsService.createDirectAppointmentInTransaction(
           tx,
           {
-            patientProfileId: paciente.patientProfileId,
+            patientProfileId: patient.patientProfileId,
             resourceId: dto.resourceId,
             startAt: dto.startAt,
             durationMinutes: dto.durationMinutes,
@@ -119,7 +119,7 @@ export class SchedulingWalkInService {
       // El encuentro nace abierto: quien llegó al mostrador ya está siendo
       // atendido, no esperando un check-in posterior.
       const encounter = this.encountersRepo.create(tx, {
-        patientProfileId: paciente.patientProfileId,
+        patientProfileId: patient.patientProfileId,
         tenantId: booking.tenantId,
         primaryPractitionerId: appointment.practitionerProfileId,
         classConceptId: CLIN.ENCOUNTER_CLASS_AMBULATORY,
@@ -144,12 +144,12 @@ export class SchedulingWalkInService {
         });
       }
 
-      await this.bookingsService.iniciarEnTransaccion(tx, booking, actor);
+      await this.bookingsService.startInTransaction(tx, booking, actor);
 
       return {
-        patientProfileId: paciente.patientProfileId,
-        personId: paciente.personId,
-        patientCode: paciente.patientCode,
+        patientProfileId: patient.patientProfileId,
+        personId: patient.personId,
+        patientCode: patient.patientCode,
         bookingId: booking.id,
         bookableSlotId: slot.id,
         appointmentId: appointment.id,

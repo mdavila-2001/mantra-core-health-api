@@ -19,7 +19,7 @@ import {
   AGENDA_NOTICE_PORT,
   type AgendaNoticePort,
 } from '../ports/agenda-notice.port';
-import { avisoDeDemora } from '../../domain/notices/agenda-notices';
+import { delayNoticeFor } from '../../domain/notices/agenda-notices';
 import {
   MAX_DELAY_MINUTES,
   type DelayBookingDto,
@@ -28,26 +28,26 @@ import {
 } from '../../presentation/dto';
 
 /** Estados en los que una cita todavía puede sufrir una demora. */
-const ESTADOS_ALCANZABLES: readonly string[] = [
+const REACHABLE_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
 ];
 
 /** Roles que operan cualquier agenda, no sólo la propia. */
-const ROLES_DE_AGENDA: readonly string[] = [
+const AGENDA_OPERATOR_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SCHEDULING_AGENT',
   'SUPERADMIN',
 ];
 
 /** Cómo nombra un recurso a la tabla de perfiles profesionales. */
-const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+const PRACTITIONER_PROFILE_TABLES: readonly string[] = [
   'practitioner_profiles',
   'health_practitioner_profiles',
 ];
 
 /** Tope de citas que una sola demora alcanza. Una jornada no tiene más. */
-const TOPE_DE_AFECTADAS = 200;
+const MAX_AFFECTED = 200;
 
 /**
  * «El médico se demora» (P8 · registro del cliente 3.5 y 4.2).
@@ -92,33 +92,33 @@ export class SchedulingDelayService {
     dto: DelayBookingDto,
     actor: AuthenticatedUser,
   ): Promise<DelayNoticeResponseDto> {
-    this.assertMinutos(dto.delayMinutes);
+    this.assertMinutes(dto.delayMinutes);
 
     const em = this.em.fork();
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) {
       throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
     }
-    await this.assertOperaLaAgenda(em, booking.resourceId, actor);
+    await this.assertOperatesAgenda(em, booking.resourceId, actor);
 
-    await this.anotarDemora(booking.bookingId, dto, actor);
-    const avisados = await this.avisar([booking], dto);
+    await this.recordDelay(booking.bookingId, dto, actor);
+    const notified = await this.notify([booking], dto);
 
     this.logger.info(
       {
         operation: 'scheduling.booking.delay',
         bookingId,
         delayMinutes: dto.delayMinutes,
-        notified: avisados,
+        notified: notified,
       },
       'Practitioner delay announced for a booking',
     );
 
     return {
-      notified: avisados,
+      notified: notified,
       affected: 1,
       bookingIds: [booking.bookingId],
-      detail: this.detalle(1, avisados),
+      detail: this.detail(1, notified),
     };
   }
 
@@ -135,7 +135,7 @@ export class SchedulingDelayService {
     dto: DelayResourceDto,
     actor: AuthenticatedUser,
   ): Promise<DelayNoticeResponseDto> {
-    this.assertMinutos(dto.delayMinutes);
+    this.assertMinutes(dto.delayMinutes);
 
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
@@ -144,47 +144,47 @@ export class SchedulingDelayService {
         resourceId,
       });
     }
-    await this.assertOperaLaAgenda(em, resourceId, actor);
+    await this.assertOperatesAgenda(em, resourceId, actor);
 
-    const desde = dto.from ? new Date(dto.from) : new Date();
-    const hasta = dto.to ? new Date(dto.to) : finDelDia(desde);
-    if (hasta.getTime() < desde.getTime()) {
+    const from = dto.from ? new Date(dto.from) : new Date();
+    const to = dto.to ? new Date(dto.to) : endOfDay(from);
+    if (to.getTime() < from.getTime()) {
       throw new PreconditionFailedException(
         'La ventana de la demora termina antes de empezar',
         { resourceId },
       );
     }
 
-    const afectadas = await this.noticeRepo.findAffectedBookings(
+    const affected = await this.noticeRepo.findAffectedBookings(
       em,
       resourceId,
-      desde,
-      hasta,
-      ESTADOS_ALCANZABLES,
-      TOPE_DE_AFECTADAS,
+      from,
+      to,
+      REACHABLE_STATES,
+      MAX_AFFECTED,
     );
 
-    for (const booking of afectadas) {
-      await this.anotarDemora(booking.bookingId, dto, actor);
+    for (const booking of affected) {
+      await this.recordDelay(booking.bookingId, dto, actor);
     }
-    const avisados = await this.avisar(afectadas, dto);
+    const notified = await this.notify(affected, dto);
 
     this.logger.info(
       {
         operation: 'scheduling.resource.delay',
         resourceId,
         delayMinutes: dto.delayMinutes,
-        affected: afectadas.length,
-        notified: avisados,
+        affected: affected.length,
+        notified: notified,
       },
       'Practitioner delay announced for a resource window',
     );
 
     return {
-      notified: avisados,
-      affected: afectadas.length,
-      bookingIds: afectadas.map((booking) => booking.bookingId),
-      detail: this.detalle(afectadas.length, avisados),
+      notified: notified,
+      affected: affected.length,
+      bookingIds: affected.map((booking) => booking.bookingId),
+      detail: this.detail(affected.length, notified),
     };
   }
 
@@ -196,7 +196,7 @@ export class SchedulingDelayService {
    * paciente la ve al abrir su turno; al revés —avisar y no registrar— dejaría
    * una notificación que la cita contradice.
    */
-  private async anotarDemora(
+  private async recordDelay(
     bookingId: string,
     dto: DelayBookingDto | DelayResourceDto,
     actor: AuthenticatedUser,
@@ -218,33 +218,33 @@ export class SchedulingDelayService {
   }
 
   /** Emite el aviso de demora a cada paciente alcanzado. */
-  private async avisar(
+  private async notify(
     bookings: readonly BookingNoticeSnapshot[],
     dto: DelayBookingDto | DelayResourceDto,
   ): Promise<number> {
     if (bookings.length === 0) return 0;
-    const resultados = await this.notices.emitMany(
+    const results = await this.notices.emitMany(
       bookings.map((booking) =>
-        avisoDeDemora(booking, dto.delayMinutes, dto.message),
+        delayNoticeFor(booking, dto.delayMinutes, dto.message),
       ),
     );
-    return resultados.filter((resultado) => resultado.delivered).length;
+    return results.filter((result) => result.delivered).length;
   }
 
   /** Qué contar de vuelta, incluido el caso de la agenda vacía. */
-  private detalle(afectadas: number, avisados: number): string {
-    if (afectadas === 0) {
+  private detail(affected: number, notified: number): string {
+    if (affected === 0) {
       return 'No había citas vigentes en la ventana informada; no se avisó a nadie';
     }
-    if (avisados === afectadas) {
+    if (notified === affected) {
       return 'La demora quedó registrada y todos los pacientes recibieron el aviso';
     }
-    return `La demora quedó registrada en las ${afectadas} citas; ${avisados} pacientes recibieron el aviso in-app (el resto no tiene cuenta de portal o no acepta este aviso)`;
+    return `La demora quedó registrada en las ${affected} citas; ${notified} pacientes recibieron el aviso in-app (el resto no tiene cuenta de portal o no acepta este aviso)`;
   }
 
   /** Un tope explícito: más que esto es reprogramar, no demorarse. */
-  private assertMinutos(minutos: number): void {
-    if (minutos > MAX_DELAY_MINUTES) {
+  private assertMinutes(minutes: number): void {
+    if (minutes > MAX_DELAY_MINUTES) {
       throw new PreconditionFailedException(
         'Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando',
         { failureCode: 'DELAY_TOO_LONG', maxMinutes: MAX_DELAY_MINUTES },
@@ -259,24 +259,24 @@ export class SchedulingDelayService {
    * `SchedulingBookingsService`: el rol autoriza a operar *una* agenda, y cuál
    * lo dice el perfil del token, no el rol.
    */
-  private async assertOperaLaAgenda(
+  private async assertOperatesAgenda(
     em: EntityManager,
     resourceId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol))) return;
+    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role))) return;
 
-    const recurso =
+    const resource =
       resourceId === undefined
         ? null
         : await this.catalogRepo.findResourceById(em, resourceId);
-    const esSuAgenda =
+    const isOwnAgenda =
       actor.practitionerProfileId !== undefined &&
-      recurso !== null &&
-      recurso.resourceRefId === actor.practitionerProfileId &&
-      TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
+      resource !== null &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
 
-    if (!esSuAgenda) {
+    if (!isOwnAgenda) {
       throw new ForbiddenException(
         'Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella.',
       );
@@ -292,8 +292,8 @@ export class SchedulingDelayService {
  * dato haría que la ventana dependiera de un `null`. Queda anotado en el
  * reporte del carril.
  */
-function finDelDia(desde: Date): Date {
-  const fin = new Date(desde);
-  fin.setHours(23, 59, 59, 999);
-  return fin;
+function endOfDay(from: Date): Date {
+  const end = new Date(from);
+  end.setHours(23, 59, 59, 999);
+  return end;
 }

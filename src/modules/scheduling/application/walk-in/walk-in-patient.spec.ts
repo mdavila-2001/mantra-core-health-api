@@ -21,26 +21,26 @@ function build() {
   const tx: any = { flush: mockFn() };
 
   const persons = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'person-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'person-1', ...data })),
   };
   const personProfiles = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'profile-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'profile-1', ...data })),
   };
   const patientProfiles = {
-    create: mockFn((_tx: any, datos: any) => ({
+    create: mockFn((_tx: any, data: any) => ({
       id: 'patient-1',
-      ...datos,
+      ...data,
     })),
   };
   const identifiers = {
     findActiveDuplicate: mockFn().mockResolvedValue(null),
-    create: mockFn((_tx: any, datos: any) => ({ id: 'ident-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'ident-1', ...data })),
   };
   const contactPoints = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'contact-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'contact-1', ...data })),
   };
   const relatedPersons = {
-    create: mockFn((_tx: any, datos: any) => ({ id: 'related-1', ...datos })),
+    create: mockFn((_tx: any, data: any) => ({ id: 'related-1', ...data })),
   };
 
   const repos: WalkInPatientRepos = {
@@ -84,9 +84,9 @@ describe('createWalkInPatient', () => {
       contactPoints,
     } = build();
 
-    const resultado = await createWalkInPatient(repos, tx, DATA_BASE);
+    const result = await createWalkInPatient(repos, tx, DATA_BASE);
 
-    const ordenDeEscritura = [
+    const writeOrder = [
       ...persons.create.mock.invocationCallOrder,
       ...tx.flush.mock.invocationCallOrder,
       ...personProfiles.create.mock.invocationCallOrder,
@@ -109,9 +109,9 @@ describe('createWalkInPatient', () => {
     expect(tx.flush.mock.invocationCallOrder[1]).toBeLessThan(
       identifiers.create.mock.invocationCallOrder[0],
     );
-    expect(ordenDeEscritura.length).toBeGreaterThan(0);
+    expect(writeOrder.length).toBeGreaterThan(0);
 
-    expect(resultado).toEqual({
+    expect(result).toEqual({
       personId: 'person-1',
       patientProfileId: 'person-1',
       patientCode: expect.stringMatching(/^PAT-/),

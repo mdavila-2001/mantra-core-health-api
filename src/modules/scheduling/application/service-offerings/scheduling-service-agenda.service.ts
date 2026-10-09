@@ -9,31 +9,31 @@ import {
 } from '../../infrastructure/repositories';
 import { SCHED } from '../../domain/scheduling.concepts';
 import {
-  cuposQueSePuedenReabrir,
-  tramoOcupado,
-  type Intervalo,
+  slotsThatCanReopen,
+  busySpan,
+  type Interval,
 } from '../../domain/time/service-availability';
 import {
-  diasLocalesQueCoinciden,
-  horaLocalAUtc,
-  type DiaLocal,
+  matchingLocalDays,
+  localTimeToUtc,
+  type LocalDay,
 } from '../../domain/time/scheduling-time';
 import { SchedulingProfessionalTimeService } from '../professional-time/scheduling-professional-time.service';
 
-const MS_POR_MINUTO = 60_000;
+const MS_PER_MINUTE = 60_000;
 
 /**
  * Cuánto se ensancha la ventana al mirar compromisos vecinos: el techo de los
  * colchones (`MAX_SERVICE_BUFFER_MINUTES`), para no perder un turno cuya limpieza
  * llega hasta el rango que se está mirando aunque él mismo quede afuera.
  */
-const MARGEN_DE_COLCHONES_MS = 240 * MS_POR_MINUTO;
+const BUFFER_MARGIN_MS = 240 * MS_PER_MINUTE;
 
 /** Franjas de una plantilla que admiten servicios, con las reglas de su política. */
-export interface FranjasDeServicio {
+export interface ServiceBands {
   readonly resourceId: string;
   readonly resourceName: string;
-  readonly franjas: readonly Intervalo[];
+  readonly bands: readonly Interval[];
   /** Aviso mínimo de la política de la plantilla, en minutos (0 ≡ sin política). */
   readonly minNoticeMinutes: number;
   /** Días de anticipación máximos; `undefined` ≡ sin tope declarado. */
@@ -41,7 +41,7 @@ export interface FranjasDeServicio {
 }
 
 /** Un recurso con lo mínimo que hace falta para mirar sus franjas. */
-export interface SedeDelProfesional {
+export interface PractitionerSite {
   readonly id: string;
   readonly name: string;
   readonly timeZone?: string;
@@ -70,57 +70,57 @@ export class SchedulingServiceAgendaService {
   constructor(
     private readonly offeringsRepo: SchedulingOfferingsRepository,
     private readonly catalogRepo: SchedulingCatalogRepository,
-    private readonly tiempoProfesional: SchedulingProfessionalTimeService,
+    private readonly professionalTime: SchedulingProfessionalTimeService,
   ) {}
 
   /**
    * Todo lo que ocupa el tiempo del profesional en un rango, en todas sus sedes.
    *
-   * @param ahora - «Ahora», inyectado para que las retenciones vencidas no cuenten.
+   * @param now - «Ahora», inyectado para que las retenciones vencidas no cuenten.
    */
-  async ocupadoDelProfesional(
+  async practitionerBusyTime(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
-    ahora: Date,
-  ): Promise<Intervalo[]> {
-    const desdeAncho = new Date(desde.getTime() - MARGEN_DE_COLCHONES_MS);
-    const hastaAncho = new Date(hasta.getTime() + MARGEN_DE_COLCHONES_MS);
+    from: Date,
+    to: Date,
+    now: Date,
+  ): Promise<Interval[]> {
+    const wideFrom = new Date(from.getTime() - BUFFER_MARGIN_MS);
+    const wideTo = new Date(to.getTime() + BUFFER_MARGIN_MS);
 
-    const [compromisos, retenciones, servicios] = await Promise.all([
-      this.tiempoProfesional.compromisos(
+    const [commitments, holds, services] = await Promise.all([
+      this.professionalTime.commitments(
         em,
         practitionerProfileId,
-        desdeAncho,
-        hastaAncho,
+        wideFrom,
+        wideTo,
       ),
       this.offeringsRepo.findLiveHoldsOfProfessional(
         em,
         practitionerProfileId,
-        desdeAncho,
-        hastaAncho,
+        wideFrom,
+        wideTo,
         CONCEPTS.HOLD_ACTIVE,
-        ahora,
+        now,
       ),
       this.offeringsRepo.findLiveServiceSlotsOfProfessional(
         em,
         practitionerProfileId,
-        desdeAncho,
-        hastaAncho,
+        wideFrom,
+        wideTo,
         {
           bookedStatusConceptId: CONCEPTS.SLOT_BOOKED,
           heldStatusConceptId: CONCEPTS.SLOT_HELD,
           activeHoldStatusConceptId: CONCEPTS.HOLD_ACTIVE,
         },
-        ahora,
+        now,
       ),
     ]);
 
     return [
-      ...compromisos.map((c) => ({ startAt: c.startAt, endAt: c.endAt })),
-      ...retenciones.map((r) => ({ startAt: r.startAt, endAt: r.endAt })),
-      ...servicios.map((s) => tramoOcupado(s.startAt, s.endAt, s)),
+      ...commitments.map((c) => ({ startAt: c.startAt, endAt: c.endAt })),
+      ...holds.map((r) => ({ startAt: r.startAt, endAt: r.endAt })),
+      ...services.map((s) => busySpan(s.startAt, s.endAt, s)),
     ];
   }
 
@@ -131,66 +131,66 @@ export class SchedulingServiceAgendaService {
    * declarado (`NULL`) es sólo consultas: así se comportaba toda franja antes de este
    * cambio y es lo que mantiene intacta la agenda existente.
    */
-  async franjasDeServicios(
+  async bandsOfServices(
     em: EntityManager,
     practitionerProfileId: string,
-    sedes: readonly SedeDelProfesional[],
-    desde: Date,
-    hasta: Date,
-  ): Promise<FranjasDeServicio[]> {
-    if (sedes.length === 0) return [];
-    const sedePorId = new Map(sedes.map((sede) => [sede.id, sede]));
+    sites: readonly PractitionerSite[],
+    from: Date,
+    to: Date,
+  ): Promise<ServiceBands[]> {
+    if (sites.length === 0) return [];
+    const siteById = new Map(sites.map((site) => [site.id, site]));
 
-    const reglas = await this.catalogRepo.findRulesByResourceOwner(
+    const rules = await this.catalogRepo.findRulesByResourceOwner(
       em,
       practitionerProfileId,
       CONCEPTS.TEMPLATE_PUBLISHED,
     );
 
-    const porPlantilla = new Map<
+    const byTemplate = new Map<
       string,
-      FranjasDeServicio & { franjas: Intervalo[] }
+      ServiceBands & { bands: Interval[] }
     >();
-    for (const { rule, resourceId, validTo: validaHasta } of reglas) {
-      const sede = sedePorId.get(resourceId);
-      if (sede === undefined) continue;
-      if (!admiteServicios(rule.bookingModeConceptId)) continue;
+    for (const { rule, resourceId, validTo: validUntil } of rules) {
+      const site = siteById.get(resourceId);
+      if (site === undefined) continue;
+      if (!acceptsServices(rule.bookingModeConceptId)) continue;
 
-      let grupo = porPlantilla.get(rule.scheduleTemplateId);
-      if (grupo === undefined) {
-        const politica = await this.politicaDe(em, rule.scheduleTemplateId);
-        grupo = {
+      let group = byTemplate.get(rule.scheduleTemplateId);
+      if (group === undefined) {
+        const policy = await this.policyOf(em, rule.scheduleTemplateId);
+        group = {
           resourceId,
-          resourceName: sede.name,
-          franjas: [],
-          minNoticeMinutes: politica.minNoticeMinutes,
-          maxAdvanceDays: politica.maxAdvanceDays,
+          resourceName: site.name,
+          bands: [],
+          minNoticeMinutes: policy.minNoticeMinutes,
+          maxAdvanceDays: policy.maxAdvanceDays,
         };
-        porPlantilla.set(rule.scheduleTemplateId, grupo);
+        byTemplate.set(rule.scheduleTemplateId, group);
       }
 
-      const zona = sede.timeZone ?? 'UTC';
-      for (const dia of diasLocalesQueCoinciden(
-        desde,
-        hasta,
+      const zone = site.timeZone ?? 'UTC';
+      for (const day of matchingLocalDays(
+        from,
+        to,
         rule.dayOfWeek,
-        zona,
+        zone,
       )) {
-        if (!vigenteEseDia(dia, rule.validFrom, rule.validTo ?? validaHasta))
+        if (!validThatDay(day, rule.validFrom, rule.validTo ?? validUntil))
           continue;
-        const inicio = horaLocalAUtc(dia, rule.startTime, zona);
-        const fin = horaLocalAUtc(dia, rule.endTime, zona);
-        const recortadoDesde = inicio < desde ? desde : inicio;
-        const recortadoHasta = fin > hasta ? hasta : fin;
-        if (recortadoHasta > recortadoDesde) {
-          grupo.franjas.push({
-            startAt: recortadoDesde,
-            endAt: recortadoHasta,
+        const start = localTimeToUtc(day, rule.startTime, zone);
+        const end = localTimeToUtc(day, rule.endTime, zone);
+        const clippedFrom = start < from ? from : start;
+        const clippedTo = end > to ? to : end;
+        if (clippedTo > clippedFrom) {
+          group.bands.push({
+            startAt: clippedFrom,
+            endAt: clippedTo,
           });
         }
       }
     }
-    return [...porPlantilla.values()];
+    return [...byTemplate.values()];
   }
 
   /**
@@ -202,25 +202,25 @@ export class SchedulingServiceAgendaService {
    *
    * @returns Cuántos cupos se retiraron.
    */
-  async retraer(
+  async retract(
     em: EntityManager,
     resourceRefId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     actorUserId: string | undefined,
   ): Promise<number> {
-    const libres = await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
+    const freeOnes = await this.catalogRepo.findOpenSlotsOfProfessionalInWindow(
       em,
       resourceRefId,
-      desde,
-      hasta,
+      from,
+      to,
       CONCEPTS.SLOT_OPEN,
     );
-    for (const libre of libres) {
-      libre.statusConceptId = SCHED.SLOT_RETRACTED;
-      touch(libre, actorUserId);
+    for (const free of freeOnes) {
+      free.statusConceptId = SCHED.SLOT_RETRACTED;
+      touch(free, actorUserId);
     }
-    return libres.length;
+    return freeOnes.length;
   }
 
   /**
@@ -231,54 +231,54 @@ export class SchedulingServiceAgendaService {
    * servicio sigue pisando se queda retraído, porque ofrecerlo sería ofrecer un
    * horario que no existe.
    *
-   * @param desde - Inicio del rango que se acaba de liberar.
-   * @param hasta - Fin del rango que se acaba de liberar.
+   * @param from - Inicio del rango que se acaba de liberar.
+   * @param to - Fin del rango que se acaba de liberar.
    * @returns Cuántos cupos volvieron a ofrecerse.
    */
-  async reabrir(
+  async reopen(
     em: EntityManager,
     practitionerProfileId: string,
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     actorUserId: string | undefined,
   ): Promise<number> {
-    const desdeAncho = new Date(desde.getTime() - MARGEN_DE_COLCHONES_MS);
-    const hastaAncho = new Date(hasta.getTime() + MARGEN_DE_COLCHONES_MS);
+    const wideFrom = new Date(from.getTime() - BUFFER_MARGIN_MS);
+    const wideTo = new Date(to.getTime() + BUFFER_MARGIN_MS);
 
-    const retraidos = await this.offeringsRepo.findRetractedSlotsOfProfessional(
+    const retracted = await this.offeringsRepo.findRetractedSlotsOfProfessional(
       em,
       practitionerProfileId,
-      desdeAncho,
-      hastaAncho,
+      wideFrom,
+      wideTo,
       SCHED.SLOT_RETRACTED,
     );
-    if (retraidos.length === 0) return 0;
+    if (retracted.length === 0) return 0;
 
-    const ocupado = await this.ocupadoDelProfesional(
+    const busy = await this.practitionerBusyTime(
       em,
       practitionerProfileId,
-      desdeAncho,
-      hastaAncho,
+      wideFrom,
+      wideTo,
       new Date(),
     );
-    const reabribles = new Set(
-      cuposQueSePuedenReabrir(
-        retraidos.map((cupo) => ({
-          id: cupo.id,
-          startAt: cupo.startAt,
-          endAt: cupo.endAt ?? cupo.startAt,
+    const reopenable = new Set(
+      slotsThatCanReopen(
+        retracted.map((slot) => ({
+          id: slot.id,
+          startAt: slot.startAt,
+          endAt: slot.endAt ?? slot.startAt,
         })),
-        ocupado,
+        busy,
       ),
     );
-    const reabiertos: BookableSlots[] = retraidos.filter((cupo) =>
-      reabribles.has(cupo.id),
+    const reopened: BookableSlots[] = retracted.filter((slot) =>
+      reopenable.has(slot.id),
     );
-    for (const cupo of reabiertos) {
-      cupo.statusConceptId = CONCEPTS.SLOT_OPEN;
-      touch(cupo, actorUserId);
+    for (const slot of reopened) {
+      slot.statusConceptId = CONCEPTS.SLOT_OPEN;
+      touch(slot, actorUserId);
     }
-    return reabiertos.length;
+    return reopened.length;
   }
 
   /**
@@ -287,86 +287,86 @@ export class SchedulingServiceAgendaService {
    * Resuelve el profesional desde el recurso del cupo; un cupo de un recurso que no es
    * un profesional (una sala, un equipo) no retrae nada y no devuelve nada.
    */
-  async reabrirTramo(
+  async reopenSpan(
     em: EntityManager,
     slot: { resourceId?: string | null },
-    desde: Date,
-    hasta: Date,
+    from: Date,
+    to: Date,
     actorUserId: string | undefined,
   ): Promise<number> {
     if (!slot.resourceId) return 0;
-    const recurso = await this.catalogRepo.findResourceById(
+    const resource = await this.catalogRepo.findResourceById(
       em,
       slot.resourceId,
     );
     if (
-      !recurso ||
+      !resource ||
       !['practitioner_profiles', 'health_practitioner_profiles'].includes(
-        recurso.resourceRefType,
+        resource.resourceRefType,
       )
     ) {
       return 0;
     }
-    return this.reabrir(em, recurso.resourceRefId, desde, hasta, actorUserId);
+    return this.reopen(em, resource.resourceRefId, from, to, actorUserId);
   }
 
   /** La oferta de un cupo de servicio y lo que el catálogo dice de su servicio. */
-  async ofertaDelCupo(
+  async offeringOfSlot(
     em: EntityManager,
     offeringId: string,
   ): Promise<{
-    oferta: PractitionerServiceOfferings;
-    catalogo: ServiceCatalog | null;
+    offering: PractitionerServiceOfferings;
+    catalog: ServiceCatalog | null;
   } | null> {
-    const oferta = await this.offeringsRepo.findOfferingById(em, offeringId);
-    if (oferta === null) return null;
-    const catalogo = await this.offeringsRepo.findCatalogItem(
+    const offering = await this.offeringsRepo.findOfferingById(em, offeringId);
+    if (offering === null) return null;
+    const catalog = await this.offeringsRepo.findCatalogItem(
       em,
-      oferta.serviceCatalogId,
+      offering.serviceCatalogId,
     );
-    return { oferta, catalogo };
+    return { offering: offering, catalog: catalog };
   }
 
-  private async politicaDe(
+  private async policyOf(
     em: EntityManager,
     templateId: string,
   ): Promise<{ minNoticeMinutes: number; maxAdvanceDays?: number }> {
-    const plantilla = await this.catalogRepo.findTemplateById(em, templateId);
-    const politica =
-      plantilla?.bookingPolicyId == null
+    const template = await this.catalogRepo.findTemplateById(em, templateId);
+    const policy =
+      template?.bookingPolicyId == null
         ? null
-        : await this.catalogRepo.findPolicyById(em, plantilla.bookingPolicyId);
+        : await this.catalogRepo.findPolicyById(em, template.bookingPolicyId);
     return {
-      minNoticeMinutes: politica?.minNoticeMinutes ?? 0,
-      maxAdvanceDays: politica?.maxAdvanceDays ?? undefined,
+      minNoticeMinutes: policy?.minNoticeMinutes ?? 0,
+      maxAdvanceDays: policy?.maxAdvanceDays ?? undefined,
     };
   }
 }
 
-function admiteServicios(modo?: string | null): boolean {
-  return modo === SCHED.RULE_MODE_SERVICES || modo === SCHED.RULE_MODE_MIXED;
+function acceptsServices(mode?: string | null): boolean {
+  return mode === SCHED.RULE_MODE_SERVICES || mode === SCHED.RULE_MODE_MIXED;
 }
 
 /** `YYYY-MM-DD` de un día local, comparable como texto. */
-function ymdDeDia(dia: DiaLocal): string {
-  const dos = (n: number): string => String(n).padStart(2, '0');
-  return `${dia.year}-${dos(dia.month)}-${dos(dia.day)}`;
+function ymdOfDay(day: LocalDay): string {
+  const two = (n: number): string => String(n).padStart(2, '0');
+  return `${day.year}-${two(day.month)}-${two(day.day)}`;
 }
 
 /** `YYYY-MM-DD` de una columna `date`, que el driver entrega como `Date` o como texto. */
-function ymdDeColumna(valor: Date | string): string {
-  return typeof valor === 'string'
-    ? valor.slice(0, 10)
-    : valor.toISOString().slice(0, 10);
+function ymdOfColumn(value: Date | string): string {
+  return typeof value === 'string'
+    ? value.slice(0, 10)
+    : value.toISOString().slice(0, 10);
 }
 
-function vigenteEseDia(
-  dia: DiaLocal,
+function validThatDay(
+  day: LocalDay,
   validFrom?: Date | string | null,
   validTo?: Date | string | null,
 ): boolean {
-  const ymd = ymdDeDia(dia);
-  if (validFrom != null && ymd < ymdDeColumna(validFrom)) return false;
-  if (validTo != null && ymd > ymdDeColumna(validTo)) return false;
+  const ymd = ymdOfDay(day);
+  if (validFrom != null && ymd < ymdOfColumn(validFrom)) return false;
+  if (validTo != null && ymd > ymdOfColumn(validTo)) return false;
   return true;
 }

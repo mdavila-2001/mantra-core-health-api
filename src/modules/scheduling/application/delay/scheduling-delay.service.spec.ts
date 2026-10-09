@@ -12,27 +12,27 @@ import { SchedulingDelayService } from './scheduling-delay.service';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { CONCEPTS } from '../../../../common';
 
-const CITA = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-const RECURSO = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
-const PERFIL_MEDICO = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+const BOOKING = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const RESOURCE = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+const PRACTITIONER_PROFILE = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
 const ADMIN = { id: 'user-admin', roles: ['SCHEDULING_ADMIN'] } as any;
-const MEDICO = {
+const PRACTITIONER_ACTOR = {
   id: 'user-medico',
   roles: ['PRACTITIONER'],
-  practitionerProfileId: PERFIL_MEDICO,
+  practitionerProfileId: PRACTITIONER_PROFILE,
 } as any;
-const OTRO_MEDICO = {
+const OTHER_PRACTITIONER = {
   id: 'user-otro',
   roles: ['PRACTITIONER'],
   practitionerProfileId: 'otro-perfil',
 } as any;
 
-const cita = {
-  bookingId: CITA,
+const booking = {
+  bookingId: BOOKING,
   tenantId: 'tenant-1',
   patientProfileId: 'paciente-1',
-  resourceId: RECURSO,
+  resourceId: RESOURCE,
   slotId: 'cupo-1',
   startAt: new Date('2026-08-20T14:00:00.000Z'),
   resourceLabel: 'Dra. Rivas',
@@ -50,21 +50,21 @@ function build() {
 
   const catalogRepo = {
     findResourceById: mockFn().mockResolvedValue({
-      id: RECURSO,
+      id: RESOURCE,
       resourceRefType: 'health_practitioner_profiles',
-      resourceRefId: PERFIL_MEDICO,
+      resourceRefId: PRACTITIONER_PROFILE,
       name: 'Consultorio 1',
     }),
   };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   const noticeRepo = {
-    describeBooking: mockFn().mockResolvedValue(cita),
-    findAffectedBookings: mockFn().mockResolvedValue([cita]),
+    describeBooking: mockFn().mockResolvedValue(booking),
+    findAffectedBookings: mockFn().mockResolvedValue([booking]),
   };
   const notices = {
     emit: mockFn().mockResolvedValue({ delivered: true }),
-    emitMany: mockFn(async (avisos: any[]) =>
-      avisos.map(() => ({ delivered: true })),
+    emitMany: mockFn(async (noticeList: any[]) =>
+      noticeList.map(() => ({ delivered: true })),
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -85,31 +85,31 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
     it('anota la demora en el historial y avisa al paciente', async () => {
       const d = build();
 
-      const resultado = await d.service.delayBooking(
-        CITA,
+      const result = await d.service.delayBooking(
+        BOOKING,
         { delayMinutes: 20, message: 'Estoy en una urgencia' },
-        MEDICO,
+        PRACTITIONER_ACTOR,
       );
 
       expect(d.historyRepo.append).toHaveBeenCalledTimes(1);
-      const [, entidad, id, data] = d.historyRepo.append.mock.calls[0];
-      expect(entidad).toBe('appointment_bookings');
-      expect(id).toBe(CITA);
+      const [, entity, id, data] = d.historyRepo.append.mock.calls[0];
+      expect(entity).toBe('appointment_bookings');
+      expect(id).toBe(BOOKING);
       expect(data.operationConceptId).toBe(SCHED.HISTORY_OP_DELAY);
       expect(data.dataSnapshot.delayMinutes).toBe(20);
       expect(data.dataSnapshot.reasonText).toBe('Estoy en una urgencia');
 
       expect(d.notices.emitMany).toHaveBeenCalledTimes(1);
-      expect(resultado).toMatchObject({
+      expect(result).toMatchObject({
         notified: 1,
         affected: 1,
-        bookingIds: [CITA],
+        bookingIds: [BOOKING],
       });
     });
 
     it('no cambia el estado de la cita: una demora no la mueve', async () => {
       const d = build();
-      await d.service.delayBooking(CITA, { delayMinutes: 10 }, MEDICO);
+      await d.service.delayBooking(BOOKING, { delayMinutes: 10 }, PRACTITIONER_ACTOR);
       // El servicio no tiene repositorio de reservas: no puede tocar el motor
       // de agenda ni por descuido. La prueba lo deja escrito.
       expect((d.service as any).bookingsRepo).toBeUndefined();
@@ -120,7 +120,7 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
       d.noticeRepo.describeBooking.mockResolvedValue(null);
 
       await expect(
-        d.service.delayBooking(CITA, { delayMinutes: 10 }, ADMIN),
+        d.service.delayBooking(BOOKING, { delayMinutes: 10 }, ADMIN),
       ).rejects.toThrow(/no encontrada/i);
       expect(d.notices.emitMany).not.toHaveBeenCalled();
     });
@@ -129,7 +129,7 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
       const d = build();
 
       await expect(
-        d.service.delayBooking(CITA, { delayMinutes: 10 }, OTRO_MEDICO),
+        d.service.delayBooking(BOOKING, { delayMinutes: 10 }, OTHER_PRACTITIONER),
       ).rejects.toThrow(/otro profesional/i);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
     });
@@ -137,14 +137,14 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
     it('quien administra agendas sí puede, sin ser el que atiende', async () => {
       const d = build();
       await expect(
-        d.service.delayBooking(CITA, { delayMinutes: 10 }, ADMIN),
+        d.service.delayBooking(BOOKING, { delayMinutes: 10 }, ADMIN),
       ).resolves.toMatchObject({ affected: 1 });
     });
 
     it('más de cuatro horas no es una demora: se rechaza', async () => {
       const d = build();
       await expect(
-        d.service.delayBooking(CITA, { delayMinutes: 300 }, ADMIN),
+        d.service.delayBooking(BOOKING, { delayMinutes: 300 }, ADMIN),
       ).rejects.toThrow(/reprogramando/i);
       expect(d.historyRepo.append).not.toHaveBeenCalled();
     });
@@ -153,44 +153,44 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
   describe('sobre la agenda entera', () => {
     it('alcanza a las citas vigentes de la ventana y avisa a cada paciente', async () => {
       const d = build();
-      const otra = { ...cita, bookingId: 'booking-2' };
-      d.noticeRepo.findAffectedBookings.mockResolvedValue([cita, otra]);
+      const other = { ...booking, bookingId: 'booking-2' };
+      d.noticeRepo.findAffectedBookings.mockResolvedValue([booking, other]);
 
-      const resultado = await d.service.delayResource(
-        RECURSO,
+      const result = await d.service.delayResource(
+        RESOURCE,
         { delayMinutes: 20 },
-        MEDICO,
+        PRACTITIONER_ACTOR,
       );
 
-      const [, , desde, hasta, estados] =
+      const [, , from, to, states] =
         d.noticeRepo.findAffectedBookings.mock.calls[0];
-      expect(desde).toBeInstanceOf(Date);
-      expect(hasta.getTime()).toBeGreaterThan(desde.getTime());
+      expect(from).toBeInstanceOf(Date);
+      expect(to.getTime()).toBeGreaterThan(from.getTime());
       // Sólo las que siguen en pie: avisar de una demora a quien ya canceló
       // sería avisar de un turno que no existe.
-      expect(estados).toEqual([
+      expect(states).toEqual([
         CONCEPTS.BOOKING_CONFIRMED,
         CONCEPTS.BOOKING_CHECKED_IN,
       ]);
 
       expect(d.historyRepo.append).toHaveBeenCalledTimes(2);
-      expect(resultado.affected).toBe(2);
-      expect(resultado.notified).toBe(2);
-      expect(resultado.bookingIds).toEqual([CITA, 'booking-2']);
+      expect(result.affected).toBe(2);
+      expect(result.notified).toBe(2);
+      expect(result.bookingIds).toEqual([BOOKING, 'booking-2']);
     });
 
     it('una agenda sin citas en la ventana lo dice en vez de fingir un aviso', async () => {
       const d = build();
       d.noticeRepo.findAffectedBookings.mockResolvedValue([]);
 
-      const resultado = await d.service.delayResource(
-        RECURSO,
+      const result = await d.service.delayResource(
+        RESOURCE,
         { delayMinutes: 20 },
         ADMIN,
       );
 
-      expect(resultado).toMatchObject({ affected: 0, notified: 0 });
-      expect(resultado.detail).toMatch(/no se avisó a nadie/i);
+      expect(result).toMatchObject({ affected: 0, notified: 0 });
+      expect(result.detail).toMatch(/no se avisó a nadie/i);
       expect(d.notices.emitMany).not.toHaveBeenCalled();
     });
 
@@ -198,7 +198,7 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
       const d = build();
       await expect(
         d.service.delayResource(
-          RECURSO,
+          RESOURCE,
           {
             delayMinutes: 20,
             from: '2026-08-20T18:00:00.000Z',
@@ -213,27 +213,27 @@ describe('SchedulingDelayService (P8 · «el médico se demora»)', () => {
       const d = build();
       d.catalogRepo.findResourceById.mockResolvedValue(null);
       await expect(
-        d.service.delayResource(RECURSO, { delayMinutes: 20 }, ADMIN),
+        d.service.delayResource(RESOURCE, { delayMinutes: 20 }, ADMIN),
       ).rejects.toThrow(/no encontrado/i);
     });
 
     it('cuenta cuántos avisos llegaron de verdad, no cuántos se intentaron', async () => {
       const d = build();
-      const otra = { ...cita, bookingId: 'booking-2' };
-      d.noticeRepo.findAffectedBookings.mockResolvedValue([cita, otra]);
+      const other = { ...booking, bookingId: 'booking-2' };
+      d.noticeRepo.findAffectedBookings.mockResolvedValue([booking, other]);
       d.notices.emitMany.mockResolvedValue([
         { delivered: true },
         { delivered: false, skippedReason: 'sin cuenta' },
       ]);
 
-      const resultado = await d.service.delayResource(
-        RECURSO,
+      const result = await d.service.delayResource(
+        RESOURCE,
         { delayMinutes: 20 },
         ADMIN,
       );
 
-      expect(resultado).toMatchObject({ affected: 2, notified: 1 });
-      expect(resultado.detail).toMatch(/1 pacientes recibieron el aviso/);
+      expect(result).toMatchObject({ affected: 2, notified: 1 });
+      expect(result.detail).toMatch(/1 pacientes recibieron el aviso/);
     });
   });
 });

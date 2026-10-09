@@ -19,10 +19,10 @@ import type {
  */
 
 /** Tabla a la que apunta un aviso de cita. */
-export const RECURSO_CITA = 'scheduling.appointment_bookings';
+export const BOOKING_RESOURCE = 'scheduling.appointment_bookings';
 
 /** Tabla a la que apunta un aviso de cupo liberado. */
-export const RECURSO_CUPO = 'scheduling.bookable_slots';
+export const SLOT_RESOURCE = 'scheduling.bookable_slots';
 
 /**
  * Ruta del portal donde el paciente ve sus turnos.
@@ -31,12 +31,12 @@ export const RECURSO_CUPO = 'scheduling.bookable_slots';
  * parte obliga a buscar a mano lo que acaba de avisar. El front la consume tal
  * cual; si la ruta cambia, cambia en un solo sitio.
  */
-export const RUTA_MIS_TURNOS = '/my-account/appointments';
+export const MY_APPOINTMENTS_ROUTE = '/my-account/appointments';
 
 /**
  * Ruta de la agenda donde el profesional acepta o rechaza lo que le piden.
  *
- * Existe porque {@link RUTA_MIS_TURNOS} es del **paciente** —lo dice su propio
+ * Existe porque {@link MY_APPOINTMENTS_ROUTE} es del **paciente** —lo dice su propio
  * nombre— y los avisos dirigidos al profesional la estaban reusando: el aviso
  * de una solicitud nueva decía «aceptala o rechazala desde tu agenda» y llevaba
  * al portal del paciente, una pantalla a la que el profesional ni siquiera
@@ -45,16 +45,16 @@ export const RUTA_MIS_TURNOS = '/my-account/appointments';
  * El sufijo `?vista=citas` selecciona la pestaña donde viven aceptar y
  * rechazar; sin él caería en la pestaña por defecto, que es otra.
  */
-export const RUTA_AGENDA_PROFESIONAL = '/schedule?vista=citas';
+export const PRACTITIONER_AGENDA_ROUTE = '/schedule?vista=citas';
 
 /** El destino navegable de un aviso sobre una cita concreta. */
-export function rutaDelTurno(bookingId: string): string {
-  return `${RUTA_MIS_TURNOS}?turno=${bookingId}`;
+export function appointmentRoute(bookingId: string): string {
+  return `${MY_APPOINTMENTS_ROUTE}?turno=${bookingId}`;
 }
 
 /** Fecha larga con hora: «lunes 18 de agosto a las 09:30». */
-export function cuando(fecha: Date | undefined): string {
-  if (!fecha) return 'una fecha por confirmar';
+export function whenText(date: Date | undefined): string {
+  if (!date) return 'una fecha por confirmar';
   return new Intl.DateTimeFormat('es-BO', {
     weekday: 'long',
     day: 'numeric',
@@ -62,17 +62,17 @@ export function cuando(fecha: Date | undefined): string {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(fecha);
+  }).format(date);
 }
 
 /** Sólo la hora: «09:30». */
-export function hora(fecha: Date | undefined): string {
-  if (!fecha) return 'la hora indicada';
+export function timeText(date: Date | undefined): string {
+  if (!date) return 'la hora indicada';
   return new Intl.DateTimeFormat('es-BO', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(fecha);
+  }).format(date);
 }
 
 /**
@@ -81,7 +81,7 @@ export function hora(fecha: Date | undefined): string {
  * Lleva hora límite —el cupo es de quien lo confirme primero— porque un aviso
  * que no dice cuánto dura convierte una oportunidad en una carrera a ciegas.
  */
-export function avisoDeCupoLiberado(
+export function slotReleasedNotice(
   slot: SlotNoticeSnapshot,
   patientProfileId: string,
   tenantId: string,
@@ -92,12 +92,12 @@ export function avisoDeCupoLiberado(
     tenantId,
     subject: 'Se liberó un horario que estaba esperando',
     bodyText:
-      `Se liberó un horario con ${slot.resourceLabel} el ${cuando(slot.startAt)}. ` +
+      `Se liberó un horario con ${slot.resourceLabel} el ${whenText(slot.startAt)}. ` +
       'Resérvelo desde «Mis citas» antes de que lo tome otra persona.',
-    relatedResourceType: RECURSO_CUPO,
+    relatedResourceType: SLOT_RESOURCE,
     relatedResourceId: slot.slotId,
     payload: {
-      route: RUTA_MIS_TURNOS,
+      route: MY_APPOINTMENTS_ROUTE,
       slotId: slot.slotId,
       resourceId: slot.resourceId,
       startAt: slot.startAt.toISOString(),
@@ -131,7 +131,7 @@ export function avisoDeCupoLiberado(
  *
  * @param booking - La cita recién solicitada.
  * @param paciente - Cómo se llama quien la pidió; `undefined` si no se resolvió.
- * @param destinatarioUserId - Cuenta del profesional.
+ * @param recipientUserId - Cuenta del profesional.
  */
 /**
  * «, en el Consultorio del Sur» — o nada, si el recurso no declara sede.
@@ -140,30 +140,30 @@ export function avisoDeCupoLiberado(
  * una frase con un hueco («pidió cita para el jueves en ») se lee peor que sin
  * el dato.
  */
-function enTalLugar(booking: BookingNoticeSnapshot): string {
+function atPlace(booking: BookingNoticeSnapshot): string {
   return booking.siteLabel === undefined ? '' : `, en ${booking.siteLabel}`;
 }
 
-export function avisoDeSolicitudAlProfesional(
+export function requestNoticeForPractitioner(
   booking: BookingNoticeSnapshot,
-  paciente: string | undefined,
-  destinatarioUserId: string,
+  patient: string | undefined,
+  recipientUserId: string,
 ): AgendaNotice {
-  const quien = paciente ?? 'Un paciente';
+  const who = patient ?? 'Un paciente';
   return {
     kind: 'BOOKING_STATE_CHANGED',
-    recipient: { userId: destinatarioUserId },
+    recipient: { userId: recipientUserId },
     tenantId: booking.tenantId,
     subject: 'Tiene una nueva solicitud de consulta',
     bodyText:
-      `${quien} pidió cita para el ${cuando(booking.startAt)}${enTalLugar(booking)}. ` +
+      `${who} pidió cita para el ${whenText(booking.startAt)}${atPlace(booking)}. ` +
       'Puede aceptarla o rechazarla desde su agenda.',
-    relatedResourceType: RECURSO_CITA,
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
       // La agenda del profesional, no el portal del paciente: es donde está el
       // «aceptala o rechazala» que promete el cuerpo de arriba.
-      route: RUTA_AGENDA_PROFESIONAL,
+      route: PRACTITIONER_AGENDA_ROUTE,
       bookingId: booking.bookingId,
       change: 'REQUESTED',
       ...(booking.startAt === undefined
@@ -189,7 +189,7 @@ export function avisoDeSolicitudAlProfesional(
  *
  * @param booking - La cita recién solicitada.
  */
-export function avisoDeSolicitudAlPaciente(
+export function requestNoticeForPatient(
   booking: BookingNoticeSnapshot,
 ): AgendaNotice {
   return {
@@ -198,13 +198,13 @@ export function avisoDeSolicitudAlPaciente(
     tenantId: booking.tenantId,
     subject: 'Enviamos su solicitud de cita',
     bodyText:
-      `Pidió cita con ${booking.resourceLabel} para el ${cuando(booking.startAt)}` +
-      `${enTalLugar(booking)}. ` +
+      `Pidió cita con ${booking.resourceLabel} para el ${whenText(booking.startAt)}` +
+      `${atPlace(booking)}. ` +
       'Todavía falta que lo confirmen: le avisamos apenas respondan.',
-    relatedResourceType: RECURSO_CITA,
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      route: appointmentRoute(booking.bookingId),
       bookingId: booking.bookingId,
       change: 'REQUESTED',
       ...(booking.startAt === undefined
@@ -222,40 +222,40 @@ export function avisoDeSolicitudAlPaciente(
  * minutos el aviso no sirve para decidir si salir de casa, que es la única
  * decisión que habilita.
  */
-export function avisoDeDemora(
+export function delayNoticeFor(
   booking: BookingNoticeSnapshot,
-  minutos: number,
-  mensaje: string | undefined,
+  minutes: number,
+  message: string | undefined,
 ): AgendaNotice {
-  const nuevaHora =
+  const newTime =
     booking.startAt === undefined
       ? undefined
-      : new Date(booking.startAt.getTime() + minutos * 60_000);
+      : new Date(booking.startAt.getTime() + minutes * 60_000);
 
   return {
     kind: 'PRACTITIONER_DELAY',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: `${booking.resourceLabel} se demora ${minutos} minutos`,
+    subject: `${booking.resourceLabel} se demora ${minutes} minutos`,
     bodyText:
-      `Su cita de las ${hora(booking.startAt)} con ${booking.resourceLabel} ` +
-      `se atrasa unos ${minutos} minutos` +
-      (nuevaHora === undefined
+      `Su cita de las ${timeText(booking.startAt)} con ${booking.resourceLabel} ` +
+      `se atrasa unos ${minutes} minutos` +
+      (newTime === undefined
         ? '. '
-        : `: se estima para las ${hora(nuevaHora)}. `) +
-      (mensaje === undefined || mensaje.trim() === ''
+        : `: se estima para las ${timeText(newTime)}. `) +
+      (message === undefined || message.trim() === ''
         ? 'Puede ver el detalle en «Mis citas».'
-        : mensaje.trim()),
-    relatedResourceType: RECURSO_CITA,
+        : message.trim()),
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      route: appointmentRoute(booking.bookingId),
       bookingId: booking.bookingId,
-      delayMinutes: minutos,
-      ...(mensaje === undefined ? {} : { message: mensaje }),
-      ...(nuevaHora === undefined
+      delayMinutes: minutes,
+      ...(message === undefined ? {} : { message: message }),
+      ...(newTime === undefined
         ? {}
-        : { estimatedStartAt: nuevaHora.toISOString() }),
+        : { estimatedStartAt: newTime.toISOString() }),
     },
   };
 }
@@ -267,23 +267,23 @@ export function avisoDeDemora(
  * frase, y usar una sola obligaría a leer la fecha para saber cuál de las dos
  * es.
  */
-export function avisoDeRecordatorio(
+export function reminderNotice(
   booking: BookingNoticeSnapshot,
   offsetMinutes: number,
 ): AgendaNotice {
-  const esVispera = offsetMinutes >= 12 * 60;
+  const isEve = offsetMinutes >= 12 * 60;
   return {
     kind: 'APPOINTMENT_REMINDER',
     recipient: { patientProfileId: booking.patientProfileId },
     tenantId: booking.tenantId,
-    subject: esVispera ? 'Mañana tiene cita' : 'Su cita es hoy',
-    bodyText: esVispera
-      ? `Mañana ${cuando(booking.startAt)} tiene cita con ${booking.resourceLabel}.`
-      : `Hoy a las ${hora(booking.startAt)} tiene cita con ${booking.resourceLabel}.`,
-    relatedResourceType: RECURSO_CITA,
+    subject: isEve ? 'Mañana tiene cita' : 'Su cita es hoy',
+    bodyText: isEve
+      ? `Mañana ${whenText(booking.startAt)} tiene cita con ${booking.resourceLabel}.`
+      : `Hoy a las ${timeText(booking.startAt)} tiene cita con ${booking.resourceLabel}.`,
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      route: appointmentRoute(booking.bookingId),
       bookingId: booking.bookingId,
       offsetMinutes,
       ...(booking.startAt === undefined
@@ -297,11 +297,11 @@ export function avisoDeRecordatorio(
 }
 
 /** Los cambios de estado que el paciente tiene que enterarse. */
-export type CambioDeCita =
+export type BookingChange =
   'ACCEPTED' | 'ASSIGNED' | 'REJECTED' | 'RESCHEDULED' | 'CANCELLED';
 
 /** Encabezado de cada cambio, en la voz de quien lo recibe. */
-const TITULO: Readonly<Record<CambioDeCita, string>> = {
+const TITLE: Readonly<Record<BookingChange, string>> = {
   ACCEPTED: 'Su cita quedó confirmada',
   // La cita puntual (AG-2): el doctor la asigna y el paciente SE ENTERA — no
   // confirma, porque ya se acordó en el consultorio.
@@ -317,48 +317,48 @@ const TITULO: Readonly<Record<CambioDeCita, string>> = {
  * El motivo va en el cuerpo y no sólo en el detalle: un aviso que dice
  * «cancelada» y obliga a abrir la app para saber por qué es media noticia.
  *
- * @param destinatario - A quién se avisa. Cuando el paciente cancela, el que
+ * @param recipient - A quién se avisa. Cuando el paciente cancela, el que
  * necesita enterarse es el profesional, y entonces llega su cuenta y no un
  * perfil de paciente.
  */
-export function avisoDeCambioDeCita(
+export function bookingChangeNotice(
   booking: BookingNoticeSnapshot,
-  cambio: CambioDeCita,
-  motivo: string | undefined,
-  destinatario: { patientProfileId?: string; userId?: string },
+  change: BookingChange,
+  reason: string | undefined,
+  recipient: { patientProfileId?: string; userId?: string },
 ): AgendaNotice {
-  const conQuien = `con ${booking.resourceLabel}`;
-  const cuerpo: Readonly<Record<CambioDeCita, string>> = {
-    ACCEPTED: `Su cita ${conQuien} del ${cuando(booking.startAt)} quedó confirmado.`,
-    ASSIGNED: `${booking.resourceLabel} le agendó para el ${cuando(booking.startAt)}. Si no puede asistir, pida el cambio desde sus turnos.`,
-    REJECTED: `Su solicitud de cita ${conQuien} del ${cuando(booking.startAt)} no se pudo tomar.`,
-    RESCHEDULED: `Su cita ${conQuien} pasó al ${cuando(booking.startAt)}.`,
-    CANCELLED: `Se canceló su cita ${conQuien} del ${cuando(booking.startAt)}.`,
+  const withWhom = `con ${booking.resourceLabel}`;
+  const body: Readonly<Record<BookingChange, string>> = {
+    ACCEPTED: `Su cita ${withWhom} del ${whenText(booking.startAt)} quedó confirmado.`,
+    ASSIGNED: `${booking.resourceLabel} le agendó para el ${whenText(booking.startAt)}. Si no puede asistir, pida el cambio desde sus turnos.`,
+    REJECTED: `Su solicitud de cita ${withWhom} del ${whenText(booking.startAt)} no se pudo tomar.`,
+    RESCHEDULED: `Su cita ${withWhom} pasó al ${whenText(booking.startAt)}.`,
+    CANCELLED: `Se canceló su cita ${withWhom} del ${whenText(booking.startAt)}.`,
   };
 
   return {
     kind: 'BOOKING_STATE_CHANGED',
-    recipient: destinatario,
+    recipient: recipient,
     tenantId: booking.tenantId,
-    subject: TITULO[cambio],
+    subject: TITLE[change],
     bodyText:
-      cuerpo[cambio] +
-      (motivo === undefined || motivo.trim() === ''
+      body[change] +
+      (reason === undefined || reason.trim() === ''
         ? ''
-        : ` Motivo: ${motivo.trim()}`),
-    relatedResourceType: RECURSO_CITA,
+        : ` Motivo: ${reason.trim()}`),
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
       // El destino lo decide el destinatario, que es lo que este aviso ya
       // distingue: cuando el paciente cancela, quien recibe es el profesional
       // —llega su `userId`— y su turno no vive en el portal del paciente.
       route:
-        destinatario.userId === undefined
-          ? rutaDelTurno(booking.bookingId)
-          : RUTA_AGENDA_PROFESIONAL,
+        recipient.userId === undefined
+          ? appointmentRoute(booking.bookingId)
+          : PRACTITIONER_AGENDA_ROUTE,
       bookingId: booking.bookingId,
-      change: cambio,
-      ...(motivo === undefined ? {} : { reasonText: motivo }),
+      change: change,
+      ...(reason === undefined ? {} : { reasonText: reason }),
       ...(booking.startAt === undefined
         ? {}
         : { startAt: booking.startAt.toISOString() }),
@@ -380,36 +380,36 @@ export function avisoDeCambioDeCita(
  * Los minutos van igual, pero después y como contexto — sirven para reconocer
  * que es *su* turno el que se movió y no otro.
  */
-export function avisoDeHorarioMovido(
+export function scheduleMovedNotice(
   booking: BookingNoticeSnapshot,
-  minutos: number,
-  destinatarioUserId: string,
+  minutes: number,
+  recipientUserId: string,
 ): AgendaNotice {
-  const direccion = minutos > 0 ? 'más tarde' : 'más temprano';
-  const cuantos = Math.abs(minutos);
+  const address = minutes > 0 ? 'más tarde' : 'más temprano';
+  const howMany = Math.abs(minutes);
   return {
     kind: 'BOOKING_STATE_CHANGED',
-    recipient: { userId: destinatarioUserId },
+    recipient: { userId: recipientUserId },
     tenantId: booking.tenantId,
     subject: 'Se movió el horario de su cita',
     bodyText:
       `Su cita con ${booking.resourceLabel} pasa a ser el ` +
-      `${cuando(booking.startAt)}${enTalLugar(booking)} — ` +
-      `${cuantos} ${cuantos === 1 ? 'minuto' : 'minutos'} ${direccion}. ` +
+      `${whenText(booking.startAt)}${atPlace(booking)} — ` +
+      `${howMany} ${howMany === 1 ? 'minuto' : 'minutos'} ${address}. ` +
       'Si no le sirve, puede pedir otro horario desde la app.',
-    relatedResourceType: RECURSO_CITA,
+    relatedResourceType: BOOKING_RESOURCE,
     relatedResourceId: booking.bookingId,
     payload: {
-      route: rutaDelTurno(booking.bookingId),
+      route: appointmentRoute(booking.bookingId),
       bookingId: booking.bookingId,
       change: 'SHIFTED',
-      shiftMinutes: minutos,
+      shiftMinutes: minutes,
       ...(booking.startAt === undefined
         ? {}
         : { startAt: booking.startAt.toISOString() }),
     },
     // Correr la misma agenda dos veces son dos movimientos distintos y los dos
     // hay que avisarlos: por eso la clave lleva los minutos, no sólo la cita.
-    debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutos}`,
+    debounceKey: `p8:booking-shifted:${booking.bookingId}:${minutes}`,
   };
 }
