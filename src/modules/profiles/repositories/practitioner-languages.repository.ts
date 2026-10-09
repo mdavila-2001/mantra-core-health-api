@@ -72,4 +72,15 @@ export class PractitionerLanguagesRepository {
       { partial: true },
     );
   }
+
+  /**
+   * Quita un idioma declarado. Lo usa el reemplazo de la lista al editar el
+   * perfil (`PATCH /profiles/practitioners/me`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param row - La fila a quitar.
+   */
+  remove(em: EntityManager, row: PractitionerLanguages): void {
+    em.remove(row);
+  }
 }

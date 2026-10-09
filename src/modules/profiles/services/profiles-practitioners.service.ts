@@ -79,6 +79,7 @@ import {
   PractitionerProfileSummaryDto,
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
+  PractitionerLanguageInputDto,
   ListPractitionersResponseDto,
   ListSpecialtyCountsResponseDto,
   SetPractitionerPhotoDto,
@@ -1252,6 +1253,14 @@ export class ProfilesPractitionersService {
         practitioner.telehealthAvailable = dto.telehealthAvailable;
       }
       touch(practitioner, actor.id);
+      if (dto.languages !== undefined) {
+        await this.replaceLanguages(
+          tx,
+          practitioner.profileId,
+          dto.languages,
+          actor.id,
+        );
+      }
 
       // --- los datos personales, que viven en `persons` y no en el perfil ----
       const person = await this.personsRepo.findById(tx, link.personId);
@@ -1389,6 +1398,63 @@ export class ProfilesPractitionersService {
     // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
     // las colecciones y la actividad, que esta operación no toca.
     return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Reemplaza los idiomas declarados del profesional por la lista recibida
+   * (informe B, C13). Diferencia por idioma en vez de borrar y recrear: el
+   * idioma que sigue declarado conserva su fila —y su fecha de alta— y sólo
+   * cambia el dominio o si interpreta en consulta.
+   *
+   * No se valida contra `VS_LANGUAGE`, igual que el alta: el idioma por
+   * defecto que escribe el alta (`LANGUAGE_SPANISH`) no es miembro sembrado de
+   * ese catálogo, y validar haría imposible volver a guardar lo que el alta
+   * dejó. Un concepto inexistente lo frena la FK de
+   * `practitioner_languages.language_concept_id`.
+   *
+   * @throws PreconditionFailedException si la lista repite un idioma.
+   */
+  private async replaceLanguages(
+    tx: EntityManager,
+    practitionerProfileId: string,
+    languages: readonly PractitionerLanguageInputDto[],
+    actorUserId: string,
+  ): Promise<void> {
+    const declared = new Map<string, PractitionerLanguageInputDto>();
+    for (const language of languages) {
+      if (declared.has(language.languageConceptId)) {
+        throw new PreconditionFailedException(
+          'Un idioma no puede declararse dos veces',
+          { languageConceptId: language.languageConceptId },
+        );
+      }
+      declared.set(language.languageConceptId, language);
+    }
+
+    const current = await this.languagesRepo.findByPractitioner(
+      tx,
+      practitionerProfileId,
+    );
+    for (const row of current) {
+      const wanted = declared.get(row.languageConceptId);
+      if (!wanted) {
+        this.languagesRepo.remove(tx, row);
+        continue;
+      }
+      declared.delete(row.languageConceptId);
+      row.proficiencyConceptId = wanted.proficiencyConceptId;
+      row.clinicalInterpretationAllowed = wanted.clinicalInterpretationAllowed;
+      touch(row, actorUserId);
+    }
+    for (const language of declared.values()) {
+      this.languagesRepo.create(tx, {
+        practitionerProfileId,
+        languageConceptId: language.languageConceptId,
+        proficiencyConceptId: language.proficiencyConceptId,
+        clinicalInterpretationAllowed: language.clinicalInterpretationAllowed,
+        actorUserId,
+      });
+    }
   }
 
   /**
