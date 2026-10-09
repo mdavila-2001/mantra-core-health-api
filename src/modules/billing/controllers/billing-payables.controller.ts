@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { BillsService, PaymentsMadeService } from '../services';
 import {
   RegisterBillDto,
@@ -29,6 +34,11 @@ export class BillingPayablesController {
   ) {}
 
   /** UC-17-04. */
+  @Audited({
+    action: 'BILL_REGISTERED',
+    entity: 'bill',
+    entityId: 'result.id',
+  })
   @Post('bills')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -43,6 +53,11 @@ export class BillingPayablesController {
   }
 
   /** UC-17-05. */
+  @Audited({
+    action: 'PAYABLE_PAYMENT_EXECUTED',
+    entity: 'payments_made',
+    entityId: 'result.id',
+  })
   @Post('payments-made\\:execute')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

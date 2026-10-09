@@ -16,11 +16,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import {
   FormsInstancesService,
@@ -101,6 +102,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-07. */
+  @Audited({
+    action: 'FORM_INSTANCE_OPENED',
+    entity: 'form_instance',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -114,6 +120,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-08. */
+  @Audited({
+    action: 'FORM_VALUES_CAPTURED',
+    entity: 'form_instance',
+    entityId: 'param:id',
+  })
   @Post(':id/values')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -128,6 +139,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-11. */
+  @Audited({
+    action: 'FORM_INSTANCE_CLOSED',
+    entity: 'form_instance',
+    entityId: 'param:id',
+  })
   @Post(':id/close')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar formulario y proyectar vista de recurso' })

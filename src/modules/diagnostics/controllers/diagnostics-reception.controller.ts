@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { requireTenantId } from '../../../common';
+import { Audited, requireTenantId } from '../../../common';
 import { LabStaffGuard } from '../guards';
 import { DiagnosticsReceptionService } from '../services';
 import { LabInboxPageDto, LabInboxQueryDto } from '../dto';
@@ -35,6 +35,11 @@ export class DiagnosticsReceptionController {
    *
    * `POST` y no `GET`: la búsqueda por paciente es PHI y no viaja en la URL.
    */
+  @Audited({
+    action: 'SERVICE_REQUEST_INBOX_LISTED',
+    entity: 'service_request',
+    entityId: 'result.id',
+  })
   @Post('service-requests/inbox')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

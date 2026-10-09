@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   ParseOptionalDatePipe,
@@ -141,6 +142,11 @@ export class SchedulingBookingsController {
    * El profesional acepta la solicitud (corrección #11): la cita queda
    * confirmada y recién ahí se programan sus recordatorios.
    */
+  @Audited({
+    action: 'BOOKING_ACCEPTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/accept')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -164,6 +170,11 @@ export class SchedulingBookingsController {
    * No la alcanza `PATIENT`: es el prestador el que pide. La persona lee lo que
    * le pidieron en el motivo de su propia cita.
    */
+  @Audited({
+    action: 'BOOKING_INFO_REQUESTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/request-info')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -187,6 +198,11 @@ export class SchedulingBookingsController {
    * quien la tiene; ésta contrapropone sobre lo que todavía no se aceptó, y la
    * solicitud sigue pendiente de que la persona lo mire.
    */
+  @Audited({
+    action: 'BOOKING_SCHEDULE_PROPOSED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/propose-schedule')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -203,6 +219,11 @@ export class SchedulingBookingsController {
    * El profesional rechaza la solicitud, con motivo obligatorio
    * (correcciones #11 y #14).
    */
+  @Audited({
+    action: 'BOOKING_REJECTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reject')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -231,6 +252,11 @@ export class SchedulingBookingsController {
    * decir que una cita está pagada es una afirmación del prestador, y dejársela
    * hacer a quien debe el dinero sería confiar en el campo equivocado.
    */
+  @Audited({
+    action: 'BOOKING_PAYMENT_STATE_SET',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Put(':id/payment-state')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -273,6 +299,11 @@ export class SchedulingBookingsController {
    * **No valida la fecha**: una cita confirmada se empieza cuando el
    * profesional decide, no cuando el reloj lo permite.
    */
+  @Audited({
+    action: 'BOOKING_STARTED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/start')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -292,6 +323,11 @@ export class SchedulingBookingsController {
    * Completa la atención (corrección #15). El paciente ve «completada» apenas
    * ocurre, sin refresco artificial.
    */
+  @Audited({
+    action: 'BOOKING_COMPLETED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/complete')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -308,6 +344,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-08. */
+  @Audited({
+    action: 'BOOKING_RESCHEDULED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reschedule')
   // `PRACTITIONER` desde la corrección #14: mover un turno es un acto del
   // profesional tanto como del mostrador, y ahora exige motivo en las dos
@@ -324,6 +365,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-09. */
+  @Audited({
+    action: 'BOOKING_CANCELLED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/cancel')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -341,6 +387,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-10. */
+  @Audited({
+    action: 'BOOKING_CHECKED_IN',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/check-in')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -359,6 +410,11 @@ export class SchedulingBookingsController {
    * queda en el historial del turno —así el paciente la ve aunque no abra la
    * campana— y sale como aviso in-app.
    */
+  @Audited({
+    action: 'BOOKING_DELAYED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/delay')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
@@ -376,6 +432,11 @@ export class SchedulingBookingsController {
   }
 
   /** UC-41-13. */
+  @Audited({
+    action: 'BOOKING_REMINDERS_SCHEDULED',
+    entity: 'appointment_booking',
+    entityId: 'param:id',
+  })
   @Post(':id/reminders')
   @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.CREATED)

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ConsentMeService } from '../services';
 import {
   MyConsentListDto,
@@ -75,6 +80,11 @@ export class ConsentMeController {
   }
 
   /** Retira un consentimiento propio: cierra su vigencia, no borra la fila. */
+  @Audited({
+    action: 'CONSENT_WITHDRAWN',
+    entity: 'consent',
+    entityId: 'param:id',
+  })
   @Post('consents/:id/withdraw')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Retirar uno de mis consentimientos' })

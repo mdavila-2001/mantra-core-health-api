@@ -11,7 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import {
   SchedulingServiceBookingService,
   SchedulingServiceOfferingsService,
@@ -65,6 +70,11 @@ export class SchedulingServiceOfferingsController {
     return this.offerings.list(query.practitionerProfileId, actor);
   }
 
+  @Audited({
+    action: 'SERVICE_OFFERING_CREATED',
+    entity: 'practitioner_service_offering',
+    entityId: 'result.id',
+  })
   @Post('service-offerings')
   @Roles('PRACTITIONER', 'CLINICIAN', 'SCHEDULING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -80,6 +90,11 @@ export class SchedulingServiceOfferingsController {
     return this.offerings.create(dto, actor);
   }
 
+  @Audited({
+    action: 'SERVICE_OFFERING_UPDATED',
+    entity: 'practitioner_service_offering',
+    entityId: 'param:id',
+  })
   @Patch('service-offerings/:id')
   @Roles('PRACTITIONER', 'CLINICIAN', 'SCHEDULING_ADMIN')
   @ApiOperation({ summary: 'Editar o apagar la oferta de un servicio' })
@@ -111,6 +126,11 @@ export class SchedulingServiceOfferingsController {
     return this.booking.availability(query, actor);
   }
 
+  @Audited({
+    action: 'SERVICE_OFFERING_HOLD_PLACED',
+    entity: 'slot_hold',
+    entityId: 'result.id',
+  })
   @Post('service-offerings/:id/holds')
   @Roles('PATIENT', 'SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
   @HttpCode(HttpStatus.CREATED)

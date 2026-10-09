@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityAuthoritiesService } from '../services';
 import {
   RegisterAuthorityDto,
@@ -32,6 +37,11 @@ export class IdentityAuthoritiesController {
   ) {}
 
   /** UC-27-01. */
+  @Audited({
+    action: 'IDENTITY_AUTHORITY_REGISTERED',
+    entity: 'identity_authority',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -44,6 +54,11 @@ export class IdentityAuthoritiesController {
   }
 
   /** UC-27-01. */
+  @Audited({
+    action: 'IDENTITY_AUTHORITY_ENDPOINT_ADDED',
+    entity: 'identity_authority',
+    entityId: 'param:id',
+  })
   @Post(':id/endpoints')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

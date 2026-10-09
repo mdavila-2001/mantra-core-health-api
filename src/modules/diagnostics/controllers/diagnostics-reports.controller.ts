@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DiagnosticsReportsService } from '../services';
 import {
   CreateReportVersionDto,
@@ -36,6 +41,11 @@ export class DiagnosticsReportsController {
   constructor(private readonly service: DiagnosticsReportsService) {}
 
   /** UC-20-07. */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_VERSION_CREATED',
+    entity: 'diagnostic_report',
+    entityId: 'param:reportId',
+  })
   @Post('reports/:reportId/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear/enmendar versión de informe diagnóstico' })
@@ -48,6 +58,11 @@ export class DiagnosticsReportsController {
   }
 
   /** UC-20-08. */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_VERSION_RELEASED',
+    entity: 'diagnostic_report_version',
+    entityId: 'param:versionId',
+  })
   @Post('reports/:reportId/versions/:versionId/release')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Validar y liberar una versión del informe' })
@@ -61,6 +76,11 @@ export class DiagnosticsReportsController {
   }
 
   /** UC-20-09. */
+  @Audited({
+    action: 'CRITICAL_RESULT_DETECTED',
+    entity: 'critical_result_notification',
+    entityId: 'result.id',
+  })
   @Post('critical-results')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Detectar y notificar un resultado crítico' })
@@ -72,6 +92,11 @@ export class DiagnosticsReportsController {
   }
 
   /** UC-20-10. */
+  @Audited({
+    action: 'CRITICAL_RESULT_ACKNOWLEDGED',
+    entity: 'critical_result_notification',
+    entityId: 'param:id',
+  })
   @Post('critical-results/:id/acknowledge')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Acusar recibo / escalar notificación crítica' })

@@ -1,21 +1,23 @@
 import { SetMetadata } from '@nestjs/common';
 
-/** Clave de metadata de `@AuditTrail()`. */
-export const AUDIT_TRAIL_KEY = 'auditTrail';
-/** Clave de metadata de `@SkipAuditTrail()`. */
-export const SKIP_AUDIT_TRAIL_KEY = 'skipAuditTrail';
+/** Clave de metadata de `@Audited()`. */
+export const AUDITED_KEY = 'audited';
+/** Clave de metadata de `@NotAudited()`. */
+export const NOT_AUDITED_KEY = 'notAudited';
 /** Clave de metadata de `@AccessLogged()`. */
 export const ACCESS_LOGGED_KEY = 'accessLogged';
 
 /**
  * De dónde sale el identificador del recurso afectado: un parámetro de ruta
- * (`param:<nombre>`) o un campo del cuerpo de la respuesta (`result:<campo>`).
- * Sólo se sella si el valor es un UUID: `audit_log.entity_id` es `uuid`.
+ * (`param:<nombre>`), un campo de la respuesta (`result.<campo>`) o del cuerpo
+ * de la petición (`body.<campo>`). Sólo se sella si el valor es un UUID:
+ * `audit_log.entity_id` es `uuid`.
  */
-export type AuditIdSource = `param:${string}` | `result:${string}`;
+export type AuditIdSource =
+  `param:${string}` | `result.${string}` | `body.${string}`;
 
-/** Nombre explícito del sello que el interceptor deja para una ruta que muta. */
-export interface AuditTrailOptions {
+/** Nombre de negocio del sello que el interceptor deja para una ruta que muta. */
+export interface AuditedOptions {
   /** Verbo de negocio en pasado y MAYÚSCULAS, p. ej. `PERMISSION_SET_CREATED`. */
   readonly action: string;
   /** Tabla afectada en singular, p. ej. `delegated_permission_set`. */
@@ -26,22 +28,23 @@ export interface AuditTrailOptions {
 
 /**
  * Nombra el sello que `AuditTrailInterceptor` escribe en `audit.audit_log` al
- * terminar la ruta. Es opcional: sin él, el interceptor sella igual toda ruta
- * autenticada que muta, con una identidad derivada de la ruta
- * (`HTTP POST /clinical/observations`). Se usa donde el nombre de negocio
- * importa para quien lee la bitácora.
+ * terminar una ruta que muta. Toda ruta `POST/PUT/PATCH/DELETE` lleva este
+ * decorador o `@NotAudited`: lo exige `audit-trail-coverage.spec.ts`. Si el
+ * servicio ya selló la petición (patrón canónico atómico, §1.1 del informe C),
+ * el interceptor no repite; la acción declarada acá debe ser la misma que usa
+ * el servicio.
  */
-export const AuditTrail = (options: AuditTrailOptions) =>
-  SetMetadata(AUDIT_TRAIL_KEY, options);
+export const Audited = (options: AuditedOptions) =>
+  SetMetadata(AUDITED_KEY, options);
 
 /**
  * Excluye una ruta (o un controlador entero) del sello transversal. El motivo es
- * obligatorio y debe nombrar el rastro alternativo o por qué no hace falta; el
- * control de CI `alovida:audit-trail` exige además que la ruta figure en su
- * allowlist, para que una exclusión no entre sin revisión.
+ * obligatorio y debe nombrar el rastro alternativo o por qué no hace falta: las
+ * rutas `@Public()` que mutan (sin actor no hay sello, `audit_log.user_id` es
+ * NOT NULL) y la plomería de cola de los workers.
  */
-export const SkipAuditTrail = (reason: string) =>
-  SetMetadata(SKIP_AUDIT_TRAIL_KEY, reason);
+export const NotAudited = (reason: string) =>
+  SetMetadata(NOT_AUDITED_KEY, reason);
 
 /**
  * Paciente cuyo dato se lee: el propio actor (`actor`, rutas `/me`) o un

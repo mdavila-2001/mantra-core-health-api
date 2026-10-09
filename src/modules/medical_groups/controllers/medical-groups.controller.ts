@@ -16,7 +16,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { MedicalGroupsService, type MedicalGroupTab } from '../services';
 import {
   CreateMedicalGroupDto,
@@ -93,6 +98,11 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-04/05/08/09/10/11/12/13: crear grupo médico. */
+  @Audited({
+    action: 'MEDICAL_GROUP_CREATED',
+    entity: 'group',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear grupo médico' })
@@ -104,6 +114,11 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-02/03: responder una invitación (solicitud enviada/recibida). */
+  @Audited({
+    action: 'MEDICAL_GROUP_INVITATION_ANSWERED',
+    entity: 'group_member',
+    entityId: 'param:memberId',
+  })
   @Post(':id/members/:memberId/respond')
   @ApiOperation({
     summary: 'Aceptar o rechazar la invitación a un cargo del grupo',
@@ -118,6 +133,11 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-17/18: "Solicitar cambio de horario". */
+  @Audited({
+    action: 'MEDICAL_GROUP_RESCHEDULE_REQUESTED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
   @Post(':id/reschedule-requests')
   @ApiOperation({ summary: 'Solicitar cambio de horario' })
   requestReschedule(
@@ -129,6 +149,11 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-19/20: el creador acepta o rechaza la fecha propuesta. */
+  @Audited({
+    action: 'MEDICAL_GROUP_RESCHEDULE_ANSWERED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
   @Post(':id/reschedule-requests/respond')
   @ApiOperation({ summary: 'Resolver la solicitud de cambio de horario' })
   respondToReschedule(
@@ -140,6 +165,11 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-21/22: notas del procedimiento, hasta una semana después. */
+  @Audited({
+    action: 'MEDICAL_GROUP_EXERCISE_NOTES_UPDATED',
+    entity: 'group',
+    entityId: 'param:id',
+  })
   @Patch(':id/exercise-notes')
   @ApiOperation({
     summary: 'Subir/corregir las notas del procedimiento (NOTAS DEL EJERCICIO)',

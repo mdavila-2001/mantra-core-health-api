@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { FormsValuesService } from '../services';
 import {
   CorrectValueDto,
@@ -36,6 +41,11 @@ export class FormsValuesController {
   constructor(private readonly valuesService: FormsValuesService) {}
 
   /** UC-09-10. */
+  @Audited({
+    action: 'FORM_VALUES_IMPORTED',
+    entity: 'field_value',
+    entityId: 'result.id',
+  })
   @Post('import')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -49,6 +59,11 @@ export class FormsValuesController {
   }
 
   /** UC-09-09. */
+  @Audited({
+    action: 'FORM_VALUE_CORRECTED',
+    entity: 'field_value',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

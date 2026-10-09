@@ -12,8 +12,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { from, lastValueFrom, Observable } from 'rxjs';
 import {
   ACCESS_LOGGED_KEY,
-  AUDIT_TRAIL_KEY,
-  SKIP_AUDIT_TRAIL_KEY,
+  AUDITED_KEY,
+  NOT_AUDITED_KEY,
   deriveRouteAuditIdentity,
   isUuid,
   joinRouteTemplate,
@@ -22,7 +22,7 @@ import {
   toInetAddress,
   type AccessLoggedOptions,
   type AuditRequestContext,
-  type AuditTrailOptions,
+  type AuditedOptions,
   type RouteAuditIdentity,
 } from '../../../common/audit-trail';
 import { CONCEPTS } from '../../../common/constants/concepts';
@@ -47,6 +47,7 @@ type AuditableRequest = AuthenticatedRequest & {
   readonly ip?: string;
   readonly method: string;
   readonly params: Record<string, unknown>;
+  readonly body?: unknown;
 };
 
 /**
@@ -76,8 +77,8 @@ type AuditableRequest = AuthenticatedRequest & {
  * `trg_forbid_update` (`SQL/10_audit/05_constraints.sql`).
  *
  * Sin actor no hay sello: `audit_log.user_id` es `NOT NULL`. Las rutas
- * `@Public()` que mutan deben declarar su rastro alternativo en la allowlist
- * del control de CI (`tools/alovida/audit-trail-coverage.mjs`).
+ * `@Public()` que mutan llevan `@NotAudited(motivo)` con su rastro alternativo;
+ * lo exige `src/common/audit-trail/audit-trail-coverage.spec.ts`.
  */
 @Injectable()
 export class AuditTrailInterceptor implements NestInterceptor {
@@ -124,7 +125,8 @@ export class AuditTrailInterceptor implements NestInterceptor {
       from(runWithAuditRequestContext(auditContext, fn));
 
     if (MUTATING_METHODS.has(request.method.toUpperCase())) {
-      if (this.isSkipped(context)) return this.withContext(auditContext, next);
+      if (this.isNotAudited(context))
+        return this.withContext(auditContext, next);
       return run(() =>
         this.sealAround(context, request, user, next, auditContext),
       );
@@ -157,9 +159,9 @@ export class AuditTrailInterceptor implements NestInterceptor {
     );
   }
 
-  private isSkipped(context: ExecutionContext): boolean {
+  private isNotAudited(context: ExecutionContext): boolean {
     const reason = this.reflector.getAllAndOverride<string | undefined>(
-      SKIP_AUDIT_TRAIL_KEY,
+      NOT_AUDITED_KEY,
       [context.getHandler(), context.getClass()],
     );
     return typeof reason === 'string' && reason.trim().length > 0;
@@ -206,8 +208,9 @@ export class AuditTrailInterceptor implements NestInterceptor {
       routeTemplate: this.routeTemplate(context),
       params: request.params ?? {},
       result,
-      options: this.reflector.getAllAndOverride<AuditTrailOptions | undefined>(
-        AUDIT_TRAIL_KEY,
+      body: request.body,
+      options: this.reflector.getAllAndOverride<AuditedOptions | undefined>(
+        AUDITED_KEY,
         [context.getHandler(), context.getClass()],
       ),
     });
