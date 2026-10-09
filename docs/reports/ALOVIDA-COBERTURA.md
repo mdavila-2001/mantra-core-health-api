@@ -1,7 +1,6 @@
 # Informe de cobertura ALOVIDA (estático)
 
-- Commit: `414c29e2f731d81ede4e00a706320a0e4c173a87` (2026-10-08T23:10:50-04:00)
-- ⚠️ Generado con cambios sin commitear en `src/` u `openapi/`: las cifras no corresponden a ese commit.
+- Commit: `dd025a608caff30d0fc57ad0cb17094b0bdd00db` (2026-10-09T00:34:48-04:00)
 - Regenerar: `node tools/alovida/coverage-report.mjs` (o `yarn alovida:coverage`)
 - Método: lectura estática del código. No arranca la app, no toca la base y **no ejecuta ninguna ruta**.
 
