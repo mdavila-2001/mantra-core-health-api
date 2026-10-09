@@ -90,21 +90,21 @@ export class DiagnosticUnitsSearchService {
     // Los filtros que viven en otras tablas se resuelven primero y **acotan** la
     // búsqueda. Cuando alguno no encuentra nada, la respuesta es vacía sin
     // seguir consultando.
-    const restricciones: string[][] = [];
+    const restrictions: string[][] = [];
     if (query.studyCode !== undefined && query.studyCode !== '') {
-      restricciones.push(
+      restrictions.push(
         await this.readRepo.findUnitIdsOfferingStudy(em, query.studyCode),
       );
     }
     if (query.insurerTenantId !== undefined) {
-      restricciones.push(
+      restrictions.push(
         await this.readRepo.findUnitIdsWithInsurerAgreement(
           em,
           query.insurerTenantId,
         ),
       );
     }
-    const restrictToUnitIds = intersectar(restricciones);
+    const restrictToUnitIds = intersect(restrictions);
     if (restrictToUnitIds !== undefined && restrictToUnitIds.length === 0) {
       return { items: [], total: 0, limit, offset };
     }
@@ -114,9 +114,9 @@ export class DiagnosticUnitsSearchService {
       tenantId: query.tenantId,
       diagnosticUnitTypeConceptId:
         query.kind === undefined ? undefined : KIND_CONCEPT[query.kind],
-      homeCollection: booleano(query.homeCollection),
-      walkIn: booleano(query.walkIn),
-      acceptsExternalOrders: booleano(query.acceptsExternalOrders),
+      homeCollection: booleanValue(query.homeCollection),
+      walkIn: booleanValue(query.walkIn),
+      acceptsExternalOrders: booleanValue(query.acceptsExternalOrders),
       restrictToUnitIds,
     };
 
@@ -128,13 +128,13 @@ export class DiagnosticUnitsSearchService {
       return { items: [], total, limit, offset };
     }
 
-    const items = await this.proyectar(em, unidades);
+    const items = await this.project(em, unidades);
 
     // Precio y calificación se filtran **después** de proyectar porque los dos
     // son agregados de otras tablas —el mínimo de una tarifa, la media de unas
     // reseñas—: expresarlos como criterio del `find` obligaría a un subquery
     // por fila, que es peor que recortar una página ya traída.
-    const filtrados = items.filter(
+    const filtered = items.filter(
       (item) =>
         (query.maxAmount === undefined ||
           (item.minAmount !== null && item.minAmount <= query.maxAmount)) &&
@@ -145,41 +145,41 @@ export class DiagnosticUnitsSearchService {
     // El total se corrige cuando esos filtros recortaron: decir «hay 40» y
     // devolver 3 haría paginar hacia páginas vacías.
     const totalReal =
-      filtrados.length === items.length ? total : offset + filtrados.length;
+      filtered.length === items.length ? total : offset + filtered.length;
 
-    return { items: filtrados, total: totalReal, limit, offset };
+    return { items: filtered, total: totalReal, limit, offset };
   }
 
   /** Proyecta las unidades a tarjetas, con sus contadores, nota y precio. */
-  private async proyectar(
+  private async project(
     em: EntityManager,
-    unidades: readonly DiagnosticUnits[],
+    units: readonly DiagnosticUnits[],
   ): Promise<DiagnosticUnitSearchItemDto[]> {
-    const ids = unidades.map((unidad) => unidad.id);
+    const ids = units.map((unit) => unit.id);
     const ahora = new Date();
 
     const [sitios, ofertas, conceptos, cronogramas, notas] = await Promise.all([
       this.readRepo.findActiveSites(em, ids),
       this.readRepo.findActiveOfferings(em, ids),
       this.readRepo.findConcepts(em, [
-        ...new Set(unidades.map((u) => u.diagnosticUnitTypeConceptId)),
+        ...new Set(units.map((u) => u.diagnosticUnitTypeConceptId)),
       ]),
       this.readRepo.findCurrentPublicSchedulesFor(em, ids, ahora),
       this.ratings.ratingsByProfiles(
         em,
-        unidades
-          .map((unidad) => unidad.publicProfileId)
-          .filter((perfil): perfil is string => perfil !== undefined),
+        units
+          .map((unit) => unit.publicProfileId)
+          .filter((profile): profile is string => profile !== undefined),
       ),
     ]);
 
-    const equipos = await this.readRepo.findEquipment(
+    const teams = await this.readRepo.findEquipment(
       em,
       sitios.map((sitio) => sitio.id),
     );
-    const precios = await this.readRepo.findCurrentPricesForSchedules(
+    const prices = await this.readRepo.findCurrentPricesForSchedules(
       em,
-      cronogramas.map((cronograma) => cronograma.id),
+      cronogramas.map((schedule) => schedule.id),
       ahora,
     );
 
@@ -194,111 +194,111 @@ export class DiagnosticUnitsSearchService {
       .map((ps) => ps.addressId)
       .filter((id): id is string => id !== undefined);
     const addresses = await this.readRepo.findAddresses(em, addressIds);
-    const ciudadPorAddressId = new Map(
+    const cityByAddressId = new Map(
       addresses
         .filter((a) => a.city !== undefined && a.city !== '')
         .map((a) => [a.id, a.city as string]),
     );
-    const ciudadPorPracticeSiteId = new Map(
+    const cityByPracticeSiteId = new Map(
       practiceSites
         .map((ps): [string, string] | undefined =>
           ps.addressId === undefined
             ? undefined
-            : ciudadPorAddressId.has(ps.addressId)
-              ? [ps.id, ciudadPorAddressId.get(ps.addressId) as string]
+            : cityByAddressId.has(ps.addressId)
+              ? [ps.id, cityByAddressId.get(ps.addressId) as string]
               : undefined,
         )
         .filter((par): par is [string, string] => par !== undefined),
     );
 
-    const conceptoPorId = new Map(
-      conceptos.map((concepto) => [concepto.id, concepto]),
+    const conceptById = new Map(
+      conceptos.map((concept) => [concept.id, concept]),
     );
-    const unidadPorSitio = new Map(
+    const unitBySite = new Map(
       sitios.map((sitio) => [sitio.id, sitio.diagnosticUnitId]),
     );
-    const unidadPorCronograma = new Map(
-      cronogramas.map((cronograma) => [
-        cronograma.id,
-        cronograma.diagnosticUnitId,
+    const unitBySchedule = new Map(
+      cronogramas.map((schedule) => [
+        schedule.id,
+        schedule.diagnosticUnitId,
       ]),
     );
-    const monedaPorCronograma = new Map(
-      cronogramas.map((cronograma) => [
-        cronograma.id,
-        cronograma.currencyConceptId,
+    const currencyBySchedule = new Map(
+      cronogramas.map((schedule) => [
+        schedule.id,
+        schedule.currencyConceptId,
       ]),
     );
 
-    const sitiosPorUnidad = contarPor(sitios, (s) => s.diagnosticUnitId);
-    const estudiosPorUnidad = contarPor(ofertas, (o) => o.diagnosticUnitId);
-    const equiposPorUnidad = contarPor(equipos, (e) =>
-      unidadPorSitio.get(e.diagnosticUnitSiteId),
+    const sitesByUnit = countBy(sitios, (s) => s.diagnosticUnitId);
+    const studiesByUnit = countBy(ofertas, (o) => o.diagnosticUnitId);
+    const teamsByUnit = countBy(teams, (e) =>
+      unitBySite.get(e.diagnosticUnitSiteId),
     );
 
-    const ciudadesPorUnidad = new Map<string, Set<string>>();
+    const citiesByUnit = new Map<string, Set<string>>();
     for (const sitio of sitios) {
-      const ciudad = ciudadPorPracticeSiteId.get(sitio.practiceSiteId);
-      if (ciudad === undefined) continue;
-      const set = ciudadesPorUnidad.get(sitio.diagnosticUnitId) ?? new Set();
-      set.add(ciudad);
-      ciudadesPorUnidad.set(sitio.diagnosticUnitId, set);
+      const city = cityByPracticeSiteId.get(sitio.practiceSiteId);
+      if (city === undefined) continue;
+      const set = citiesByUnit.get(sitio.diagnosticUnitId) ?? new Set();
+      set.add(city);
+      citiesByUnit.set(sitio.diagnosticUnitId, set);
     }
 
-    const minimoPorUnidad = new Map<string, number>();
-    const monedaMinimaPorUnidad = new Map<string, string | undefined>();
-    for (const precio of precios) {
-      const unidadId = unidadPorCronograma.get(precio.priceScheduleId);
-      if (unidadId === undefined) continue;
+    const minimumByUnit = new Map<string, number>();
+    const minimumCurrencyByUnit = new Map<string, string | undefined>();
+    for (const price of prices) {
+      const unitId = unitBySchedule.get(price.priceScheduleId);
+      if (unitId === undefined) continue;
       // Se compara el importe **base publicado**, que es el que el centro
       // muestra en su tarifa. `patient_amount` puede no estar fijado y usar uno
       // u otro según la fila haría comparar peras con manzanas entre centros.
-      const importe = numero(precio.baseAmount);
-      if (importe === undefined) continue;
-      const previo = minimoPorUnidad.get(unidadId);
-      if (previo === undefined || importe < previo) {
-        minimoPorUnidad.set(unidadId, importe);
-        monedaMinimaPorUnidad.set(
-          unidadId,
-          monedaPorCronograma.get(precio.priceScheduleId),
+      const amount = numero(price.baseAmount);
+      if (amount === undefined) continue;
+      const previous = minimumByUnit.get(unitId);
+      if (previous === undefined || amount < previous) {
+        minimumByUnit.set(unitId, amount);
+        minimumCurrencyByUnit.set(
+          unitId,
+          currencyBySchedule.get(price.priceScheduleId),
         );
       }
     }
-    const conceptosMoneda = await this.readRepo.findConcepts(em, [
+    const currencyConcepts = await this.readRepo.findConcepts(em, [
       ...new Set(
-        [...monedaMinimaPorUnidad.values()].filter(
+        [...minimumCurrencyByUnit.values()].filter(
           (id): id is string => id !== undefined,
         ),
       ),
     ]);
-    const monedaConceptoPorId = new Map(conceptosMoneda.map((c) => [c.id, c]));
+    const conceptCurrencyById = new Map(currencyConcepts.map((c) => [c.id, c]));
 
-    return unidades.map((unidad) => {
-      const nota =
-        unidad.publicProfileId === undefined
+    return units.map((unit) => {
+      const note =
+        unit.publicProfileId === undefined
           ? undefined
-          : notas.get(unidad.publicProfileId);
-      const monedaConceptoId = monedaMinimaPorUnidad.get(unidad.id);
+          : notas.get(unit.publicProfileId);
+      const conceptCurrencyId = minimumCurrencyByUnit.get(unit.id);
       return {
-        id: unidad.id,
-        tenantId: unidad.tenantId,
-        code: unidad.code,
-        name: unidad.name,
-        type: concepto(conceptoPorId.get(unidad.diagnosticUnitTypeConceptId)),
-        siteCount: sitiosPorUnidad.get(unidad.id) ?? 0,
-        equipmentCount: equiposPorUnidad.get(unidad.id) ?? 0,
-        studyCount: estudiosPorUnidad.get(unidad.id) ?? 0,
-        acceptsExternalOrders: unidad.acceptsExternalOrders ?? null,
-        walkInAvailable: unidad.walkInAvailable ?? null,
-        homeCollectionAvailable: unidad.homeCollectionAvailable ?? null,
-        rating: nota?.average ?? null,
-        ratingCount: nota?.count ?? 0,
-        minAmount: minimoPorUnidad.get(unidad.id) ?? null,
+        id: unit.id,
+        tenantId: unit.tenantId,
+        code: unit.code,
+        name: unit.name,
+        type: concept(conceptById.get(unit.diagnosticUnitTypeConceptId)),
+        siteCount: sitesByUnit.get(unit.id) ?? 0,
+        equipmentCount: teamsByUnit.get(unit.id) ?? 0,
+        studyCount: studiesByUnit.get(unit.id) ?? 0,
+        acceptsExternalOrders: unit.acceptsExternalOrders ?? null,
+        walkInAvailable: unit.walkInAvailable ?? null,
+        homeCollectionAvailable: unit.homeCollectionAvailable ?? null,
+        rating: note?.average ?? null,
+        ratingCount: note?.count ?? 0,
+        minAmount: minimumByUnit.get(unit.id) ?? null,
         minAmountCurrency:
-          monedaConceptoId === undefined
+          conceptCurrencyId === undefined
             ? null
-            : (monedaConceptoPorId.get(monedaConceptoId)?.code ?? null),
-        cities: [...(ciudadesPorUnidad.get(unidad.id) ?? [])].sort(),
+            : (conceptCurrencyById.get(conceptCurrencyId)?.code ?? null),
+        cities: [...(citiesByUnit.get(unit.id) ?? [])].sort(),
       };
     });
   }
@@ -309,43 +309,43 @@ export class DiagnosticUnitsSearchService {
  *
  * Nunca devuelve el uuid: un identificador en pantalla no le dice nada a nadie.
  */
-function concepto(entrada: CatalogConcepts | undefined): {
+function concept(entry: CatalogConcepts | undefined): {
   /** Código del concepto. */
   code: string;
   /** Etiqueta legible. */
   display: string;
 } {
   return {
-    code: entrada?.code ?? '',
-    display: entrada?.display ?? '',
+    code: entry?.code ?? '',
+    display: entry?.display ?? '',
   };
 }
 
 /** Cuenta elementos por la clave que devuelve `key`, salteando las vacías. */
-function contarPor<T>(
+function countBy<T>(
   items: readonly T[],
   key: (item: T) => string | undefined,
 ): Map<string, number> {
-  const conteo = new Map<string, number>();
+  const count = new Map<string, number>();
   for (const item of items) {
     const k = key(item);
     if (k === undefined) continue;
-    conteo.set(k, (conteo.get(k) ?? 0) + 1);
+    count.set(k, (count.get(k) ?? 0) + 1);
   }
-  return conteo;
+  return count;
 }
 
 /** La intersección de las listas, o nada si no hubo ninguna. */
-function intersectar(listas: readonly string[][]): string[] | undefined {
-  if (listas.length === 0) return undefined;
-  return listas.reduce((acumulado, lista) => {
-    const conjunto = new Set(lista);
-    return acumulado.filter((id) => conjunto.has(id));
+function intersect(lists: readonly string[][]): string[] | undefined {
+  if (lists.length === 0) return undefined;
+  return lists.reduce((accumulated, list) => {
+    const set = new Set(list);
+    return accumulated.filter((id) => set.has(id));
   });
 }
 
 /** El texto de la query como booleano, o nada si no vino. */
-function booleano(value: string | undefined): boolean | undefined {
+function booleanValue(value: string | undefined): boolean | undefined {
   return value === undefined ? undefined : value === 'true';
 }
 

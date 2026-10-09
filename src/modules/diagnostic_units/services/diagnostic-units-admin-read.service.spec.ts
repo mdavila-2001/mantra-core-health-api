@@ -11,7 +11,7 @@ import { DiagnosticUnitsAdminReadService } from './diagnostic-units-admin-read.s
 import { DUNIT } from '../diagnostic_units.concepts';
 import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
-const UNIDAD_PUBLICADA = {
+const PUBLISHED_UNIT = {
   id: 'unit-1',
   tenantId: 'tenant-1',
   code: 'LAB-CENTRAL',
@@ -21,8 +21,8 @@ const UNIDAD_PUBLICADA = {
   verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED,
 };
 
-const UNIDAD_EN_BORRADOR = {
-  ...UNIDAD_PUBLICADA,
+const DRAFT_UNIT = {
+  ...PUBLISHED_UNIT,
   id: 'unit-2',
   code: 'LAB-NORTE',
   name: 'Laboratorio Norte',
@@ -38,7 +38,7 @@ function build() {
   const em = { fork: mockFn(() => em) };
   const readRepo = {
     findByTenant: mockFn().mockResolvedValue([]),
-    findById: mockFn().mockResolvedValue(UNIDAD_PUBLICADA),
+    findById: mockFn().mockResolvedValue(PUBLISHED_UNIT),
     findSites: mockFn().mockResolvedValue([]),
     findEquipment: mockFn().mockResolvedValue([]),
     findOfferings: mockFn().mockResolvedValue([]),
@@ -60,7 +60,7 @@ function build() {
 }
 
 /** Ejecuta con el tenant fijado, como haría el interceptor de contexto. */
-function conTenant<T>(fn: () => Promise<T>, tenantId = 'tenant-1'): Promise<T> {
+function withTenant<T>(fn: () => Promise<T>, tenantId = 'tenant-1'): Promise<T> {
   return runWithTenant(tenantId, fn);
 }
 
@@ -69,14 +69,14 @@ describe('DiagnosticUnitsAdminReadService', () => {
     it('devuelve la unidad sin publicar, que el directorio esconde', async () => {
       const d = build();
       d.readRepo.findByTenant.mockResolvedValue([
-        UNIDAD_PUBLICADA,
-        UNIDAD_EN_BORRADOR,
+        PUBLISHED_UNIT,
+        DRAFT_UNIT,
       ]);
 
-      const lista = await conTenant(() => d.service.list());
+      const list = await withTenant(() => d.service.list());
 
-      expect(lista.count).toBe(2);
-      expect(lista.items.map((item) => item.code)).toEqual([
+      expect(list.count).toBe(2);
+      expect(list.items.map((item) => item.code)).toEqual([
         'LAB-CENTRAL',
         'LAB-NORTE',
       ]);
@@ -85,30 +85,30 @@ describe('DiagnosticUnitsAdminReadService', () => {
     it('marca cuál se ve hoy en el directorio y cuál no', async () => {
       const d = build();
       d.readRepo.findByTenant.mockResolvedValue([
-        UNIDAD_PUBLICADA,
-        UNIDAD_EN_BORRADOR,
+        PUBLISHED_UNIT,
+        DRAFT_UNIT,
       ]);
 
-      const lista = await conTenant(() => d.service.list());
+      const list = await withTenant(() => d.service.list());
 
       // La regla es la misma que aplica el directorio —activa y verificada—;
       // acá se informa en vez de filtrar, para poder decir por qué no se ve.
-      expect(lista.items[0].publiclyListed).toBe(true);
-      expect(lista.items[1].publiclyListed).toBe(false);
+      expect(list.items[0].publiclyListed).toBe(true);
+      expect(list.items[1].publiclyListed).toBe(false);
     });
 
     it('no consulta nada más cuando el tenant no tiene unidades', async () => {
       const d = build();
 
-      const lista = await conTenant(() => d.service.list());
+      const list = await withTenant(() => d.service.list());
 
-      expect(lista).toEqual({ items: [], count: 0 });
+      expect(list).toEqual({ items: [], count: 0 });
       expect(d.readRepo.findSites).not.toHaveBeenCalled();
     });
 
     it('cuenta sedes, estudios y equipos de cada unidad', async () => {
       const d = build();
-      d.readRepo.findByTenant.mockResolvedValue([UNIDAD_PUBLICADA]);
+      d.readRepo.findByTenant.mockResolvedValue([PUBLISHED_UNIT]);
       d.readRepo.findSites.mockResolvedValue([
         {
           id: 'sede-1',
@@ -143,9 +143,9 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      const lista = await conTenant(() => d.service.list());
+      const list = await withTenant(() => d.service.list());
 
-      expect(lista.items[0]).toMatchObject({
+      expect(list.items[0]).toMatchObject({
         siteCount: 1,
         studyCount: 2,
         equipmentCount: 1,
@@ -159,14 +159,14 @@ describe('DiagnosticUnitsAdminReadService', () => {
       d.readRepo.findById.mockResolvedValue(null);
 
       await expect(
-        conTenant(() => d.service.getById('unit-1')),
+        withTenant(() => d.service.getById('unit-1')),
       ).rejects.toThrow(ResourceNotFoundException);
     });
 
     it('acota la búsqueda al tenant del contexto', async () => {
       const d = build();
 
-      await conTenant(() => d.service.getById('unit-1'), 'tenant-9');
+      await withTenant(() => d.service.getById('unit-1'), 'tenant-9');
 
       expect(d.readRepo.findById).toHaveBeenCalledWith(
         d.em,
@@ -191,9 +191,9 @@ describe('DiagnosticUnitsAdminReadService', () => {
         { id: 'ps-1', code: 'S-CENTRAL', name: 'Sede Central' },
       ]);
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
-      expect(ficha.sites[0]).toMatchObject({
+      expect(record.sites[0]).toMatchObject({
         code: 'S-CENTRAL',
         name: 'Sede Central',
         accessionPrefix: 'LC',
@@ -213,10 +213,10 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
-      expect(ficha.sites[0].code).toBe('LC');
-      expect(ficha.sites[0].name).toBe('Sede sin nombre registrado');
+      expect(record.sites[0].code).toBe('LC');
+      expect(record.sites[0].name).toBe('Sede sin nombre registrado');
     });
 
     it('devuelve también los precios de cronogramas no públicos', async () => {
@@ -267,15 +267,15 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
       // El directorio sólo publica el primero; la consola tiene que ver los dos
       // o no habría manera de administrar el convenio con la aseguradora.
-      expect(ficha.studies[0].prices.map((p) => p.scheduleCode)).toEqual([
+      expect(record.studies[0].prices.map((p) => p.scheduleCode)).toEqual([
         'PUBLICO',
         'ASEGURADORA-A',
       ]);
-      expect(ficha.studies[0].prices[1].schedulePublic).toBe(false);
+      expect(record.studies[0].prices[1].schedulePublic).toBe(false);
     });
 
     it('descarta el precio cuyo cronograma no vino, en vez de inventarlo', async () => {
@@ -301,9 +301,9 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
-      expect(ficha.studies[0].prices).toEqual([]);
+      expect(record.studies[0].prices).toEqual([]);
     });
 
     it('resuelve el nombre del personal por su asignación de rol', async () => {
@@ -325,9 +325,9 @@ describe('DiagnosticUnitsAdminReadService', () => {
         new Map([['perfil-1', 'Dr. Marco Rojas']]),
       );
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
-      expect(ficha.staff[0]).toMatchObject({
+      expect(record.staff[0]).toMatchObject({
         practitionerProfileId: 'perfil-1',
         practitionerName: 'Dr. Marco Rojas',
         mayValidateResults: true,
@@ -346,13 +346,13 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      const ficha = await conTenant(() => d.service.getById('unit-1'));
+      const record = await withTenant(() => d.service.getById('unit-1'));
 
       // Sigue en la lista con el dato faltante explícito: esconderlo dejaría
       // una vinculación activa sin que nadie pueda verla ni cerrarla.
-      expect(ficha.staff).toHaveLength(1);
-      expect(ficha.staff[0].practitionerProfileId).toBeNull();
-      expect(ficha.staff[0].practitionerName).toBeNull();
+      expect(record.staff).toHaveLength(1);
+      expect(record.staff[0].practitionerProfileId).toBeNull();
+      expect(record.staff[0].practitionerName).toBeNull();
     });
 
     it('calcula los días hasta la próxima calibración', async () => {
@@ -384,10 +384,10 @@ describe('DiagnosticUnitsAdminReadService', () => {
           },
         ]);
 
-        const ficha = await conTenant(() => d.service.getById('unit-1'));
+        const record = await withTenant(() => d.service.getById('unit-1'));
 
-        expect(ficha.equipment[0].daysToCalibration).toBe(5);
-        expect(ficha.equipment[1].daysToCalibration).toBeNull();
+        expect(record.equipment[0].daysToCalibration).toBe(5);
+        expect(record.equipment[1].daysToCalibration).toBeNull();
       } finally {
         jest.useRealTimers();
       }
@@ -406,9 +406,9 @@ describe('DiagnosticUnitsAdminReadService', () => {
           },
         ]);
 
-        const ficha = await conTenant(() => d.service.getById('unit-1'));
+        const record = await withTenant(() => d.service.getById('unit-1'));
 
-        expect(ficha.accreditations[0].daysToExpiry).toBe(-15);
+        expect(record.accreditations[0].daysToExpiry).toBe(-15);
       } finally {
         jest.useRealTimers();
       }
@@ -426,7 +426,7 @@ describe('DiagnosticUnitsAdminReadService', () => {
         },
       ]);
 
-      await conTenant(() => d.service.getById('unit-1'));
+      await withTenant(() => d.service.getById('unit-1'));
 
       expect(d.readRepo.findConcepts).toHaveBeenCalledTimes(1);
       const [, ids] = d.readRepo.findConcepts.mock.calls[0];
