@@ -684,7 +684,7 @@ export class ObjectStorageService {
     // nuevo del cliente, la comprobación de MCH-010 se haría contra lo que
     // declare ahora y no contra aquello que se autorizó al emitir.
     const { version, location } = await this.em.transactional(async (tx) => {
-      const resuelto = await this.resolveServableVersion(
+      const resolved = await this.resolveServableVersion(
         tx,
         versionId,
         actor,
@@ -696,7 +696,7 @@ export class ObjectStorageService {
       // evidencia no se abre el objeto.
       await this.recordDicomAccess(
         tx,
-        resuelto.manifest,
+        resolved.manifest,
         actor,
         claims.p,
         DICOMWEB_OUTCOME.ALLOWED,
@@ -705,9 +705,9 @@ export class ObjectStorageService {
         action: OBJECT_ACCESS_EVENT.REDEEMED,
         entity: OBJECT_ACCESS_ENTITY,
         entityId: versionId,
-        tenantId: resuelto.manifest.tenantId,
+        tenantId: resolved.manifest.tenantId,
       });
-      return resuelto;
+      return resolved;
     });
     const namespace = await this.storageRepo.findNamespaceById(
       this.em,
@@ -783,10 +783,10 @@ export class ObjectStorageService {
     actor: AuthenticatedUser,
     purposeOfUseCode: string | undefined,
     evento: string,
-    operacion: () => Promise<T>,
+    operation: () => Promise<T>,
   ): Promise<T> {
     try {
-      return await operacion();
+      return await operation();
     } catch (error) {
       try {
         await this.em.transactional((tx) =>
@@ -836,18 +836,18 @@ export class ObjectStorageService {
     purposeOfUseCode: string,
     outcome: string,
   ): Promise<string | undefined> {
-    const coordenadas = await this.dicomRepo.findDicomCoordinates(
+    const coordinates = await this.dicomRepo.findDicomCoordinates(
       tx,
       manifest.id,
     );
-    if (!coordenadas) return undefined;
+    if (!coordinates) return undefined;
     return this.dicomRepo.createAccessLog(tx, {
-      tenantId: coordenadas.tenantId,
+      tenantId: coordinates.tenantId,
       principalId: actor.id,
       operation: DICOMWEB_OPERATION.WADO_URI,
-      studyInstanceUid: coordenadas.studyInstanceUid,
-      seriesInstanceUid: coordenadas.seriesInstanceUid,
-      sopInstanceUid: coordenadas.sopInstanceUid,
+      studyInstanceUid: coordinates.studyInstanceUid,
+      seriesInstanceUid: coordinates.seriesInstanceUid,
+      sopInstanceUid: coordinates.sopInstanceUid,
       purposeOfUseCode,
       outcome,
     }).id;
@@ -994,13 +994,13 @@ export class ObjectStorageService {
     purposeOfUseCode: string,
     context: Record<string, unknown>,
   ): Promise<void> {
-    const denegar = (motivo: string): never => {
+    const deny = (reason: string): never => {
       this.logger.warn(
         {
           operation: 'object-storage.access.denied',
           actorUserId: actor.id,
           manifestId: manifest.id,
-          reason: motivo,
+          reason: reason,
           ...context,
         },
         'Access to a stored object denied',
@@ -1009,10 +1009,10 @@ export class ObjectStorageService {
     };
 
     if (!OBJECT_ACCESS_PURPOSES.includes(purposeOfUseCode)) {
-      denegar('PURPOSE_NOT_ALLOWED');
+      deny('PURPOSE_NOT_ALLOWED');
     }
     if (!(actor.tenantIds ?? []).includes(manifest.tenantId)) {
-      denegar('TENANT_MISMATCH');
+      deny('TENANT_MISMATCH');
     }
     if (!manifest.patientProfileId) return;
 
@@ -1025,7 +1025,7 @@ export class ObjectStorageService {
       // La política responde 403 con el detalle del expediente; acá se
       // uniforma, porque el que pregunta ni siquiera debería saber que el
       // objeto existe.
-      denegar('PATIENT_ACCESS_DENIED');
+      deny('PATIENT_ACCESS_DENIED');
     }
   }
 
@@ -1288,14 +1288,14 @@ function signAccessToken(claims: SignedAccessClaims): string {
  * el tiempo de respuesta cuántos bytes acertó quien está probando.
  */
 function verifyAccessToken(token: string): SignedAccessClaims | null {
-  const partes = token.split('.');
-  if (partes.length !== 2 || !partes[0] || !partes[1]) return null;
-  const [payload, firma] = partes;
-  const esperada = Buffer.from(accessSignature(payload));
-  const recibida = Buffer.from(firma);
+  const parts = token.split('.');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+  const [payload, firma] = parts;
+  const expected = Buffer.from(accessSignature(payload));
+  const received = Buffer.from(firma);
   if (
-    esperada.byteLength !== recibida.byteLength ||
-    !timingSafeEqual(esperada, recibida)
+    expected.byteLength !== received.byteLength ||
+    !timingSafeEqual(expected, received)
   ) {
     return null;
   }
