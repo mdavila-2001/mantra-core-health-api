@@ -17,6 +17,7 @@ import { isMeshDescriptor } from './remote.mjs';
 
 const MAX_IMAGES = 3;
 const WIKIDATA_ITEM_LABEL = 'Elemento de Wikidata';
+const ICD_TITLE_LABEL = 'Título ICD-10-CM (inglés)';
 const ORPHANET_EXPERT_FALLBACK = (orpha) => `https://www.orpha.net/en/disease/detail/${orpha}`;
 
 const prefixed = (prefix) => (v) => (String(v).startsWith(prefix) ? String(v) : `${prefix}${v}`);
@@ -162,7 +163,7 @@ function buildFacts(term, identity, wd, ctx) {
   const seen = new Set();
   pushFact(facts, seen, { label: 'Código CIE-10-ES', value: term.code, source: GLOSSARY_SOURCE, sourceUrl: CIE_SOURCE_URL });
   const icd = ctx.icd10cm?.codes.get(term.code);
-  if (icd?.title) pushFact(facts, seen, { label: 'Título ICD-10-CM (inglés)', value: icd.title, source: 'icd10cm-tabular', sourceUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html' });
+  if (icd?.title) pushFact(facts, seen, { label: ICD_TITLE_LABEL, value: icd.title, source: 'icd10cm-tabular', sourceUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html' });
   const { orpha, mondo } = identity;
   if (orpha) {
     const url = orpha.expertLink ?? ORPHANET_EXPERT_FALLBACK(orpha.orpha);
@@ -337,8 +338,8 @@ export function buildArticle(term, identity, wd, ctx) {
   for (const r of imageRejects) reject(r.level, r.reason, r.detail);
 
   const facts = buildFacts(term, eff, wd, ctx);
-  // El puntero al ítem de Wikidata no basta para tener artículo: es un enlace, no un dato.
-  const hasSourceFacts = facts.some((f) => f.source !== GLOSSARY_SOURCE && f.label !== WIKIDATA_ITEM_LABEL);
+  // Ni el puntero al ítem de Wikidata ni el título de la ICD-10-CM bastan para tener artículo: son un enlace y un nombre.
+  const hasSourceFacts = facts.some((f) => f.source !== GLOSSARY_SOURCE && f.label !== WIKIDATA_ITEM_LABEL && f.label !== ICD_TITLE_LABEL);
   if (sections.length === 0 && images.length === 0 && !hasSourceFacts) {
     const linked = eff.orpha || eff.mondo || wd?.qid;
     reject('term', linked ? REJECT_REASONS.EMPTY_ARTICLE : REJECT_REASONS.NO_EXACT_SOURCE, null);

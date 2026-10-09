@@ -4,7 +4,7 @@
 //
 //   node --max-old-space-size=4096 build-articles.mjs \
 //        [--seed-dir <shards>] [--cache-dir <dir>] [--out-dir <dir>] \
-//        [--offline] [--hpo-license-ack] [--include-wikipedia-cited] [--no-wikidata-bridge]
+//        [--offline] [--hpo-license-ack] [--include-wikipedia-cited] [--wikidata-bridge]
 //
 // Salida (en --out-dir): articles.ndjson · rejected.ndjson · sources.json ·
 // stats.json · COVERAGE.md. Determinista: con la misma caché produce los mismos
@@ -57,7 +57,7 @@ function remoteRetrievedAt(cacheDir, offline) {
 
 const read = (dir, file) => readFileSync(join(dir, 'files', file), 'utf8');
 
-export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpoAck = false, includeWikipediaCited = false, wikidataBridge = true, limit = null, http: injected = null }) {
+export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpoAck = false, includeWikipediaCited = false, wikidataBridge = false, limit = null, http: injected = null }) {
   const manifest = JSON.parse(readFileSync(join(cacheDir, 'sources-manifest.json'), 'utf8'));
   const day = (name) => manifest[name].retrievedAt;
   const http = injected ?? (offline ? new OfflineHttp() : new HttpClient({ concurrency: 1, minDelayMs: 1000 }));
@@ -170,7 +170,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     offline: Boolean(args.offline),
     hpoAck: Boolean(args['hpo-license-ack']),
     includeWikipediaCited: Boolean(args['include-wikipedia-cited']),
-    wikidataBridge: !args['no-wikidata-bridge'],
+    wikidataBridge: Boolean(args['wikidata-bridge']),
     limit: args.limit ? Number(args.limit) : null,
   });
 }
