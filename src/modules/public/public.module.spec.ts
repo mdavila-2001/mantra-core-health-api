@@ -26,8 +26,8 @@ describe('PublicCatalogModule (M4 · H2)', () => {
   it.each([
     ['organizationServices', 'public/profiles/o/:slug/services'],
     ['pharmacyProducts', 'public/profiles/f/:slug/products'],
-  ])('%s es GET %s y @Public()', (metodo, ruta) => {
-    const handler = (PublicCatalogController.prototype as any)[metodo];
+  ])('%s es GET %s y @Public()', (method, ruta) => {
+    const handler = (PublicCatalogController.prototype as any)[method];
     expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(ruta);
     expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
       RequestMethod.GET,
@@ -65,7 +65,7 @@ describe('PublicCatalogModule (M4 · H2)', () => {
       metatype: PublicCatalogPageQueryDto,
       data: '',
     };
-    const valida = async (query: Record<string, unknown>) => {
+    const valid = async (query: Record<string, unknown>) => {
       try {
         return await PIPE.transform(query, META);
       } catch {
@@ -74,22 +74,22 @@ describe('PublicCatalogModule (M4 · H2)', () => {
     };
 
     it('acepta limit dentro de [1, 50] y lo convierte a número', async () => {
-      expect(await valida({ limit: '50' })).toEqual({ limit: 50 });
-      expect(await valida({ limit: '1', cursor: 'abc' })).toEqual({
+      expect(await valid({ limit: '50' })).toEqual({ limit: 50 });
+      expect(await valid({ limit: '1', cursor: 'abc' })).toEqual({
         limit: 1,
         cursor: 'abc',
       });
-      expect(await valida({})).toEqual({});
+      expect(await valid({})).toEqual({});
     });
 
     it('rechaza limit fuera de rango o no numérico', async () => {
-      expect(await valida({ limit: '0' })).toBe('rechazada');
-      expect(await valida({ limit: '51' })).toBe('rechazada');
-      expect(await valida({ limit: 'veinte' })).toBe('rechazada');
+      expect(await valid({ limit: '0' })).toBe('rechazada');
+      expect(await valid({ limit: '51' })).toBe('rechazada');
+      expect(await valid({ limit: 'veinte' })).toBe('rechazada');
     });
 
     it('rechaza un parámetro que la lectura no declara', async () => {
-      expect(await valida({ city: 'Cochabamba' })).toBe('rechazada');
+      expect(await valid({ city: 'Cochabamba' })).toBe('rechazada');
     });
   });
 });

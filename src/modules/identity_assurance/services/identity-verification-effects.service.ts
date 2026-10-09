@@ -105,13 +105,13 @@ export class IdentityVerificationEffectsService {
    * @param tx - Transacción activa.
    * @param kase - Caso revocado o vencido.
    * @param actorUserId - Quién lo registró.
-   * @param motivo - Si la autoridad retiró el respaldo o si sólo venció.
+   * @param reason - Si la autoridad retiró el respaldo o si sólo venció.
    */
   async applyRevoked(
     tx: EntityManager,
     kase: IdentityVerificationCases,
     actorUserId: string,
-    motivo: 'REVOKED' | 'EXPIRED' = 'REVOKED',
+    reason: 'REVOKED' | 'EXPIRED' = 'REVOKED',
   ): Promise<void> {
     const targetId = await this.publicSubjectOf(tx, kase);
     if (!targetId) return;
@@ -120,7 +120,7 @@ export class IdentityVerificationEffectsService {
       tx,
       targetId,
       actorUserId,
-      motivo,
+      reason,
     );
 
     this.logger.info(
@@ -129,7 +129,7 @@ export class IdentityVerificationEffectsService {
         caseId: kase.id,
         targetId,
         revoked,
-        motivo,
+        motivo: reason,
       },
       'Public verified badge revoked after the case lost its backing',
     );

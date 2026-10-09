@@ -21,7 +21,7 @@ import {
   CodeSystemsReadService,
   ImportTemplateService,
   IMPORT_PARSERS,
-  LECTOR_DE_IMPORTACION,
+  LECTOR_IMPORT,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -66,7 +66,7 @@ import {
     ImportTemplateService,
     // Qué formatos sabe leer el importador y con qué perfiles. Va por token
     // para que sumar un formato sea cambiar esta lista y no el servicio.
-    { provide: IMPORT_PARSERS, useValue: LECTOR_DE_IMPORTACION },
+    { provide: IMPORT_PARSERS, useValue: LECTOR_IMPORT },
     TerminologySourcesRepository,
     CodeSystemsRepository,
     CodeSystemVersionsRepository,

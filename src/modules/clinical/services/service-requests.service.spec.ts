@@ -34,7 +34,7 @@ function build() {
     findById: mockFn().mockResolvedValue(ENCOUNTER),
   };
   const clinicalRead = {
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const duplicateStudyDetector = {
     findDuplicate: mockFn().mockResolvedValue(null),
@@ -142,7 +142,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
   });
 
   describe('formInstanceId (P43)', () => {
-    const alta = {
+    const registration = {
       custodianTenantId: 't1',
       patientProfileId: 'p1',
       codeConceptId: 'code1',
@@ -162,7 +162,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         }),
       );
       const res = await d.service.create(
-        { ...alta, formInstanceId: 'form-1' },
+        { ...registration, formInstanceId: 'form-1' },
         actor,
       );
       expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
@@ -184,7 +184,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
         createdAt: new Date(),
       });
-      const res = await d.service.create(alta, actor);
+      const res = await d.service.create(registration, actor);
       expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
       expect(res.formInstanceId).toBeNull();
     });
@@ -195,7 +195,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         new PreconditionFailedException('La instancia es de otro encuentro'),
       );
       await expect(
-        d.service.create({ ...alta, formInstanceId: 'form-1' }, actor),
+        d.service.create({ ...registration, formInstanceId: 'form-1' }, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
     });
@@ -440,7 +440,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
 
     it('propagates the ForbiddenException raised by assertPuedeLeerHistoria', async () => {
       const d = build();
-      d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
         new Error('forbidden'),
       );
 
@@ -519,7 +519,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     patientProfileId: 'p1',
     codeConceptId: 'code1',
   };
-  const orden = (statusConceptId: string) => ({
+  const order = (statusConceptId: string) => ({
     id: 'sr1',
     custodianTenantId: 't1',
     patientProfileId: 'p1',
@@ -531,7 +531,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('publica exactamente un hecho al outbox, dentro de la transacción y sólo con ids', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
 
     await d.service.create(dto, actor);
@@ -553,7 +553,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('le avisa al paciente de una orden activa', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
 
     await d.service.create(dto, actor);
@@ -569,7 +569,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     const d = build();
     d.duplicateStudyDetector.findDuplicate.mockResolvedValue(MATCH);
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR),
+      order(CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR),
     );
 
     await d.service.create(
@@ -588,7 +588,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('una emisión fallida no tumba la orden', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
     d.clinicalNotifications.serviceRequestPlaced.mockResolvedValue({
       suppressed: false,
@@ -603,7 +603,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('si la orden no llega a persistirse no hay hecho ni aviso', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
     d.tx.flush.mockRejectedValueOnce(new Error('violación de FK'));
 

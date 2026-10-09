@@ -9,10 +9,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import {
-  armarPapel,
-  dibujar,
+  buildRole,
+  draw,
   EncounterPdfService,
-  type DatosDelPapel,
+  type RoleData,
 } from './encounter-pdf.service';
 import {
   PreconditionFailedException,
@@ -46,7 +46,7 @@ const encounterFinished = () => ({
 function build() {
   const em = { fork: mockFn(() => em) };
   const encountersRepo = { findById: mockFn() };
-  const clinicalRead = { assertPuedeLeerHistoria: mockFn() };
+  const clinicalRead = { assertCanReadHistory: mockFn() };
   const notesRepo = {
     findHeadersByEncounter: mockFn().mockResolvedValue([]),
     findVersionsByIds: mockFn().mockResolvedValue(new Map()),
@@ -110,7 +110,7 @@ describe('EncounterPdfService', () => {
     await expect(d.service.render('missing', actor)).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
-    expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+    expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
   });
 
   it('403 si el actor no puede leer la historia (delegado, se comprueba antes que el 422)', async () => {
@@ -119,7 +119,7 @@ describe('EncounterPdfService', () => {
       ...encounterFinished(),
       statusConceptId: 'en-curso', // ni siquiera finalizado: el 403 igual va primero
     });
-    d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
       new ForbiddenException('nope'),
     );
 
@@ -278,7 +278,7 @@ describe('EncounterPdfService.renderForPatient (BR-15/CL-31)', () => {
 });
 
 describe('armarPapel', () => {
-  const base: DatosDelPapel = {
+  const base: RoleData = {
     encounterId: 'enc1',
     startAt: new Date('2026-09-15T11:00:00.000Z'),
     endAt: new Date('2026-09-15T12:00:00.000Z'),
@@ -296,24 +296,24 @@ describe('armarPapel', () => {
   };
 
   it('el encabezado lleva el nombre del paciente y del profesional', () => {
-    const papel = armarPapel(base);
-    expect(papel.encabezado).toContain('Paciente: Paciente de Prueba');
-    expect(papel.encabezado).toContain('Profesional: Profesional de Prueba');
+    const role = buildRole(base);
+    expect(role.encabezado).toContain('Paciente: Paciente de Prueba');
+    expect(role.encabezado).toContain('Profesional: Profesional de Prueba');
   });
 
   it('cada diagnóstico se imprime como CIE-10 code — display', () => {
     const conceptsById = new Map([
       ['concept-1', { code: 'J06.9', display: 'Rinofaringitis aguda' } as any],
     ]);
-    const papel = armarPapel({
+    const role = buildRole({
       ...base,
       conditions: [{ codeConceptId: 'concept-1' }],
       conceptsById,
     });
-    const diagnosticos = papel.secciones.find(
+    const diagnoses = role.secciones.find(
       (s) => s.titulo === 'Diagnósticos',
     );
-    expect(diagnosticos?.lineas).toContain(
+    expect(diagnoses?.lineas).toContain(
       'CIE-10 J06.9 — Rinofaringitis aguda',
     );
   });
@@ -322,7 +322,7 @@ describe('armarPapel', () => {
     const conceptsById = new Map([
       ['med-1', { code: 'AMOX-500', display: 'Amoxicilina 500mg' } as any],
     ]);
-    const papel = armarPapel({
+    const role = buildRole({
       ...base,
       medicationRequests: [
         {
@@ -333,10 +333,10 @@ describe('armarPapel', () => {
       ],
       conceptsById,
     });
-    const prescripciones = papel.secciones.find(
+    const prescriptions = role.secciones.find(
       (s) => s.titulo === 'Prescripciones',
     );
-    expect(prescripciones?.lineas).toContain(
+    expect(prescriptions?.lineas).toContain(
       'AMOX-500 — Amoxicilina 500mg · 1 comprimido · cada 8 horas',
     );
   });
@@ -345,7 +345,7 @@ describe('armarPapel', () => {
     const conceptsById = new Map([
       ['act-1', { code: 'ACT', display: 'Control de signos vitales' } as any],
     ]);
-    const papel = armarPapel({
+    const role = buildRole({
       ...base,
       carePlans: [
         {
@@ -355,40 +355,40 @@ describe('armarPapel', () => {
       ],
       conceptsById,
     });
-    const plan = papel.secciones.find((s) => s.titulo === 'Plan de cuidados');
+    const plan = role.secciones.find((s) => s.titulo === 'Plan de cuidados');
     expect(plan?.lineas).toContain('Meta: Recuperar movilidad');
     expect(plan?.lineas).toContain('- ACT — Control de signos vitales');
   });
 
   it('los documentos listan el nombre de cada archivo', () => {
-    const papel = armarPapel({
+    const role = buildRole({
       ...base,
       documents: [{ files: [{ fileId: 'f1' }] }],
       fileNamesById: new Map([['f1', 'orden-de-laboratorio.pdf']]),
     });
-    const documentos = papel.secciones.find((s) => s.titulo === 'Documentos');
-    expect(documentos?.lineas).toContain('- orden-de-laboratorio.pdf');
+    const documents = role.secciones.find((s) => s.titulo === 'Documentos');
+    expect(documents?.lineas).toContain('- orden-de-laboratorio.pdf');
   });
 
   it('el pie trae las tres partes del sello: hash, fecha y profesional', () => {
-    const papel = armarPapel(base);
-    expect(papel.pie).toContain(`SHA-256 ${'b'.repeat(64)}`);
-    expect(papel.pie).toContain('sellado el');
-    expect(papel.pie).toContain('cerrado por Profesional de Prueba');
+    const role = buildRole(base);
+    expect(role.pie).toContain(`SHA-256 ${'b'.repeat(64)}`);
+    expect(role.pie).toContain('sellado el');
+    expect(role.pie).toContain('cerrado por Profesional de Prueba');
   });
 
   it('una sección sin datos dice explícitamente que no hay datos', () => {
-    const papel = armarPapel(base);
-    const diagnosticos = papel.secciones.find(
+    const role = buildRole(base);
+    const diagnoses = role.secciones.find(
       (s) => s.titulo === 'Diagnósticos',
     );
-    expect(diagnosticos?.lineas).toEqual(['Sin datos registrados.']);
+    expect(diagnoses?.lineas).toEqual(['Sin datos registrados.']);
   });
 });
 
 describe('dibujar', () => {
   it('produce %PDF y el hash en los metadatos, sin `compress: false`', async () => {
-    const papel = armarPapel({
+    const role = buildRole({
       encounterId: 'enc1',
       startAt: null,
       endAt: null,
@@ -405,7 +405,7 @@ describe('dibujar', () => {
       sealedAt: null,
     });
 
-    const buffer = await dibujar(papel);
+    const buffer = await draw(role);
 
     expect(buffer.subarray(0, 4).toString('latin1')).toBe('%PDF');
     expect(buffer.includes(Buffer.from('c'.repeat(64)))).toBe(true);

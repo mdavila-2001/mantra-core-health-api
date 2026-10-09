@@ -15,8 +15,8 @@ import { RedisThrottlerStorage } from './redis-throttler.storage';
  *
  * @returns El doble y los comandos que se le pidieron.
  */
-function redisFalso(inicial: { count: number; pttl: number }) {
-  const estado = { ...inicial };
+function redisFake(initial: { count: number; pttl: number }) {
+  const estado = { ...initial };
   const pexpire = mockFn((_clave: string, ms: number) => {
     estado.pttl = ms;
     return Promise.resolve(1);
@@ -45,7 +45,7 @@ function redisFalso(inicial: { count: number; pttl: number }) {
 
 describe('RedisThrottlerStorage', () => {
   it('la primera petición abre la ventana', async () => {
-    const redis = redisFalso({ count: 0, pttl: -2 });
+    const redis = redisFake({ count: 0, pttl: -2 });
     const storage = new RedisThrottlerStorage(redis as any);
 
     const res = await storage.increment('ip-1', 60_000, 60, 0);
@@ -59,7 +59,7 @@ describe('RedisThrottlerStorage', () => {
   // petición, un cliente constante nunca se toparía con el límite porque la
   // ventana se correría con él.
   it('la segunda petición no repone el vencimiento', async () => {
-    const redis = redisFalso({ count: 1, pttl: 30_000 });
+    const redis = redisFake({ count: 1, pttl: 30_000 });
     const storage = new RedisThrottlerStorage(redis as any);
 
     const res = await storage.increment('ip-1', 60_000, 60, 0);
@@ -70,7 +70,7 @@ describe('RedisThrottlerStorage', () => {
   });
 
   it('marca bloqueado al pasar el tope', async () => {
-    const redis = redisFalso({ count: 60, pttl: 10_000 });
+    const redis = redisFake({ count: 60, pttl: 10_000 });
     const storage = new RedisThrottlerStorage(redis as any);
 
     const res = await storage.increment('ip-1', 60_000, 60, 0);
@@ -83,7 +83,7 @@ describe('RedisThrottlerStorage', () => {
   // reponer la ventana, esa clave no vence nunca y la IP queda bloqueada para
   // siempre — un defecto que sólo aparece bajo fallo parcial.
   it('repone la ventana de una clave sin vencimiento', async () => {
-    const redis = redisFalso({ count: 40, pttl: -1 });
+    const redis = redisFake({ count: 40, pttl: -1 });
     const storage = new RedisThrottlerStorage(redis as any);
 
     const res = await storage.increment('ip-1', 60_000, 60, 0);
@@ -96,13 +96,13 @@ describe('RedisThrottlerStorage', () => {
     it('sin cliente Redis cuenta en memoria en vez de fallar', async () => {
       const storage = new RedisThrottlerStorage(undefined);
 
-      const primera = await storage.increment('ip-2', 60_000, 2, 0);
-      const segunda = await storage.increment('ip-2', 60_000, 2, 0);
-      const tercera = await storage.increment('ip-2', 60_000, 2, 0);
+      const first = await storage.increment('ip-2', 60_000, 2, 0);
+      const second = await storage.increment('ip-2', 60_000, 2, 0);
+      const third = await storage.increment('ip-2', 60_000, 2, 0);
 
-      expect(primera.totalHits).toBe(1);
-      expect(segunda.isBlocked).toBe(false);
-      expect(tercera.isBlocked).toBe(true);
+      expect(first.totalHits).toBe(1);
+      expect(second.isBlocked).toBe(false);
+      expect(third.isBlocked).toBe(true);
     });
 
     // Fallar cerrado convertiría una caída de Redis en una caída del sitio

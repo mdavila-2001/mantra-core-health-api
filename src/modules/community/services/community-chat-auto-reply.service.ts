@@ -57,10 +57,10 @@ export class CommunityChatAutoReplyService {
   ): Promise<ChatAutoReplyDto | null> {
     const em = this.em.fork();
     await this.visibility.assertActsAsProfile(em, profileId, actor);
-    const fila = await em.findOne(ChatAutoReplies, {
+    const row = await em.findOne(ChatAutoReplies, {
       publicProfileId: profileId,
     });
-    return fila ? aDto(fila) : null;
+    return row ? toDto(row) : null;
   }
 
   /**
@@ -81,37 +81,37 @@ export class CommunityChatAutoReplyService {
     return this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
 
-      const existente = await tx.findOne(ChatAutoReplies, {
+      const existing = await tx.findOne(ChatAutoReplies, {
         publicProfileId: profileId,
       });
-      const fila = existente ?? new ChatAutoReplies();
-      if (!existente) {
-        fila.publicProfileId = profileId;
-        fila.createdAt = new Date();
-        fila.statusConceptId = CONCEPTS.STATE_ACTIVE;
+      const row = existing ?? new ChatAutoReplies();
+      if (!existing) {
+        row.publicProfileId = profileId;
+        row.createdAt = new Date();
+        row.statusConceptId = CONCEPTS.STATE_ACTIVE;
       }
 
-      fila.isActive = dto.isActive;
-      fila.inactivityMinutes = dto.inactivityMinutes;
-      fila.bodyText = dto.bodyText.trim();
-      fila.cooldownHours = dto.cooldownHours;
-      fila.onlyOutsideBusinessHours = dto.onlyOutsideBusinessHours;
+      row.isActive = dto.isActive;
+      row.inactivityMinutes = dto.inactivityMinutes;
+      row.bodyText = dto.bodyText.trim();
+      row.cooldownHours = dto.cooldownHours;
+      row.onlyOutsideBusinessHours = dto.onlyOutsideBusinessHours;
       // La franja sólo se guarda si se va a usar: dejar un horario colgado de
       // una opción apagada es un dato que miente la próxima vez que se
       // encienda.
-      fila.businessHoursFrom = dto.onlyOutsideBusinessHours
-        ? normalizarHora(dto.businessHoursFrom)
+      row.businessHoursFrom = dto.onlyOutsideBusinessHours
+        ? normalizeTime(dto.businessHoursFrom)
         : undefined;
-      fila.businessHoursTo = dto.onlyOutsideBusinessHours
-        ? normalizarHora(dto.businessHoursTo)
+      row.businessHoursTo = dto.onlyOutsideBusinessHours
+        ? normalizeTime(dto.businessHoursTo)
         : undefined;
 
-      touch(fila, actor.id);
-      if (!existente) {
-        tx.persist(fila);
+      touch(row, actor.id);
+      if (!existing) {
+        tx.persist(row);
       }
       await tx.flush();
-      return aDto(fila);
+      return toDto(row);
     });
   }
 
@@ -143,7 +143,7 @@ export class CommunityChatAutoReplyService {
    *   pueda pararlo y para que las cuatro condiciones midan el mismo momento.
    * @returns El texto a mandar, o `null` si no corresponde.
    */
-  async textoParaResponder(
+  async textForResponder(
     em: EntityManager,
     conversationId: string,
     recipientProfileId: string,
@@ -156,25 +156,25 @@ export class CommunityChatAutoReplyService {
       return null;
     }
 
-    const participacion = await em.findOne(ConversationParticipants, {
+    const participation = await em.findOne(ConversationParticipants, {
       conversationId,
       participantProfileId: recipientProfileId,
     });
-    if (!participacion) {
+    if (!participation) {
       return null;
     }
 
-    const ausente = await this.estuvoAusente(
+    const absent = await this.wasAbsent(
       em,
       config,
       recipientProfileId,
       ahora,
     );
-    if (!ausente) {
+    if (!absent) {
       return null;
     }
 
-    const ultimoAviso = participacion.lastAutoReplyAt;
+    const ultimoAviso = participation.lastAutoReplyAt;
     if (
       ultimoAviso &&
       ahora.getTime() - ultimoAviso.getTime() < config.cooldownHours * 3_600_000
@@ -182,13 +182,13 @@ export class CommunityChatAutoReplyService {
       return null;
     }
 
-    if (config.onlyOutsideBusinessHours && dentroDeLaFranja(config, ahora)) {
+    if (config.onlyOutsideBusinessHours && bandInside(config, ahora)) {
       return null;
     }
 
     // La marca se pone acá, dentro de la misma transacción del mensaje
     // entrante: si el envío falla, tampoco queda anotado el aviso.
-    participacion.lastAutoReplyAt = ahora;
+    participation.lastAutoReplyAt = ahora;
 
     return config.bodyText;
   }
@@ -198,7 +198,7 @@ export class CommunityChatAutoReplyService {
    *
    * Se mide contra la última conversación que marcó leída, sea cual sea.
    */
-  private async estuvoAusente(
+  private async wasAbsent(
     em: EntityManager,
     config: ChatAutoReplies,
     recipientProfileId: string,
@@ -212,13 +212,13 @@ export class CommunityChatAutoReplyService {
     if (!ultima?.updatedAt) {
       return false;
     }
-    const inactividad = ahora.getTime() - ultima.updatedAt.getTime();
-    return inactividad >= config.inactivityMinutes * 60_000;
+    const inactivity = ahora.getTime() - ultima.updatedAt.getTime();
+    return inactivity >= config.inactivityMinutes * 60_000;
   }
 }
 
 /** `HH:MM:SS` → `HH:MM`; `undefined` se queda como está. */
-function normalizarHora(valor: string | undefined): string | undefined {
+function normalizeTime(valor: string | undefined): string | undefined {
   return valor === undefined ? undefined : valor.slice(0, 5);
 }
 
@@ -229,21 +229,21 @@ function normalizarHora(valor: string | undefined): string | undefined {
  * atiende de noche y cruza la medianoche: se resuelve como la unión de los dos
  * tramos, no como un rango vacío.
  */
-function dentroDeLaFranja(config: ChatAutoReplies, ahora: Date): boolean {
-  const desde = enMinutos(config.businessHoursFrom);
-  const hasta = enMinutos(config.businessHoursTo);
-  if (desde === null || hasta === null) {
+function bandInside(config: ChatAutoReplies, ahora: Date): boolean {
+  const from = inMinutes(config.businessHoursFrom);
+  const hasta = inMinutes(config.businessHoursTo);
+  if (from === null || hasta === null) {
     // Pidió franja y no la declaró: no hay horario que respetar, así que la
     // condición no bloquea nada.
     return false;
   }
-  const minutos = ahora.getHours() * 60 + ahora.getMinutes();
-  return desde <= hasta
-    ? minutos >= desde && minutos < hasta
-    : minutos >= desde || minutos < hasta;
+  const minutes = ahora.getHours() * 60 + ahora.getMinutes();
+  return from <= hasta
+    ? minutes >= from && minutes < hasta
+    : minutes >= from || minutes < hasta;
 }
 
-function enMinutos(hhmm: string | undefined): number | null {
+function inMinutes(hhmm: string | undefined): number | null {
   if (!hhmm) {
     return null;
   }
@@ -253,17 +253,17 @@ function enMinutos(hhmm: string | undefined): number | null {
     : null;
 }
 
-function aDto(fila: ChatAutoReplies): ChatAutoReplyDto {
+function toDto(row: ChatAutoReplies): ChatAutoReplyDto {
   return {
-    id: fila.id,
-    publicProfileId: fila.publicProfileId,
-    isActive: fila.isActive,
-    inactivityMinutes: fila.inactivityMinutes,
-    bodyText: fila.bodyText,
-    cooldownHours: fila.cooldownHours,
-    onlyOutsideBusinessHours: fila.onlyOutsideBusinessHours,
-    businessHoursFrom: fila.businessHoursFrom ?? null,
-    businessHoursTo: fila.businessHoursTo ?? null,
-    updatedAt: fila.updatedAt,
+    id: row.id,
+    publicProfileId: row.publicProfileId,
+    isActive: row.isActive,
+    inactivityMinutes: row.inactivityMinutes,
+    bodyText: row.bodyText,
+    cooldownHours: row.cooldownHours,
+    onlyOutsideBusinessHours: row.onlyOutsideBusinessHours,
+    businessHoursFrom: row.businessHoursFrom ?? null,
+    businessHoursTo: row.businessHoursTo ?? null,
+    updatedAt: row.updatedAt,
   };
 }

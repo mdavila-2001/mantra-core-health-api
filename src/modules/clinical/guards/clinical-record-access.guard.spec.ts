@@ -11,7 +11,7 @@ import { ClinicalRecordAccessGuard } from './clinical-record-access.guard';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const AJENO = 'patient-ajeno';
+const FOREIGN = 'patient-ajeno';
 
 function buildContext(
   user: any,
@@ -36,34 +36,34 @@ function buildContext(
  */
 function buildWriteContext(
   user: any,
-  opciones: {
+  options: {
     body?: unknown;
     paramPatientId?: string;
     method?: string;
   } = {},
 ): ExecutionContext {
   const params =
-    opciones.paramPatientId === undefined
+    options.paramPatientId === undefined
       ? {}
-      : { patientProfileId: opciones.paramPatientId };
+      : { patientProfileId: options.paramPatientId };
   return {
     switchToHttp: () => ({
       getRequest: () => ({
         user,
         params,
-        method: opciones.method ?? 'POST',
-        body: opciones.body,
+        method: options.method ?? 'POST',
+        body: options.body,
       }),
     }),
   } as any;
 }
 
 /** Actor con rol de quien atiende; la política decide, no el rol. */
-const actorQueAtiende = { id: 'u1', roles: ['PRACTITIONER'] };
+const actorThatAttends = { id: 'u1', roles: ['PRACTITIONER'] };
 
 describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
   it('deja pasar sin evaluar cuando no hay sujeto o no hay paciente en la ruta', async () => {
-    const readService = { assertPuedeLeerHistoria: mockFn() };
+    const readService = { assertCanReadHistory: mockFn() };
     const guard = new ClinicalRecordAccessGuard(readService as any);
 
     await expect(
@@ -78,12 +78,12 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         buildContext({ id: 'u1', roles: ['PATIENT'] }, '' as any),
       ),
     ).resolves.toBe(true);
-    expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+    expect(readService.assertCanReadHistory).not.toHaveBeenCalled();
   });
 
   it('permite cuando assertPuedeLeerHistoria resuelve sin lanzar', async () => {
     const readService = {
-      assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+      assertCanReadHistory: mockFn().mockResolvedValue(undefined),
     };
     const guard = new ClinicalRecordAccessGuard(readService as any);
     const actor = { id: 'u1', roles: ['PRACTITIONER'] };
@@ -91,7 +91,7 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
     await expect(
       guard.canActivate(buildContext(actor, 'patient-1')),
     ).resolves.toBe(true);
-    expect(readService.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+    expect(readService.assertCanReadHistory).toHaveBeenCalledWith(
       'patient-1',
       actor,
     );
@@ -99,7 +99,7 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
   it('propaga el 403 de assertPuedeLeerHistoria sin envolverlo', async () => {
     const readService = {
-      assertPuedeLeerHistoria: mockFn().mockRejectedValue(
+      assertCanReadHistory: mockFn().mockRejectedValue(
         new ForbiddenException('no autorizado'),
       ),
     };
@@ -121,22 +121,22 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
   describe('SEC-01 · el paciente que viaja en el cuerpo', () => {
     it('evalúa el paciente del cuerpo cuando la ruta no lo trae y deja pasar al autorizado', async () => {
       const readService = {
-        assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             body: { patientProfileId: 'patient-1', noteText: 'evolución' },
           }),
         ),
       ).resolves.toBe(true);
       // La firma real es `(patientProfileId, actor)`. La fuente de SEC-01 la
       // escribía invertida; copiarla habría roto el guard en silencio.
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
         'patient-1',
-        actorQueAtiende,
+        actorThatAttends,
       );
     });
 
@@ -144,7 +144,7 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       // El agujero de SEC-01, en una línea: un `PRACTITIONER` autenticado
       // escribiendo en la historia de cualquiera con sólo mandar su id.
       const readService = {
-        assertPuedeEscribirHistoria: mockFn().mockRejectedValue(
+        assertCanWriteHistory: mockFn().mockRejectedValue(
           new ForbiddenException('no autorizado'),
         ),
       };
@@ -152,46 +152,46 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
-            body: { patientProfileId: AJENO },
+          buildWriteContext(actorThatAttends, {
+            body: { patientProfileId: FOREIGN },
           }),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
-        AJENO,
-        actorQueAtiende,
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
+        FOREIGN,
+        actorThatAttends,
       );
     });
 
     it('mira el cuerpo en POST, PUT y PATCH', async () => {
       for (const method of ['POST', 'PUT', 'PATCH']) {
         const readService = {
-          assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+          assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
         };
         const guard = new ClinicalRecordAccessGuard(readService as any);
 
         await guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             method,
             body: { patientProfileId: 'patient-1' },
           }),
         );
-        expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+        expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
           'patient-1',
-          actorQueAtiende,
+          actorThatAttends,
         );
       }
     });
 
     it('pregunta una sola vez cuando la ruta y el cuerpo traen el mismo paciente', async () => {
       const readService = {
-        assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             paramPatientId: 'patient-1',
             body: { patientProfileId: 'patient-1' },
           }),
@@ -199,36 +199,36 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       ).resolves.toBe(true);
       // Repetir la pregunta duplicaría la consulta de autorización sin cambiar
       // la respuesta.
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledTimes(1);
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledTimes(1);
     });
 
     it('evalúa los dos pacientes cuando la ruta y el cuerpo no coinciden', async () => {
       const readService = {
-        assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             paramPatientId: 'patient-1',
-            body: { patientProfileId: AJENO },
+            body: { patientProfileId: FOREIGN },
           }),
         ),
       ).resolves.toBe(true);
       // La petición toca dos historias: el permiso sobre una no es permiso
       // sobre la otra. No se inventa un error de «discrepancia» — se pregunta
       // por las dos y decide la política de siempre.
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledTimes(2);
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenNthCalledWith(
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledTimes(2);
+      expect(readService.assertCanWriteHistory).toHaveBeenNthCalledWith(
         1,
         'patient-1',
-        actorQueAtiende,
+        actorThatAttends,
       );
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenNthCalledWith(
+      expect(readService.assertCanWriteHistory).toHaveBeenNthCalledWith(
         2,
-        AJENO,
-        actorQueAtiende,
+        FOREIGN,
+        actorThatAttends,
       );
     });
 
@@ -237,9 +237,9 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       // la ruta es la historia que el profesional sí atiende, y el cuerpo mete
       // de contrabando la que no.
       const readService = {
-        assertPuedeEscribirHistoria: mockFn(
+        assertCanWriteHistory: mockFn(
           async (patientProfileId: string) => {
-            if (patientProfileId === AJENO) {
+            if (patientProfileId === FOREIGN) {
               throw new ForbiddenException('no autorizado');
             }
           },
@@ -249,17 +249,17 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             paramPatientId: 'patient-1',
-            body: { patientProfileId: AJENO },
+            body: { patientProfileId: FOREIGN },
           }),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledTimes(2);
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledTimes(2);
     });
 
     it('no inventa un paciente cuando el cuerpo no lo trae', async () => {
-      const readService = { assertPuedeEscribirHistoria: mockFn() };
+      const readService = { assertCanWriteHistory: mockFn() };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       for (const body of [
@@ -270,14 +270,14 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
         'texto plano',
       ]) {
         await expect(
-          guard.canActivate(buildWriteContext(actorQueAtiende, { body })),
+          guard.canActivate(buildWriteContext(actorThatAttends, { body })),
         ).resolves.toBe(true);
       }
-      expect(readService.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanWriteHistory).not.toHaveBeenCalled();
     });
 
     it('no coerciona un patientProfileId que no sea string', async () => {
-      const readService = { assertPuedeEscribirHistoria: mockFn() };
+      const readService = { assertCanWriteHistory: mockFn() };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       // Un array colado en el cuerpo NO puede convertirse en una autorización
@@ -286,9 +286,9 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       // 400 cualquiera de estos valores contra el `@IsUUID()` del DTO, así que
       // ninguno llega al handler.
       for (const patientProfileId of [
-        [AJENO],
-        [AJENO, 'patient-1'],
-        { id: AJENO },
+        [FOREIGN],
+        [FOREIGN, 'patient-1'],
+        { id: FOREIGN },
         12345,
         true,
         null,
@@ -296,37 +296,37 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       ]) {
         await expect(
           guard.canActivate(
-            buildWriteContext(actorQueAtiende, { body: { patientProfileId } }),
+            buildWriteContext(actorThatAttends, { body: { patientProfileId } }),
           ),
         ).resolves.toBe(true);
       }
-      expect(readService.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanWriteHistory).not.toHaveBeenCalled();
     });
 
     it('sigue evaluando el paciente de la ruta aunque el cuerpo venga malformado', async () => {
       // Que el cuerpo sea basura no puede desactivar la puerta que ya existía.
       const readService = {
-        assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             paramPatientId: 'patient-1',
-            body: { patientProfileId: [AJENO] },
+            body: { patientProfileId: [FOREIGN] },
           }),
         ),
       ).resolves.toBe(true);
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledTimes(1);
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledTimes(1);
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
         'patient-1',
-        actorQueAtiende,
+        actorThatAttends,
       );
     });
 
     it('no evalúa al actor sin sujeto aunque el cuerpo traiga paciente', async () => {
-      const readService = { assertPuedeEscribirHistoria: mockFn() };
+      const readService = { assertCanWriteHistory: mockFn() };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
@@ -338,15 +338,15 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       ).resolves.toBe(true);
       // `JwtAuthGuard` es quien responde a una petición sin sesión; este guard
       // no se mete en esa decisión.
-      expect(readService.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanWriteHistory).not.toHaveBeenCalled();
     });
   });
 
   describe('MCH-007 · escribir no es leer', () => {
     it('en una escritura pregunta por escritura: un permiso de sólo lectura no alcanza', async () => {
       const readService = {
-        assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
-        assertPuedeEscribirHistoria: mockFn().mockRejectedValue(
+        assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn().mockRejectedValue(
           new ForbiddenException('sin permiso de escritura'),
         ),
       };
@@ -354,44 +354,44 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             body: { patientProfileId: 'patient-1' },
           }),
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
-      expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanReadHistory).not.toHaveBeenCalled();
     });
 
     it('también el paciente de la ruta se evalúa como escritura en un PATCH', async () => {
       const readService = {
-        assertPuedeLeerHistoria: mockFn(),
-        assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanReadHistory: mockFn(),
+        assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await guard.canActivate(
-        buildWriteContext(actorQueAtiende, {
+        buildWriteContext(actorThatAttends, {
           method: 'PATCH',
           paramPatientId: 'patient-1',
         }),
       );
-      expect(readService.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(readService.assertCanWriteHistory).toHaveBeenCalledWith(
         'patient-1',
-        actorQueAtiende,
+        actorThatAttends,
       );
-      expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanReadHistory).not.toHaveBeenCalled();
     });
 
     it('un GET sigue preguntando por lectura', async () => {
       const readService = {
-        assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
-        assertPuedeEscribirHistoria: mockFn(),
+        assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+        assertCanWriteHistory: mockFn(),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
-      await guard.canActivate(buildContext(actorQueAtiende));
-      expect(readService.assertPuedeLeerHistoria).toHaveBeenCalledTimes(1);
-      expect(readService.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      await guard.canActivate(buildContext(actorThatAttends));
+      expect(readService.assertCanReadHistory).toHaveBeenCalledTimes(1);
+      expect(readService.assertCanWriteHistory).not.toHaveBeenCalled();
     });
   });
 
@@ -401,39 +401,39 @@ describe('ClinicalRecordAccessGuard (FT-07-R08)', () => {
       // escrituras empiece a evaluar cuerpos en las dos rutas de lectura que
       // ya cuelgan de este guard.
       const readService = {
-        assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+        assertCanReadHistory: mockFn().mockResolvedValue(undefined),
       };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             method: 'GET',
             paramPatientId: 'patient-1',
-            body: { patientProfileId: AJENO },
+            body: { patientProfileId: FOREIGN },
           }),
         ),
       ).resolves.toBe(true);
-      expect(readService.assertPuedeLeerHistoria).toHaveBeenCalledTimes(1);
-      expect(readService.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+      expect(readService.assertCanReadHistory).toHaveBeenCalledTimes(1);
+      expect(readService.assertCanReadHistory).toHaveBeenCalledWith(
         'patient-1',
-        actorQueAtiende,
+        actorThatAttends,
       );
     });
 
     it('sigue dejando pasar un GET sin paciente en la ruta, mire lo que mire el cuerpo', async () => {
-      const readService = { assertPuedeLeerHistoria: mockFn() };
+      const readService = { assertCanReadHistory: mockFn() };
       const guard = new ClinicalRecordAccessGuard(readService as any);
 
       await expect(
         guard.canActivate(
-          buildWriteContext(actorQueAtiende, {
+          buildWriteContext(actorThatAttends, {
             method: 'GET',
-            body: { patientProfileId: AJENO },
+            body: { patientProfileId: FOREIGN },
           }),
         ),
       ).resolves.toBe(true);
-      expect(readService.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+      expect(readService.assertCanReadHistory).not.toHaveBeenCalled();
     });
   });
 });

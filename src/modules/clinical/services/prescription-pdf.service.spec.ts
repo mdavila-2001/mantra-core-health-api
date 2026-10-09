@@ -9,10 +9,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import {
-  armarReceta,
-  dibujar,
+  buildPrescription,
+  draw,
   PrescriptionPdfService,
-  type DatosDeLaReceta,
+  type PrescriptionData,
 } from './prescription-pdf.service';
 import { ResourceNotFoundException } from '../../../common';
 import { CLIN } from '../clinical.concepts';
@@ -20,7 +20,7 @@ import { PROF } from '../../profiles/profiles.concepts';
 
 const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
 
-const recetaEmitida = () => ({
+const issuedPrescription = () => ({
   id: 'req-1',
   patientProfileId: 'pat-1',
   prescriberProfileId: 'prac-1',
@@ -44,7 +44,7 @@ const recetaEmitida = () => ({
 function build() {
   const em = { fork: mockFn(() => em) };
   const requestsRepo = { findById: mockFn() };
-  const clinicalRead = { assertPuedeLeerHistoria: mockFn() };
+  const clinicalRead = { assertCanReadHistory: mockFn() };
   const conditionsRepo = { findById: mockFn() };
   const catalogConceptsRepo = {
     findByIds: mockFn().mockResolvedValue(new Map()),
@@ -120,13 +120,13 @@ describe('PrescriptionPdfService.render', () => {
     await expect(d.service.render('missing', actor)).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
-    expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+    expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
   });
 
   it('403 si el actor no es el prescriptor y no puede leer la historia (delegado)', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
-    d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
+    d.clinicalRead.assertCanReadHistory.mockRejectedValue(
       new ForbiddenException('no'),
     );
 
@@ -137,7 +137,7 @@ describe('PrescriptionPdfService.render', () => {
 
   it('el prescriptor pasa sin consultar assertPuedeLeerHistoria', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
 
     await d.service.render('req-1', {
       id: 'user-1',
@@ -145,16 +145,16 @@ describe('PrescriptionPdfService.render', () => {
       practitionerProfileId: 'prac-1',
     } as any);
 
-    expect(d.clinicalRead.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+    expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
   });
 
   it('quien no es el prescriptor sí pasa por assertPuedeLeerHistoria', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
 
     await d.service.render('req-1', actor);
 
-    expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
       'pat-1',
       actor,
     );
@@ -163,7 +163,7 @@ describe('PrescriptionPdfService.render', () => {
   it('un PDF de una receta DRAFT sale %PDF con marca de agua de copia de trabajo', async () => {
     const d = build();
     d.requestsRepo.findById.mockResolvedValue({
-      ...recetaEmitida(),
+      ...issuedPrescription(),
       statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
       issuedAt: undefined,
     });
@@ -177,7 +177,7 @@ describe('PrescriptionPdfService.render', () => {
 
   it('un PDF de una receta ISSUED no lleva marca de agua', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
 
     const { buffer } = await d.service.render('req-1', actor);
 
@@ -197,7 +197,7 @@ describe('PrescriptionPdfService.verify', () => {
 
   it('sin PHI: el resultado no trae nombre de paciente ni de medicamento', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
 
     const res = await d.service.verify('req-1');
 
@@ -210,7 +210,7 @@ describe('PrescriptionPdfService.verify', () => {
   it('DRAFT no expone el hash', async () => {
     const d = build();
     d.requestsRepo.findById.mockResolvedValue({
-      ...recetaEmitida(),
+      ...issuedPrescription(),
       statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
     });
 
@@ -222,7 +222,7 @@ describe('PrescriptionPdfService.verify', () => {
 
   it('sin matrícula nacional, prescriberLicense es null', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
 
     const res = await d.service.verify('req-1');
 
@@ -231,7 +231,7 @@ describe('PrescriptionPdfService.verify', () => {
 
   it('con matrícula nacional activa, prescriberLicense la refleja', async () => {
     const d = build();
-    d.requestsRepo.findById.mockResolvedValue(recetaEmitida());
+    d.requestsRepo.findById.mockResolvedValue(issuedPrescription());
     d.jurisdictionAuthorizationsRepo.findByPractitioner.mockResolvedValue([
       {
         jurisdictionConceptId: PROF.JURISDICTION_NATIONAL,
@@ -257,9 +257,9 @@ describe('armarReceta', () => {
     ['unit-1', { code: 'UNIT_{tablet}', display: 'Tablet' }],
   ]) as any;
 
-  function datosBase(
-    overrides: Partial<DatosDeLaReceta> = {},
-  ): DatosDeLaReceta {
+  function baseData(
+    overrides: Partial<PrescriptionData> = {},
+  ): PrescriptionData {
     return {
       requestId: 'req-1',
       status: CLIN.MEDICATION_REQUEST_ISSUED,
@@ -283,17 +283,17 @@ describe('armarReceta', () => {
   }
 
   it('sin cobertura declarada, la sección lo dice explícito', () => {
-    const papel = armarReceta(datosBase());
-    const seccion = papel.secciones.find(
+    const role = buildPrescription(baseData());
+    const section = role.secciones.find(
       (s) => s.titulo === 'Cobertura de seguro',
     );
 
-    expect(seccion?.lineas).toEqual(['Sin seguro vinculado en AloVida']);
+    expect(section?.lineas).toEqual(['Sin seguro vinculado en AloVida']);
   });
 
   it('con un beneficio vigente, imprime cobertura y copago', () => {
-    const papel = armarReceta(
-      datosBase({
+    const role = buildPrescription(
+      baseData({
         coverages: [
           {
             id: 'cov-1',
@@ -318,70 +318,70 @@ describe('armarReceta', () => {
         ],
       }),
     );
-    const seccion = papel.secciones.find(
+    const section = role.secciones.find(
       (s) => s.titulo === 'Cobertura de seguro',
     );
-    const texto = seccion?.lineas.join(' ') ?? '';
+    const text = section?.lineas.join(' ') ?? '';
 
-    expect(texto).toContain('Alianza Vida');
-    expect(texto).toContain('cobertura 80.00 %');
-    expect(texto).toContain('copago 20.00 BOB');
+    expect(text).toContain('Alianza Vida');
+    expect(text).toContain('cobertura 80.00 %');
+    expect(text).toContain('copago 20.00 BOB');
   });
 
   it('DRAFT trae marca de agua y el asunto de copia de trabajo', () => {
-    const papel = armarReceta(
-      datosBase({ status: CLIN.MEDICATION_REQUEST_DRAFT, issuedAt: undefined }),
+    const role = buildPrescription(
+      baseData({ status: CLIN.MEDICATION_REQUEST_DRAFT, issuedAt: undefined }),
     );
 
-    expect(papel.marcaDeAgua).toContain('COPIA DE TRABAJO');
-    expect(papel.subject).toBe('Copia de trabajo — sin validez farmacéutica');
+    expect(role.marcaDeAgua).toContain('COPIA DE TRABAJO');
+    expect(role.subject).toBe('Copia de trabajo — sin validez farmacéutica');
   });
 
   it('ISSUED no trae marca de agua y el asunto es oficial', () => {
-    const papel = armarReceta(datosBase());
+    const role = buildPrescription(baseData());
 
-    expect(papel.marcaDeAgua).toBeUndefined();
-    expect(papel.subject).toBe('Receta médica oficial');
+    expect(role.marcaDeAgua).toBeUndefined();
+    expect(role.subject).toBe('Receta médica oficial');
   });
 
   it('INVALIDATED trae el motivo en la marca de agua', () => {
-    const papel = armarReceta(
-      datosBase({
+    const role = buildPrescription(
+      baseData({
         status: CLIN.MEDICATION_REQUEST_INVALIDATED,
         statusReasonText: 'Error de dosis',
       }),
     );
 
-    expect(papel.marcaDeAgua).toBe('SIN VALIDEZ FARMACÉUTICA — Error de dosis');
+    expect(role.marcaDeAgua).toBe('SIN VALIDEZ FARMACÉUTICA — Error de dosis');
   });
 
   it('el documento de identidad sale con su sigla de departamento', () => {
-    const papel = armarReceta(
-      datosBase({ patientDocument: '1234567', patientDocumentArea: 'LP' }),
+    const role = buildPrescription(
+      baseData({ patientDocument: '1234567', patientDocumentArea: 'LP' }),
     );
-    const seccion = papel.secciones.find((s) => s.titulo === 'Paciente');
+    const section = role.secciones.find((s) => s.titulo === 'Paciente');
 
-    expect(seccion?.lineas).toContain('Documento: 1234567 LP');
+    expect(section?.lineas).toContain('Documento: 1234567 LP');
   });
 
   it('sin matrícula, lo dice explícito', () => {
-    const papel = armarReceta(datosBase({ hasLicense: false }));
-    const seccion = papel.secciones.find((s) => s.titulo === 'Profesional');
+    const role = buildPrescription(baseData({ hasLicense: false }));
+    const section = role.secciones.find((s) => s.titulo === 'Profesional');
 
-    expect(seccion?.lineas).toContain('Matrícula: sin registrar');
+    expect(section?.lineas).toContain('Matrícula: sin registrar');
   });
 
   it('con matrícula pendiente de verificación, lo dice explícito', () => {
-    const papel = armarReceta(
-      datosBase({
+    const role = buildPrescription(
+      baseData({
         hasLicense: true,
         licenseVerified: false,
         licenseNumber: 'LIC-9',
       }),
     );
-    const seccion = papel.secciones.find((s) => s.titulo === 'Profesional');
+    const section = role.secciones.find((s) => s.titulo === 'Profesional');
 
-    expect(seccion?.lineas.join(' ')).toContain(
+    expect(section?.lineas.join(' ')).toContain(
       'declarada, pendiente de verificación',
     );
   });
@@ -389,7 +389,7 @@ describe('armarReceta', () => {
 
 describe('dibujar', () => {
   it('produce %PDF y el hash en los metadatos', async () => {
-    const papel = armarReceta({
+    const role = buildPrescription({
       requestId: 'req-1',
       status: CLIN.MEDICATION_REQUEST_ISSUED,
       createdAt: new Date('2026-09-01T10:00:00.000Z'),
@@ -405,7 +405,7 @@ describe('dibujar', () => {
       ahora: new Date('2026-09-16T00:00:00.000Z'),
     });
 
-    const buffer = await dibujar(papel);
+    const buffer = await draw(role);
 
     expect(buffer.subarray(0, 4).toString('latin1')).toBe('%PDF');
     expect(buffer.length).toBeGreaterThan(1000);

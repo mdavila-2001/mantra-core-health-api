@@ -14,7 +14,7 @@ import {
  * si `displayName` falta): estas pruebas afirman `ownSite`, no el resto del
  * alta.
  */
-const ALTA_MINIMA = {
+const MINIMAL_REGISTRATION = {
   email: 'ana@ejemplo.test',
   password: 'secreto12',
   displayName: 'Ana Rojas',
@@ -25,16 +25,16 @@ const ALTA_MINIMA = {
 
 describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
   it('rechaza el alta si falta el documento de identidad', async () => {
-    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
-    expect(await propiedadesConError(sinDocumento)).toContain('nationalId');
+    const { nationalId: _nationalId, ...sinDocumento } = MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(sinDocumento)).toContain('nationalId');
   });
 });
 
 describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
   it('acepta el correo laboral junto al correo de acceso personal', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         email: 'ana.personal@example.test',
         workEmail: 'ana@hospital.example.test',
       }),
@@ -43,8 +43,8 @@ describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
 
   it('rechaza un correo laboral con formato inválido', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workEmail: 'no-es-un-correo',
       }),
     ).toEqual(['workEmail']);
@@ -52,7 +52,7 @@ describe('RegisterPractitionerDto · correo laboral separado (MED-03)', () => {
 });
 
 describe('RegisterPractitionerDto · especialidad principal y tres adicionales (MED-02)', () => {
-  const cuatroEspecialidades = [
+  const fourSpecialties = [
     '7218acbc-5098-56ae-980a-9345961ced89',
     'bd0484b1-8959-5ba5-bb65-ca9305eedb30',
     'e0f2c074-572e-521c-a647-0ec85de5ff62',
@@ -61,19 +61,19 @@ describe('RegisterPractitionerDto · especialidad principal y tres adicionales (
 
   it('acepta una especialidad principal y tres adicionales', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        specialtyConceptIds: cuatroEspecialidades,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        specialtyConceptIds: fourSpecialties,
       }),
     ).toEqual([]);
   });
 
   it('rechaza una especialidad principal y cuatro adicionales', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         specialtyConceptIds: [
-          ...cuatroEspecialidades,
+          ...fourSpecialties,
           'c7a25eba-6961-5b97-bfae-bf1e2a33ce19',
         ],
       }),
@@ -88,20 +88,20 @@ describe('RegisterPractitionerDto · especialidad principal y tres adicionales (
  * pipe, no aplana solo — cada nivel de `@ValidateNested()` cuelga sus propios
  * errores en `children`.
  *
- * @param errores - Los errores devueltos por `validate()`.
- * @param prefijo - La ruta acumulada hasta este nivel.
+ * @param errors - Los errores devueltos por `validate()`.
+ * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasConError(
-  errores: readonly ValidationError[],
-  prefijo = '',
+function rutasWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
 ): string[] {
   const rutas: string[] = [];
-  for (const error of errores) {
-    const ruta = prefijo ? `${prefijo}.${error.property}` : error.property;
+  for (const error of errors) {
+    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasConError(error.children, ruta));
+      rutas.push(...rutasWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -114,18 +114,18 @@ function rutasConError(
  * `ValidationPipe` real de `main.ts`: sin ella, una clave desconocida se
  * ignora en silencio en vez de rechazar el alta entera.
  *
- * @param alta - El cuerpo del alta, tal como llegaría del cliente.
+ * @param registration - El cuerpo del alta, tal como llegaría del cliente.
  * @returns Las rutas con error (`ownSite.name`, `ownSite.address.longitude`…).
  */
-async function propiedadesConError(
-  alta: Record<string, unknown>,
+async function propertiesWithError(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(RegisterPractitionerDto, alta);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(RegisterPractitionerDto, registration);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasConError(errores);
+  return rutasWithError(errors);
 }
 
 /**
@@ -137,8 +137,8 @@ async function propiedadesConError(
 describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
   it('acepta un empleador del catálogo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workEmployerConceptId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
       }),
     ).toEqual([]);
@@ -146,8 +146,8 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
 
   it('acepta un empleador en texto libre', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workEmployerFreeText: 'Consultores Médicos Asociados S.R.L.',
       }),
     ).toEqual([]);
@@ -155,8 +155,8 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
 
   it('rechaza un empleador que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workEmployerConceptId: 'employer:bo:BANCO_UNION',
       }),
     ).toEqual(['workEmployerConceptId']);
@@ -164,8 +164,8 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
 
   it('rechaza un empleador en texto libre demasiado largo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workEmployerFreeText: 'A'.repeat(201),
       }),
     ).toEqual(['workEmployerFreeText']);
@@ -180,25 +180,25 @@ describe('RegisterPractitionerDto · ocupación y empresa (1.3)', () => {
  * NULL—, así que el rechazo tiene que ocurrir en el borde y no al persistir.
  */
 describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () => {
-  const TIPO = '36c99f5d-9417-51e8-89d2-4f54138bb323';
+  const KIND = '36c99f5d-9417-51e8-89d2-4f54138bb323';
 
   it('acepta el alta sin el arreglo', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('acepta un arreglo vacío', async () => {
     expect(
-      await propiedadesConError({ ...ALTA_MINIMA, credentials: [] }),
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, credentials: [] }),
     ).toEqual([]);
   });
 
   it('acepta un título con su tipo, su número y su institución', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'DIP-001',
             issuingInstitutionText: 'Universidad Mayor de San Andrés',
           },
@@ -209,11 +209,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('acepta el fileId del PDF precargado para asociarlo a ese título', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'TIT-001',
             fileId: '36c99f5d-9417-51e8-89d2-4f54138bb323',
           },
@@ -224,11 +224,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza un fileId que no es uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'TIT-001',
             fileId: 'documento-subido',
           },
@@ -239,20 +239,20 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza un elemento sin número', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        credentials: [{ credentialTypeConceptId: TIPO }],
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        credentials: [{ credentialTypeConceptId: KIND }],
       }),
     ).toEqual(['credentials.0.number']);
   });
 
   it('señala el elemento exacto que viene mal', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
-          { credentialTypeConceptId: TIPO, number: 'DIP-001' },
-          { credentialTypeConceptId: TIPO },
+          { credentialTypeConceptId: KIND, number: 'DIP-001' },
+          { credentialTypeConceptId: KIND },
         ],
       }),
     ).toEqual(['credentials.1.number']);
@@ -262,28 +262,28 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     // La columna es NOT NULL pero acepta la cadena vacía: sin esto, una
     // credencial sin número entraría por una superficie pública.
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        credentials: [{ credentialTypeConceptId: TIPO, number: '' }],
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        credentials: [{ credentialTypeConceptId: KIND, number: '' }],
       }),
     ).toEqual(['credentials.0.number']);
   });
 
   it('rechaza un número que es sólo espacios', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        credentials: [{ credentialTypeConceptId: TIPO, number: '   ' }],
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        credentials: [{ credentialTypeConceptId: KIND, number: '   ' }],
       }),
     ).toEqual(['credentials.0.number']);
   });
 
   it('acepta el número más largo que la columna admite', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
-          { credentialTypeConceptId: TIPO, number: 'A'.repeat(100) },
+          { credentialTypeConceptId: KIND, number: 'A'.repeat(100) },
         ],
       }),
     ).toEqual([]);
@@ -291,10 +291,10 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza un número más largo que la columna', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
-          { credentialTypeConceptId: TIPO, number: 'A'.repeat(101) },
+          { credentialTypeConceptId: KIND, number: 'A'.repeat(101) },
         ],
       }),
     ).toEqual(['credentials.0.number']);
@@ -302,8 +302,8 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza un tipo que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           { credentialTypeConceptId: 'CREDENTIAL_TYPE_DEGREE', number: 'T-1' },
         ],
@@ -313,11 +313,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza una institución más larga que la columna', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'T-1',
             issuingInstitutionText: 'A'.repeat(201),
           },
@@ -330,11 +330,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     // Antes se rechazaba la ciudad porque no tenía columna: el formulario la
     // pedía y la API la tiraba. Ahora los tres tienen dónde guardarse.
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'T-1',
             issuingCityText: 'La Paz',
             issuingCountryText: 'Bolivia',
@@ -347,11 +347,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
 
   it('rechaza una profesión que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'T-1',
             professionConceptId: 'Ingeniero de sistemas',
           },
@@ -364,11 +364,11 @@ describe('RegisterPractitionerDto · títulos declarados en el alta (1.6)', () =
     // `forbidNonWhitelisted` también rige adentro del arreglo: lo que no tiene
     // dónde guardarse no se acepta en silencio.
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         credentials: [
           {
-            credentialTypeConceptId: TIPO,
+            credentialTypeConceptId: KIND,
             number: 'T-1',
             issuingProvinceText: 'Murillo',
           },
@@ -384,16 +384,16 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
     const {
       issuerAdministrativeAreaConceptId: _issuerAdministrativeAreaConceptId,
       ...sinDepartamento
-    } = ALTA_MINIMA;
-    expect(await propiedadesConError(sinDepartamento)).toEqual([
+    } = MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(sinDepartamento)).toEqual([
       'issuerAdministrativeAreaConceptId',
     ]);
   });
 
   it('acepta documento y departamento juntos', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         nationalId: '4821993',
         issuerAdministrativeAreaConceptId:
           '22222222-2222-4222-8222-222222222222',
@@ -402,9 +402,9 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
   });
 
   it('rechaza el departamento sin documento', async () => {
-    const { nationalId: _nationalId, ...sinDocumento } = ALTA_MINIMA;
+    const { nationalId: _nationalId, ...sinDocumento } = MINIMAL_REGISTRATION;
     expect(
-      await propiedadesConError({
+      await propertiesWithError({
         ...sinDocumento,
       }),
     ).toEqual(['nationalId']);
@@ -412,8 +412,8 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
 
   it('rechaza el CI en blanco', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         nationalId: '',
       }),
     ).toEqual(['nationalId']);
@@ -421,8 +421,8 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
 
   it('rechaza un departamento que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         nationalId: '4821993',
         issuerAdministrativeAreaConceptId: 'geo:bo:department:SC',
       }),
@@ -432,13 +432,13 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
 
 describe('RegisterPractitionerDto · ownSite (P20)', () => {
   it('acepta el alta sin ownSite: el campo es opcional', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('acepta un ownSite mínimo, sólo con nombre', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         ownSite: { name: 'Consultorio' },
       }),
     ).toEqual([]);
@@ -446,8 +446,8 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
 
   it('rechaza un nombre de consultorio demasiado corto', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         ownSite: { name: 'X' },
       }),
     ).toEqual(['ownSite.name']);
@@ -455,8 +455,8 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
 
   it('acepta address.lines vacío: la sede se puede ubicar sólo por municipio o GPS', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         ownSite: {
           name: 'Consultorio',
           address: {
@@ -470,8 +470,8 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
 
   it('rechaza latitud sin longitud: el par es ambos o ninguno', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         ownSite: {
           name: 'Consultorio',
           address: { lines: [], latitude: -16.5 },
@@ -482,25 +482,25 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
 
   it('rechaza una propiedad desconocida dentro de ownSite: whitelist anidado', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         ownSite: { name: 'Consultorio', foo: 1 },
       }),
     ).toEqual(['ownSite.foo']);
   });
 
   it('el alta asistida (OmitType) hereda ownSite', async () => {
-    const { password: _password, ...altaSinPassword } = ALTA_MINIMA;
+    const { password: _password, ...altaSinPassword } = MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
       ...altaSinPassword,
       reason: 'Alta de plantel',
       ownSite: { name: 'X' },
     });
-    const errores = await validate(dto, {
+    const errors = await validate(dto, {
       whitelist: true,
       forbidNonWhitelisted: true,
     });
-    expect(rutasConError(errores)).toEqual(['ownSite.name']);
+    expect(rutasWithError(errors)).toEqual(['ownSite.name']);
   });
 });
 
@@ -511,8 +511,8 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
 describe('RegisterPractitionerDto · domicilio (P19)', () => {
   it('acepta los tres campos del domicilio', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
         homeAddressLines: 'Barrio Equipetrol, Calle 7 Este #12',
         homeLatitude: -17.7689,
@@ -522,31 +522,31 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
   });
 
   it('acepta el alta sin ningún dato de domicilio', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('rechaza latitud sin longitud', async () => {
     expect(
-      await propiedadesConError({ ...ALTA_MINIMA, homeLatitude: -17.7689 }),
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeLatitude: -17.7689 }),
     ).toEqual(['homeLongitude']);
   });
 
   it('rechaza longitud sin latitud', async () => {
     expect(
-      await propiedadesConError({ ...ALTA_MINIMA, homeLongitude: -63.1956 }),
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeLongitude: -63.1956 }),
     ).toEqual(['homeLatitude']);
   });
 
   it('rechaza la calle vacía: ausente y vacía no son lo mismo', async () => {
     expect(
-      await propiedadesConError({ ...ALTA_MINIMA, homeAddressLines: '' }),
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeAddressLines: '' }),
     ).toEqual(['homeAddressLines']);
   });
 
   it('rechaza una latitud fuera de rango', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         homeLatitude: 91,
         homeLongitude: -63.1956,
       }),
@@ -554,17 +554,17 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
   });
 
   it('el alta asistida (OmitType) hereda el domicilio', async () => {
-    const { password: _password, ...altaSinPassword } = ALTA_MINIMA;
+    const { password: _password, ...altaSinPassword } = MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
       ...altaSinPassword,
       reason: 'Alta de plantel',
       homeLatitude: -17.7689,
     });
-    const errores = await validate(dto, {
+    const errors = await validate(dto, {
       whitelist: true,
       forbidNonWhitelisted: true,
     });
-    expect(rutasConError(errores)).toEqual(['homeLongitude']);
+    expect(rutasWithError(errors)).toEqual(['homeLongitude']);
   });
 });
 
@@ -574,8 +574,8 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
 describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
   it('acepta la dirección y el par de coordenadas del trabajo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workAddressLines: 'Hospital Central, Av. Principal 200',
         workLatitude: -17.78,
         workLongitude: -63.18,
@@ -584,19 +584,19 @@ describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
   });
 
   it('acepta el alta sin dirección de trabajo', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('rechaza coordenadas laborales incompletas', async () => {
     expect(
-      await propiedadesConError({ ...ALTA_MINIMA, workLatitude: -17.78 }),
+      await propertiesWithError({ ...MINIMAL_REGISTRATION, workLatitude: -17.78 }),
     ).toEqual(['workLongitude']);
   });
 
   it('rechaza coordenadas laborales fuera de rango', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         workLatitude: -91,
         workLongitude: -63.18,
       }),

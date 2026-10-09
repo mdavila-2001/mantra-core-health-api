@@ -552,13 +552,13 @@ export class ModerationRepository {
     if (contentRefIds.length === 0) return [];
     // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
     // arreglo de Postgres. Ver la nota en `ReactionsRepository`.
-    const marcadores = contentRefIds.map(() => '?').join(', ');
+    const markers = contentRefIds.map(() => '?').join(', ');
     const rows = await em
       .getConnection()
       .execute<Array<{ target_id: string; count: number }>>(
         `select target_id, count(*)::int as count
            from community.content_reports
-          where target_id in (${marcadores})
+          where target_id in (${markers})
           group by target_id`,
         [...contentRefIds],
         'all',

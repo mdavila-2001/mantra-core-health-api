@@ -5,10 +5,10 @@ import type { PatientSearchScope } from '../repositories/patient-profiles.reposi
  * Roles que atienden y, por eso, pueden buscar a la persona que tienen enfrente
  * — incluso para darla de alta si nunca la atendieron (P-07-10).
  */
-export const ROLES_QUE_ATIENDEN = ['CLINICIAN', 'PRACTITIONER'] as const;
+export const ROLES_THAT_ATTEND = ['CLINICIAN', 'PRACTITIONER'] as const;
 
 /** Roles que administran el padrón completo de personas. */
-export const ROLES_QUE_ADMINISTRAN = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
+export const ROLES_THAT_MANAGE = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
 
 /**
  * Hasta dónde llega la búsqueda de pacientes de quien pregunta (UC-05-13).
@@ -49,7 +49,7 @@ export const ROLES_QUE_ADMINISTRAN = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
  *   `SUPERADMIN`, `CLINICIAN`, `PRACTITIONER`) ven el mismo padrón. Se
  *   conserva el parámetro porque la diferencia entre ellos no es CUÁNTO ven
  *   —eso resuelve esta función—, es si necesitan aportar un criterio para
- *   preguntar, y eso lo exige {@link requiereCriterioDeBusqueda} en el
+ *   preguntar, y eso lo exige {@link searchRequiresCriterion} en el
  *   servicio.
  * @returns El alcance con el que hay que resolver la consulta.
  */
@@ -70,8 +70,8 @@ export function resolvePatientSearchScope(
  * @param actor - Usuario autenticado que pregunta.
  * @returns `true` si el actor debe aportar `q` o `nationalId`.
  */
-export function requiereCriterioDeBusqueda(actor: AuthenticatedUser): boolean {
-  return !actor.roles.some((rol) =>
-    (ROLES_QUE_ADMINISTRAN as readonly string[]).includes(rol),
+export function searchRequiresCriterion(actor: AuthenticatedUser): boolean {
+  return !actor.roles.some((role) =>
+    (ROLES_THAT_MANAGE as readonly string[]).includes(role),
   );
 }

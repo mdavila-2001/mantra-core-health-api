@@ -417,8 +417,8 @@ export class PractitionerAccountingService {
     accountIds: readonly (string | undefined)[],
   ): Promise<ReadonlyMap<string, string | null>> {
     const ids = accountIds.filter((id): id is string => Boolean(id));
-    const cuentas: Accounts[] = await this.accountsRepo.findByIds(em, ids);
-    return new Map(cuentas.map((c) => [c.id, c.currencyConceptId ?? null]));
+    const accounts: Accounts[] = await this.accountsRepo.findByIds(em, ids);
+    return new Map(accounts.map((c) => [c.id, c.currencyConceptId ?? null]));
   }
 
   /** Los activos de la práctica, para el listado del auto-servicio. */
@@ -429,7 +429,7 @@ export class PractitionerAccountingService {
     await this.assertOwnsPractice(actor, practiceId);
     const em = this.em.fork();
     const assets = await this.assetRepo.listByPractice(em, practiceId);
-    const monedas = await this.currencyByAccount(
+    const currencies = await this.currencyByAccount(
       em,
       assets.map((a) => a.accountId),
     );
@@ -442,7 +442,7 @@ export class PractitionerAccountingService {
       depreciationMethodConceptId: asset.depreciationMethodConceptId ?? null,
       accountId: asset.accountId ?? null,
       currencyConceptId: asset.accountId
-        ? (monedas.get(asset.accountId) ?? null)
+        ? (currencies.get(asset.accountId) ?? null)
         : null,
       acquisitionDate: toIsoDate(asset.acquisitionDate),
       acquisitionCost: asset.acquisitionCost ?? null,
@@ -531,7 +531,7 @@ export class PractitionerAccountingService {
       );
     }
 
-    const resultado = await this.assetService.runDepreciation(
+    const result = await this.assetService.runDepreciation(
       {
         practiceId,
         fiscalPeriodId: period.id,
@@ -542,7 +542,7 @@ export class PractitionerAccountingService {
       },
       actor,
     );
-    if (resultado.transactionIds.length === 0) {
+    if (result.transactionIds.length === 0) {
       throw new PreconditionFailedException(
         'Este activo no tiene depreciación pendiente para el período abierto',
         { assetId, fiscalPeriodId: period.id },
@@ -552,14 +552,14 @@ export class PractitionerAccountingService {
     // asiento: se relee la fila que acaba de crear (idempotente por
     // activo/periodo, `AssetRepository.findDepreciation`) para poder
     // devolver el monto que de verdad se depreció.
-    const depreciacion = await this.assetRepo.findDepreciation(
+    const depreciation = await this.assetRepo.findDepreciation(
       em,
       assetId,
       period.id,
     );
     return {
-      transactionId: resultado.transactionIds[0],
-      amount: depreciacion?.amount ?? '0.00',
+      transactionId: result.transactionIds[0],
+      amount: depreciation?.amount ?? '0.00',
     };
   }
 
@@ -571,7 +571,7 @@ export class PractitionerAccountingService {
     await this.assertOwnsPractice(actor, practiceId);
     const em = this.em.fork();
     const liabilities = await this.liabilityRepo.listByPractice(em, practiceId);
-    const monedas = await this.currencyByAccount(
+    const currencies = await this.currencyByAccount(
       em,
       liabilities.map((l) => l.accountId),
     );
@@ -583,7 +583,7 @@ export class PractitionerAccountingService {
       liabilityTypeConceptId: liability.liabilityTypeConceptId ?? null,
       accountId: liability.accountId ?? null,
       currencyConceptId: liability.accountId
-        ? (monedas.get(liability.accountId) ?? null)
+        ? (currencies.get(liability.accountId) ?? null)
         : null,
       principalAmount: liability.principalAmount ?? null,
       outstandingAmount: liability.outstandingAmount ?? null,
@@ -624,14 +624,14 @@ export class PractitionerAccountingService {
       currencyConceptId: liability.accountId
         ? (monedas.get(liability.accountId) ?? null)
         : null,
-      schedule: filas.map((fila) => ({
-        id: fila.id,
-        installmentNumber: fila.installmentNumber,
-        dueDate: toIsoDate(fila.dueDate) ?? undefined,
-        principalDue: fila.principalDue,
-        interestDue: fila.interestDue,
-        paidAmount: fila.paidAmount ?? '0.00',
-        statusConceptId: fila.statusConceptId,
+      schedule: filas.map((row) => ({
+        id: row.id,
+        installmentNumber: row.installmentNumber,
+        dueDate: toIsoDate(row.dueDate) ?? undefined,
+        principalDue: row.principalDue,
+        interestDue: row.interestDue,
+        paidAmount: row.paidAmount ?? '0.00',
+        statusConceptId: row.statusConceptId,
       })),
     };
   }
@@ -662,7 +662,7 @@ export class PractitionerAccountingService {
       }
 
       const startDate = new Date(dto.startDate);
-      const cuotas = buildAmortizationSchedule({
+      const installments = buildAmortizationSchedule({
         principalAmount: dto.principalAmount,
         annualInterestRate: dto.interestRate,
         installments: dto.installments,
@@ -678,7 +678,7 @@ export class PractitionerAccountingService {
         outstandingAmount: dto.principalAmount,
         interestRate: dto.interestRate,
         startDate,
-        dueDate: cuotas[cuotas.length - 1]?.dueDate,
+        dueDate: installments[installments.length - 1]?.dueDate,
         creditorName: dto.creditorName,
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         automated: dto.automated ?? true,
@@ -686,27 +686,27 @@ export class PractitionerAccountingService {
       });
       await tx.flush();
 
-      const filas = cuotas.map((cuota) =>
+      const rows = installments.map((installment) =>
         this.liabilityRepo.createSchedule(tx, {
           liabilityId: liability.id,
-          installmentNumber: cuota.installmentNumber,
-          dueDate: cuota.dueDate,
-          principalDue: cuota.principalDue,
-          interestDue: cuota.interestDue,
+          installmentNumber: installment.installmentNumber,
+          dueDate: installment.dueDate,
+          principalDue: installment.principalDue,
+          interestDue: installment.interestDue,
           statusConceptId: ACCT.LIAB_SCHEDULE_PENDING,
           actorUserId: actor.id,
         }),
       );
       await tx.flush();
 
-      const schedule: LiabilityScheduleDto[] = filas.map((fila) => ({
-        id: fila.id,
-        installmentNumber: fila.installmentNumber,
-        dueDate: fila.dueDate?.toISOString().slice(0, 10),
-        principalDue: fila.principalDue,
-        interestDue: fila.interestDue,
-        paidAmount: fila.paidAmount ?? '0.00',
-        statusConceptId: fila.statusConceptId,
+      const schedule: LiabilityScheduleDto[] = rows.map((row) => ({
+        id: row.id,
+        installmentNumber: row.installmentNumber,
+        dueDate: row.dueDate?.toISOString().slice(0, 10),
+        principalDue: row.principalDue,
+        interestDue: row.interestDue,
+        paidAmount: row.paidAmount ?? '0.00',
+        statusConceptId: row.statusConceptId,
       }));
 
       return { id: liability.id, code: liability.code, schedule };
@@ -775,7 +775,7 @@ export class PractitionerAccountingService {
       toCents(principalComponent) + toCents(interestComponent),
     );
 
-    const resultado = await this.liabilityService.payLiability(
+    const result = await this.liabilityService.payLiability(
       liabilityId,
       {
         practiceId,
@@ -790,7 +790,7 @@ export class PractitionerAccountingService {
     );
 
     return {
-      transactionId: resultado.transactionId,
+      transactionId: result.transactionId,
       installmentNumber: schedule.installmentNumber,
       amount,
     };

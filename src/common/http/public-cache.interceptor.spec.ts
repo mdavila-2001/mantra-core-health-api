@@ -18,7 +18,7 @@ import { PublicCacheStore } from './public-cache.store';
  *
  * @returns El interceptor, la respuesta falsa y el ejecutor del caso.
  */
-function build(opciones: {
+function build(options: {
   /** Si el manejador está marcado `@Public()`. */
   publico: boolean;
   /** Método HTTP de la petición. */
@@ -37,8 +37,8 @@ function build(opciones: {
   store?: PublicCacheStore;
 }) {
   const headers: Record<string, unknown> = {};
-  if (opciones.ifNoneMatch !== undefined)
-    headers['if-none-match'] = opciones.ifNoneMatch;
+  if (options.ifNoneMatch !== undefined)
+    headers['if-none-match'] = options.ifNoneMatch;
 
   const res = {
     setHeader: mockFn(),
@@ -51,29 +51,29 @@ function build(opciones: {
 
   const reflector = {
     getAllAndOverride: mockFn((clave: unknown) =>
-      clave === HEADERS_METADATA ? (opciones.headers ?? []) : opciones.publico,
+      clave === HEADERS_METADATA ? (options.headers ?? []) : options.publico,
     ),
   };
-  const path = opciones.path ?? '/public/search';
+  const path = options.path ?? '/public/search';
   const context = {
     getHandler: () => undefined,
     getClass: () => undefined,
     switchToHttp: () => ({
       getRequest: () => ({
-        method: opciones.method ?? 'GET',
+        method: options.method ?? 'GET',
         path,
-        originalUrl: opciones.originalUrl ?? path,
+        originalUrl: options.originalUrl ?? path,
         headers,
       }),
       getResponse: () => res,
     }),
   };
   const handleFn = mockFn(() =>
-    of(opciones.body ?? { items: [], nextCursor: null }),
+    of(options.body ?? { items: [], nextCursor: null }),
   );
   const next = { handle: handleFn };
 
-  const store = opciones.store ?? new PublicCacheStore();
+  const store = options.store ?? new PublicCacheStore();
   const interceptor = new PublicCacheInterceptor(reflector as any, store);
   return {
     res,
@@ -140,15 +140,15 @@ describe('PublicCacheInterceptor', () => {
     await primero.ejecutar();
     const etag = primero.res.cabeceras['ETag'];
 
-    const segundo = build({
+    const second = build({
       publico: true,
       body: { items: [7] },
       ifNoneMatch: etag,
     });
-    const cuerpo = await segundo.ejecutar();
+    const body = await second.ejecutar();
 
-    expect(segundo.res.status).toHaveBeenCalledWith(304);
-    expect(cuerpo).toBeUndefined();
+    expect(second.res.status).toHaveBeenCalledWith(304);
+    expect(body).toBeUndefined();
   });
 
   // La regresión que motiva `coincide()`: cualquier navegador que ya vio dos
@@ -159,14 +159,14 @@ describe('PublicCacheInterceptor', () => {
     await primero.ejecutar();
     const etag = primero.res.cabeceras['ETag'];
 
-    const segundo = build({
+    const second = build({
       publico: true,
       body: { items: [7] },
       ifNoneMatch: `W/"otro-viejo", ${etag}, W/"otro-mas"`,
     });
-    await segundo.ejecutar();
+    await second.ejecutar();
 
-    expect(segundo.res.status).toHaveBeenCalledWith(304);
+    expect(second.res.status).toHaveBeenCalledWith(304);
   });
 
   it('un ETag que no coincide sirve el cuerpo entero', async () => {
@@ -176,10 +176,10 @@ describe('PublicCacheInterceptor', () => {
       ifNoneMatch: 'W/"de-otra-version"',
     });
 
-    const cuerpo = await d.ejecutar();
+    const body = await d.ejecutar();
 
     expect(d.res.status).not.toHaveBeenCalled();
-    expect(cuerpo).toEqual({ items: [7] });
+    expect(body).toEqual({ items: [7] });
   });
 
   it('un POST público no se cachea', async () => {
@@ -229,20 +229,20 @@ describe('PublicCacheInterceptor', () => {
       expect(primero.llamadasAlHandler()).toBe(1);
       const etag = primero.res.cabeceras['ETag'];
 
-      const segundo = build({
+      const second = build({
         publico: true,
         body: { items: [7] },
         ifNoneMatch: etag,
         store,
       });
-      const cuerpo = await segundo.ejecutar();
+      const body = await second.ejecutar();
 
-      expect(segundo.llamadasAlHandler()).toBe(0);
-      expect(segundo.res.status).toHaveBeenCalledWith(304);
-      expect(cuerpo).toBeUndefined();
+      expect(second.llamadasAlHandler()).toBe(0);
+      expect(second.res.status).toHaveBeenCalledWith(304);
+      expect(body).toBeUndefined();
       // Las cabeceras se repiten desde la caché, no se pierden por saltar el handler.
-      expect(segundo.res.cabeceras['ETag']).toBe(etag);
-      expect(segundo.res.cabeceras['Cache-Control']).toContain('public');
+      expect(second.res.cabeceras['ETag']).toBe(etag);
+      expect(second.res.cabeceras['Cache-Control']).toContain('public');
     });
 
     it('una relectura sin If-None-Match también evita next.handle(): sirve el cuerpo cacheado', async () => {
@@ -250,12 +250,12 @@ describe('PublicCacheInterceptor', () => {
       const primero = build({ publico: true, body: { items: [9] }, store });
       await primero.ejecutar();
 
-      const segundo = build({ publico: true, body: { items: [9] }, store });
-      const cuerpo = await segundo.ejecutar();
+      const second = build({ publico: true, body: { items: [9] }, store });
+      const body = await second.ejecutar();
 
-      expect(segundo.llamadasAlHandler()).toBe(0);
-      expect(segundo.res.status).not.toHaveBeenCalled();
-      expect(cuerpo).toEqual({ items: [9] });
+      expect(second.llamadasAlHandler()).toBe(0);
+      expect(second.res.status).not.toHaveBeenCalled();
+      expect(body).toEqual({ items: [9] });
     });
 
     it('una escritura limpia el caché: la siguiente lectura vuelve a llamar al handler', async () => {
@@ -265,45 +265,45 @@ describe('PublicCacheInterceptor', () => {
 
       // Una escritura, aunque no sea `@Public()`: publicar un post es lo que
       // vuelve obsoleto el feed que se acaba de cachear.
-      const escritura = build({
+      const write = build({
         publico: false,
         method: 'POST',
         store,
       });
-      await escritura.ejecutar();
+      await write.ejecutar();
       expect(store.size).toBe(0);
 
-      const tercero = build({ publico: true, body: { items: [1, 2] }, store });
-      const cuerpo = await tercero.ejecutar();
+      const third = build({ publico: true, body: { items: [1, 2] }, store });
+      const body = await third.ejecutar();
 
-      expect(tercero.llamadasAlHandler()).toBe(1);
-      expect(cuerpo).toEqual({ items: [1, 2] });
+      expect(third.llamadasAlHandler()).toBe(1);
+      expect(body).toEqual({ items: [1, 2] });
     });
 
     it('claves distintas (rutas o query distintas) no se pisan entre sí', async () => {
       const store = new PublicCacheStore();
-      const busqueda = build({
+      const search = build({
         publico: true,
         path: '/public/search',
         originalUrl: '/public/search?q=a',
         body: { items: ['a'] },
         store,
       });
-      await busqueda.ejecutar();
+      await search.ejecutar();
 
-      const otraBusqueda = build({
+      const otherSearch = build({
         publico: true,
         path: '/public/search',
         originalUrl: '/public/search?q=b',
         body: { items: ['b'] },
         store,
       });
-      const cuerpo = await otraBusqueda.ejecutar();
+      const body = await otherSearch.ejecutar();
 
       // Es una clave nueva: no hay entrada cacheada todavía, así que sí llama
       // al handler y no arrastra el resultado de la otra búsqueda.
-      expect(otraBusqueda.llamadasAlHandler()).toBe(1);
-      expect(cuerpo).toEqual({ items: ['b'] });
+      expect(otherSearch.llamadasAlHandler()).toBe(1);
+      expect(body).toEqual({ items: ['b'] });
     });
 
     it('un handler con Cache-Control propio nunca se cachea (respeta no-store)', async () => {
@@ -316,15 +316,15 @@ describe('PublicCacheInterceptor', () => {
       await primero.ejecutar();
       expect(store.size).toBe(0);
 
-      const segundo = build({
+      const second = build({
         publico: true,
         headers: [{ name: 'Cache-Control', value: 'no-store' }],
         store,
       });
-      await segundo.ejecutar();
+      await second.ejecutar();
 
       // Sin caché de por medio, cada pedido vuelve a llamar al handler.
-      expect(segundo.llamadasAlHandler()).toBe(1);
+      expect(second.llamadasAlHandler()).toBe(1);
     });
   });
 });

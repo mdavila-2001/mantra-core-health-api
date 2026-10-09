@@ -44,8 +44,8 @@ function build() {
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new AllergyIntolerancesService(
     em as any,
@@ -66,7 +66,7 @@ function build() {
 }
 
 /** La alergia que devuelve `create` por defecto. */
-function alergiaCreada(over: Record<string, unknown> = {}) {
+function createdAllergy(over: Record<string, unknown> = {}) {
   return {
     id: 'alg1',
     patientProfileId: 'p1',
@@ -80,7 +80,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
   it('records an allergy with reactions, flushing parent before children', async () => {
     const d = build();
     d.allergyRepo.findActiveBySubstance.mockResolvedValue(null);
-    d.allergyRepo.create.mockReturnValue(alergiaCreada());
+    d.allergyRepo.create.mockReturnValue(createdAllergy());
     d.allergyRepo.createReaction.mockReturnValue({ id: 'rx1' });
 
     const res = await d.service.create(
@@ -120,7 +120,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
       const d = build();
       d.allergyRepo.findActiveBySubstance.mockResolvedValue(null);
       d.allergyRepo.create.mockReturnValue(
-        alergiaCreada({ encounterId: 'enc-1' }),
+        createdAllergy({ encounterId: 'enc-1' }),
       );
 
       const res = await d.service.create(
@@ -188,7 +188,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         patientProfileId: 'p1',
       });
       const res = await d.service.listAttachments('alg1', actor);
-      expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -209,7 +209,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         id: 'alg1',
         patientProfileId: 'p1',
       });
-      d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
         new Error('403'),
       );
       await expect(d.service.listAttachments('alg1', actor)).rejects.toThrow(
@@ -229,7 +229,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
 
       const res = await d.service.attachFile('alg1', { fileId: 'f1' }, actor);
 
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'p1',
         actor,
       );
@@ -247,7 +247,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
       await expect(
         d.service.attachFile('nope', { fileId: 'f1' }, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).not.toHaveBeenCalled();
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
       expect(d.filesService.createLink).not.toHaveBeenCalled();
     });
 
@@ -257,7 +257,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         id: 'alg1',
         patientProfileId: 'p1',
       });
-      d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
         new Error('403'),
       );
       await expect(

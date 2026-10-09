@@ -52,7 +52,7 @@ function build() {
 const actor = { id: 'user-1', roles: [] } as any;
 
 /** Una fila de cola mínima. */
-const fila = (id: string, extra: Record<string, unknown> = {}) => ({
+const row = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
   contentTypeConceptId: COMM.CONTENT_TYPE_POST,
   contentRefId: `post-${id}`,
@@ -79,7 +79,7 @@ const TENANT = '3f2b6c14-0000-5000-8000-000000000001';
  * @param limit - Tope efectivo.
  * @returns La página, como la devuelve el servicio.
  */
-const listQueueEnTenant = (d: any, query: any, limit: number): Promise<any> =>
+const listQueueInTenant = (d: any, query: any, limit: number): Promise<any> =>
   runWithTenant(TENANT, () => d.service.listQueue(query, limit));
 
 describe('CommunityModerationReadService', () => {
@@ -92,7 +92,7 @@ describe('CommunityModerationReadService', () => {
 
     it('acota la cola al tenant del contexto', async () => {
       const d = build();
-      await listQueueEnTenant(d, {} as any, 20);
+      await listQueueInTenant(d, {} as any, 20);
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
@@ -105,7 +105,7 @@ describe('CommunityModerationReadService', () => {
 
     it('pide una fila más que el tope, para saber si hay siguiente', async () => {
       const d = build();
-      await listQueueEnTenant(d, {} as any, 20);
+      await listQueueInTenant(d, {} as any, 20);
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
@@ -122,7 +122,7 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce los códigos de filtro a conceptos', async () => {
       const d = build();
-      await listQueueEnTenant(
+      await listQueueInTenant(
         d,
         {
           status: ['QUEUED', 'IN_REVIEW'],
@@ -154,7 +154,7 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce la antigüedad en horas a un instante', async () => {
       const d = build();
-      await listQueueEnTenant(d, { minAgeHours: 24 } as any, 20);
+      await listQueueInTenant(d, { minAgeHours: 24 } as any, 20);
 
       const filtros = d.moderationRepo.listQueuePage.mock.calls[0][2];
       expect(filtros.queuedBefore).toBeInstanceOf(Date);
@@ -167,9 +167,9 @@ describe('CommunityModerationReadService', () => {
 
     it('no emite cursor cuando la página no está llena', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1')]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.count).toBe(1);
       expect(page.nextCursor).toBeNull();
@@ -178,11 +178,11 @@ describe('CommunityModerationReadService', () => {
     it('emite cursor y recorta la fila extra cuando hay más', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1'),
-        fila('q2'),
+        row('q1'),
+        row('q2'),
       ]);
 
-      const page = await listQueueEnTenant(d, {} as any, 1);
+      const page = await listQueueInTenant(d, {} as any, 1);
 
       expect(page.count).toBe(1);
       expect(page.items[0]!.id).toBe('q1');
@@ -199,14 +199,14 @@ describe('CommunityModerationReadService', () => {
     it('el cursor cae en createdAt si la fila no tiene queuedAt', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1', {
+        row('q1', {
           queuedAt: undefined,
           createdAt: new Date('2026-08-01T08:00:00Z'),
         }),
-        fila('q2'),
+        row('q2'),
       ]);
 
-      const page = await listQueueEnTenant(d, {} as any, 1);
+      const page = await listQueueInTenant(d, {} as any, 1);
 
       expect(decodeKeysetCursor(page.nextCursor!)).toEqual({
         queuedAt: '2026-08-01T08:00:00.000Z',
@@ -221,7 +221,7 @@ describe('CommunityModerationReadService', () => {
     it('trae el recuento de reportes y el reporte que la originó', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1', { contentReportId: 'rep-1' }),
+        row('q1', { contentReportId: 'rep-1' }),
       ]);
       d.moderationRepo.countReportsByContent.mockResolvedValue([
         { targetId: 'post-q1', count: 7 },
@@ -235,7 +235,7 @@ describe('CommunityModerationReadService', () => {
         },
       ]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.items[0]!.reportCount).toBe(7);
       expect(page.items[0]!.report?.detailText).toBe(
@@ -245,9 +245,9 @@ describe('CommunityModerationReadService', () => {
 
     it('una entrada sin reporte asociado trae report en null, no undefined', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1')]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.items[0]!.report).toBeNull();
       expect(page.items[0]!.reportCount).toBe(0);

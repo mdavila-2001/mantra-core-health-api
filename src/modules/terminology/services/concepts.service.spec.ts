@@ -546,7 +546,7 @@ describe('ConceptsService', () => {
    * cambio de contrato para quien serializa la respuesta.
    */
   describe('searchConcepts · idioma y etiquetas', () => {
-    const conceptoIngles = {
+    const englishConcept = {
       id: 'concept-1',
       code: 'COND_SEV_MILD',
       display: 'Mild',
@@ -558,7 +558,7 @@ describe('ConceptsService', () => {
     it('sin `lang` ni `includeValueSets` devuelve exactamente lo de siempre', async () => {
       const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
         build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
 
       const result = await service.searchConcepts(undefined, undefined, 50);
 
@@ -584,7 +584,7 @@ describe('ConceptsService', () => {
 
     it('con `lang` devuelve la designación de ese idioma y su definición', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([['concept-1', { value: 'Leve' }]]),
       );
@@ -621,7 +621,7 @@ describe('ConceptsService', () => {
 
     it('sin traducción cargada devuelve el original y lo marca — no lo deja en blanco', async () => {
       const { service, conceptsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
 
       const result = await service.searchConcepts(
         undefined,
@@ -641,7 +641,7 @@ describe('ConceptsService', () => {
 
     it('una definición que no sea texto se descarta en vez de pintarse cruda', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
       designationsRepo.findPropertyForConcepts.mockResolvedValue([
         { conceptId: 'concept-1', valueJson: { texto: 'algo' } },
       ]);
@@ -662,8 +662,8 @@ describe('ConceptsService', () => {
     it('resuelve las etiquetas de toda la página en una sola consulta', async () => {
       const { service, conceptsRepo, valueSetsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        conceptoIngles,
-        { ...conceptoIngles, id: 'concept-2', code: 'COND_SEV_SEVERE' },
+        englishConcept,
+        { ...englishConcept, id: 'concept-2', code: 'COND_SEV_SEVERE' },
       ]);
       valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
         new Map([
@@ -706,8 +706,8 @@ describe('ConceptsService', () => {
     it('con `lang` ordena por nombre — un glosario se lee alfabético', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        { ...conceptoIngles, id: 'c-1', code: 'A_CODE' },
-        { ...conceptoIngles, id: 'c-2', code: 'B_CODE' },
+        { ...englishConcept, id: 'c-1', code: 'A_CODE' },
+        { ...englishConcept, id: 'c-2', code: 'B_CODE' },
       ]);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([
@@ -734,8 +734,8 @@ describe('ConceptsService', () => {
     it('sin `lang` conserva el orden del catálogo, que es por código', async () => {
       const { service, conceptsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        { ...conceptoIngles, id: 'c-1', code: 'A_CODE', display: 'Zebra' },
-        { ...conceptoIngles, id: 'c-2', code: 'B_CODE', display: 'Alfa' },
+        { ...englishConcept, id: 'c-1', code: 'A_CODE', display: 'Zebra' },
+        { ...englishConcept, id: 'c-2', code: 'B_CODE', display: 'Alfa' },
       ]);
 
       const result = await service.searchConcepts(undefined, undefined, 50);
@@ -821,7 +821,7 @@ describe('ConceptsService', () => {
   });
 
   describe('readConcept', () => {
-    const concepto = {
+    const concept = {
       id: 'concept-1',
       code: 'I10',
       display: 'Hipertensión esencial',
@@ -833,7 +833,7 @@ describe('ConceptsService', () => {
     it('arma la ficha con sus textos, sus etiquetas y sus sinónimos', async () => {
       const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
         build();
-      conceptsRepo.findById.mockResolvedValue(concepto);
+      conceptsRepo.findById.mockResolvedValue(concept);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([['concept-1', { value: 'Hipertensión esencial' }]]),
       );
@@ -867,20 +867,20 @@ describe('ConceptsService', () => {
         ]),
       );
 
-      const ficha = await service.readConcept('concept-1', 'ES');
+      const record = await service.readConcept('concept-1', 'ES');
 
-      expect(ficha).toMatchObject({
+      expect(record).toMatchObject({
         conceptId: 'concept-1',
         code: 'I10',
         display: 'Hipertensión esencial',
         definition: 'Presión arterial alta.',
         translated: true,
       });
-      expect(ficha.valueSets).toEqual([
+      expect(record.valueSets).toEqual([
         { id: 'vs-1', internalCode: 'condition-code', name: 'Diagnóstico' },
       ]);
       // El nombre que ya se muestra arriba no vuelve como sinónimo de sí mismo.
-      expect(ficha.synonyms).toEqual([
+      expect(record.synonyms).toEqual([
         {
           value: 'Hypertensive disorder',
           language: 'EN',
@@ -1169,7 +1169,7 @@ describe('ConceptsService', () => {
     });
 
     describe('búsqueda paginada (glosario de cientos de miles de términos)', () => {
-      const corazon = {
+      const heart = {
         id: 'concept-1',
         code: 'GLOSSARY_CORAZON',
         display: 'Heart',
@@ -1178,7 +1178,7 @@ describe('ConceptsService', () => {
         codeSystemVersionId: 'v1',
         stateConceptId: CONCEPTS.TERM_ACTIVE,
       };
-      const aorta = { ...corazon, id: 'concept-2', code: 'GLOSSARY_AORTA' };
+      const aorta = { ...heart, id: 'concept-2', code: 'GLOSSARY_AORTA' };
 
       it('pasa el desplazamiento y devuelve el total, no sólo lo de la página', async () => {
         const { service, conceptsRepo, valueSetsRepo } = build();
@@ -1191,7 +1191,7 @@ describe('ConceptsService', () => {
         });
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
-            ['concept-1', corazon],
+            ['concept-1', heart],
             ['concept-2', aorta],
           ]),
         );
@@ -1232,7 +1232,7 @@ describe('ConceptsService', () => {
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
             ['concept-2', { ...aorta, display: 'Aorta' }],
-            ['concept-1', { ...corazon, display: 'Zzz' }],
+            ['concept-1', { ...heart, display: 'Zzz' }],
           ]),
         );
 
@@ -1321,7 +1321,7 @@ describe('ConceptsService', () => {
         });
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
-            ['concept-1', corazon],
+            ['concept-1', heart],
             ['concept-2', aorta],
           ]),
         );
@@ -1769,7 +1769,7 @@ describe('ConceptsService', () => {
 
     describe('ficha', () => {
       /** Configura los mocks comunes a la ficha de un término del glosario. */
-      function setUpGlossaryTermFicha({
+      function setUpGlossaryTermRecord({
         stateConceptId = CONCEPTS.TERM_ACTIVE,
       }: { stateConceptId?: string } = {}) {
         const built = build();
@@ -1847,16 +1847,16 @@ describe('ConceptsService', () => {
       }
 
       it('separa categoría y etiquetas de `valueSets`, y resuelve las relaciones tipadas', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.category).toEqual({
+        expect(record.category).toEqual({
           valueSetId: 'vs-cat-1',
           internalCode: 'glossary-category-anatomy',
           name: 'Anatomía',
         });
-        expect(ficha.tags).toEqual([
+        expect(record.tags).toEqual([
           {
             valueSetId: 'vs-tag-1',
             internalCode: 'glossary-tag-cardiovascular',
@@ -1864,13 +1864,13 @@ describe('ConceptsService', () => {
           },
         ]);
         // El value set paraguas no aparece ni como categoría ni como etiqueta.
-        expect(ficha.category?.internalCode).not.toBe(GLOSSARY_ALL_TERMS_CODE);
+        expect(record.category?.internalCode).not.toBe(GLOSSARY_ALL_TERMS_CODE);
         expect(
-          ficha.tags.some(
+          record.tags.some(
             (tag) => tag.internalCode === GLOSSARY_ALL_TERMS_CODE,
           ),
         ).toBe(false);
-        expect(ficha.relations).toEqual([
+        expect(record.relations).toEqual([
           {
             type: 'ANATOMY',
             conceptId: 'concept-2',
@@ -1878,50 +1878,50 @@ describe('ConceptsService', () => {
             display: 'Heart failure',
           },
         ]);
-        expect(ficha.slug).toBe('corazon');
+        expect(record.slug).toBe('corazon');
       });
 
       it('sin `lang`, cae a castellano y lo marca como traducido (es el idioma nativo del contenido)', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.clinicalDefinition).toEqual({
+        expect(record.clinicalDefinition).toEqual({
           text: 'Definición clínica en castellano',
           translated: true,
         });
-        expect(ficha.plainSummary).toEqual({
+        expect(record.plainSummary).toEqual({
           text: 'Resumen en castellano',
           translated: true,
         });
       });
 
       it('con `lang=EN`, la definición clínica sin traducir cae a ES y se marca `translated: false`', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1', 'EN');
+        const record = await service.readConcept('concept-1', 'EN');
 
         // No hay `clinicalDefinition.en` cargado para este término (ver fixture):
         // debe caer al texto en castellano, no dejarlo en blanco.
-        expect(ficha.clinicalDefinition).toEqual({
+        expect(record.clinicalDefinition).toEqual({
           text: 'Definición clínica en castellano',
           translated: false,
         });
       });
 
       it('con `lang=EN`, el resumen llano que sí tiene traducción se marca `translated: true`', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1', 'EN');
+        const record = await service.readConcept('concept-1', 'EN');
 
-        expect(ficha.plainSummary).toEqual({
+        expect(record.plainSummary).toEqual({
           text: 'Summary in English',
           translated: true,
         });
       });
 
       it('un término del glosario en borrador es 404, no una ficha a medias', async () => {
-        const { service } = setUpGlossaryTermFicha({
+        const { service } = setUpGlossaryTermRecord({
           stateConceptId: CONCEPTS.TERM_DRAFT,
         });
 
@@ -1956,15 +1956,15 @@ describe('ConceptsService', () => {
           ]),
         );
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.conceptId).toBe('concept-1');
-        expect(ficha.category).toBeNull();
+        expect(record.conceptId).toBe('concept-1');
+        expect(record.category).toBeNull();
       });
 
       it('publica la imagen del término con su atribución y licencia, y deja `properties` intacto', async () => {
-        const { service, designationsRepo } = setUpGlossaryTermFicha();
-        const imagen = {
+        const { service, designationsRepo } = setUpGlossaryTermRecord();
+        const image = {
           url: 'https://upload.wikimedia.org/heart.jpg',
           thumbUrl: 'https://upload.wikimedia.org/heart-320.jpg',
           attribution: 'Patrick J. Lynch',
@@ -1972,24 +1972,24 @@ describe('ConceptsService', () => {
           sourcePage: 'https://commons.wikimedia.org/wiki/File:Heart.jpg',
         };
         designationsRepo.findPropertiesByConcept.mockResolvedValue([
-          { propertyCode: GLOSSARY_IMAGE_PROPERTY_CODE, valueJson: imagen },
+          { propertyCode: GLOSSARY_IMAGE_PROPERTY_CODE, valueJson: image },
           { propertyCode: 'source_url', valueJson: 'https://cima.aemps.es/' },
         ]);
 
-        const ficha = await service.readConcept('concept-1', 'ES');
+        const record = await service.readConcept('concept-1', 'ES');
 
-        expect(ficha.image).toEqual({
-          source: imagen.url,
-          thumbnailSource: imagen.thumbUrl,
-          attribution: imagen.attribution,
-          license: imagen.license,
-          sourcePage: imagen.sourcePage,
+        expect(record.image).toEqual({
+          source: image.url,
+          thumbnailSource: image.thumbUrl,
+          attribution: image.attribution,
+          license: image.license,
+          sourcePage: image.sourcePage,
           // Sin alt propio, se arma con el nombre que muestra la ficha.
           alt: 'Imagen ilustrativa: Heart',
           status: 'approved',
         });
-        expect(ficha.properties).toMatchObject({
-          [GLOSSARY_IMAGE_PROPERTY_CODE]: imagen,
+        expect(record.properties).toMatchObject({
+          [GLOSSARY_IMAGE_PROPERTY_CODE]: image,
           source_url: 'https://cima.aemps.es/',
         });
       });
@@ -1997,7 +1997,7 @@ describe('ConceptsService', () => {
   });
 
   describe('imageFromProperty', () => {
-    const completa = {
+    const complete = {
       url: 'https://x/y.jpg',
       attribution: 'Autor',
       license: 'CC0',
@@ -2033,17 +2033,17 @@ describe('ConceptsService', () => {
 
     it('una imagen rechazada en revisión no se publica', () => {
       expect(
-        imageFromProperty({ ...completa, status: 'rejected' }),
+        imageFromProperty({ ...complete, status: 'rejected' }),
       ).toBeUndefined();
       expect(
-        imageFromProperty({ ...completa, status: 'pending' }),
+        imageFromProperty({ ...complete, status: 'pending' }),
       ).toMatchObject({ status: 'pending' });
     });
 
     it('un valor que no es objeto es «sin imagen», no un error', () => {
       expect(imageFromProperty('https://x/y.jpg')).toBeUndefined();
       expect(imageFromProperty(null)).toBeUndefined();
-      expect(imageFromProperty([completa])).toBeUndefined();
+      expect(imageFromProperty([complete])).toBeUndefined();
     });
   });
 });

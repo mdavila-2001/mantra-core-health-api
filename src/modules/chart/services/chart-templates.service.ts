@@ -361,7 +361,7 @@ export class ChartTemplatesService {
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
 
     let provenance: ChartTemplateProvenanceDto | undefined;
-    let presentacion: Presentaciones = new Map();
+    let presentation: Presentations = new Map();
     let kind: ChartTemplateResponseDto['kind'];
     const fields: ChartTemplateFieldDto[] = [];
 
@@ -371,10 +371,10 @@ export class ChartTemplatesService {
 
       // El código viene prefijado con el de la plantilla porque
       // `dynamic_field_definitions` es una tabla global; se compara el sufijo.
-      if (esClaveDeCatalogo(field.code)) {
-        provenance = leerProcedencia(field.defaultValueJson);
-        presentacion = leerPresentacion(field.defaultValueJson);
-        kind = leerClase(field.defaultValueJson);
+      if (isCatalogKey(field.code)) {
+        provenance = readProvenance(field.defaultValueJson);
+        presentation = readPresentation(field.defaultValueJson);
+        kind = readClass(field.defaultValueJson);
         continue;
       }
 
@@ -405,7 +405,7 @@ export class ChartTemplatesService {
     }
 
     return {
-      fields: aplicarPresentacion(fields, presentacion),
+      fields: applyPresentation(fields, presentation),
       provenance,
       kind,
     };
@@ -455,7 +455,7 @@ export class ChartTemplatesService {
  * formularios comparten nombres de campo—, pero se acepta también el código
  * pelado: una plantilla podría traer la clave sin prefijo.
  */
-function esClaveDeCatalogo(code: string): boolean {
+function isCatalogKey(code: string): boolean {
   return (
     code === CHART_TEMPLATE_PROVENANCE_FIELD_CODE ||
     code.endsWith(`.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`)
@@ -470,19 +470,19 @@ function esClaveDeCatalogo(code: string): boolean {
  * legible y completable — se pierde el renglón de procedencia, no el
  * formulario.
  */
-function leerProcedencia(
+function readProvenance(
   value: unknown,
 ): ChartTemplateProvenanceDto | undefined {
   if (typeof value !== 'object' || value === null) return undefined;
   const raw = value as Record<string, unknown>;
-  const requeridos = [
+  const required = [
     'sourceTitle',
     'organization',
     'url',
     'license',
     'retrievedAt',
   ] as const;
-  if (requeridos.some((key) => typeof raw[key] !== 'string')) return undefined;
+  if (required.some((key) => typeof raw[key] !== 'string')) return undefined;
 
   return {
     sourceTitle: raw.sourceTitle as string,
@@ -497,10 +497,10 @@ function leerProcedencia(
 }
 
 /** Lo que el catálogo dice de cada campo, por código sin prefijo. */
-type Presentaciones = ReadonlyMap<string, Record<string, unknown>>;
+type Presentations = ReadonlyMap<string, Record<string, unknown>>;
 
 /** El código de un campo sin el prefijo de su plantilla. */
-function codigoPelado(code: string): string {
+function bareCode(code: string): string {
   const punto = code.indexOf('.');
   return punto === -1 ? code : code.slice(punto + 1);
 }
@@ -510,14 +510,14 @@ function codigoPelado(code: string): string {
  * Como con la procedencia, lo malformado se ignora en vez de lanzar: se pierde
  * la lista o la condición, no el formulario.
  */
-function leerPresentacion(value: unknown): Presentaciones {
+function readPresentation(value: unknown): Presentations {
   if (typeof value !== 'object' || value === null) return new Map();
   const raw = (value as Record<string, unknown>).fieldPresentation;
   if (typeof raw !== 'object' || raw === null) return new Map();
   return new Map(
     Object.entries(raw as Record<string, unknown>).filter(
-      (entrada): entrada is [string, Record<string, unknown>] =>
-        typeof entrada[1] === 'object' && entrada[1] !== null,
+      (entry): entry is [string, Record<string, unknown>] =>
+        typeof entry[1] === 'object' && entry[1] !== null,
     ),
   );
 }
@@ -528,17 +528,17 @@ function leerPresentacion(value: unknown): Presentaciones {
  * valor—; si ese campo no está en la respuesta, la condición se descarta y el
  * campo queda siempre visible, que es el error menos dañino.
  */
-function aplicarPresentacion(
+function applyPresentation(
   fields: ChartTemplateFieldDto[],
-  presentacion: Presentaciones,
+  presentation: Presentations,
 ): ChartTemplateFieldDto[] {
-  if (presentacion.size === 0) return fields;
-  const idPorCodigo = new Map(
-    fields.map((f) => [codigoPelado(f.code), f.fieldId]),
+  if (presentation.size === 0) return fields;
+  const idByCode = new Map(
+    fields.map((f) => [bareCode(f.code), f.fieldId]),
   );
 
   return fields.map((field) => {
-    const p = presentacion.get(codigoPelado(field.code));
+    const p = presentation.get(bareCode(field.code));
     if (p === undefined || field.own) return field;
 
     const extra: Partial<ChartTemplateFieldDto> = {};
@@ -553,16 +553,16 @@ function aplicarPresentacion(
     if (p.allowOther === true) extra.allowOther = true;
     if (typeof p.description === 'string') extra.description = p.description;
 
-    const condicion = p.showWhen as
+    const condition = p.showWhen as
       { field?: unknown; equals?: unknown } | undefined;
     const padre =
-      typeof condicion?.field === 'string'
-        ? idPorCodigo.get(condicion.field)
+      typeof condition?.field === 'string'
+        ? idByCode.get(condition.field)
         : undefined;
-    if (padre !== undefined && condicion?.equals !== undefined) {
+    if (padre !== undefined && condition?.equals !== undefined) {
       extra.showWhen = {
         fieldId: padre,
-        equals: condicion.equals as ChartTemplateShowWhenDto['equals'],
+        equals: condition.equals as ChartTemplateShowWhenDto['equals'],
       };
     }
     return { ...field, ...extra };
@@ -570,7 +570,7 @@ function aplicarPresentacion(
 }
 
 /** La clase de ficha del catálogo (`BASE`, `SPECIFIC`, `GENERAL`), si la trae. */
-function leerClase(value: unknown): ChartTemplateResponseDto['kind'] {
+function readClass(value: unknown): ChartTemplateResponseDto['kind'] {
   if (typeof value !== 'object' || value === null) return undefined;
   const kind = (value as Record<string, unknown>).kind;
   return kind === 'BASE' || kind === 'SPECIFIC' || kind === 'GENERAL'

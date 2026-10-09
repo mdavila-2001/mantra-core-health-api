@@ -157,10 +157,10 @@ describe('PatientRepresentationService', () => {
     it('rechaza con el mismo mensaje al intruso y al uuid inventado', async () => {
       // El rechazo tiene que ser indistinguible: si el paciente ajeno diera un
       // mensaje distinto del inventado, probar uuids confirmaría quién existe.
-      const ajeno = build({ patient: { profileId: 'person-ajena' } });
-      const inventado = build({ patient: null });
+      const foreign = build({ patient: { profileId: 'person-ajena' } });
+      const invented = build({ patient: null });
 
-      const capturar = async (s: PatientRepresentationService) => {
+      const capture = async (s: PatientRepresentationService) => {
         try {
           await s.assertMayActForPatient('x', tutor);
           return null;
@@ -169,13 +169,13 @@ describe('PatientRepresentationService', () => {
         }
       };
 
-      const errorAjeno = await capturar(ajeno.service);
-      const errorInventado = await capturar(inventado.service);
+      const errorForeign = await capture(foreign.service);
+      const errorInvented = await capture(invented.service);
 
-      expect(errorAjeno).toBeInstanceOf(ForbiddenException);
-      expect(errorInventado).toBeInstanceOf(ForbiddenException);
-      expect(errorInventado!.message).toBe(errorAjeno!.message);
-      expect(errorAjeno!.message).toBe(
+      expect(errorForeign).toBeInstanceOf(ForbiddenException);
+      expect(errorInvented).toBeInstanceOf(ForbiddenException);
+      expect(errorInvented!.message).toBe(errorForeign!.message);
+      expect(errorForeign!.message).toBe(
         'No cuenta con autorización de tutoría sobre el paciente indicado',
       );
     });

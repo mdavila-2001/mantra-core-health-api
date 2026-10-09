@@ -116,13 +116,13 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): string {
     if (actor.roles.includes('SUPERADMIN')) {
-      const elegido = declared ?? actor.practitionerProfileId;
-      if (!elegido) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
         throw new ForbiddenException(
           'Una receta necesita un profesional prescriptor.',
         );
       }
-      return elegido;
+      return chosen;
     }
     if (!actor.practitionerProfileId) {
       throw new ForbiddenException(
@@ -146,8 +146,8 @@ export class MedicationsService {
     indicationText?: string;
   }): string | undefined {
     if (dto.indicationConditionId !== undefined) return undefined;
-    const texto = dto.indicationText?.trim();
-    return texto ? texto : undefined;
+    const text = dto.indicationText?.trim();
+    return text ? text : undefined;
   }
 
   /**
@@ -162,7 +162,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<FileLinkResponseDto> {
     const request = await this.loadRequestOrThrow(this.em, requestId);
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       request.patientProfileId,
       actor,
     );
@@ -192,7 +192,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
     const request = await this.loadRequestOrThrow(this.em, requestId);
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       request.patientProfileId,
       actor,
     );
@@ -275,7 +275,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<MedicationRequests> {
     const request = await this.loadRequestOrThrow(tx, requestId);
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       request.patientProfileId,
       actor,
     );
@@ -291,15 +291,15 @@ export class MedicationsService {
    * campo es opcional al prescribir), firma quien redactó el borrador.
    * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
    */
-  private assertFirmaElPrescriptor(
+  private assertPrescriberSignature(
     request: MedicationRequests,
     actor: AuthenticatedUser,
   ): void {
     if (actor.roles.includes('SUPERADMIN')) return;
-    const esSuya = request.prescriberProfileId
+    const isTheirs = request.prescriberProfileId
       ? request.prescriberProfileId === actor.practitionerProfileId
       : request.createdByUserId === actor.id;
-    if (!esSuya) {
+    if (!isTheirs) {
       throw new ForbiddenException(
         'Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional.',
       );
@@ -475,8 +475,8 @@ export class MedicationsService {
       // P24: el texto libre se reemplaza entero cuando viaja; con condición
       // codificada (previa o recién puesta) gana el concepto y el texto cae.
       if (dto.indicationText !== undefined) {
-        const texto = dto.indicationText.trim();
-        request.indicationText = texto ? texto : undefined;
+        const text = dto.indicationText.trim();
+        request.indicationText = text ? text : undefined;
       }
       if (request.indicationConditionId) request.indicationText = undefined;
       touch(request, actor.id);
@@ -515,7 +515,7 @@ export class MedicationsService {
       }
       // Antes del atajo idempotente: quien no es el prescriptor recibe 403
       // aunque la receta ya esté firmada, no un 200 que parezca éxito.
-      this.assertFirmaElPrescriptor(request, actor);
+      this.assertPrescriberSignature(request, actor);
       if (!request.signedAt) {
         request.signedAt = new Date();
         request.signedByUserId = actor.id;
@@ -550,7 +550,7 @@ export class MedicationsService {
       { operation: 'clinical.medication.issue', requestId },
       'Issuing medication request',
     );
-    const emitida = await this.em.transactional(async (tx) => {
+    const issued = await this.em.transactional(async (tx) => {
       const request = await this.loadRequestForWrite(tx, requestId, actor);
       // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
       // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
@@ -636,11 +636,11 @@ export class MedicationsService {
     // puede deshacerla. `prescriptionIssued` no lanza: el peor caso es una
     // receta emitida sin su aviso, nunca un aviso sin su receta.
     await this.clinicalNotifications.prescriptionIssued(
-      emitida.id,
-      emitida.patientProfileId,
+      issued.id,
+      issued.patientProfileId,
       actor.id,
     );
-    return emitida;
+    return issued;
   }
 
   /**

@@ -82,7 +82,7 @@ interface GatewaySocketData {
 }
 
 /** Tope de conversaciones a las que se avisa un cambio de presencia. */
-const CONVERSACIONES_POR_PRESENCIA = 100;
+const CONVERSATIONS_BY_PRESENCE = 100;
 
 /**
  * Empuje en tiempo real de la mensajería directa de `community`.
@@ -176,12 +176,12 @@ export class CommunityMessagingGateway
    * «en línea»: cerrar una no lo apaga.
    */
   async handleDisconnect(client: Socket): Promise<void> {
-    const perfiles = (client.data as GatewaySocketData).profileIds;
-    if (!perfiles || perfiles.size === 0) return;
-    for (const profileId of perfiles) {
-      if (this.socketsEnSala(this.salaDePerfil(profileId)) > 0) continue;
-      const lastSeenAt = await this.presence.marcarDesconectado(profileId);
-      await this.emitirPresencia({ profileId, online: false, lastSeenAt });
+    const profiles = (client.data as GatewaySocketData).profileIds;
+    if (!profiles || profiles.size === 0) return;
+    for (const profileId of profiles) {
+      if (this.socketsInRoom(this.profileRoom(profileId)) > 0) continue;
+      const lastSeenAt = await this.presence.markDisconnected(profileId);
+      await this.issuePresence({ profileId, online: false, lastSeenAt });
     }
   }
 
@@ -190,7 +190,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = this.user(client);
     if (!user || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -200,14 +200,14 @@ export class CommunityMessagingGateway
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
     }
-    await client.join(this.salaDePerfil(body.profileId));
-    this.recordarPerfil(client, body.profileId);
+    await client.join(this.profileRoom(body.profileId));
+    this.rememberProfile(client, body.profileId);
 
     // Entrar a la bandeja es estar en línea. Se avisa sólo cuando de verdad
     // cambió: renovar una presencia que ya existía no es noticia para nadie.
-    const recienLlegado = await this.presence.marcarEnLinea(body.profileId);
-    if (recienLlegado) {
-      await this.emitirPresencia({
+    const justArrived = await this.presence.markInLine(body.profileId);
+    if (justArrived) {
+      await this.issuePresence({
         profileId: body.profileId,
         online: true,
         lastSeenAt: new Date(),
@@ -220,7 +220,7 @@ export class CommunityMessagingGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = this.user(client);
     if (!user || !body?.conversationId || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -248,8 +248,8 @@ export class CommunityMessagingGateway
       return;
     }
 
-    await client.join(this.salaDeConversacion(body.conversationId));
-    this.recordarPerfil(client, body.profileId);
+    await client.join(this.conversationRoom(body.conversationId));
+    this.rememberProfile(client, body.profileId);
   }
 
   @SubscribeMessage('leave:conversation')
@@ -258,11 +258,11 @@ export class CommunityMessagingGateway
     @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
     if (!body?.conversationId) return;
-    await client.leave(this.salaDeConversacion(body.conversationId));
+    await client.leave(this.conversationRoom(body.conversationId));
     // Salir del hilo es dejar de escribir en él, aunque el cliente no lo diga.
-    if (body.profileId && this.perfilDelSocket(client, body.profileId)) {
+    if (body.profileId && this.profileSocket(client, body.profileId)) {
       client
-        .to(this.salaDeConversacion(body.conversationId))
+        .to(this.conversationRoom(body.conversationId))
         .emit('conversation:typing', {
           conversationId: body.conversationId,
           profileId: body.profileId,
@@ -283,16 +283,16 @@ export class CommunityMessagingGateway
     body: { conversationId?: string; profileId?: string; typing?: boolean },
   ): void {
     if (!body?.conversationId || !body?.profileId) return;
-    const sala = this.salaDeConversacion(body.conversationId);
-    if (!client.rooms.has(sala)) return;
-    if (!this.perfilDelSocket(client, body.profileId)) return;
+    const room = this.conversationRoom(body.conversationId);
+    if (!client.rooms.has(room)) return;
+    if (!this.profileSocket(client, body.profileId)) return;
 
     const payload: GatewayTypingPayload = {
       conversationId: body.conversationId,
       profileId: body.profileId,
       typing: body.typing !== false,
     };
-    client.to(sala).emit('conversation:typing', payload);
+    client.to(room).emit('conversation:typing', payload);
   }
 
   /**
@@ -301,14 +301,14 @@ export class CommunityMessagingGateway
    */
   @SubscribeMessage('presence:ping')
   async handlePresencePing(@ConnectedSocket() client: Socket): Promise<void> {
-    const perfiles = (client.data as GatewaySocketData).profileIds;
-    if (!perfiles) return;
-    for (const profileId of perfiles) {
-      const volvio = await this.presence.marcarEnLinea(profileId);
+    const profiles = (client.data as GatewaySocketData).profileIds;
+    if (!profiles) return;
+    for (const profileId of profiles) {
+      const returned = await this.presence.markInLine(profileId);
       // Si había caducado (Redis reinició, o el ping llegó tarde), el
       // renovar es volver a entrar, y hay que decirlo.
-      if (volvio) {
-        await this.emitirPresencia({
+      if (returned) {
+        await this.issuePresence({
           profileId,
           online: true,
           lastSeenAt: new Date(),
@@ -322,7 +322,7 @@ export class CommunityMessagingGateway
     message: GatewayMessagePayload,
     recipientProfileIds: string[],
   ): void {
-    this.emitirA(
+    this.issueA(
       'conversation:message',
       message,
       message.conversationId,
@@ -335,7 +335,7 @@ export class CommunityMessagingGateway
     message: GatewayMessagePayload,
     recipientProfileIds: string[],
   ): void {
-    this.emitirA(
+    this.issueA(
       'conversation:message:updated',
       message,
       message.conversationId,
@@ -348,7 +348,7 @@ export class CommunityMessagingGateway
     payload: GatewayMessageDeletedPayload,
     recipientProfileIds: string[],
   ): void {
-    this.emitirA(
+    this.issueA(
       'conversation:message:deleted',
       payload,
       payload.conversationId,
@@ -361,7 +361,7 @@ export class CommunityMessagingGateway
     payload: GatewayPinnedPayload,
     recipientProfileIds: string[],
   ): void {
-    this.emitirA(
+    this.issueA(
       'conversation:pinned',
       payload,
       payload.conversationId,
@@ -373,7 +373,7 @@ export class CommunityMessagingGateway
   emitRead(payload: GatewayReadPayload): void {
     try {
       this.server
-        .to(this.salaDeConversacion(payload.conversationId))
+        .to(this.conversationRoom(payload.conversationId))
         .emit('conversation:read', payload);
     } catch (error) {
       this.logger.warn(
@@ -401,7 +401,7 @@ export class CommunityMessagingGateway
           peerProfileId: peerProfileId ?? profileId,
         };
         this.server
-          .to(this.salaDePerfil(profileId))
+          .to(this.profileRoom(profileId))
           .emit('conversation:new', payload);
       }
     } catch (error) {
@@ -417,23 +417,23 @@ export class CommunityMessagingGateway
    * que participa el perfil: es donde se mira («en línea» bajo el nombre).
    * A quien no tiene ese hilo abierto no le sirve de nada.
    */
-  private async emitirPresencia(
+  private async issuePresence(
     payload: GatewayPresencePayload,
   ): Promise<void> {
     try {
       const em = this.em.fork();
-      const participaciones =
+      const participations =
         await this.conversationsRepo.listActiveParticipationsOf(
           em,
           payload.profileId,
           CONCEPTS.STATE_ACTIVE,
-          CONVERSACIONES_POR_PRESENCIA,
+          CONVERSATIONS_BY_PRESENCE,
         );
-      const salas = participaciones.map((participacion) =>
-        this.salaDeConversacion(participacion.conversationId),
+      const rooms = participations.map((participation) =>
+        this.conversationRoom(participation.conversationId),
       );
-      if (salas.length === 0) return;
-      this.server.to(salas).emit('profile:presence', payload);
+      if (rooms.length === 0) return;
+      this.server.to(rooms).emit('profile:presence', payload);
     } catch (error) {
       this.logger.warn(
         { operation: 'community.gateway.emitPresence', err: error },
@@ -443,18 +443,18 @@ export class CommunityMessagingGateway
   }
 
   /** A la sala del hilo y a la bandeja de cada destinatario; nunca lanza. */
-  private emitirA(
+  private issueA(
     evento: string,
     payload: unknown,
     conversationId: string,
     recipientProfileIds: string[],
   ): void {
     try {
-      const salas = [
-        this.salaDeConversacion(conversationId),
-        ...recipientProfileIds.map((id) => this.salaDePerfil(id)),
+      const rooms = [
+        this.conversationRoom(conversationId),
+        ...recipientProfileIds.map((id) => this.profileRoom(id)),
       ];
-      this.server.to(salas).emit(evento, payload);
+      this.server.to(rooms).emit(evento, payload);
     } catch (error) {
       this.logger.warn(
         { operation: `community.gateway.${evento}`, err: error },
@@ -463,31 +463,31 @@ export class CommunityMessagingGateway
     }
   }
 
-  private recordarPerfil(client: Socket, profileId: string): void {
+  private rememberProfile(client: Socket, profileId: string): void {
     const data = client.data as GatewaySocketData;
     data.profileIds ??= new Set<string>();
     data.profileIds.add(profileId);
   }
 
-  private perfilDelSocket(client: Socket, profileId: string): boolean {
+  private profileSocket(client: Socket, profileId: string): boolean {
     return (
       (client.data as GatewaySocketData).profileIds?.has(profileId) ?? false
     );
   }
 
-  private socketsEnSala(sala: string): number {
-    return this.server.sockets.adapter.rooms.get(sala)?.size ?? 0;
+  private socketsInRoom(room: string): number {
+    return this.server.sockets.adapter.rooms.get(room)?.size ?? 0;
   }
 
-  private usuarioDe(client: Socket): AuthenticatedUser | undefined {
+  private user(client: Socket): AuthenticatedUser | undefined {
     return (client.data as GatewaySocketData).user;
   }
 
-  private salaDeConversacion(conversationId: string): string {
+  private conversationRoom(conversationId: string): string {
     return `conversation:${conversationId}`;
   }
 
-  private salaDePerfil(profileId: string): string {
+  private profileRoom(profileId: string): string {
     return `profile:${profileId}`;
   }
 }

@@ -894,26 +894,26 @@ export class NotificationsService implements InAppNotificationEmitter {
       );
     }
 
-    const filas = await this.notificationsRepo.findPreferences(
+    const rows = await this.notificationsRepo.findPreferences(
       em,
       actor.id,
       channel.id,
     );
-    const porCategoria = new Map(
-      filas
-        .filter((fila) => fila.categoryConceptId)
-        .map((fila) => [fila.categoryConceptId, fila]),
+    const byCategory = new Map(
+      rows
+        .filter((row) => row.categoryConceptId)
+        .map((row) => [row.categoryConceptId, row]),
     );
 
     return {
       categories: NOTIFICATION_CATEGORIES.map((category) => ({
         category,
         optedIn:
-          porCategoria.get(NOTIFICATION_CATEGORY_CONCEPT[category])?.optedIn ??
+          byCategory.get(NOTIFICATION_CATEGORY_CONCEPT[category])?.optedIn ??
           true,
       })),
-      quietHours: this.leerHorasDeSilencio(
-        filas.find((fila) => !fila.categoryConceptId)?.quietHoursJson,
+      quietHours: this.readSilenceHours(
+        rows.find((row) => !row.categoryConceptId)?.quietHoursJson,
       ),
     };
   }
@@ -951,26 +951,26 @@ export class NotificationsService implements InAppNotificationEmitter {
         );
       }
 
-      const filas = await this.notificationsRepo.findPreferences(
+      const rows = await this.notificationsRepo.findPreferences(
         tx,
         actor.id,
         channel.id,
       );
 
-      for (const cambio of dto.categories ?? []) {
-        const conceptId = NOTIFICATION_CATEGORY_CONCEPT[cambio.category];
-        const fila = filas.find(
-          (candidata) => candidata.categoryConceptId === conceptId,
+      for (const change of dto.categories ?? []) {
+        const conceptId = NOTIFICATION_CATEGORY_CONCEPT[change.category];
+        const row = rows.find(
+          (candidate) => candidate.categoryConceptId === conceptId,
         );
-        if (fila) {
-          fila.optedIn = cambio.optedIn;
-          touch(fila, actor.id);
+        if (row) {
+          row.optedIn = change.optedIn;
+          touch(row, actor.id);
         } else {
           this.notificationsRepo.createPreference(tx, {
             userId: actor.id,
             channelId: channel.id,
             categoryConceptId: conceptId,
-            optedIn: cambio.optedIn,
+            optedIn: change.optedIn,
             actorUserId: actor.id,
           });
         }
@@ -982,10 +982,10 @@ export class NotificationsService implements InAppNotificationEmitter {
           dto.quietHours === null
             ? undefined
             : { start: dto.quietHours.start, end: dto.quietHours.end };
-        const fila = filas.find((candidata) => !candidata.categoryConceptId);
-        if (fila) {
-          fila.quietHoursJson = valor;
-          touch(fila, actor.id);
+        const row = rows.find((candidate) => !candidate.categoryConceptId);
+        if (row) {
+          row.quietHoursJson = valor;
+          touch(row, actor.id);
         } else {
           this.notificationsRepo.createPreference(tx, {
             userId: actor.id,
@@ -1045,20 +1045,20 @@ export class NotificationsService implements InAppNotificationEmitter {
       dto.recipientUserId,
       dto.channelId,
     );
-    const deCategoria = dto.categoryConceptId
+    const ofCategory = dto.categoryConceptId
       ? preferences.find(
           (preference) =>
             preference.categoryConceptId === dto.categoryConceptId,
         )
       : undefined;
-    const deCanal = preferences.find(
+    const ofChannel = preferences.find(
       (preference) => !preference.categoryConceptId,
     );
 
-    if (deCategoria?.optedIn === false) {
+    if (ofCategory?.optedIn === false) {
       return 'El destinatario no acepta este canal para esta categoría';
     }
-    if (deCanal?.optedIn === false) {
+    if (ofChannel?.optedIn === false) {
       return 'El destinatario no acepta este canal';
     }
 
@@ -1067,9 +1067,9 @@ export class NotificationsService implements InAppNotificationEmitter {
     const scheduledAt = dto.scheduledAt
       ? new Date(dto.scheduledAt)
       : new Date();
-    const horasDeSilencio =
-      deCategoria?.quietHoursJson ?? deCanal?.quietHoursJson;
-    if (this.inQuietHours(horasDeSilencio, scheduledAt)) {
+    const silenceHours =
+      ofCategory?.quietHoursJson ?? ofChannel?.quietHoursJson;
+    if (this.inQuietHours(silenceHours, scheduledAt)) {
       return 'La notificación cae dentro de las horas de silencio del destinatario';
     }
 
@@ -1085,7 +1085,7 @@ export class NotificationsService implements InAppNotificationEmitter {
    * @param categoryConceptId - Categoría del aviso.
    * @returns El instante desde el que se muestra.
    */
-  private async aplazarPorSilencio(
+  private async deferBySilence(
     tx: EntityManager,
     recipientUserId: string,
     channelId: string,
@@ -1106,20 +1106,20 @@ export class NotificationsService implements InAppNotificationEmitter {
 
     if (!this.inQuietHours(ventana, ahora)) return ahora;
 
-    const fin = this.finDeVentana(ventana);
+    const fin = this.windowEnd(ventana);
     if (fin === undefined) return ahora;
 
-    const disponible = new Date(ahora);
-    disponible.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
+    const available = new Date(ahora);
+    available.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
     // Si el fin ya pasó hoy, la ventana cruza la medianoche: termina mañana.
-    if (disponible <= ahora) {
-      disponible.setUTCDate(disponible.getUTCDate() + 1);
+    if (available <= ahora) {
+      available.setUTCDate(available.getUTCDate() + 1);
     }
-    return disponible;
+    return available;
   }
 
   /** Los minutos UTC en que termina la ventana, o `undefined`. */
-  private finDeVentana(quietHoursJson: unknown): number | undefined {
+  private windowEnd(quietHoursJson: unknown): number | undefined {
     if (!quietHoursJson || typeof quietHoursJson !== 'object') return undefined;
     const { end } = quietHoursJson as {
       /** Hora de fin. */
@@ -1138,7 +1138,7 @@ export class NotificationsService implements InAppNotificationEmitter {
    * pantalla de preferencias por una fila vieja mal escrita dejaría a alguien
    * sin poder arreglarla.
    */
-  private leerHorasDeSilencio(
+  private readSilenceHours(
     quietHoursJson: unknown,
   ): { start: string; end: string } | null {
     if (!quietHoursJson || typeof quietHoursJson !== 'object') return null;
@@ -1231,17 +1231,17 @@ export class NotificationsService implements InAppNotificationEmitter {
     // historia. En cuanto la persona lo lee, el siguiente mensaje vuelve a
     // avisar, que es lo que cualquiera espera de una bandeja.
     if (input.destination) {
-      const sinLeer = await this.notificationsRepo.findUnreadInAppForResource(
+      const withoutRead = await this.notificationsRepo.findUnreadInAppForResource(
         tx,
         input.recipientUserId,
         input.destination.type,
         input.destination.id,
         CONCEPTS.INAPP_UNREAD,
       );
-      if (sinLeer) {
+      if (withoutRead) {
         return {
-          inAppNotificationId: sinLeer.id,
-          requestId: sinLeer.notificationRequestId,
+          inAppNotificationId: withoutRead.id,
+          requestId: withoutRead.notificationRequestId,
           suppressed: false,
         };
       }
@@ -1264,7 +1264,7 @@ export class NotificationsService implements InAppNotificationEmitter {
     // se entere de algo que sí ocurrió. Se crea con `available_at` al final de
     // la ventana y aparece a la mañana, que es literalmente lo que el carril
     // pide: «no crece entre 22:00 y 07:00; se muestra a la mañana».
-    const availableAt = await this.aplazarPorSilencio(
+    const availableAt = await this.deferBySilence(
       tx,
       input.recipientUserId,
       channel.id,

@@ -153,7 +153,7 @@ export class TerminologyVersionsController {
   async importConceptsFile(
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @UploadedFile() file: ArchivoSubido | undefined,
-    @Body() opciones: ImportConceptsFileRequestDto,
+    @Body() options: ImportConceptsFileRequestDto,
     @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) response: Response,
   ): Promise<ImportConceptsFileResponseDto> {
@@ -161,20 +161,20 @@ export class TerminologyVersionsController {
       throw new PreconditionFailedException('Falta el archivo', { versionId });
     }
 
-    const resultado = await this.fileImportService.importFromFile(
+    const result = await this.fileImportService.importFromFile(
       versionId,
       file.buffer,
       user,
-      opciones,
+      options,
     );
 
     // Validar no crea nada, así que responder 201 diría que sí. El 201 queda
     // para la importación que escribió, y el rechazo por errores también es
     // 200: la petición se atendió y su respuesta es el informe de qué corregir.
-    if (resultado.dryRun || resultado.aborted) {
+    if (result.dryRun || result.aborted) {
       response.status(HttpStatus.OK);
     }
-    return resultado;
+    return result;
   }
 
   /**

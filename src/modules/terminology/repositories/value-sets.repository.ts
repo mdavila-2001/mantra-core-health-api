@@ -376,7 +376,7 @@ export class ValueSetsRepository {
     });
     if (versions.length === 0) return new Map();
 
-    const valueSetIdPorVersion = new Map(
+    const valueSetIdByVersion = new Map(
       versions.map((version) => [version.id, version.valueSetId]),
     );
     const valueSets = await em.find(
@@ -384,30 +384,30 @@ export class ValueSetsRepository {
       { id: { $in: [...new Set(versions.map((v) => v.valueSetId))] } },
       { orderBy: { internalCode: 'ASC' } },
     );
-    const valueSetPorId = new Map(valueSets.map((row) => [row.id, row]));
+    const valueSetById = new Map(valueSets.map((row) => [row.id, row]));
 
-    const porConcepto = new Map<string, ValueSets[]>();
+    const byConcept = new Map<string, ValueSets[]>();
     for (const member of members) {
-      const valueSetId = valueSetIdPorVersion.get(member.valueSetVersionId);
+      const valueSetId = valueSetIdByVersion.get(member.valueSetVersionId);
       if (valueSetId === undefined) continue;
-      const valueSet = valueSetPorId.get(valueSetId);
+      const valueSet = valueSetById.get(valueSetId);
       if (valueSet === undefined) continue;
 
-      const acumulado = porConcepto.get(member.conceptId);
-      if (acumulado === undefined) {
-        porConcepto.set(member.conceptId, [valueSet]);
-      } else if (!acumulado.includes(valueSet)) {
-        acumulado.push(valueSet);
+      const accumulated = byConcept.get(member.conceptId);
+      if (accumulated === undefined) {
+        byConcept.set(member.conceptId, [valueSet]);
+      } else if (!accumulated.includes(valueSet)) {
+        accumulated.push(valueSet);
       }
     }
 
     // El orden de `members` es el de la tabla, no el del catálogo: sin esto, las
     // etiquetas de un término saldrían en un orden distinto en cada consulta y
     // la pantalla parecería inestable sin haber cambiado nada.
-    for (const lista of porConcepto.values()) {
-      lista.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
+    for (const list of byConcept.values()) {
+      list.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
     }
-    return porConcepto;
+    return byConcept;
   }
 
   /**

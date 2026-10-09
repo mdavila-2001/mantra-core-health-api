@@ -27,14 +27,14 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  * hasta la próxima ventana.
  */
 describe('CommunityChatAutoReplyService', () => {
-  const DESTINATARIO = 'p-ausente';
-  const CONVERSACION = 'conv-1';
+  const RECIPIENT = 'p-ausente';
+  const CONVERSATION = 'conv-1';
 
   /** Una configuración encendida, con lo demás por defecto. */
   const config = (extra: Partial<ChatAutoReplies> = {}): ChatAutoReplies =>
     ({
       id: 'ar-1',
-      publicProfileId: DESTINATARIO,
+      publicProfileId: RECIPIENT,
       isActive: true,
       inactivityMinutes: 30,
       bodyText: 'Vuelvo a las 18.',
@@ -44,13 +44,13 @@ describe('CommunityChatAutoReplyService', () => {
     }) as ChatAutoReplies;
 
   /** La participación del destinatario en la conversación donde llegó. */
-  const participacion = (
+  const participation = (
     extra: Partial<ConversationParticipants> = {},
   ): ConversationParticipants =>
     ({
       id: 'part-1',
-      conversationId: CONVERSACION,
-      participantProfileId: DESTINATARIO,
+      conversationId: CONVERSATION,
+      participantProfileId: RECIPIENT,
       ...extra,
     }) as ConversationParticipants;
 
@@ -62,7 +62,7 @@ describe('CommunityChatAutoReplyService', () => {
    * @param opciones.ultimaActividad - Su participación más reciente, que es lo
    *   que mide la ausencia. `null` = nunca leyó nada.
    */
-  const build = (opciones: {
+  const build = (options: {
     config?: ChatAutoReplies | null;
     participacion?: ConversationParticipants | null;
     /** Hace cuántos minutos leyó algo. `null` = nunca leyó nada. */
@@ -81,37 +81,37 @@ describe('CommunityChatAutoReplyService', () => {
     // rojo culpaba a la franja horaria.
     let ahora = new Date();
 
-    const filaConversacion =
-      opciones.participacion === undefined
-        ? participacion()
-        : opciones.participacion;
+    const conversationRow =
+      options.participacion === undefined
+        ? participation()
+        : options.participacion;
 
     const em = {
       findOne: mockFn().mockImplementation(
-        (entidad: unknown, _where: unknown, opts?: { orderBy?: unknown }) => {
-          if (entidad === ChatAutoReplies) {
+        (entity: unknown, _where: unknown, opts?: { orderBy?: unknown }) => {
+          if (entity === ChatAutoReplies) {
             return Promise.resolve(
-              opciones.config === undefined ? config() : opciones.config,
+              options.config === undefined ? config() : options.config,
             );
           }
           // La consulta ordenada es la de «última actividad»; la otra es la
           // participación en esta conversación.
           if (opts?.orderBy) {
-            const minutos = opciones.ausenciaMinutos ?? 120;
+            const minutes = options.ausenciaMinutos ?? 120;
             return Promise.resolve(
-              opciones.ausenciaMinutos === null
+              options.ausenciaMinutos === null
                 ? null
-                : participacion({
-                    updatedAt: new Date(ahora.getTime() - minutos * 60_000),
+                : participation({
+                    updatedAt: new Date(ahora.getTime() - minutes * 60_000),
                   }),
             );
           }
-          if (opciones.avisoHaceHoras !== undefined && filaConversacion) {
-            filaConversacion.lastAutoReplyAt = new Date(
-              ahora.getTime() - opciones.avisoHaceHoras * 3_600_000,
+          if (options.avisoHaceHoras !== undefined && conversationRow) {
+            conversationRow.lastAutoReplyAt = new Date(
+              ahora.getTime() - options.avisoHaceHoras * 3_600_000,
             );
           }
-          return Promise.resolve(filaConversacion);
+          return Promise.resolve(conversationRow);
         },
       ),
     };
@@ -119,19 +119,19 @@ describe('CommunityChatAutoReplyService', () => {
     return {
       service,
       em,
-      filaConversacion,
-      fijarAhora: (cuando: Date) => {
-        ahora = cuando;
+      filaConversacion: conversationRow,
+      fijarAhora: (when: Date) => {
+        ahora = when;
       },
     };
   };
 
   const responder = (d: ReturnType<typeof build>, ahora = new Date()) => {
     d.fijarAhora(ahora);
-    return d.service.textoParaResponder(
+    return d.service.textForResponder(
       d.em as never,
-      CONVERSACION,
-      DESTINATARIO,
+      CONVERSATION,
+      RECIPIENT,
       ahora,
     );
   };
@@ -180,9 +180,9 @@ describe('CommunityChatAutoReplyService', () => {
         businessHoursTo: '18:00',
       }),
     });
-    const alMediodia = new Date();
-    alMediodia.setHours(12, 0, 0, 0);
-    await expect(responder(d, alMediodia)).resolves.toBeNull();
+    const atNoon = new Date();
+    atNoon.setHours(12, 0, 0, 0);
+    await expect(responder(d, atNoon)).resolves.toBeNull();
   });
 
   it('con franja horaria sí contesta fuera del horario', async () => {
@@ -193,15 +193,15 @@ describe('CommunityChatAutoReplyService', () => {
         businessHoursTo: '18:00',
       }),
     });
-    const aLaNoche = new Date();
-    aLaNoche.setHours(21, 0, 0, 0);
-    await expect(responder(d, aLaNoche)).resolves.toBe('Vuelvo a las 18.');
+    const atNight = new Date();
+    atNight.setHours(21, 0, 0, 0);
+    await expect(responder(d, atNight)).resolves.toBe('Vuelvo a las 18.');
   });
 
   it('una franja que cruza la medianoche es la de quien atiende de noche', async () => {
     // Un doble por evaluación, y no uno compartido: la primera llamada anota el
     // descanso, así que reusarlo mediría el cooldown en vez de la franja.
-    const franjaNocturna = () =>
+    const overnightBand = () =>
       build({
         config: config({
           onlyOutsideBusinessHours: true,
@@ -210,14 +210,14 @@ describe('CommunityChatAutoReplyService', () => {
         }),
       });
 
-    const aLasTres = new Date();
-    aLasTres.setHours(3, 0, 0, 0);
+    const atThree = new Date();
+    atThree.setHours(3, 0, 0, 0);
     // Dentro de la franja 22→06, del otro lado de la medianoche: no contesta.
-    await expect(responder(franjaNocturna(), aLasTres)).resolves.toBeNull();
+    await expect(responder(overnightBand(), atThree)).resolves.toBeNull();
 
-    const alMediodia = new Date();
-    alMediodia.setHours(12, 0, 0, 0);
-    await expect(responder(franjaNocturna(), alMediodia)).resolves.toBe(
+    const atNoon = new Date();
+    atNoon.setHours(12, 0, 0, 0);
+    await expect(responder(overnightBand(), atNoon)).resolves.toBe(
       'Vuelvo a las 18.',
     );
   });

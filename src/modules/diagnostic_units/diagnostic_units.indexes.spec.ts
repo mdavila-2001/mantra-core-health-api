@@ -36,12 +36,12 @@ import { diagnosticUnitsIndexes } from '../../orm/catalog/indexes/diagnostic_uni
  * modelo —nunca el catálogo a mano, porque la próxima regeneración lo pisa—.
  */
 describe('unicidad canónica de diagnostic_units', () => {
-  const indicesUnicos = diagnosticUnitsIndexes.filter(
+  const uniqueIndices = diagnosticUnitsIndexes.filter(
     ([tabla, , , unico]) => tabla === 'diagnostic_units' && unico,
   );
 
   it('admite varias unidades por organización, distinguidas por su código', () => {
-    expect(indicesUnicos).toContainEqual([
+    expect(uniqueIndices).toContainEqual([
       'diagnostic_units',
       'uq_diagnostic_units_tenant_id_code',
       ['tenant_id', 'code'],
@@ -53,14 +53,14 @@ describe('unicidad canónica de diagnostic_units', () => {
   it('ya no declara «una sola unidad por organización»', () => {
     // `uq_diagnostic_units_tenant_id` sobre `tenant_id` a solas era justo eso, y
     // es lo que hacía imposible el directorio de laboratorios.
-    const nombres = indicesUnicos.map(([, nombre]) => nombre);
-    expect(nombres).not.toContain('uq_diagnostic_units_tenant_id');
+    const names = uniqueIndices.map(([, nombre]) => nombre);
+    expect(names).not.toContain('uq_diagnostic_units_tenant_id');
   });
 
   it('ya no hace el código único en toda la plataforma', () => {
     // Dos organizaciones distintas pueden llamar «LAB-01» a una unidad suya sin
     // pisarse: el código sólo tiene que ser único dentro de su tenant.
-    const nombres = indicesUnicos.map(([, nombre]) => nombre);
-    expect(nombres).not.toContain('uq_diagnostic_units_code');
+    const names = uniqueIndices.map(([, nombre]) => nombre);
+    expect(names).not.toContain('uq_diagnostic_units_code');
   });
 });

@@ -64,7 +64,7 @@ import auditTamizajeConsumoAlcohol from './psiquiatria/audit-tamizaje-consumo-al
  * un tipo de más rompe el arranque del seed con el nombre del archivo, no una
  * plantilla a medio crear.
  */
-const TIPOS_ADMITIDOS = [
+const ACCEPTED_TYPES = [
   'string',
   'text',
   'integer',
@@ -84,7 +84,7 @@ const TIPOS_ADMITIDOS = [
  * lista blanca y no una puerta abierta: agregar un código acá obliga a que
  * exista el control que lo dibuja.
  */
-const CODIGOS_JSON_CON_CONTROL = ['odontograma_fdi'] as const;
+const JSON_CODES_WITH_CONTROL = ['odontograma_fdi'] as const;
 
 /**
  * La ficha de catálogo de un formulario: de dónde salió.
@@ -128,10 +128,10 @@ export interface StandardFormSpecialty {
  * Tipo de dato admitido en un formulario del catálogo.
  *
  * Los generales, más `json` para los campos de
- * {@link CODIGOS_JSON_CON_CONTROL} — los que tienen un control dedicado que
+ * {@link JSON_CODES_WITH_CONTROL} — los que tienen un control dedicado que
  * sabe dibujar su forma.
  */
-export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number] | 'json';
+export type StandardFormDataType = (typeof ACCEPTED_TYPES)[number] | 'json';
 
 /**
  * Cuándo se muestra un campo: la semántica de `enableWhen` de HL7 FHIR
@@ -225,20 +225,20 @@ export type RawForm = Omit<StandardFormDefinition, 'fields' | 'kind'> & {
  * `.json` mal tipeado tiene que decir cuál es, no dejar una plantilla a medio
  * crear en la base.
  */
-export function validar(form: RawForm): StandardFormDefinition {
-  const anteriores = new Map<string, RawForm['fields'][number]>();
+export function validate(form: RawForm): StandardFormDefinition {
+  const previous = new Map<string, RawForm['fields'][number]>();
   const fields = form.fields.map((field) => {
-    const falla = (motivo: string): never => {
+    const failure = (reason: string): never => {
       throw new Error(
-        `Formulario ${form.code}: el campo "${field.code}" ${motivo}.`,
+        `Formulario ${form.code}: el campo "${field.code}" ${reason}.`,
       );
     };
-    validarTipo(field, falla);
-    validarOpciones(field, falla);
+    validateType(field, failure);
+    validateOptions(field, failure);
     if (field.showWhen !== undefined) {
-      validarCondicion(field.showWhen, anteriores, falla);
+      validateCondition(field.showWhen, previous, failure);
     }
-    anteriores.set(field.code, field);
+    previous.set(field.code, field);
     return field as StandardFormField;
   });
   const kind = form.kind ?? 'BASE';
@@ -249,25 +249,25 @@ export function validar(form: RawForm): StandardFormDefinition {
 }
 
 /** El tipo tiene que ser uno que el motor sepa dibujar. */
-function validarTipo(
+function validateType(
   field: RawForm['fields'][number],
-  falla: (motivo: string) => never,
+  failure: (motivo: string) => never,
 ): void {
-  const conControl =
+  const withControl =
     field.dataType === 'json' &&
-    (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
-  const esListaMultiple =
+    (JSON_CODES_WITH_CONTROL as readonly string[]).includes(field.code);
+  const isListMultiple =
     field.dataType === 'json' &&
     field.multiple === true &&
     (field.options?.length ?? 0) > 0;
   if (
-    !conControl &&
-    !esListaMultiple &&
-    !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
+    !withControl &&
+    !isListMultiple &&
+    !(ACCEPTED_TYPES as readonly string[]).includes(field.dataType)
   ) {
-    falla(
+    failure(
       `declara el tipo "${field.dataType}", que no está entre los admitidos ` +
-        `(${TIPOS_ADMITIDOS.join(', ')}; json sólo para listas de varias respuestas)`,
+        `(${ACCEPTED_TYPES.join(', ')}; json sólo para listas de varias respuestas)`,
     );
   }
 }
@@ -276,23 +276,23 @@ function validarTipo(
  * Una lista cerrada no puede venir vacía ni repetir opciones, y su tipo dice
  * dónde se guarda la respuesta: `string` para una, `json` para varias.
  */
-function validarOpciones(
+function validateOptions(
   field: RawForm['fields'][number],
-  falla: (motivo: string) => never,
+  failure: (motivo: string) => never,
 ): void {
   if (field.options === undefined) {
     if (field.multiple === true)
-      falla('declara varias respuestas sin opciones');
+      failure('declara varias respuestas sin opciones');
     return;
   }
-  if (field.options.length === 0) falla('declara una lista de opciones vacía');
+  if (field.options.length === 0) failure('declara una lista de opciones vacía');
   if (new Set(field.options).size !== field.options.length) {
-    falla('repite una opción');
+    failure('repite una opción');
   }
-  const tipoEsperado = field.multiple === true ? 'json' : 'string';
-  if (field.dataType !== tipoEsperado) {
-    falla(
-      `es de ${field.multiple === true ? 'varias respuestas' : 'una respuesta'} y debe ser ${tipoEsperado}`,
+  const expectedType = field.multiple === true ? 'json' : 'string';
+  if (field.dataType !== expectedType) {
+    failure(
+      `es de ${field.multiple === true ? 'varias respuestas' : 'una respuesta'} y debe ser ${expectedType}`,
     );
   }
 }
@@ -302,32 +302,32 @@ function validarOpciones(
  * que ese campo puede tomar: `true`/`false` si es sí/no, una de sus opciones si
  * es de lista. Cualquier otra cosa dejaría un campo que nunca se muestra.
  */
-function validarCondicion(
+function validateCondition(
   showWhen: { field: string; equals: unknown },
-  anteriores: ReadonlyMap<string, RawForm['fields'][number]>,
-  falla: (motivo: string) => never,
+  previous: ReadonlyMap<string, RawForm['fields'][number]>,
+  failure: (motivo: string) => never,
 ): void {
-  const padre = anteriores.get(showWhen.field);
+  const padre = previous.get(showWhen.field);
   if (padre === undefined) {
-    falla(`depende de "${showWhen.field}", que no está antes en la ficha`);
+    failure(`depende de "${showWhen.field}", que no está antes en la ficha`);
   }
-  const valores = Array.isArray(showWhen.equals)
+  const values = Array.isArray(showWhen.equals)
     ? (showWhen.equals as unknown[])
     : [showWhen.equals];
-  if (valores.length === 0) falla('tiene una condición sin valores');
-  for (const valor of valores) {
+  if (values.length === 0) failure('tiene una condición sin valores');
+  for (const valor of values) {
     if (padre.dataType === 'boolean') {
       if (typeof valor !== 'boolean') {
-        falla(`depende del sí/no "${padre.code}" con un valor que no es sí/no`);
+        failure(`depende del sí/no "${padre.code}" con un valor que no es sí/no`);
       }
     } else if (padre.options !== undefined) {
       if (typeof valor !== 'string' || !padre.options.includes(valor)) {
-        falla(
+        failure(
           `depende de "${padre.code}" con «${String(valor)}», que no es una de sus opciones`,
         );
       }
     } else {
-      falla(`depende de "${padre.code}", que no es sí/no ni de lista`);
+      failure(`depende de "${padre.code}", que no es sí/no ni de lista`);
     }
   }
 }
@@ -397,4 +397,4 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   // v4.2.0 — tamizajes de salud mental de dominio público (OMS)
   srq20TamizajeSaludMental,
   auditTamizajeConsumoAlcohol,
-].map(validar);
+].map(validate);

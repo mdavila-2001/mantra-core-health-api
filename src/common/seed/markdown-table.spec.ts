@@ -1,6 +1,6 @@
-import { filasDeTabla, columna, opcional } from './markdown-table';
+import { tableRows, column, optional } from './markdown-table';
 
-const EJEMPLO = `# USUARIO MEDICOS 1
+const EXAMPLE = `# USUARIO MEDICOS 1
 
 ### BASE DE DATOS DE MEDICOS
 
@@ -13,32 +13,32 @@ const EJEMPLO = `# USUARIO MEDICOS 1
 
 describe('markdown-table', () => {
   it('lee sólo las filas de datos, no la cabecera ni el separador', () => {
-    const filas = filasDeTabla(EJEMPLO);
-    expect(filas).toHaveLength(3);
+    const rows = tableRows(EXAMPLE);
+    expect(rows).toHaveLength(3);
   });
 
   it('resuelve una columna por su título, sin importar mayúsculas ni tildes', () => {
-    const [fila] = filasDeTabla(EJEMPLO);
-    expect(columna(fila!, 'nombre')).toBe('XIOMARA');
-    expect(columna(fila!, 'Matrícula Ministerio de Salud y Deportes')).toBe(
+    const [fila] = tableRows(EXAMPLE);
+    expect(column(fila!, 'nombre')).toBe('XIOMARA');
+    expect(column(fila!, 'Matrícula Ministerio de Salud y Deportes')).toBe(
       'C-1894',
     );
   });
 
   it('prueba varios alias de columna en orden hasta encontrar uno', () => {
-    const [fila] = filasDeTabla(EJEMPLO);
-    expect(columna(fila!, 'no existe', 'nombre 2', 'nombre')).toBe('');
-    expect(columna(fila!, 'apellido paterno')).toBe('CUELLAR');
+    const [fila] = tableRows(EXAMPLE);
+    expect(column(fila!, 'no existe', 'nombre 2', 'nombre')).toBe('');
+    expect(column(fila!, 'apellido paterno')).toBe('CUELLAR');
   });
 
   it('una fila vacía da celdas vacías, no undefined', () => {
-    const filas = filasDeTabla(EJEMPLO);
-    const vacia = filas[2]!;
-    expect(columna(vacia, 'nombre')).toBe('');
+    const rows = tableRows(EXAMPLE);
+    const empty = rows[2]!;
+    expect(column(empty, 'nombre')).toBe('');
   });
 
   it('opcional distingue vacío de con contenido', () => {
-    expect(opcional('  ')).toBeUndefined();
-    expect(opcional(' XIOMARA ')).toBe('XIOMARA');
+    expect(optional('  ')).toBeUndefined();
+    expect(optional(' XIOMARA ')).toBe('XIOMARA');
   });
 });

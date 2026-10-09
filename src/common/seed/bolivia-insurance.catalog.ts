@@ -324,12 +324,12 @@ const SECTOR_BY_PLAN_ID: ReadonlyMap<string, InsuranceSector> = (() => {
   for (const insurer of BOLIVIA_PUBLIC_INSURERS)
     register(insurer.code, 'public');
   for (const plan of BOLIVIA_HEALTH_PLANS) {
-    const esPublica = BOLIVIA_PUBLIC_INSURERS.some(
+    const isPublic = BOLIVIA_PUBLIC_INSURERS.some(
       (i) => i.code === plan.carrierCode,
     );
     index.set(
       carrierPlanId(plan.carrierCode, plan.code),
-      esPublica ? 'public' : 'private',
+      isPublic ? 'public' : 'private',
     );
   }
   return index;

@@ -19,10 +19,10 @@ function build(opts: { encounter?: any; allowed?: boolean } = {}) {
   const em: any = { fork: () => em, find: mockFn().mockResolvedValue([]) };
   const encounters = { findById: mockFn().mockResolvedValue(encounter) };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn(async () => {
+    assertCanWriteHistory: mockFn(async () => {
       if (!allowed) throw new ForbiddenException('sin acceso');
     }),
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const treatment = {
     sign: mockFn().mockResolvedValue({ id: 'tic1', status: 'signed' }),
@@ -40,7 +40,7 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
   it('aceptado: toma paciente y tenant del encuentro y firma', async () => {
     const d = build();
     await d.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'p1',
       ACTOR,
     );
@@ -66,32 +66,32 @@ describe('EncounterInformedConsentsService (CL-77)', () => {
       } as any,
       ACTOR,
     );
-    const firmado = d.treatment.sign.mock.calls[0][0];
-    expect(firmado.patientProfileId).toBe('p1');
-    expect(firmado.tenantId).toBe('t1');
+    const signed = d.treatment.sign.mock.calls[0][0];
+    expect(signed.patientProfileId).toBe('p1');
+    expect(signed.tenantId).toBe('t1');
   });
 
   it('inválido: encuentro inexistente es 404; sin acceso a la historia es 403 y no firma', async () => {
-    const sinEncuentro = build({ encounter: null });
+    const withoutEncounter = build({ encounter: null });
     await expect(
-      sinEncuentro.service.register(
+      withoutEncounter.service.register(
         'e1',
         { decision: 'ACCEPTED' } as any,
         ACTOR,
       ),
     ).rejects.toMatchObject({ status: 404 });
 
-    const sinAcceso = build({ allowed: false });
+    const withoutAccess = build({ allowed: false });
     await expect(
-      sinAcceso.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR),
+      withoutAccess.service.register('e1', { decision: 'ACCEPTED' } as any, ACTOR),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(sinAcceso.treatment.sign).not.toHaveBeenCalled();
+    expect(withoutAccess.treatment.sign).not.toHaveBeenCalled();
   });
 
   it('la lectura exige poder leer la historia del paciente del encuentro', async () => {
     const d = build();
     await d.service.listForEncounter('e1', ACTOR);
-    expect(d.clinicalRead.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
       'p1',
       ACTOR,
     );

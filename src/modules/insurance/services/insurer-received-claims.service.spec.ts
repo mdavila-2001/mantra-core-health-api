@@ -23,26 +23,26 @@ const CARRIER = 'carrier-1';
 const CLAIM_ID = '11111111-1111-4111-8111-111111111111';
 
 /** Miembro OWNER/ADMIN de la aseguradora: la autoridad por membresía. */
-const dueño = { id: 'u-owner', roles: ['USER'] } as any;
+const owner = { id: 'u-owner', roles: ['USER'] } as any;
 /** Operador con el rol de aseguradora vigente (sin ámbito: excepción global). */
-const operador = { id: 'u-op', roles: ['USER', 'INSURANCE_OPERATOR'] } as any;
+const operator = { id: 'u-op', roles: ['USER', 'INSURANCE_OPERATOR'] } as any;
 /** Operador de OTRA aseguradora: su rol está indexado a un tenant ajeno. */
-const operadorAjeno = {
+const foreignOperator = {
   id: 'u-ajeno',
   roles: ['USER', 'INSURANCE_OPERATOR'],
   scopedRoles: { 'tenant-9': ['INSURANCE_OPERATOR'] },
 } as any;
 /** Operador cuyo rol está indexado a ESTE tenant. */
-const operadorDeEsteTenant = {
+const thisOperatorTenant = {
   id: 'u-op2',
   roles: ['USER', 'INSURANCE_OPERATOR'],
   scopedRoles: { [TENANT]: ['INSURANCE_OPERATOR'] },
 } as any;
 /** Un paciente, un prestador: nadie con permiso sobre una aseguradora. */
-const extraño = { id: 'u-extraño', roles: ['USER', 'PATIENT'] } as any;
+const strange = { id: 'u-extraño', roles: ['USER', 'PATIENT'] } as any;
 
 /** Una solicitud presentada, con lo mínimo que lee la fila. */
-function solicitud(over: Record<string, unknown> = {}) {
+function request(over: Record<string, unknown> = {}) {
   return {
     id: CLAIM_ID,
     claimIdentifier: 'CLM-2026-1042',
@@ -83,13 +83,13 @@ function renglones() {
   ];
 }
 
-interface Opciones {
+interface Options {
   /** La organización activa no es una aseguradora. */
   sinAseguradora?: boolean;
   /** `canAdminister` de la sesión. */
   administra?: boolean;
-  claim?: ReturnType<typeof solicitud> | null;
-  claims?: ReturnType<typeof solicitud>[];
+  claim?: ReturnType<typeof request> | null;
+  claims?: ReturnType<typeof request>[];
   lines?: ReturnType<typeof renglones>;
   versions?: any[];
   pedidoCambio?: boolean;
@@ -101,16 +101,16 @@ interface Opciones {
  * `createVersion` devuelve —y registra— la versión que el servicio escribe, así
  * que la lectura posterior al dictamen ve exactamente lo que se persistió.
  *
- * @param opciones - Lo que cambia respecto del caso por omisión.
+ * @param options - Lo que cambia respecto del caso por omisión.
  * @returns El servicio y sus dobles.
  */
-function build(opciones: Opciones = {}) {
-  const claim = 'claim' in opciones ? opciones.claim : solicitud();
-  const lines = opciones.lines ?? renglones();
-  const versions: any[] = opciones.versions ?? [];
+function build(options: Options = {}) {
+  const claim = 'claim' in options ? options.claim : request();
+  const lines = options.lines ?? renglones();
+  const versions: any[] = options.versions ?? [];
 
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const filas: Record<string, unknown[]> = {
+  const rows: Record<string, unknown[]> = {
     Persons: [
       { id: 'pat-1', displayName: 'Ana Pérez' },
       { id: 'doc-1', displayName: 'Luis Rojas' },
@@ -130,19 +130,19 @@ function build(opciones: Opciones = {}) {
   };
   const em = {
     fork: mockFn(() => ({
-      find: mockFn(async (e: { name: string }) => filas[e.name] ?? []),
+      find: mockFn(async (e: { name: string }) => rows[e.name] ?? []),
     })),
     transactional: mockFn(async (cb: any) => cb(tx)),
   };
 
   const catalogRepo = {
     findCarrierByTenantId: mockFn().mockResolvedValue(
-      opciones.sinAseguradora ? null : { id: CARRIER },
+      options.sinAseguradora ? null : { id: CARRIER },
     ),
   };
   const claimReadRepo = {
     findClaimsPage: mockFn().mockResolvedValue(
-      opciones.claims ?? (claim ? [claim] : []),
+      options.claims ?? (claim ? [claim] : []),
     ),
     findClaimInScope: mockFn().mockResolvedValue(claim),
     findLinesByClaimIds: mockFn().mockResolvedValue(lines),
@@ -200,7 +200,7 @@ function build(opciones: Opciones = {}) {
     createLineAdjudication: mockFn(),
   };
   const tenantAdministration = {
-    canAdminister: mockFn().mockResolvedValue(opciones.administra ?? false),
+    canAdminister: mockFn().mockResolvedValue(options.administra ?? false),
   };
   const linkedOrders = {
     lockAndResolve: mockFn().mockResolvedValue(null),
@@ -235,14 +235,14 @@ function build(opciones: Opciones = {}) {
   };
 }
 
-const enTenant = <T>(fn: () => Promise<T>) => runWithTenant(TENANT, fn);
+const inTenant = <T>(fn: () => Promise<T>) => runWithTenant(TENANT, fn);
 
 describe('InsurerReceivedClaimsService.list', () => {
   describe('correcto', () => {
     it('arma la fila del contrato con todo resuelto por lote', async () => {
       const d = build({ administra: true });
 
-      const r = await enTenant(() => d.service.list(dueño));
+      const r = await inTenant(() => d.service.list(owner));
 
       expect(r.truncated).toBe(false);
       expect(r.items).toHaveLength(1);
@@ -311,7 +311,7 @@ describe('InsurerReceivedClaimsService.list', () => {
     it('acota por la aseguradora del tenant activo, nunca por algo que mande el cliente', async () => {
       const d = build({ administra: true });
 
-      await enTenant(() => d.service.list(dueño));
+      await inTenant(() => d.service.list(owner));
 
       expect(d.catalogRepo.findCarrierByTenantId).toHaveBeenCalledWith(
         expect.anything(),
@@ -329,7 +329,7 @@ describe('InsurerReceivedClaimsService.list', () => {
     });
 
     it('una solicitud dictaminada trae su estado, el total aprobado y quién la decidió', async () => {
-      const versiones = [
+      const versions = [
         {
           id: 'v-1',
           insuranceClaimId: CLAIM_ID,
@@ -343,11 +343,11 @@ describe('InsurerReceivedClaimsService.list', () => {
       ];
       const d = build({
         administra: true,
-        claim: solicitud({ statusConceptId: INS.CLAIM_ADJUDICATED }),
-        versions: versiones,
+        claim: request({ statusConceptId: INS.CLAIM_ADJUDICATED }),
+        versions: versions,
       });
 
-      const [item] = (await enTenant(() => d.service.list(dueño))).items;
+      const [item] = (await inTenant(() => d.service.list(owner))).items;
 
       expect(item.status).toEqual({
         code: 'PARTIAL',
@@ -368,15 +368,15 @@ describe('InsurerReceivedClaimsService.list', () => {
     it.each([
       [INS.ADJ_OUTCOME_APPROVED, 'APPROVED', 'Aprobada'],
       [INS.ADJ_OUTCOME_DENIED, 'REJECTED', 'Rechazada'],
-    ])('el resultado %s se ve como %s', async (concepto, codigo, display) => {
+    ])('el resultado %s se ve como %s', async (concept, code, display) => {
       const d = build({
         administra: true,
-        claim: solicitud({ statusConceptId: INS.CLAIM_ADJUDICATED }),
+        claim: request({ statusConceptId: INS.CLAIM_ADJUDICATED }),
         versions: [
           {
             id: 'v-1',
             insuranceClaimId: CLAIM_ID,
-            outcomeConceptId: concepto,
+            outcomeConceptId: concept,
             totalApprovedAmount: '0.00',
             adjudicatedAt: new Date('2026-09-27T15:00:00.000Z'),
             supersedesVersionId: null,
@@ -384,10 +384,10 @@ describe('InsurerReceivedClaimsService.list', () => {
         ],
       });
 
-      const [item] = (await enTenant(() => d.service.list(dueño))).items;
+      const [item] = (await inTenant(() => d.service.list(owner))).items;
 
-      expect(item.status).toEqual({ code: codigo, display });
-      expect(item.decision?.outcome).toBe(codigo);
+      expect(item.status).toEqual({ code: code, display });
+      expect(item.decision?.outcome).toBe(code);
     });
 
     it('pagada y revertida conservan su estado, sea cual sea el dictamen', async () => {
@@ -397,10 +397,10 @@ describe('InsurerReceivedClaimsService.list', () => {
       ]) {
         const d = build({
           administra: true,
-          claim: solicitud({ statusConceptId: concepto }),
+          claim: request({ statusConceptId: concepto }),
         });
 
-        const [item] = (await enTenant(() => d.service.list(dueño))).items;
+        const [item] = (await inTenant(() => d.service.list(owner))).items;
 
         expect(item.status?.code).toBe(codigo);
       }
@@ -409,10 +409,10 @@ describe('InsurerReceivedClaimsService.list', () => {
     it('una solicitud sin atención asociada viaja sin profesional ni día', async () => {
       const d = build({
         administra: true,
-        claim: solicitud({ encounterId: undefined }),
+        claim: request({ encounterId: undefined }),
       });
 
-      const [item] = (await enTenant(() => d.service.list(dueño))).items;
+      const [item] = (await inTenant(() => d.service.list(owner))).items;
 
       expect(item.practitioner).toBeNull();
       expect(item.serviceDate).toBeNull();
@@ -420,22 +420,22 @@ describe('InsurerReceivedClaimsService.list', () => {
   });
 
   describe('límite', () => {
-    const muchas = (n: number) =>
-      Array.from({ length: n }, (_, i) => solicitud({ id: `c-${i}` }));
+    const many = (n: number) =>
+      Array.from({ length: n }, (_, i) => request({ id: `c-${i}` }));
 
     it('exactamente 500 no se recorta', async () => {
-      const d = build({ administra: true, claims: muchas(500) });
+      const d = build({ administra: true, claims: many(500) });
 
-      const r = await enTenant(() => d.service.list(dueño));
+      const r = await inTenant(() => d.service.list(owner));
 
       expect(r.items).toHaveLength(500);
       expect(r.truncated).toBe(false);
     });
 
     it('501 se recorta a 500 y lo avisa', async () => {
-      const d = build({ administra: true, claims: muchas(501) });
+      const d = build({ administra: true, claims: many(501) });
 
-      const r = await enTenant(() => d.service.list(dueño));
+      const r = await inTenant(() => d.service.list(owner));
 
       expect(r.items).toHaveLength(500);
       expect(r.truncated).toBe(true);
@@ -444,7 +444,7 @@ describe('InsurerReceivedClaimsService.list', () => {
     it('sin solicitudes responde vacío y no lee nada más', async () => {
       const d = build({ administra: true, claims: [] });
 
-      const r = await enTenant(() => d.service.list(dueño));
+      const r = await inTenant(() => d.service.list(owner));
 
       expect(r).toEqual({ items: [], truncated: false });
       expect(d.claimReadRepo.findLinesByClaimIds).not.toHaveBeenCalled();
@@ -456,7 +456,7 @@ describe('InsurerReceivedClaimsService.list', () => {
         lines: [{ ...renglones()[1], serviceConceptId: undefined } as any],
       });
 
-      const [item] = (await enTenant(() => d.service.list(dueño))).items;
+      const [item] = (await inTenant(() => d.service.list(owner))).items;
 
       expect(item.service).toBeNull();
       expect(item.lines[0]).toMatchObject({ code: '', display: 'Ítem 1' });
@@ -466,7 +466,7 @@ describe('InsurerReceivedClaimsService.list', () => {
       const corrupto = { ...renglones()[1], billedAmount: 'abc' } as any;
       const d = build({ administra: true, lines: [corrupto] });
 
-      const intento = enTenant(() => d.service.list(dueño));
+      const intento = inTenant(() => d.service.list(owner));
 
       await expect(intento).rejects.toBeInstanceOf(CorruptStoredAmountError);
       await expect(intento).rejects.toMatchObject({
@@ -481,7 +481,7 @@ describe('InsurerReceivedClaimsService.list', () => {
       const d = build({ sinAseguradora: true, administra: true });
 
       await expect(
-        enTenant(() => d.service.list(dueño)),
+        inTenant(() => d.service.list(owner)),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.claimReadRepo.findClaimsPage).not.toHaveBeenCalled();
     });
@@ -490,7 +490,7 @@ describe('InsurerReceivedClaimsService.list', () => {
       const d = build({ administra: false });
 
       await expect(
-        enTenant(() => d.service.list(extraño)),
+        inTenant(() => d.service.list(strange)),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.claimReadRepo.findClaimsPage).not.toHaveBeenCalled();
     });
@@ -499,40 +499,37 @@ describe('InsurerReceivedClaimsService.list', () => {
       const d = build({ administra: false });
 
       await expect(
-        enTenant(() => d.service.list(operadorAjeno)),
+        inTenant(() => d.service.list(foreignOperator)),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('el mismo rol, concedido en este tenant o sin ámbito, sí vale', async () => {
-      for (const actor of [operador, operadorDeEsteTenant]) {
+      for (const actor of [operator, thisOperatorTenant]) {
         const d = build({ administra: false });
 
-        const r = await enTenant(() => d.service.list(actor));
+        const r = await inTenant(() => d.service.list(actor));
 
         expect(r.items).toHaveLength(1);
       }
     });
 
     it('los dos rechazos dicen lo mismo: no revelan qué organización es aseguradora', async () => {
-      const mensajes: string[] = [];
-      for (const opciones of [
-        { sinAseguradora: true },
-        { administra: false },
-      ]) {
-        const d = build(opciones);
-        const error = await enTenant(() => d.service.list(extraño)).catch(
+      const messages: string[] = [];
+      for (const options of [{ sinAseguradora: true }, { administra: false }]) {
+        const d = build(options);
+        const error = await inTenant(() => d.service.list(strange)).catch(
           (e: unknown) => e as Error,
         );
-        mensajes.push((error as Error).message);
+        messages.push((error as Error).message);
       }
 
-      expect(new Set(mensajes).size).toBe(1);
+      expect(new Set(messages).size).toBe(1);
     });
 
     it('sin tenant activo responde 422 y no consulta nada', async () => {
       const d = build({ administra: true });
 
-      await expect(d.service.list(dueño)).rejects.toBeInstanceOf(
+      await expect(d.service.list(owner)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
       expect(d.catalogRepo.findCarrierByTenantId).not.toHaveBeenCalled();
@@ -541,11 +538,11 @@ describe('InsurerReceivedClaimsService.list', () => {
 });
 
 describe('InsurerReceivedClaimsService.decide', () => {
-  const decidir = (d: ReturnType<typeof build>, dto: any, actor = dueño) =>
-    enTenant(() => d.service.decide(CLAIM_ID, dto, actor));
+  const decide = (d: ReturnType<typeof build>, dto: any, actor = owner) =>
+    inTenant(() => d.service.decide(CLAIM_ID, dto, actor));
 
   /** Los renglones que se escribieron, por id de línea. */
-  const escritos = (d: ReturnType<typeof build>) =>
+  const written = (d: ReturnType<typeof build>) =>
     new Map<string, any>(
       d.claimRepo.createLineAdjudication.mock.calls.map((c: any[]) => [
         c[1].insuranceClaimLineId,
@@ -557,7 +554,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('aprobar todo: versión 1 aprobada por el total, líneas aprobadas, solicitud adjudicada y evento publicado', async () => {
       const d = build({ administra: true });
 
-      const r = await decidir(d, { outcome: 'APPROVED' });
+      const r = await decide(d, { outcome: 'APPROVED' });
 
       expect(d.claimRepo.createVersion.mock.calls[0][1]).toMatchObject({
         insuranceClaimId: CLAIM_ID,
@@ -568,7 +565,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         totalDeniedAmount: '0.00',
         actorUserId: 'u-owner',
       });
-      expect(escritos(d).get('l-1')).toMatchObject({
+      expect(written(d).get('l-1')).toMatchObject({
         decisionConceptId: INS.LINE_DECISION_APPROVED,
         approvedAmount: '250.00',
         deniedAmount: '0.00',
@@ -593,7 +590,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('aprobar en parte: reparte el monto entre líneas y fundamenta sólo lo denegado', async () => {
       const d = build({ administra: true });
 
-      const r = await decidir(d, {
+      const r = await decide(d, {
         outcome: 'PARTIAL',
         approvedAmount: '200.00',
         reason: 'El plan cubre la mitad',
@@ -606,14 +603,14 @@ describe('InsurerReceivedClaimsService.decide', () => {
         totalApprovedAmount: '200.00',
         totalDeniedAmount: '200.00',
       });
-      expect(escritos(d).get('l-1')).toMatchObject({
+      expect(written(d).get('l-1')).toMatchObject({
         approvedAmount: '125.00',
         deniedAmount: '125.00',
         decisionConceptId: INS.LINE_DECISION_APPROVED,
         policyClauseReference: 'Cláusula 7.2',
         denialRationale: 'El plan cubre la mitad',
       });
-      expect(escritos(d).get('l-2')).toMatchObject({
+      expect(written(d).get('l-2')).toMatchObject({
         approvedAmount: '75.00',
         deniedAmount: '75.00',
       });
@@ -631,7 +628,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('rechazar: todo denegado, con motivo, y no se publica evento de facturación', async () => {
       const d = build({ administra: true });
 
-      const r = await decidir(d, {
+      const r = await decide(d, {
         outcome: 'REJECTED',
         reason: 'Servicio no cubierto',
       });
@@ -641,7 +638,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         totalApprovedAmount: '0.00',
         totalDeniedAmount: '400.00',
       });
-      for (const linea of escritos(d).values()) {
+      for (const linea of written(d).values()) {
         expect(linea).toMatchObject({
           decisionConceptId: INS.LINE_DECISION_DENIED,
           approvedAmount: '0.00',
@@ -655,7 +652,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('el evento lleva ids e importes, nunca datos del paciente', async () => {
       const d = build({ administra: true });
 
-      await decidir(d, { outcome: 'APPROVED' });
+      await decide(d, { outcome: 'APPROVED' });
 
       const evento = d.outbox.publishDomainEvent.mock.calls[0][1];
       expect(evento.payloadJson).toEqual({
@@ -675,7 +672,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('el dictamen se escribe con la solicitud ya bloqueada', async () => {
       const d = build({ administra: true });
 
-      await decidir(d, { outcome: 'APPROVED' });
+      await decide(d, { outcome: 'APPROVED' });
 
       expect(d.claimRepo.findClaimForUpdate).toHaveBeenCalledWith(
         d.tx,
@@ -689,7 +686,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('un operador con el rol de aseguradora también puede dictaminar', async () => {
       const d = build({ administra: false });
 
-      const r = await decidir(d, { outcome: 'APPROVED' }, operador);
+      const r = await decide(d, { outcome: 'APPROVED' }, operator);
 
       expect(r.status?.code).toBe('APPROVED');
     });
@@ -700,14 +697,14 @@ describe('InsurerReceivedClaimsService.decide', () => {
       const d = build({ administra: true });
 
       await expect(
-        decidir(d, { outcome: 'REJECTED', reason: '  Nada. ' }),
+        decide(d, { outcome: 'REJECTED', reason: '  Nada. ' }),
       ).resolves.toBeDefined();
     });
 
     it('aprobar no exige motivo, y si viene con menos de cinco caracteres se acepta', async () => {
       const d = build({ administra: true });
 
-      await decidir(d, { outcome: 'APPROVED', reason: 'ok' });
+      await decide(d, { outcome: 'APPROVED', reason: 'ok' });
 
       expect(d.claimRepo.createVersion.mock.calls[0][1]).toMatchObject({
         dispositionText: 'ok',
@@ -716,17 +713,17 @@ describe('InsurerReceivedClaimsService.decide', () => {
 
     it.each(['0.01', '399.99'])(
       'una aprobación parcial de %s está dentro del rango',
-      async (monto) => {
+      async (amount) => {
         const d = build({ administra: true });
 
-        await decidir(d, {
+        await decide(d, {
           outcome: 'PARTIAL',
-          approvedAmount: monto,
+          approvedAmount: amount,
           reason: 'Cobertura parcial',
         });
 
         expect(d.claimRepo.createVersion.mock.calls[0][1]).toMatchObject({
-          totalApprovedAmount: monto,
+          totalApprovedAmount: amount,
         });
       },
     );
@@ -734,7 +731,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('una aprobación parcial reparte hasta el último centavo', async () => {
       const d = build({
         administra: true,
-        claim: solicitud({ totalAmount: '100.00' }),
+        claim: request({ totalAmount: '100.00' }),
         lines: [
           { ...renglones()[1], billedAmount: '33.33' },
           { ...renglones()[0], billedAmount: '33.33' },
@@ -747,23 +744,23 @@ describe('InsurerReceivedClaimsService.decide', () => {
         ] as any,
       });
 
-      await decidir(d, {
+      await decide(d, {
         outcome: 'PARTIAL',
         approvedAmount: '0.01',
         reason: 'Cobertura mínima',
       });
 
-      const aprobado = [...escritos(d).values()].reduce(
-        (suma, l) => suma + Number(l.approvedAmount),
+      const approved = [...written(d).values()].reduce(
+        (sum, l) => sum + Number(l.approvedAmount),
         0,
       );
-      expect(aprobado).toBeCloseTo(0.01, 2);
-      expect(escritos(d).get('l-3')).toMatchObject({ approvedAmount: '0.01' });
+      expect(approved).toBeCloseTo(0.01, 2);
+      expect(written(d).get('l-3')).toMatchObject({ approvedAmount: '0.01' });
     });
   });
 
   describe('inválido', () => {
-    const nada = (d: ReturnType<typeof build>) => {
+    const nothing = (d: ReturnType<typeof build>) => {
       expect(d.claimRepo.createVersion).not.toHaveBeenCalled();
       expect(d.claimRepo.createLineAdjudication).not.toHaveBeenCalled();
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
@@ -773,16 +770,16 @@ describe('InsurerReceivedClaimsService.decide', () => {
       const d = build({ administra: false });
 
       await expect(
-        decidir(d, { outcome: 'APPROVED' }, extraño),
+        decide(d, { outcome: 'APPROVED' }, strange),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.claimReadRepo.findClaimInScope).not.toHaveBeenCalled();
-      nada(d);
+      nothing(d);
     });
 
     it('una solicitud inexistente o de otra aseguradora es 404, sin el id en el error', async () => {
       const d = build({ administra: true, claim: null });
 
-      const error = await decidir(d, { outcome: 'APPROVED' }).catch(
+      const error = await decide(d, { outcome: 'APPROVED' }).catch(
         (e: unknown) => e,
       );
 
@@ -790,29 +787,29 @@ describe('InsurerReceivedClaimsService.decide', () => {
       expect(JSON.stringify((error as any).getResponse())).not.toContain(
         CLAIM_ID,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('si bajo el bloqueo la solicitud resulta de otra aseguradora, también es 404', async () => {
       const d = build({ administra: true });
       d.claimRepo.findClaimForUpdate.mockResolvedValue(
-        solicitud({ insuranceCarrierId: 'carrier-otra' }),
+        request({ insuranceCarrierId: 'carrier-otra' }),
       );
 
-      await expect(decidir(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+      await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('una solicitud ya dictaminada es 409 con reason ALREADY_DECIDED', async () => {
       const d = build({
         administra: true,
-        claim: solicitud({ statusConceptId: INS.CLAIM_ADJUDICATED }),
+        claim: request({ statusConceptId: INS.CLAIM_ADJUDICATED }),
         versions: [{ id: 'v-0', insuranceClaimId: CLAIM_ID }],
       });
 
-      const error: any = await decidir(d, { outcome: 'APPROVED' }).catch(
+      const error: any = await decide(d, { outcome: 'APPROVED' }).catch(
         (e) => e,
       );
 
@@ -820,7 +817,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
       expect(error.getResponse().details).toEqual({
         reason: 'ALREADY_DECIDED',
       });
-      nada(d);
+      nothing(d);
     });
 
     it('una solicitud con una versión de dictamen es 409 aunque su estado no lo diga', async () => {
@@ -829,22 +826,22 @@ describe('InsurerReceivedClaimsService.decide', () => {
         versions: [{ id: 'v-0', insuranceClaimId: CLAIM_ID }],
       });
 
-      await expect(decidir(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+      await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
         ConflictException,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('una solicitud pagada o revertida tampoco se dictamina: 409', async () => {
       for (const estado of [INS.CLAIM_PAID, INS.CLAIM_REVERSED]) {
         const d = build({
           administra: true,
-          claim: solicitud({ statusConceptId: estado }),
+          claim: request({ statusConceptId: estado }),
         });
 
-        await expect(
-          decidir(d, { outcome: 'APPROVED' }),
-        ).rejects.toBeInstanceOf(ConflictException);
+        await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+          ConflictException,
+        );
       }
     });
 
@@ -884,40 +881,40 @@ describe('InsurerReceivedClaimsService.decide', () => {
     ])('%s es 422 y no escribe nada', async (_caso, dto) => {
       const d = build({ administra: true });
 
-      await expect(decidir(d, dto)).rejects.toBeInstanceOf(
+      await expect(decide(d, dto)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('si los renglones no suman lo solicitado, 422', async () => {
       const d = build({
         administra: true,
-        claim: solicitud({ totalAmount: '500.00' }),
+        claim: request({ totalAmount: '500.00' }),
       });
 
-      await expect(decidir(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+      await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('una solicitud sin monto solicitado, 422', async () => {
       const d = build({
         administra: true,
-        claim: solicitud({ totalAmount: undefined }),
+        claim: request({ totalAmount: undefined }),
       });
 
-      await expect(decidir(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+      await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
-      nada(d);
+      nothing(d);
     });
 
     it('el 422 dice qué campo falló, sin repetir lo que el cliente mandó', async () => {
       const d = build({ administra: true });
 
-      const error: any = await decidir(d, {
+      const error: any = await decide(d, {
         outcome: 'PARTIAL',
         approvedAmount: '400.00',
         reason: 'Parcial',
@@ -930,23 +927,23 @@ describe('InsurerReceivedClaimsService.decide', () => {
   });
 
   describe('solicitud enlazada a un pedido', () => {
-    const enlazada = () => solicitud({ inventoryReservationId: 'reserva-1' });
+    const linked = () => request({ inventoryReservationId: 'reserva-1' });
 
     it('si el pedido cambió desde que se presentó, 422 y no se escribe nada', async () => {
-      const d = build({ administra: true, claim: enlazada() });
+      const d = build({ administra: true, claim: linked() });
       d.linkedOrders.lockAndResolve.mockResolvedValue(null);
 
-      await expect(decidir(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+      await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
       expect(d.claimRepo.createVersion).not.toHaveBeenCalled();
     });
 
     it('bloquea el pedido antes que el reclamo', async () => {
-      const d = build({ administra: true, claim: enlazada() });
+      const d = build({ administra: true, claim: linked() });
       d.linkedOrders.lockAndResolve.mockResolvedValue(null);
 
-      await decidir(d, { outcome: 'APPROVED' }).catch(() => undefined);
+      await decide(d, { outcome: 'APPROVED' }).catch(() => undefined);
 
       expect(d.linkedOrders.lockAndResolve).toHaveBeenCalledTimes(1);
       expect(d.claimRepo.findClaimForUpdate).not.toHaveBeenCalled();
@@ -955,7 +952,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     it('una solicitud sin pedido no consulta el pedido', async () => {
       const d = build({ administra: true });
 
-      await decidir(d, { outcome: 'APPROVED' });
+      await decide(d, { outcome: 'APPROVED' });
 
       expect(d.linkedOrders.lockAndResolve).not.toHaveBeenCalled();
     });

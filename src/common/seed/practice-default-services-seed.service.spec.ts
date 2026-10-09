@@ -3,18 +3,18 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
 import { CONCEPTS } from '../constants/concepts';
 
 /** Doble del `EntityManager` con lo poco que el paso usa. */
-function armar(practicas: { id: string }[], yaSembradas: string[]) {
-  const creadas: Record<string, unknown>[] = [];
+function build(practices: { id: string }[], alreadySeeded: string[]) {
+  const created: Record<string, unknown>[] = [];
   const em = {
     find: jest
       .fn<(...args: unknown[]) => Promise<unknown[]>>()
       // La primera lectura son las prácticas; la segunda, las filas que ya
       // tienen el servicio.
-      .mockResolvedValueOnce(practicas)
-      .mockResolvedValueOnce(yaSembradas.map((id) => ({ practiceId: id }))),
-    create: jest.fn((_entidad: unknown, datos: Record<string, unknown>) => {
-      creadas.push(datos);
-      return datos;
+      .mockResolvedValueOnce(practices)
+      .mockResolvedValueOnce(alreadySeeded.map((id) => ({ practiceId: id }))),
+    create: jest.fn((entity: unknown, data: Record<string, unknown>) => {
+      created.push(data);
+      return data;
     }),
     flush: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
   };
@@ -24,12 +24,12 @@ function armar(practicas: { id: string }[], yaSembradas: string[]) {
     orm as never,
     logger as never,
   );
-  return { service, em, creadas };
+  return { service, em, creadas: created };
 }
 
 describe('PracticeDefaultServicesSeedService', () => {
   it('siembra el servicio en la práctica que no lo tiene', async () => {
-    const d = armar([{ id: 'p1' }], []);
+    const d = build([{ id: 'p1' }], []);
 
     const res = await d.service.run();
 
@@ -51,16 +51,16 @@ describe('PracticeDefaultServicesSeedService', () => {
    * Lo que hace seguro dejarlo en cada arranque: la segunda corrida no escribe.
    */
   it('no duplica el servicio en la práctica que ya lo tiene', async () => {
-    const d = armar([{ id: 'p1' }, { id: 'p2' }], ['p1']);
+    const d = build([{ id: 'p1' }, { id: 'p2' }], ['p1']);
 
     const res = await d.service.run();
 
     expect(res).toEqual({ inserted: 1 });
-    expect(d.creadas.map((fila) => fila.practiceId)).toEqual(['p2']);
+    expect(d.creadas.map((row) => row.practiceId)).toEqual(['p2']);
   });
 
   it('sin prácticas no consulta el catálogo ni escribe', async () => {
-    const d = armar([], []);
+    const d = build([], []);
 
     const res = await d.service.run();
 

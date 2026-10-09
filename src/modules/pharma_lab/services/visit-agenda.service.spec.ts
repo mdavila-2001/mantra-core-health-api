@@ -35,7 +35,7 @@ const TUESDAY_15_LOCAL = proximoMartes15Local();
 /** 15:00 en La Paz del primer martes estrictamente futuro. */
 function proximoMartes15Local(): Date {
   const ahora = new Date();
-  const fecha = new Date(
+  const date = new Date(
     Date.UTC(
       ahora.getUTCFullYear(),
       ahora.getUTCMonth(),
@@ -48,15 +48,15 @@ function proximoMartes15Local(): Date {
   );
   // Martes es 2. A las 19:00 UTC son las 15:00 del mismo día en La Paz, así que
   // el día de la semana coincide en las dos zonas y no hace falta corregirlo.
-  while (fecha.getUTCDay() !== 2 || fecha.getTime() <= ahora.getTime()) {
-    fecha.setUTCDate(fecha.getUTCDate() + 1);
+  while (date.getUTCDay() !== 2 || date.getTime() <= ahora.getTime()) {
+    date.setUTCDate(date.getUTCDate() + 1);
   }
-  return fecha;
+  return date;
 }
 
 /** Un desplazamiento en minutos sobre {@link TUESDAY_15_LOCAL}. */
-function martesMas(minutos: number): Date {
-  return new Date(TUESDAY_15_LOCAL.getTime() + minutos * 60_000);
+function tuesdayPlus(minutes: number): Date {
+  return new Date(TUESDAY_15_LOCAL.getTime() + minutes * 60_000);
 }
 
 /** Política activa por defecto: martes de 15:00 a 17:00, presencial. */
@@ -245,7 +245,7 @@ describe('VisitAgendaService', () => {
     it('rechaza un horario fuera de la ventana', async () => {
       const { service, em } = build();
       // 11:00 local del martes: la ventana empieza a las 15:00.
-      const tooEarly = martesMas(-240);
+      const tooEarly = tuesdayPlus(-240);
 
       await expect(
         service.assertSlotAvailable(
@@ -261,7 +261,7 @@ describe('VisitAgendaService', () => {
     it('rechaza una visita que se sale del final de la ventana', async () => {
       const { service, em } = build();
       // 16:45 local + 30 minutos termina a las 17:15, y la ventana cierra a las 17:00.
-      const almostClosing = martesMas(105);
+      const almostClosing = tuesdayPlus(105);
 
       await expect(
         service.assertSlotAvailable(
@@ -325,7 +325,7 @@ describe('VisitAgendaService', () => {
         occupying: [
           {
             id: 'other',
-            requestedStartAt: martesMas(15),
+            requestedStartAt: tuesdayPlus(15),
             durationMinutes: 30,
           },
         ],
@@ -348,7 +348,7 @@ describe('VisitAgendaService', () => {
           {
             kind: 'consultation',
             startAt: TUESDAY_15_LOCAL,
-            endAt: martesMas(30),
+            endAt: tuesdayPlus(30),
           },
         ],
       });
@@ -370,7 +370,7 @@ describe('VisitAgendaService', () => {
         occupying: [
           {
             id: 'other',
-            requestedStartAt: martesMas(120),
+            requestedStartAt: tuesdayPlus(120),
             durationMinutes: 30,
           },
         ],

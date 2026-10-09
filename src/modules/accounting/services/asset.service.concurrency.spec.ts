@@ -44,15 +44,15 @@ class FakeDb {
 
   /** Toma el cerrojo de una fila; quien lo tenga lo suelta al confirmar. */
   private async lock(rowId: string, tx: Tx): Promise<void> {
-    const previo = this.tails.get(rowId) ?? Promise.resolve();
-    let liberar!: () => void;
-    const mio = new Promise<void>((resolve) => (liberar = resolve));
+    const previous = this.tails.get(rowId) ?? Promise.resolve();
+    let release!: () => void;
+    const mine = new Promise<void>((resolve) => (release = resolve));
     this.tails.set(
       rowId,
-      previo.then(() => mio),
+      previous.then(() => mine),
     );
-    await previo;
-    tx.releases.push(liberar);
+    await previous;
+    tx.releases.push(release);
   }
 
   /** El `EntityManager` de una transacción. */
@@ -62,16 +62,16 @@ class FakeDb {
       releases: [],
       find: async (entity: unknown, where: any, opts: any = {}) => {
         if (entity !== Assets) throw new Error('find inesperado');
-        const filas = this.assets.filter(
+        const rows = this.assets.filter(
           (a) =>
             a.practiceId === where.practiceId &&
             a.statusConceptId === where.statusConceptId &&
             (!where.id || a.id === where.id),
         );
         if (opts.lockMode === LockMode.PESSIMISTIC_WRITE) {
-          for (const fila of filas) await this.lock(fila.id, tx);
+          for (const row of rows) await this.lock(row.id, tx);
         }
-        return filas;
+        return rows;
       },
       findOne: async (entity: unknown, where: any) => {
         if (entity !== AssetDepreciations)
@@ -108,7 +108,7 @@ class FakeDb {
       // Si el caso de uso lanzó, no hay nada confirmable: `staged` queda
       // vacío porque el servicio no llega a `create` sin depreciar.
       this.committed.push(...tx.staged);
-      for (const liberar of tx.releases) liberar();
+      for (const release of tx.releases) release();
     }
   };
 }
@@ -123,7 +123,7 @@ const runDto = {
   postingDate: '2026-09-30',
 };
 
-function activo(): Assets {
+function active(): Assets {
   return {
     id: 'as1',
     practiceId: 'p1',
@@ -139,7 +139,7 @@ function activo(): Assets {
 }
 
 function build(repo: AssetRepository) {
-  const db = new FakeDb([activo()]);
+  const db = new FakeDb([active()]);
   const posting = {
     // El posteo cede el turno: es la ventana real entre "comprobé que no
     // existe" y "escribí", por donde entra la segunda corrida si nada la
@@ -164,15 +164,15 @@ describe('AssetService.runDepreciation — dos corridas concurrentes (AC-26-5)',
   it('con FOR UPDATE se serializan: la segunda espera, relee y omite → una sola depreciación y un solo posteo', async () => {
     const d = build(new AssetRepository());
 
-    const resultados = await Promise.allSettled([
+    const results = await Promise.allSettled([
       d.service.runDepreciation(runDto, actor),
       d.service.runDepreciation(runDto, actor),
     ]);
 
     // Una corrida depreció; la otra, al releer tras el cerrojo, no encontró
     // nada elegible y respondió como responde hoy el disparo manual (422).
-    const ok = resultados.filter((r) => r.status === 'fulfilled');
-    const ko = resultados.filter((r) => r.status === 'rejected');
+    const ok = results.filter((r) => r.status === 'fulfilled');
+    const ko = results.filter((r) => r.status === 'rejected');
     expect(ok).toHaveLength(1);
     expect(ko).toHaveLength(1);
     expect((ko[0] as PromiseRejectedResult).reason).toBeInstanceOf(
@@ -188,7 +188,7 @@ describe('AssetService.runDepreciation — dos corridas concurrentes (AC-26-5)',
 
   it('control negativo: sin FOR UPDATE, el mismo arnés deja dos filas y dos posteos', async () => {
     /** El repositorio real, pero pidiendo los activos sin bloqueo. */
-    class RepoSinLock extends AssetRepository {
+    class RepoWithoutLock extends AssetRepository {
       override activeAssets(
         em: any,
         practiceId: string,
@@ -201,7 +201,7 @@ describe('AssetService.runDepreciation — dos corridas concurrentes (AC-26-5)',
         });
       }
     }
-    const d = build(new RepoSinLock());
+    const d = build(new RepoWithoutLock());
 
     await Promise.all([
       d.service.runDepreciation(runDto, actor),

@@ -12,7 +12,7 @@ import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
  * cualquier tipo (la exclusividad con `tenantType` la comprueba el servicio,
  * no el DTO).
  */
-const ALTA_MINIMA = {
+const MINIMAL_REGISTRATION = {
   organization: {
     code: 'CENTRO_IMAGEN_Z',
     legalName: 'Centro de Imagen Z S.R.L.',
@@ -31,20 +31,20 @@ const ALTA_MINIMA = {
  * `ValidationPipe` de Nest (`prependConstraintsWithParentProp`) para las
  * propiedades anidadas.
  *
- * @param errores - Los errores devueltos por `validate()`.
- * @param prefijo - La ruta acumulada hasta este nivel.
+ * @param errors - Los errores devueltos por `validate()`.
+ * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasConError(
-  errores: readonly ValidationError[],
-  prefijo = '',
+function rutasWithError(
+  errors: readonly ValidationError[],
+  prefix = '',
 ): string[] {
   const rutas: string[] = [];
-  for (const error of errores) {
-    const ruta = prefijo ? `${prefijo}.${error.property}` : error.property;
+  for (const error of errors) {
+    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasConError(error.children, ruta));
+      rutas.push(...rutasWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -56,30 +56,30 @@ function rutasConError(
  * `forbidNonWhitelisted` reproduce el `ValidationPipe` real de `main.ts`: sin
  * ella, una clave desconocida se ignora en silencio.
  *
- * @param alta - El cuerpo del alta, tal como llegaría del cliente.
+ * @param registration - El cuerpo del alta, tal como llegaría del cliente.
  * @returns Las rutas con error.
  */
-async function propiedadesConError(
-  alta: Record<string, unknown>,
+async function propertiesWithError(
+  registration: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(RegisterOrganizationDto, alta);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(RegisterOrganizationDto, registration);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasConError(errores);
+  return rutasWithError(errors);
 }
 
 describe('RegisterOrganizationDto · alta mínima', () => {
   it('acepta el alta mínima con DIAGNOSTIC_CENTER, sin el bloque diagnosticUnit', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 
   it('acepta DIAGNOSTIC_CENTER entre los tipos válidos', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        organization: { ...ALTA_MINIMA.organization, tenantType: 'HOSPITAL' },
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: { ...MINIMAL_REGISTRATION.organization, tenantType: 'HOSPITAL' },
       }),
     ).toEqual([]);
   });
@@ -94,10 +94,10 @@ describe('RegisterOrganizationDto · alta mínima', () => {
 describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
   it('acepta el bloque completo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           diagnosticUnit: {
             code: 'CENTRO_IMAGEN_Z_CENTRAL',
             name: 'Sede central',
@@ -122,10 +122,10 @@ describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
 
   it('rechaza una modalidad que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           diagnosticUnit: {
             modalityConceptIds: ['no-es-un-uuid'],
           },
@@ -136,10 +136,10 @@ describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
 
   it('rechaza una clave desconocida dentro de diagnosticUnit', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           diagnosticUnit: { codigoQueNoExiste: 'X' },
         },
       }),
@@ -148,10 +148,10 @@ describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
 
   it('el par de coordenadas de la sede primaria es ambas o ninguna', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           diagnosticUnit: {
             primarySite: {
               address: { lines: [], latitude: -17.78 },
@@ -172,19 +172,19 @@ describe('RegisterOrganizationDto · diagnosticUnit (1.5)', () => {
 describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
   it('acepta un código boliviano', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
-        organization: { ...ALTA_MINIMA.organization, legalEntityType: 'SRL' },
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        organization: { ...MINIMAL_REGISTRATION.organization, legalEntityType: 'SRL' },
       }),
     ).toEqual([]);
   });
 
   it('acepta un código de otra jurisdicción', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           legalEntityType: 'US_LLC',
         },
       }),
@@ -193,10 +193,10 @@ describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
 
   it('rechaza un código fuera del diccionario', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           legalEntityType: 'BO_SRL',
         },
       }),
@@ -204,7 +204,7 @@ describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
   });
 
   it('sin el campo, el alta sigue siendo válida', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 });
 
@@ -225,10 +225,10 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
 
   it('acepta el bloque completo con los cinco fileId', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           legalDocuments: LEGAL_DOCUMENTS_COMPLETOS,
         },
       }),
@@ -241,10 +241,10 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
     void healthAuthorityCertificateFileId;
 
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           legalDocuments: incompleto,
         },
       }),
@@ -253,10 +253,10 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
 
   it('rechaza un fileId que no es un uuid', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_MINIMA,
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
         organization: {
-          ...ALTA_MINIMA.organization,
+          ...MINIMAL_REGISTRATION.organization,
           legalDocuments: {
             ...LEGAL_DOCUMENTS_COMPLETOS,
             constitutionFileId: 'no-es-un-uuid',
@@ -267,7 +267,7 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
   });
 
   it('sin el bloque, el alta sigue siendo válida (opcional en el contrato)', async () => {
-    expect(await propiedadesConError(ALTA_MINIMA)).toEqual([]);
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
   });
 });
 
@@ -277,7 +277,7 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
  * `TenantTypeProfileService`, no este DTO.
  */
 describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () => {
-  const ALTA_PAYER = {
+  const PAYER_REGISTRATION = {
     organization: {
       code: 'ASEGURADORA_Z',
       legalName: 'Aseguradora Z S.R.L.',
@@ -289,17 +289,17 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
         regulatorIdentifier: 'APS-9001',
       },
     },
-    owner: ALTA_MINIMA.owner,
+    owner: MINIMAL_REGISTRATION.owner,
   };
 
   it('acepta el par completo', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_PAYER,
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
         organization: {
-          ...ALTA_PAYER.organization,
+          ...PAYER_REGISTRATION.organization,
           payer: {
-            ...ALTA_PAYER.organization.payer,
+            ...PAYER_REGISTRATION.organization.payer,
             latitude: -17.7833,
             longitude: -63.1821,
           },
@@ -310,11 +310,11 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
 
   it('sólo latitude es 400: el par va junto o no va', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_PAYER,
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
         organization: {
-          ...ALTA_PAYER.organization,
-          payer: { ...ALTA_PAYER.organization.payer, latitude: -17.7833 },
+          ...PAYER_REGISTRATION.organization,
+          payer: { ...PAYER_REGISTRATION.organization.payer, latitude: -17.7833 },
         },
       }),
     ).toEqual(['organization.payer.longitude']);
@@ -322,11 +322,11 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
 
   it('sólo longitude es 400: el par va junto o no va', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_PAYER,
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
         organization: {
-          ...ALTA_PAYER.organization,
-          payer: { ...ALTA_PAYER.organization.payer, longitude: -63.1821 },
+          ...PAYER_REGISTRATION.organization,
+          payer: { ...PAYER_REGISTRATION.organization.payer, longitude: -63.1821 },
         },
       }),
     ).toEqual(['organization.payer.latitude']);
@@ -334,12 +334,12 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
 
   it('rechaza una latitud fuera de rango', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_PAYER,
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
         organization: {
-          ...ALTA_PAYER.organization,
+          ...PAYER_REGISTRATION.organization,
           payer: {
-            ...ALTA_PAYER.organization.payer,
+            ...PAYER_REGISTRATION.organization.payer,
             latitude: 90.5,
             longitude: -63.1821,
           },
@@ -350,12 +350,12 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
 
   it('rechaza una longitud fuera de rango', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_PAYER,
+      await propertiesWithError({
+        ...PAYER_REGISTRATION,
         organization: {
-          ...ALTA_PAYER.organization,
+          ...PAYER_REGISTRATION.organization,
           payer: {
-            ...ALTA_PAYER.organization.payer,
+            ...PAYER_REGISTRATION.organization.payer,
             latitude: -17.7833,
             longitude: -180.5,
           },
@@ -365,7 +365,7 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
   });
 
   it('sin coordenadas, el alta sigue siendo válida (opcional en el contrato)', async () => {
-    expect(await propiedadesConError(ALTA_PAYER)).toEqual([]);
+    expect(await propertiesWithError(PAYER_REGISTRATION)).toEqual([]);
   });
 });
 
@@ -375,7 +375,7 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
  * anterior). Mismo criterio que `RegisterOrganizationOwnerDto`.
  */
 describe('RegisterOrganizationDto · representante legal y gerencias · nombre en partes', () => {
-  const ALTA_CON_REPRESENTACION = {
+  const REGISTRATION_WITH_REPRESENTATION = {
     organization: {
       code: 'ASEGURADORA_PARTES',
       legalName: 'Aseguradora Partes S.R.L.',
@@ -387,25 +387,25 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
         regulatorIdentifier: 'APS-9001',
       },
     },
-    owner: ALTA_MINIMA.owner,
+    owner: MINIMAL_REGISTRATION.owner,
   };
 
-  const REPRESENTANTE_BASE = {
+  const BASE_REPRESENTATIVE = {
     idNumber: '4872190 SC',
     email: 'legal@aseguradora.com',
     powerOfAttorneyFileId: '11111111-1111-4111-8111-111111111111',
   };
 
-  const GERENCIA_BASE = {
+  const BASE_MANAGEMENT = {
     phone: '+591 70012345',
     email: 'gm@aseguradora.com',
   };
 
-  function altaCon(legalRepresentative: Record<string, unknown>) {
+  function registrationWith(legalRepresentative: Record<string, unknown>) {
     return {
-      ...ALTA_CON_REPRESENTACION,
+      ...REGISTRATION_WITH_REPRESENTATION,
       organization: {
-        ...ALTA_CON_REPRESENTACION.organization,
+        ...REGISTRATION_WITH_REPRESENTATION.organization,
         legalRepresentative,
       },
     };
@@ -413,17 +413,17 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
 
   it('acepta las partes (name/lastName), sin fullName', async () => {
     expect(
-      await propiedadesConError(
-        altaCon({ ...REPRESENTANTE_BASE, name: 'Mariana', lastName: 'Siles' }),
+      await propertiesWithError(
+        registrationWith({ ...BASE_REPRESENTATIVE, name: 'Mariana', lastName: 'Siles' }),
       ),
     ).toEqual([]);
   });
 
   it('acepta sólo fullName (forma anterior), sin partes', async () => {
     expect(
-      await propiedadesConError(
-        altaCon({
-          ...REPRESENTANTE_BASE,
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
           fullName: 'Mariana Siles Justiniano',
         }),
       ),
@@ -432,7 +432,7 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
 
   it('sin partes NI fullName, rechaza name y lastName', async () => {
     expect(
-      await propiedadesConError(altaCon({ ...REPRESENTANTE_BASE })),
+      await propertiesWithError(registrationWith({ ...BASE_REPRESENTATIVE })),
     ).toEqual([
       'organization.legalRepresentative.lastName',
       'organization.legalRepresentative.name',
@@ -441,9 +441,9 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
 
   it('rechaza thirdName: no es una clave del contrato, el cliente lo pliega en middleName', async () => {
     expect(
-      await propiedadesConError(
-        altaCon({
-          ...REPRESENTANTE_BASE,
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
           name: 'Mariana',
           lastName: 'Siles',
           thirdName: 'Elena',
@@ -454,9 +454,9 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
 
   it('rechaza un nombre de más de 100 caracteres', async () => {
     expect(
-      await propiedadesConError(
-        altaCon({
-          ...REPRESENTANTE_BASE,
+      await propertiesWithError(
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
           name: 'A'.repeat(101),
           lastName: 'Siles',
         }),
@@ -466,23 +466,23 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
 
   it('una gerencia con partes, sin fullName, es válida', async () => {
     expect(
-      await propiedadesConError({
-        ...ALTA_CON_REPRESENTACION,
+      await propertiesWithError({
+        ...REGISTRATION_WITH_REPRESENTATION,
         organization: {
-          ...ALTA_CON_REPRESENTACION.organization,
+          ...REGISTRATION_WITH_REPRESENTATION.organization,
           executives: {
             generalManager: {
-              ...GERENCIA_BASE,
+              ...BASE_MANAGEMENT,
               name: 'Carlos',
               lastName: 'Mendoza',
             },
             commercialManager: {
-              ...GERENCIA_BASE,
+              ...BASE_MANAGEMENT,
               name: 'Ana',
               lastName: 'Paz',
             },
             marketingManager: {
-              ...GERENCIA_BASE,
+              ...BASE_MANAGEMENT,
               name: 'Luis',
               lastName: 'Rojas',
             },

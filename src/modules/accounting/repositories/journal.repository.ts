@@ -564,19 +564,19 @@ export class JournalRepository {
     const assignments = await em.find(JournalEntryAssignments, {
       ledgerEntryId: { $in: entries.map((e) => e.id) },
     });
-    const asignacionPorLinea = new Map(
+    const assignmentByLine = new Map(
       assignments.map((a) => [a.ledgerEntryId, a]),
     );
 
     return entries.map((entry) => {
-      const asignacion = asignacionPorLinea.get(entry.id);
+      const assignment = assignmentByLine.get(entry.id);
       return {
         directionConceptId: entry.directionConceptId,
         amount: entry.amount,
         amountBase: entry.amountBase ?? null,
-        costCenterId: asignacion?.costCenterId ?? null,
-        profitCenterId: asignacion?.profitCenterId ?? null,
-        segmentId: asignacion?.segmentId ?? null,
+        costCenterId: assignment?.costCenterId ?? null,
+        profitCenterId: assignment?.profitCenterId ?? null,
+        segmentId: assignment?.segmentId ?? null,
       };
     });
   }

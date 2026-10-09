@@ -3,10 +3,10 @@ import { plainToInstance } from 'class-transformer';
 import { validate, type ValidationError } from 'class-validator';
 import { UpdateOwnCredentialDto } from './update-own-credential.dto';
 
-async function rutasConError(
-  cuerpo: Record<string, unknown>,
+async function rutasWithError(
+  body: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(UpdateOwnCredentialDto, cuerpo);
+  const dto = plainToInstance(UpdateOwnCredentialDto, body);
   const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -20,9 +20,9 @@ async function rutasConError(
 
 describe('UpdateOwnCredentialDto', () => {
   it('acepta un PATCH vacío y todos los campos editables válidos', async () => {
-    expect(await rutasConError({})).toEqual([]);
+    expect(await rutasWithError({})).toEqual([]);
     expect(
-      await rutasConError({
+      await rutasWithError({
         credentialTypeConceptId: '7218acbc-5098-56ae-980a-9345961ced89',
         number: 'DIP-2024-17',
         issuingInstitutionText: '',
@@ -34,7 +34,7 @@ describe('UpdateOwnCredentialDto', () => {
 
   it('rechaza campos de dueño/estado/verificación y valores null', async () => {
     expect(
-      await rutasConError({
+      await rutasWithError({
         ownerUserId: 'user-1',
         stateConceptId: 'verified',
         verifiedByUserId: 'admin-1',
@@ -44,7 +44,7 @@ describe('UpdateOwnCredentialDto', () => {
   });
 
   it('rechaza un número vacío o compuesto sólo de espacios', async () => {
-    expect(await rutasConError({ number: '' })).toEqual(['number']);
-    expect(await rutasConError({ number: '   ' })).toEqual(['number']);
+    expect(await rutasWithError({ number: '' })).toEqual(['number']);
+    expect(await rutasWithError({ number: '   ' })).toEqual(['number']);
   });
 });

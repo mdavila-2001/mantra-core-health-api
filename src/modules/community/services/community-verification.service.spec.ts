@@ -12,18 +12,18 @@ import { CONCEPTS } from '../../../common';
 import { COMM } from '../community.concepts';
 import { CommunityVerificationService } from './community-verification.service';
 
-const AYER = new Date(Date.now() - 24 * 3_600_000);
-const MANANA = new Date(Date.now() + 24 * 3_600_000);
+const YESTERDAY = new Date(Date.now() - 24 * 3_600_000);
+const TOMORROW = new Date(Date.now() + 24 * 3_600_000);
 
 /** Un sello con los campos que la lectura mira. */
-function sello(over: Record<string, unknown> = {}): any {
+function stamp(over: Record<string, unknown> = {}): any {
   return {
     id: 'badge-1',
     subjectRefId: 'perfil-1',
     badgeTypeConceptId: COMM.BADGE_TYPE_LICENSE_VERIFIED,
     verificationMethodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
     statusConceptId: CONCEPTS.STATE_ACTIVE,
-    validFrom: AYER,
+    validFrom: YESTERDAY,
     validTo: null,
     ...over,
   };
@@ -40,10 +40,10 @@ const perfil: any = {
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  *
- * @param opciones - Perfil y sellos que devuelve el repositorio.
+ * @param options - Perfil y sellos que devuelve el repositorio.
  * @returns Resultado de build.
  */
-function build(opciones?: { profile?: any; badges?: any[]; existente?: any }) {
+function build(options?: { profile?: any; badges?: any[]; existente?: any }) {
   const tx = {
     create: mockFn((_e: any, d: any) => ({ ...d, id: 'badge-new' })),
     // El alta hace un flush antes de anotar la auditoría: el historial apunta
@@ -54,19 +54,19 @@ function build(opciones?: { profile?: any; badges?: any[]; existente?: any }) {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const repo = {
     findProfileByTarget: mockFn().mockResolvedValue(
-      opciones?.profile === undefined ? { ...perfil } : opciones.profile,
+      options?.profile === undefined ? { ...perfil } : options.profile,
     ),
-    findActive: mockFn().mockResolvedValue(opciones?.existente ?? null),
-    findAllBySubject: mockFn().mockResolvedValue(opciones?.badges ?? []),
+    findActive: mockFn().mockResolvedValue(options?.existente ?? null),
+    findAllBySubject: mockFn().mockResolvedValue(options?.badges ?? []),
     findExpired: mockFn().mockResolvedValue([]),
-    grant: mockFn((_em: any, data: any, existente: any) =>
-      existente
-        ? { badge: existente, created: false }
-        : { badge: sello({ id: 'badge-new', ...data }), created: true },
+    grant: mockFn((_em: any, data: any, existing: any) =>
+      existing
+        ? { badge: existing, created: false }
+        : { badge: stamp({ id: 'badge-new', ...data }), created: true },
     ),
-    revoke: mockFn((badge: any, _actor: string, motivo: string) => {
+    revoke: mockFn((badge: any, _actor: string, reason: string) => {
       badge.statusConceptId =
-        motivo === 'REVOKED' ? CONCEPTS.STATE_REVOKED : CONCEPTS.STATE_EXPIRED;
+        reason === 'REVOKED' ? CONCEPTS.STATE_REVOKED : CONCEPTS.STATE_EXPIRED;
     }),
     recordHistory: mockFn(),
   };
@@ -99,8 +99,8 @@ describe('CommunityVerificationService', () => {
     });
 
     it('una re-verificación renueva el sello en vez de apilar un segundo', async () => {
-      const existente = sello();
-      const d = build({ existente });
+      const existing = stamp();
+      const d = build({ existente: existing });
 
       const res = await d.service.applyVerified(d.tx as any, {
         targetId: 'sujeto-1',
@@ -148,8 +148,8 @@ describe('CommunityVerificationService', () => {
         ...perfil,
         verificationStatusConceptId: CONCEPTS.STATE_ACTIVE,
       };
-      const activo = sello();
-      const d = build({ profile, badges: [activo] });
+      const active = stamp();
+      const d = build({ profile, badges: [active] });
 
       const res = await d.service.applyRevoked(
         d.tx as any,
@@ -182,7 +182,7 @@ describe('CommunityVerificationService', () => {
     it('un sello vigente es VERIFIED con su procedencia', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [sello()]);
+      const badge = d.service.readBadge(perfil, [stamp()]);
 
       expect(badge.status).toBe('VERIFIED');
       expect(badge.badgeTypeConceptId).toBe(COMM.BADGE_TYPE_LICENSE_VERIFIED);
@@ -194,19 +194,19 @@ describe('CommunityVerificationService', () => {
     it('un sello cuya ventana ya pasó NO es VERIFIED aunque siga marcado activo', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [sello({ validTo: AYER })]);
+      const badge = d.service.readBadge(perfil, [stamp({ validTo: YESTERDAY })]);
 
       // La ventana manda sobre el estado: es lo que hace que un sello vencido
       // no siga luciendo mientras el barrido no pasó todavía.
       expect(badge.status).toBe('EXPIRED');
-      expect(badge.validUntil).toBe(AYER.toISOString());
+      expect(badge.validUntil).toBe(YESTERDAY.toISOString());
     });
 
     it('un sello que todavía no empezó tampoco es VERIFIED', () => {
       const d = build();
 
       const badge = d.service.readBadge(perfil, [
-        sello({ validFrom: MANANA, validTo: null }),
+        stamp({ validFrom: TOMORROW, validTo: null }),
       ]);
 
       expect(badge.status).not.toBe('VERIFIED');
@@ -227,23 +227,23 @@ describe('CommunityVerificationService', () => {
       const d = build();
 
       const badge = d.service.readBadge(perfil, [
-        sello({ statusConceptId: CONCEPTS.STATE_REVOKED, validTo: AYER }),
+        stamp({ statusConceptId: CONCEPTS.STATE_REVOKED, validTo: YESTERDAY }),
       ]);
 
       expect(badge.status).toBe('EXPIRED');
-      expect(badge.validUntil).toBe(AYER.toISOString());
+      expect(badge.validUntil).toBe(YESTERDAY.toISOString());
     });
 
     it('con dos sellos gana el vigente', () => {
       const d = build();
 
       const badge = d.service.readBadge(perfil, [
-        sello({
+        stamp({
           id: 'viejo',
           statusConceptId: CONCEPTS.STATE_REVOKED,
-          validTo: AYER,
+          validTo: YESTERDAY,
         }),
-        sello({ id: 'nuevo' }),
+        stamp({ id: 'nuevo' }),
       ]);
 
       expect(badge.status).toBe('VERIFIED');
@@ -253,26 +253,26 @@ describe('CommunityVerificationService', () => {
   describe('el término de prestigio sale del sello, no de la columna resumen', () => {
     it('suma con sello vigente', () => {
       const d = build();
-      expect(d.service.verificationTerm(perfil, [sello()])).toBe(1);
+      expect(d.service.verificationTerm(perfil, [stamp()])).toBe(1);
     });
 
     it('no resta con sello vencido: renovar la matrícula no es un castigo', () => {
       const d = build();
       expect(
-        d.service.verificationTerm(perfil, [sello({ validTo: AYER })]),
+        d.service.verificationTerm(perfil, [stamp({ validTo: YESTERDAY })]),
       ).toBe(0);
     });
 
     it('un perfil marcado como verificado sin sello detrás NO suma', () => {
       const d = build();
-      const mentiroso = {
+      const lying = {
         ...perfil,
         verificationStatusConceptId: CONCEPTS.STATE_ACTIVE,
       };
 
       // Es la prueba de que el prestigio se ata al sello con evidencia y no a
       // la columna, que es lo que se puede desincronizar.
-      expect(d.service.verificationTerm(mentiroso, [])).toBe(0);
+      expect(d.service.verificationTerm(lying, [])).toBe(0);
     });
   });
 });

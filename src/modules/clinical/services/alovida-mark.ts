@@ -20,17 +20,17 @@
     ========================================================================== */
 
 /** Alto del isotipo cuando su ancho vale 1. Del `viewBox` del SVG original. */
-export const PROPORCION_DE_MARCA = 0.73113;
+export const BRAND_RATIO = 0.73113;
 
 /** Un contorno cerrado del isotipo, en el formato relativo original. */
-interface SubtrazoDeMarca {
+interface SubtrazoBrand {
   /** Punto de arranque, en la caja normalizada. */
   readonly inicio: readonly [number, number];
   /** `[dx,dy]` para recta, `[dx1,dy1,dx2,dy2,dx3,dy3]` para curva cúbica. */
   readonly segmentos: readonly (readonly number[])[];
 }
 
-const SUBTRAZOS: readonly SubtrazoDeMarca[] = [
+const SUBTRAZOS: readonly SubtrazoBrand[] = [
   {
     inicio: [0.57343, 0.00165],
     segmentos: [
@@ -149,12 +149,12 @@ const SUBTRAZOS: readonly SubtrazoDeMarca[] = [
 export type ColorRgb = readonly [number, number, number];
 
 /** Dónde y cómo se estampa el isotipo. */
-export interface OpcionesDeMarca {
+export interface BrandOptions {
   /** Borde izquierdo del isotipo, en puntos. */
   readonly x: number;
   /** Borde superior del isotipo, en puntos. */
   readonly y: number;
-  /** Ancho en puntos; el alto sale de {@link PROPORCION_DE_MARCA}. */
+  /** Ancho en puntos; el alto sale de {@link BRAND_RATIO}. */
   readonly ancho: number;
   readonly color: ColorRgb;
   /** 0 a 1. Por debajo de 1 se estampa como filigrana. */
@@ -162,8 +162,8 @@ export interface OpcionesDeMarca {
 }
 
 /** El alto que ocupa el isotipo para un ancho dado. */
-export function altoDeMarca(ancho: number): number {
-  return ancho * PROPORCION_DE_MARCA;
+export function brandHeight(width: number): number {
+  return width * BRAND_RATIO;
 }
 
 /** `#rrggbb`, la forma que pide `doc.fillColor` de pdfkit. */
@@ -185,34 +185,34 @@ function colorHex([r, g, b]: ColorRgb): string {
  * llevando un punto "actual" que arranca en `inicio` y avanza sumando cada
  * delta ya escalado por `ancho`.
  */
-export function dibujarMarcaAlovida(
+export function drawBrandAlovida(
   doc: PDFKit.PDFDocument,
-  opciones: OpcionesDeMarca,
+  options: BrandOptions,
 ): void {
-  const { x, y, ancho, color, opacidad = 1 } = opciones;
+  const { x, y, ancho, color, opacidad = 1 } = options;
 
   doc.save();
   if (opacidad < 1) doc.opacity(opacidad);
 
-  for (const trazo of SUBTRAZOS) {
-    let actualX = x + trazo.inicio[0] * ancho;
-    let actualY = y + trazo.inicio[1] * ancho;
+  for (const stroke of SUBTRAZOS) {
+    let actualX = x + stroke.inicio[0] * ancho;
+    let actualY = y + stroke.inicio[1] * ancho;
     doc.moveTo(actualX, actualY);
 
-    for (const segmento of trazo.segmentos) {
-      if (segmento.length === 6) {
-        const [dx1, dy1, dx2, dy2, dx3, dy3] = segmento;
+    for (const segment of stroke.segmentos) {
+      if (segment.length === 6) {
+        const [dx1, dy1, dx2, dy2, dx3, dy3] = segment;
         const cp1x = actualX + dx1 * ancho;
         const cp1y = actualY + dy1 * ancho;
         const cp2x = actualX + dx2 * ancho;
         const cp2y = actualY + dy2 * ancho;
         const finX = actualX + dx3 * ancho;
-        const finY = actualY + dy3 * ancho;
-        doc.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, finX, finY);
+        const endY = actualY + dy3 * ancho;
+        doc.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, finX, endY);
         actualX = finX;
-        actualY = finY;
+        actualY = endY;
       } else {
-        const [dx, dy] = segmento;
+        const [dx, dy] = segment;
         actualX += dx * ancho;
         actualY += dy * ancho;
         doc.lineTo(actualX, actualY);

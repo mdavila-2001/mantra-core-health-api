@@ -3,21 +3,21 @@ import { validate } from 'class-validator';
 import { CreateConditionDto, VerifyConditionDto } from './condition.dto';
 
 const ID = '11111111-1111-4111-8111-111111111111';
-const OTRO = '22222222-2222-4222-8222-222222222222';
+const OTHER = '22222222-2222-4222-8222-222222222222';
 
 /**
  * Los errores de validación, como los vería el `ValidationPipe` global de
  * `main.ts` (`whitelist` y `forbidNonWhitelisted`).
  *
- * @param clase - El DTO.
- * @param cuerpo - Lo que mandaría el cliente.
+ * @param classKey - El DTO.
+ * @param body - Lo que mandaría el cliente.
  * @returns Las propiedades que no pasaron, en orden.
  */
-async function erroresDe<T extends object>(
-  clase: new () => T,
-  cuerpo: unknown,
+async function errors<T extends object>(
+  classKey: new () => T,
+  body: unknown,
 ): Promise<string[]> {
-  const dto = plainToInstance(clase, cuerpo);
+  const dto = plainToInstance(classKey, body);
   const errores = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -33,27 +33,27 @@ describe('CreateConditionDto · estado de verificación del alta (Hito 4 §B)', 
   };
 
   it('el alta de siempre, sin el campo, sigue siendo válida', async () => {
-    expect(await erroresDe(CreateConditionDto, base)).toEqual([]);
+    expect(await errors(CreateConditionDto, base)).toEqual([]);
   });
 
   it('acepta el estado de verificación como uuid', async () => {
     expect(
-      await erroresDe(CreateConditionDto, {
+      await errors(CreateConditionDto, {
         ...base,
-        verificationStatusConceptId: OTRO,
+        verificationStatusConceptId: OTHER,
       }),
     ).toEqual([]);
   });
 
   it('rechaza un estado de verificación que no es uuid', async () => {
     expect(
-      await erroresDe(CreateConditionDto, {
+      await errors(CreateConditionDto, {
         ...base,
         verificationStatusConceptId: 'COND_PROVISIONAL',
       }),
     ).toEqual(['verificationStatusConceptId']);
     expect(
-      await erroresDe(CreateConditionDto, {
+      await errors(CreateConditionDto, {
         ...base,
         verificationStatusConceptId: '',
       }),
@@ -62,7 +62,7 @@ describe('CreateConditionDto · estado de verificación del alta (Hito 4 §B)', 
 
   it('sigue rechazando claves que el contrato no declara', async () => {
     expect(
-      await erroresDe(CreateConditionDto, { ...base, status: 'ACTIVE' }),
+      await errors(CreateConditionDto, { ...base, status: 'ACTIVE' }),
     ).toEqual(['status']);
   });
 });
@@ -70,7 +70,7 @@ describe('CreateConditionDto · estado de verificación del alta (Hito 4 §B)', 
 describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
   it('acepta un motivo solo, para confirmar o refutar', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'REFUTED',
         reasonText: 'Descartado por estudio',
       }),
@@ -79,13 +79,13 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('acepta una evidencia de nota o de análisis, sola', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         basedOn: { kind: 'NOTE', noteId: ID },
       }),
     ).toEqual([]);
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         basedOn: { kind: 'ANALYSIS', diagnosticReportId: ID },
       }),
@@ -94,7 +94,7 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('acepta las fechas y el curso al confirmar', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         reasonText: 'Cuadro compatible',
         onsetAt: '2026-09-01T00:00:00.000Z',
@@ -106,7 +106,7 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('acepta el límite: un motivo de exactamente 500 caracteres', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         reasonText: 'a'.repeat(500),
       }),
@@ -115,19 +115,19 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('rechaza un resultado fuera de CONFIRMED y REFUTED, o ausente', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'PROVISIONAL',
         reasonText: 'x',
       }),
     ).toEqual(['outcome']);
-    expect(await erroresDe(VerifyConditionDto, { reasonText: 'x' })).toEqual([
+    expect(await errors(VerifyConditionDto, { reasonText: 'x' })).toEqual([
       'outcome',
     ]);
   });
 
   it('rechaza un motivo de más de 500 caracteres', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         reasonText: 'a'.repeat(501),
       }),
@@ -136,13 +136,13 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('rechaza una evidencia de clase desconocida o con un id que no es uuid', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         basedOn: { kind: 'OTRA', noteId: ID },
       }),
     ).toEqual(['basedOn']);
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         basedOn: { kind: 'NOTE', noteId: 'no-es-uuid' },
       }),
@@ -151,7 +151,7 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('rechaza fechas que no son fechas y un curso que no es uuid', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         reasonText: 'x',
         onsetAt: 'ayer',
@@ -163,7 +163,7 @@ describe('VerifyConditionDto · cuerpo de la verificación (C3 / P41)', () => {
 
   it('rechaza claves que el contrato no declara: no se cuela un estado ni un autor', async () => {
     expect(
-      await erroresDe(VerifyConditionDto, {
+      await errors(VerifyConditionDto, {
         outcome: 'CONFIRMED',
         reasonText: 'x',
         verificationStatusConceptId: ID,

@@ -189,19 +189,19 @@ describe('PersistenceSessionFactory', () => {
 
     it('con fallback-to-primary, reintenta en la primaria y lo registra', async () => {
       const d = build('fallback-to-primary');
-      let intento = 0;
-      const resultado = await d.factory.read(
+      let attempt = 0;
+      const result = await d.factory.read(
         'scheduling',
         'buscar',
         async (em) => {
-          intento += 1;
-          if (intento === 1)
+          attempt += 1;
+          if (attempt === 1)
             throw Object.assign(new Error('x'), { code: '08006' });
           return em;
         },
       );
 
-      expect(resultado).toEqual({ marca: 'postgres-write' });
+      expect(result).toEqual({ marca: 'postgres-write' });
       expect(d.metrics.snapshot()['postgres-write'].fallbacks).toBe(1);
       // Nunca en silencio: el desvío deja motivo, conexiones y duración.
       expect(d.logger.warn).toHaveBeenCalledWith(

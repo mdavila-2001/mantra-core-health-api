@@ -26,7 +26,7 @@ function build() {
   const filesService = { createLink: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new ProceduresService(
     em as any,
@@ -119,7 +119,7 @@ describe('ProceduresService · attachFile (ALV-033, odontología)', () => {
       createdAt: new Date('2026-01-01'),
     });
 
-    const resultado = await d.service.attachFile(
+    const result = await d.service.attachFile(
       'proc1',
       { fileId: 'file1' },
       actor,
@@ -130,7 +130,7 @@ describe('ProceduresService · attachFile (ALV-033, odontología)', () => {
       { ownerType: 'PROCEDURE', ownerId: 'proc1' },
       actor,
     );
-    expect(resultado.ownerId).toBe('proc1');
+    expect(result.ownerId).toBe('proc1');
   });
 
   it('rechaza adjuntar a un procedimiento que no existe', async () => {
@@ -151,14 +151,14 @@ describe('ProceduresService · MCH-007, adjuntar por id', () => {
       id: 'proc1',
       patientProfileId: 'paciente-ajeno',
     });
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
     await expect(
       d.service.attachFile('proc1', { fileId: 'f1' } as any, actor),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );

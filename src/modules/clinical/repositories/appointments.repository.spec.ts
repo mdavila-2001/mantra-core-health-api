@@ -22,14 +22,14 @@ import { Appointments } from '../entities';
  */
 describe('AppointmentsRepository', () => {
   /** Un `EntityManager` que sólo recuerda con qué lo llamaron. */
-  function emQueRecuerda() {
-    const llamadas: Record<string, unknown>[] = [];
+  function rememberingEm() {
+    const calls: Record<string, unknown>[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
-        create: (_entidad: unknown, datos: Record<string, unknown>) => {
-          llamadas.push(datos);
-          return datos;
+        create: (entity: unknown, data: Record<string, unknown>) => {
+          calls.push(data);
+          return data;
         },
       } as never,
     };
@@ -44,7 +44,7 @@ describe('AppointmentsRepository', () => {
 
   it('el canal de la atención llega a la fila', () => {
     // El que se perdía: el servicio lo mandaba y la columna quedaba NULL.
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     new AppointmentsRepository().create(em, {
       ...base,
@@ -55,7 +55,7 @@ describe('AppointmentsRepository', () => {
   });
 
   it('sin canal la columna queda sin valor: ausente no es presencial explícito', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     new AppointmentsRepository().create(em, base);
 
@@ -65,8 +65,8 @@ describe('AppointmentsRepository', () => {
   it('ningún campo del contrato se pierde en el traspaso', () => {
     // La red que atrapa al PRÓXIMO campo que alguien agregue al contrato y
     // olvide nombrar en `create()`. Si esta prueba falla, el mensaje dice cuál.
-    const { em, llamadas } = emQueRecuerda();
-    const entrada = {
+    const { em, llamadas } = rememberingEm();
+    const entry = {
       ...base,
       practitionerProfileId: 'hp-1',
       endAt: new Date('2026-09-10T17:00:00Z'),
@@ -74,18 +74,18 @@ describe('AppointmentsRepository', () => {
       channelConceptId: 'concepto-domicilio',
     };
 
-    new AppointmentsRepository().create(em, entrada);
+    new AppointmentsRepository().create(em, entry);
 
-    const fila = llamadas[0];
+    const row = llamadas[0];
     // `actorUserId` se traduce a dos columnas de auditoría y por eso se
     // comprueba aparte, no por su propio nombre.
-    for (const [campo, valor] of Object.entries(entrada)) {
-      expect({ campo, valor: fila[campo] }).toEqual({ campo, valor });
+    for (const [campo, valor] of Object.entries(entry)) {
+      expect({ campo, valor: row[campo] }).toEqual({ campo, valor });
     }
   });
 
   it('el actor queda como autor y como último editor', () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas } = rememberingEm();
 
     new AppointmentsRepository().create(em, { ...base, actorUserId: 'user-9' });
 
@@ -94,16 +94,16 @@ describe('AppointmentsRepository', () => {
   });
 
   it('crea la entidad de citas y no otra', () => {
-    const llamadas: unknown[] = [];
+    const calls: unknown[] = [];
     const em = {
-      create: (entidad: unknown, datos: unknown) => {
-        llamadas.push(entidad);
-        return datos;
+      create: (entity: unknown, data: unknown) => {
+        calls.push(entity);
+        return data;
       },
     } as never;
 
     new AppointmentsRepository().create(em, base);
 
-    expect(llamadas[0]).toBe(Appointments);
+    expect(calls[0]).toBe(Appointments);
   });
 });

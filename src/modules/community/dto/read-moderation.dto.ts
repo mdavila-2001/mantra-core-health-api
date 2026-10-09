@@ -13,8 +13,8 @@ const comoLista = ({ value }: { value: unknown }): unknown => {
   if (typeof value === 'string') {
     return value
       .split(',')
-      .map((parte) => parte.trim())
-      .filter((parte) => parte.length > 0);
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
   }
   return value;
 };

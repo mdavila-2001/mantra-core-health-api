@@ -70,7 +70,7 @@ export class NotificationsGateway implements OnGatewayConnection {
     try {
       const user = await this.wsAuth.authenticate(client);
       (client.data as GatewaySocketData).userId = user.id;
-      await client.join(this.salaDeUsuario(user.id));
+      await client.join(this.userRoom(user.id));
     } catch {
       // `CommunityMessagingGateway` ya desconecta un socket sin token válido;
       // no se repite acá para no cerrar dos veces la misma conexión.
@@ -89,7 +89,7 @@ export class NotificationsGateway implements OnGatewayConnection {
   ): void {
     try {
       this.server
-        ?.to(this.salaDeUsuario(recipientUserId))
+        ?.to(this.userRoom(recipientUserId))
         .emit('notification:new', notification);
     } catch (error) {
       this.logger.warn(
@@ -103,7 +103,7 @@ export class NotificationsGateway implements OnGatewayConnection {
     }
   }
 
-  private salaDeUsuario(userId: string): string {
+  private userRoom(userId: string): string {
     return `user:${userId}`;
   }
 }

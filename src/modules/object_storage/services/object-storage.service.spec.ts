@@ -137,7 +137,7 @@ function build() {
   // MCH-010: la política del expediente. Por defecto autoriza; las pruebas de
   // acceso la hacen negar para comprobar que el objeto deja de alcanzarse.
   const clinicalAccess = {
-    assertPuedeLeerHistoria: mockFn(() => Promise.resolve()),
+    assertCanReadHistory: mockFn(() => Promise.resolve()),
   };
   // MCH-020: cadena WORM donde queda todo acceso, con el resultado que tuvo.
   const auditTrail = { record: mockFn(() => Promise.resolve()) };
@@ -658,7 +658,7 @@ describe('ObjectStorageService', () => {
     }
 
     /** Emite y devuelve el token que viaja en la URL. */
-    async function emitir(d: ReturnType<typeof build>, body: any = dto) {
+    async function issue(d: ReturnType<typeof build>, body: any = dto) {
       const res: any = await d.service.issueSignedUrl(VERSION, body, actor);
       const token = String(res.url).split('/').pop() as string;
       return { res, token };
@@ -682,14 +682,14 @@ describe('ObjectStorageService', () => {
       it('does not serve the object of a patient the actor cannot read', async () => {
         const d = build();
         wire(d);
-        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+        d.clinicalAccess.assertCanReadHistory.mockRejectedValue(
           new Error('403'),
         );
 
         await expect(
           d.service.issueSignedUrl(VERSION, dto, actor),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).toHaveBeenCalledWith(
+        expect(d.clinicalAccess.assertCanReadHistory).toHaveBeenCalledWith(
           'pat-1',
           actor,
         );
@@ -707,18 +707,18 @@ describe('ObjectStorageService', () => {
             actor,
           ),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+        expect(d.clinicalAccess.assertCanReadHistory).not.toHaveBeenCalled();
       });
 
       it('answers a foreign object exactly like a missing one', async () => {
-        const ajeno = build();
-        wire(ajeno, { tenantId: '99999999-9999-9999-9999-999999999999' });
-        const inexistente = build();
-        wire(inexistente);
-        inexistente.storageRepo.findVersionById.mockResolvedValue(null);
+        const foreign = build();
+        wire(foreign, { tenantId: '99999999-9999-9999-9999-999999999999' });
+        const nonexistent = build();
+        wire(nonexistent);
+        nonexistent.storageRepo.findVersionById.mockResolvedValue(null);
 
-        const respuestas = await Promise.all(
-          [ajeno, inexistente].map((d) =>
+        const responses = await Promise.all(
+          [foreign, nonexistent].map((d) =>
             d.service
               .issueSignedUrl(VERSION, dto, actor)
               .then(() => null)
@@ -728,7 +728,7 @@ describe('ObjectStorageService', () => {
               })),
           ),
         );
-        expect(respuestas[0]).toEqual(respuestas[1]);
+        expect(responses[0]).toEqual(responses[1]);
       });
 
       it('does not authorise an object without a patient beyond its tenant', async () => {
@@ -738,16 +738,16 @@ describe('ObjectStorageService', () => {
         await d.service.issueSignedUrl(VERSION, dto, actor);
 
         // Sin historia no hay política clínica que preguntar; queda la custodia.
-        expect(d.clinicalAccess.assertPuedeLeerHistoria).not.toHaveBeenCalled();
+        expect(d.clinicalAccess.assertCanReadHistory).not.toHaveBeenCalled();
       });
 
       it('re-checks the patient policy when the link is redeemed', async () => {
         const d = build();
         wire(d);
         d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
         // El permiso se retira entre la emisión y el canje.
-        d.clinicalAccess.assertPuedeLeerHistoria.mockRejectedValue(
+        d.clinicalAccess.assertCanReadHistory.mockRejectedValue(
           new Error('403'),
         );
 
@@ -761,7 +761,7 @@ describe('ObjectStorageService', () => {
         const d = build();
         wire(d);
         d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
-        const { token } = await emitir(d, {
+        const { token } = await issue(d, {
           purposeOfUseCode: 'EMERGENCY',
         });
 
@@ -783,7 +783,7 @@ describe('ObjectStorageService', () => {
         const d = build();
         wire(d);
 
-        const { res, token } = await emitir(d);
+        const { res, token } = await issue(d);
 
         expect(res.providerUri).toBeUndefined();
         expect(JSON.stringify(res)).not.toContain('s3://');
@@ -799,7 +799,7 @@ describe('ObjectStorageService', () => {
         wire(d);
         const antes = Date.now();
 
-        const { res } = await emitir(d, { ...dto, expiresInSeconds: 86400 });
+        const { res } = await issue(d, { ...dto, expiresInSeconds: 86400 });
 
         expect(new Date(res.expiresAt).getTime()).toBeLessThanOrEqual(
           antes + 900 * 1000 + 1000,
@@ -811,7 +811,7 @@ describe('ObjectStorageService', () => {
         wire(d);
         const body = { pipe: mockFn() };
         d.reader.open.mockResolvedValue({ body, contentLength: 1024 });
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
 
         const content: any = await (d.service as any).redeemSignedAccess(
           VERSION,
@@ -833,9 +833,9 @@ describe('ObjectStorageService', () => {
       it('rejects the link once it expired', async () => {
         const d = build();
         wire(d);
-        const { res, token } = await emitir(d);
-        const vence = new Date(res.expiresAt).getTime();
-        jest.spyOn(Date, 'now').mockReturnValue(vence + 1000);
+        const { res, token } = await issue(d);
+        const expires = new Date(res.expiresAt).getTime();
+        jest.spyOn(Date, 'now').mockReturnValue(expires + 1000);
 
         await expect(
           (d.service as any).redeemSignedAccess(VERSION, token, actor),
@@ -846,7 +846,7 @@ describe('ObjectStorageService', () => {
       it('rejects the link for another version', async () => {
         const d = build();
         wire(d);
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
 
         await expect(
           (d.service as any).redeemSignedAccess(
@@ -861,19 +861,19 @@ describe('ObjectStorageService', () => {
       it('rejects a tampered signature or payload', async () => {
         const d = build();
         wire(d);
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
         const [payload, firma] = token.split('.');
-        const otraFirma = `${payload}.${firma.slice(0, -2)}${firma.endsWith('AA') ? 'BB' : 'AA'}`;
+        const otherSignature = `${payload}.${firma.slice(0, -2)}${firma.endsWith('AA') ? 'BB' : 'AA'}`;
         const claims = JSON.parse(
           Buffer.from(payload, 'base64url').toString('utf8'),
         );
-        const otroPayload = `${Buffer.from(
+        const otherPayload = `${Buffer.from(
           JSON.stringify({ ...claims, exp: claims.exp + 3600 }),
         ).toString('base64url')}.${firma}`;
 
-        for (const falso of [otraFirma, otroPayload, 'basura', '']) {
+        for (const fake of [otherSignature, otherPayload, 'basura', '']) {
           await expect(
-            (d.service as any).redeemSignedAccess(VERSION, falso, actor),
+            (d.service as any).redeemSignedAccess(VERSION, fake, actor),
           ).rejects.toBeInstanceOf(ResourceNotFoundException);
         }
         expect(d.reader.open).not.toHaveBeenCalled();
@@ -882,7 +882,7 @@ describe('ObjectStorageService', () => {
       it('rejects the link when redeemed by someone else', async () => {
         const d = build();
         wire(d);
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
 
         await expect(
           (d.service as any).redeemSignedAccess(VERSION, token, {
@@ -895,7 +895,7 @@ describe('ObjectStorageService', () => {
       it('re-checks the object on redemption: pending deletion is not served', async () => {
         const d = build();
         wire(d);
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
         d.storageRepo.findManifestById.mockResolvedValue({
           id: MANIFEST,
           tenantId: TENANT,
@@ -915,7 +915,7 @@ describe('ObjectStorageService', () => {
         d.reader.open.mockRejectedValue(
           new ObjectContentUnavailableError('PROVIDER_ERROR'),
         );
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
 
         await expect(
           (d.service as any).redeemSignedAccess(VERSION, token, actor),
@@ -1048,7 +1048,7 @@ describe('ObjectStorageService', () => {
         const d = build();
         wire(d);
         d.reader.open.mockResolvedValue({ body: { pipe: mockFn() } });
-        const { token } = await emitir(d);
+        const { token } = await issue(d);
 
         await (d.service as any).redeemSignedAccess(VERSION, token, actor);
 

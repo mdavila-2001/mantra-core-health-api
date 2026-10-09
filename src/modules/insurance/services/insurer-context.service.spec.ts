@@ -11,26 +11,26 @@ const CARRIER = 'carrier-1';
 const DENIED = 'No hay acceso a esta consola';
 const em = {} as never;
 
-const dueño = { id: 'u-owner', roles: ['USER'] } as any;
-const operadorDeOtroTenant = {
+const owner = { id: 'u-owner', roles: ['USER'] } as any;
+const otherOperatorTenant = {
   id: 'u-op-otro',
   roles: ['USER', 'INSURANCE_OPERATOR'],
   scopedRoles: { 'tenant-2': ['INSURANCE_OPERATOR'] },
 } as any;
-const operadorDeEsteTenant = {
+const thisOperatorTenant = {
   id: 'u-op',
   roles: ['USER', 'INSURANCE_OPERATOR'],
   scopedRoles: { [TENANT]: ['INSURANCE_OPERATOR'] },
 } as any;
 
-function build(opciones: { aseguradora?: boolean; administra?: boolean }) {
+function build(options: { aseguradora?: boolean; administra?: boolean }) {
   const catalogRepo = {
     findCarrierByTenantId: mockFn().mockResolvedValue(
-      opciones.aseguradora === false ? null : { id: CARRIER },
+      options.aseguradora === false ? null : { id: CARRIER },
     ),
   };
   const tenantAdministration = {
-    canAdminister: mockFn().mockResolvedValue(opciones.administra ?? false),
+    canAdminister: mockFn().mockResolvedValue(options.administra ?? false),
   };
   const service = new InsurerContextService(
     catalogRepo as never,
@@ -43,11 +43,11 @@ describe('InsurerContextService', () => {
   it('rechaza con el mensaje pedido si el tenant activo no es una aseguradora', async () => {
     const d = build({ aseguradora: false, administra: true });
 
-    const resultado = runWithTenant(TENANT, () =>
-      d.service.resolve(em, dueño, DENIED),
+    const result = runWithTenant(TENANT, () =>
+      d.service.resolve(em, owner, DENIED),
     );
 
-    await expect(resultado).rejects.toThrow(new ForbiddenException(DENIED));
+    await expect(result).rejects.toThrow(new ForbiddenException(DENIED));
     expect(d.catalogRepo.findCarrierByTenantId).toHaveBeenCalledWith(
       em,
       TENANT,
@@ -58,7 +58,7 @@ describe('InsurerContextService', () => {
     const d = build({ administra: true });
 
     await expect(
-      runWithTenant(TENANT, () => d.service.resolve(em, dueño, DENIED)),
+      runWithTenant(TENANT, () => d.service.resolve(em, owner, DENIED)),
     ).resolves.toEqual({ carrierId: CARRIER, tenantId: TENANT });
   });
 
@@ -67,7 +67,7 @@ describe('InsurerContextService', () => {
 
     await expect(
       runWithTenant(TENANT, () =>
-        d.service.resolve(em, operadorDeEsteTenant, DENIED),
+        d.service.resolve(em, thisOperatorTenant, DENIED),
       ),
     ).resolves.toEqual({ carrierId: CARRIER, tenantId: TENANT });
   });
@@ -77,7 +77,7 @@ describe('InsurerContextService', () => {
 
     await expect(
       runWithTenant(TENANT, () =>
-        d.service.resolve(em, operadorDeOtroTenant, DENIED),
+        d.service.resolve(em, otherOperatorTenant, DENIED),
       ),
     ).rejects.toThrow(new ForbiddenException(DENIED));
   });

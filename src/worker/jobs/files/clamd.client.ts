@@ -59,42 +59,42 @@ export class ClamdClient {
    * @returns `true` si contestó `PONG`.
    */
   async ping(): Promise<boolean> {
-    const respuesta = await this.conversar((socket) => {
+    const response = await this.converse((socket) => {
       socket.write('zPING\0');
     });
-    return respuesta.startsWith('PONG');
+    return response.startsWith('PONG');
   }
 
   /**
    * Escanea un contenido en memoria.
    *
-   * @param contenido - Los bytes tal como se guardaron.
+   * @param content - Los bytes tal como se guardaron.
    * @returns El veredicto del motor.
    * @throws Error si el demonio no responde, corta, o contesta algo que no es
    *   un veredicto: no hay veredicto por defecto.
    */
-  async scan(contenido: Buffer): Promise<ClamdVerdict> {
-    const trozo = this.options.chunkBytes ?? CHUNK_BYTES;
-    const respuesta = await this.conversar((socket) => {
+  async scan(content: Buffer): Promise<ClamdVerdict> {
+    const chunk = this.options.chunkBytes ?? CHUNK_BYTES;
+    const response = await this.converse((socket) => {
       socket.write('zINSTREAM\0');
-      for (let inicio = 0; inicio < contenido.length; inicio += trozo) {
-        const parte = contenido.subarray(inicio, inicio + trozo);
+      for (let start = 0; start < content.length; start += chunk) {
+        const part = content.subarray(start, start + chunk);
         const longitud = Buffer.alloc(4);
-        longitud.writeUInt32BE(parte.length, 0);
+        longitud.writeUInt32BE(part.length, 0);
         socket.write(longitud);
-        socket.write(parte);
+        socket.write(part);
       }
       // Longitud cero: fin del flujo. Sin esto clamd espera para siempre.
       socket.write(Buffer.alloc(4));
     });
 
-    if (/\bOK$/.test(respuesta)) return { clean: true };
+    if (/\bOK$/.test(response)) return { clean: true };
 
-    const encontrado = /^stream:\s+(.*)\s+FOUND$/.exec(respuesta);
-    if (encontrado) return { clean: false, signature: encontrado[1] };
+    const found = /^stream:\s+(.*)\s+FOUND$/.exec(response);
+    if (found) return { clean: false, signature: found[1] };
 
     throw new Error(
-      `clamd respondió algo que no es un veredicto: ${respuesta}`,
+      `clamd respondió algo que no es un veredicto: ${response}`,
     );
   }
 
@@ -104,38 +104,38 @@ export class ClamdClient {
    * El plazo cubre la conversación entera y no cada escritura: lo que interesa
    * es que un demonio colgado no retenga el tick del worker.
    */
-  private conversar(escribir: (socket: Socket) => void): Promise<string> {
-    return new Promise<string>((resolver, rechazar) => {
+  private converse(write: (socket: Socket) => void): Promise<string> {
+    return new Promise<string>((resolver, reject) => {
       const socket = connect({
         host: this.options.host,
         port: this.options.port,
       });
-      const partes: Buffer[] = [];
-      let resuelto = false;
+      const parts: Buffer[] = [];
+      let resolved = false;
 
-      const terminar = (error?: Error, respuesta?: string): void => {
-        if (resuelto) return;
-        resuelto = true;
+      const finish = (error?: Error, response?: string): void => {
+        if (resolved) return;
+        resolved = true;
         socket.destroy();
-        if (error) rechazar(error);
-        else resolver((respuesta ?? '').replace(/\0$/, '').trim());
+        if (error) reject(error);
+        else resolver((response ?? '').replace(/\0$/, '').trim());
       };
 
       socket.setTimeout(this.options.timeoutMs, () =>
-        terminar(
+        finish(
           new Error(`clamd no respondió en ${this.options.timeoutMs} ms`),
         ),
       );
-      socket.on('error', (error) => terminar(error));
-      socket.on('data', (parte) => partes.push(parte));
+      socket.on('error', (error) => finish(error));
+      socket.on('data', (part) => parts.push(part));
       socket.on('end', () =>
-        terminar(undefined, Buffer.concat(partes).toString('utf8')),
+        finish(undefined, Buffer.concat(parts).toString('utf8')),
       );
       socket.on('connect', () => {
         try {
-          escribir(socket);
+          write(socket);
         } catch (error) {
-          terminar(error as Error);
+          finish(error as Error);
         }
       });
     });

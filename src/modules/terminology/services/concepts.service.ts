@@ -692,11 +692,11 @@ export class ConceptsService {
     const requestedValueSetId = options.valueSetId;
     let scopingValueSetId = requestedValueSetId;
     if (scopingValueSetId === undefined && options.includeValueSets === true) {
-      const paraguas = await this.valueSetsRepo.findByInternalCode(
+      const umbrella = await this.valueSetsRepo.findByInternalCode(
         this.em,
         GLOSSARY_ALL_TERMS_CODE,
       );
-      scopingValueSetId = paraguas?.id;
+      scopingValueSetId = umbrella?.id;
     }
 
     // Una lectura del glosario (paraguas, categoría o etiqueta) se resuelve
@@ -721,12 +721,12 @@ export class ConceptsService {
     // catálogo entero sería lo peor que podría pasar.
     let effectiveIds = ids;
     if (scopingValueSetId !== undefined) {
-      const miembros =
+      const members =
         await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
           this.em,
           scopingValueSetId,
         );
-      if (miembros === null) {
+      if (members === null) {
         // Un `valueSetId` explícito que no resuelve es un pedido inválido de
         // quien llama: sigue siendo 404. El paraguas resuelto acá —sin que
         // nadie lo haya pedido— no lo es: si `glossary-all-terms` no tiene
@@ -742,10 +742,10 @@ export class ConceptsService {
       } else {
         effectiveIds =
           ids === undefined
-            ? miembros
+            ? members
             : // Con las dos listas presentes vale la intersección: cada filtro
               // acota, ninguno amplía.
-              miembros.filter((conceptId) => ids.includes(conceptId));
+              members.filter((conceptId) => ids.includes(conceptId));
         if (effectiveIds.length === 0) {
           return { items: [], count: 0, limit };
         }
@@ -856,12 +856,12 @@ export class ConceptsService {
       offset,
     );
 
-    const porId = await this.conceptsRepo.findByIds(this.em, page.ids);
+    const byId = await this.conceptsRepo.findByIds(this.em, page.ids);
     // El orden es el de la consulta: `findByIds` devuelve un mapa, no una
     // lista, y reordenar acá por `localeCompare` podría no coincidir con el
     // corte de la base y repetir o saltear un término entre páginas.
     const concepts = page.ids
-      .map((id) => porId.get(id))
+      .map((id) => byId.get(id))
       .filter((concept): concept is CatalogConcepts => concept !== undefined);
 
     const items = await this.buildSearchItems(concepts, options, true);
@@ -911,36 +911,36 @@ export class ConceptsService {
           : Promise.resolve([]),
       ]);
 
-    const miniaturaPorConcepto = new Map<string, string>();
+    const thumbnailByConcept = new Map<string, string>();
     for (const property of images) {
       const image = imageFromProperty(property.valueJson);
       const url = image?.thumbnailSource ?? image?.source;
-      if (url !== undefined) miniaturaPorConcepto.set(property.conceptId, url);
+      if (url !== undefined) thumbnailByConcept.set(property.conceptId, url);
     }
 
     return concepts.map((concept) => {
-      const texto = textos.get(concept.id);
-      const etiquetasDelConcepto = etiquetas?.get(concept.id);
-      const { category, tags } = splitCategoryAndTags(etiquetasDelConcepto);
-      const miniatura = miniaturaPorConcepto.get(concept.id);
+      const text = textos.get(concept.id);
+      const conceptLabels = etiquetas?.get(concept.id);
+      const { category, tags } = splitCategoryAndTags(conceptLabels);
+      const thumbnail = thumbnailByConcept.get(concept.id);
       return {
         conceptId: concept.id,
         code: concept.code,
         // Sin idioma pedido, `texto` es `undefined` y esto es literalmente lo
         // que devolvía antes. Con idioma, cae al original cuando falta la
         // designación: un término sin traducir se muestra igual, marcado.
-        display: texto?.display ?? concept.display,
-        definition: texto?.definition ?? concept.definition,
+        display: text?.display ?? concept.display,
+        definition: text?.definition ?? concept.definition,
         selectable: concept.selectable,
         codeSystemVersionId: concept.codeSystemVersionId,
         // Las claves ausentes no viajan en el JSON, así que sin `language` ni
         // `includeValueSets` el cuerpo es idéntico al de siempre.
         ...(options.language === undefined
           ? {}
-          : { translated: texto?.translated ?? false }),
+          : { translated: text?.translated ?? false }),
         ...(etiquetas === undefined
           ? {}
-          : { valueSets: toValueSetRefs(etiquetasDelConcepto) }),
+          : { valueSets: toValueSetRefs(conceptLabels) }),
         ...(glossaryScoped
           ? {
               slug: glossaryTexts.get(concept.id)?.slug,
@@ -955,9 +955,9 @@ export class ConceptsService {
               tags: tags.map((tag) => tag.name),
               relationsCount: (relationsBySource.get(concept.id) ?? []).length,
               status: glossaryStatusOf(concept.stateConceptId),
-              ...(miniatura === undefined
+              ...(thumbnail === undefined
                 ? {}
-                : { imageThumbnailUrl: miniatura }),
+                : { imageThumbnailUrl: thumbnail }),
             }
           : {}),
       };
@@ -1121,20 +1121,20 @@ export class ConceptsService {
       this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
       this.resolveGlossaryTexts([conceptId], language),
     ]);
-    const etiquetasDelConcepto = etiquetas.get(conceptId);
-    const esTerminoDelGlosario = (etiquetasDelConcepto ?? []).some(
+    const conceptLabels = etiquetas.get(conceptId);
+    const isGlossaryTerm = (conceptLabels ?? []).some(
       (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
     );
     const glossaryText = glossaryTexts.get(conceptId);
     if (
-      !esTerminoDelGlosario ||
+      !isGlossaryTerm ||
       concept.stateConceptId !== CONCEPTS.TERM_ACTIVE ||
       glossaryText?.slug === undefined
     ) {
       throw notFound();
     }
 
-    const { category } = splitCategoryAndTags(etiquetasDelConcepto);
+    const { category } = splitCategoryAndTags(conceptLabels);
     return {
       conceptId: concept.id,
       slug: glossaryText.slug,
@@ -1318,8 +1318,8 @@ export class ConceptsService {
       this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
     ]);
 
-    const etiquetasDelConcepto = etiquetas.get(conceptId);
-    const esTerminoDelGlosario = (etiquetasDelConcepto ?? []).some(
+    const conceptLabels = etiquetas.get(conceptId);
+    const isGlossaryTerm = (conceptLabels ?? []).some(
       (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
     );
     // El glosario público nunca deja pasar un borrador: es el «campo de
@@ -1327,7 +1327,7 @@ export class ConceptsService {
     // carril. Se responde 404 —no una ficha a medias— para que un borrador
     // sea indistinguible de un concepto inexistente desde este endpoint.
     if (
-      esTerminoDelGlosario &&
+      isGlossaryTerm &&
       concept.stateConceptId !== CONCEPTS.TERM_ACTIVE
     ) {
       throw new ResourceNotFoundException('Concepto no encontrado', {
@@ -1335,14 +1335,14 @@ export class ConceptsService {
       });
     }
 
-    const texto = textos.get(conceptId);
-    const display = texto?.display ?? concept.display;
-    const { category, tags } = splitCategoryAndTags(etiquetasDelConcepto);
-    const glossaryTexto = glossaryTexts.get(conceptId);
+    const text = textos.get(conceptId);
+    const display = text?.display ?? concept.display;
+    const { category, tags } = splitCategoryAndTags(conceptLabels);
+    const glossaryText = glossaryTexts.get(conceptId);
     const propiedades: Record<string, unknown> = Object.fromEntries(
       properties.map((property) => [property.propertyCode, property.valueJson]),
     );
-    const imagen = imageFromProperty(
+    const image = imageFromProperty(
       propiedades[GLOSSARY_IMAGE_PROPERTY_CODE],
       display,
     );
@@ -1351,13 +1351,13 @@ export class ConceptsService {
       conceptId: concept.id,
       code: concept.code,
       display,
-      definition: texto?.definition ?? concept.definition,
+      definition: text?.definition ?? concept.definition,
       selectable: concept.selectable,
       codeSystemVersionId: concept.codeSystemVersionId,
       ...(language === undefined
         ? {}
-        : { translated: texto?.translated ?? false }),
-      valueSets: toValueSetRefs(etiquetasDelConcepto),
+        : { translated: text?.translated ?? false }),
+      valueSets: toValueSetRefs(conceptLabels),
       synonyms: designations
         // La que ya se está mostrando arriba no es un sinónimo de sí misma:
         // repetirla bajo «también se le dice» no informa de nada.
@@ -1371,15 +1371,15 @@ export class ConceptsService {
             ? {}
             : { preferred: designation.preferred }),
         })),
-      ...(glossaryTexto?.slug === undefined
+      ...(glossaryText?.slug === undefined
         ? {}
-        : { slug: glossaryTexto.slug }),
-      ...(glossaryTexto?.clinicalDefinition === undefined
+        : { slug: glossaryText.slug }),
+      ...(glossaryText?.clinicalDefinition === undefined
         ? {}
-        : { clinicalDefinition: glossaryTexto.clinicalDefinition }),
-      ...(glossaryTexto?.plainSummary === undefined
+        : { clinicalDefinition: glossaryText.clinicalDefinition }),
+      ...(glossaryText?.plainSummary === undefined
         ? {}
-        : { plainSummary: glossaryTexto.plainSummary }),
+        : { plainSummary: glossaryText.plainSummary }),
       category,
       tags,
       relations: relations.get(conceptId) ?? [],
@@ -1391,7 +1391,7 @@ export class ConceptsService {
       // La imagen viaja además como campo propio, ya validada: sin URL, sin
       // atribución o sin licencia no se publica — una foto sin crédito no se
       // muestra, por linda que sea.
-      ...(imagen === undefined ? {} : { image: imagen }),
+      ...(image === undefined ? {} : { image: image }),
     };
   }
 
@@ -1447,31 +1447,31 @@ export class ConceptsService {
       ),
     ]);
 
-    const definicionPorConcepto = new Map<string, string>();
+    const definitionByConcept = new Map<string, string>();
     for (const property of definitions) {
       // `value_json` es jsonb: la definición se guarda como cadena JSON, pero un
       // valor cargado a mano podría ser cualquier cosa. Sólo se acepta texto —
       // pintar `[object Object]` en un glosario sería peor que no traducir.
       if (typeof property.valueJson === 'string') {
-        definicionPorConcepto.set(property.conceptId, property.valueJson);
+        definitionByConcept.set(property.conceptId, property.valueJson);
       }
     }
 
-    const textos = new Map<
+    const texts = new Map<
       string,
       { display?: string; definition?: string; translated: boolean }
     >();
     for (const conceptId of conceptIds) {
       const designation = designations.get(conceptId);
-      const definition = definicionPorConcepto.get(conceptId);
+      const definition = definitionByConcept.get(conceptId);
       if (designation === undefined && definition === undefined) continue;
-      textos.set(conceptId, {
+      texts.set(conceptId, {
         ...(designation === undefined ? {} : { display: designation.value }),
         ...(definition === undefined ? {} : { definition }),
         translated: designation !== undefined,
       });
     }
-    return textos;
+    return texts;
   }
 
   /**

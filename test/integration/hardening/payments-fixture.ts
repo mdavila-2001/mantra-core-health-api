@@ -61,7 +61,7 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
     },
 
     /** Intención con riesgo aprobado, lista para cobrar. */
-    async intencion(amount: string): Promise<string> {
+    async intent(amount: string): Promise<string> {
       const intent = await http()
         .post('/payments/intents')
         .set(bearer(ctx().adminToken))
@@ -136,7 +136,7 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
       return row.status_concept_id;
     },
 
-    async estadoIntencion(intentId: string): Promise<string> {
+    async intentState(intentId: string): Promise<string> {
       const [row] = await sql<{ status_concept_id: string }>(
         'select status_concept_id from payments.payment_intents where id = ?',
         [intentId],

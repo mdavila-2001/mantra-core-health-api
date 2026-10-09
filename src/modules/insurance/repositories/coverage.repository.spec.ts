@@ -17,7 +17,7 @@ import {
  * consulta con `$in`.
  */
 describe('CoverageRepository.findActiveCarriersByPatients', () => {
-  const COBERTURA = {
+  const COVERAGE = {
     id: 'cov-1',
     patientProfileId: 'paciente-1',
     insurancePlanId: 'plan-1',
@@ -25,25 +25,25 @@ describe('CoverageRepository.findActiveCarriersByPatients', () => {
     statusConceptId: INS.COVERAGE_ACTIVE,
   };
   const PLAN = { id: 'plan-1', insuranceProductId: 'prod-1' };
-  const PRODUCTO = { id: 'prod-1', insuranceCarrierId: 'carrier-1' };
-  const ASEGURADORA = { id: 'carrier-1', legalName: 'Seguros Illimani' };
+  const PRODUCT = { id: 'prod-1', insuranceCarrierId: 'carrier-1' };
+  const INSURER = { id: 'carrier-1', legalName: 'Seguros Illimani' };
 
   /** Un `EntityManager` que responde por tipo de entidad, en el orden real. */
-  function emConTablas(tablas: {
+  function emWithTables(tablas: {
     coberturas?: readonly unknown[];
     planes?: readonly unknown[];
     productos?: readonly unknown[];
     aseguradoras?: readonly unknown[];
   }) {
     return {
-      find: (entidad: unknown) => {
-        if (entidad === PatientCoverages)
+      find: (entity: unknown) => {
+        if (entity === PatientCoverages)
           return Promise.resolve(tablas.coberturas ?? []);
-        if (entidad === InsurancePlans)
+        if (entity === InsurancePlans)
           return Promise.resolve(tablas.planes ?? []);
-        if (entidad === InsuranceProducts)
+        if (entity === InsuranceProducts)
           return Promise.resolve(tablas.productos ?? []);
-        if (entidad === InsuranceCarriers)
+        if (entity === InsuranceCarriers)
           return Promise.resolve(tablas.aseguradoras ?? []);
         throw new Error('Entidad inesperada en el spec');
       },
@@ -52,79 +52,79 @@ describe('CoverageRepository.findActiveCarriersByPatients', () => {
 
   it('resuelve el nombre legal de la aseguradora siguiendo los tres saltos', async () => {
     const repo = new CoverageRepository();
-    const em = emConTablas({
-      coberturas: [COBERTURA],
+    const em = emWithTables({
+      coberturas: [COVERAGE],
       planes: [PLAN],
-      productos: [PRODUCTO],
-      aseguradoras: [ASEGURADORA],
+      productos: [PRODUCT],
+      aseguradoras: [INSURER],
     });
 
-    const resultado = await repo.findActiveCarriersByPatients(em, [
+    const result = await repo.findActiveCarriersByPatients(em, [
       'paciente-1',
     ]);
 
-    expect(resultado.get('paciente-1')).toBe('Seguros Illimani');
+    expect(result.get('paciente-1')).toBe('Seguros Illimani');
   });
 
   it('un paciente sin fila en patient_coverages no entra en el mapa — es Particular', async () => {
     const repo = new CoverageRepository();
-    const em = emConTablas({ coberturas: [] });
+    const em = emWithTables({ coberturas: [] });
 
-    const resultado = await repo.findActiveCarriersByPatients(em, [
+    const result = await repo.findActiveCarriersByPatients(em, [
       'paciente-sin-seguro',
     ]);
 
-    expect(resultado.has('paciente-sin-seguro')).toBe(false);
-    expect(resultado.size).toBe(0);
+    expect(result.has('paciente-sin-seguro')).toBe(false);
+    expect(result.size).toBe(0);
   });
 
   it('con la lista vacía, no hace ninguna consulta', async () => {
     const repo = new CoverageRepository();
-    let llamadas = 0;
+    let calls = 0;
     const em = {
       find: () => {
-        llamadas++;
+        calls++;
         return Promise.resolve([]);
       },
     } as never;
 
-    const resultado = await repo.findActiveCarriersByPatients(em, []);
+    const result = await repo.findActiveCarriersByPatients(em, []);
 
-    expect(resultado.size).toBe(0);
-    expect(llamadas).toBe(0);
+    expect(result.size).toBe(0);
+    expect(calls).toBe(0);
   });
 
   it('resuelve varios pacientes con UNA sola consulta por tabla', async () => {
     const repo = new CoverageRepository();
-    let llamadasAPlanes = 0;
-    const base = emConTablas({
+    let callsToPlans = 0;
+    const base = emWithTables({
       coberturas: [
-        COBERTURA,
-        { ...COBERTURA, id: 'cov-2', patientProfileId: 'paciente-2' },
+        COVERAGE,
+        { ...COVERAGE, id: 'cov-2', patientProfileId: 'paciente-2' },
       ],
       planes: [PLAN],
-      productos: [PRODUCTO],
-      aseguradoras: [ASEGURADORA],
+      productos: [PRODUCT],
+      aseguradoras: [INSURER],
     });
     const em = {
-      find: (entidad: unknown, ...resto: unknown[]) => {
-        if (entidad === InsurancePlans) llamadasAPlanes++;
+      find: (entity: unknown, ...rest: unknown[]) => {
+        if (entity === InsurancePlans) callsToPlans++;
         return (base as { find: (...a: unknown[]) => Promise<unknown> }).find(
-          entidad,
-          ...resto,
+          entity,
+          ...rest,
         );
       },
     } as never;
 
-    const resultado = await repo.findActiveCarriersByPatients(em, [
+    const result = await repo.findActiveCarriersByPatients(em, [
       'paciente-1',
       'paciente-2',
     ]);
 
-    expect(resultado.get('paciente-1')).toBe('Seguros Illimani');
-    expect(resultado.get('paciente-2')).toBe('Seguros Illimani');
+    expect(result.get('paciente-1')).toBe('Seguros Illimani');
+    expect(result.get('paciente-2')).toBe('Seguros Illimani');
     // Dos pacientes con el MISMO plan: una sola consulta a `insurance_plans`,
     // no una por paciente.
-    expect(llamadasAPlanes).toBe(1);
+    expect(callsToPlans).toBe(1);
   });
 });

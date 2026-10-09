@@ -13,22 +13,22 @@ const user = { id: 'u1', roles: [] } as any;
 
 /** Un socket doblado: salas, `data` y lo que emite a otros. */
 function socket(rooms: string[] = [], profileIds: string[] = []) {
-  const emitidoAOtros = mockFn();
+  const issuedToOther = mockFn();
   const client = {
     id: 's-1',
     rooms: new Set(rooms),
     data: { user, profileIds: new Set(profileIds) },
-    join: mockFn(async (sala: string) => {
-      client.rooms.add(sala);
+    join: mockFn(async (room: string) => {
+      client.rooms.add(room);
     }),
-    leave: mockFn(async (sala: string) => {
-      client.rooms.delete(sala);
+    leave: mockFn(async (room: string) => {
+      client.rooms.delete(room);
     }),
     emit: mockFn(),
-    to: mockFn(() => ({ emit: emitidoAOtros })),
+    to: mockFn(() => ({ emit: issuedToOther })),
     disconnect: mockFn(),
   };
-  return { client, emitidoAOtros };
+  return { client, emitidoAOtros: issuedToOther };
 }
 
 /**
@@ -55,8 +55,8 @@ function build() {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
   };
   const presence = {
-    marcarEnLinea: mockFn().mockResolvedValue(true),
-    marcarDesconectado: mockFn().mockResolvedValue(
+    markInLine: mockFn().mockResolvedValue(true),
+    markDisconnected: mockFn().mockResolvedValue(
       new Date('2026-09-09T10:00:00Z'),
     ),
   };
@@ -105,19 +105,19 @@ describe('CommunityMessagingGateway', () => {
 
     it('ignora a quien no se unió al hilo o dice ser otro perfil', () => {
       const d = build();
-      const noUnido = socket([], ['p-1']);
-      d.gateway.handleTyping(noUnido.client as any, {
+      const notJoined = socket([], ['p-1']);
+      d.gateway.handleTyping(notJoined.client as any, {
         conversationId: 'c-1',
         profileId: 'p-1',
       });
-      expect(noUnido.emitidoAOtros).not.toHaveBeenCalled();
+      expect(notJoined.emitidoAOtros).not.toHaveBeenCalled();
 
-      const otroPerfil = socket(['conversation:c-1'], ['p-1']);
-      d.gateway.handleTyping(otroPerfil.client as any, {
+      const otherProfile = socket(['conversation:c-1'], ['p-1']);
+      d.gateway.handleTyping(otherProfile.client as any, {
         conversationId: 'c-1',
         profileId: 'p-ajeno',
       });
-      expect(otroPerfil.emitidoAOtros).not.toHaveBeenCalled();
+      expect(otherProfile.emitidoAOtros).not.toHaveBeenCalled();
     });
 
     it('salir del hilo avisa que dejó de escribir', async () => {
@@ -146,7 +146,7 @@ describe('CommunityMessagingGateway', () => {
       await d.gateway.handleJoinInbox(client as any, { profileId: 'p-1' });
 
       expect(client.join).toHaveBeenCalledWith('profile:p-1');
-      expect(d.presence.marcarEnLinea).toHaveBeenCalledWith('p-1');
+      expect(d.presence.markInLine).toHaveBeenCalledWith('p-1');
       expect(d.server.to).toHaveBeenCalledWith([
         'conversation:c-1',
         'conversation:c-2',
@@ -160,7 +160,7 @@ describe('CommunityMessagingGateway', () => {
 
     it('renovar una presencia que ya existía no avisa nada', async () => {
       const d = build();
-      d.presence.marcarEnLinea.mockResolvedValue(false);
+      d.presence.markInLine.mockResolvedValue(false);
       const { client } = socket();
 
       await d.gateway.handleJoinInbox(client as any, { profileId: 'p-1' });
@@ -179,7 +179,7 @@ describe('CommunityMessagingGateway', () => {
         code: 'NOT_OWN_PROFILE',
         event: 'join:inbox',
       });
-      expect(d.presence.marcarEnLinea).not.toHaveBeenCalled();
+      expect(d.presence.markInLine).not.toHaveBeenCalled();
     });
 
     it('desconectar el último socket del perfil lo deja fuera de línea y avisa', async () => {
@@ -188,7 +188,7 @@ describe('CommunityMessagingGateway', () => {
 
       await d.gateway.handleDisconnect(client as any);
 
-      expect(d.presence.marcarDesconectado).toHaveBeenCalledWith('p-1');
+      expect(d.presence.markDisconnected).toHaveBeenCalledWith('p-1');
       expect(d.serverEmit).toHaveBeenCalledWith('profile:presence', {
         profileId: 'p-1',
         online: false,
@@ -203,18 +203,18 @@ describe('CommunityMessagingGateway', () => {
 
       await d.gateway.handleDisconnect(client as any);
 
-      expect(d.presence.marcarDesconectado).not.toHaveBeenCalled();
+      expect(d.presence.markDisconnected).not.toHaveBeenCalled();
       expect(d.serverEmit).not.toHaveBeenCalled();
     });
 
     it('el ping renueva; si había caducado, vuelve a avisar', async () => {
       const d = build();
-      d.presence.marcarEnLinea.mockResolvedValueOnce(true);
+      d.presence.markInLine.mockResolvedValueOnce(true);
       const { client } = socket([], ['p-1']);
 
       await d.gateway.handlePresencePing(client as any);
 
-      expect(d.presence.marcarEnLinea).toHaveBeenCalledWith('p-1');
+      expect(d.presence.markInLine).toHaveBeenCalledWith('p-1');
       expect(d.serverEmit).toHaveBeenCalledWith(
         'profile:presence',
         expect.objectContaining({ profileId: 'p-1', online: true }),
@@ -225,14 +225,14 @@ describe('CommunityMessagingGateway', () => {
   describe('empujes tras el commit (F4.5 / F4.6)', () => {
     it('editar, borrar y fijar van al hilo y a la bandeja de cada destinatario', () => {
       const d = build();
-      const mensaje = {
+      const message = {
         id: 'm-1',
         conversationId: 'c-1',
         senderProfileId: 'p-1',
         contentTypeConceptId: 'ct',
       };
 
-      d.gateway.emitMessageUpdated(mensaje, ['p-2']);
+      d.gateway.emitMessageUpdated(message, ['p-2']);
       d.gateway.emitMessageDeleted(
         { conversationId: 'c-1', messageId: 'm-1', deletedAt: new Date() },
         ['p-2'],
@@ -246,7 +246,7 @@ describe('CommunityMessagingGateway', () => {
         'profile:p-2',
       ]);
       expect(
-        d.serverEmit.mock.calls.map((llamada: unknown[]) => llamada[0]),
+        d.serverEmit.mock.calls.map((call: unknown[]) => call[0]),
       ).toEqual([
         'conversation:message:updated',
         'conversation:message:deleted',

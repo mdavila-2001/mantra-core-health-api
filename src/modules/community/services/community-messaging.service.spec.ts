@@ -53,7 +53,7 @@ function build() {
   // El aviso in-app del carril P1, doblado: enviar un mensaje se prueba acá,
   // avisarlo se prueba en su propio servicio.
   const messageNotifications = {
-    mensajeNuevo: mockFn().mockResolvedValue(undefined),
+    newMessage: mockFn().mockResolvedValue(undefined),
   };
   // El gateway WS, doblado: se prueba que se llame, no lo que hace socket.io.
   const gateway = {
@@ -73,7 +73,7 @@ function build() {
   // solo se prueba en su propio servicio. Por defecto no contesta nadie, que
   // es el caso de todo perfil que no la configuró.
   const autoReply = {
-    textoParaResponder: mockFn().mockResolvedValue(null),
+    textForResponder: mockFn().mockResolvedValue(null),
   };
   const attachableFiles = {
     assertUsableBy: mockFn().mockResolvedValue({}),
@@ -184,9 +184,9 @@ describe('CommunityMessagingService', () => {
         targetTypeConceptId: COMM.PROFILE_TARGET_USER,
       },
     ],
-  ])('rechaza un destinatario %s', async (_caso, perfil) => {
+  ])('rechaza un destinatario %s', async (_caso, profile) => {
     const d = build();
-    d.profilesRepo.findById.mockResolvedValue(perfil);
+    d.profilesRepo.findById.mockResolvedValue(profile);
 
     await expect(
       d.service.createConversation(
@@ -394,7 +394,7 @@ describe('CommunityMessagingService', () => {
       ]);
 
       await expect(
-        (d.service as any).enviar(
+        (d.service as any).send(
           'conv1',
           { senderProfileId: 'p1', attachmentFileId: 'f-1' },
           undefined,
@@ -629,7 +629,7 @@ describe('CommunityMessagingService', () => {
   /* --- F4.4 · favorita, fijada, archivada ---------------------------------- */
 
   describe('updateParticipant (F4.4)', () => {
-    const participante = () => ({
+    const participant = () => ({
       id: 'part-1',
       isFavorite: false,
       isPinned: false,
@@ -639,7 +639,7 @@ describe('CommunityMessagingService', () => {
 
     it('cambia sólo lo que viene y devuelve cómo quedó', async () => {
       const d = build();
-      const p = participante();
+      const p = participant();
       d.conversationsRepo.findActiveParticipant.mockResolvedValue(p);
 
       const res = await d.service.updateParticipant(
@@ -664,23 +664,23 @@ describe('CommunityMessagingService', () => {
 
     it('archivar quita el favorito; desarchivar limpia la fecha', async () => {
       const d = build();
-      const p = { ...participante(), isFavorite: true };
+      const p = { ...participant(), isFavorite: true };
       d.conversationsRepo.findActiveParticipant.mockResolvedValue(p);
 
-      const archivada = await d.service.updateParticipant(
+      const archived = await d.service.updateParticipant(
         'conv1',
         { profileId: 'p1', archived: true },
         actor,
       );
-      expect(archivada.isFavorite).toBe(false);
-      expect(archivada.archivedAt).toBeInstanceOf(Date);
+      expect(archived.isFavorite).toBe(false);
+      expect(archived.archivedAt).toBeInstanceOf(Date);
 
-      const devuelta = await d.service.updateParticipant(
+      const returned = await d.service.updateParticipant(
         'conv1',
         { profileId: 'p1', archived: false },
         actor,
       );
-      expect(devuelta.archivedAt).toBeNull();
+      expect(returned.archivedAt).toBeNull();
     });
 
     it('404 si no es participante activo', async () => {
@@ -702,7 +702,7 @@ describe('CommunityMessagingService', () => {
      * aceptó el servidor lo tiene**: es lo que le pone `sendMessage` al
      * confirmarlo, y es contra eso que se mide la ventana de edición.
      */
-    const mensaje = (extra: Record<string, unknown> = {}): any => ({
+    const message = (extra: Record<string, unknown> = {}): any => ({
       id: 'm1',
       conversationId: 'conv1',
       senderProfileId: 'p1',
@@ -715,8 +715,8 @@ describe('CommunityMessagingService', () => {
     });
 
     /** Hace `minutos` que se mandó. */
-    const haceMinutos = (minutos: number): Date =>
-      new Date(Date.now() - minutos * 60_000);
+    const minutesAgo = (minutes: number): Date =>
+      new Date(Date.now() - minutes * 60_000);
 
     it('edita un mensaje propio, lo marca editado y lo empuja actualizado', async () => {
       const d = build();
@@ -724,7 +724,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje(),
+        message(),
       );
       d.conversationsRepo.findParticipants.mockResolvedValue([
         { participantProfileId: 'p1' },
@@ -757,7 +757,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje({ sentAt: haceMinutos(6) }),
+        message({ sentAt: minutesAgo(6) }),
       );
 
       await expect(
@@ -778,7 +778,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje({ sentAt: haceMinutos(4) }),
+        message({ sentAt: minutesAgo(4) }),
       );
       d.conversationsRepo.findParticipants.mockResolvedValue([
         { participantProfileId: 'p1' },
@@ -803,7 +803,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje({ sentAt: null }),
+        message({ sentAt: null }),
       );
 
       await expect(
@@ -821,7 +821,7 @@ describe('CommunityMessagingService', () => {
       // tiene plazo; retirarlo, no — y la bitácora del mensaje sobrevive porque
       // el borrado es lógico.
       const d = build();
-      const m = mensaje({ sentAt: haceMinutos(600) });
+      const m = message({ sentAt: minutesAgo(600) });
       d.conversationsRepo.findActiveParticipant.mockResolvedValue({
         id: 'part',
       });
@@ -847,7 +847,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje({ senderProfileId: 'p-otro' }),
+        message({ senderProfileId: 'p-otro' }),
       );
 
       await expect(
@@ -882,7 +882,7 @@ describe('CommunityMessagingService', () => {
 
     it('elimina de forma lógica, suelta el fijado si era ése y avisa las dos cosas', async () => {
       const d = build();
-      const m = mensaje();
+      const m = message();
       const conversation = {
         id: 'conv1',
         pinnedMessageId: 'm1',
@@ -925,7 +925,7 @@ describe('CommunityMessagingService', () => {
         id: 'part',
       });
       d.conversationsRepo.findMessageInConversation.mockResolvedValue(
-        mensaje({ deletedAt: new Date() }),
+        message({ deletedAt: new Date() }),
       );
       await expect(
         d.service.editMessage(

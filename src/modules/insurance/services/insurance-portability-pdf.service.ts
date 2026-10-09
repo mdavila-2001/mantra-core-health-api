@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
 import {
-  dibujarMarcaAlovida,
-  altoDeMarca,
+  drawBrandAlovida,
+  brandHeight,
 } from '../../clinical/services/alovida-mark';
-import { dibujarQr } from '../../clinical/services/prescription-qr';
+import { drawQr } from '../../clinical/services/prescription-qr';
 import type { InsurancePortabilityReportDto } from '../dto/insurance-portability.dto';
 
 /**
@@ -164,7 +164,7 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
 
     try {
       const markWidth = 28;
-      dibujarMarcaAlovida(doc, {
+      drawBrandAlovida(doc, {
         x: PAGE_MARGIN,
         y: PAGE_MARGIN,
         ancho: markWidth,
@@ -184,7 +184,7 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
         );
 
       doc.y =
-        PAGE_MARGIN + Math.max(altoDeMarca(markWidth), TITLE_FONT_SIZE) + 24;
+        PAGE_MARGIN + Math.max(brandHeight(markWidth), TITLE_FONT_SIZE) + 24;
       doc.x = PAGE_MARGIN;
 
       section(doc, 'Afiliado', sheet.member);
@@ -223,7 +223,7 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
       const qrSide = 70;
       const qrX = doc.page.width - PAGE_MARGIN - qrSide;
       const qrY = doc.page.height - PAGE_MARGIN - 90;
-      dibujarQr(doc, sheet.qrUrl, qrX, qrY, qrSide);
+      drawQr(doc, sheet.qrUrl, qrX, qrY, qrSide);
 
       doc
         .font('Courier')

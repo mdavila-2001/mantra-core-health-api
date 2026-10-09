@@ -19,12 +19,12 @@ const CARRIER = '22222222-2222-2222-2222-222222222222';
 const CLAIM = '33333333-3333-3333-3333-333333333333';
 const COVERAGE = '44444444-4444-4444-4444-444444444444';
 const PERSON = '55555555-5555-5555-5555-555555555555';
-const MONEDA = '66666666-6666-6666-6666-666666666666';
+const CURRENCY = '66666666-6666-6666-6666-666666666666';
 const ESTADO = '77777777-7777-7777-7777-777777777777';
 const PRACTICE = '88888888-8888-8888-8888-888888888888';
 
 /** Un reclamo mínimo, con lo que la lectura mira de verdad. */
-function reclamo(over: Record<string, unknown> = {}) {
+function claim(over: Record<string, unknown> = {}) {
   return {
     id: CLAIM,
     claimIdentifier: 'CLM-1',
@@ -33,7 +33,7 @@ function reclamo(over: Record<string, unknown> = {}) {
     billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
     billingProviderEntityId: PRACTICE,
     statusConceptId: ESTADO,
-    currencyConceptId: MONEDA,
+    currencyConceptId: CURRENCY,
     totalAmount: '1615.125',
     submittedAt: new Date('2026-05-01T12:00:00.000Z'),
     ...over,
@@ -46,8 +46,8 @@ function reclamo(over: Record<string, unknown> = {}) {
  */
 function repo(over: Record<string, unknown> = {}) {
   return {
-    findClaimsPage: mockFn().mockResolvedValue([reclamo()]),
-    findClaimInScope: mockFn().mockResolvedValue(reclamo()),
+    findClaimsPage: mockFn().mockResolvedValue([claim()]),
+    findClaimInScope: mockFn().mockResolvedValue(claim()),
     findCarriersByIds: mockFn().mockResolvedValue([
       { id: CARRIER, legalName: 'Aseguradora X' },
     ]),
@@ -83,15 +83,15 @@ function practiceLookup(practiceIds: string[] = [PRACTICE]) {
 
 /** Doble del `EntityManager`: `fork`, `find` y `findOne`. */
 function em(
-  porEntidad: (nombre: string) => unknown[] = () => [],
-  porEntidadUno: (nombre: string, where: any) => unknown = () => undefined,
+  byEntity: (nombre: string) => unknown[] = () => [],
+  byEntityOne: (nombre: string, where: any) => unknown = () => undefined,
 ) {
   const fork = {
-    find: jest.fn((entidad: { name?: string }) =>
-      Promise.resolve(porEntidad(entidad.name ?? '')),
+    find: jest.fn((entity: { name?: string }) =>
+      Promise.resolve(byEntity(entity.name ?? '')),
     ),
-    findOne: jest.fn((entidad: { name?: string }, where: any) =>
-      Promise.resolve(porEntidadUno(entidad.name ?? '', where)),
+    findOne: jest.fn((entity: { name?: string }, where: any) =>
+      Promise.resolve(byEntityOne(entity.name ?? '', where)),
     ),
   };
   return { fork: () => fork } as never;
@@ -114,19 +114,19 @@ function catalogRepo(over: Record<string, unknown> = {}) {
 }
 
 /** Arma el servicio con sus cinco dependencias dobladas. */
-function servicioCon(
+function serviceWith(
   r: Record<string, unknown>,
-  practicas: string[] = [PRACTICE],
+  practices: string[] = [PRACTICE],
   detector: Record<string, unknown> = duplicateStudyDetector(),
-  entidadManager: unknown = em(),
-  catalogo: Record<string, unknown> = catalogRepo(),
+  entityManager: unknown = em(),
+  catalog: Record<string, unknown> = catalogRepo(),
 ) {
   return new ClaimsReadService(
-    entidadManager as never,
+    entityManager as never,
     r as never,
-    practiceLookup(practicas) as never,
+    practiceLookup(practices) as never,
     detector as never,
-    catalogo as never,
+    catalog as never,
   );
 }
 
@@ -134,7 +134,7 @@ function servicioCon(
  * Corre dentro de un contexto de tenant: `requireTenantId()` lanza sin él, que
  * es exactamente lo que tiene que pasar y no lo que se está probando acá.
  */
-function conTenant<T>(fn: () => Promise<T>): Promise<T> {
+function withTenant<T>(fn: () => Promise<T>): Promise<T> {
   return runWithTenant(TENANT, fn);
 }
 
@@ -144,17 +144,17 @@ function conTenant<T>(fn: () => Promise<T>): Promise<T> {
  * `rejects.toThrow` comprueba el tipo; acá hace falta el objeto para verificar
  * que dos rechazos distintos producen **el mismo cuerpo** (AC-16-14).
  */
-async function rechazoDe(
+async function rejection(
   fn: () => Promise<unknown>,
 ): Promise<ForbiddenException> {
-  let capturado: unknown;
+  let captured: unknown;
   try {
     await fn();
   } catch (error) {
-    capturado = error;
+    captured = error;
   }
-  expect(capturado).toBeInstanceOf(ForbiddenException);
-  return capturado as ForbiddenException;
+  expect(captured).toBeInstanceOf(ForbiddenException);
+  return captured as ForbiddenException;
 }
 
 describe('ClaimsReadService', () => {
@@ -162,7 +162,7 @@ describe('ClaimsReadService', () => {
     it('acota el listado a las prácticas de la organización, no a sus aseguradoras', async () => {
       const r = repo();
 
-      await conTenant(() => servicioCon(r).listClaims({}));
+      await withTenant(() => serviceWith(r).listClaims({}));
 
       // La lista que llega al repositorio son PRÁCTICAS. Antes eran las
       // aseguradoras del tenant, que es el otro lado del mismo dato: desde un
@@ -183,7 +183,7 @@ describe('ClaimsReadService', () => {
       // Una organización sin prácticas no envió ninguna solicitud: la pantalla
       // no es suya. Una lista vacía se leería como «no hay solicitudes».
       await expect(
-        conTenant(() => servicioCon(r, []).listClaims({})),
+        withTenant(() => serviceWith(r, []).listClaims({})),
       ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimsPage).not.toHaveBeenCalled();
     });
@@ -192,7 +192,7 @@ describe('ClaimsReadService', () => {
       const r = repo();
 
       await expect(
-        conTenant(() => servicioCon(r, []).getClaim(CLAIM)),
+        withTenant(() => serviceWith(r, []).getClaim(CLAIM)),
       ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimInScope).not.toHaveBeenCalled();
     });
@@ -201,12 +201,12 @@ describe('ClaimsReadService', () => {
   describe('alcance de la aseguradora (bandeja de solicitudes recibidas)', () => {
     it('cuando el tenant es aseguradora, acota por insuranceCarrierId sin requerir prácticas', async () => {
       const r = repo();
-      const catalogo = catalogRepo({
+      const catalog = catalogRepo({
         findCarrierByTenantId: mockFn().mockResolvedValue({ id: CARRIER }),
       });
 
-      await conTenant(() =>
-        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).listClaims(
+      await withTenant(() =>
+        serviceWith(r, [], duplicateStudyDetector(), em(), catalog).listClaims(
           {},
         ),
       );
@@ -224,12 +224,12 @@ describe('ClaimsReadService', () => {
 
     it('la aseguradora puede consultar el detalle de sus solicitudes recibidas', async () => {
       const r = repo();
-      const catalogo = catalogRepo({
+      const catalog = catalogRepo({
         findCarrierByTenantId: mockFn().mockResolvedValue({ id: CARRIER }),
       });
 
-      const res = await conTenant(() =>
-        servicioCon(r, [], duplicateStudyDetector(), em(), catalogo).getClaim(
+      const res = await withTenant(() =>
+        serviceWith(r, [], duplicateStudyDetector(), em(), catalog).getClaim(
           CLAIM,
         ),
       );
@@ -247,16 +247,16 @@ describe('ClaimsReadService', () => {
 
   describe('listClaims', () => {
     it('descarta la fila de sondeo y emite cursor sólo si hay más', async () => {
-      const filas = Array.from({ length: 3 }, (_, i) =>
-        reclamo({
+      const rows = Array.from({ length: 3 }, (_, i) =>
+        claim({
           id: `0000000${i}-0000-0000-0000-000000000000`,
           claimIdentifier: `CLM-${i}`,
         }),
       );
-      const r = repo({ findClaimsPage: mockFn().mockResolvedValue(filas) });
+      const r = repo({ findClaimsPage: mockFn().mockResolvedValue(rows) });
 
-      const pagina = await conTenant(() =>
-        servicioCon(r).listClaims({ limit: 2 }),
+      const pagina = await withTenant(() =>
+        serviceWith(r).listClaims({ limit: 2 }),
       );
 
       expect(pagina.items).toHaveLength(2);
@@ -274,11 +274,11 @@ describe('ClaimsReadService', () => {
 
     it('no emite cursor en la última página', async () => {
       const r = repo({
-        findClaimsPage: mockFn().mockResolvedValue([reclamo()]),
+        findClaimsPage: mockFn().mockResolvedValue([claim()]),
       });
 
-      const pagina = await conTenant(() =>
-        servicioCon(r).listClaims({ limit: 25 }),
+      const pagina = await withTenant(() =>
+        serviceWith(r).listClaims({ limit: 25 }),
       );
 
       expect(pagina.nextCursor).toBeNull();
@@ -289,13 +289,13 @@ describe('ClaimsReadService', () => {
       // pantalla es suya y todavía no presentó nada.
       const r = repo({ findClaimsPage: mockFn().mockResolvedValue([]) });
 
-      const pagina = await conTenant(() => servicioCon(r).listClaims({}));
+      const pagina = await withTenant(() => serviceWith(r).listClaims({}));
 
       expect(pagina).toEqual({ items: [], nextCursor: null });
     });
 
     it('deja el total aprobado en null cuando no hay dictamen', async () => {
-      const pagina = await conTenant(() => servicioCon(repo()).listClaims({}));
+      const pagina = await withTenant(() => serviceWith(repo()).listClaims({}));
 
       // No es cero: «todavía no contestaron» y «denegaron todo» son cosas
       // distintas, y esta es la línea que lo fija.
@@ -309,7 +309,7 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const pagina = await conTenant(() => servicioCon(r).listClaims({}));
+      const pagina = await withTenant(() => serviceWith(r).listClaims({}));
 
       expect(pagina.items[0].hasOpenDispute).toBe(true);
     });
@@ -322,8 +322,8 @@ describe('ClaimsReadService', () => {
       // AC-16-14: 403, y sin `details` — si el id viajara ahí, «no es tuya» y
       // «no existe» dejarían de ser indistinguibles. Se mira el cuerpo que el
       // filtro va a serializar, no la instancia.
-      const rechazo = await rechazoDe(() =>
-        conTenant(() => servicioCon(r).getClaim(CLAIM)),
+      const rechazo = await rejection(() =>
+        withTenant(() => serviceWith(r).getClaim(CLAIM)),
       );
 
       expect(rechazo.getStatus()).toBe(403);
@@ -335,27 +335,27 @@ describe('ClaimsReadService', () => {
       // Los dos casos llegan igual al servicio —el repositorio devuelve `null`
       // por alcance o por inexistencia— y tienen que salir igual. Se comparan
       // status y mensaje, que es lo que el cliente puede observar.
-      const ajena = repo({
+      const foreign = repo({
         findClaimInScope: mockFn().mockResolvedValue(null),
       });
-      const inexistente = repo({
+      const nonexistent = repo({
         findClaimInScope: mockFn().mockResolvedValue(null),
       });
 
-      const una = await rechazoDe(() =>
-        conTenant(() => servicioCon(ajena).getClaim(CLAIM)),
+      const una = await rejection(() =>
+        withTenant(() => serviceWith(foreign).getClaim(CLAIM)),
       );
-      const otra = await rechazoDe(() =>
-        conTenant(() =>
-          servicioCon(inexistente).getClaim(
+      const other = await rejection(() =>
+        withTenant(() =>
+          serviceWith(nonexistent).getClaim(
             '99999999-9999-9999-9999-999999999999',
           ),
         ),
       );
 
-      expect(una.getStatus()).toBe(otra.getStatus());
-      expect(una.message).toBe(otra.message);
-      expect(una.getResponse()).toEqual(otra.getResponse());
+      expect(una.getStatus()).toBe(other.getStatus());
+      expect(una.message).toBe(other.message);
+      expect(una.getResponse()).toEqual(other.getResponse());
     });
 
     it('suma los ítems en el servidor y no toca el total declarado', async () => {
@@ -382,13 +382,13 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
       // Igualdad de cadena, no de número: es el contrato de AC-16-6.
-      expect(detalle.lineBilledTotal.amount).toBe('1615.125');
-      expect(detalle.header.billedTotal.amount).toBe('1615.125');
+      expect(detail.lineBilledTotal.amount).toBe('1615.125');
+      expect(detail.header.billedTotal.amount).toBe('1615.125');
       // Sin dictamen por ítem, el aprobado de la suma es ausencia y no cero.
-      expect(detalle.lineApprovedTotal).toBeNull();
+      expect(detail.lineApprovedTotal).toBeNull();
     });
 
     it('toma como vigente la versión que nadie sucede, no la de número más alto', async () => {
@@ -415,10 +415,10 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.adjudication?.id).toBe('v2');
-      expect(detalle.adjudicationHistory).toHaveLength(2);
+      expect(detail.adjudication?.id).toBe('v2');
+      expect(detail.adjudicationHistory).toHaveLength(2);
     });
 
     it('no afirma el tipo de documento cuando sólo hay una referencia de texto', async () => {
@@ -434,12 +434,12 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.lines[0].reference).toBe('ORD-2026-77');
+      expect(detail.lines[0].reference).toBe('ORD-2026-77');
       // `supporting_clinical_reference` es un varchar sin integridad
       // referencial: no dice qué es, así que el tipo queda sin declarar.
-      expect(detalle.lines[0].referenceType).toBeNull();
+      expect(detail.lines[0].referenceType).toBeNull();
     });
 
     it('declara el tipo cuando sí hay clave foránea', async () => {
@@ -455,10 +455,10 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.lines[0].referenceType).toBe('DIAGNOSTIC_STUDY');
-      expect(detalle.lines[0].reference).toBe('off-1');
+      expect(detail.lines[0].referenceType).toBe('DIAGNOSTIC_STUDY');
+      expect(detail.lines[0].reference).toBe('off-1');
     });
 
     /**
@@ -497,16 +497,16 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.lines[0].policyClauseReference).toBe(
+      expect(detail.lines[0].policyClauseReference).toBe(
         'Cláusula 12.3: Fármaco fuera de vademécum',
       );
-      expect(detalle.lines[0].denialRationale).toBe(
+      expect(detail.lines[0].denialRationale).toBe(
         'Requiere autorización previa según la póliza.',
       );
       // Los importes no se alteran por agregar la cláusula.
-      expect(detalle.lines[0].deniedAmount?.amount).toBe('120.00');
+      expect(detail.lines[0].deniedAmount?.amount).toBe('120.00');
     });
 
     it('sin adjudicación de línea, la cláusula y la justificación quedan en null, no undefined', async () => {
@@ -521,10 +521,10 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.lines[0].policyClauseReference).toBeNull();
-      expect(detalle.lines[0].denialRationale).toBeNull();
+      expect(detail.lines[0].policyClauseReference).toBeNull();
+      expect(detail.lines[0].denialRationale).toBeNull();
     });
 
     it('trae los canales de contacto de la aseguradora en la cabecera (subtarea 2.3)', async () => {
@@ -540,11 +540,11 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.header.carrierWhatsappNumber).toBe('+59171548278');
-      expect(detalle.header.carrierCallCenterPhone).toBe('800-10-6060');
-      expect(detalle.header.carrierSupportEmail).toBe(
+      expect(detail.header.carrierWhatsappNumber).toBe('+59171548278');
+      expect(detail.header.carrierCallCenterPhone).toBe('800-10-6060');
+      expect(detail.header.carrierSupportEmail).toBe(
         'siniestros@aseguradora.com.bo',
       );
     });
@@ -552,11 +552,11 @@ describe('ClaimsReadService', () => {
     it('sin canales registrados por la aseguradora, los tres quedan en null', async () => {
       const r = repo();
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.header.carrierWhatsappNumber).toBeNull();
-      expect(detalle.header.carrierCallCenterPhone).toBeNull();
-      expect(detalle.header.carrierSupportEmail).toBeNull();
+      expect(detail.header.carrierWhatsappNumber).toBeNull();
+      expect(detail.header.carrierCallCenterPhone).toBeNull();
+      expect(detail.header.carrierSupportEmail).toBeNull();
     });
   });
 
@@ -565,7 +565,7 @@ describe('ClaimsReadService', () => {
     it('un reclamo parcialmente aprobado con EOB publicada concilia los tres importes', async () => {
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
-          reclamo({
+          claim({
             statusConceptId: INS.CLAIM_ADJUDICATED,
             totalAmount: '300.00',
           }),
@@ -624,19 +624,19 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.settlement.availability).toBe('AVAILABLE');
-      expect(detalle.settlement.reconciled).toBe(true);
-      expect(detalle.settlement.totalBilledAmount).toBe('300.00');
-      expect(detalle.settlement.totalApprovedAmount).toBe('150.00');
-      expect(detalle.settlement.totalPatientAmount).toBe('30.00');
-      expect(detalle.settlement.totalDeniedAmount).toBe('120.00');
-      expect(detalle.settlement.exclusions).toHaveLength(1);
-      expect(detalle.settlement.exclusions[0]?.policyClauseReference).toBe(
+      expect(detail.settlement.availability).toBe('AVAILABLE');
+      expect(detail.settlement.reconciled).toBe(true);
+      expect(detail.settlement.totalBilledAmount).toBe('300.00');
+      expect(detail.settlement.totalApprovedAmount).toBe('150.00');
+      expect(detail.settlement.totalPatientAmount).toBe('30.00');
+      expect(detail.settlement.totalDeniedAmount).toBe('120.00');
+      expect(detail.settlement.exclusions).toHaveLength(1);
+      expect(detail.settlement.exclusions[0]?.policyClauseReference).toBe(
         'Cláusula 12.3: estudios complementarios sin autorización previa',
       );
-      expect(detalle.eob).toEqual({
+      expect(detail.eob).toEqual({
         id: 'eob-1',
         publishedAt: '2026-09-02T00:00:00.000Z',
       });
@@ -645,11 +645,11 @@ describe('ClaimsReadService', () => {
     it('sin versión de adjudicación, la liquidación está pendiente de publicación', async () => {
       const r = repo();
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.settlement.availability).toBe('PENDING_PUBLICATION');
-      expect(detalle.settlement.totalApprovedAmount).toBeNull();
-      expect(detalle.eob).toBeNull();
+      expect(detail.settlement.availability).toBe('PENDING_PUBLICATION');
+      expect(detail.settlement.totalApprovedAmount).toBeNull();
+      expect(detail.eob).toBeNull();
     });
 
     it('una exclusión sin cláusula degrada la liquidación a revisión', async () => {
@@ -694,11 +694,11 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.settlement.availability).toBe('UNDER_REVIEW');
-      expect(detalle.settlement.reconciled).toBe(false);
-      expect(detalle.settlement.exclusions).toHaveLength(0);
+      expect(detail.settlement.availability).toBe('UNDER_REVIEW');
+      expect(detail.settlement.reconciled).toBe(false);
+      expect(detail.settlement.exclusions).toHaveLength(0);
     });
   });
 
@@ -708,7 +708,7 @@ describe('ClaimsReadService', () => {
     const REPORT = 'report-1';
 
     /** `em()` con una unidad diagnóstica activa del tenant. */
-    function emConUnidad() {
+    function emWithUnit() {
       return em((nombre) =>
         nombre === 'DiagnosticUnits' ? [{ id: UNIT }] : [],
       );
@@ -717,8 +717,8 @@ describe('ClaimsReadService', () => {
     it('amplía el alcance a las unidades diagnósticas activas del tenant', async () => {
       const r = repo();
 
-      await conTenant(() =>
-        servicioCon(r, [], duplicateStudyDetector(), emConUnidad()).listClaims(
+      await withTenant(() =>
+        serviceWith(r, [], duplicateStudyDetector(), emWithUnit()).listClaims(
           {},
         ),
       );
@@ -737,7 +737,7 @@ describe('ClaimsReadService', () => {
       const r = repo();
 
       await expect(
-        conTenant(() => servicioCon(r, []).listClaims({})),
+        withTenant(() => serviceWith(r, []).listClaims({})),
       ).rejects.toThrow(ForbiddenException);
       expect(r.findClaimsPage).not.toHaveBeenCalled();
     });
@@ -755,7 +755,7 @@ describe('ClaimsReadService', () => {
 
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
-          reclamo({ serviceRequestId: ORDER }),
+          claim({ serviceRequestId: ORDER }),
         ),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
@@ -781,8 +781,8 @@ describe('ClaimsReadService', () => {
         }),
       });
 
-      const detalle = await conTenant(() =>
-        servicioCon(
+      const detail = await withTenant(() =>
+        serviceWith(
           r,
           [PRACTICE],
           detector,
@@ -790,7 +790,7 @@ describe('ClaimsReadService', () => {
         ).getClaim(CLAIM),
       );
 
-      expect(detalle.lines[0].duplicateStudy).toEqual({
+      expect(detail.lines[0].duplicateStudy).toEqual({
         previousDiagnosticReportId: REPORT,
         studyName: 'Ecografía abdominal',
         performedAt: new Date('2026-08-27T09:00:00.000Z'),
@@ -804,7 +804,7 @@ describe('ClaimsReadService', () => {
     it('duplicateStudy es null cuando la orden no tiene enlace', async () => {
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
-          reclamo({ serviceRequestId: ORDER }),
+          claim({ serviceRequestId: ORDER }),
         ),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
@@ -815,21 +815,21 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const orderSinEnlace = (nombre: string, where: any) =>
+      const orderWithoutEnlace = (nombre: string, where: any) =>
         nombre === 'ServiceRequests' && where.id === ORDER
           ? { id: ORDER, previousDiagnosticReportId: undefined }
           : undefined;
 
-      const detalle = await conTenant(() =>
-        servicioCon(
+      const detail = await withTenant(() =>
+        serviceWith(
           r,
           [PRACTICE],
           duplicateStudyDetector(),
-          em(() => [], orderSinEnlace),
+          em(() => [], orderWithoutEnlace),
         ).getClaim(CLAIM),
       );
 
-      expect(detalle.lines[0].duplicateStudy).toBeNull();
+      expect(detail.lines[0].duplicateStudy).toBeNull();
     });
 
     it('duplicateStudy es null cuando la solicitud no viene de una orden', async () => {
@@ -844,13 +844,13 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const detalle = await conTenant(() => servicioCon(r).getClaim(CLAIM));
+      const detail = await withTenant(() => serviceWith(r).getClaim(CLAIM));
 
-      expect(detalle.lines[0].duplicateStudy).toBeNull();
+      expect(detail.lines[0].duplicateStudy).toBeNull();
     });
 
     it('marca reused=true cuando la orden reutilizó el informe (sin justificación)', async () => {
-      const orderReutilizada = (nombre: string, where: any) =>
+      const orderReused = (nombre: string, where: any) =>
         nombre === 'ServiceRequests' && where.id === ORDER
           ? {
               id: ORDER,
@@ -862,7 +862,7 @@ describe('ClaimsReadService', () => {
 
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
-          reclamo({ serviceRequestId: ORDER }),
+          claim({ serviceRequestId: ORDER }),
         ),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
@@ -888,17 +888,17 @@ describe('ClaimsReadService', () => {
         }),
       });
 
-      const detalle = await conTenant(() =>
-        servicioCon(
+      const detail = await withTenant(() =>
+        serviceWith(
           r,
           [PRACTICE],
           detector,
-          em(() => [], orderReutilizada),
+          em(() => [], orderReused),
         ).getClaim(CLAIM),
       );
 
-      expect(detalle.lines[0].duplicateStudy?.reused).toBe(true);
-      expect(detalle.lines[0].duplicateStudy?.justification).toBeNull();
+      expect(detail.lines[0].duplicateStudy?.reused).toBe(true);
+      expect(detail.lines[0].duplicateStudy?.justification).toBeNull();
     });
   });
 });

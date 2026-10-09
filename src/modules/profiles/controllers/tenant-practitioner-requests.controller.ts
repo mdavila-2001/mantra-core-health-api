@@ -62,7 +62,7 @@ export class TenantPractitionerRequestsController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AffiliationRequestListDto> {
-    return this.affiliations.listarSolicitudes(tenantId, actor);
+    return this.affiliations.listSolicitudes(tenantId, actor);
   }
 
   /** La organización acepta el vínculo. */
@@ -74,7 +74,7 @@ export class TenantPractitionerRequestsController {
     @Param('affiliationId', ParseUUIDPipe) affiliationId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
-    return this.affiliations.aprobar(tenantId, affiliationId, actor);
+    return this.affiliations.approve(tenantId, affiliationId, actor);
   }
 
   /** La organización rechaza el vínculo, con motivo si quiere darlo. */
@@ -87,7 +87,7 @@ export class TenantPractitionerRequestsController {
     @Body() dto: RejectAffiliationDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
-    return this.affiliations.rechazar(tenantId, affiliationId, dto, actor);
+    return this.affiliations.reject(tenantId, affiliationId, dto, actor);
   }
 
   /**
@@ -115,6 +115,6 @@ export class TenantPractitionerRequestsController {
     @Body() dto: RejectAffiliationDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
-    return this.affiliations.revocar(tenantId, affiliationId, dto, actor);
+    return this.affiliations.revoke(tenantId, affiliationId, dto, actor);
   }
 }

@@ -370,7 +370,7 @@ export class ProfilesPractitionersController {
     @Query('municipality') municipality?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ListLinkableOrganizationsResponseDto> {
-    return this.linkableOrganizations.buscar({ query: q, municipality, limit });
+    return this.linkableOrganizations.search({ query: q, municipality, limit });
   }
 
   /**

@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeOrganizationReadService } from './practice-organization-read.service';
 import { ResourceNotFoundException } from '../../../common';
 
-const PRACTICA = {
+const PRACTICE = {
   id: 'prac-1',
   tenantId: 'tenant-1',
   code: 'HOSP-CENTRAL',
@@ -31,7 +31,7 @@ const PRACTICA = {
  */
 function build() {
   const em = { fork: mockFn(() => em) };
-  const practicesRepo = { findById: mockFn().mockResolvedValue(PRACTICA) };
+  const practicesRepo = { findById: mockFn().mockResolvedValue(PRACTICE) };
   const readRepo = {
     findSites: mockFn().mockResolvedValue([]),
     findClinicalUnits: mockFn().mockResolvedValue([]),
