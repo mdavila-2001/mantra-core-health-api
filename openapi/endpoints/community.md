@@ -10976,7 +10976,7 @@ Contexto declarado en el controlador: El feed de la portada: lo último de todas
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublico`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
+NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublic`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
 
 ### Parámetros
 
@@ -11623,7 +11623,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11722,7 +11722,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11821,7 +11821,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -11920,7 +11920,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12022,7 +12022,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12121,7 +12121,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -12224,7 +12224,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
-| 422 | `PRECONDITION_FAILED` | opciones.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |

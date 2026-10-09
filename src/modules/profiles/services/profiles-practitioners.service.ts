@@ -931,6 +931,9 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
+    // Las piezas que no se pudieron leer viajan en la respuesta (P-09): un
+    // vacío que en realidad es un fallo tiene que poder decirse en pantalla.
+    const unavailable: string[] = [];
     // Cada pieza del perfil se lee **sin poder tumbar a las demás** (F-18,
     // 18/08/2026). La ficha de la Guía devolvía 500 —con código de soporte a la
     // vista del paciente— en cuanto una de estas seis lecturas fallaba sobre un
@@ -952,22 +955,32 @@ export class ProfilesPractitionersService {
       this.withoutBreakingRecord(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'especialidades' },
+        {
+          profileId,
+          pieza: 'especialidades',
+          section: 'specialties',
+          unavailable,
+        },
       ),
       this.withoutBreakingRecord(
         () => this.credentialsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'credenciales' },
+        {
+          profileId,
+          pieza: 'credenciales',
+          section: 'credentials',
+          unavailable,
+        },
       ),
       this.withoutBreakingRecord(
         () => this.authorizationsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'matrículas' },
+        { profileId, pieza: 'matrículas', section: 'licenses', unavailable },
       ),
       this.withoutBreakingRecord(
         () => this.languagesRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'idiomas' },
+        { profileId, pieza: 'idiomas', section: 'languages', unavailable },
       ),
       // TP-2: el titular ve su trayectoria entera —incluida la solicitud que
       // mandó y todavía nadie aceptó, que si no no sabría que la mandó—; quien
@@ -985,14 +998,19 @@ export class ProfilesPractitionersService {
             ? this.affiliations.visiblesThird(em, profileId)
             : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'afiliaciones' },
+        {
+          profileId,
+          pieza: 'afiliaciones',
+          section: 'affiliations',
+          unavailable,
+        },
       ),
       subjectUserId === undefined
         ? Promise.resolve(WITHOUT_ACTIVITY)
         : this.withoutBreakingRecord(
             () => this.countActivity(em, subjectUserId),
             WITHOUT_ACTIVITY,
-            { profileId, pieza: 'actividad' },
+            { profileId, pieza: 'actividad', section: 'activity', unavailable },
           ),
       // El contacto: sólo en la lectura propia, y envuelto como las demás. Un
       // fallo leyendo `common.contact_points` deja el perfil sin correo, no
@@ -1001,7 +1019,7 @@ export class ProfilesPractitionersService {
         ? this.withoutBreakingRecord(
             () => this.contactPointsRepo.findVigentesByOwner(em, person.id),
             [],
-            { profileId, pieza: 'contacto' },
+            { profileId, pieza: 'contacto', section: 'contact', unavailable },
           )
         : Promise.resolve([]),
       // El documento y las direcciones: sólo en la lectura propia y envueltos
@@ -1010,7 +1028,7 @@ export class ProfilesPractitionersService {
         ? this.withoutBreakingRecord(
             () => this.readDocumentAndAddresses(em, person.id),
             {},
-            { profileId, pieza: 'filiación' },
+            { profileId, pieza: 'filiación', section: 'identity', unavailable },
           )
         : Promise.resolve(
             {} as Awaited<ReturnType<typeof this.readDocumentAndAddresses>>,
@@ -1025,13 +1043,19 @@ export class ProfilesPractitionersService {
     // Desde que el alta pide los contactos separados, el sistema no alcanza
     // para saber cuál es cuál: hay dos correos y dos celulares, y lo que los
     // distingue es el uso. Sin este par, el personal y el de trabajo se pisan.
-    const contactByUsage = (sistema: string, usage: string): string | undefined =>
+    const contactByUsage = (
+      sistema: string,
+      usage: string,
+    ): string | undefined =>
       contactos.find(
         (punto) =>
           punto.systemConceptId === sistema && punto.useConceptId === usage,
       )?.value;
 
     return {
+      ...(unavailable.length > 0
+        ? { unavailableSections: [...unavailable].sort() }
+        : {}),
       profileId,
       personId: person.id,
       practitionerCode: practitioner.practitionerCode,
@@ -1301,13 +1325,7 @@ export class ProfilesPractitionersService {
         }
 
         if (dto.phone !== undefined) {
-          await this.replacePhone(
-            tx,
-            person.id,
-            dto.phone,
-            actor.id,
-            ahora,
-          );
+          await this.replacePhone(tx, person.id, dto.phone, actor.id, ahora);
         }
         // Los cinco contactos que el alta captura por separado. `phone` sigue
         // arriba —es la forma anterior— y escribe el mismo par que
@@ -1321,14 +1339,7 @@ export class ProfilesPractitionersService {
           [dto.workLandline, PAR_LANDLINE_WORK],
         ] as const) {
           if (valor === undefined) continue;
-          await this.replaceContact(
-            tx,
-            person.id,
-            valor,
-            actor.id,
-            ahora,
-            par,
-          );
+          await this.replaceContact(tx, person.id, valor, actor.id, ahora, par);
         }
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
@@ -1391,10 +1402,7 @@ export class ProfilesPractitionersService {
     departmentId: string,
     actorUserId: string,
   ): Promise<void> {
-    await this.administrativeAreas.assertIsAdministrativeArea(
-      tx,
-      departmentId,
-    );
+    await this.administrativeAreas.assertIsAdministrativeArea(tx, departmentId);
     const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
@@ -1624,13 +1632,20 @@ export class ProfilesPractitionersService {
   private async withoutBreakingRecord<T>(
     leer: () => Promise<T>,
     empty: T,
-    context: { profileId: string; pieza: string },
+    context: {
+      profileId: string;
+      pieza: string;
+      /** Nombre de la pieza en el contrato (`unavailableSections`). */
+      section: string;
+      unavailable: string[];
+    },
   ): Promise<T> {
     try {
       return await leer();
     } catch (error) {
+      context.unavailable.push(context.section);
       this.logger.warn(
-        { ...context, err: error },
+        { profileId: context.profileId, pieza: context.pieza, err: error },
         'La ficha del profesional se devuelve sin esta pieza: la lectura falló',
       );
       return empty;
@@ -2763,14 +2778,13 @@ export class ProfilesPractitionersService {
       // ID-16: el mismo establecimiento del padrón con el mismo cargo e inicio
       // es el doble envío que el índice único de la base rechaza; se dice acá.
       if (dto.healthFacilityConceptId !== undefined) {
-        const sameFacility =
-          await this.affiliationsRepo.findSameFacility(
-            tx,
-            profileId,
-            dto.healthFacilityConceptId,
-            roleTitle,
-            startDate,
-          );
+        const sameFacility = await this.affiliationsRepo.findSameFacility(
+          tx,
+          profileId,
+          dto.healthFacilityConceptId,
+          roleTitle,
+          startDate,
+        );
         if (sameFacility) {
           throw new ConflictException(
             'Ese vínculo con el establecimiento ya está en el historial laboral',
@@ -2790,11 +2804,12 @@ export class ProfilesPractitionersService {
       // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
       // la organización.
       if (dto.practiceSiteId) {
-        const alreadyRequested = await this.affiliationsRepo.findByPractitionerAndSite(
-          tx,
-          profileId,
-          dto.practiceSiteId,
-        );
+        const alreadyRequested =
+          await this.affiliationsRepo.findByPractitionerAndSite(
+            tx,
+            profileId,
+            dto.practiceSiteId,
+          );
         if (alreadyRequested) {
           throw new ConflictException(
             'Ya pidió vincularse a esa sede',
@@ -2848,7 +2863,10 @@ export class ProfilesPractitionersService {
     // vínculo quedó pendiente: un declarado no tiene a quién avisarle y un
     // aprobado ya está resuelto. Nunca lanza — el vínculo ya se creó, y que no
     // salga un aviso no puede deshacerlo.
-    if (created.statusKind === 'pendiente' && dto.practiceSiteId !== undefined) {
+    if (
+      created.statusKind === 'pendiente' &&
+      dto.practiceSiteId !== undefined
+    ) {
       await this.orderNotify(dto.practiceSiteId, created);
     }
     return created;

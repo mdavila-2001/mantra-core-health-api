@@ -16,6 +16,7 @@ import {
 import { ForbiddenException } from '@nestjs/common';
 import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
+import { AUD } from '../../audit/audit.concepts';
 
 // CL-02 (BR-10): el prescriptor sale de la sesión, así que quien prescribe en
 // estas pruebas tiene perfil profesional. Sin él, prescribir es 403.
@@ -119,6 +120,13 @@ describe('MedicationsService', () => {
       expect(res.status).toBe(CLIN.MEDICATION_REQUEST_DRAFT);
       expect(d.requestsRepo.create.mock.calls[0][1].statusConceptId).toBe(
         CLIN.MEDICATION_REQUEST_DRAFT,
+      );
+      // P-06: el historial empieza en el borrador, no a mitad del ciclo.
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        expect.anything(),
+        'medication_requests',
+        'mr1',
+        expect.objectContaining({ operationConceptId: AUD.OPERATION_INSERT }),
       );
     });
 
@@ -244,10 +252,13 @@ describe('MedicationsService', () => {
       it('SUPERADMIN pasa con el perfil que declare', async () => {
         const d = build();
         d.requestsRepo.create.mockReturnValue(created());
-        await d.service.prescribe({ ...registration, prescriberProfileId: 'hp-otro' }, {
-          id: 'root',
-          roles: ['SUPERADMIN'],
-        } as any);
+        await d.service.prescribe(
+          { ...registration, prescriberProfileId: 'hp-otro' },
+          {
+            id: 'root',
+            roles: ['SUPERADMIN'],
+          } as any,
+        );
         expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
           'hp-otro',
         );
@@ -303,7 +314,10 @@ describe('MedicationsService', () => {
       it('un texto vacío no se guarda como cadena vacía', async () => {
         const d = build();
         d.requestsRepo.create.mockReturnValue(created());
-        await d.service.prescribe({ ...registration, indicationText: '   ' }, actor);
+        await d.service.prescribe(
+          { ...registration, indicationText: '   ' },
+          actor,
+        );
         expect(
           d.requestsRepo.create.mock.calls[0][1].indicationText,
         ).toBeUndefined();
@@ -359,7 +373,10 @@ describe('MedicationsService', () => {
           new PreconditionFailedException('La instancia no está cerrada'),
         );
         await expect(
-          d.service.prescribe({ ...registration, formInstanceId: 'form-1' }, actor),
+          d.service.prescribe(
+            { ...registration, formInstanceId: 'form-1' },
+            actor,
+          ),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
         expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });
@@ -533,12 +550,15 @@ describe('MedicationsService', () => {
       expect(d.auditTrail.record.mock.calls[0][2].action).toBe(
         'MEDICATION_ISSUED',
       );
-      // §2: sella la primera revisión versionada en medication_requests_history.
+      // §2: la emisión es una revisión más (la primera la selló el borrador).
       expect(d.historyRepo.append).toHaveBeenCalledWith(
         expect.anything(),
         'medication_requests',
         'mr1',
-        expect.objectContaining({ dataSnapshot: expect.any(Object) }),
+        expect.objectContaining({
+          operationConceptId: AUD.OPERATION_UPDATE,
+          dataSnapshot: expect.any(Object),
+        }),
       );
     });
 
@@ -669,6 +689,12 @@ describe('MedicationsService', () => {
       expect((request as any).signedAt).toBeInstanceOf(Date);
       expect((request as any).signedByUserId).toBe('user-1');
       expect(res.signedAt).toBeInstanceOf(Date);
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        expect.anything(),
+        'medication_requests',
+        'mr1',
+        expect.objectContaining({ operationConceptId: AUD.OPERATION_UPDATE }),
+      );
     });
 
     it('rejects signing a non-draft request', async () => {
@@ -798,6 +824,13 @@ describe('MedicationsService', () => {
         'mr1',
       );
       expect(d.requestsRepo.create.mock.calls[0][1].doseText).toBe('500mg');
+      // La renovación nace con su propia primera revisión.
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        expect.anything(),
+        'medication_requests',
+        'mr3',
+        expect.objectContaining({ operationConceptId: AUD.OPERATION_INSERT }),
+      );
     });
 
     it('rejects renewing a draft', async () => {

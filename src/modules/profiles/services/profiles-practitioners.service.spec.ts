@@ -454,14 +454,12 @@ describe('ProfilesPractitionersService', () => {
     it('la matrícula que agrega el propio profesional nace pendiente; la del administrador, vigente', async () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
-      d.authorizationsRepo.create.mockImplementation(
-        (_tx: any, data: any) => ({
-          id: 'auth-1',
-          licenseNumber: data.licenseNumber,
-          stateConceptId: data.stateConceptId,
-          createdAt: new Date(),
-        }),
-      );
+      d.authorizationsRepo.create.mockImplementation((_tx: any, data: any) => ({
+        id: 'auth-1',
+        licenseNumber: data.licenseNumber,
+        stateConceptId: data.stateConceptId,
+        createdAt: new Date(),
+      }));
 
       const own = await d.service.addJurisdictionAuthorization(
         'pp1',
@@ -966,7 +964,10 @@ describe('ProfilesPractitionersService', () => {
     it('la primera de la lista queda como principal', async () => {
       const d = registration();
       const PEDIATRICS = 'bd0484b1-8959-5ba5-bb65-ca9305eedb30';
-      await d.service.onboardPractitioner(registrationWith([CARDIO, PEDIATRICS]), actor);
+      await d.service.onboardPractitioner(
+        registrationWith([CARDIO, PEDIATRICS]),
+        actor,
+      );
       const written = d.specialtiesRepo.create.mock.calls.map(
         (call: any) => call[1],
       );
@@ -1903,10 +1904,7 @@ describe('ProfilesPractitionersService', () => {
     }
 
     /** Deja el doble listo para editar y para la relectura posterior. */
-    function prepareForEdit(
-      d: ReturnType<typeof build>,
-      practitioner: any,
-    ) {
+    function prepareForEdit(d: ReturnType<typeof build>, practitioner: any) {
       d.accountLinksRepo.findActiveByUser.mockResolvedValue({
         personId: 'per-1',
       });
@@ -2899,6 +2897,34 @@ describe('ProfilesPractitionersService', () => {
         clinicalNotes: 0,
         documents: 0,
       });
+      // P-09: los ceros de arriba no son datos: la respuesta dice qué faltó.
+      expect(profile.unavailableSections).toEqual([
+        'activity',
+        'affiliations',
+        'credentials',
+        'languages',
+        'licenses',
+        'specialties',
+      ]);
+    });
+
+    it('P-09: una ficha que llegó completa no trae unavailableSections', async () => {
+      const d = build();
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Ana',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'PRC-1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil).not.toHaveProperty('unavailableSections');
     });
 
     it('un perfil inexistente responde no encontrado', async () => {
@@ -3138,7 +3164,10 @@ describe('ProfilesPractitionersService', () => {
       expect(progress.practitionerProfileId).toBe('pp-1');
       expect(progress.steps).toHaveLength(5);
       expect(progress.firstIncomplete).toBe('professional-data');
-      expect(progress.steps[0].missing).toEqual(['license-number', 'specialty']);
+      expect(progress.steps[0].missing).toEqual([
+        'license-number',
+        'specialty',
+      ]);
       expect(progress.steps.every((step) => !step.complete)).toBe(true);
     });
 

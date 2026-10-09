@@ -61433,6 +61433,10 @@ components:
     PractitionerProfileSummaryDto:
       type: object
       properties:
+        unavailableSections:
+          type: array
+          items:
+            type: string
         profileId:
           type: string
           format: uuid
@@ -78758,10 +78762,6 @@ components:
         tenantContextId:
           type: string
           description: Contexto de tenant
-          format: uuid
-        definitionSetVersionId:
-          type: string
-          description: Versión publicada del set cuyo schema se congela
           format: uuid
         schemaVersion:
           type: number
