@@ -20,7 +20,7 @@ import { RestoreObjectiveStatus } from '../policies';
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 /** Política ACTIVE con ambos objetivos fijados, base de los casos de MCH-023. */
-const politicaActiva = () => ({
+const activePolicy = () => ({
   id: 'bp1',
   statusConceptId: CONCEPTS.STATE_ACTIVE,
   rpoSeconds: 60,
@@ -68,10 +68,10 @@ describe('BackupService', () => {
       ['RPO absurdo', { rpoSeconds: 31_536_001, rtoSeconds: 900 }],
       ['RTO absurdo', { rpoSeconds: 3600, rtoSeconds: 31_536_001 }],
       ['RPO no entero', { rpoSeconds: 1.5, rtoSeconds: 900 }],
-    ])('rechaza %s por su propio rango', async (_caso, objetivos) => {
+    ])('rechaza %s por su propio rango', async (_caso, targets) => {
       const d = build();
       await expect(
-        d.service.createPolicy(objetivos as any, actor),
+        d.service.createPolicy(targets as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.repo.createPolicy).not.toHaveBeenCalled();
     });
@@ -112,7 +112,7 @@ describe('BackupService', () => {
 
     it('flags an objective breach when measured RPO exceeds target', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt1',
         outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
@@ -134,7 +134,7 @@ describe('BackupService', () => {
     // MCH-023-AC01: sin medición el resultado es desconocido, nunca aprobado.
     it('sin mediciones el estado es NOT_MEASURED, no "no incumple"', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt2',
         outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
@@ -156,7 +156,7 @@ describe('BackupService', () => {
 
     it('una medición a medias tampoco alcanza para aprobar', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt3',
         outcomeConceptId: 'o',
@@ -175,7 +175,7 @@ describe('BackupService', () => {
 
     it('sin verificación de integridad no se aprueba', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt4',
         outcomeConceptId: 'o',
@@ -219,7 +219,7 @@ describe('BackupService', () => {
       ],
     ])('queda FAILED cuando %s', async (_caso, dto) => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt5',
         outcomeConceptId: 'o',
@@ -233,7 +233,7 @@ describe('BackupService', () => {
 
     it('aprueba sólo con las dos mediciones dentro del objetivo e integridad verificada', async () => {
       const d = build();
-      d.repo.findPolicyById.mockResolvedValue(politicaActiva());
+      d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({
         id: 'rt6',
         outcomeConceptId: 'o',
