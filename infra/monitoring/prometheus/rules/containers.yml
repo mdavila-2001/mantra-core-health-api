@@ -11,13 +11,19 @@ groups:
           summary: "{{ $labels.display }} está UNHEALTHY"
           description: "Su healthcheck falla hace más de 3 min. Si tiene la etiqueta autoheal=true, autoheal lo reinicia solo."
 
+      # Sólo los que estaban corriendo en los últimos 15 min: Coolify deja
+      # detenidos los contenedores de cada despliegue anterior, y ésos no son
+      # una caída. Por la misma ventana la alerta se apaga sola a los 15 min,
+      # así que va sin aviso de «resuelto» (ver alertmanager.yml).
       - alert: ContainerDown
-        expr: alovida_container_expected_running == 1 and alovida_container_running == 0
-        for: 3m
+        expr: |
+          alovida_container_expected_running == 1 and alovida_container_running == 0
+          and max_over_time(alovida_container_running[15m]) == 1
+        for: 2m
         labels: { severity: critical }
         annotations:
-          summary: "{{ $labels.display }} está DETENIDO"
-          description: "Tiene política de reinicio y no está corriendo hace más de 3 min."
+          summary: "{{ $labels.display }} se DETUVO"
+          description: "Estaba corriendo hace menos de 15 min, tiene política de reinicio y ahora está parado. Si no fue un despliegue o una parada a mano, revisalo."
 
       # Cuenta arranques por el cambio de StartedAt y no por RestartCount: los
       # reinicios que hace autoheal por la API no incrementan RestartCount.

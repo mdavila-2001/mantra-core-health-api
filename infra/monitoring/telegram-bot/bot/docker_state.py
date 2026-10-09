@@ -6,8 +6,9 @@ contador de reinicios, ni la política de reinicio. Eso sale de acá.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
 from .http_json import get_json
@@ -16,9 +17,18 @@ from .http_json import get_json
 # contenedor con `restart: "no"` (los *-init, api-migrate) termina a propósito.
 RESTARTING_POLICIES = frozenset({"always", "unless-stopped", "on-failure"})
 
+# Un contenedor detenido hace más que esto es un resto de un despliegue viejo
+# (Coolify deja los anteriores parados), no una caída: no se cuenta como tal.
+STALE_AFTER = timedelta(hours=1)
+
 # Etiquetas que Coolify y compose ponen, de la más legible a la menos.
 RESOURCE_LABELS = ("coolify.resourceName", "coolify.name", "com.docker.compose.project")
 SERVICE_LABEL = "com.docker.compose.service"
+
+# `traefik.http.routers.<router>.rule` = "Host(`test.…`) && PathPrefix(`/`)".
+_ROUTER_RULE = re.compile(r"^traefik\.http\.routers\.([^.]+)\.rule$")
+_RULE_HOST = re.compile(r"Host\(`([^`]+)`\)")
+_RULE_PATH = re.compile(r"PathPrefix\(`([^`]+)`\)")
 
 
 @dataclass(frozen=True)
@@ -32,6 +42,9 @@ class ContainerState:
     oom_killed: bool
     restart_policy: str
     started_at: datetime | None
+    finished_at: datetime | None = None
+    # (router de Traefik, sitio legible): «https-0-<uuid>-proxy-4313» → «test.62….sslip.io».
+    routes: tuple[tuple[str, str], ...] = ()
 
     @property
     def running(self) -> bool:
@@ -39,7 +52,13 @@ class ContainerState:
 
     @property
     def unhealthy(self) -> bool:
-        return self.health == "unhealthy"
+        # Sólo si corre: un contenedor detenido conserva su último health.
+        return self.running and self.health == "unhealthy"
+
+    def stale(self, now: datetime) -> bool:
+        if self.running or self.finished_at is None:
+            return False
+        return now - self.finished_at > STALE_AFTER
 
     @property
     def expected_running(self) -> bool:
@@ -76,7 +95,27 @@ def parse_inspect(inspect: dict[str, Any]) -> ContainerState:
         oom_killed=bool(state.get("OOMKilled", False)),
         restart_policy=policy,
         started_at=_parse_docker_time(state.get("StartedAt")),
+        finished_at=_parse_docker_time(state.get("FinishedAt")),
+        routes=parse_routes(labels),
     )
+
+
+def parse_routes(labels: dict[str, str]) -> tuple[tuple[str, str], ...]:
+    """Routers de Traefik declarados en las etiquetas, con el sitio que atienden.
+
+    El sitio es el primer `Host` de la regla, más el `PathPrefix` si no es «/»
+    (el servicio de IA atiende `/ai/` dentro de los dominios del front).
+    """
+    routes = []
+    for key, rule in labels.items():
+        match = _ROUTER_RULE.match(key)
+        host = _RULE_HOST.search(rule or "")
+        if not match or not host:
+            continue
+        path = _RULE_PATH.search(rule)
+        suffix = path.group(1).rstrip("/") if path and path.group(1) != "/" else ""
+        routes.append((match.group(1), host.group(1) + suffix))
+    return tuple(sorted(routes))
 
 
 def _first_label(labels: dict[str, str], keys: tuple[str, ...]) -> str:

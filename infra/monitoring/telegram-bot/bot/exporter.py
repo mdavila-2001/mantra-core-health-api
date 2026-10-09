@@ -66,7 +66,23 @@ def render_metrics(states: list[ContainerState], docker_up: bool) -> str:
         lines.append(f"# HELP {metric} {help_text}")
         lines.append(f"# TYPE {metric} gauge")
         lines.extend(f"{metric}{{{_labels(state)}}} {value_of(state)}" for state in states)
+    lines.extend(_router_info(states))
     return "\n".join(lines) + "\n"
+
+
+def _router_info(states: list[ContainerState]) -> list[str]:
+    # Traefik nombra los routers con el uuid de Coolify («…@docker»); esta serie
+    # le pone el dominio para que las alertas y el bot digan «test.…», no el uuid.
+    # Sólo los que corren: un despliegue viejo detenido declara el mismo router.
+    routes = sorted({route for state in states if state.running for route in state.routes})
+    lines = [
+        "# HELP alovida_router_info Sitio que atiende cada router de Traefik (siempre 1).",
+        "# TYPE alovida_router_info gauge",
+    ]
+    lines.extend(
+        f'alovida_router_info{{router="{_escape(router)}@docker",site="{_escape(site)}"}} 1' for router, site in routes
+    )
+    return lines
 
 
 def _epoch(moment) -> int:
