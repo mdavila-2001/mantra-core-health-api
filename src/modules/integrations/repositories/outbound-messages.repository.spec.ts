@@ -33,7 +33,11 @@ describe('OutboundMessagesRepository.holdQueuedForConnection', () => {
       statusConceptId: 'QUEUED',
     });
     expect(queued.map((m) => m.statusConceptId)).toEqual(['HELD', 'HELD']);
-    expect(queued.every((m) => (m as { updatedByUserId?: string }).updatedByUserId === 'user-1')).toBe(true);
+    expect(
+      queued.every(
+        (m) => (m as { updatedByUserId?: string }).updatedByUserId === 'user-1',
+      ),
+    ).toBe(true);
     expect(em.flush).toHaveBeenCalledTimes(1);
     expect(em.nativeUpdate).not.toHaveBeenCalled();
   });

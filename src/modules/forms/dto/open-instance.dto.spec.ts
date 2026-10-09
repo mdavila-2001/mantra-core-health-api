@@ -16,7 +16,10 @@ describe('OpenInstanceDto', () => {
     transform: true,
     transformOptions: { enableImplicitConversion: true },
   });
-  const metadata: ArgumentMetadata = { type: 'body', metatype: OpenInstanceDto };
+  const metadata: ArgumentMetadata = {
+    type: 'body',
+    metatype: OpenInstanceDto,
+  };
   const resourceId = '0b6f1f0e-4c1d-4c8a-9a51-2f6f2c0b7c11';
 
   function parse(body: unknown): Promise<OpenInstanceDto> {
@@ -24,7 +27,9 @@ describe('OpenInstanceDto', () => {
   }
 
   it('acepta el recurso con una versión de schema explícita', async () => {
-    await expect(parse({ resourceId, schemaVersion: 2 })).resolves.toMatchObject({
+    await expect(
+      parse({ resourceId, schemaVersion: 2 }),
+    ).resolves.toMatchObject({
       resourceId,
       schemaVersion: 2,
     });

@@ -1309,7 +1309,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
         d.service.registerPractitioner({
           ...dto,
           profilePhotoBase64:
-            'data:image/jpeg;base64,' + Buffer.from('no soy una foto').toString('base64'),
+            'data:image/jpeg;base64,' +
+            Buffer.from('no soy una foto').toString('base64'),
         }),
       ).rejects.toMatchObject({
         status: 422,
