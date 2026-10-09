@@ -13,10 +13,10 @@ Especificación: `tareas/TAREA-41-red-de-conocimiento-y-auditoria-clinica.md`
 | Regla (§12.2) | Cómo se cumple |
 |---|---|
 | 1 · Se ensambla, no se redacta | El texto de cada sección es un trozo del resumen de la NLM, cortado por sus propios `<h3>`. Hay una prueba que exige que sea subcadena de la fuente. |
-| 2 · Sección sin fuente = sección ausente | Un encabezado sin regla en `lib/kinds.mjs` no se fuerza a un `kind` cercano: va a `rejected.ndjson` (`unmapped-heading`). |
+| 2 · Sección sin fuente = sección ausente | Cada bloque de la NLM es UNA sección (nunca se fusionan). Un encabezado sin regla no se fuerza a un `kind` cercano: sale como `additional_information` con su pregunta exacta en `locator`. |
 | 3 · Seis campos de procedencia | Toda sección sale con `source`, `sourceUrl`, `license`, `retrievedAt`, `sourceVersion`, `locator`. |
 | 4/6 · Sin traducción automática | Solo castellano de la fuente. Los pies de imagen que Commons no da en castellano no se usan como texto alternativo. |
-| 5 · Cero dosis | `lib/guards.mjs#doseCheck` rechaza la sección (no el término) ante cantidad+unidad, la palabra «dosis» o una frecuencia de administración de un producto. Una prueba revisa el resultado completo. |
+| 5 · Cero dosis | `lib/guards.mjs#redactDose` omite los PÁRRAFOS con cantidad+unidad, «dosis» o frecuencia de administración de un producto; la sección sale como extracto (`excerpt`, `omitted`). Si no queda ningún párrafo, se rechaza. Una prueba revisa el resultado completo. |
 | A.D.A.M. fuera | Cada página se descarga y se revisa; si nombra a A.D.A.M. el término no se publica. |
 | 7 · Imágenes | Ver `lib/images.mjs`: lista blanca de licencias, solo hosts de la CSP, autor obligatorio, y MeSH ↔ título (`name-match`). |
 | 8 · Sin CC BY-SA como texto | No se usa Wikipedia. Wikidata solo aporta el vínculo MeSH → imagen. |
@@ -24,12 +24,13 @@ Especificación: `tareas/TAREA-41-red-de-conocimiento-y-auditoria-clinica.md`
 ## Piezas
 
 ```text
+fetch-xml.mjs       baja el XML de temas más reciente (una descarga) con su sidecar .meta.json
 fetch-pages.mjs     baja y cachea la página pública de cada tema (1 petición/s, User-Agent propio)
 build-articles.mjs  orquestador: articles.ndjson, rejected.ndjson, manifest.json,
                     pages-verification.ndjson, images-trace.ndjson
 lib/config.mjs      rutas por defecto (todas redefinibles por variable de entorno)
 lib/sections.mjs    troceo del HTML de la NLM en bloques literales
-lib/kinds.mjs       catálogo cerrado de §12.3 y reglas encabezado → kind
+lib/kinds.mjs       catálogo de §12.3 (+ 11 kinds transversales) y reglas encabezado → kind
 lib/guards.mjs      dosis y A.D.A.M.
 lib/pages.mjs       lectura de la página cacheada (verificación de literalidad)
 lib/article.mjs     ensamblado del artículo (temas y guías)
@@ -38,12 +39,15 @@ lib/contract.mjs    validador del contrato de §12.3: la corrida falla si un art
 lib/coverage.mjs    cifras de cobertura medidas sobre la salida
 render-evidence.mjs tablas de COVERAGE.md (cuenta, no interpreta)
 render-gaps.mjs     tablas de GAPS.md
-test/               31 pruebas con fixtures reales y chicos (node --test)
+test/               39 pruebas con fixtures reales y chicos (node --test)
 ```
 
 ## Correr
 
 ```bash
+# 0. XML de temas más reciente (una descarga de ~30 MB)
+node tools/terminology-import/encyclopedia/s1-medlineplus/fetch-xml.mjs
+
 # 1. páginas públicas de los temas (≈ 17–25 min; reanudable; caché en glossary-data-build/cache/encyclopedia-s1/)
 node tools/terminology-import/encyclopedia/s1-medlineplus/fetch-pages.mjs
 
@@ -72,6 +76,10 @@ byte a byte igual (la fecha de consulta a Commons se guarda dentro de su caché)
 ficha, todas opcionales para el consumidor:
 
 - `sections[].items` — las viñetas literales de la sección, cuando las hay.
+- `sections[].excerpt` + `omitted[{reason, paragraphs}]` — la sección sale sin los párrafos con dosis (o sin los elementos de lista que apuntan a A.D.A.M.).
+- `sections[].table` — la sección trae una tabla: una fila por línea, celdas unidas por « | ».
+- Varias secciones pueden tener el mismo `kind` (se distinguen por `locator`); 11 `kind` transversales nuevos, registrados en la ficha §12.3.
+- `images[].match` (`name-match` | `label-match`) y `images[].enabled`: **`label-match` sale apagada por defecto** (decisión del propietario, 2026-10-09); el front muestra solo `enabled === true`. Hasta 3 imágenes por término.
 - `images[].licenseFamily` (`public-domain` · `cc0` · `cc-by` · `cc-by-sa`),
   `images[].captionLang` y `images[].wikidataId`.
 - `images[].kind` es `image` (ráster) o `diagram` (SVG). **No** se afirma «foto»:

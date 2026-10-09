@@ -7,12 +7,15 @@
 // reordena. Lo que el HTML trae roto o no representable en texto plano se
 // MARCA (`flags`) para que el ensamblador lo mande a `rejected.ndjson` en vez
 // de publicarlo deformado:
-//   - `malformed-markup`: etiquetas fuera de la gramática de la NLM
-//     (`<ph3>`, `<topic>` en minúscula con contenido, etc.).
-//   - `table`: una tabla no cabe en texto plano sin inventar separadores.
+//   - `malformed-markup`: etiquetas fuera de la gramática de la NLM que no
+//     tienen una lectura segura (se reparan solo `<ph3>` y `<topic …>`, ver
+//     `repairMarkup`).
+// Las tablas SÍ se publican: cada fila es una línea y las celdas se separan con
+// « | » (único carácter que agrega el sistema); el bloque lleva la marca `table`.
 //   - `adam-encyclopedia-link`: el bloque enlaza a la Enciclopedia Médica de
-//     MedlinePlus (`/ency/`, contenido de A.D.A.M.); el texto que acompaña es un
-//     puntero a ese contenido, así que el bloque no se publica.
+//     MedlinePlus (`/ency/`, contenido de A.D.A.M.) fuera de una lista. Los
+//     elementos de lista que solo apuntan a esa enciclopedia se QUITAN y se
+//     cuentan (`adamLinksRemoved`; la sección sale como extracto).
 // =============================================================================
 
 import { decodeEntities, htmlToText } from '../../../lib/glossary-es/common.mjs';
@@ -25,9 +28,39 @@ const TABLE = /<table\b/i;
 const ADAM_ENCYCLOPEDIA_LINK = /medlineplus\.gov\/(?:spanish\/)?ency\//i;
 const IMG = /<img\b[^>]*>/gi;
 
-/** Sustituye los `<TOPIC … LINKTEXT="x"/>` autocerrados por su texto visible. Devuelve HTML. */
+const cleanLinkText = (t) => decodeEntities(t).replace(/\s+/g, ' ').trim();
+/** `<topic id=".." linktext="x">contenido</topic>` en minúscula: la NLM lo usa a veces como enlace con texto. */
+const OPEN_TOPIC = /<topic\s+id="\d+"\s+linktext="([^"]*)"\s*>([\s\S]*?)<\/topic>/gi;
+
+/**
+ * Sustituye los enlaces internos `<TOPIC … LINKTEXT="x"/>` por su texto visible y repara
+ * los dos errores de marcado que la NLM tiene en su XML (comprobados contra la página):
+ *  - `<topic … linktext="x">c</topic>` → «x» + «c»; si está vacío y le sigue un `<a>` con ese
+ *    mismo texto, se descarta para no duplicarlo;
+ *  - `<ph3>Título` (sin cierre) → `<h3>Título</h3>`.
+ * Devuelve HTML.
+ */
 export function resolveTopicLinks(html) {
-  return html.replace(SELF_CLOSED_TOPIC, (_, linkText) => decodeEntities(linkText).replace(/\s+/g, ' ').trim());
+  return html
+    .replace(SELF_CLOSED_TOPIC, (_, linkText) => cleanLinkText(linkText))
+    .replace(OPEN_TOPIC, (whole, linkText, content, offset, all) => {
+      const text = cleanLinkText(linkText);
+      const next = all.slice(offset + whole.length);
+      if (!content.trim() && next.match(/^\s*<a\b[^>]*>([\s\S]*?)<\/a>/i)?.[1]?.trim() === text) return '';
+      return `${text}${content}`;
+    })
+    .replace(/<ph3>([^<]*)/gi, (_, title) => `<h3>${title.trim()}</h3>`)
+    .replace(/<\/ph3>/gi, '');
+}
+
+/** Cada `<table>` pasa a un párrafo por fila, con las celdas unidas por « | ». */
+export function tablesToParagraphs(html) {
+  return html.replace(/<table\b[\s\S]*?<\/table>/gi, (table) =>
+    [...table.matchAll(/<tr\b[\s\S]*?<\/tr>/gi)]
+      .map((tr) => [...tr[0].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) => htmlToText(c[1]) ?? '').join(' | '))
+      .filter((row) => row.replace(/[|\s]/g, '') !== '')
+      .map((row) => `<p>${row}</p>`)
+      .join('\n'));
 }
 
 /** Quita las imágenes del HTML (se registran aparte; ninguna es del glosario). */
@@ -48,14 +81,23 @@ export function splitSections(rawHtml) {
     const heading = m ? htmlToText(m[1]) : null;
     const bodyHtml = m ? part.slice(m[0].length) : part;
     if (m && !heading) continue;
-    const { html, images } = stripImages(bodyHtml);
+    const { html: withoutImages, images } = stripImages(bodyHtml);
+    // Elementos de lista que solo apuntan a la Enciclopedia Médica (A.D.A.M.) se quitan y se cuentan;
+    // si el enlace está en otro lugar (un párrafo), el bloque entero queda marcado y no se publica.
+    let adamLinksRemoved = 0;
+    const noImages = withoutImages.replace(/<li\b[^>]*>(?:(?!<\/li>)[\s\S])*?<\/li>/gi, (li) => {
+      if (!ADAM_ENCYCLOPEDIA_LINK.test(li)) return li;
+      adamLinksRemoved += 1;
+      return '';
+    });
+    const html = tablesToParagraphs(noImages);
     const text = htmlToText(html);
     if (!text && !heading) continue;
     const flags = [];
-    if (MALFORMED.test(bodyHtml) || MALFORMED.test(part.slice(0, 40))) flags.push('malformed-markup');
-    if (TABLE.test(html)) flags.push('table');
-    if (ADAM_ENCYCLOPEDIA_LINK.test(bodyHtml)) flags.push('adam-encyclopedia-link');
-    blocks.push({ heading, text, images, flags });
+    if (MALFORMED.test(bodyHtml)) flags.push('malformed-markup');
+    if (TABLE.test(noImages)) flags.push('table');
+    if (ADAM_ENCYCLOPEDIA_LINK.test(noImages)) flags.push('adam-encyclopedia-link');
+    blocks.push({ heading, text, images, flags, ...(adamLinksRemoved ? { adamLinksRemoved } : {}) });
   }
   return blocks;
 }

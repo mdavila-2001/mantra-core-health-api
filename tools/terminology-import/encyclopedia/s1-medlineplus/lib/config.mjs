@@ -21,6 +21,8 @@ export const DEFAULTS = Object.freeze({
   corpusDir: process.env.S1_CORPUS_DIR ?? join(WORKSPACE_ROOT, 'glossary-data-build-catalogos', 'ndjson'),
   /** Caché de páginas HTML de medlineplus.gov y de respuestas de Commons (solo lo que este corte baja). */
   cacheDir: process.env.S1_CACHE_DIR ?? join(WORKSPACE_ROOT, 'glossary-data-build-catalogos', 'cache', 'encyclopedia-s1'),
+  /** XML de temas descargado por este corte (`fetch-xml.mjs`), con su sidecar .meta.json. */
+  xmlDir: process.env.S1_XML_DIR ?? join(WORKSPACE_ROOT, 'glossary-data-build-catalogos', 'cache', 'encyclopedia-s1', 'xml'),
   /** Caché de las guías de pruebas que ya bajó `import-medlineplus-es.mjs`. */
   labCacheDir: process.env.S1_LAB_CACHE_DIR ?? join(WORKSPACE_ROOT, 'glossary-data-build-catalogos', 'cache', 'medlineplus', 'pruebas'),
   seedShardsDir: process.env.S1_SEED_SHARDS_DIR ?? join(WORKSPACE_ROOT, 'mantra-core-health', 'public', 'glossary-seed', 'shards'),

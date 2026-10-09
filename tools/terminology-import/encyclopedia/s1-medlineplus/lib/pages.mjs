@@ -45,7 +45,7 @@ export function innerDiv(html, id) {
 
 /**
  * Datos de una página de tema.
- * @returns {{ summaryText: string|null, summarySquashed: string|null, attributions: string[], lastUpdated: string|null,
+ * @returns {{ summaryHtml: string|null, summaryText: string|null, summarySquashed: string|null, attributions: string[], lastUpdated: string|null,
  *   lastUpdatedIso: string|null, adamInPage: boolean, adamInSummary: boolean, encyLinks: number,
  *   primaryImage: string|null }}
  */
@@ -62,6 +62,7 @@ export function parseTopicPage(html) {
   const lastUpdated = html.match(/<span id="lastupdate">\s*Última actualización\s*([^<]+?)\s*<\/span>/i)?.[1] ?? null;
   const primaryImage = html.match(/<img[^>]+src="(https:\/\/medlineplus\.gov\/images\/[^"]+)"[^>]*title="[^"]*"/i)?.[1] ?? null;
   return {
+    summaryHtml: summaryNoAttribution == null ? null : summaryNoAttribution,
     summaryText: summaryNoAttribution == null ? null : comparableText(summaryNoAttribution),
     summarySquashed: summaryNoAttribution == null ? null : squashedText(summaryNoAttribution),
     attributions,

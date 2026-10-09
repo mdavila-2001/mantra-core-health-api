@@ -25,12 +25,14 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HttpClient, ensureDir, readNdjson, sha256File, writeJson, writeNdjson } from '../../lib/glossary-es/common.mjs';
-import { parseTopics } from '../../lib/glossary-es/medlineplus.mjs';
+import { parseTopics, topicRows as topicRowsFromXml } from '../../lib/glossary-es/medlineplus.mjs';
 import { LAB_SOURCE, TOPIC_SOURCE, buildLabArticle, buildTopicArticle } from './lib/article.mjs';
 import { DEFAULTS, S1_USER_AGENT } from './lib/config.mjs';
 import { validateArticle } from './lib/contract.mjs';
 import { measureCoverage, plain } from './lib/coverage.mjs';
-import { buildImage, commonsRequestUrl, imageCandidate, indexMeshImages, parseCommonsResponse } from './lib/images.mjs';
+import {
+  MAX_IMAGES_PER_ARTICLE, buildImage, commonsRequestUrl, entitiesRequestUrl, entityMatchesTopic, imageCandidates, indexMeshImages, parseCommonsResponse, parseEntities,
+} from './lib/images.mjs';
 import { isoFromSpanishDate, parseTopicPage, topicPageCachePath } from './lib/pages.mjs';
 
 const MEDLINEPLUS_SOURCES = new Set([TOPIC_SOURCE, LAB_SOURCE]);
@@ -58,58 +60,78 @@ function latestTopicsXml(dir) {
 }
 
 /**
- * Metadatos de Commons para `files`, de a 50 por pedido. Cada lote se guarda en
- * disco como `{ retrievedAt, requestUrl, response }`: la fecha de consulta forma
- * parte del dato (la usa `images[].retrievedAt`) y la corrida es reproducible con
- * la misma caché. Sin `online`, lo que no esté en caché queda en `missing`.
+ * Pedidos por lotes con caché en disco. Cada lote se guarda como `{ retrievedAt, requestUrl, response }`
+ * (la fecha de consulta es parte del dato). Primero se lee TODO lo ya cacheado en `subdir`, sin importar
+ * con qué lote se pidió; solo lo que falte se pide (si `online`), de a `batchSize`, 1 por segundo y con
+ * User-Agent identificable. Lo que siga faltando queda en `missing`.
+ * `parse(response)` devuelve un Map(clave → dato); `items` son las claves que se necesitan.
  */
-export async function loadCommons(files, { cacheDir, online, nowIso = () => new Date().toISOString() }) {
-  const sorted = [...new Set(files)].sort();
-  const http = new HttpClient({ concurrency: 1, minDelayMs: 1000, headers: { 'User-Agent': S1_USER_AGENT } });
-  const merged = new Map();
-  const missing = [];
-  for (let i = 0; i < sorted.length; i += COMMONS_BATCH) {
-    const batch = sorted.slice(i, i + COMMONS_BATCH);
-    const key = createHash('sha1').update(batch.join('\n')).digest('hex').slice(0, 16);
-    const cachePath = join(cacheDir, 'commons', `batch-${key}.json`);
-    let entry;
-    if (existsSync(cachePath)) {
-      entry = JSON.parse(readFileSync(cachePath, 'utf8'));
-    } else if (online) {
-      const requestUrl = commonsRequestUrl(batch);
-      const { body } = await http.get(requestUrl, { accept: 'application/json' });
-      entry = { retrievedAt: nowIso(), requestUrl, response: JSON.parse(body.toString('utf8')) };
-      writeJson(cachePath, entry, true);
-    } else {
-      missing.push(...batch);
-      continue;
-    }
-    for (const [name, data] of parseCommonsResponse(entry.response)) merged.set(name, { ...data, retrievedAt: entry.retrievedAt.slice(0, 10) });
+async function cachedBatches(items, { cacheDir, subdir, batchSize, requestUrl, parse, online, nowIso = () => new Date().toISOString() }) {
+  const dir = join(cacheDir, subdir);
+  const known = new Map();
+  const absorb = (entry) => {
+    for (const [key, data] of parse(entry.response)) known.set(key, { ...data, retrievedAt: entry.retrievedAt.slice(0, 10) });
+  };
+  if (existsSync(dir)) {
+    for (const file of readdirSync(dir).filter((f) => /^batch-.*\.json$/.test(f)).sort()) absorb(JSON.parse(readFileSync(join(dir, file), 'utf8')));
   }
-  return { commons: merged, missing, http: http.stats };
+  const http = new HttpClient({ concurrency: 1, minDelayMs: 1000, headers: { 'User-Agent': S1_USER_AGENT } });
+  let toAsk = [...new Set(items)].filter((item) => !known.has(item)).sort();
+  if (online) {
+    for (let i = 0; i < toAsk.length; i += batchSize) {
+      const batch = toAsk.slice(i, i + batchSize);
+      const key = createHash('sha1').update(batch.join('\n')).digest('hex').slice(0, 16);
+      const url = requestUrl(batch);
+      const { body } = await http.get(url, { accept: 'application/json' });
+      const entry = { retrievedAt: nowIso(), requestUrl: url, response: JSON.parse(body.toString('utf8')) };
+      writeJson(join(dir, `batch-${key}.json`), entry, true);
+      absorb(entry);
+    }
+    toAsk = toAsk.filter((item) => !known.has(item));
+  }
+  return { known, missing: toAsk, http: http.stats };
+}
+
+/** Metadatos de Commons para `files` (50 por pedido). Un archivo que Commons ya no devuelve queda en `missing`. */
+export async function loadCommons(files, opts) {
+  const { known, missing, http } = await cachedBatches(files, { ...opts, subdir: 'commons', batchSize: COMMONS_BATCH, requestUrl: commonsRequestUrl, parse: parseCommonsResponse });
+  return { commons: known, missing, http };
+}
+
+/** Etiquetas y alias de Wikidata para `qids` (50 por pedido). */
+export async function loadEntities(qids, opts) {
+  const { known, missing, http } = await cachedBatches(qids, { ...opts, subdir: 'wikidata-entities', batchSize: 50, requestUrl: entitiesRequestUrl, parse: parseEntities });
+  return { entities: known, missing, http };
 }
 
 export async function buildAll(opts) {
-  const o = { ...DEFAULTS, xmlDir: join(DEFAULTS.corpusDir, '..', 'cache', 'medlineplus'), limit: Infinity, fetchCommons: false, ...opts };
-  const meta = JSON.parse(readFileSync(join(o.corpusDir, 'medlineplus-es.meta.json'), 'utf8'));
+  const o = { ...DEFAULTS, limit: Infinity, fetchCommons: false, ...opts };
   const xml = latestTopicsXml(o.xmlDir);
   const xmlSha = sha256File(xml.path);
-  if (meta.topicsXml?.sha256 && meta.topicsXml.sha256 !== xmlSha) {
-    throw new Error(`El XML ${xml.path} no coincide con el sha256 de medlineplus-es.meta.json (${xmlSha} ≠ ${meta.topicsXml.sha256})`);
+  // Fecha/huella del XML: su sidecar `.meta.json` (lo escribe fetch-xml.mjs) o, en su defecto,
+  // el medlineplus-es.meta.json del corpus que descargó import-medlineplus-es.mjs.
+  const sidecarPath = `${xml.path}.meta.json`;
+  const xmlMeta = existsSync(sidecarPath)
+    ? JSON.parse(readFileSync(sidecarPath, 'utf8'))
+    : { retrievedAt: JSON.parse(readFileSync(join(o.corpusDir, 'medlineplus-es.meta.json'), 'utf8')).retrievedAt, sha256: JSON.parse(readFileSync(join(o.corpusDir, 'medlineplus-es.meta.json'), 'utf8')).topicsXml?.sha256, url: `https://medlineplus.gov/xml/mplus_topics_${xml.version}.xml` };
+  if (xmlMeta.sha256 && xmlMeta.sha256 !== xmlSha) {
+    throw new Error(`El XML ${xml.path} no coincide con su sha256 registrado (${xmlSha} ≠ ${xmlMeta.sha256})`);
   }
-  const snapshot = { retrievedAt: meta.retrievedAt, xmlVersion: xml.version };
+  const snapshot = { retrievedAt: xmlMeta.retrievedAt, xmlVersion: xml.version };
 
   const seed = readSeedTerms(o.seedShardsDir);
   const topics = parseTopics(readFileSync(xml.path, 'utf8'));
   const topicById = new Map(topics.map((t) => [t.id, t]));
-  const topicRows = readNdjson(join(o.corpusDir, 'medlineplus-es.ndjson')).slice(0, o.limit);
+  // Las filas de los temas salen del propio XML (mismo normalizador que el importador del glosario).
+  const topicRows = topicRowsFromXml(topics, { retrievedAt: xmlMeta.retrievedAt, xmlUrl: xmlMeta.url }).slice(0, o.limit);
   const labRows = readNdjson(join(o.corpusDir, 'medlineplus-es-pruebas.ndjson')).slice(0, o.limit);
+  const seedTopicsMissingInXml = [...seed.values()].filter((r) => r.source === TOPIC_SOURCE && !topicById.has(r.code));
 
   const meshIndex = indexMeshImages(o.imageRows ?? []);
   const articles = [];
   const rejected = [];
   const pageChecks = [];
-  const imageCandidates = [];
+  const imageWork = [];
   const termsInScope = [];
 
   for (const row of topicRows) {
@@ -130,11 +152,11 @@ export async function buildAll(opts) {
       slug: row.slug, topicId: row.code, url: row.sourceUrl, verified: Boolean(page), lastUpdated: page?.lastUpdated ?? null,
       attributions: page?.attributions ?? [], adamInPage: page?.adamInPage ?? null, adamInSummary: page?.adamInSummary ?? null,
       encyLinks: page?.encyLinks ?? null, primaryImage: page?.primaryImage ?? null,
-      published: Boolean(result.article), articleRejection: result.article ? null : result.rejected.at(-1)?.reason ?? null,
+      published: Boolean(result.article), textFrom: result.textFrom ?? null, articleRejection: result.article ? null : result.rejected.at(-1)?.reason ?? null,
     });
     if (!result.article) continue;
     articles.push(result.article);
-    imageCandidates.push({ article: result.article, term: row.esName, candidate: imageCandidate({ mesh: topicView.mesh, enTitle: topic?.mapped?.title ?? null }, meshIndex), seedRow });
+    imageWork.push({ article: result.article, term: row.esName, enTitle: topic?.mapped?.title ?? null, candidates: imageCandidates({ mesh: topicView.mesh, enTitle: topic?.mapped?.title ?? null }, meshIndex), seedRow });
   }
 
   for (const row of labRows) {
@@ -153,26 +175,35 @@ export async function buildAll(opts) {
   }
 
   // --- Imágenes -----------------------------------------------------------
+  // 1) nombre del descriptor MeSH == título del tema ('name-match'); 2) si no, el ítem de Wikidata se
+  // llama como el tema en castellano o inglés ('label-match'); 3) si no, queda retenida.
   const trace = [];
-  const wanted = imageCandidates.filter((c) => c.candidate?.tier === 'name-match');
-  const { commons, missing, http } = o.imageRows?.length
-    ? await loadCommons(wanted.map((c) => c.candidate.row.file), { cacheDir: o.cacheDir, online: o.fetchCommons })
-    : { commons: new Map(), missing: [], http: null };
-  for (const c of imageCandidates) {
-    if (!c.candidate) continue;
-    const base = { slug: c.seedRow.slug, meshId: c.candidate.meshId, meshName: c.candidate.meshName, wikidataId: c.candidate.row.wikidataId, file: c.candidate.row.file, tier: c.candidate.tier };
-    if (c.candidate.tier !== 'name-match') {
-      trace.push({ ...base, outcome: 'withheld', reason: 'mesh-name-differs-from-topic-title' });
-      continue;
+  const online = o.fetchCommons;
+  const needLabels = imageWork.filter((w) => w.candidates.length && !w.candidates.some((c) => c.nameMatch)).flatMap((w) => w.candidates.map((c) => c.wikidataId));
+  const labels = o.imageRows?.length ? await loadEntities(needLabels, { cacheDir: o.cacheDir, online }) : { entities: new Map(), missing: [], http: null };
+  const chosen = [];
+  for (const w of imageWork) {
+    const nameMatch = w.candidates.find((c) => c.nameMatch);
+    const labelMatch = nameMatch ? null : w.candidates.find((c) => entityMatchesTopic(labels.entities.get(c.wikidataId), { esName: w.term, enTitle: w.enTitle }));
+    const pick = nameMatch ?? labelMatch;
+    if (pick) chosen.push({ ...w, pick, tier: nameMatch ? 'name-match' : 'label-match' });
+    else if (w.candidates.length) trace.push({ slug: w.seedRow.slug, meshId: w.candidates[0].meshId, meshName: w.candidates[0].meshName, wikidataId: w.candidates[0].wikidataId, file: w.candidates[0].rows[0].file, tier: 'name-differs', outcome: 'withheld', reason: labels.missing.length ? 'wikidata-labels-not-verified' : 'mesh-name-and-wikidata-label-differ-from-topic-title' });
+  }
+  const wantedFiles = chosen.flatMap((c) => c.pick.rows.slice(0, MAX_IMAGES_PER_ARTICLE).map((r) => r.file));
+  const { commons, missing, http } = wantedFiles.length ? await loadCommons(wantedFiles, { cacheDir: o.cacheDir, online }) : { commons: new Map(), missing: [], http: null };
+  for (const c of chosen) {
+    for (const row of c.pick.rows.slice(0, MAX_IMAGES_PER_ARTICLE)) {
+      const base = { slug: c.seedRow.slug, meshId: c.pick.meshId, meshName: c.pick.meshName, wikidataId: c.pick.wikidataId, file: row.file, tier: c.tier };
+      const built = buildImage({ commons: commons.get(row.file), term: c.term, wikidataId: c.pick.wikidataId });
+      if (built.reject) {
+        trace.push({ ...base, outcome: 'rejected', reason: built.reject.reason, detail: built.reject.detail });
+        rejected.push({ scope: 'image', conceptRef: { system: c.seedRow.codeSystem, code: c.seedRow.code, slug: c.seedRow.slug }, term: c.seedRow.esName, category: c.seedRow.categoryKey, reason: built.reject.reason, detail: built.reject.detail, file: row.file });
+        continue;
+      }
+      // Decisión del propietario (2026-10-09): `label-match` queda APAGADA por defecto; `name-match` se muestra.
+      c.article.images.push({ ...built.image, match: c.tier, enabled: c.tier === 'name-match' });
+      trace.push({ ...base, outcome: 'accepted', license: built.image.license, sourcePage: built.image.sourcePage });
     }
-    const built = buildImage({ commons: commons.get(c.candidate.row.file), term: c.term, wikidataId: c.candidate.row.wikidataId });
-    if (built.reject) {
-      trace.push({ ...base, outcome: 'rejected', reason: built.reject.reason, detail: built.reject.detail });
-      rejected.push({ scope: 'image', conceptRef: { system: c.seedRow.codeSystem, code: c.seedRow.code, slug: c.seedRow.slug }, term: c.seedRow.esName, category: c.seedRow.categoryKey, reason: built.reject.reason, detail: built.reject.detail, file: c.candidate.row.file });
-      continue;
-    }
-    c.article.images.push(built.image);
-    trace.push({ ...base, outcome: 'accepted', license: built.image.license, sourcePage: built.image.sourcePage });
   }
 
   articles.sort((a, b) => a.conceptRef.slug.localeCompare(b.conceptRef.slug));
@@ -187,9 +218,10 @@ export async function buildAll(opts) {
   await writeNdjson(join(o.outDir, 'images-trace.ndjson'), trace);
   const manifest = {
     slice: 'F9-S1-medlineplus',
-    sources: { topicsXml: { path: xml.path, version: xml.version, sha256: xmlSha }, corpusRetrievedAt: meta.retrievedAt },
+    sources: { topicsXml: { path: xml.path, version: xml.version, sha256: xmlSha, retrievedAt: xmlMeta.retrievedAt }, glossaryTopicsMissingInXml: seedTopicsMissingInXml.map((r) => r.slug) },
     counts: { termsInScope: termsInScope.length, articles: articles.length, rejected: rejected.length, sections: articles.reduce((n, a) => n + a.sections.length, 0), images: articles.reduce((n, a) => n + a.images.length, 0) },
-    commons: { filesRequested: [...new Set(wanted.map((c) => c.candidate.row.file))].length, notInCache: missing.length, http },
+    commons: { filesRequested: new Set(wantedFiles).size, notInCache: missing.length, http },
+    wikidataLabels: { qidsChecked: new Set(needLabels).size, notInCache: labels.missing.length, http: labels.http },
     coverage: plain(coverage),
   };
   writeJson(join(o.outDir, 'manifest.json'), manifest, true);

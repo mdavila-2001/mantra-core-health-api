@@ -18,14 +18,14 @@ import { readNdjson } from '../../../lib/glossary-es/common.mjs';
 import { parseTopics } from '../../../lib/glossary-es/medlineplus.mjs';
 import { buildAll } from '../build-articles.mjs';
 import { validateArticle } from '../lib/contract.mjs';
-import { adamCheck, doseCheck } from '../lib/guards.mjs';
+import { adamCheck, doseCheck, redactDose } from '../lib/guards.mjs';
 import {
-  ALLOWED_IMAGE_HOSTS, allowedLicense, buildImage, commonsCaption, imageCandidate, indexMeshImages, isAllowedImageUrl,
+  ALLOWED_IMAGE_HOSTS, allowedLicense, buildImage, commonsCaption, cleanAttribution, entityMatchesTopic, imageCandidates, indexMeshImages, isAllowedImageUrl,
   normalizeTitleForMatch, parseCommonsResponse,
 } from '../lib/images.mjs';
-import { KINDS_BY_FAMILY, familyOf, kindForHeading } from '../lib/kinds.mjs';
+import { ALL_KINDS, KINDS_BY_FAMILY, KIND_ORDER, TRANSVERSAL_KINDS, familyOf, kindForHeading } from '../lib/kinds.mjs';
 import { isoFromSpanishDate, parseTopicPage } from '../lib/pages.mjs';
-import { bulletItems, splitSections, squashedText, stripTrailingAttribution } from '../lib/sections.mjs';
+import { bulletItems, splitSections, squashedText, stripTrailingAttribution, tablesToParagraphs } from '../lib/sections.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const read = (rel) => readFileSync(join(FX, rel), 'utf8');
@@ -81,17 +81,40 @@ test('<TOPIC … LINKTEXT/> autocerrado se resuelve a su texto visible (no se pi
   assert.ok(!/<topic/i.test(text));
 });
 
-test('markup fuera de la gramática y tablas quedan marcados, no deformados', () => {
-  const malformed = splitSections(topicById.get(DIABETES_1).fullSummaryHtml);
-  assert.ok(malformed.some((b) => b.flags.includes('malformed-markup')), '<ph3> debe marcarse');
+test('<ph3> mal formado se repara y la tabla se publica fila por fila', () => {
+  const fixed = splitSections(topicById.get(DIABETES_1).fullSummaryHtml);
+  assert.ok(fixed.some((b) => b.heading === '¿Cuáles son los síntomas de la diabetes tipo 1?'), '<ph3> pasa a ser un título');
+  assert.ok(fixed.every((b) => !b.flags.includes('malformed-markup')));
   const tables = splitSections(topicById.get(HDL).fullSummaryHtml);
-  assert.ok(tables.some((b) => b.flags.includes('table')), '<table> debe marcarse');
+  const table = tables.find((b) => b.flags.includes('table'));
+  assert.ok(table, '<table> debe marcarse');
+  assert.match(table.text, / \| /, 'las celdas quedan separadas por « | »');
+  assert.ok(!table.text.includes('<'));
 });
 
-test('un bloque que enlaza a la Enciclopedia Médica (A.D.A.M.) queda marcado', () => {
+test('tablesToParagraphs: una fila por párrafo, celdas unidas por « | »', () => {
+  assert.equal(tablesToParagraphs('<table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table>'), '<p>A | B</p>\n<p>1 | 2</p>');
+});
+
+test('<topic … linktext> en minúscula se lee como texto visible y no duplica el enlace vecino', () => {
+  const strep = splitSections(topicById.get('2174').fullSummaryHtml).map((b) => b.text).join('\n');
+  assert.ok(!/<topic/i.test(strep));
+  assert.ok(!/gripe\s*gripe/i.test(strep), 'el <topic> vacío seguido de <a>gripe</a> no duplica «gripe»');
+  const opioids = splitSections(topicById.get('7130').fullSummaryHtml).map((b) => b.text).join('\n');
+  assert.match(opioids, /trastorno por consumo de opioides\s*sigue siendo un posible riesgo/);
+});
+
+test('los elementos de lista que solo apuntan a la Enciclopedia Médica (A.D.A.M.) se quitan y se cuentan', async () => {
   const topic = topics.find((x) => x.language === 'Spanish' && x.title === 'Aborto');
   assert.ok(topic, 'Aborto está en el XML real');
-  assert.ok(splitSections(topic.fullSummaryHtml).some((b) => b.flags.includes('adam-encyclopedia-link')));
+  const block = splitSections(topic.fullSummaryHtml)[0];
+  assert.equal(block.adamLinksRemoved, 2);
+  assert.ok(!block.flags.includes('adam-encyclopedia-link'));
+  assert.ok(!/Aborto con medicamentos|Aborto quirúrgico/.test(block.text), 'los títulos de los artículos de A.D.A.M. no se publican');
+  const { articles } = await runFixtures();
+  const aborto = articles.find((a) => a.conceptRef.slug === 'medlineplus-es-2238');
+  assert.deepEqual(aborto.sections[0].omitted, [{ reason: 'adam-encyclopedia-link', paragraphs: 2 }]);
+  assert.equal(aborto.sections[0].excerpt, true);
 });
 
 test('bulletItems devuelve las viñetas literales en orden', () => {
@@ -121,12 +144,32 @@ test('kindForHeading: encabezados reales de la NLM por familia', () => {
   for (const [family, heading, kind] of cases) assert.equal(kindForHeading(family, heading)?.kind, kind, `${family} · ${heading}`);
 });
 
-test('kindForHeading no inventa: lo no reconocido es null y no cruza familias', () => {
-  assert.equal(kindForHeading('test', '¿Por qué necesito un análisis del complemento?'), null);
-  assert.equal(kindForHeading('test', '¿Debo saber algo más sobre la prueba de 17-OHP?'), null);
-  assert.equal(kindForHeading('disease', '¿Cómo se transmite el VIH?'), null);
-  assert.equal(kindForHeading('other', '¿Qué causa la afasia?'), null, '«otros» solo admite definition y overview');
-  assert.equal(kindForHeading('symptom', '¿Qué causa el dolor?'), null, 'la ficha no da «causas» a síntomas');
+test('kindForHeading: los kinds transversales nombran lo que la NLM publica', () => {
+  const cases = [
+    ['¿Por qué necesito un análisis del complemento?', 'indications'],
+    ['¿Quién necesita una tomografía computarizada?', 'indications'],
+    ['¿Debo saber algo más sobre la prueba de 17-OHP?', 'additional_information'],
+    ['¿Cómo se transmite el VIH?', 'transmission'],
+    ['¿Es contagiosa la amigdalitis?', 'transmission'],
+    ['¿Cuáles son los efectos secundarios de la quimioterapia?', 'side_effects'],
+    ['¿Cuáles son los beneficios de dejar de fumar?', 'benefits'],
+    ['¿Cómo funcionan los medicamentos para el VIH?', 'how_it_works'],
+    ['¿Cómo puedo tomar estatinas de forma segura?', 'safe_use'],
+    ['¿Por qué es importante la salud mental?', 'importance'],
+    ['¿Qué causa el dolor?', 'causes'],
+    ['¿Cuáles son los posibles beneficios y riesgos de la detección del cáncer de próstata?', 'considerations'],
+    ['¿Qué problemas trata el reemplazo de rodilla?', 'purpose'],
+    ['¿Qué aumenta el riesgo de padecer obesidad?', 'risk_factors'],
+    ['¿Cuáles son los riesgos de la circuncisión?', 'risks'],
+  ];
+  for (const [heading, kind] of cases) assert.equal(kindForHeading('x', heading).kind, kind, heading);
+});
+
+test('kindForHeading nunca devuelve null: lo no reconocido es additional_information (con su locator)', () => {
+  const r = kindForHeading('x', '¿Cuáles son las etapas del parto?');
+  assert.deepEqual(r, { kind: 'additional_information', rule: 'fallback' });
+  for (const kind of TRANSVERSAL_KINDS) assert.ok(ALL_KINDS.has(kind), kind);
+  for (const kinds of Object.values(KINDS_BY_FAMILY)) for (const kind of kinds) assert.ok(KIND_ORDER.includes(kind), kind);
 });
 
 test('toda regla produce un kind del catálogo cerrado de su familia', () => {
@@ -146,6 +189,15 @@ test('doseCheck rechaza dosis y posología reales y deja pasar concentraciones y
   assert.equal(doseCheck('El nivel normal es de 70 a 99 mg/dL en ayunas').ok, true, 'una concentración no es una dosis');
   assert.equal(doseCheck('Cepillarse los dientes dos veces al día con una pasta dental con fluoruro').ok, true, 'un hábito no es posología');
   assert.equal(doseCheck('Es posible sufrir una sobredosis de heroína.').ok, true, '«sobredosis» no da una cantidad');
+});
+
+test('redactDose conserva los párrafos limpios y cuenta los descartados', () => {
+  const text = 'La enfermedad afecta los nervios.\n\nTome 400 microgramos (mcg) de ácido fólico todos los días.\n\nConsulte a su médico si hay fiebre.';
+  const r = redactDose(text);
+  assert.equal(r.text, 'La enfermedad afecta los nervios.\n\nConsulte a su médico si hay fiebre.');
+  assert.equal(r.kept, 2);
+  assert.equal(r.removed.length, 1);
+  assert.equal(redactDose('Tome una dosis de 5 mg.').text, null, 'si no queda nada, la sección se rechaza');
 });
 
 test('adamCheck detecta A.D.A.M. pero no al autor «Adam MP» de una cita de GeneReviews', () => {
@@ -203,14 +255,28 @@ test('el texto de cada sección publicada es subcadena del resumen de la fuente 
   for (const s of a.sections) assert.ok(source.includes(squashedText(s.text.replace(/•/g, ''))), s.kind);
 });
 
-test('rechazos con motivo: página que no coincide, dosis y término fuera del glosario', async () => {
+test('XML vencido: el artículo se arma desde la página citada; dosis: se publica el resto del texto', async () => {
+  const { articles, rejected, pageChecks } = await runFixtures();
+  assert.equal(pageChecks.find((c) => c.slug === 'medlineplus-es-1985').textFrom, 'page', 'Diabetes tipo 1: el XML va detrás de la página');
+  assert.ok(articles.some((a) => a.conceptRef.slug === 'medlineplus-es-1985'));
+  assert.equal(pageChecks.find((c) => c.slug === 'medlineplus-es-6249').textFrom, 'xml');
+  const analgesics = articles.find((a) => a.conceptRef.slug === 'medlineplus-es-4060');
+  const excerpt = analgesics.sections.find((s) => s.excerpt);
+  assert.ok(excerpt, 'Analgésicos: una sección con «dosis» sale como extracto');
+  assert.deepEqual(excerpt.omitted, [{ reason: 'dose-or-posology', paragraphs: 1 }]);
+  assert.equal(doseCheck(excerpt.text).ok, true);
+  assert.ok(!rejected.some((r) => r.reason === 'source-text-differs-from-live-page'));
+});
+
+test('secciones repetidas por la fuente se informan; las distintas con el mismo kind se conservan', async () => {
   const { articles, rejected } = await runFixtures();
-  const by = (slug, reason) => rejected.find((r) => r.conceptRef?.slug === slug && r.reason === reason);
-  assert.ok(by('medlineplus-es-1985', 'source-text-differs-from-live-page'), 'Diabetes tipo 1: el XML y la página difieren');
-  assert.ok(!articles.some((a) => a.conceptRef.slug === 'medlineplus-es-1985'));
-  const dose = by('medlineplus-es-4060', 'dose-or-posology');
-  assert.ok(dose && /dosis/.test(dose.detail), 'Analgésicos: la sección con «dosis» no se publica');
-  assert.ok(articles.find((a) => a.conceptRef.slug === 'medlineplus-es-4060'), 'pero el término sí conserva sus otras secciones');
+  assert.ok(rejected.some((r) => r.conceptRef?.slug === 'medlineplus-es-2062' && r.reason === 'repeated-in-source'));
+  const oral = articles.find((a) => a.conceptRef.slug === 'medlineplus-es-2062');
+  const definitions = oral.sections.filter((s) => s.kind === 'definition');
+  assert.equal(definitions.length, 2, 'dos secciones distintas de la fuente con el mismo kind, ambas publicadas');
+  assert.notEqual(definitions[0].text, definitions[1].text);
+  const hdl = articles.find((a) => a.conceptRef.slug === 'medlineplus-es-6786');
+  assert.ok(hdl.sections.some((s) => s.table === true), 'la tabla se publica con la marca table');
 });
 
 test('sin término en la semilla no se crea artículo (no se inventan términos)', async () => {
@@ -226,13 +292,15 @@ test('sin página verificada el término no se publica', async () => {
   assert.ok(rejected.some((r) => r.conceptRef?.slug === 'medlineplus-es-6249' && r.reason === 'page-not-verified'));
 });
 
-test('guía de prueba: kinds de «Pruebas y laboratorio» y «Otros nombres» fuera del texto', async () => {
+test('guía de prueba: cada sección de la NLM sale con su kind, sin fusionar, y «Otros nombres» fuera del texto', async () => {
   const { articles, rejected } = await runFixtures();
   const a = articles.find((x) => x.conceptRef.slug === 'medlineplus-lab-analisis-del-complemento');
-  assert.deepEqual(a.sections.map((s) => s.kind), ['definition', 'purpose', 'preparation', 'procedure_description', 'risks', 'interpretation']);
+  assert.deepEqual(a.sections.map((s) => s.kind), ['definition', 'indications', 'purpose', 'preparation', 'procedure_description', 'interpretation', 'risks']);
   assert.ok(a.sections.every((s) => s.sourceVersion === '2024-06-10' && s.source === 'nlm-medlineplus-es-pruebas'));
-  const unmapped = rejected.filter((r) => r.conceptRef?.slug === 'medlineplus-lab-analisis-del-complemento' && r.reason === 'unmapped-heading');
-  assert.ok(unmapped.some((r) => /necesito/.test(r.heading)), '«¿Por qué necesito…?» no tiene kind en el catálogo y se informa');
+  const why = a.sections.find((s) => s.kind === 'indications');
+  assert.match(why.locator, /^¿Por qué necesito/);
+  assert.ok(!a.sections.some((s) => /Otros nombres:/.test(s.text)));
+  assert.ok(!rejected.some((r) => r.conceptRef?.slug === 'medlineplus-lab-analisis-del-complemento'), 'no se pierde ninguna sección');
 });
 
 test('«Adam MP» en las referencias de una guía NO dispara el filtro de A.D.A.M.', async () => {
@@ -280,13 +348,23 @@ test('normalizeTitleForMatch: MeSH invertido y plural coinciden; descriptor más
   assert.notEqual(normalizeTitleForMatch('Humeral Fractures'), normalizeTitleForMatch('Arm Injuries and Disorders'));
 });
 
-test('imageCandidate: solo `name-match` es elegible; el resto queda retenido', () => {
+test('imageCandidates: marca `nameMatch` y entrega un candidato por ítem de Wikidata', () => {
   const idx = indexMeshImages(readNdjson(join(FX, 'wikidata-images.ndjson')));
-  const exact = imageCandidate({ mesh: [{ id: 'D000715', name: 'Anatomy' }], enTitle: 'Anatomy' }, idx);
-  assert.equal(exact.tier, 'name-match');
-  const broader = imageCandidate({ mesh: [{ id: 'D000715', name: 'Anatomy' }], enTitle: 'Human Body' }, idx);
-  assert.equal(broader.tier, 'name-differs');
-  assert.equal(imageCandidate({ mesh: [{ id: 'D999999', name: 'Nada' }], enTitle: 'Nada' }, idx), null);
+  const exact = imageCandidates({ mesh: [{ id: 'D000715', name: 'Anatomy' }], enTitle: 'Anatomy' }, idx);
+  assert.equal(exact.length, 1);
+  assert.equal(exact[0].nameMatch, true);
+  assert.equal(exact[0].wikidataId, 'Q514');
+  const broader = imageCandidates({ mesh: [{ id: 'D000715', name: 'Anatomy' }], enTitle: 'Human Body' }, idx);
+  assert.equal(broader[0].nameMatch, false, 'el descriptor no se llama como el tema: hace falta verificar la etiqueta del ítem');
+  assert.deepEqual(imageCandidates({ mesh: [{ id: 'D999999', name: 'Nada' }], enTitle: 'Nada' }, idx), []);
+});
+
+test('entityMatchesTopic: el ítem de Wikidata debe llamarse como el tema (etiqueta o alias)', () => {
+  const item = { es: ['anatomía', 'anatomía humana'], en: ['anatomy'] };
+  assert.equal(entityMatchesTopic(item, { esName: 'Anatomía', enTitle: 'Human Body' }), true, 'castellano con acento y mayúscula');
+  assert.equal(entityMatchesTopic(item, { esName: 'Cuerpo humano', enTitle: 'Anatomy' }), true, 'inglés');
+  assert.equal(entityMatchesTopic(item, { esName: 'Cuerpo humano', enTitle: 'Human Body' }), false);
+  assert.equal(entityMatchesTopic(undefined, { esName: 'Anatomía', enTitle: 'Anatomy' }), false);
 });
 
 test('Commons: imagen de dominio público aceptada con autor, página de origen y hosts permitidos', async () => {
@@ -298,6 +376,8 @@ test('Commons: imagen de dominio público aceptada con autor, página de origen 
   assert.equal(img.licenseFamily, 'public-domain');
   assert.equal(img.author, 'Leonardo da Vinci');
   assert.equal(img.sourcePage, 'https://commons.wikimedia.org/wiki/File:Leonardo_da_vinci,_Drawing_of_a_Woman%27s_Torso.jpg');
+  assert.equal(img.match, 'name-match');
+  assert.equal(img.enabled, true, 'name-match se muestra');
   assert.equal(img.altTextQuality, 'generic');
   assert.equal(img.altText, 'Imagen de Anatomía');
   assert.equal(img.retrievedAt, '2026-10-08');
@@ -322,6 +402,15 @@ test('buildImage rechaza licencia no permitida, restricciones y hosts fuera de l
   assert.equal(buildImage({ commons: null, term: 'X', wikidataId: 'Q1' }).reject.reason, 'commons-not-verified');
 });
 
+test('contrato: una imagen label-match solo es válida apagada por defecto', async () => {
+  const { articles } = await runFixtures();
+  const art = structuredClone(articles.find((x) => x.images.length));
+  art.images[0].match = 'label-match';
+  assert.ok(validateArticle(art).some((e) => /apagada por defecto/.test(e)));
+  art.images[0].enabled = false;
+  assert.deepEqual(validateArticle(art), []);
+});
+
 test('Commons: el pie en castellano da alt «caption»; en otro idioma queda como genérico', () => {
   assert.deepEqual(commonsCaption('<div class="description mw-content-ltr es" dir="ltr" lang="es"><span class="language es">Español: </span>Lámina anatómica</div><div lang="en">English text</div>'), { text: 'Lámina anatómica', lang: 'es' });
   const en = commonsCaption('<div lang="en">Drawing of a torso</div>');
@@ -333,6 +422,12 @@ test('Commons: el pie en castellano da alt «caption»; en otro idioma queda com
   assert.equal(built.altTextQuality, 'generic');
   assert.equal(built.kind, 'diagram');
   assert.equal(built.captionLang, 'en');
+});
+
+test('cleanAttribution deja el autor en una línea (caso real de Commons: lista con viñetas)', () => {
+  assert.equal(cleanAttribution('<ul><li>Photo Credit:</li><li>Content Providers(s): CDC</li></ul>'), 'Photo Credit: Content Providers(s): CDC');
+  assert.equal(cleanAttribution('<div>Emmanuelm at en.wikipedia</div>\n<div>(Original text : Emmanuelm (talk))</div>'), 'Emmanuelm at en.wikipedia (Original text : Emmanuelm (talk))');
+  assert.equal(cleanAttribution(null), null);
 });
 
 test('parseCommonsResponse lee la respuesta real de la API', () => {
