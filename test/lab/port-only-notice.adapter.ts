@@ -2,7 +2,7 @@ import type {
   AgendaNotice,
   AgendaNoticePort,
   AgendaNoticeResult,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * Prueba de la corrección de H4: un adaptador que depende **sólo del puerto**.

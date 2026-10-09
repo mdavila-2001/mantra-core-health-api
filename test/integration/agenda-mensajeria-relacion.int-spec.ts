@@ -5,14 +5,14 @@ import * as path from 'node:path';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import type { PinoLogger } from 'nestjs-pino';
 import { MESSAGING_SEED } from '../../src/common/seed/messaging-seed.service';
-import { MessagingAgendaNoticeAdapter } from '../../src/modules/scheduling/adapters/messaging-agenda-notice.adapter';
-import type { SupportAdminNoticeAdapter } from '../../src/modules/scheduling/adapters/support-admin-notice.adapter';
-import type { SchedulingNoticeRepository } from '../../src/modules/scheduling/repositories/scheduling-notice.repository';
+import { MessagingAgendaNoticeAdapter } from '../../src/modules/scheduling/infrastructure/adapters/messaging-agenda-notice.adapter';
+import type { SupportAdminNoticeAdapter } from '../../src/modules/scheduling/infrastructure/adapters/support-admin-notice.adapter';
+import type { SchedulingNoticeRepository } from '../../src/modules/scheduling/infrastructure/repositories/scheduling-notice.repository';
 import type { NotificationsService } from '../../src/modules/messaging/services';
 import type {
   AgendaNotice,
   AgendaNoticeResult,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 import {
   StrictAgendaNoticePortDouble,
   UnexpectedAgendaNoticeCall,

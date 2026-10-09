@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { AGENDA_NOTICE_PORT } from '../../src/modules/scheduling/ports/agenda-notice.port';
+import { AGENDA_NOTICE_PORT } from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 import { bootstrapTestApp, type TestContext } from './harness';
 import type {
   AgendaNotice,
   AgendaNoticePort,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * Durabilidad, reintento y visibilidad del fallo en la relación

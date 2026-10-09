@@ -25,8 +25,8 @@ import { buildPinoOptions } from '../../../src/logging/pino-options';
 import { SessionValidator } from '../../../src/common/auth/session-validator';
 import { RedisThrottlerStorage } from '../../../src/common/security/redis-throttler.storage';
 import { CommunityMessagingGateway } from '../../../src/modules/community/gateways/community-messaging.gateway';
-import { SchedulingBookingsService } from '../../../src/modules/scheduling/services/scheduling-bookings.service';
-import { SchedulingBookingsController } from '../../../src/modules/scheduling/controllers/scheduling-bookings.controller';
+import { createBookingsService } from '../../../src/modules/scheduling/application/bookings/scheduling-bookings.testing';
+import { SchedulingBookingsController } from '../../../src/modules/scheduling/presentation/controllers/scheduling-bookings.controller';
 
 const T1 = '11111111-1111-4111-8111-111111111111';
 const T2 = '22222222-2222-4222-8222-222222222222';
@@ -62,17 +62,27 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
     const booking = { id: ID, tenantId: T2, patientProfileId: P2, resourceId: ID,
       statusConceptId: CONCEPTS.BOOKING_CONFIRMED, createdAt: new Date(0), reasonText: 'synthetic private reason' };
     const ownership = jest.fn(async () => { throw new Error('must deny foreign patient'); });
-    const service = new SchedulingBookingsService({ fork: () => ({}) } as any,
-      { findBookings: async () => ({ rows: [{ booking, slot: null }], fetchCapReached: false }),
+    const service = createBookingsService({
+      em: { fork: () => ({}) },
+      bookingsRepo: { findBookings: async () => ({ rows: [{ booking, slot: null }], fetchCapReached: false }),
         latestRescheduleOrigins: async () => new Map(), findPatientNames: async () => new Map(),
         findPaymentStatesForBookings: async () => new Map(),
-        findBookingsWithSlotsByIds: async () => [], findFollowUpsOf: async () => [] } as any,
-      {} as any, { latestBySource: async () => new Map() } as any,
-      { findTypesByIds: async () => new Map() } as any, {} as any, {} as any, log as any,
-      {} as any, {} as any, { findActiveCarriersByPatients: async () => new Map() } as any,
-      {} as any, { findLatestIdsByAppointmentIds: async () => new Map() } as any, {} as any,
-      { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership } as any,
-      {} as any);
+        findBookingsWithSlotsByIds: async () => [], findFollowUpsOf: async () => [] },
+      catalogRepo: {},
+      historyRepo: { latestBySource: async () => new Map() },
+      appointmentsRepo: { findTypesByIds: async () => new Map() },
+      noticeRepo: {},
+      notices: {},
+      logger: log,
+      affiliations: {},
+      professionalTime: {},
+      coverageRepo: { findActiveCarriersByPatients: async () => new Map() },
+      waitlist: {},
+      encountersRepo: { findLatestIdsByAppointmentIds: async () => new Map() },
+      claimReadRepo: {},
+      representation: { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership },
+      formOrigin: {},
+    });
     const user = { ...actor('PATIENT'), patientProfileId: P1 };
     const result: any = await guarded(SchedulingBookingsController, 'searchBookings',
       { headers: { 'x-tenant-id': T1 }, user, params: {}, query: { resourceId: ID }, body: {} },

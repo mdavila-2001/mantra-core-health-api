@@ -61,7 +61,7 @@ export interface CreateAppointmentData {
  * forma de llenarla, así que un encuentro nunca podía decir de qué turno venía.
  *
  * Lo escribe la confirmación de una reserva: una cita **es** el turno visto
- * desde lo clínico. Ver `SchedulingBookingsService.crearCitaClinica` para por
+ * desde lo clínico. Ver `ClinicalAppointmentSync.createClinicalAppointment` (scheduling) para por
  * qué nace ahí y no en el check-in.
  */
 @Injectable()

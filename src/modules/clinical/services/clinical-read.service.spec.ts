@@ -91,10 +91,11 @@ function build() {
   const bookingsRepo = {
     // Sin ventana de fechas a propósito: una consulta en curso no se pregunta
     // por el calendario.
-    tieneConsultaEnCurso: mockFn((_em: unknown, pro: string, pac: string) =>
-      Promise.resolve(inCourse.has(clave(pro, pac))),
+    hasConsultationInProgress: mockFn(
+      (_em: unknown, pro: string, pac: string) =>
+        Promise.resolve(inCourse.has(clave(pro, pac))),
     ),
-    findConfirmadasConPacienteEntre: mockFn(
+    findConfirmedWithPatientBetween: mockFn(
       (
         _em: unknown,
         practitionerProfileId: string,
@@ -104,7 +105,8 @@ function build() {
       ) =>
         Promise.resolve(
           (
-            reservations.get(clave(practitionerProfileId, patientProfileId)) ?? []
+            reservations.get(clave(practitionerProfileId, patientProfileId)) ??
+            []
           ).filter((r) => r.startAt >= from && r.startAt < hasta),
         ),
     ),
@@ -682,10 +684,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
 
     await expect(
-      c.service.assertCanReadHistory(
-        PATIENT,
-        actorWith('u', 'PRACTITIONER'),
-      ),
+      c.service.assertCanReadHistory(PATIENT, actorWith('u', 'PRACTITIONER')),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
@@ -904,20 +903,17 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
   });
 
   it('el camino barato va primero: con consulta en curso no se consulta la agenda', async () => {
-    // No es cosmético: `findConfirmadasConPacienteEntre` trae una ventana de 96
+    // No es cosmético: `findConfirmedWithPatientBetween` trae una ventana de 96
     // horas y compara zona por zona. Si la respuesta ya se sabe, no se paga.
     const c = build();
     c.darDeAltaProfesional(MEDICO);
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
     c.iniciarConsulta(MEDICO, PATIENT);
 
-    await c.service.assertCanReadHistory(
-      PATIENT,
-      actorWith('u', 'CLINICIAN'),
-    );
+    await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
     expect(
-      c.bookingsRepo.findConfirmadasConPacienteEntre,
+      c.bookingsRepo.findConfirmedWithPatientBetween,
     ).not.toHaveBeenCalled();
   });
 
@@ -928,7 +924,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'SUPERADMIN')),
     ).resolves.toBeUndefined();
     expect(
-      c.bookingsRepo.findConfirmadasConPacienteEntre,
+      c.bookingsRepo.findConfirmedWithPatientBetween,
     ).not.toHaveBeenCalled();
   });
 
@@ -1046,10 +1042,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
     c.agendar(MEDICO, PATIENT, todayInLaPazAt(10), LA_PAZ);
 
-    await c.service.assertCanReadHistory(
-      PATIENT,
-      actorWith('u', 'CLINICIAN'),
-    );
+    await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
     expect(
       c.careRelationshipsRepo.findActiveForPractitionerPatient,
