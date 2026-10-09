@@ -4,7 +4,7 @@
 > verificado en `mantra-core-health-redesa-api`, explicado en prosa, no sólo enumerado.
 >
 > Lo que **falta** no se cubre aquí a propósito: eso vive en
-> `ESTADO-Y-PENDIENTES.md` (en la raíz del repo) y en
+> `docs/progress/ESTADO-Y-PENDIENTES.md` y en
 > [`docs/reports/production-readiness-2026-07-31.md`](../../reports/production-readiness-2026-07-31.md).
 > Cada cifra de este documento sale de un comando reproducible; al final hay una sección con
 > exactamente cuáles.
@@ -521,7 +521,7 @@ Nada de lo anterior pide fe. Los comandos:
 
 ```bash
 # Inventario y límites de dominio (entidades, endpoints, huérfanos, cross-domain)
-yarn alovida:coverage        # → ALOVIDA-COBERTURA.md
+yarn alovida:coverage        # → docs/reports/ALOVIDA-COBERTURA.md
 
 # Antipatrones prohibidos (borrado duro, CRUD sobre inmutables, tenant sin acotar…)
 yarn alovida:guardrails

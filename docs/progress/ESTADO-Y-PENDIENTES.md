@@ -292,7 +292,7 @@ completa en `CARRIL_REPORT-marcelo.md`.
 - Hay pruebas unitarias, de integración y smoke; los cambios sobre persistencia deben validarse
   contra una base real, no sólo con `EntityManager` simulado.
 
-Las cifras anteriores son una fotografía. Regenerar `ALOVIDA-COBERTURA.md` con
+Las cifras anteriores son una fotografía. Regenerar `docs/reports/ALOVIDA-COBERTURA.md` con
 `yarn alovida:coverage` cuando cambien controllers, entidades o límites de dominio.
 
 ## Cambios transversales ya incorporados
@@ -488,9 +488,9 @@ Una corrección se considera terminada cuando:
 | Documento | Propósito | Mantenimiento |
 | --- | --- | --- |
 | `README.md` | Arranque, arquitectura y operación | Manual, cuando cambia el proyecto |
-| `ESTADO-Y-PENDIENTES.md` | Foto vigente y backlog transversal | Manual; reemplaza planes fechados |
+| `docs/progress/ESTADO-Y-PENDIENTES.md` | Foto vigente y backlog transversal | Manual; reemplaza planes fechados |
 | `docs/governance/ALOVIDA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
-| `ALOVIDA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn alovida:coverage` |
+| `docs/reports/ALOVIDA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn alovida:coverage` |
 | `docs/frontend/CATALOGO-FLUJOS-VERIFICADOS.md` | Cuerpos reales para el frontend | Generado con `exercise-front-flows.mjs` (token de administrador) |
 | Cobertura por actor clínico (en `docs/governance/ALOVIDA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn alovida:personas` (token de cada actor) |
 | `src/modules/*/README.md` | Contrato por dominio | Manual, junto al módulo |

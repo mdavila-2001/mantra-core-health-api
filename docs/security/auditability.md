@@ -7,7 +7,7 @@
 
 | Tabla | Naturaleza | Qué registra |
 |---|---|---|
-| `audit.audit_log` | **WORM** (Write Once Read Many) | Cambios relevantes — mencionado explícitamente en `ESTADO-Y-PENDIENTES.md` como control transversal ya incorporado |
+| `audit.audit_log` | **WORM** (Write Once Read Many) | Cambios relevantes — mencionado explícitamente en `docs/progress/ESTADO-Y-PENDIENTES.md` como control transversal ya incorporado |
 | `audit.data_access_log` | Append-only | **Lecturas** de datos sensibles — distinto de `audit_log`, que registra cambios |
 
 Regla del estándar de diseño del proyecto: *"toda lectura de datos sensibles deja traza en

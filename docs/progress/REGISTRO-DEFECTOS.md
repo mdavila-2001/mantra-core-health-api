@@ -13,7 +13,7 @@ alguien dice «los defectos que venimos poniendo», hay que adivinar a cuál se 
 |---|---|---|
 | `INFORME-HALLAZGOS-M1-2026-08-12.md` | Fichas H-01…H-10, la única con formato de defecto | raíz del workspace (**fuera de git**) |
 | `COORDINACION-AGENTES.md` | Bitácora de sesiones con bloqueadores 🔴/🟡 | repo del front, 1 509 líneas |
-| `ESTADO-Y-PENDIENTES.md` | Backlog P0/P1/P2 | este repo |
+| `docs/progress/ESTADO-Y-PENDIENTES.md` | Backlog P0/P1/P2 | este repo |
 | `PENDIENTES-RED-SOCIAL-BUSCADOR.md` | Huecos H1–H5 de `community` | raíz del workspace |
 
 Este archivo no los reemplaza: los indexa y los ordena por lo que cuesta que sigan abiertos.

@@ -39,7 +39,7 @@ middleware — se implementa **por dominio**, donde el negocio lo exige. Ejemplo
 `POST /payments/intents` (`src/modules/payments/controllers/payments-intents.controller.ts`):
 repetir la misma `idempotencyKey` devuelve el intent existente en lugar de generar un segundo
 cobro. Otros flujos con semántica idempotente conocida (documentados en
-`ESTADO-Y-PENDIENTES.md`): emisión de solicitudes de medicación (perioperatorio).
+`docs/progress/ESTADO-Y-PENDIENTES.md`): emisión de solicitudes de medicación (perioperatorio).
 
 **Brecha:** no existe un catálogo consolidado de qué endpoints son idempotentes y con qué
 mecanismo (`Idempotency-Key` header vs. campo del body vs. `UNIQUE` constraint natural). Se

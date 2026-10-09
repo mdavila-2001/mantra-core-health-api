@@ -311,7 +311,7 @@ for (const c of crossDomain.slice(0, 60)) p(`- ${c.file} → \`${c.imports}\``);
 if (crossDomain.length > 60) p(`- … +${crossDomain.length - 60} más`);
 
 const report = lines.join('\n') + '\n';
-writeFileSync(join(ROOT, 'ALOVIDA-COBERTURA.md'), report);
+writeFileSync(join(ROOT, 'docs/reports/ALOVIDA-COBERTURA.md'), report);
 console.log(report);
 console.log(
   `\nResumen: entidades=${entities.length} orphan_table=${orphanTables.length} orphan_endpoint=${orphanEndpoints.length} cross_domain=${crossDomain.length}`,
