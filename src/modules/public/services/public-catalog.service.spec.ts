@@ -18,7 +18,7 @@ const ORG = {
   tenantId: TENANT,
   targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
 };
-const FARMACIA = {
+const PHARMACY = {
   id: 'prof-far',
   tenantId: TENANT,
   targetTypeConceptId: COMM.PROFILE_TARGET_PHARMACY,
@@ -36,7 +36,7 @@ function build() {
 }
 
 /** Una fila tal como la devuelve la base, CON un campo interno que no debe salir. */
-function servicio(over: Record<string, unknown> = {}) {
+function service(over: Record<string, unknown> = {}) {
   return {
     id: '11111111-1111-4111-8111-111111111111',
     code: 'CONS-GEN',
@@ -49,7 +49,7 @@ function servicio(over: Record<string, unknown> = {}) {
   };
 }
 
-function producto(over: Record<string, unknown> = {}) {
+function product(over: Record<string, unknown> = {}) {
   return {
     id: '22222222-2222-4222-8222-222222222222',
     sortName: 'Amoxicilina',
@@ -69,7 +69,7 @@ describe('PublicCatalogService (M4 · H2)', () => {
     it('trae los servicios de la organización del slug, con el precio como texto exacto', async () => {
       const d = build();
       d.repo.findVisibleProfileBySlug.mockResolvedValue(ORG);
-      d.repo.findOfferedServices.mockResolvedValue([servicio()]);
+      d.repo.findOfferedServices.mockResolvedValue([service()]);
 
       const page = await d.service.organizationServices('clinica-norte', {});
 
@@ -99,7 +99,7 @@ describe('PublicCatalogService (M4 · H2)', () => {
       const d = build();
       d.repo.findVisibleProfileBySlug.mockResolvedValue(ORG);
       d.repo.findOfferedServices.mockResolvedValue([
-        servicio({
+        service({
           incomeAccountId: 'cta-4100',
           taxCodeId: 'iva',
           practiceId: 'pr-1',
@@ -120,8 +120,8 @@ describe('PublicCatalogService (M4 · H2)', () => {
       const d = build();
       d.repo.findVisibleProfileBySlug.mockResolvedValue(ORG);
       d.repo.findOfferedServices.mockResolvedValue([
-        servicio({ price: '0.00' }),
-        servicio({ id: '33333333-3333-4333-8333-333333333333', price: '0' }),
+        service({ price: '0.00' }),
+        service({ id: '33333333-3333-4333-8333-333333333333', price: '0' }),
       ]);
 
       const page = await d.service.organizationServices('clinica-norte', {});
@@ -136,7 +136,7 @@ describe('PublicCatalogService (M4 · H2)', () => {
       const d = build();
       d.repo.findVisibleProfileBySlug.mockResolvedValue(ORG);
       d.repo.findOfferedServices.mockResolvedValue([
-        servicio({ isActive: false }),
+        service({ isActive: false }),
       ]);
 
       const page = await d.service.organizationServices('clinica-norte', {});
@@ -155,19 +155,19 @@ describe('PublicCatalogService (M4 · H2)', () => {
 
     it('un slug de farmacia pedido como organización es el MISMO 404', async () => {
       const d = build();
-      d.repo.findVisibleProfileBySlug.mockResolvedValue(FARMACIA);
+      d.repo.findVisibleProfileBySlug.mockResolvedValue(PHARMACY);
 
-      const errorOtroTipo = await d.service
+      const errorOtherType = await d.service
         .organizationServices('farmacia-central', {})
         .catch((e: unknown) => e);
       d.repo.findVisibleProfileBySlug.mockResolvedValue(null);
-      const errorInexistente = await d.service
+      const errorNonexistent = await d.service
         .organizationServices('farmacia-central', {})
         .catch((e: unknown) => e);
 
-      expect(errorOtroTipo).toBeInstanceOf(ResourceNotFoundException);
-      expect((errorOtroTipo as Error).message).toBe(
-        (errorInexistente as Error).message,
+      expect(errorOtherType).toBeInstanceOf(ResourceNotFoundException);
+      expect((errorOtherType as Error).message).toBe(
+        (errorNonexistent as Error).message,
       );
       expect(d.repo.findOfferedServices).not.toHaveBeenCalled();
     });
@@ -176,9 +176,9 @@ describe('PublicCatalogService (M4 · H2)', () => {
       const d = build();
       d.repo.findVisibleProfileBySlug.mockResolvedValue(ORG);
       d.repo.findOfferedServices.mockResolvedValue([
-        servicio({ id: 'aaaaaaaa-0000-4000-8000-000000000001', code: 'A' }),
-        servicio({ id: 'aaaaaaaa-0000-4000-8000-000000000002', code: 'B' }),
-        servicio({ id: 'aaaaaaaa-0000-4000-8000-000000000003', code: 'C' }),
+        service({ id: 'aaaaaaaa-0000-4000-8000-000000000001', code: 'A' }),
+        service({ id: 'aaaaaaaa-0000-4000-8000-000000000002', code: 'B' }),
+        service({ id: 'aaaaaaaa-0000-4000-8000-000000000003', code: 'C' }),
       ]);
 
       const page = await d.service.organizationServices('clinica-norte', {
@@ -235,8 +235,8 @@ describe('PublicCatalogService (M4 · H2)', () => {
   describe('pharmacyProducts — GET /public/profiles/f/:slug/products', () => {
     it('trae genérico, marca, presentación, precio como texto y stock', async () => {
       const d = build();
-      d.repo.findVisibleProfileBySlug.mockResolvedValue(FARMACIA);
-      d.repo.findPharmacyProducts.mockResolvedValue([producto()]);
+      d.repo.findVisibleProfileBySlug.mockResolvedValue(PHARMACY);
+      d.repo.findPharmacyProducts.mockResolvedValue([product()]);
 
       const page = await d.service.pharmacyProducts('farmacia-central', {});
 
@@ -263,9 +263,9 @@ describe('PublicCatalogService (M4 · H2)', () => {
 
     it('un producto agotado se lista con inStock=false, no se omite', async () => {
       const d = build();
-      d.repo.findVisibleProfileBySlug.mockResolvedValue(FARMACIA);
+      d.repo.findVisibleProfileBySlug.mockResolvedValue(PHARMACY);
       d.repo.findPharmacyProducts.mockResolvedValue([
-        producto({ availableQuantity: '0' }),
+        product({ availableQuantity: '0' }),
       ]);
 
       const page = await d.service.pharmacyProducts('farmacia-central', {});
@@ -276,9 +276,9 @@ describe('PublicCatalogService (M4 · H2)', () => {
 
     it('sin precio publicado viaja price=null y currency=null; sin presentación, null', async () => {
       const d = build();
-      d.repo.findVisibleProfileBySlug.mockResolvedValue(FARMACIA);
+      d.repo.findVisibleProfileBySlug.mockResolvedValue(PHARMACY);
       d.repo.findPharmacyProducts.mockResolvedValue([
-        producto({
+        product({
           price: null,
           currency: 'BOB',
           strengthText: null,
@@ -309,13 +309,13 @@ describe('PublicCatalogService (M4 · H2)', () => {
 
     it('pagina por el genérico y el id', async () => {
       const d = build();
-      d.repo.findVisibleProfileBySlug.mockResolvedValue(FARMACIA);
+      d.repo.findVisibleProfileBySlug.mockResolvedValue(PHARMACY);
       d.repo.findPharmacyProducts.mockResolvedValue([
-        producto({
+        product({
           id: 'bbbbbbbb-0000-4000-8000-000000000001',
           sortName: 'Ibuprofeno',
         }),
-        producto({
+        product({
           id: 'bbbbbbbb-0000-4000-8000-000000000002',
           sortName: 'Paracetamol',
         }),
