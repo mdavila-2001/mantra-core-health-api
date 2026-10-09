@@ -514,14 +514,15 @@ export class ClinicalReadService {
     patientProfileId: string,
   ): Promise<boolean> {
     const ahora = new Date();
-    const reservations = await this.bookingsRepo.findConfirmedWithPatientBetween(
-      em,
-      practitionerProfileId,
-      patientProfileId,
-      new Date(ahora.getTime() - WINDOW_MS),
-      new Date(ahora.getTime() + WINDOW_MS),
-      STATES_THAT_ENABLE,
-    );
+    const reservations =
+      await this.bookingsRepo.findConfirmedWithPatientBetween(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+        new Date(ahora.getTime() - WINDOW_MS),
+        new Date(ahora.getTime() + WINDOW_MS),
+        STATES_THAT_ENABLE,
+      );
 
     return reservations.some((reservation) => {
       const zone = reservation.timeZone ?? DEFAULT_ZONE;

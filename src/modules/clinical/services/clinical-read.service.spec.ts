@@ -91,8 +91,9 @@ function build() {
   const bookingsRepo = {
     // Sin ventana de fechas a propósito: una consulta en curso no se pregunta
     // por el calendario.
-    hasConsultationInProgress: mockFn((_em: unknown, pro: string, pac: string) =>
-      Promise.resolve(inCourse.has(clave(pro, pac))),
+    hasConsultationInProgress: mockFn(
+      (_em: unknown, pro: string, pac: string) =>
+        Promise.resolve(inCourse.has(clave(pro, pac))),
     ),
     findConfirmedWithPatientBetween: mockFn(
       (
@@ -104,7 +105,8 @@ function build() {
       ) =>
         Promise.resolve(
           (
-            reservations.get(clave(practitionerProfileId, patientProfileId)) ?? []
+            reservations.get(clave(practitionerProfileId, patientProfileId)) ??
+            []
           ).filter((r) => r.startAt >= from && r.startAt < hasta),
         ),
     ),
@@ -682,10 +684,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
 
     await expect(
-      c.service.assertCanReadHistory(
-        PATIENT,
-        actorWith('u', 'PRACTITIONER'),
-      ),
+      c.service.assertCanReadHistory(PATIENT, actorWith('u', 'PRACTITIONER')),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
@@ -911,10 +910,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
     c.iniciarConsulta(MEDICO, PATIENT);
 
-    await c.service.assertCanReadHistory(
-      PATIENT,
-      actorWith('u', 'CLINICIAN'),
-    );
+    await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
     expect(
       c.bookingsRepo.findConfirmedWithPatientBetween,
@@ -1046,10 +1042,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
     c.agendar(MEDICO, PATIENT, todayInLaPazAt(10), LA_PAZ);
 
-    await c.service.assertCanReadHistory(
-      PATIENT,
-      actorWith('u', 'CLINICIAN'),
-    );
+    await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
     expect(
       c.careRelationshipsRepo.findActiveForPractitionerPatient,
