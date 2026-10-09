@@ -16,13 +16,13 @@ import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog
 import { boProfessionConceptId } from '../../../common/seed/bo-professions.catalog';
 import type { RegisterPractitionerDto } from '../dto';
 
-const IDENTIDAD_PROFESIONAL = {
+const PROFESSIONAL_IDENTITY = {
   nationalId: '4821993',
   issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
 };
 
 const dto: RegisterPractitionerDto = {
-  ...IDENTIDAD_PROFESIONAL,
+  ...PROFESSIONAL_IDENTITY,
   email: 'dra.rojas@sanrafael.bo',
   password: 'password123',
   name: 'Ana',
@@ -213,11 +213,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     await d.service.registerPractitioner(dto);
 
-    const concedidos = d.rolesRepo.create.mock.calls.map(
+    const granted = d.rolesRepo.create.mock.calls.map(
       (c: unknown[]) => (c[1] as { roleConceptId: string }).roleConceptId,
     );
-    expect(concedidos).toContain(ROLE_CONCEPT_BY_CODE.PRACTITIONER);
-    expect(concedidos).toContain(ROLE_CONCEPT_BY_CODE.USER);
+    expect(granted).toContain(ROLE_CONCEPT_BY_CODE.PRACTITIONER);
+    expect(granted).toContain(ROLE_CONCEPT_BY_CODE.USER);
   });
 
   /**
@@ -230,21 +230,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     await d.service.registerPractitioner(dto);
 
-    const concedidos = d.rolesRepo.create.mock.calls.map(
+    const granted = d.rolesRepo.create.mock.calls.map(
       (c: unknown[]) => (c[1] as { roleConceptId: string }).roleConceptId,
     );
-    expect(concedidos).not.toContain(ROLE_CONCEPT_BY_CODE.CLINICIAN);
+    expect(granted).not.toContain(ROLE_CONCEPT_BY_CODE.CLINICIAN);
   });
 
   describe('assistedRegisterPractitioner (P6)', () => {
     const admin = { id: 'admin-1' } as never;
-    const dtoAsistido = { ...dto, reason: 'Alta de plantel' } as never;
+    const dtoAssisted = { ...dto, reason: 'Alta de plantel' } as never;
 
     it('no crea contraseña: reserva el login y emite un token de activación', async () => {
       const d = build();
 
       const res = await d.service.assistedRegisterPractitioner(
-        dtoAsistido,
+        dtoAssisted,
         admin,
       );
 
@@ -260,7 +260,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     it('guarda el motivo del alta: es la trazabilidad C-18', async () => {
       const d = build();
 
-      await d.service.assistedRegisterPractitioner(dtoAsistido, admin);
+      await d.service.assistedRegisterPractitioner(dtoAssisted, admin);
 
       expect(d.activationsRepo.create).toHaveBeenCalledWith(
         d.tx,
@@ -276,7 +276,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       const res = await d.service.assistedRegisterPractitioner(
-        dtoAsistido,
+        dtoAssisted,
         admin,
       );
 
@@ -311,15 +311,15 @@ describe('IamPractitionerSelfRegistrationService', () => {
         specialtyConceptIds: ['esp-cardio', 'esp-neuro'],
       });
 
-      const filas = d.specialtiesRepo.create.mock.calls.map(
+      const rows = d.specialtiesRepo.create.mock.calls.map(
         (c: unknown[]) => c[1] as Record<string, unknown>,
       );
-      expect(filas).toHaveLength(2);
-      expect(filas[0]).toMatchObject({
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toMatchObject({
         specialtyConceptId: 'esp-cardio',
         isPrimary: true,
       });
-      expect(filas[1]).toMatchObject({
+      expect(rows[1]).toMatchObject({
         specialtyConceptId: 'esp-neuro',
         isPrimary: false,
       });
@@ -430,7 +430,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
-      ...IDENTIDAD_PROFESIONAL,
+      ...PROFESSIONAL_IDENTITY,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -456,7 +456,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
-      ...IDENTIDAD_PROFESIONAL,
+      ...PROFESSIONAL_IDENTITY,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -481,7 +481,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
    * (`credentialNumber`) sigue funcionando sin quedar ambiguo.
    */
   describe('los títulos declarados en el alta', () => {
-    const titulo = {
+    const degree = {
       credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DIPLOMA,
       number: 'DIP-001',
     };
@@ -490,7 +490,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -503,7 +503,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -517,11 +517,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
-        credentials: [{ ...titulo, issuingInstitutionText: '  UMSA  ' }],
+        credentials: [{ ...degree, issuingInstitutionText: '  UMSA  ' }],
       });
 
       expect(d.professionalCredentialsRepo.create).toHaveBeenCalledTimes(1);
@@ -541,7 +541,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -575,7 +575,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -617,7 +617,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
-          ...IDENTIDAD_PROFESIONAL,
+          ...PROFESSIONAL_IDENTITY,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
@@ -639,12 +639,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
-          ...IDENTIDAD_PROFESIONAL,
+          ...PROFESSIONAL_IDENTITY,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
           credentials: [
-            titulo,
+            degree,
             // El segundo es un idioma: la FK lo aceptaría, el dominio no.
             { credentialTypeConceptId: PROF.LANGUAGE_SPANISH, number: 'X-1' },
           ],
@@ -665,19 +665,19 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     it('guarda la ciudad, el país y la profesión del título, limpios', async () => {
       const d = build();
-      const ingenierosCiviles = boProfessionConceptId('21420');
+      const civilEngineers = boProfessionConceptId('21420');
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
         credentials: [
           {
-            ...titulo,
+            ...degree,
             issuingCityText: ' Cochabamba ',
             issuingCountryText: 'Bolivia',
-            professionConceptId: ingenierosCiviles,
+            professionConceptId: civilEngineers,
             titleText: ' Diplomado en Salud Pública ',
           },
         ],
@@ -688,7 +688,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         expect.objectContaining({
           issuingCityText: 'Cochabamba',
           issuingCountryText: 'Bolivia',
-          professionConceptId: ingenierosCiviles,
+          professionConceptId: civilEngineers,
           titleText: 'Diplomado en Salud Pública',
         }),
       );
@@ -698,11 +698,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
-        credentials: [{ ...titulo, issuingCityText: '   ' }],
+        credentials: [{ ...degree, issuingCityText: '   ' }],
       });
 
       expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
@@ -716,13 +716,13 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
-          ...IDENTIDAD_PROFESIONAL,
+          ...PROFESSIONAL_IDENTITY,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
           // Un idioma: la FK lo aceptaría, el dominio no.
           credentials: [
-            { ...titulo, professionConceptId: PROF.LANGUAGE_SPANISH },
+            { ...degree, professionConceptId: PROF.LANGUAGE_SPANISH },
           ],
         }),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -735,11 +735,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
-          ...IDENTIDAD_PROFESIONAL,
+          ...PROFESSIONAL_IDENTITY,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
-          credentials: [{ ...titulo, number: '   ' }],
+          credentials: [{ ...degree, number: '   ' }],
         }),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
 
@@ -750,7 +750,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       const d = build();
 
       await d.service.registerPractitioner({
-        ...IDENTIDAD_PROFESIONAL,
+        ...PROFESSIONAL_IDENTITY,
         email: dto.email,
         password: dto.password,
         licenseNumber: dto.licenseNumber,
@@ -769,12 +769,12 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await expect(
         d.service.registerPractitioner({
-          ...IDENTIDAD_PROFESIONAL,
+          ...PROFESSIONAL_IDENTITY,
           email: dto.email,
           password: dto.password,
           licenseNumber: dto.licenseNumber,
           credentialNumber: 'TIT-99310',
-          credentials: [titulo],
+          credentials: [degree],
         }),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
 
@@ -829,7 +829,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const d = build();
 
     await d.service.registerPractitioner({
-      ...IDENTIDAD_PROFESIONAL,
+      ...PROFESSIONAL_IDENTITY,
       email: dto.email,
       password: dto.password,
       licenseNumber: dto.licenseNumber,
@@ -1000,7 +1000,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       workLandline: '+591 3 3456789',
     });
 
-    const esperados = [
+    const expected = [
       // El correo de trabajo es además la identidad de login.
       [CONCEPTS.CONTACT_EMAIL, CONCEPTS.CONTACT_USE_WORK, dto.email],
       [
@@ -1013,24 +1013,24 @@ describe('IamPractitionerSelfRegistrationService', () => {
       [CONCEPTS.CONTACT_PHONE, CONCEPTS.CONTACT_USE_WORK, '+591 3 3456789'],
     ] as const;
 
-    for (const [systemConceptId, useConceptId, value] of esperados) {
+    for (const [systemConceptId, useConceptId, value] of expected) {
       expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ systemConceptId, useConceptId, value }),
       );
     }
-    expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(esperados.length);
+    expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(expected.length);
   });
 
   it('guarda el correo de acceso personal y workEmail en usos distintos', async () => {
     const d = build();
-    const correoPersonal = 'ana.personal@example.test';
-    const correoTrabajo = 'ana@hospital.example.test';
+    const emailPersonal = 'ana.personal@example.test';
+    const workEmail = 'ana@hospital.example.test';
 
     await d.service.registerPractitioner({
       ...dto,
-      email: correoPersonal,
-      workEmail: correoTrabajo,
+      email: emailPersonal,
+      workEmail: workEmail,
     } as RegisterPractitionerDto);
 
     expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
@@ -1038,7 +1038,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect.objectContaining({
         systemConceptId: CONCEPTS.CONTACT_EMAIL,
         useConceptId: CONCEPTS.CONTACT_USE_HOME,
-        value: correoPersonal,
+        value: emailPersonal,
       }),
     );
     expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
@@ -1046,7 +1046,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect.objectContaining({
         systemConceptId: CONCEPTS.CONTACT_EMAIL,
         useConceptId: CONCEPTS.CONTACT_USE_WORK,
-        value: correoTrabajo,
+        value: workEmail,
       }),
     );
   });
@@ -1059,7 +1059,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       personalEmail: dto.email.toUpperCase(),
     } as RegisterPractitionerDto);
 
-    const correos = d.contactPointsRepo.create.mock.calls
+    const emails = d.contactPointsRepo.create.mock.calls
       .map(
         ([, fila]: [
           unknown,
@@ -1067,11 +1067,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
         ]) => fila,
       )
       .filter(
-        (fila: { systemConceptId: string }) =>
-          fila.systemConceptId === CONCEPTS.CONTACT_EMAIL,
+        (row: { systemConceptId: string }) =>
+          row.systemConceptId === CONCEPTS.CONTACT_EMAIL,
       );
-    expect(correos).toHaveLength(1);
-    expect(correos[0]).toMatchObject({
+    expect(emails).toHaveLength(1);
+    expect(emails[0]).toMatchObject({
       useConceptId: CONCEPTS.CONTACT_USE_HOME,
     });
   });
@@ -1100,19 +1100,19 @@ describe('IamPractitionerSelfRegistrationService', () => {
       workMobilePhone: '+591 70022222',
     });
 
-    const celulares = d.contactPointsRepo.create.mock.calls
+    const mobiles = d.contactPointsRepo.create.mock.calls
       .map(
         ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
           fila,
       )
       .filter(
-        (fila: { systemConceptId: string }) =>
-          fila.systemConceptId === CONCEPTS.CONTACT_MOBILE,
+        (row: { systemConceptId: string }) =>
+          row.systemConceptId === CONCEPTS.CONTACT_MOBILE,
       );
 
-    expect(celulares).toHaveLength(2);
+    expect(mobiles).toHaveLength(2);
     expect(
-      new Set(celulares.map((fila: { value: string }) => fila.value)),
+      new Set(mobiles.map((row: { value: string }) => row.value)),
     ).toEqual(new Set(['+591 70011111', '+591 70022222']));
   });
 
@@ -1140,18 +1140,18 @@ describe('IamPractitionerSelfRegistrationService', () => {
       workLandline: '+591 3 2222222',
     });
 
-    const fijos = d.contactPointsRepo.create.mock.calls
+    const landline = d.contactPointsRepo.create.mock.calls
       .map(
         ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
           fila,
       )
       .filter(
-        (fila: { systemConceptId: string }) =>
-          fila.systemConceptId === CONCEPTS.CONTACT_PHONE,
+        (row: { systemConceptId: string }) =>
+          row.systemConceptId === CONCEPTS.CONTACT_PHONE,
       );
 
-    expect(fijos).toHaveLength(1);
-    expect(fijos[0].value).toBe('+591 3 2222222');
+    expect(landline).toHaveLength(1);
+    expect(landline[0].value).toBe('+591 3 2222222');
   });
 
   it('ata el departamento emisor al identificador, no a la persona', async () => {
@@ -1233,7 +1233,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
   describe('foto de perfil durante el registro', () => {
     // Cabecera JPEG válida para que sniffMimeType la reconozca como IMAGE
-    const FOTO_JPEG_B64 =
+    const PHOTO_JPEG_B64 =
       'data:image/jpeg;base64,' +
       Buffer.from([
         0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
@@ -1244,7 +1244,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       const result = await d.service.registerPractitioner({
         ...dto,
-        profilePhotoBase64: FOTO_JPEG_B64,
+        profilePhotoBase64: PHOTO_JPEG_B64,
       });
 
       expect(d.fileUploadService.upload).toHaveBeenCalledWith(
@@ -1305,7 +1305,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       const result = await d.service.registerPractitioner({
         ...dto,
-        profilePhotoBase64: FOTO_JPEG_B64,
+        profilePhotoBase64: PHOTO_JPEG_B64,
       });
 
       expect(result.userId).toBe('user-1');
@@ -1419,14 +1419,14 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await d.service.registerPractitioner({ ...dto, ownSite });
 
-      const ordenMembresia =
+      const membershipOrder =
         d.tenantMembershipsRepo.create.mock.invocationCallOrder[0];
-      const ordenProvision =
+      const orderProvision =
         d.ownSiteProvisioning.provision.mock.invocationCallOrder[0];
-      const ordenVerificacion =
+      const verificationOrder =
         d.emailVerificationsRepo.create.mock.invocationCallOrder[0];
-      expect(ordenMembresia).toBeLessThan(ordenProvision);
-      expect(ordenProvision).toBeLessThan(ordenVerificacion);
+      expect(membershipOrder).toBeLessThan(orderProvision);
+      expect(orderProvision).toBeLessThan(verificationOrder);
     });
 
     it('si el provisioning falla, el alta entera no ocurre', async () => {
@@ -1478,7 +1478,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
    * (`createResidenceAddress`) que ya usa el registro de paciente.
    */
   describe('el domicilio del alta (P19)', () => {
-    const municipio = 'concept-santa-cruz';
+    const municipality = 'concept-santa-cruz';
 
     it('con calle, coordenadas y municipio: escribe la fila HOME completa', async () => {
       const d = build();
@@ -1489,7 +1489,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await d.service.registerPractitioner({
         ...dto,
-        residenceMunicipalityConceptId: municipio,
+        residenceMunicipalityConceptId: municipality,
         homeAddressLines: 'Barrio Equipetrol, Calle 7 Este #12',
         homeLatitude: -17.7689,
         homeLongitude: -63.1956,
@@ -1500,7 +1500,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         expect.objectContaining({
           ownerId: 'person-1',
           useConceptId: CONCEPTS.ADDR_USE_HOME,
-          municipalityConceptId: municipio,
+          municipalityConceptId: municipality,
           administrativeAreaConceptId: boDepartmentConceptId('SC'),
           city: 'Santa Cruz de la Sierra',
           lines: 'Barrio Equipetrol, Calle 7 Este #12',
@@ -1520,13 +1520,13 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       await d.service.registerPractitioner({
         ...dto,
-        residenceMunicipalityConceptId: municipio,
+        residenceMunicipalityConceptId: municipality,
       });
 
       expect(d.addressesRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
-          municipalityConceptId: municipio,
+          municipalityConceptId: municipality,
           lines: undefined,
           latitude: undefined,
           longitude: undefined,
@@ -1668,9 +1668,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
           version: { sizeBytes: String(2 * 1024 * 1024 + 1) },
         },
       ],
-    ])('rechaza %s', async (_caso, archivo) => {
+    ])('rechaza %s', async (_caso, file) => {
       const d = build();
-      d.attachableFileService.claimAnonymousUpload.mockResolvedValue(archivo);
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue(file);
       await expect(
         d.service.registerPractitioner({ ...dto, signatureFileId }),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

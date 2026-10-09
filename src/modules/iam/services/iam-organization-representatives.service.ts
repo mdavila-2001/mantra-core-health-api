@@ -71,7 +71,7 @@ export class IamOrganizationRepresentativesService {
    * `person-name.ts` usa en las otras cuatro altas. Traducir acá evita que la
    * pieza compartida conozca el nombre de campo de un DTO en particular.
    */
-  private nombreDe(dto: {
+  private name(dto: {
     readonly name?: string;
     readonly middleName?: string;
     readonly lastName?: string;
@@ -114,9 +114,9 @@ export class IamOrganizationRepresentativesService {
       contactPoints: this.contactPointsRepo,
     };
 
-    const representanteCreado = legalRepresentative
+    const createdRepresentative = legalRepresentative
       ? createContactPerson(repos, tx, {
-          ...this.nombreDe(legalRepresentative),
+          ...this.name(legalRepresentative),
           email: legalRepresentative.email,
           phone: legalRepresentative.phone,
           nationalId: legalRepresentative.idNumber,
@@ -124,17 +124,17 @@ export class IamOrganizationRepresentativesService {
         })
       : undefined;
 
-    const gerenciasCreadas: RegistrationExecutive[] = [];
+    const createdManagements: RegistrationExecutive[] = [];
     if (executives) {
       for (const key of EXECUTIVE_DTO_KEYS) {
-        const contacto = executives[key];
+        const contact = executives[key];
         const { personId } = createContactPerson(repos, tx, {
-          ...this.nombreDe(contacto),
-          email: contacto.email,
-          mobile: contacto.phone,
+          ...this.name(contact),
+          email: contact.email,
+          mobile: contact.phone,
           actorUserId: input.ownerUserId,
         });
-        gerenciasCreadas.push({
+        createdManagements.push({
           role: EXECUTIVE_ROLE_BY_DTO_KEY[key],
           personId,
         });
@@ -152,15 +152,15 @@ export class IamOrganizationRepresentativesService {
         legalEntityType: input.legalEntityType,
         alreadyDeclaredFileIds: input.legalDocumentFileIds,
         legalRepresentative:
-          legalRepresentative && representanteCreado
+          legalRepresentative && createdRepresentative
             ? {
-                personId: representanteCreado.personId,
-                ciIdentifierId: representanteCreado.identifierId,
+                personId: createdRepresentative.personId,
+                ciIdentifierId: createdRepresentative.identifierId,
                 powerOfAttorneyFileId:
                   legalRepresentative.powerOfAttorneyFileId,
               }
             : undefined,
-        executives: gerenciasCreadas.length > 0 ? gerenciasCreadas : undefined,
+        executives: createdManagements.length > 0 ? createdManagements : undefined,
       });
 
     return { representativesRegistered: count };

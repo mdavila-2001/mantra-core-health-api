@@ -517,13 +517,13 @@ describe('IamOrganizationSelfRegistrationService', () => {
   });
 
   describe('documentos exigidos por el tipo societario (CL-43)', () => {
-    const sinConstitucion = {
+    const withoutConstitution = {
       taxIdentifierFileId: 'file-tax',
       commerceRegistryFileId: 'file-commerce',
       operatingLicenseFileId: 'file-license',
       healthAuthorityCertificateFileId: 'file-sedes',
     };
-    const representante = {
+    const representative = {
       firstName: 'Ana',
       lastName: 'Rojas',
       idNumber: '4821993',
@@ -538,8 +538,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
         organization: {
           ...dto.organization,
           legalEntityType: 'UNIPERSONAL',
-          legalDocuments: sinConstitucion,
-          legalRepresentative: representante,
+          legalDocuments: withoutConstitution,
+          legalRepresentative: representative,
         },
       } as never);
 
@@ -579,7 +579,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
           organization: {
             ...dto.organization,
             legalEntityType: 'SRL',
-            legalDocuments: sinConstitucion,
+            legalDocuments: withoutConstitution,
           },
         } as never),
       ).rejects.toThrow(PreconditionFailedException);
@@ -601,10 +601,10 @@ describe('IamOrganizationSelfRegistrationService', () => {
             ...dto.organization,
             legalEntityType: 'SRL',
             legalDocuments: {
-              ...sinConstitucion,
+              ...withoutConstitution,
               constitutionFileId: 'file-constitution',
             },
-            legalRepresentative: representante,
+            legalRepresentative: representative,
           },
         } as never),
       ).rejects.toThrow(PreconditionFailedException);
@@ -621,7 +621,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
           organization: {
             ...dto.organization,
             tenantType: 'PAYER',
-            legalDocuments: sinConstitucion,
+            legalDocuments: withoutConstitution,
           },
         } as never),
       ).rejects.toThrow(PreconditionFailedException);

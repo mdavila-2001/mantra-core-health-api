@@ -85,7 +85,7 @@ import { BO_PROFESSION_CONCEPT_IDS } from '../../../common/seed/bo-professions.c
  * `professional-credential-type`, la misma que siembra la app y la misma que
  * valida `ProfilesPractitionersService.addOwnCredential`.
  */
-const TIPOS_DE_CREDENCIAL: readonly string[] = [
+const CREDENTIAL_TYPES: readonly string[] = [
   PROF.CREDENTIAL_TYPE_DEGREE,
   PROF.CREDENTIAL_TYPE_DIPLOMA,
   PROF.CREDENTIAL_TYPE_MASTER,
@@ -94,9 +94,9 @@ const TIPOS_DE_CREDENCIAL: readonly string[] = [
 ];
 
 /** Texto recortado, o `undefined` si viene vacío: una cadena en blanco no es un dato. */
-function textoOpcional(valor: string | undefined): string | undefined {
-  const limpio = valor?.trim();
-  return limpio ? limpio : undefined;
+function optionalText(valor: string | undefined): string | undefined {
+  const clean = valor?.trim();
+  return clean ? clean : undefined;
 }
 
 const DATA_URI_REGEX = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/;
@@ -140,7 +140,7 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
 
 /** Un punto de contacto listo para persistirse, ya resuelto su par sistema/uso. */
-interface ContactoDeclarado {
+interface DeclaredContact {
   readonly systemConceptId: string;
   readonly value: string;
   readonly useConceptId: string;
@@ -166,7 +166,7 @@ interface ContactoDeclarado {
  * @param dto - Cuerpo del alta de profesional.
  * @returns Los contactos declarados, sin los vacíos.
  */
-function contactosDeclarados(
+function declaredContacts(
   dto: Pick<
     RegisterPractitionerDto,
     | 'email'
@@ -177,9 +177,9 @@ function contactosDeclarados(
     | 'workLandline'
     | 'phone'
   >,
-): readonly ContactoDeclarado[] {
-  const fijoDeTrabajo = dto.workLandline ?? dto.phone;
-  const correoPersonal =
+): readonly DeclaredContact[] {
+  const workLandline = dto.workLandline ?? dto.phone;
+  const emailPersonal =
     dto.personalEmail ?? (dto.workEmail ? dto.email : undefined);
   // ID-12: sin correo institucional el cliente manda `personalEmail === email`.
   // Eso dice que el único correo es personal, y guardarlo además como de
@@ -188,20 +188,20 @@ function contactosDeclarados(
     dto.workEmail === undefined &&
     dto.personalEmail !== undefined &&
     dto.personalEmail.trim().toLowerCase() === dto.email.trim().toLowerCase();
-  const correoTrabajo = soloPersonal ? undefined : (dto.workEmail ?? dto.email);
+  const workEmail = soloPersonal ? undefined : (dto.workEmail ?? dto.email);
 
-  const candidatos: readonly (ContactoDeclarado | null)[] = [
-    correoTrabajo
+  const candidates: readonly (DeclaredContact | null)[] = [
+    workEmail
       ? {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
-          value: correoTrabajo,
+          value: workEmail,
           useConceptId: CONCEPTS.CONTACT_USE_WORK,
         }
       : null,
-    correoPersonal
+    emailPersonal
       ? {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
-          value: correoPersonal,
+          value: emailPersonal,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
         }
       : null,
@@ -219,17 +219,17 @@ function contactosDeclarados(
           useConceptId: CONCEPTS.CONTACT_USE_WORK,
         }
       : null,
-    fijoDeTrabajo
+    workLandline
       ? {
           systemConceptId: CONCEPTS.CONTACT_PHONE,
-          value: fijoDeTrabajo,
+          value: workLandline,
           useConceptId: CONCEPTS.CONTACT_USE_WORK,
         }
       : null,
   ];
 
-  return candidatos.filter(
-    (contacto): contacto is ContactoDeclarado => contacto !== null,
+  return candidates.filter(
+    (contact): contact is DeclaredContact => contact !== null,
   );
 }
 
@@ -400,7 +400,7 @@ export class IamPractitionerSelfRegistrationService {
     dto: RegisterPractitionerDto | AssistedPractitionerRegistrationDto,
     span: TraceSpan,
     ip?: string,
-    asistido?: {
+    assisted?: {
       actor: AuthenticatedUser;
       reason: string;
       clinicalRoles: string[];
@@ -461,7 +461,7 @@ export class IamPractitionerSelfRegistrationService {
       // El CI y su departamento emisor son requisitos del alta médica. Se
       // comprueba el catálogo también acá para proteger a llamadores que no
       // pasen por el ValidationPipe HTTP. Ocurre antes de cualquier escritura.
-      await this.assertDepartamentoEmisor(
+      await this.assertIssuerDepartment(
         tx,
         dto.issuerAdministrativeAreaConceptId,
       );
@@ -477,23 +477,23 @@ export class IamPractitionerSelfRegistrationService {
       // emite un token de activación y el titular la fija al entrar.
       const user = this.usersRepo.create(tx, {
         displayName,
-        statusConceptId: asistido
+        statusConceptId: assisted
           ? CONCEPTS.STATE_PENDING
           : CONCEPTS.USER_ACTIVE,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
-        ...(asistido ? { mustChangePassword: true } : {}),
+        ...(assisted ? { mustChangePassword: true } : {}),
       });
       // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
       await tx.flush();
 
-      if (asistido) {
+      if (assisted) {
         // Reserva el login sin secreto: nadie puede entrar hasta que el titular
         // consuma el token y elija su contraseña.
         this.credentialsRepo.createPendingPassword(tx, {
           userId: user.id,
           externalSubject: dto.email,
-          actorUserId: asistido.actor.id,
+          actorUserId: assisted.actor.id,
         });
       } else {
         this.credentialsRepo.createPassword(tx, {
@@ -667,42 +667,42 @@ export class IamPractitionerSelfRegistrationService {
       //
       // Van en esta misma transacción, así que si una falla no queda ninguna a
       // medias: o entra el alta entera o no entra nada.
-      for (const declarada of dto.credentials ?? []) {
+      for (const declared of dto.credentials ?? []) {
         // La FK acepta CUALQUIER concepto del catálogo, así que sin esta
         // comprobación alguien podría archivar como «título» el concepto de un
         // idioma. Quién decide cuáles son tipos de credencial es la enumeración
         // `professional-credential-type`, la misma que valida `addOwnCredential`.
-        if (!TIPOS_DE_CREDENCIAL.includes(declarada.credentialTypeConceptId)) {
+        if (!CREDENTIAL_TYPES.includes(declared.credentialTypeConceptId)) {
           throw new PreconditionFailedException(
             'Ese concepto no es un tipo de credencial profesional',
-            { credentialTypeConceptId: declarada.credentialTypeConceptId },
+            { credentialTypeConceptId: declared.credentialTypeConceptId },
           );
         }
         // El DTO ya lo exige, y se comprueba acá también por lo mismo que el
         // departamento emisor: un llamador que no pase por el `ValidationPipe`
         // podría saltárselo, y una credencial sin número no se puede verificar.
-        const numero = declarada.number.trim();
+        const numero = declared.number.trim();
         if (numero === '') {
           throw new PreconditionFailedException(
             'El número del título no puede estar vacío',
-            { credentialTypeConceptId: declarada.credentialTypeConceptId },
+            { credentialTypeConceptId: declared.credentialTypeConceptId },
           );
         }
         // Mismo criterio que el tipo: la FK acepta cualquier concepto, y quién
         // decide qué es una profesión es VS_BO_PROFESSION (COB-2023).
         if (
-          declarada.professionConceptId !== undefined &&
-          !BO_PROFESSION_CONCEPT_IDS.has(declarada.professionConceptId)
+          declared.professionConceptId !== undefined &&
+          !BO_PROFESSION_CONCEPT_IDS.has(declared.professionConceptId)
         ) {
           throw new PreconditionFailedException(
             'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
-            { professionConceptId: declarada.professionConceptId },
+            { professionConceptId: declared.professionConceptId },
           );
         }
-        if (declarada.fileId) {
+        if (declared.fileId) {
           await this.attachableFiles.claimAnonymousUpload(
             tx,
-            declarada.fileId,
+            declared.fileId,
             { tenantId: SEED.tenantId, ownerUserId: user.id },
             {
               allowedMimeTypes: ['application/pdf'],
@@ -717,14 +717,14 @@ export class IamPractitionerSelfRegistrationService {
         }
         this.professionalCredentialsRepo.create(tx, {
           practitionerProfileId: person.id,
-          credentialTypeConceptId: declarada.credentialTypeConceptId,
+          credentialTypeConceptId: declared.credentialTypeConceptId,
           number: numero,
-          issuingInstitutionText: declarada.issuingInstitutionText?.trim(),
-          issuingCityText: textoOpcional(declarada.issuingCityText),
-          issuingCountryText: textoOpcional(declarada.issuingCountryText),
-          professionConceptId: declarada.professionConceptId,
-          titleText: textoOpcional(declarada.titleText),
-          fileId: declarada.fileId,
+          issuingInstitutionText: declared.issuingInstitutionText?.trim(),
+          issuingCityText: optionalText(declared.issuingCityText),
+          issuingCountryText: optionalText(declared.issuingCountryText),
+          professionConceptId: declared.professionConceptId,
+          titleText: optionalText(declared.titleText),
+          fileId: declared.fileId,
           stateConceptId: PROF.CRED_PENDING,
           actorUserId: user.id,
         });
@@ -744,8 +744,8 @@ export class IamPractitionerSelfRegistrationService {
       // concepto del catálogo y quién decide cuáles son especialidades es
       // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
       // dos filas: quien pega dos veces la misma opción declara una.
-      const especialidades = [...new Set(dto.specialtyConceptIds ?? [])];
-      for (const [orden, specialtyConceptId] of especialidades.entries()) {
+      const specialties = [...new Set(dto.specialtyConceptIds ?? [])];
+      for (const [orden, specialtyConceptId] of specialties.entries()) {
         await this.specialtyCatalog.assertIsMedicalSpecialty(
           tx,
           specialtyConceptId,
@@ -825,13 +825,13 @@ export class IamPractitionerSelfRegistrationService {
       // demás si los aportó. Cada uno es una fila propia de
       // `common.contact_points`, distinguida por el par sistema/uso: el modelo
       // ya admitía N contactos por persona, lo que faltaba era pedirlos.
-      for (const contacto of contactosDeclarados(dto)) {
+      for (const contact of declaredContacts(dto)) {
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
-          systemConceptId: contacto.systemConceptId,
-          value: contacto.value,
-          useConceptId: contacto.useConceptId,
+          systemConceptId: contact.systemConceptId,
+          value: contact.value,
+          useConceptId: contact.useConceptId,
           actorUserId: user.id,
         });
       }
@@ -867,7 +867,7 @@ export class IamPractitionerSelfRegistrationService {
               practitionerProfileId: person.id,
             },
             dto.ownSite,
-            asistido?.actor.id ?? user.id,
+            assisted?.actor.id ?? user.id,
           )
         : null;
 
@@ -885,25 +885,25 @@ export class IamPractitionerSelfRegistrationService {
       // transacción que la cuenta: un rol concedido a un alta que después se
       // deshace sería un privilegio sin sujeto detrás. El autorregistro no pasa
       // por aquí (`asistido` es nulo) porque nadie ha validado quién solicita.
-      const rolesConcedidos: string[] = [];
-      const rolesRechazados: string[] = [];
-      if (asistido) {
-        for (const code of asistido.clinicalRoles) {
+      const rolesGranted: string[] = [];
+      const rolesRejected: string[] = [];
+      if (assisted) {
+        for (const code of assisted.clinicalRoles) {
           const ok = await this.effectiveRoles.ensureRoleByCode(
             tx,
             user.id,
             code,
-            { tenantId: SEED.tenantId, actorUserId: asistido.actor.id },
+            { tenantId: SEED.tenantId, actorUserId: assisted.actor.id },
           );
-          (ok ? rolesConcedidos : rolesRechazados).push(code);
+          (ok ? rolesGranted : rolesRejected).push(code);
         }
-        if (rolesRechazados.length > 0) {
+        if (rolesRejected.length > 0) {
           // Fallar el alta entera es lo correcto: devolver 201 con la mitad de
           // los roles deja al administrador creyendo que el profesional quedó
           // operativo, y el fallo aparecería mucho más tarde como un 403 suelto.
           throw new PreconditionFailedException(
             'Alguno de los roles indicados no existe o no es asignable',
-            { roles: rolesRechazados },
+            { roles: rolesRejected },
           );
         }
       }
@@ -915,11 +915,11 @@ export class IamPractitionerSelfRegistrationService {
         recordedByUserId: user.id,
         ip,
         detailJson: {
-          flow: asistido
+          flow: assisted
             ? 'practitioner-assisted-registration'
             : 'practitioner-self-registration',
-          ...(rolesConcedidos.length > 0
-            ? { clinicalRoles: rolesConcedidos }
+          ...(rolesGranted.length > 0
+            ? { clinicalRoles: rolesGranted }
             : {}),
         },
       });
@@ -927,7 +927,7 @@ export class IamPractitionerSelfRegistrationService {
       // Token de activación de un solo uso, sólo en el alta administrativa: es
       // lo único que el administrador entrega al titular. Del lado del servidor
       // vive únicamente su hash.
-      const activacion = asistido
+      const activation = assisted
         ? (() => {
             const par = this.tokenService.issueRefreshToken();
             const expiresAt = new Date(Date.now() + ACTIVATION_TTL_MS);
@@ -935,8 +935,8 @@ export class IamPractitionerSelfRegistrationService {
               userId: user.id,
               tokenHash: par.hash,
               expiresAt,
-              reason: asistido.reason,
-              actorUserId: asistido.actor.id,
+              reason: assisted.reason,
+              actorUserId: assisted.actor.id,
             });
             return { token: par.raw, expiresAt };
           })()
@@ -952,8 +952,8 @@ export class IamPractitionerSelfRegistrationService {
         sedesLicenseId: sedesLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
-        activacion,
-        clinicalRoles: rolesConcedidos,
+        activacion: activation,
+        clinicalRoles: rolesGranted,
         ownSite: ownSite
           ? { practiceId: ownSite.practiceId, siteId: ownSite.siteId }
           : null,
@@ -1026,7 +1026,7 @@ export class IamPractitionerSelfRegistrationService {
    * @param conceptId - El uuid declarado como `issuerAdministrativeAreaConceptId`.
    * @throws PreconditionFailedException si falta o no pertenece a `VS_BO_DEPARTMENT`.
    */
-  private async assertDepartamentoEmisor(
+  private async assertIssuerDepartment(
     tx: EntityManager,
     conceptId: string | undefined,
   ): Promise<void> {
