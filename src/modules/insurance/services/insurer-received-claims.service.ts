@@ -35,6 +35,7 @@ import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { matchesLinkedClaimSnapshot } from './linked-claim-validation';
 import type { MyClaimDto, MyClaimsView } from '../dto/my-claims.dto';
 import {
+  CorruptStoredAmountError,
   fromCents,
   splitApproval,
   toCents,
@@ -952,13 +953,8 @@ function groupLines(
     own.push(line);
     grouped.set(line.insuranceClaimId, own);
   }
-  const amount = (line: InsuranceClaimLines): bigint => {
-    try {
-      return line.billedAmount ? toCents(line.billedAmount) : 0n;
-    } catch {
-      return 0n;
-    }
-  };
+  const amount = (line: InsuranceClaimLines): bigint =>
+    line.billedAmount ? storedCents(line, line.billedAmount) : 0n;
   for (const own of grouped.values()) {
     own.sort((a, b) => {
       const byAmount = amount(b) - amount(a);
@@ -1018,7 +1014,7 @@ function toLine(
     display: service?.display ?? `Ítem ${line.lineSequence}`,
     quantity,
     unitPrice: {
-      amount: unitPrice(billed, quantity),
+      amount: unitPrice(line, billed, quantity),
       currency,
     },
     billedAmount: { amount: billed, currency },
@@ -1032,12 +1028,31 @@ function toLine(
  * @param quantity - Cantidad.
  * @returns El precio unitario, o el facturado si la cantidad no es positiva.
  */
-function unitPrice(billed: string, quantity: number): string {
+function unitPrice(
+  line: InsuranceClaimLines,
+  billed: string,
+  quantity: number,
+): string {
+  const cents = storedCents(line, billed);
+  if (!(quantity > 0)) return fromCents(cents);
+  return fromCents(BigInt(Math.round(Number(cents) / quantity)));
+}
+
+/**
+ * Pasa a centavos un importe ya guardado en un renglón.
+ *
+ * @param line - El renglón que lo guarda, para nombrarlo si está corrupto.
+ * @param amount - El importe tal como lo devolvió la base.
+ * @returns El importe en centavos.
+ * @throws CorruptStoredAmountError si la base guarda algo que no es un importe.
+ */
+function storedCents(line: InsuranceClaimLines, amount: string): bigint {
   try {
-    const cents = toCents(billed);
-    if (!(quantity > 0)) return fromCents(cents);
-    return fromCents(BigInt(Math.round(Number(cents) / quantity)));
-  } catch {
-    return billed;
+    return toCents(amount);
+  } catch (error) {
+    if (error instanceof RangeError) {
+      throw new CorruptStoredAmountError(line.insuranceClaimId, line.id, amount);
+    }
+    throw error;
   }
 }
