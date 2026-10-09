@@ -19,13 +19,13 @@ const actor = {
   practitionerProfileId: 'hp-1',
 } as any;
 
-const actorSinPerfil = { id: 'user-2', roles: ['PRACTITIONER'] } as any;
+const actorWithoutProfile = { id: 'user-2', roles: ['PRACTITIONER'] } as any;
 
 /** Cuenta administradora de la organización, sin perfil profesional. */
 const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 /** Un paciente autenticado: ni perfil profesional ni rol administrativo. */
-const paciente = {
+const patient = {
   id: 'user-3',
   roles: ['PATIENT'],
   patientProfileId: 'pat-1',
@@ -282,7 +282,7 @@ describe('QuotationsService.createQuotation', () => {
     const d = build();
 
     await expect(
-      d.service.createQuotation(baseDto, actorSinPerfil),
+      d.service.createQuotation(baseDto, actorWithoutProfile),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
   });
@@ -380,7 +380,7 @@ describe('QuotationsService.createQuotation', () => {
 
   it('la cuenta administradora con perfil profesional cotiza en una práctica de su organización', async () => {
     const d = build();
-    const adminConPerfil = {
+    const adminWithProfile = {
       ...admin,
       practitionerProfileId: 'hp-admin',
     } as any;
@@ -392,7 +392,7 @@ describe('QuotationsService.createQuotation', () => {
     d.quotationsRepo.create.mockReturnValue(quotationRow());
 
     const res = await runWithTenant('mi-tenant', () =>
-      d.service.createQuotation(baseDto, adminConPerfil),
+      d.service.createQuotation(baseDto, adminWithProfile),
     );
 
     expect(res.id).toBe('q-1');
@@ -400,7 +400,7 @@ describe('QuotationsService.createQuotation', () => {
 
   it('la cuenta administradora de otra organización no cotiza en esa práctica: 422', async () => {
     const d = build();
-    const adminConPerfil = {
+    const adminWithProfile = {
       ...admin,
       practitionerProfileId: 'hp-admin',
     } as any;
@@ -413,7 +413,7 @@ describe('QuotationsService.createQuotation', () => {
 
     await expect(
       runWithTenant('mi-tenant', () =>
-        d.service.createQuotation(baseDto, adminConPerfil),
+        d.service.createQuotation(baseDto, adminWithProfile),
       ),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     expect(d.serviceCatalogRepo.findById).not.toHaveBeenCalled();
@@ -448,7 +448,7 @@ describe('QuotationsService.getQuotation', () => {
     d.quotationsRepo.findById.mockResolvedValue(quotationRow());
 
     await expect(
-      d.service.getQuotation('q-1', paciente),
+      d.service.getQuotation('q-1', patient),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
@@ -595,7 +595,7 @@ describe('QuotationsService.listQuotationsByPatient', () => {
   it('un paciente autenticado no lista cotizaciones: ni vinculación ni organización', async () => {
     const d = build();
 
-    const res = await d.service.listQuotationsByPatient('pat-1', paciente);
+    const res = await d.service.listQuotationsByPatient('pat-1', patient);
 
     expect(res).toEqual([]);
     expect(d.quotationsRepo.findByPatient).not.toHaveBeenCalled();
@@ -644,8 +644,8 @@ describe('QuotationsService.listQuotationsByPatient', () => {
  * hecho»), sin base: la persistencia real la verifica M1.
  */
 describe('QuotationsService.createQuotation con el body del front (AG-35)', () => {
-  const PRACTICA = '11111111-1111-4111-8111-111111111111';
-  const SERVICIO = '33333333-3333-4333-8333-333333333333';
+  const PRACTICE = '11111111-1111-4111-8111-111111111111';
+  const SERVICE = '33333333-3333-4333-8333-333333333333';
   const pipe = new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
@@ -656,21 +656,21 @@ describe('QuotationsService.createQuotation con el body del front (AG-35)', () =
   it('guarda la cotización con los importes numéricos del front, como texto exacto', async () => {
     const d = build();
     d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
-      [PRACTICA],
+      [PRACTICE],
     );
     d.serviceCatalogRepo.findById.mockResolvedValue({
       ...catalogItem,
-      id: SERVICIO,
-      practiceId: PRACTICA,
+      id: SERVICE,
+      practiceId: PRACTICE,
     });
     d.quotationsRepo.create.mockReturnValue(quotationRow({ id: 'q-front' }));
 
     const dto = (await pipe.transform(
       {
-        practiceId: PRACTICA,
+        practiceId: PRACTICE,
         patientProfileId: '22222222-2222-4222-8222-222222222222',
         attentionDate: '2026-09-20',
-        serviceCatalogId: SERVICIO,
+        serviceCatalogId: SERVICE,
         offeredPrice: 1500,
         paymentPlanInstallmentCount: 3,
         downPaymentAmount: 300,
@@ -694,8 +694,8 @@ describe('QuotationsService.createQuotation con el body del front (AG-35)', () =
         downPaymentAmount: '300',
       }),
     );
-    const cuotas = d.installmentsRepo.createMany.mock.calls[0][1];
-    expect(cuotas.map((c: { amount: string }) => c.amount)).toEqual([
+    const installments = d.installmentsRepo.createMany.mock.calls[0][1];
+    expect(installments.map((c: { amount: string }) => c.amount)).toEqual([
       '400',
       '400',
       '400',

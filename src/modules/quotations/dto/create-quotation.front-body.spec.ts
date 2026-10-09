@@ -26,7 +26,7 @@ const GLOBAL = new ValidationPipe({
   transform: true,
   transformOptions: { enableImplicitConversion: true },
 });
-const SIN_CONVERSION = new ValidationPipe({
+const WITHOUT_CONVERSION = new ValidationPipe({
   whitelist: true,
   forbidNonWhitelisted: true,
   transform: true,
@@ -57,7 +57,7 @@ const FRONT_BODY = {
 };
 
 /** El mismo body con otros importes, para los casos límite e inválidos. */
-function conImportes(
+function withAmounts(
   offeredPrice: unknown,
   downPaymentAmount: unknown,
   amounts: unknown[],
@@ -97,7 +97,7 @@ async function rejection(
 describe('CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1)', () => {
   describe.each([
     ['con el pipe global de main.ts', GLOBAL],
-    ['sin conversión implícita', SIN_CONVERSION],
+    ['sin conversión implícita', WITHOUT_CONVERSION],
   ])('%s', (_nombre, pipe) => {
     it('correcto: acepta los importes numéricos del front y los entrega como texto exacto', async () => {
       const dto = await run(pipe, FRONT_BODY);
@@ -114,7 +114,7 @@ describe('CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1)', () =
     it('correcto: sigue aceptando los importes como texto, sin tocarlos', async () => {
       const dto = await run(
         pipe,
-        conImportes('890.00', '190.00', ['500.00', '200.00']),
+        withAmounts('890.00', '190.00', ['500.00', '200.00']),
       );
 
       expect(dto.offeredPrice).toBe('890.00');
@@ -128,7 +128,7 @@ describe('CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1)', () =
       // 700.01 = 0 + 233.34 + 233.34 + 233.33 — lo que arma `fromCents` del front.
       const dto = await run(
         pipe,
-        conImportes(700.01, 0, [233.34, 233.34, 233.33]),
+        withAmounts(700.01, 0, [233.34, 233.34, 233.33]),
       );
 
       expect(dto.offeredPrice).toBe('700.01');
@@ -142,33 +142,33 @@ describe('CreateQuotationDto con el body del front (AG-35 · M4 H3.S1.M1)', () =
 
     it('inválido: un número con más de dos decimales no se redondea en silencio: 400', async () => {
       expect(
-        await rejection(pipe, conImportes(1.005, 0, [1.005])),
+        await rejection(pipe, withAmounts(1.005, 0, [1.005])),
       ).not.toBeNull();
       // El error de coma flotante clásico tampoco pasa disfrazado de precio.
       expect(
-        await rejection(pipe, conImportes(0.1 + 0.2, 0, [0.1 + 0.2])),
+        await rejection(pipe, withAmounts(0.1 + 0.2, 0, [0.1 + 0.2])),
       ).not.toBeNull();
     });
 
     it('inválido: negativo, NaN o infinito dan 400', async () => {
       expect(
-        await rejection(pipe, conImportes(-1500, 0, [-1500])),
+        await rejection(pipe, withAmounts(-1500, 0, [-1500])),
       ).not.toBeNull();
       expect(
-        await rejection(pipe, conImportes(Number.NaN, 0, [400])),
+        await rejection(pipe, withAmounts(Number.NaN, 0, [400])),
       ).not.toBeNull();
       expect(
-        await rejection(pipe, conImportes(Number.POSITIVE_INFINITY, 0, [400])),
+        await rejection(pipe, withAmounts(Number.POSITIVE_INFINITY, 0, [400])),
       ).not.toBeNull();
     });
 
     it('inválido: un importe que no es número ni texto numérico da 400', async () => {
-      expect(await rejection(pipe, conImportes(true, 0, [400]))).not.toBeNull();
+      expect(await rejection(pipe, withAmounts(true, 0, [400]))).not.toBeNull();
       expect(
-        await rejection(pipe, conImportes('mil', 0, [400])),
+        await rejection(pipe, withAmounts('mil', 0, [400])),
       ).not.toBeNull();
       expect(
-        await rejection(pipe, conImportes(1500, null, [1500])),
+        await rejection(pipe, withAmounts(1500, null, [1500])),
       ).not.toBeNull();
     });
   });
