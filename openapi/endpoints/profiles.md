@@ -4894,6 +4894,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -5023,6 +5026,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -5243,6 +5247,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -5372,6 +5379,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -5728,6 +5736,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -5857,6 +5868,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -6127,6 +6139,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -6256,6 +6271,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -8457,6 +8473,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -8586,6 +8605,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
