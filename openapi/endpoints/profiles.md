@@ -4444,7 +4444,7 @@ Contexto declarado en el controlador: Un consultorio de OTRO profesional — las
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -4454,7 +4454,7 @@ NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `Prof
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/00000000-0000-4000-8000-000000000001/affiliations HTTP/1.1
@@ -4463,8 +4463,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -4479,15 +4479,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -4500,15 +4498,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 
@@ -6492,7 +6488,7 @@ El sujeto sale de la sesión: no hay forma de escribir el historial de otro.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -6500,7 +6496,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/me/affiliations HTTP/1.1
@@ -6509,8 +6505,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -6523,15 +6519,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -6544,15 +6538,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 

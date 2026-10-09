@@ -213,7 +213,7 @@ Asignar campos a un target con política de extensión. Requiere JWT y los roles
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /forms/assignments` en `FormsAssignmentsController_createAssignment`. El controlador delega en `FormsAssignmentsService.createAssignment`. Valida el body como `CreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
+NestJS resuelve `POST /forms/assignments` en `FormsAssignmentsController_createAssignment`. El controlador delega en `FormsAssignmentsService.createAssignment`. Valida el body como `FormsCreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
 
 ### Parámetros
 
@@ -221,7 +221,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAssignmentDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `FormsCreateAssignmentDto`; los campos opcionales se omiten.
 
 ```http
 POST /forms/assignments HTTP/1.1
