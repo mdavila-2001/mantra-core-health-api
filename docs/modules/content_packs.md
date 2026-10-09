@@ -3,7 +3,7 @@
   Fuente real: src/modules/content_packs/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `content_packs`
@@ -19,6 +19,26 @@ Superficie de plataforma para aplicar **paquetes de contenido**: material curado
 que una instalación puede querer o no, y que antes se sembraba solo en cada
 arranque. Es la contracara de `SEED_CONTENT_ON_BOOT`: lo que el arranque dejó de
 sembrar por su cuenta se aplica desde acá cuando alguien lo decide.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/content_packs -name '*.controller.ts' | wc -l
+  find src/modules/content_packs -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/content_packs -name '*.entity.ts' | wc -l
+  find src/modules/content_packs -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 2 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`SeedModule`).
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /admin/content-packs` | SUPERADMIN | `content-packs` |
+| `POST /admin/content-packs/:code/apply` | SUPERADMIN | `content-packs` |
 
 ## Qué es y qué no es un paquete
 

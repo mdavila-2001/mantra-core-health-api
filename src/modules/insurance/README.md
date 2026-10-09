@@ -1,6 +1,91 @@
 # src / modules / insurance
 
-Agrupa los componentes relacionados con **insurance** y mantiene cohesionada esta responsabilidad del sistema.
+Seguros y cobertura (schema `insurance`): aseguradoras, productos, planes y beneficios, redes de proveedores, coberturas del paciente y dependientes, elegibilidad, autorizaciones previas, reclamos (líneas, adjudicación, apelaciones, disputas, reversas), conciliación, corredores y comisiones, campañas, liquidación al profesional y liquidación al paciente.
+
+Entidades (31, `find src/modules/insurance -name '*.entity.ts' | wc -l`): `insurance_carriers`, `insurance_products`, `insurance_plans`, `insurance_plan_benefits`, `provider_networks`, `network_provider_memberships`, `patient_coverages`, `coverage_dependents`, `coordination_of_benefits`, `employer_groups`, `coverage_eligibility_requests`, `coverage_eligibility_responses`, `prior_authorization_requests`, `prior_authorization_items`, `prior_authorization_determinations`, `insurance_claims`, `insurance_claim_lines`, `claim_line_adjudications`, `claim_adjudication_versions`, `claim_appeal_decisions`, `claim_disputes`, `claim_reversals`, `patient_explanations_of_benefit`, `insurance_reconciliation_batches`, `insurance_reconciliation_items`, `insurance_brokers`, `broker_clients`, `broker_carrier_agreements`, `broker_commission_statements`, `insurance_campaigns`, `insurance_campaign_partners`.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/insurance -name '*.controller.ts' | wc -l
+  find src/modules/insurance -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/insurance -name '*.entity.ts' | wc -l
+  find src/modules/insurance -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **18 controllers, 60 rutas HTTP, 31 entidades y 23 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationModule`, `TerminologyModule`, `CommonModule`, `AuditModule`, `MessagingModule`, `CommunityModule` (`insurance.module.ts`); `insurance-patient-settlement.module.ts` es un módulo aparte sin imports.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /claim-disputes/:id/appeal-decisions` | BILLING, FINANCE | `appeals` |
+| `POST /broker-commission-statements` | BILLING, FINANCE | `broker-commission` |
+| `GET /insurance-claims` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
+| `GET /insurance-claims/:id` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
+| `POST /insurance-claims` |  | `claims` |
+| `POST /insurance-claims/:id/adjudications` |  | `claims` |
+| `POST /insurance-claims/:id/eob` |  | `claims` |
+| `POST /insurance-claims/:id/reversals` |  | `claims` |
+| `POST /insurance-claims/:id/disputes` | BILLING_OPERATOR, SECURITY_ADMIN | `claims` |
+| `GET /patient-coverages/me` | PATIENT | `coverage` |
+| `POST /patient-coverages` | BILLING, FINANCE | `coverage` |
+| `POST /coverage-eligibility-requests` | BILLING, FINANCE | `coverage` |
+| `POST /coordination-of-benefits` | BILLING, FINANCE | `coverage` |
+| `GET /insurance/analytics/loss-ratio` | sesión | `insurance-analytics` |
+| `POST /insurance-carriers` | SECURITY_ADMIN | `insurance-backbone` |
+| `PUT /insurance-carriers/:id/contact-channels` | sesión | `insurance-backbone` |
+| `POST /insurance-carriers/:id/products` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST /insurance-products/:productId/plans` | sesión | `insurance-backbone` |
+| `POST /insurance-plans/:planId/benefits` | sesión | `insurance-backbone` |
+| `PUT /insurance-plans/:planId/benefits/:benefitId` | sesión | `insurance-backbone` |
+| `PUT /insurance-plans/:planId/benefits/:benefitId/rules` | sesión | `insurance-backbone` |
+| `PUT /insurance-plans/:planId/premium` | sesión | `insurance-backbone` |
+| `POST /provider-networks` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST /provider-networks/:id/memberships` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST /insurance-brokers` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST /insurance-brokers/:id/agreements` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST /employer-groups` | SECURITY_ADMIN | `insurance-backbone` |
+| `POST ` |  | `insurance-campaigns` |
+| `GET ` |  | `insurance-campaigns` |
+| `GET /active` | pública | `insurance-campaigns` |
+| `GET /my-benefits` |  | `insurance-campaigns` |
+| `GET /patient/:patientProfileId` |  | `insurance-campaigns` |
+| `GET /:id` |  | `insurance-campaigns` |
+| `PATCH /:id/status` |  | `insurance-campaigns` |
+| `PATCH /:id` |  | `insurance-campaigns` |
+| `GET /insurance-carrier-catalog` | pública | `insurance-catalog` |
+| `GET /public/portability/verify/:manifestHash` | pública | `insurance-portability-public` |
+| `POST /insurance/portability/export` | sesión | `insurance-portability` |
+| `GET /insurance/portability/certificates/:certificateId/pdf` | sesión | `insurance-portability` |
+| `GET /insurance/portability/certificates/:certificateId/json` | sesión | `insurance-portability` |
+| `GET /insurance-carriers` | sesión | `insurance-read` |
+| `GET /insurance-carriers/:id` | sesión | `insurance-read` |
+| `GET /insurance-brokers` | sesión | `insurance-read` |
+| `GET /insurance-brokers/:id` | sesión | `insurance-read` |
+| `GET /insurance-brokers/:id/clients` | sesión | `insurance-read` |
+| `POST /insurance/patients/search` | sesión | `insurer-patients` |
+| `GET /insurance/patients/options` | sesión | `insurer-patients` |
+| `POST /insurance/patients/conversation` | sesión | `insurer-patients` |
+| `GET /insurance/received-claims` | sesión | `insurer-received-claims` |
+| `POST /insurance/received-claims/:id/decision` | sesión | `insurer-received-claims` |
+| `GET /practitioners/:profileId/insurance-networks` | SECURITY_ADMIN,
+    SCHEDULING_ADMIN,
+    SCHEDULING_AGENT,
+    PRACTITIONER,
+    CLINICIAN,
+    PATIENT, | `practitioner-insurance-networks` |
+| `POST /practitioner-settlement-batches` |  | `practitioner-settlement-batches` |
+| `GET /practitioner-settlement-batches/:id` |  | `practitioner-settlement-batches` |
+| `GET /practitioner-settlement-batches` |  | `practitioner-settlement-batches` |
+| `GET /prior-authorization-requests/inbox` |  | `prior-auth` |
+| `GET /prior-authorization-requests/:id` |  | `prior-auth` |
+| `POST /prior-authorization-requests` |  | `prior-auth` |
+| `POST /prior-authorization-requests/:id/determinations` |  | `prior-auth` |
+| `POST /reconciliation-batches` | SECURITY_ADMIN | `reconciliation` |
+| `POST /reconciliation-batches/:id/items` | SECURITY_ADMIN | `reconciliation` |
 
 ## Liquidación al profesional (H8)
 
@@ -228,8 +313,10 @@ Reglas que no se deducen del código:
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `insurance.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `insurance.concepts.ts` | Conceptos de terminología del módulo. |
 | `insurance.module.ts` | Composición de dependencias del módulo NestJS. |
+| `insurance-patient-settlement.module.ts` | Módulo aparte: puerto de lectura de la liquidación al paciente, sin dependencias circulares con los módulos operativos (lo consume `pharmacy_inventory`). |
+| `insurance-currency.ts` | Mapa concepto de moneda → código (`BOB`, `USD`). |
 
 ## Criterios de mantenimiento
 

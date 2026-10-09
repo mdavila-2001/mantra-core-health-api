@@ -3,7 +3,7 @@
   Fuente real: src/modules/object_storage/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `object_storage`
@@ -18,6 +18,40 @@
 Cargas multiparte, versiones inmutables direccionadas por contenido, catálogo DICOM con registro de
 accesos, payloads grandes enlazados a su origen, retención WORM y legal, verificación de integridad,
 archivado en frío y borrado gobernado.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/object_storage -name '*.controller.ts' | wc -l
+  find src/modules/object_storage -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/object_storage -name '*.entity.ts' | wc -l
+  find src/modules/object_storage -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 14 rutas HTTP, 17 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`, `ClinicalModule`, `AuditModule`).
+
+Entidades (`tableName`, 17 de 17 archivos `*.entity.ts`): `archive_manifests`, `dicom_instance_manifests`, `dicom_series_manifests`, `dicom_study_manifests`, `dicomweb_access_logs`, `large_payload_manifests`, `multipart_uploads`, `object_checksums`, `object_deletion_markers`, `object_encryption_envelopes`, `object_integrity_checks`, `object_legal_holds`, `object_locations`, `object_manifests`, `object_namespaces`, `object_retention_locks`, `object_versions`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /dicomweb/studies/:studyUid/series/:seriesUid/instances/:sopUid` | DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN | `dicomweb` |
+| `POST /object-storage/namespaces/:code/uploads/initiate` | STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/uploads/:id/complete` | STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/objects/:manifestId/versions` | SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/dicom/studies/catalog` | PACS_GATEWAY, SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/large-payloads` | SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/versions/:versionId/retention-lock` | COMPLIANCE_OFFICER, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/versions/:versionId/legal-holds` | LEGAL_COUNSEL, STORAGE_ADMIN | `object-storage` |
+| `DELETE /object-storage/versions/:versionId/legal-holds/:holdId` | LEGAL_COUNSEL, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/versions/:versionId/signed-url` | DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `GET /object-storage/versions/:versionId/content/:token` | DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/versions/:versionId/integrity-checks` | SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/archive-jobs/build` | SYSTEM, STORAGE_ADMIN | `object-storage` |
+| `POST /object-storage/objects/:manifestId/request-deletion` | COMPLIANCE_OFFICER, STORAGE_ADMIN | `object-storage` |
 
 ## Casos de uso cubiertos (12)
 

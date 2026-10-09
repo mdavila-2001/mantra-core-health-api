@@ -3,7 +3,7 @@
   Fuente real: src/modules/pharmacy_inventory/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `pharmacy_inventory`
@@ -15,7 +15,56 @@
 
 # src / modules / pharmacy inventory
 
-Agrupa los componentes relacionados con **pharmacy inventory** y mantiene cohesionada esta responsabilidad del sistema.
+Inventario y operación de farmacia (schema `pharmacy_inventory`): ubicaciones, lotes, series y posiciones de stock con su libro de movimientos; conteos físicos, retiros de lote (recall), reservas y transferencias; sincronización de inventario externo; compras (proveedores, cotizaciones, órdenes y recepciones); dispensación de medicación y pedidos del paciente a la farmacia.
+
+Entidades (21, `find src/modules/pharmacy_inventory -name '*.entity.ts' | wc -l`): `inventory_locations`, `inventory_lots`, `inventory_serials`, `inventory_stock_positions`, `inventory_ledger_entries`, `inventory_count_sessions`, `inventory_count_lines`, `inventory_recall_holds`, `inventory_reservations`, `inventory_reservation_lines`, `pharmacy_inventory_sync_batches`, `pharmacy_inventory_sync_items`, `pharmacy_suppliers`, `purchase_quotations`, `pharmacy_purchase_orders`, `pharmacy_purchase_order_lines`, `pharmacy_goods_receipts`, `pharmacy_goods_receipt_lines`, `medication_dispensations`, `medication_dispensation_lines`, `pharmacy_order_substitutions`.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/pharmacy_inventory -name '*.controller.ts' | wc -l
+  find src/modules/pharmacy_inventory -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/pharmacy_inventory -name '*.entity.ts' | wc -l
+  find src/modules/pharmacy_inventory -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 29 rutas HTTP, 21 entidad y 11 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`pharmacy_inventory.module.ts`): `DirectoryAuthorizationModule`, `InsurancePatientSettlementModule`, `PharmacyModule`, `MessagingModule`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /pharmacy/:pharmacyId/dispensations` | SECURITY_ADMIN | `pharmacy-dispensing` |
+| `POST /pharmacy/dispensations/:id/reverse` | SECURITY_ADMIN | `pharmacy-dispensing` |
+| `POST /internal/reservations/expire` | SYSTEM, SECURITY_ADMIN | `pharmacy-inventory-internal` |
+| `POST /internal/inventory-sync-batches` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
+| `POST /internal/inventory-sync/:batchId/reconcile` | SECURITY_ADMIN | `pharmacy-inventory-internal` |
+| `GET /pharmacy-inventory/sites/:siteId/stock` | sesión | `pharmacy-inventory-read` |
+| `GET /pharmacy-inventory/availability` | sesión | `pharmacy-inventory-read` |
+| `POST /pharmacy/:siteId/inventory-locations` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/:pharmacyId/reservations` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/:pharmacyId/transfers` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/:siteId/count-sessions` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/count-sessions/:id/approve` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/recall-holds` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `POST /pharmacy/recall-holds/:id/release` | SECURITY_ADMIN | `pharmacy-inventory` |
+| `GET /pharmacy/orders` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/orders` | PATIENT | `pharmacy-orders` |
+| `GET /pharmacy/orders/me` | PATIENT | `pharmacy-orders` |
+| `GET /pharmacy/orders/:id` | sesión | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/cancel` | PATIENT | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/review` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/confirm` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/accept-substitutions` | PATIENT | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/prefer-original` | PATIENT | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/reject` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/ready` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/orders/:id/dispense` | SECURITY_ADMIN | `pharmacy-orders` |
+| `POST /pharmacy/:pharmacyId/suppliers` | SECURITY_ADMIN | `pharmacy-procurement` |
+| `POST /pharmacy/:pharmacyId/purchase-orders` | SECURITY_ADMIN | `pharmacy-procurement` |
+| `POST /pharmacy/:pharmacyId/goods-receipts` | SECURITY_ADMIN | `pharmacy-procurement` |
 
 ## Contenido
 
@@ -31,7 +80,7 @@ Agrupa los componentes relacionados con **pharmacy inventory** y mantiene cohesi
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `pharmacy_inventory.concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `pharmacy_inventory.concepts.ts` | Conceptos de terminología del módulo. |
 | `pharmacy_inventory.module.ts` | Composición de dependencias del módulo NestJS. |
 
 ## Cara de lectura (carril E2 · `/pharmacy-inventory`)

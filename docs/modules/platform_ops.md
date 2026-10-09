@@ -3,7 +3,7 @@
   Fuente real: src/modules/platform_ops/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `platform_ops`
@@ -19,6 +19,41 @@ Solicitudes de cambio con aprobación del CAB, artefactos inmutables, despliegue
 health checks que derivan incidentes, ciclo de vida del incidente con timeline append-only,
 postmortems, SLO y presupuesto de error con congelamiento de despliegues, capacidad, revisiones de
 preparación, runbooks versionados y ejercicios de resiliencia.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/platform_ops -name '*.controller.ts' | wc -l
+  find src/modules/platform_ops -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/platform_ops -name '*.entity.ts' | wc -l
+  find src/modules/platform_ops -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 15 rutas HTTP, 38 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 38 de 38 archivos `*.entity.ts`): `artifacts`, `capacity_measurements`, `capacity_plans`, `change_approvals`, `change_requests`, `component_tools`, `deployments`, `error_budget_burn_events`, `error_budget_policies`, `escalation_policies`, `escalation_policy_steps`, `health_check_runs`, `health_checks`, `health_incidents`, `incident_communications`, `incident_responders`, `incident_timeline_events`, `maintenance_windows`, `on_call_schedules`, `on_call_shifts`, `operational_improvement_items`, `operational_readiness_reviews`, `operational_teams`, `postmortem_action_items`, `postmortems`, `readiness_review_findings`, `recovery_objectives`, `resilience_exercises`, `runbook_executions`, `runbook_versions`, `runbooks`, `service_components`, `service_dependencies`, `service_level_indicators`, `service_level_objectives`, `service_ownerships`, `slo_measurements`, `tool_registry`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /ops/change-requests` | RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/change-requests/:id/approvals` | CHANGE_APPROVER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/artifacts` | DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/deployments` | RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/deployments/:id/rollback` | SRE, RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/health-checks/:id/runs` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `PATCH /ops/incidents/:id` | INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/incidents/:id/postmortem` | SRE, INCIDENT_COMMANDER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/slo/:id/measurements` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/error-budget/:policyId/burn-events` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/capacity-plans/:id/measurements` | CAPACITY_PLANNER, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/readiness-reviews/:id/complete` | RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/runbooks/:id/versions` | SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/runbook-executions` | SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/resilience-exercises/:id/complete` | SRE, PLATFORM_ADMIN | `platform-ops` |
 
 ## Casos de uso cubiertos (14)
 

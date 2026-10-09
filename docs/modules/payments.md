@@ -3,7 +3,7 @@
   Fuente real: src/modules/payments/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `payments`
@@ -18,6 +18,40 @@
 Cobros con pasarela: intención de pago, checkout, procesamiento contra el gateway,
 reembolsos, anulaciones y las operaciones de cierre (tarifas, liquidaciones, payouts
 y conciliación).
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/payments -name '*.controller.ts' | wc -l
+  find src/modules/payments -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/payments -name '*.entity.ts' | wc -l
+  find src/modules/payments -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 14 rutas HTTP, 53 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 53 de 53 archivos `*.entity.ts`): `callback_verification_runs`, `cash_registers`, `cashier_payment_contexts`, `connected_accounts`, `fee_schedules`, `fx_rate_locks`, `gateway_connections`, `gateway_payment_channel_mappings`, `gateway_settlements`, `installment_plans`, `installment_schedules`, `invoice_regeneration_requests`, `kyc_verifications`, `payment_cancellation_requests`, `payment_channel_catalog`, `payment_checkout_sessions`, `payment_debt_invoice_requests`, `payment_debt_lines`, `payment_debts`, `payment_disputes`, `payment_gateways`, `payment_intents`, `payment_mandates`, `payment_methods`, `payment_receipts`, `payment_splits`, `payment_status_inquiries`, `payment_transactions`, `payment_webhook_events`, `payout_items`, `payouts`, `plan_eligibility_rules`, `plan_features`, `plan_prices`, `plan_quotas`, `provider_api_attempts`, `provider_api_operations`, `provider_callback_endpoints`, `provider_callback_events`, `provider_invoice_artifacts`, `provider_reconciliation_records`, `reconciliation_exceptions`, `reconciliation_runs`, `refunds`, `risk_assessments`, `settlement_lines`, `subscription_plans`, `subscription_usage_counters`, `subscriptions`, `tips`, `transaction_fees`, `wallet_ledger_entries`, `wallets`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /payments/intents` | PAYMENTS_ADMIN, CASHIER | `payments-intents` |
+| `POST /payments/intents/:id/fx-lock` | PAYMENTS_ADMIN | `payments-intents` |
+| `POST /payments/intents/:id/risk-assessment` | PAYMENTS_ADMIN | `payments-intents` |
+| `POST /payments/intents/:id/transactions` | PAYMENTS_ADMIN, CASHIER | `payments-intents` |
+| `POST /payments/intents/:id/splits` | PAYMENTS_ADMIN | `payments-intents` |
+| `POST /payments/checkout-sessions` | PAYMENTS_ADMIN, CASHIER | `payments-operations` |
+| `POST /payments/callbacks/:callbackPath` | pública | `payments-operations` |
+| `POST /payments/fee-schedules` | PAYMENTS_ADMIN | `payments-operations` |
+| `POST /payments/settlements/import` | PAYMENTS_ADMIN | `payments-operations` |
+| `POST /payments/payouts` | PAYMENTS_ADMIN | `payments-operations` |
+| `POST /payments/reconciliation-runs` | PAYMENTS_ADMIN | `payments-operations` |
+| `POST /payments/transactions/:id/status-inquiry` | PAYMENTS_ADMIN | `payments-transactions` |
+| `POST /payments/transactions/:id/refunds` | PAYMENTS_ADMIN | `payments-transactions` |
+| `POST /payments/transactions/:id/cancellation-requests` | PAYMENTS_ADMIN, CASHIER | `payments-transactions` |
 
 ## Casos de uso cubiertos (14)
 

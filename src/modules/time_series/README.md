@@ -4,6 +4,40 @@ Doce flujos de medición append-only sobre TimescaleDB: ingesta por lote, normal
 dispositivo con promoción al registro clínico, administración física de las particiones (chunks,
 compresión, retención), agregados continuos y consulta de rango con downsampling.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/time_series -name '*.controller.ts' | wc -l
+  find src/modules/time_series -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/time_series -name '*.entity.ts' | wc -l
+  find src/modules/time_series -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 14 rutas HTTP, 12 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 12 de 12 archivos `*.entity.ts`): `ads_delivery_event_series`, `ai_runtime_metric_series`, `application_tracking_series`, `audit_access_metric_series`, `device_raw_reading_series`, `ingestion_pipeline_metric_series`, `lab_analyzer_event_series`, `location_ping_series`, `normalized_vital_series`, `payment_gateway_metric_series`, `service_sli_series`, `telemetry_event_series`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /ts/series/:seriesId/query` | ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/series/:seriesId/points/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/series/:seriesId/backfill/governed` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `series` |
+| `POST /ts/devices/:deviceId/readings/ingest` | INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/normalize/run` | SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/ads/events/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/metrics/:dataset/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/location/pings/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/admin/hypertables` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `PATCH /ts/admin/hypertables/:table` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/compression/run` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/retention/policies` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/rollups/audit-daily/refresh` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/rollups/:name/refresh` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |

@@ -3,7 +3,7 @@
   Fuente real: src/modules/education/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `education`
@@ -17,6 +17,40 @@
 
 Catálogo de cursos con módulos y lecciones, versionado, instructores, cohortes, inscripciones con
 progreso, evaluaciones corregidas automáticamente, certificados verificables y créditos CME.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/education -name '*.controller.ts' | wc -l
+  find src/modules/education -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/education -name '*.entity.ts' | wc -l
+  find src/modules/education -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 14 rutas HTTP, 15 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `assessment_attempts`, `assessment_questions`, `assessments`, `certificates`, `cme_credit_records`, `course_cohorts`, `course_instructors`, `course_modules`, `course_reviews`, `course_versions`, `courses`, `enrollments`, `instructors`, `lesson_progress`, `lessons`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /education/courses/publish` | EDUCATION_ADMIN, COURSE_AUTHOR | `education` |
+| `POST /education/courses/:id/versions/publish` | EDUCATION_ADMIN, COURSE_AUTHOR | `education` |
+| `POST /education/courses/:id/instructors` | EDUCATION_ADMIN | `education` |
+| `POST /education/courses/:id/cohorts` | EDUCATION_ADMIN | `education` |
+| `POST /education/enrollments` | EDUCATION_ADMIN, LEARNER | `education` |
+| `POST /education/enrollments/:id/lesson-progress` | LEARNER, EDUCATION_ADMIN, SYSTEM | `education` |
+| `POST /education/courses/:id/assessments` | EDUCATION_ADMIN, COURSE_AUTHOR | `education` |
+| `POST /education/assessments/:id/attempts` | LEARNER, EDUCATION_ADMIN | `education` |
+| `POST /education/attempts/:id/submit` | LEARNER, EDUCATION_ADMIN | `education` |
+| `POST /education/enrollments/:id/complete` | SYSTEM, EDUCATION_ADMIN, LEARNER | `education` |
+| `POST /education/enrollments/:id/certificate` | SYSTEM, EDUCATION_ADMIN | `education` |
+| `POST /education/certificates/:id/cme-credits` | SYSTEM, EDUCATION_ADMIN | `education` |
+| `POST /education/courses/:id/reviews` | LEARNER, EDUCATION_ADMIN | `education` |
+| `POST /education/certificates/:id/revoke` | EDUCATION_ADMIN | `education` |
 
 ## Casos de uso cubiertos (14)
 

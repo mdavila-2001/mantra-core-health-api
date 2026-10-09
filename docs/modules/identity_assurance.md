@@ -3,7 +3,7 @@
   Fuente real: src/modules/identity_assurance/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `identity_assurance`
@@ -16,6 +16,53 @@
 # src / modules / identity assurance
 
 Agrupa los componentes relacionados con **identity assurance** y mantiene cohesionada esta responsabilidad del sistema.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/identity_assurance -name '*.controller.ts' | wc -l
+  find src/modules/identity_assurance -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/identity_assurance -name '*.entity.ts' | wc -l
+  find src/modules/identity_assurance -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **8 controllers, 27 rutas HTTP, 11 entidad y 11 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`, `IdentityEvidenceLifecycleModule`, `ProfilesModule`, `DirectoryModule`, `CommunityModule`).
+
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `identity_assertions`, `identity_authorities`, `identity_authority_endpoints`, `identity_check_results`, `identity_checks`, `identity_evidence_records`, `identity_fraud_signals`, `identity_manual_review_cases`, `identity_verification_attempts`, `identity_verification_cases`, `identity_verification_policies`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /identity/assertions/:id/revoke` | SECURITY_ADMIN | `identity-assertions` |
+| `POST /identity/authorities` | SECURITY_ADMIN | `identity-authorities` |
+| `POST /identity/authorities/:id/endpoints` | SECURITY_ADMIN | `identity-authorities` |
+| `GET /identity/verification-cases` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/expire-sweep` | SYSTEM, SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/:id/evidence` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/:id/checks\\:plan` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/:id/fraud-signals` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/:id/manual-review` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/verification-cases/:id/assertions` | SECURITY_ADMIN | `identity-cases` |
+| `POST /identity/checks/:id/attempts` | SECURITY_ADMIN | `identity-checks` |
+| `POST /identity/checks/:id/results` | SECURITY_ADMIN | `identity-checks` |
+| `POST /identity/manual-review/:id/decision` | SECURITY_ADMIN | `identity-manual-review` |
+| `POST /identity/verification-policies` | SECURITY_ADMIN | `identity-policies` |
+| `POST /identity/me/identity-verification` | sesión | `identity-self-service` |
+| `POST /identity/me/practitioner/identity-verification` | sesión | `identity-self-service` |
+| `POST /identity/me/practitioner/license-verification` | sesión | `identity-self-service` |
+| `POST /identity/me/tenants/:tenantId/verification` | sesión | `identity-self-service` |
+| `GET /identity/me/verification-types` | sesión | `identity-self-service` |
+| `GET /identity/me/verification-cases` | sesión | `identity-self-service` |
+| `GET /identity/me/verification-cases/:caseId` | sesión | `identity-self-service` |
+| `POST /internal/identity/evidence/storage-purge-review` | SYSTEM | `identity-worker` |
+| `POST /internal/identity/evidence/lifecycle-scan` | SYSTEM | `identity-worker` |
+| `GET /internal/identity/checks/dispatchable` | SYSTEM, SECURITY_ADMIN | `identity-worker` |
+| `POST /internal/identity/checks/:id/attempts` | SYSTEM, SECURITY_ADMIN | `identity-worker` |
+| `POST /internal/identity/checks/:id/results` | SYSTEM, SECURITY_ADMIN | `identity-worker` |
 
 ## Contenido
 

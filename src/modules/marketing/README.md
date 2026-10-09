@@ -3,6 +3,40 @@
 Segmentación de audiencia, campañas multicanal, plantillas de contenido versionadas, journeys con
 inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/marketing -name '*.controller.ts' | wc -l
+  find src/modules/marketing -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/marketing -name '*.entity.ts' | wc -l
+  find src/modules/marketing -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 14 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`, `campaign_dispatch_recipients`, `campaign_dispatches`, `campaign_members`, `campaign_schedules`, `content_templates`, `journey_enrollments`, `journey_steps`, `journeys`, `marketing_campaigns`, `marketing_touchpoints`, `segment_members`, `segments`, `tracked_links`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /marketing/segments` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/segments/:id/refresh` | MARKETING_MANAGER, SYSTEM | `marketing` |
+| `POST /marketing/campaigns` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/campaigns/:id/members/materialize` | MARKETING_MANAGER, SYSTEM | `marketing` |
+| `POST /marketing/content-templates/:code/versions` | CONTENT_EDITOR, MARKETING_MANAGER | `marketing` |
+| `POST /marketing/journeys` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/journeys/:id/steps` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/journeys/:id/activate` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/enrollments/:id/advance` | SYSTEM, MARKETING_MANAGER | `marketing` |
+| `POST /marketing/enrollments/:id/exit` | SYSTEM, MARKETING_MANAGER | `marketing` |
+| `POST /marketing/tracked-links` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/touchpoints` | SYSTEM, MARKETING_MANAGER | `marketing` |
+| `POST /marketing/attribution/compute` | SYSTEM, MARKETING_MANAGER | `marketing` |
+| `GET /r/:code` | pública | `tracked-link-redirect` |
+
 ## Casos de uso cubiertos (12)
 
 | UC | Endpoint | Descripción |

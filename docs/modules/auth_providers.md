@@ -3,7 +3,7 @@
   Fuente real: src/modules/auth_providers/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `auth_providers`
@@ -18,6 +18,38 @@
 Alta de proveedores OIDC/SAML/OAuth2, configuración de protocolo por entorno, claves de firma con
 rotación, mapeo de claims a atributos, vínculo por tenant, reglas de aprovisionamiento, login
 federado con `state`/`nonce`, vinculación y desvinculación de identidades.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/auth_providers -name '*.controller.ts' | wc -l
+  find src/modules/auth_providers -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/auth_providers -name '*.entity.ts' | wc -l
+  find src/modules/auth_providers -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 12 rutas HTTP, 9 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `account_link_requests`, `federated_identities`, `federated_login_attempts`, `identity_providers`, `provider_attribute_mappings`, `provider_protocol_configs`, `provider_signing_keys`, `provider_tenant_bindings`, `provisioning_rules`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /auth-providers/identity-providers` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/protocol-configs` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/signing-keys` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/signing-keys/rotate` | IDENTITY_ADMIN | `auth-providers` |
+| `PUT /auth-providers/identity-providers/:id/attribute-mappings` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/tenant-bindings` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/provisioning-rules` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/by-code/:code/authorize` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/identity-providers/by-code/:code/callback` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/account-link-requests` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/account-link-requests/complete` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/federated-identities/:id/unlink` | IDENTITY_ADMIN | `auth-providers` |
 
 ## Casos de uso cubiertos (12)
 

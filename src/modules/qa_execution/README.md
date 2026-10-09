@@ -5,6 +5,35 @@ decide **qué se llama, contra qué destino, con qué límites y con qué aproba
 desde el worker `qa_lab`. El navegador pide, aprueba y observa; no ejecuta. Decisiones en
 [ADR-0025](../../../docs/adr/ADR-0025-qa-runner-en-servidor.md).
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/qa_execution -name '*.controller.ts' | wc -l
+  find src/modules/qa_execution -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/qa_execution -name '*.entity.ts' | wc -l
+  find src/modules/qa_execution -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 9 rutas HTTP, 4 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`QaLabModule`).
+
+Entidades (`tableName`, 4 de 4 archivos `*.entity.ts`): `execution_plans`, `execution_targets`, `plan_approvals`, `plan_events`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /admin/qa/targets` | ...QA_READ_ROLES | `qa-execution` |
+| `PUT /admin/qa/environments/:environmentId/target` | ...QA_TARGET_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/preflight` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/plans` | ...QA_PLAN_ROLES | `qa-execution` |
+| `GET /admin/qa/plans` | ...QA_READ_ROLES | `qa-execution` |
+| `GET /admin/qa/plans/:planId` | ...QA_READ_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/approvals` | ...QA_APPROVE_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/cancel` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/run-next` | SYSTEM | `qa-execution` |
+
 ## Endpoints
 
 | Método y ruta | Rol | Descripción |

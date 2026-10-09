@@ -6,6 +6,45 @@ Cross-cutting reference data shared by every clinical/business domain: official
 download URLs). Owners are polymorphic (`owner_type_concept_id` + `owner_id`) and,
 except for `files.tenant_id`, are **not** FK-enforced.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/common -name '*.controller.ts' | wc -l
+  find src/modules/common -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/common -name '*.entity.ts' | wc -l
+  find src/modules/common -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 19 rutas HTTP, 7 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`).
+
+Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `addresses`, `contact_points`, `file_derivatives`, `file_links`, `file_versions`, `files`, `identifiers`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /common/addresses` | sesión | `common-addresses` |
+| `POST /common/contact-points` | sesión | `common-contact-points` |
+| `POST /common/contact-points/:id/verify` | sesión | `common-contact-points` |
+| `POST /common/files/upload` | sesión | `common-files` |
+| `GET /common/files/links` | sesión | `common-files` |
+| `GET /common/files/:id/content` | sesión | `common-files` |
+| `POST /common/files` | sesión | `common-files` |
+| `POST /common/files/:id/versions` | sesión | `common-files` |
+| `POST /common/files/:id/versions/:vid/derivatives` | sesión | `common-files` |
+| `POST /common/files/:id/links` | sesión | `common-files` |
+| `DELETE /common/files/:id` | sesión | `common-files` |
+| `POST /common/files/:id/download-url` | sesión | `common-files` |
+| `POST /common/identifiers` | sesión | `common-identifiers` |
+| `GET /internal/files/versions/pending-scan` | SYSTEM, SECURITY_ADMIN | `internal-files` |
+| `POST /internal/files/versions/:vid/scan-result` | SYSTEM, SECURITY_ADMIN | `internal-files` |
+| `POST /internal/storage-lifecycle/audio/:assetId/begin` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/audio/:assetId/dispatch` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/audio/:assetId/abort` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/recover` | SYSTEM | `internal-storage-lifecycle` |
+
 ## Endpoints
 
 | # | Method & path | Use case | Code | Auth |
@@ -108,11 +147,11 @@ logged.
 
 ```
 common/
-├── controllers/   5 controllers (+ unit specs) — thin HTTP layer
+├── controllers/   6 controllers (+ unit specs) — thin HTTP layer
 ├── dto/           request/response DTOs + enums
 ├── entities/      MikroORM entities (schema `common`)
 ├── repositories/  7 stateless repositories (em passed in)
-├── services/      4 services (+ unit specs) — business logic & transactions
+├── services/      6 services (+ unit specs) — business logic & transactions
 └── common.module.ts
 ```
 

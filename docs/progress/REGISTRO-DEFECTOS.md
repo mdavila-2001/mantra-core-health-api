@@ -13,7 +13,7 @@ alguien dice «los defectos que venimos poniendo», hay que adivinar a cuál se 
 |---|---|---|
 | `INFORME-HALLAZGOS-M1-2026-08-12.md` | Fichas H-01…H-10, la única con formato de defecto | raíz del workspace (**fuera de git**) |
 | `COORDINACION-AGENTES.md` | Bitácora de sesiones con bloqueadores 🔴/🟡 | repo del front, 1 509 líneas |
-| `ESTADO-Y-PENDIENTES.md` | Backlog P0/P1/P2 | este repo |
+| `docs/progress/ESTADO-Y-PENDIENTES.md` | Backlog P0/P1/P2 | este repo |
 | `PENDIENTES-RED-SOCIAL-BUSCADOR.md` | Huecos H1–H5 de `community` | raíz del workspace |
 
 Este archivo no los reemplaza: los indexa y los ordena por lo que cuesta que sigan abiertos.
@@ -575,7 +575,7 @@ fuga, pero la pantalla no debería ofrecerse).
 Los 12 prompts traían criterios de aceptación que nadie había ejecutado. `yarn e2e:auditoria`
 (`mantra-core-health/playwright/auditoria-prompts.spec.ts`) los corre contra la API viva:
 **20 criterios · 8 verdes · 5 rojos · 7 no medibles**. Cada rojo de abajo tiene su salida
-literal; los verdes están en `CARRIL_REPORT-justin.md`.
+literal; los verdes están en `docs/progress/archive/CARRIL_REPORT-justin.md`.
 
 Regla del carril: **quien mide no arregla en el mismo PR.** De los cinco, **A-02 y A-03 están
 cerrados** por MAC-1 (rama `justin/mac1-cupos-vencidos`, 20/08); los otros tres siguen
@@ -609,7 +609,7 @@ Consultar el pasado sigue siendo posible con `onlyAvailable=false`: lo necesita 
 día del médico (MAC-6) para mostrar lo ya atendido. Lo que se cerró es **ofrecerlo como
 reservable**.
 
-Detalle en `CARRIL_REPORT-justin.md`, sección MAC-1.
+Detalle en `docs/progress/archive/CARRIL_REPORT-justin.md`, sección MAC-1.
 
 ### Lo que la auditoría **no pudo medir**, y por qué
 

@@ -34,7 +34,7 @@ commit); consistencia eventual entre PostgreSQL y los almacenes secundarios, rec
 ## Consecuencias negativas
 - Ventana de inconsistencia real entre PostgreSQL y MongoDB/OpenSearch/Redis hasta que
   `cross_store_consistency` reconcilie — su implementación está en curso
-  (`ESTADO-Y-PENDIENTES.md`), no completa.
+  (`docs/progress/ESTADO-Y-PENDIENTES.md`), no completa.
 - El rol `SAGA_ORCHESTRATOR` sugiere que existen flujos con necesidad real de compensación
   multi-paso — no documentados en detalle en esta fase.
 

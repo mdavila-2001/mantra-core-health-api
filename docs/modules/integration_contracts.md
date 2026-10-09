@@ -3,7 +3,7 @@
   Fuente real: src/modules/integration_contracts/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `integration_contracts`
@@ -20,6 +20,38 @@ aseguradoras, farmacias): definición y versionado de contratos, perfiles de
 autenticación sender-constrained (OAuth2 confidencial + mTLS/DPoP), suscripciones
 de webhook, intercambios idempotentes con intentos/reintentos, cursores de
 sincronización monótonos y evidencia firmada de entrega de webhooks.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/integration_contracts -name '*.controller.ts' | wc -l
+  find src/modules/integration_contracts -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/integration_contracts -name '*.entity.ts' | wc -l
+  find src/modules/integration_contracts -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 12 rutas HTTP, 9 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `contract_webhook_subscriptions`, `integration_auth_profiles`, `integration_contract_versions`, `integration_contracts`, `integration_exchange_attempts`, `integration_exchange_records`, `integration_idempotency_records`, `integration_sync_cursors`, `webhook_delivery_evidence`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /integration/contracts` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/versions` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/versions/:versionId/activate` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/auth-profiles` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/auth-profiles/:apId/rotate` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/webhook-subscriptions` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/exchanges` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/exchanges/:recordId/attempts` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/sync-cursors/:scope/advance` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/contracts/:id/retire` | SECURITY_ADMIN | `integration-contracts` |
+| `POST /integration/exchanges/:recordId/retry` | SECURITY_ADMIN | `integration-exchanges` |
+| `POST /integration/webhooks/:subscriptionId/deliveries` | SECURITY_ADMIN | `integration-exchanges` |
 
 ## Endpoints (UC → ruta)
 
