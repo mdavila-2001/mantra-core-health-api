@@ -60,7 +60,7 @@ Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `agent_guardrails`, `a
 | UC-48-13 | `POST /automation/agent-runs/:id/record-automations/:recordAutomationId/execute` | Escribir con dedupe |
 | UC-48-14 | `POST /automation/runs/:workflowRunId/finalize` | Cerrar con resumen de coste |
 
-15 endpoints para 14 casos de uso: UC-48-05 y UC-48-09 tienen dos cada uno, y UC-48-10 se dispara
+15 endpoints para 14 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 17 rutas, ver «Rutas HTTP y alcance (medido)»): UC-48-05 y UC-48-09 tienen dos cada uno, y UC-48-10 se dispara
 además automáticamente desde el registro del paso.
 
 ## Flujo general

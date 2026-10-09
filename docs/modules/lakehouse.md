@@ -73,7 +73,7 @@ Entidades (`tableName`, 18 de 18 archivos `*.entity.ts`): `cohort_definitions`, 
 | UC-63-11 | `POST /research/dataset-releases/:id/approve` | Aprobar y materializar |
 | UC-63-12 | `POST /research/dataset-releases/:id/revoke` | Expirar o revocar |
 
-11 endpoints para 12 casos de uso: UC-63-06 no tiene endpoint propio — el caso de uso lo declara
+11 endpoints para 12 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 13 rutas, ver «Rutas HTTP y alcance (medido)»): UC-63-06 no tiene endpoint propio — el caso de uso lo declara
 explícitamente como *interno, parte del commit de UC-63-05*, y así se implementa.
 
 ## Estados en `varchar`, en minúsculas

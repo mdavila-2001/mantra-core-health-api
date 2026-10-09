@@ -173,8 +173,8 @@ rechazo por regla de negocio (`warn`). Sin datos sensibles.
 
 ```
 terminology/
-├── controllers/   6 controladores (+ specs, README)
-├── services/      6 servicios (+ specs, README)
+├── controllers/   7 controladores (+ specs, README)
+├── services/      9 servicios (+ specs, README)
 ├── repositories/  9 repositorios (+ README)
 ├── dto/           DTOs de entrada/salida (+ README)
 ├── entities/      entidades MikroORM (generadas)

@@ -65,7 +65,7 @@ Entidades (`tableName`, 73 de 73 archivos `*.entity.ts`): `ad_account_users`, `a
 
 ## Entidades
 
-El módulo abarca 74 tablas de `ads.*`. Las que se escriben desde aquí:
+El módulo abarca `ads.*` (74 tablas según este README; al 2026-10-08 hay 73 archivos `*.entity.ts`, ver «Rutas HTTP y alcance (medido)»). Las que se escriben desde aquí:
 
 - **Estructura**: `business_managers`, `ad_accounts`, `ad_account_users`, `ad_partners`,
   `partner_relationships`, `ad_platform_connections`, `ad_identity_assets`,

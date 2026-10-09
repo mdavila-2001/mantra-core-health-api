@@ -162,11 +162,11 @@ logged.
 
 ```
 common/
-├── controllers/   5 controllers (+ unit specs) — thin HTTP layer
+├── controllers/   6 controllers (+ unit specs) — thin HTTP layer
 ├── dto/           request/response DTOs + enums
 ├── entities/      MikroORM entities (schema `common`)
 ├── repositories/  7 stateless repositories (em passed in)
-├── services/      4 services (+ unit specs) — business logic & transactions
+├── services/      6 services (+ unit specs) — business logic & transactions
 └── common.module.ts
 ```
 

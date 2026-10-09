@@ -58,7 +58,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `embedding_jobs`, `emb
 | UC-59-12 | `POST /vector-rag/collections/:id/reconciliation` | Reconciliar canónico vs vectorial |
 | UC-59-13 | `POST .../embedding-model-versions/:id/retire` · `PUT .../collections/:id/lifecycle` | Retirar y sellar |
 
-15 endpoints para 13 casos de uso: UC-59-03 y UC-59-13 tienen dos cada uno.
+15 endpoints para 13 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 16 rutas, ver «Rutas HTTP y alcance (medido)»): UC-59-03 y UC-59-13 tienen dos cada uno.
 
 ## Estados en `varchar`, en minúsculas
 
