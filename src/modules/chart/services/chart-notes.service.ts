@@ -196,7 +196,7 @@ export class ChartNotesService {
       'Signing note version',
     );
     return this.em.transactional(async (tx) => {
-      this.assertSignatureWithOwnProfile(actor, dto.signerProfileId);
+      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -217,7 +217,7 @@ export class ChartNotesService {
       const hash = this.contentHash(version);
       this.notesRepo.createSignature(tx, {
         clinicalNoteVersionId: versionId,
-        signerProfileId: dto.signerProfileId,
+        signerProfileId,
         signatureTypeConceptId: CHART.SIGNATURE_AUTHOR,
         signedContentHash: hash,
         certificateThumbprint: dto.certificateThumbprint,
@@ -225,7 +225,7 @@ export class ChartNotesService {
       });
 
       version.statusConceptId = CHART.VERSION_SIGNED;
-      version.signedByProfileId = dto.signerProfileId;
+      version.signedByProfileId = signerProfileId;
       version.signedAt = new Date();
       version.contentHash = hash;
       version.releaseEligibilityConceptId = CHART.ELIGIBILITY_ELIGIBLE;
@@ -252,7 +252,7 @@ export class ChartNotesService {
       'Cosigning note version',
     );
     return this.em.transactional(async (tx) => {
-      this.assertSignatureWithOwnProfile(actor, dto.signerProfileId);
+      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -283,18 +283,18 @@ export class ChartNotesService {
       const alreadyCosigned = signatures.some(
         (s) =>
           s.signatureTypeConceptId === CHART.SIGNATURE_COSIGN &&
-          s.signerProfileId === dto.signerProfileId,
+          s.signerProfileId === signerProfileId,
       );
       if (alreadyCosigned) {
         throw new ConflictException('El cofirmante ya firmó esta versión', {
           versionId,
-          signerProfileId: dto.signerProfileId,
+          signerProfileId,
         });
       }
 
       this.notesRepo.createSignature(tx, {
         clinicalNoteVersionId: versionId,
-        signerProfileId: dto.signerProfileId,
+        signerProfileId,
         signatureTypeConceptId: CHART.SIGNATURE_COSIGN,
         signedContentHash: version.contentHash,
         certificateThumbprint: dto.certificateThumbprint,
@@ -542,35 +542,49 @@ export class ChartNotesService {
 
   /**
    * D-7: una nota la firma su propio profesional; nadie firma en nombre de
-   * otro perfil. `SUPERADMIN` tiene paso franco, igual que en el resto del
-   * sistema de roles.
+   * otro perfil. Como el firmante sólo puede ser el perfil de la sesión, el
+   * servidor lo deriva y el cliente no tiene que mandarlo (informe B, C5: el
+   * cuerpo `{}` de la pantalla daba 400). Si el cuerpo lo trae, se confirma.
+   * `SUPERADMIN` tiene paso franco, igual que en el resto del sistema de
+   * roles, y firma con el perfil que declare (o el suyo, si tiene).
    *
+   * @param declared - Perfil que trajo el cuerpo, si trajo alguno.
    * @param actor - Sesión que pide firmar o cofirmar.
-   * @param signerProfileId - Perfil profesional que el DTO declara como firmante.
-   * @throws ForbiddenException si la sesión no tiene perfil profesional, o si
-   *   el perfil declarado no es el suyo.
+   * @returns El perfil profesional que queda como firmante.
+   * @throws ForbiddenException si la sesión no tiene perfil profesional (ni
+   *   uno declarado, en el caso de `SUPERADMIN`), o si el perfil declarado no
+   *   es el suyo.
    */
-  private assertSignatureWithOwnProfile(
+  private resolveSigner(
+    declared: string | undefined,
     actor: AuthenticatedUser,
-    signerProfileId: string,
-  ): void {
-    if (actor.roles.includes(SUPERADMIN_ROLE)) return;
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
+        throw new ForbiddenException(
+          'Una firma clínica necesita un perfil profesional firmante.',
+        );
+      }
+      return chosen;
+    }
     if (!actor.practitionerProfileId) {
       throw new ForbiddenException(
         'La sesión no tiene un perfil profesional con el que firmar.',
       );
     }
-    if (signerProfileId !== actor.practitionerProfileId) {
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
       throw new ForbiddenException(
         'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
       );
     }
+    return actor.practitionerProfileId;
   }
 
   /**
    * CL-20 (BR-13): el autor de una nota, de una versión o de una enmienda es
    * el profesional de la sesión, nunca el que diga el cuerpo. La misma regla
-   * que {@link assertSignatureWithOwnProfile}, aplicada a escribir en vez de a
+   * que {@link resolveSigner}, aplicada a escribir en vez de a
    * firmar: el DTO conserva `authorProfileId` por compatibilidad —si viene, se
    * confirma; si difiere, 403— y si no viene, el autor es el perfil de la
    * sesión. `SUPERADMIN` pasa con lo que declare.

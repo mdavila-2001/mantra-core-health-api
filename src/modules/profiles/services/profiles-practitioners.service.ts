@@ -79,6 +79,7 @@ import {
   PractitionerProfileSummaryDto,
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
+  PractitionerLanguageInputDto,
   ListPractitionersResponseDto,
   ListSpecialtyCountsResponseDto,
   SetPractitionerPhotoDto,
@@ -1015,7 +1016,10 @@ export class ProfilesPractitionersService {
     // Desde que el alta pide los contactos separados, el sistema no alcanza
     // para saber cuál es cuál: hay dos correos y dos celulares, y lo que los
     // distingue es el uso. Sin este par, el personal y el de trabajo se pisan.
-    const contactByUsage = (sistema: string, usage: string): string | undefined =>
+    const contactByUsage = (
+      sistema: string,
+      usage: string,
+    ): string | undefined =>
       contactos.find(
         (punto) =>
           punto.systemConceptId === sistema && punto.useConceptId === usage,
@@ -1215,6 +1219,14 @@ export class ProfilesPractitionersService {
         practitioner.telehealthAvailable = dto.telehealthAvailable;
       }
       touch(practitioner, actor.id);
+      if (dto.languages !== undefined) {
+        await this.replaceLanguages(
+          tx,
+          practitioner.profileId,
+          dto.languages,
+          actor.id,
+        );
+      }
 
       // --- los datos personales, que viven en `persons` y no en el perfil ----
       const person = await this.personsRepo.findById(tx, link.personId);
@@ -1288,13 +1300,7 @@ export class ProfilesPractitionersService {
         }
 
         if (dto.phone !== undefined) {
-          await this.replacePhone(
-            tx,
-            person.id,
-            dto.phone,
-            actor.id,
-            ahora,
-          );
+          await this.replacePhone(tx, person.id, dto.phone, actor.id, ahora);
         }
         // Los cinco contactos que el alta captura por separado. `phone` sigue
         // arriba —es la forma anterior— y escribe el mismo par que
@@ -1308,14 +1314,7 @@ export class ProfilesPractitionersService {
           [dto.workLandline, PAR_LANDLINE_WORK],
         ] as const) {
           if (valor === undefined) continue;
-          await this.replaceContact(
-            tx,
-            person.id,
-            valor,
-            actor.id,
-            ahora,
-            par,
-          );
+          await this.replaceContact(tx, person.id, valor, actor.id, ahora, par);
         }
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
@@ -1368,6 +1367,63 @@ export class ProfilesPractitionersService {
   }
 
   /**
+   * Reemplaza los idiomas declarados del profesional por la lista recibida
+   * (informe B, C13). Diferencia por idioma en vez de borrar y recrear: el
+   * idioma que sigue declarado conserva su fila —y su fecha de alta— y sólo
+   * cambia el dominio o si interpreta en consulta.
+   *
+   * No se valida contra `VS_LANGUAGE`, igual que el alta: el idioma por
+   * defecto que escribe el alta (`LANGUAGE_SPANISH`) no es miembro sembrado de
+   * ese catálogo, y validar haría imposible volver a guardar lo que el alta
+   * dejó. Un concepto inexistente lo frena la FK de
+   * `practitioner_languages.language_concept_id`.
+   *
+   * @throws PreconditionFailedException si la lista repite un idioma.
+   */
+  private async replaceLanguages(
+    tx: EntityManager,
+    practitionerProfileId: string,
+    languages: readonly PractitionerLanguageInputDto[],
+    actorUserId: string,
+  ): Promise<void> {
+    const declared = new Map<string, PractitionerLanguageInputDto>();
+    for (const language of languages) {
+      if (declared.has(language.languageConceptId)) {
+        throw new PreconditionFailedException(
+          'Un idioma no puede declararse dos veces',
+          { languageConceptId: language.languageConceptId },
+        );
+      }
+      declared.set(language.languageConceptId, language);
+    }
+
+    const current = await this.languagesRepo.findByPractitioner(
+      tx,
+      practitionerProfileId,
+    );
+    for (const row of current) {
+      const wanted = declared.get(row.languageConceptId);
+      if (!wanted) {
+        this.languagesRepo.remove(tx, row);
+        continue;
+      }
+      declared.delete(row.languageConceptId);
+      row.proficiencyConceptId = wanted.proficiencyConceptId;
+      row.clinicalInterpretationAllowed = wanted.clinicalInterpretationAllowed;
+      touch(row, actorUserId);
+    }
+    for (const language of declared.values()) {
+      this.languagesRepo.create(tx, {
+        practitionerProfileId,
+        languageConceptId: language.languageConceptId,
+        proficiencyConceptId: language.proficiencyConceptId,
+        clinicalInterpretationAllowed: language.clinicalInterpretationAllowed,
+        actorUserId,
+      });
+    }
+  }
+
+  /**
    * Corrige el departamento emisor del documento (P28, ID-13), sin tocar el
    * número: la fila `ID_TYPE_NATIONAL` vigente se edita en el lugar, como en el
    * perfil del paciente. Fuera de `VS_BO_DEPARTMENT` responde 422.
@@ -1378,10 +1434,7 @@ export class ProfilesPractitionersService {
     departmentId: string,
     actorUserId: string,
   ): Promise<void> {
-    await this.administrativeAreas.assertIsAdministrativeArea(
-      tx,
-      departmentId,
-    );
+    await this.administrativeAreas.assertIsAdministrativeArea(tx, departmentId);
     const rows = await tx.find(Identifiers, {
       ownerId: personId,
       validTo: null,
@@ -2705,14 +2758,13 @@ export class ProfilesPractitionersService {
       // ID-16: el mismo establecimiento del padrón con el mismo cargo e inicio
       // es el doble envío que el índice único de la base rechaza; se dice acá.
       if (dto.healthFacilityConceptId !== undefined) {
-        const sameFacility =
-          await this.affiliationsRepo.findSameFacility(
-            tx,
-            profileId,
-            dto.healthFacilityConceptId,
-            roleTitle,
-            startDate,
-          );
+        const sameFacility = await this.affiliationsRepo.findSameFacility(
+          tx,
+          profileId,
+          dto.healthFacilityConceptId,
+          roleTitle,
+          startDate,
+        );
         if (sameFacility) {
           throw new ConflictException(
             'Ese vínculo con el establecimiento ya está en el historial laboral',
@@ -2732,11 +2784,12 @@ export class ProfilesPractitionersService {
       // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
       // la organización.
       if (dto.practiceSiteId) {
-        const alreadyRequested = await this.affiliationsRepo.findByPractitionerAndSite(
-          tx,
-          profileId,
-          dto.practiceSiteId,
-        );
+        const alreadyRequested =
+          await this.affiliationsRepo.findByPractitionerAndSite(
+            tx,
+            profileId,
+            dto.practiceSiteId,
+          );
         if (alreadyRequested) {
           throw new ConflictException('Ya pidió vincularse a esa sede', {
             practiceSiteId: dto.practiceSiteId,
@@ -2786,7 +2839,10 @@ export class ProfilesPractitionersService {
     // vínculo quedó pendiente: un declarado no tiene a quién avisarle y un
     // aprobado ya está resuelto. Nunca lanza — el vínculo ya se creó, y que no
     // salga un aviso no puede deshacerlo.
-    if (created.statusKind === 'pendiente' && dto.practiceSiteId !== undefined) {
+    if (
+      created.statusKind === 'pendiente' &&
+      dto.practiceSiteId !== undefined
+    ) {
       await this.orderNotify(dto.practiceSiteId, created);
     }
     return created;

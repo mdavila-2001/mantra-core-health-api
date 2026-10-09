@@ -1,5 +1,8 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsEmail,
   IsIn,
@@ -13,6 +16,7 @@ import {
   MaxLength,
   Min,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 // Mismas constantes de longitud que el alta y que el PATCH de paciente: son el
 // mismo dato declarado por la misma persona.
@@ -62,6 +66,32 @@ function removesDot(latitude: unknown, longitud: unknown): boolean {
 /** Mensaje único para los cuatro campos telefónicos del perfil. */
 const MENSAJE_TELEFONO =
   'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
+
+/** Tope de idiomas por profesional: la lista se reemplaza entera en cada PATCH. */
+export const MAX_PRACTITIONER_LANGUAGES = 20;
+
+/**
+ * Un idioma en el que atiende, tal como se guarda en
+ * `profiles.practitioner_languages` (mismas tres columnas que devuelve la
+ * lectura, `PractitionerLanguageDto`).
+ */
+export class PractitionerLanguageInputDto {
+  /** El idioma (concepto del catálogo de idiomas). */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  languageConceptId!: string;
+
+  /** Qué tan bien lo domina, si lo declara. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  proficiencyConceptId?: string;
+
+  /** Si puede sostener una consulta clínica en ese idioma, no sólo hablarlo. */
+  @ApiProperty()
+  @IsBoolean()
+  clinicalInterpretationAllowed!: boolean;
+}
 
 export class UpdateOwnPractitionerProfileDto {
   /** «Médica cardióloga», «Kinesiólogo». */
@@ -416,4 +446,23 @@ export class UpdateOwnPractitionerProfileDto {
   @IsString()
   @MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)
   workEmployerFreeText?: string;
+
+  /**
+   * Los idiomas en que atiende. Reemplaza la lista guardada: lo que no viene
+   * se quita, y `[]` deja al profesional sin idiomas declarados. Omitido, no
+   * se toca. Informe B, C13: la pantalla ya lo mandaba y el DTO no lo
+   * declaraba, así que guardar idiomas daba 400.
+   */
+  @ApiPropertyOptional({
+    type: [PractitionerLanguageInputDto],
+    maxItems: MAX_PRACTITIONER_LANGUAGES,
+    description:
+      'Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse.',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_PRACTITIONER_LANGUAGES)
+  @ValidateNested({ each: true })
+  @Type(() => PractitionerLanguageInputDto)
+  languages?: PractitionerLanguageInputDto[];
 }
