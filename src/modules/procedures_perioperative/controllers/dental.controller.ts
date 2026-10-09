@@ -13,6 +13,7 @@ import {
   Roles,
   requireTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { PeriopDentalService } from '../services';
 import {
@@ -71,6 +72,7 @@ export class DentalController {
 
   /** Histórico odontológico de una persona, del más reciente al más antiguo. */
   @Get('dental-procedures')
+  @AccessLogged({ resourceType: 'DENTAL_PROCEDURES' })
   @ApiOperation({
     summary: 'Histórico odontológico del paciente',
     description:

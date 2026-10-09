@@ -11,7 +11,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { ReferralsService } from '../services';
 import {
   CreateReferralDto,
@@ -65,6 +70,7 @@ export class ReferralsController {
    * no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
    */
   @Get()
+  @AccessLogged({ resourceType: 'REFERRALS' })
   @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
@@ -78,6 +84,7 @@ export class ReferralsController {
    * `@Roles` de clase con uno propio en vez de reutilizar `listByPatient`.
    */
   @Get('me')
+  @AccessLogged({ resourceType: 'REFERRALS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mis derivaciones' })
   listMine(@CurrentUser() actor: AuthenticatedUser) {

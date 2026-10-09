@@ -5,7 +5,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { DicomCatalogService } from '../services';
 import { DicomInstanceAccessResponseDto } from '../dto';
 
@@ -34,6 +39,7 @@ export class DicomWebController {
 
   /** UC-60-05. */
   @Get('studies/:studyUid/series/:seriesUid/instances/:sopUid')
+  @AccessLogged({ resourceType: 'DICOM_INSTANCE' })
   @Roles('DICOM_VIEWER', 'CLINICIAN', 'STORAGE_ADMIN')
   @ApiOperation({
     summary: 'Resolver una instancia DICOM y registrar el acceso (WADO-RS)',

@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { DataReleaseService } from '../services';
 import {
   ExportBundleDto,
@@ -60,6 +65,10 @@ export class FhirR5Controller {
 
   /** UC-52-13. */
   @Get('Patient/:id/$everything')
+  @AccessLogged({
+    resourceType: 'FHIR_PATIENT_EVERYTHING',
+    patient: 'param:id',
+  })
   @Roles('INTEROP_CONSUMER', 'CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @ApiOperation({
     summary: 'Servir la historia longitudinal del paciente',

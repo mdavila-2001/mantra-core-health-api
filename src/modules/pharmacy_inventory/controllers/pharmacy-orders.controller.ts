@@ -22,6 +22,7 @@ import {
   ParseOptionalLimitPipe,
   Roles,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { PharmacyOrdersService } from '../services';
 import {
@@ -57,6 +58,7 @@ export class PharmacyOrdersController {
    * el tenant en el WHERE: una organización nunca ve pedidos de otra.
    */
   @Get()
+  @AccessLogged({ resourceType: 'PHARMACY_ORDERS' })
   @Roles('SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Bandeja de pedidos de las farmacias del tenant (FAR-E2)',
@@ -108,6 +110,7 @@ export class PharmacyOrdersController {
    * Declarado antes que `:id` para que «me» nunca caiga en el parámetro.
    */
   @Get('me')
+  @AccessLogged({ resourceType: 'PHARMACY_ORDERS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({
     summary: 'Mis pedidos de farmacia, más nuevos primero (FAR-E1)',
@@ -124,6 +127,7 @@ export class PharmacyOrdersController {
    * La membresía se autoriza en el servicio; se mantiene el guard JWT global.
    */
   @Get(':id')
+  @AccessLogged({ resourceType: 'PHARMACY_ORDER', resourceId: 'param:id' })
   @ApiOperation({
     summary: 'Consultar un pedido de farmacia (FAR-E1)',
     description:

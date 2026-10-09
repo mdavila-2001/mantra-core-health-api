@@ -7,7 +7,11 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { MedicalAspectsService } from '../services';
 import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';
 
@@ -33,6 +37,7 @@ export class ClinicalMedicalAspectsController {
 
   /** Lo que la persona declaró de su salud; `{}` si nunca declaró nada. */
   @Get()
+  @AccessLogged({ resourceType: 'MEDICAL_ASPECTS', patient: 'actor' })
   @ApiOperation({ summary: 'Ver mis aspectos médicos declarados' })
   getOwn(
     @CurrentUser() actor: AuthenticatedUser,

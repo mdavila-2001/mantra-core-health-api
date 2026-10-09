@@ -23,6 +23,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { ChartMeReadService, EncounterPdfService } from '../services';
 import {
@@ -120,6 +121,11 @@ export class ChartMeController {
    * documentos sólo para el profesional.
    */
   @Get('encounters/:id/pdf')
+  @AccessLogged({
+    resourceType: 'ENCOUNTER_PDF',
+    patient: 'actor',
+    resourceId: 'param:id',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el PDF oficial de una atención propia',

@@ -7,6 +7,7 @@ import {
 } from '@mikro-orm/core';
 import type { EntityManager as SqlEntityManager } from '@mikro-orm/postgresql';
 import { AUD } from '../../modules/audit/audit.concepts';
+import { getAuditRequestContext, isUuid } from '../../common/audit-trail';
 
 /**
  * Columnas META estándar de toda tabla `audit.<x>_history` (generadas 1:1). El
@@ -34,6 +35,11 @@ const HISTORY_META_COLUMNS = new Set([
 const EXPLICITLY_WIRED_SOURCES = new Set([
   'medication_requests',
   'appointment_bookings',
+  // `ConditionsService` versiona sus tres mutaciones (`create`,
+  // `changeClinicalStatus`, `verify`) con `HistoryRepository.append`, y es el
+  // único servicio que escribe `clinical.conditions`. Sin esta entrada cada
+  // cambio dejaba DOS revisiones (la del servicio y la del espejo).
+  'conditions',
 ]);
 
 interface HistoryBinding {
@@ -144,6 +150,12 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
     return '<identificador-no-escalar>';
   }
 
+  /** Actor de la petición en curso, o `null` fuera de una (workers, seeds). */
+  private changedByUserId(): string | null {
+    const actorUserId = getAuditRequestContext()?.actorUserId;
+    return isUuid(actorUserId) ? actorUserId : null;
+  }
+
   private operationConcept(type: ChangeSetType): string {
     return type === ChangeSetType.CREATE
       ? AUD.OPERATION_INSERT
@@ -188,13 +200,21 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
             `WHERE "${binding.sourceIdColumn}" = ? AND valid_to IS NULL`,
           [sourceId],
         );
-        // Sella la nueva revisión con nº correlativo atómico (MAX+1).
+        // Sella la nueva revisión con nº correlativo atómico (MAX+1). El autor
+        // sale del contexto de bitácora de la petición: sin él, toda revisión
+        // del espejo quedaba con `changed_by_user_id` NULL.
         await em.execute(
           `INSERT INTO ${binding.historyTable} ` +
-            `(history_id, "${binding.sourceIdColumn}", "${binding.versionColumn}", operation_concept_id, valid_from, data_snapshot, recorded_at) ` +
-            `SELECT gen_random_uuid(), ?, COALESCE(MAX("${binding.versionColumn}"), 0) + 1, ?, now(), ?::jsonb, now() ` +
+            `(history_id, "${binding.sourceIdColumn}", "${binding.versionColumn}", operation_concept_id, valid_from, data_snapshot, changed_by_user_id, recorded_at) ` +
+            `SELECT gen_random_uuid(), ?, COALESCE(MAX("${binding.versionColumn}"), 0) + 1, ?, now(), ?::jsonb, ?, now() ` +
             `FROM ${binding.historyTable} WHERE "${binding.sourceIdColumn}" = ?`,
-          [sourceId, this.operationConcept(cs.type), snapshot, sourceId],
+          [
+            sourceId,
+            this.operationConcept(cs.type),
+            snapshot,
+            this.changedByUserId(),
+            sourceId,
+          ],
         );
       } catch (err) {
         console.error(
