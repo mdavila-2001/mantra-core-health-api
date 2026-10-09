@@ -208,11 +208,11 @@ describe('SearchIndexService', () => {
  * geográfica ordene por distancia real, y que un campo de más no se escriba.
  */
 describe('SearchIndexService · P10', () => {
-  const PUBLICO = 'community_public_profiles';
-  const TENANT_PUBLICO = 'public-directory';
+  const PUBLIC = 'community_public_profiles';
+  const TENANT_PUBLIC = 'public-directory';
 
   /** Cliente que reporta el índice como inexistente, para ver el `create`. */
-  function buildSinIndice() {
+  function buildWithoutIndex() {
     return build({
       indices: {
         exists: mockFn(async () => ({ body: false })),
@@ -224,23 +224,23 @@ describe('SearchIndexService · P10', () => {
 
   describe('analizador español', () => {
     it('crea el índice público con sus settings de análisis', async () => {
-      const { service, client } = buildSinIndice();
+      const { service, client } = buildWithoutIndex();
 
-      await service.ensureIndex(PUBLICO);
+      await service.ensureIndex(PUBLIC);
 
       const [[llamada]] = client.indices.create.mock.calls;
-      const analisis = llamada.body.settings.analysis;
-      expect(analisis.analyzer.es_text.filter).toContain('asciifolding');
-      expect(analisis.analyzer.es_text.filter).toContain('spanish_stemmer');
+      const analysis = llamada.body.settings.analysis;
+      expect(analysis.analyzer.es_text.filter).toContain('asciifolding');
+      expect(analysis.analyzer.es_text.filter).toContain('spanish_stemmer');
       // Sin esto, «cardiologo» no encuentra «Cardiología» y el buscador
       // devuelve cero sobre datos que sí existen.
-      expect(analisis.normalizer.es_keyword.filter).toContain('asciifolding');
+      expect(analysis.normalizer.es_keyword.filter).toContain('asciifolding');
     });
 
     it('el índice público declara el punto geográfico', async () => {
-      const { service, client } = buildSinIndice();
+      const { service, client } = buildWithoutIndex();
 
-      await service.ensureIndex(PUBLICO);
+      await service.ensureIndex(PUBLIC);
 
       const [[llamada]] = client.indices.create.mock.calls;
       expect(llamada.body.mappings.properties.location).toEqual({
@@ -269,8 +269,8 @@ describe('SearchIndexService · P10', () => {
         })),
       });
 
-      const res = await service.search(PUBLICO, {
-        tenantId: TENANT_PUBLICO,
+      const res = await service.search(PUBLIC, {
+        tenantId: TENANT_PUBLIC,
         geo: {
           field: 'location',
           lat: -16.5,
@@ -298,8 +298,8 @@ describe('SearchIndexService · P10', () => {
       const { service } = build();
 
       await expect(
-        service.search(PUBLICO, {
-          tenantId: TENANT_PUBLICO,
+        service.search(PUBLIC, {
+          tenantId: TENANT_PUBLIC,
           geo: {
             field: 'homeAddress',
             lat: 0,
@@ -316,7 +316,7 @@ describe('SearchIndexService · P10', () => {
       const { service, client } = build();
 
       await expect(
-        service.indexDocument(PUBLICO, TENANT_PUBLICO, 'p1', {
+        service.indexDocument(PUBLIC, TENANT_PUBLIC, 'p1', {
           slug: 'dra-demo',
           displayName: 'Dra. Demo',
           // El identificador interno del sujeto: exactamente la fuga que la
@@ -331,7 +331,7 @@ describe('SearchIndexService · P10', () => {
       const { service, client } = build();
 
       await expect(
-        service.bulkIndex(PUBLICO, TENANT_PUBLICO, [
+        service.bulkIndex(PUBLIC, TENANT_PUBLIC, [
           { id: 'p1', document: { slug: 'a', displayName: 'A' } },
           { id: 'p2', document: { slug: 'b', tenantIdReal: 'x' } },
         ]),
@@ -342,7 +342,7 @@ describe('SearchIndexService · P10', () => {
     it('acepta el documento que sólo trae claves declaradas', async () => {
       const { service, client } = build();
 
-      await service.indexDocument(PUBLICO, TENANT_PUBLICO, 'p1', {
+      await service.indexDocument(PUBLIC, TENANT_PUBLIC, 'p1', {
         kind: 'PRACTITIONER',
         slug: 'dra-demo',
         displayName: 'Dra. Demo',
@@ -371,7 +371,7 @@ describe('SearchIndexService · P10', () => {
         },
       });
 
-      const res = await service.recreateIndex(PUBLICO);
+      const res = await service.recreateIndex(PUBLIC);
 
       expect(res.dropped).toBe(true);
       expect(client.indices.delete).toHaveBeenCalled();
