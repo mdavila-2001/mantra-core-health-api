@@ -90,10 +90,7 @@ export class ServiceRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DuplicateStudyCheckResultDto> {
     const tenantId = requireTenantId();
-    await this.clinicalRead.assertCanReadHistory(
-      dto.patientProfileId,
-      actor,
-    );
+    await this.clinicalRead.assertCanReadHistory(dto.patientProfileId, actor);
 
     const em = this.em.fork();
     const encounter = await this.encountersRepo.findById(em, dto.encounterId);

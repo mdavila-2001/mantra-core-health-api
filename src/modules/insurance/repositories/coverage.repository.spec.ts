@@ -59,9 +59,7 @@ describe('CoverageRepository.findActiveCarriersByPatients', () => {
       aseguradoras: [INSURER],
     });
 
-    const result = await repo.findActiveCarriersByPatients(em, [
-      'paciente-1',
-    ]);
+    const result = await repo.findActiveCarriersByPatients(em, ['paciente-1']);
 
     expect(result.get('paciente-1')).toBe('Seguros Illimani');
   });

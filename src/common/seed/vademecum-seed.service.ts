@@ -356,9 +356,12 @@ export class VademecumSeedService {
       const codeSystemVersionId =
         idReal.get(concept.code_system_version_id) ??
         concept.code_system_version_id;
-      const alreadyPresent = existing.get(`${codeSystemVersionId}|${concept.code}`);
+      const alreadyPresent = existing.get(
+        `${codeSystemVersionId}|${concept.code}`,
+      );
       if (alreadyPresent !== undefined) {
-        if (alreadyPresent !== concept.id) idReal.set(concept.id, alreadyPresent);
+        if (alreadyPresent !== concept.id)
+          idReal.set(concept.id, alreadyPresent);
         continue;
       }
       em.create(

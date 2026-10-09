@@ -127,8 +127,7 @@ export class DirectoryNetworksSeedService {
       unmappedSpecialties: [],
       failed: [],
     };
-    if (!enabled || !password)
-      return { ...result, reason: 'not-configured' };
+    if (!enabled || !password) return { ...result, reason: 'not-configured' };
 
     const em = this.orm.em.fork();
     if (!(await em.findOne(Users, { id: SEED_ACTOR_ID }))) {
@@ -173,10 +172,15 @@ export class DirectoryNetworksSeedService {
           profileId = link.personId;
         } else {
           const [primera] = record.sedes;
-          const registration = await this.registrationWithNationalId(record, email, password, {
-            specialtyConceptIds: concepts.length ? concepts : undefined,
-            ownSite: primera ? this.siteOf(primera) : undefined,
-          });
+          const registration = await this.registrationWithNationalId(
+            record,
+            email,
+            password,
+            {
+              specialtyConceptIds: concepts.length ? concepts : undefined,
+              ownSite: primera ? this.siteOf(primera) : undefined,
+            },
+          );
           result.practitionersCreated++;
           if (primera) result.sitesCreated++;
           userId = registration.userId;
@@ -312,11 +316,7 @@ export class DirectoryNetworksSeedService {
   private email(record: Ficha): string {
     const parts = record.nombre.replace(',', ' ').split(/\s+/).filter(Boolean);
     const suffix = deterministicId(`seed:directory:${record.key}`).slice(0, 6);
-    return syntheticEmail(
-      parts[1] ?? parts[0] ?? '',
-      parts[0] ?? '',
-      suffix,
-    );
+    return syntheticEmail(parts[1] ?? parts[0] ?? '', parts[0] ?? '', suffix);
   }
 
   private siteOf(site: Site): {
@@ -416,10 +416,8 @@ export class DirectoryNetworksSeedService {
       MEDICAL_SPECIALTY_VALUE_SET,
     );
     const ids = set
-      ? ((await this.valueSets.findIncludedConceptIdsByValueSet(
-          em,
-          set.id,
-        )) ?? [])
+      ? ((await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id)) ??
+        [])
       : [];
     const concepts = ids.length
       ? await em.find(CatalogConcepts, { id: { $in: [...ids] } })

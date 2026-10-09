@@ -72,9 +72,7 @@ describe('NdjsonParser', () => {
   });
 
   it('ignora en silencio las claves que el perfil no espera', () => {
-    const result = parse(
-      '{"code":"ZZ-001","display":"Uno","sobrante":"x"}\n',
-    );
+    const result = parse('{"code":"ZZ-001","display":"Uno","sobrante":"x"}\n');
 
     expect(result.problemas).toHaveLength(0);
     expect(result.filas[0]?.valores).toEqual({

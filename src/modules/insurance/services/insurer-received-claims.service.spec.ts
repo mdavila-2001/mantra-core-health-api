@@ -501,10 +501,7 @@ describe('InsurerReceivedClaimsService.list', () => {
 
     it('los dos rechazos dicen lo mismo: no revelan qué organización es aseguradora', async () => {
       const messages: string[] = [];
-      for (const options of [
-        { sinAseguradora: true },
-        { administra: false },
-      ]) {
+      for (const options of [{ sinAseguradora: true }, { administra: false }]) {
         const d = build(options);
         const error = await inTenant(() => d.service.list(strange)).catch(
           (e: unknown) => e as Error,
@@ -828,9 +825,9 @@ describe('InsurerReceivedClaimsService.decide', () => {
           claim: request({ statusConceptId: estado }),
         });
 
-        await expect(
-          decide(d, { outcome: 'APPROVED' }),
-        ).rejects.toBeInstanceOf(ConflictException);
+        await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+          ConflictException,
+        );
       }
     });
 

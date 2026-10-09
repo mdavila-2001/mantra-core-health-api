@@ -723,11 +723,10 @@ export class ConceptsService {
     // catálogo entero sería lo peor que podría pasar.
     let effectiveIds = ids;
     if (scopingValueSetId !== undefined) {
-      const members =
-        await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
-          this.em,
-          scopingValueSetId,
-        );
+      const members = await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
+        this.em,
+        scopingValueSetId,
+      );
       if (members === null) {
         // Un `valueSetId` explícito que no resuelve es un pedido inválido de
         // quien llama: sigue siendo 404. El paraguas resuelto acá —sin que
@@ -1387,10 +1386,7 @@ export class ConceptsService {
     // estado que mantiene fuera el contenido sin revisar» que exige el
     // carril. Se responde 404 —no una ficha a medias— para que un borrador
     // sea indistinguible de un concepto inexistente desde este endpoint.
-    if (
-      isGlossaryTerm &&
-      concept.stateConceptId !== CONCEPTS.TERM_ACTIVE
-    ) {
+    if (isGlossaryTerm && concept.stateConceptId !== CONCEPTS.TERM_ACTIVE) {
       throw new ResourceNotFoundException('Concepto no encontrado', {
         conceptId,
       });
@@ -1432,9 +1428,7 @@ export class ConceptsService {
             ? {}
             : { preferred: designation.preferred }),
         })),
-      ...(glossaryText?.slug === undefined
-        ? {}
-        : { slug: glossaryText.slug }),
+      ...(glossaryText?.slug === undefined ? {} : { slug: glossaryText.slug }),
       ...(glossaryText?.clinicalDefinition === undefined
         ? {}
         : { clinicalDefinition: glossaryText.clinicalDefinition }),

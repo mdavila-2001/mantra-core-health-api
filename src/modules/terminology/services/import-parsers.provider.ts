@@ -38,9 +38,7 @@ export const IMPORT_PARSERS = Symbol('IMPORT_PARSERS');
 export const LECTOR_IMPORT: LectorImportFiles = {
   detectarFormato,
   parseadorDe: (format) =>
-    PARSEADORES_DE_IMPORTACION.find(
-      (parser) => parser.formato === format,
-    ),
+    PARSEADORES_DE_IMPORTACION.find((parser) => parser.formato === format),
   perfil: (id) =>
     Object.prototype.hasOwnProperty.call(PERFILES_DE_IMPORTACION, id)
       ? PERFILES_DE_IMPORTACION[id as PerfilDeImportacion['id']]

@@ -244,10 +244,13 @@ describe('MedicationsService', () => {
       it('SUPERADMIN pasa con el perfil que declare', async () => {
         const d = build();
         d.requestsRepo.create.mockReturnValue(created());
-        await d.service.prescribe({ ...registration, prescriberProfileId: 'hp-otro' }, {
-          id: 'root',
-          roles: ['SUPERADMIN'],
-        } as any);
+        await d.service.prescribe(
+          { ...registration, prescriberProfileId: 'hp-otro' },
+          {
+            id: 'root',
+            roles: ['SUPERADMIN'],
+          } as any,
+        );
         expect(d.requestsRepo.create.mock.calls[0][1].prescriberProfileId).toBe(
           'hp-otro',
         );
@@ -303,7 +306,10 @@ describe('MedicationsService', () => {
       it('un texto vacío no se guarda como cadena vacía', async () => {
         const d = build();
         d.requestsRepo.create.mockReturnValue(created());
-        await d.service.prescribe({ ...registration, indicationText: '   ' }, actor);
+        await d.service.prescribe(
+          { ...registration, indicationText: '   ' },
+          actor,
+        );
         expect(
           d.requestsRepo.create.mock.calls[0][1].indicationText,
         ).toBeUndefined();
@@ -359,7 +365,10 @@ describe('MedicationsService', () => {
           new PreconditionFailedException('La instancia no está cerrada'),
         );
         await expect(
-          d.service.prescribe({ ...registration, formInstanceId: 'form-1' }, actor),
+          d.service.prescribe(
+            { ...registration, formInstanceId: 'form-1' },
+            actor,
+          ),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
         expect(d.requestsRepo.create).not.toHaveBeenCalled();
       });

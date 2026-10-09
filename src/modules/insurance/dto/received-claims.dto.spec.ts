@@ -72,16 +72,16 @@ describe('ReceivedClaimDecisionDto', () => {
     it.each(['abc', '-5', '10.123', '1,5', '1e3', '', ' 10.00'])(
       'rechaza el monto %j',
       async (approvedAmount) => {
-        expect(await errors({ outcome: 'PARTIAL', approvedAmount })).toEqual(
-          ['approvedAmount'],
-        );
+        expect(await errors({ outcome: 'PARTIAL', approvedAmount })).toEqual([
+          'approvedAmount',
+        ]);
       },
     );
 
     it('rechaza un monto que no es cadena: el dinero viaja como cadena decimal', async () => {
-      expect(
-        await errors({ outcome: 'PARTIAL', approvedAmount: 200 }),
-      ).toEqual(['approvedAmount']);
+      expect(await errors({ outcome: 'PARTIAL', approvedAmount: 200 })).toEqual(
+        ['approvedAmount'],
+      );
     });
 
     it('rechaza un motivo de más de 1000 caracteres y una cláusula de más de 255', async () => {

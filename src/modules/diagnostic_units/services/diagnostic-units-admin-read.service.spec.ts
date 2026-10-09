@@ -60,7 +60,10 @@ function build() {
 }
 
 /** Ejecuta con el tenant fijado, como haría el interceptor de contexto. */
-function withTenant<T>(fn: () => Promise<T>, tenantId = 'tenant-1'): Promise<T> {
+function withTenant<T>(
+  fn: () => Promise<T>,
+  tenantId = 'tenant-1',
+): Promise<T> {
   return runWithTenant(tenantId, fn);
 }
 
@@ -68,10 +71,7 @@ describe('DiagnosticUnitsAdminReadService', () => {
   describe('list', () => {
     it('devuelve la unidad sin publicar, que el directorio esconde', async () => {
       const d = build();
-      d.readRepo.findByTenant.mockResolvedValue([
-        PUBLISHED_UNIT,
-        DRAFT_UNIT,
-      ]);
+      d.readRepo.findByTenant.mockResolvedValue([PUBLISHED_UNIT, DRAFT_UNIT]);
 
       const list = await withTenant(() => d.service.list());
 
@@ -84,10 +84,7 @@ describe('DiagnosticUnitsAdminReadService', () => {
 
     it('marca cuál se ve hoy en el directorio y cuál no', async () => {
       const d = build();
-      d.readRepo.findByTenant.mockResolvedValue([
-        PUBLISHED_UNIT,
-        DRAFT_UNIT,
-      ]);
+      d.readRepo.findByTenant.mockResolvedValue([PUBLISHED_UNIT, DRAFT_UNIT]);
 
       const list = await withTenant(() => d.service.list());
 

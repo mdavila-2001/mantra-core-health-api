@@ -177,10 +177,7 @@ describe('CommunityModerationReadService', () => {
 
     it('emite cursor y recorta la fila extra cuando hay más', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([
-        row('q1'),
-        row('q2'),
-      ]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1'), row('q2')]);
 
       const page = await listQueueInTenant(d, {} as any, 1);
 

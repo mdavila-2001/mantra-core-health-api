@@ -648,13 +648,7 @@ export class ProfilesPatientsService {
       }
 
       if (dto.phone !== undefined) {
-        await this.replacePhone(
-          tx,
-          person.id,
-          dto.phone,
-          actor.id,
-          ahora,
-        );
+        await this.replacePhone(tx, person.id, dto.phone, actor.id, ahora);
       }
 
       // El NIT y las dos direcciones: se declaraban al registrarse y después no

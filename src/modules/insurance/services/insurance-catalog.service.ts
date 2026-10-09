@@ -28,7 +28,9 @@ import type { CarrierCatalogEntryDto, CarrierCatalogResponseDto } from '../dto';
  */
 function publicCarrierLabel(legalName: string, sigla?: string | null): string {
   const isAcronym = sigla != null && /^[A-Z]{2,}$/.test(sigla);
-  return isAcronym && sigla !== legalName ? `${legalName} - ${sigla}` : legalName;
+  return isAcronym && sigla !== legalName
+    ? `${legalName} - ${sigla}`
+    : legalName;
 }
 
 /**

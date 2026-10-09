@@ -310,7 +310,10 @@ export class CommunityMessagingReadService {
       profiles.map((profile) => [profile.id, profile.displayName]),
     );
     const avatarByProfile = new Map(
-      profiles.map((profile) => [profile.id, this.fileUrl(profile.avatarFileId)]),
+      profiles.map((profile) => [
+        profile.id,
+        this.fileUrl(profile.avatarFileId),
+      ]),
     );
 
     const todas: ConversationListItemDto[] = await Promise.all(

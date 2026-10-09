@@ -1111,9 +1111,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
       );
 
     expect(mobiles).toHaveLength(2);
-    expect(
-      new Set(mobiles.map((row: { value: string }) => row.value)),
-    ).toEqual(new Set(['+591 70011111', '+591 70022222']));
+    expect(new Set(mobiles.map((row: { value: string }) => row.value))).toEqual(
+      new Set(['+591 70011111', '+591 70022222']),
+    );
   });
 
   it('el teléfono de la forma anterior sigue cayendo donde el fijo de trabajo', async () => {

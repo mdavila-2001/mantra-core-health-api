@@ -918,9 +918,7 @@ export class IamPractitionerSelfRegistrationService {
           flow: assisted
             ? 'practitioner-assisted-registration'
             : 'practitioner-self-registration',
-          ...(rolesGranted.length > 0
-            ? { clinicalRoles: rolesGranted }
-            : {}),
+          ...(rolesGranted.length > 0 ? { clinicalRoles: rolesGranted } : {}),
         },
       });
 

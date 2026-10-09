@@ -117,7 +117,8 @@ export class ClinicalRecordAccessGuard implements CanActivate {
     // alguna de las dos, la política ya responde lo que corresponde.
     const toEvaluate: string[] = [];
     for (const candidate of [ofRoute, ofBody]) {
-      if (candidate && !toEvaluate.includes(candidate)) toEvaluate.push(candidate);
+      if (candidate && !toEvaluate.includes(candidate))
+        toEvaluate.push(candidate);
     }
 
     if (!actor || toEvaluate.length === 0) {
@@ -134,10 +135,7 @@ export class ClinicalRecordAccessGuard implements CanActivate {
       // MCH-007: una escritura se decide con la política de escritura —un
       // grant de sólo lectura no alcanza—, también para el paciente de la ruta.
       if (escribe) {
-        await this.readService.assertCanWriteHistory(
-          patientProfileId,
-          actor,
-        );
+        await this.readService.assertCanWriteHistory(patientProfileId, actor);
       } else {
         await this.readService.assertCanReadHistory(patientProfileId, actor);
       }

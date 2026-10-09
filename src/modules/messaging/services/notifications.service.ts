@@ -1231,13 +1231,14 @@ export class NotificationsService implements InAppNotificationEmitter {
     // historia. En cuanto la persona lo lee, el siguiente mensaje vuelve a
     // avisar, que es lo que cualquiera espera de una bandeja.
     if (input.destination) {
-      const withoutRead = await this.notificationsRepo.findUnreadInAppForResource(
-        tx,
-        input.recipientUserId,
-        input.destination.type,
-        input.destination.id,
-        CONCEPTS.INAPP_UNREAD,
-      );
+      const withoutRead =
+        await this.notificationsRepo.findUnreadInAppForResource(
+          tx,
+          input.recipientUserId,
+          input.destination.type,
+          input.destination.id,
+          CONCEPTS.INAPP_UNREAD,
+        );
       if (withoutRead) {
         return {
           inAppNotificationId: withoutRead.id,

@@ -433,9 +433,7 @@ export class PublicSearchRepository {
     // El lugar del catálogo acota el mismo eje —el sujeto— y por la misma
     // puerta que la ciudad: «cardiólogos en Cochabamba» interseca, no pisa.
     if (filtros.territory) {
-      subjectsSets.push(
-        await this.targetIdsByTerritory(em, filtros.territory),
-      );
+      subjectsSets.push(await this.targetIdsByTerritory(em, filtros.territory));
     }
     if (filtros.specialtyConceptId) {
       subjectsSets.push(
@@ -570,9 +568,7 @@ export class PublicSearchRepository {
               LIMIT ?`,
             [
               territory.departmentConceptId,
-              territory.municipalityCodePrefixes.map(
-                (prefix) => `${prefix}%`,
-              ),
+              territory.municipalityCodePrefixes.map((prefix) => `${prefix}%`),
               tope,
             ],
             'all',

@@ -296,9 +296,7 @@ export class PractitionerAccessRequestsService {
       // acá se comprueba además que sea subconjunto de lo pedido: el paciente
       // no puede "autorizar" una especialidad que nadie le pidió.
       const authorized = dto.authorizedSpecialtyConceptIds ?? [];
-      const invalid = authorized.filter(
-        (id) => !requestedSpecialties.has(id),
-      );
+      const invalid = authorized.filter((id) => !requestedSpecialties.has(id));
       if (invalid.length > 0) {
         throw new PreconditionFailedException(
           'Sólo se pueden autorizar especialidades que el profesional pidió',

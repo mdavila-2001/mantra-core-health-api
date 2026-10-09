@@ -146,7 +146,9 @@ describe('ConditionsService (UC-08-08)', () => {
     it('sin el campo sigue naciendo confirmado: el contrato anterior no cambia', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(
+        created(CLIN.CONDITION_CONFIRMED),
+      );
 
       await d.service.create(body, actor);
 
@@ -158,7 +160,9 @@ describe('ConditionsService (UC-08-08)', () => {
     it('confirmado explícito equivale a omitirlo', async () => {
       const d = build();
       d.conditionsRepo.findActiveByCode.mockResolvedValue(null);
-      d.conditionsRepo.create.mockReturnValue(created(CLIN.CONDITION_CONFIRMED));
+      d.conditionsRepo.create.mockReturnValue(
+        created(CLIN.CONDITION_CONFIRMED),
+      );
 
       await d.service.create(
         { ...body, verificationStatusConceptId: CLIN.CONDITION_CONFIRMED },

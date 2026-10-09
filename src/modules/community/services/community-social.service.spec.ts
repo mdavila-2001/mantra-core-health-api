@@ -610,9 +610,7 @@ describe('CommunitySocialService', () => {
         { id: 'u-1', roles: [] } as any,
       );
 
-      expect(existing.visibilityConceptId).toBe(
-        COMM.PROFILE_VISIBILITY_PUBLIC,
-      );
+      expect(existing.visibilityConceptId).toBe(COMM.PROFILE_VISIBILITY_PUBLIC);
     });
 
     /** Y declararla `PRIVATE` la saca del directorio. */

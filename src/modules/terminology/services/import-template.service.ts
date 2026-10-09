@@ -116,10 +116,7 @@ function buildCsv(profile: PerfilDeImportacion): Buffer {
   const names = profile.columnas.map((column) => column.nombre);
   const example = names.map((nombre) => profile.ejemplo[nombre] ?? '');
 
-  const rows = [
-    names.map(escapar).join(','),
-    example.map(escapar).join(','),
-  ];
+  const rows = [names.map(escapar).join(','), example.map(escapar).join(',')];
   return Buffer.from(rows.join('\n') + '\n', 'utf8');
 }
 

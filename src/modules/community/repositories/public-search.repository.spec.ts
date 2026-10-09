@@ -328,6 +328,9 @@ describe('PublicSearchRepository.practiceSitesByPractitioner', () => {
 
     const map = await d.repo.practiceSitesByPractitioner(d.em as any, [DOCTOR]);
 
-    expect(map.get(DOCTOR)?.map((s) => s.id)).toEqual(['z-propia', 'a-clinica']);
+    expect(map.get(DOCTOR)?.map((s) => s.id)).toEqual([
+      'z-propia',
+      'a-clinica',
+    ]);
   });
 });

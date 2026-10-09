@@ -82,9 +82,9 @@ describe('RolesGuard', () => {
     it('retirar el rol (fuera de scopedRoles y de roles) deja de autorizar', () => {
       const { guard } = build(['STORAGE_ADMIN']);
       const withoutRole: AuthenticatedUser = { id: 'u1', roles: [] };
-      expect(() => guard.canActivate(contextFor(withoutRole, 'tenant-A'))).toThrow(
-        ForbiddenException,
-      );
+      expect(() =>
+        guard.canActivate(contextFor(withoutRole, 'tenant-A')),
+      ).toThrow(ForbiddenException);
     });
   });
 });
