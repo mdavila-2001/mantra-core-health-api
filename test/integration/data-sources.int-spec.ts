@@ -9,7 +9,7 @@ import {
   RoutedPersistenceSession,
   type ResolvedDataSources,
 } from '../../src/persistence';
-import { SCHEDULING_MODULE } from '../../src/modules/scheduling/scheduling.tokens';
+import { SCHEDULING_MODULE } from '../../src/modules/scheduling/infrastructure/persistence/scheduling.tokens';
 
 /**
  * Enrutado de datos y estado de las fuentes, contra la aplicación real.

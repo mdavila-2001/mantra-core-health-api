@@ -9,7 +9,7 @@ import {
   SchedulingAgendaController,
   TenantAgendaController,
   SchedulingServiceOfferingsController,
-} from './controllers';
+} from './presentation/controllers';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
@@ -25,7 +25,7 @@ import {
   SchedulingServiceOfferingsService,
   SchedulingServiceAgendaService,
   SchedulingServiceBookingService,
-} from './services';
+} from './application';
 import {
   SchedulingCatalogRepository,
   SchedulingBookingsRepository,
@@ -34,7 +34,7 @@ import {
   SchedulingAgendaRepository,
   SchedulingNoticeRepository,
   SchedulingOfferingsRepository,
-} from './repositories';
+} from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { InsuranceModule } from '../insurance/insurance.module';
@@ -71,10 +71,10 @@ import { CommunityModule } from '../community/community.module';
 // cuenta va y cómo se llama el profesional. Se registran acá —y no se importa
 // el módulo entero— por el mismo criterio que `AppointmentsRepository`.
 import * as profileEntities from '../profiles/entities';
-import { schedulingPersistenceProviders } from './scheduling.persistence';
-import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
-import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice.adapter';
-import { SupportAdminNoticeAdapter } from './adapters/support-admin-notice.adapter';
+import { schedulingPersistenceProviders } from './infrastructure/persistence/scheduling.persistence';
+import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
+import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
+import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-admin-notice.adapter';
 // P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
 // Clase sin estado de `forms` (`EntityManager` por parámetro): se provee suelta,
 // sin importar `FormsModule` entero, mismo criterio que `AppointmentsRepository`.

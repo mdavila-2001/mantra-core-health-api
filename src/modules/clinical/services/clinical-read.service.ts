@@ -3,9 +3,9 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
-import { SCHED } from '../../scheduling/scheduling.concepts';
-import { SchedulingBookingsRepository } from '../../scheduling/repositories';
-import { diaLocalDe } from '../../scheduling/scheduling-time';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
+import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
+import { diaLocalDe } from '../../scheduling/domain/time/scheduling-time';
 import {
   AllergyIntolerancesRepository,
   // BR-14 (CL-11): lectura de reacciones de alergia, independiente del
