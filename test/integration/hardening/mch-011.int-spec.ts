@@ -25,12 +25,12 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
 
   /** Intención cobrada y confirmada por el proveedor. */
   async function intencionCapturada() {
-    const intentId = await f.intencion('150.00');
+    const intentId = await f.intent('150.00');
     const ref = f.ref();
     await f.operar(intentId, 'SALE', ref).expect(201);
     await f.callback(ref, 'CAPTURED').expect(200);
     expect(await f.estadoTransaccion(ref)).toBe(CONCEPTS.TXN_CAPTURED);
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
     return { intentId, ref };
   }
 
@@ -51,7 +51,7 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
     expect(res.body.decision).toBe('obsoleto');
 
     expect(await f.estadoTransaccion(ref)).toBe(CONCEPTS.TXN_CAPTURED);
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
   });
 
   it('AC01/AC03 · un FAILED tardío no marca fallido el cobro y queda para conciliar', async () => {
@@ -63,7 +63,7 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
     expect(res.body.reconciliationRequired).toBe(true);
 
     expect(await f.estadoTransaccion(ref)).toBe(CONCEPTS.TXN_CAPTURED);
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
 
     // La contradicción queda archivada sin procesar: es la cola de conciliación,
     // no un evento perdido.
@@ -75,13 +75,13 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
   });
 
   it('AC02 · las permutaciones de los mismos eventos dejan el mismo estado final', async () => {
-    const enOrden = await f.intencion('150.00');
+    const enOrden = await f.intent('150.00');
     const refA = f.ref();
     await f.operar(enOrden, 'AUTHORIZE', refA).expect(201);
     await f.callback(refA, 'AUTHORIZED').expect(200);
     await f.callback(refA, 'CAPTURED').expect(200);
 
-    const permutado = await f.intencion('150.00');
+    const permutado = await f.intent('150.00');
     const refB = f.ref();
     await f.operar(permutado, 'AUTHORIZE', refB).expect(201);
     await f.callback(refB, 'CAPTURED').expect(200);
@@ -91,8 +91,8 @@ describe('MCH-011 · callbacks fuera de orden no hacen retroceder estados (integ
       await f.estadoTransaccion(refA),
     );
     expect(await f.estadoTransaccion(refB)).toBe(CONCEPTS.TXN_CAPTURED);
-    expect(await f.estadoIntencion(permutado)).toBe(
-      await f.estadoIntencion(enOrden),
+    expect(await f.intentState(permutado)).toBe(
+      await f.intentState(enOrden),
     );
   });
 

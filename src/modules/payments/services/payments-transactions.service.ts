@@ -31,12 +31,12 @@ import {
 } from '../dto';
 import { resolveGatewayWebhookSecrets } from './webhook-secret.resolver';
 import {
-  compararImportes,
-  esImportePositivo,
-  restarImportes,
-  sumarImportes,
+  compareAmounts,
+  isPositiveAmount,
+  subtractAmounts,
+  addAmounts,
 } from './payment-money';
-import { decidirCallback, referenciaEvento } from './payment-callback-machine';
+import { decideCallback, eventReference } from './payment-callback-machine';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -171,33 +171,33 @@ export class PaymentsTransactionsService {
       // debe, no contra el de la intención. Antes se admitía cualquier importe y
       // el saldo nunca se calculaba, así que una captura parcial podía cerrar la
       // intención completa y una segunda podía cobrar de más.
-      const capturado = await this.capturadoDeIntencion(tx, intentId);
-      const saldo = restarImportes(intent.amount, capturado);
+      const captured = await this.intentCaptured(tx, intentId);
+      const balance = subtractAmounts(intent.amount, captured);
       // Sin importe explícito se pide el saldo pendiente, que en una intención
       // intacta es el total.
-      const solicitado = dto.amount ?? saldo;
-      if (!esImportePositivo(solicitado)) {
+      const requested = dto.amount ?? balance;
+      if (!isPositiveAmount(requested)) {
         throw new PreconditionFailedException(
           'El importe a procesar debe ser mayor que cero',
-          { intentId, amount: solicitado },
+          { intentId, amount: requested },
         );
       }
-      if (compararImportes(solicitado, saldo) > 0) {
+      if (compareAmounts(requested, balance) > 0) {
         throw new ConflictException(
           'El importe excede el saldo pendiente de la intención',
-          { intentId, amount: solicitado, captured: capturado, balance: saldo },
+          { intentId, amount: requested, captured: captured, balance: balance },
         );
       }
       // Capturar más de lo autorizado es un cobro sin autorización del emisor.
       if (
         dto.operation === 'CAPTURE' &&
         open?.statusConceptId === CONCEPTS.TXN_AUTHORIZED &&
-        compararImportes(solicitado, open.amount) > 0
+        compareAmounts(requested, open.amount) > 0
       ) {
         throw new ConflictException('La captura excede el importe autorizado', {
           intentId,
           transactionId: open.id,
-          amount: solicitado,
+          amount: requested,
           authorized: open.amount,
         });
       }
@@ -207,7 +207,7 @@ export class PaymentsTransactionsService {
         gatewayId: intent.gatewayId,
         transactionTypeConceptId: OPERATION_CONCEPT[dto.operation],
         gatewayTransactionRef: dto.gatewayTransactionRef,
-        amount: solicitado,
+        amount: requested,
         currencyConceptId: intent.currencyConceptId,
         statusConceptId: CONCEPTS.TXN_PROCESSING,
         authorizationCode: dto.authorizationCode,
@@ -304,7 +304,7 @@ export class PaymentsTransactionsService {
       // sólo coincidencia exacta contaba como duplicado y cualquier otro caso
       // sobreescribía, así que un AUTHORIZED atrasado hacía retroceder un cobro
       // ya confirmado.
-      const decision = decidirCallback(
+      const decision = decideCallback(
         transaction.statusConceptId,
         targetStatus,
       );
@@ -312,12 +312,12 @@ export class PaymentsTransactionsService {
       // Bandeja de entrada: el hecho verificado se archiva con su firma antes de
       // decidir nada. La referencia es determinista, así que su índice único
       // reconoce la reentrega aunque el estado local ya haya avanzado.
-      const eventRef = referenciaEvento(dto);
-      const archivado = await this.transactionsRepo.findWebhookEventByRef(
+      const eventRef = eventReference(dto);
+      const archived = await this.transactionsRepo.findWebhookEventByRef(
         tx,
         eventRef,
       );
-      if (!archivado) {
+      if (!archived) {
         this.transactionsRepo.recordWebhookEvent(tx, {
           gatewayId: transaction.gatewayId,
           eventType: `payments.callback.${dto.outcome}`,
@@ -381,14 +381,14 @@ export class PaymentsTransactionsService {
         // capturado y confirmado, no de la operación que informa este callback.
         // Antes un CAPTURED de 40 sobre una intención de 100 la dejaba
         // PI_SUCCEEDED, es decir, la obligación aparecía satisfecha por completo.
-        const capturado = await this.capturadoDeIntencion(
+        const captured = await this.intentCaptured(
           tx,
           transaction.paymentIntentId,
           { id: transaction.id, statusConceptId: targetStatus },
         );
-        intent.statusConceptId = this.estadoIntencion(
+        intent.statusConceptId = this.intentState(
           dto.outcome,
-          capturado,
+          captured,
           intent.amount,
         );
         touch(intent, undefined);
@@ -488,7 +488,7 @@ export class PaymentsTransactionsService {
 
       // El DTO ya lo valida; se repite acá porque el tope de abajo supone
       // importes positivos y el servicio también se llama sin pasar por HTTP.
-      if (!esImportePositivo(dto.amount)) {
+      if (!isPositiveAmount(dto.amount)) {
         throw new PreconditionFailedException(
           'El importe del reembolso debe ser mayor que cero',
           { transactionId, amount: dto.amount },
@@ -502,14 +502,14 @@ export class PaymentsTransactionsService {
       // Un reembolso fallido no devolvió dinero; uno pendiente sí lo compromete.
       // Suma y comparación exactas (MCH-017): con `Number`, 0.10 + 0.20 superaba
       // 0.30 y se rechazaba un reembolso válido.
-      const refunded = sumarImportes(
+      const refunded = addAmounts(
         previous
           .filter((r) => r.statusConceptId !== CONCEPTS.REFUND_FAILED)
           .map((r) => r.amount),
       );
       if (
-        compararImportes(
-          sumarImportes([refunded, dto.amount]),
+        compareAmounts(
+          addAmounts([refunded, dto.amount]),
           transaction.amount,
         ) > 0
       ) {
@@ -610,25 +610,25 @@ export class PaymentsTransactionsService {
    *
    * @param tx - Transacción de base de datos activa.
    * @param intentId - Intención de pago.
-   * @param enCurso - Transacción cuyo estado está cambiando en esta misma unidad;
+   * @param inCourse - Transacción cuyo estado está cambiando en esta misma unidad;
    *   se toma su estado nuevo en lugar del persistido.
    * @returns El importe capturado, como cadena decimal.
    */
-  private async capturadoDeIntencion(
+  private async intentCaptured(
     tx: EntityManager,
     intentId: string,
-    enCurso?: { id: string; statusConceptId: string },
+    inCourse?: { id: string; statusConceptId: string },
   ): Promise<string> {
-    const transacciones = await this.transactionsRepo.findByIntent(
+    const transactions = await this.transactionsRepo.findByIntent(
       tx,
       intentId,
     );
-    return sumarImportes(
-      transacciones
+    return addAmounts(
+      transactions
         .map((t) => ({
           amount: t.amount,
           statusConceptId:
-            t.id === enCurso?.id ? enCurso.statusConceptId : t.statusConceptId,
+            t.id === inCourse?.id ? inCourse.statusConceptId : t.statusConceptId,
         }))
         .filter((t) => CAPTURED_STATES.includes(t.statusConceptId))
         .map((t) => t.amount),
@@ -644,17 +644,17 @@ export class PaymentsTransactionsService {
    * posterior a un cobro parcial tampoco la marca fallida: hay dinero cobrado.
    *
    * @param outcome - Resultado informado por el proveedor.
-   * @param capturado - Importe efectivamente capturado.
-   * @param debido - Importe de la intención.
+   * @param captured - Importe efectivamente capturado.
+   * @param due - Importe de la intención.
    * @returns El concepto de estado de la intención.
    */
-  private estadoIntencion(
+  private intentState(
     outcome: GatewayCallbackDto['outcome'],
-    capturado: string,
-    debido: string,
+    captured: string,
+    due: string,
   ): string {
-    if (compararImportes(capturado, debido) >= 0) return CONCEPTS.PI_SUCCEEDED;
-    if (outcome === 'FAILED' && !esImportePositivo(capturado)) {
+    if (compareAmounts(captured, due) >= 0) return CONCEPTS.PI_SUCCEEDED;
+    if (outcome === 'FAILED' && !isPositiveAmount(captured)) {
       return CONCEPTS.PI_FAILED;
     }
     return CONCEPTS.PI_PROCESSING;
