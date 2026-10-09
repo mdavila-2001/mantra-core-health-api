@@ -1,0 +1,935 @@
+[
+ {
+  "categoryKey": "anatomy",
+  "slug": "wikidata-anatomia-q9597",
+  "code": "Q9597",
+  "codeSystem": "wikidata-anatomia",
+  "esName": "Abdomen",
+  "enDisplay": "abdomen",
+  "esSynonyms": [],
+  "definition": "cavidad del cuerpo humano, situada entre el tórax y la pelvis",
+  "definitionKind": "wikidata-description",
+  "definitionSource": {
+   "name": "Wikidata Q9597 — descripción en castellano (comunidad de Wikidata)",
+   "url": "https://www.wikidata.org/wiki/Q9597",
+   "retrievedAt": "2026-09-30T15:20:40.524Z"
+  },
+  "plainSummaryEs": "",
+  "plainSummarySource": null,
+  "tagKeys": [],
+  "lang": "es",
+  "hierarchy": [],
+  "externalIds": {
+   "wikidata": "Q9597",
+   "ta98": [
+    "A01.1.00.016"
+   ],
+   "ta2": [
+    "127"
+   ]
+  },
+  "anatomyClassVerified": true,
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-b66-4",
+    "provenance": "wikidata:P927 Q2528129→Q9597 (CIE-10 = B66.4; Wikidata = Q9597)",
+    "targetId": "181e13b2-766e-4e66-a213-00f4f5769878",
+    "targetName": "Paragonimiasis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-n80",
+    "provenance": "wikidata:P927 Q205764→Q9597 (CIE-10 = N80; Wikidata = Q9597)",
+    "targetId": "e3fc7097-1334-4e93-aec6-30dc2a79e85a",
+    "targetName": "Endometriosis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-r10",
+    "provenance": "wikidata:P927 Q183425→Q9597 (CIE-10 = R10; Wikidata = Q9597)",
+    "targetId": "8a6e72b2-8121-4936-a480-ecc41da00f48",
+    "targetName": "Dolor abdominal y pélvico"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-s30",
+    "provenance": "wikidata:P927 Q308292→Q9597 (CIE-10 = S30; Wikidata = Q9597)",
+    "targetId": "a2a3c1ab-c04b-4799-a220-2b4e67aaf2d4",
+    "targetName": "Traumatismo superficial de abdomen, parte inferior de la espalda, pelvis y genitales externos"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Belly_button.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4a/Belly_button.jpg/330px-Belly_button.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Kayau · CC BY 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY 3.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Belly_button.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "wikidata",
+  "sourceUrl": "https://www.wikidata.org/wiki/Q9597",
+  "sourceRetrievedAt": "2026-09-30T15:20:40.524Z",
+  "reviewStatus": "external-source",
+  "hasDetail": false,
+  "sourceName": "Wikidata — estructuras anatómicas (Q4936952) con identificador TA98 (P1323) o TA2 (P7173); etiqueta y descripción ES de la comunidad",
+  "sourceLicense": "Wikidata: datos bajo CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Etiquetas y descripciones en castellano aportadas por la comunidad de Wikidata. Imagen: licencia de su archivo en Wikimedia Commons.",
+  "id": "8116b9e4-be75-49aa-a036-4c4626e91e2e"
+ },
+ {
+  "categoryKey": "signs-symptoms",
+  "slug": "wikidata-sintoma-q30141432",
+  "code": "Q30141432",
+  "codeSystem": "wikidata-sintoma",
+  "esName": "Abandono de las actividades laborales o sociales",
+  "enDisplay": "withdrawal from work or social activities",
+  "esSynonyms": [],
+  "definition": "",
+  "definitionKind": null,
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "plainSummarySource": null,
+  "tagKeys": [
+   "neurologic"
+  ],
+  "lang": "es",
+  "hierarchy": [],
+  "externalIds": {
+   "wikidata": "Q30141432"
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-g30",
+    "provenance": "wikidata:P780 Q11081→Q30141432 (CIE-10 = G30; Wikidata = Q30141432)",
+    "targetId": "10c173e7-21cd-449d-a93a-0d964f5ec254",
+    "targetName": "Enfermedad de Alzheimer"
+   }
+  ],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "wikidata-relaciones",
+  "sourceUrl": "https://www.wikidata.org/wiki/Q30141432",
+  "sourceRetrievedAt": "2026-10-01T21:51:15.011Z",
+  "reviewStatus": "external-source",
+  "categoryRule": "etiquetas compartidas por más de la mitad de sus 1 enfermedades vinculadas",
+  "hasDetail": false,
+  "sourceName": "Wikidata — síntoma o signo declarado por la enfermedad (P780); etiqueta y descripción ES de la comunidad",
+  "sourceLicense": "CC0 1.0 (Wikidata, dominio público)",
+  "id": "58f4cc79-18cc-4c1d-ae71-6ec4fe8c3a66"
+ },
+ {
+  "categoryKey": "signs-symptoms",
+  "slug": "cie10es-dx-r10-0",
+  "code": "R10.0",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Abdomen agudo",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "tagKeys": [
+   "digestive"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.18",
+    "display": "SÍNTOMAS, SIGNOS Y RESULTADOS ANORMALES DE PRUEBAS COMPLEMENTARIAS, NO CLASIFICADOS BAJO OTRO CONCEPTO (R00-R99)"
+   },
+   {
+    "code": "R10-R19",
+    "display": "SÍNTOMAS Y SIGNOS QUE AFECTAN AL APARATO DIGESTIVO Y EL ABDOMEN (R10-R19)"
+   },
+   {
+    "code": "R10",
+    "display": "Dolor abdominal y pélvico"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "R10.0",
+   "wikidata": "Q424317"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-r10",
+    "provenance": "cie10es:jerarquía R10.0 ⊂ R10",
+    "targetId": "8a6e72b2-8121-4936-a480-ecc41da00f48",
+    "targetName": "Dolor abdominal y pélvico"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q120569",
+    "provenance": "wikidata:P1995 Q424317→Q120569 (CIE-10 = R10.0; Wikidata = Q120569)",
+    "targetId": "b557b095-8c29-4c69-a1c7-fe74041b138e",
+    "targetName": "Gastroenterología"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Quadranti_addominali.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Quadranti_addominali.jpg/330px-Quadranti_addominali.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Rocco Cusari (doc44) · Public domain · vía Wikimedia Commons",
+  "imageLicense": "Public domain",
+  "imageLicenseUrl": null,
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Quadranti_addominali.jpg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": null,
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Quadranti_addominali.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Quadranti_addominali.jpg/330px-Quadranti_addominali.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Rocco Cusari (doc44) · Public domain · vía Wikimedia Commons",
+    "license": "Public domain",
+    "licenseUrl": null,
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Quadranti_addominali.jpg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q424317",
+    "matchProperty": "P494 (CIE-10 (OMS)) = R10.0"
+   }
+  ],
+  "imageMatch": "P494 (CIE-10 (OMS)) = R10.0",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "192b14c7-4ae4-4913-a71b-8d2c124faf0a"
+ },
+ {
+  "categoryKey": "signs-symptoms",
+  "slug": "cie10es-dx-r12",
+  "code": "R12",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Acidez",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "La acidez es una sensación de ardor dolorosa en el pecho o la garganta. Ocurre cuando el ácido del estómago regresa hacia el esófago, el tubo que transporta la comida desde la boca hacia el estómago.\n\nSi tiene acidez más de dos veces por semana, es posible que tenga enfermedad por reflujo gastroesofágico (ERGE), aunque es posible que sufra de ERGE aún sin tener acidez estomacal.\n\nEl embarazo, algunos alimentos, las bebidas alcohólicas y algunas medicinas pueden provocar acidez. El tratamiento de la acidez es importante porque con el transcurso del tiempo, el reflujo puede dañar el esófago. Las medicinas sin receta médica pueden ayudar. Si la acidez persiste, es posible que necesite medicinas con receta médica o una cirugía.\n\nSi usted, además, tiene otros síntomas, como un dolor opresivo en el pecho, podría tratarse de un infarto (ataque al corazón). Busque ayuda de inmediato.",
+  "definitionSource": {
+   "name": "MedlinePlus en español — «Acidez estomacal» — «Acidez estomacal», el mismo concepto según Wikidata Q537297",
+   "url": "https://medlineplus.gov/spanish/heartburn.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "incomodidad ardiente detrás de la parte inferior del esternón debido especialmente al flujo hacia atrás del contenido ácido del estómago en el esófago",
+  "tagKeys": [
+   "digestive"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.18",
+    "display": "SÍNTOMAS, SIGNOS Y RESULTADOS ANORMALES DE PRUEBAS COMPLEMENTARIAS, NO CLASIFICADOS BAJO OTRO CONCEPTO (R00-R99)"
+   },
+   {
+    "code": "R10-R19",
+    "display": "SÍNTOMAS Y SIGNOS QUE AFECTAN AL APARATO DIGESTIVO Y EL ABDOMEN (R10-R19)"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "R12",
+   "wikidata": "Q537297"
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a04-7",
+    "provenance": "wikidata:P780 Q574905→Q537297 (CIE-10 = A04.7; CIE-10 = R12)",
+    "targetId": "efeb5a9e-f649-48aa-a3c9-e1cc4ad3cde8",
+    "targetName": "Enterocolitis debida a Clostridium difficile"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-b66-2",
+    "provenance": "wikidata:P780 Q1210303→Q537297 (CIE-10 = B66.2; CIE-10 = R12)",
+    "targetId": "121e0a40-6fc2-4bc8-a166-29887e0fb288",
+    "targetName": "Dicrocoeliasis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-b67",
+    "provenance": "wikidata:P780 Q777087→Q537297 (CIE-10 = B67; CIE-10 = R12)",
+    "targetId": "46bb5518-1552-4aba-a602-48a2b13dfb72",
+    "targetName": "Equinococosis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-k21",
+    "provenance": "wikidata:P780 Q223591→Q537297 (CIE-10 = K21; CIE-10 = R12)",
+    "targetId": "470aad7d-07c8-434d-a213-d570cb60b59a",
+    "targetName": "Enfermedad por reflujo gastroesofágico"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-k27",
+    "provenance": "wikidata:P780 Q172941→Q537297 (CIE-10 = K27; CIE-10 = R12)",
+    "targetId": "410aa40b-0e74-45eb-aebe-634036c788a6",
+    "targetName": "Úlcera péptica, no especificado sitio"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-k52-9",
+    "provenance": "wikidata:P780 Q156103→Q537297 (CIE-10 = K52.9; CIE-10 = R12)",
+    "targetId": "c16a007d-f71f-469d-a2f5-85c02a80e0ea",
+    "targetName": "Gastroenteritis y colitis no infecciosas, no especificadas"
+   },
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "medlineplus-es-2257",
+    "provenance": "wikidata:identidad Q537297 (CIE-10 = R12; MeSH = D006356)",
+    "targetId": "002b227d-a144-4085-a67d-6da8b5b36b52",
+    "targetName": "Acidez estomacal"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q120569",
+    "provenance": "wikidata:P1995 Q537297→Q120569 (CIE-10 = R12; Wikidata = Q120569)",
+    "targetId": "b557b095-8c29-4c69-a1c7-fe74041b138e",
+    "targetName": "Gastroenterología"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-25673006",
+    "provenance": "wikidata:P2176 Q537297→Q422210 (CIE-10 = R12; ATC = A02BC01)",
+    "targetId": "4871094d-2179-4317-a729-936a8181add4",
+    "targetName": "Omeprazol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-317331009",
+    "provenance": "wikidata:P2176 Q537297→Q553223 (CIE-10 = R12; ATC = A02BC05)",
+    "targetId": "7478206f-e814-40f1-a29f-fe62ddcd4070",
+    "targetName": "Esomeprazol"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-39128000",
+    "provenance": "wikidata:P2176 Q537297→Q411159 (CIE-10 = R12; ATC = A02BA03)",
+    "targetId": "9f845d71-20cd-4c71-a1d4-6d20cd2340f2",
+    "targetName": "Famotidina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-43343000",
+    "provenance": "wikidata:P2176 Q537297→Q419991 (CIE-10 = R12; ATC = A02AD02)",
+    "targetId": "3ee45a7b-3df2-4b13-ab99-0ff85bf826be",
+    "targetName": "Magaldrato"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-55217007",
+    "provenance": "wikidata:P2176 Q537297→Q23767 (CIE-10 = R12; ATC = A12AA04)",
+    "targetId": "fc29990f-4256-4b9b-ab60-546c63ed1e5a",
+    "targetName": "Calcio carbonato"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-57376006",
+    "provenance": "wikidata:P2176 Q537297→Q179731 (CIE-10 = R12; ATC = B05XA02)",
+    "targetId": "976e7218-0dce-45b2-a42e-869a822882ea",
+    "targetName": "Sodio bicarbonato"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "cima-vtm-60468008",
+    "provenance": "wikidata:P2176 Q537297→Q407548 (CIE-10 = R12; ATC = A02AA04)",
+    "targetId": "d28c2b46-70b9-4bd0-afb2-594a4ed70416",
+    "targetName": "Magnesio hidróxido"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-medicamento-q1188290",
+    "provenance": "wikidata:P2176 Q537297→Q1188290 (CIE-10 = R12; Wikidata = Q1188290)",
+    "targetId": "d1727ef1-11eb-480d-aec9-573c021df7ce",
+    "targetName": "Nizatidina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-medicamento-q407931",
+    "provenance": "wikidata:P2176 Q537297→Q407931 (CIE-10 = R12; Wikidata = Q407931)",
+    "targetId": "54aa3b54-d1e6-4aba-a283-d9e644fb91ae",
+    "targetName": "Carbonato de magnesio"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-medicamento-q409492",
+    "provenance": "wikidata:P2176 Q537297→Q409492 (CIE-10 = R12; Wikidata = Q409492)",
+    "targetId": "9eff9f32-daac-49f0-aba1-10fe24790822",
+    "targetName": "Cimetidina"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-tratamiento-q27104479",
+    "provenance": "wikidata:P2176 Q537297→Q27104479 (CIE-10 = R12; Wikidata = Q27104479)",
+    "targetId": "964a31ce-b7fa-4ae4-aaf6-82d6cdec5af2",
+    "targetName": "Ion carbonato"
+   },
+   {
+    "type": "TREATMENT",
+    "targetSlug": "wikidata-tratamiento-q4737377",
+    "provenance": "wikidata:P2176 Q537297→Q4737377 (CIE-10 = R12; Wikidata = Q4737377)",
+    "targetId": "116b5242-c429-48be-a028-aebc183096e0",
+    "targetName": "Carbonato de aluminio"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Heartburn.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Heartburn.png/330px-Heartburn.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "IntentionallyDense · CC BY-SA 3.0 · vía Wikimedia Commons",
+  "imageLicense": "CC BY-SA 3.0",
+  "imageLicenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Heartburn.png",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "incomodidad ardiente detrás de la parte inferior del esternón debido especialmente al flujo hacia atrás del contenido ácido del estómago en el esófago",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Heartburn.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Heartburn.png/330px-Heartburn.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "IntentionallyDense · CC BY-SA 3.0 · vía Wikimedia Commons",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Heartburn.png",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q537297",
+    "matchProperty": "P494 (CIE-10 (OMS)) = R12"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q537297 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q537297",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P494 (CIE-10 (OMS)) = R12",
+  "definitionKind": "same-concept-medlineplus",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "886e6f8c-7ee7-4dac-a447-4fa0f5d317f8"
+ },
+ {
+  "id": "1dea6742-f983-4cac-a8e6-2daaafa8deae",
+  "slug": "cefalea",
+  "code": "GLOSSARY_CEFALEA",
+  "codeSystem": "glossary-curated-es",
+  "categoryKey": "signs-symptoms",
+  "tagKeys": [
+   "neurologic"
+  ],
+  "lang": "es",
+  "esName": "Cefalea",
+  "enDisplay": "Headache",
+  "esSynonyms": [
+   "Dolor de cabeza"
+  ],
+  "definition": "Dolor localizado en cualquier región de la cabeza, que puede originarse por causas primarias (migraña, tensional) o secundarias a otra condición subyacente.",
+  "plainSummaryEs": "Es el dolor de cabeza, que puede ser leve o intenso y tener distintas causas.",
+  "relations": [
+   {
+    "type": "ANATOMY",
+    "targetSlug": "encefalo",
+    "targetId": "74881bde-ff03-42ac-ab7f-128e63c6f94a",
+    "targetName": "Encéfalo (cerebro)"
+   }
+  ],
+  "source": "alovida-curated"
+ },
+ {
+  "categoryKey": "lab",
+  "slug": "medlineplus-lab-17-hidroxiprogesterona",
+  "code": "17-hidroxiprogesterona",
+  "codeSystem": "medlineplus-es-lab",
+  "esName": "17-hidroxiprogesterona",
+  "enDisplay": null,
+  "esSynonyms": [
+   "17-OH progesterona",
+   "17-OHP",
+   "17 alfahidroxiprogesterona",
+   "17 hidroxiprogesterona en suero",
+   "progesterona 17-hidroxi"
+  ],
+  "definition": "Una prueba de 17-hidroxiprogesterona mide la cantidad de 17-hidroxiprogesterona (17-OHP) en una muestra de sangre. La 17-OHP es una sustancia que producen las glándulas suprarrenales. Los proveedores de atención médica pueden usar esta prueba para ayudar a diagnosticar un grupo de trastornos genéticos poco comunes que afectan las glándulas suprarrenales. Esos trastornos genéticos de las glándulas suprarrenales se conocen como hiperplasia suprarrenal congénita (HSC). Las glándulas suprarrenales son dos pequeños órganos que se encuentran encima de cada riñón. Producen diferentes tipos de hormonas, que son mensajeros químicos en el torrente sanguíneo que controlan las acciones de ciertas células u órganos.\n\nNormalmente, las glándulas suprarrenales utilizan 17-OHP para producir una hormona llamada cortisol. Esta hormona ayuda a controlar sus niveles de energía, glucosa en la sangre (también llamada azúcar en la sangre), presión arterial y la respuesta de su cuerpo al estrés, las enfermedades y las lesiones.\n\nPara utilizar la 17-OHP, las glándulas suprarrenales necesitan una enzima llamada 21-hidroxilasa. Una enzima es una proteína que acelera ciertas reacciones químicas en el cuerpo. El cuerpo produce la enzima 21-hidroxilasa gracias a un gen específico. Los genes son partes del ADN de las células que se heredan de los padres. Usted hereda dos copias de cada gen, una de cada padre. Los genes contienen información que determina cómo es su cuerpo y cómo funciona.\n\nUna mutación en este gen causa la HSC. Los cambios en los genes también se denominan variantes genéticas o mutaciones. En el tipo más común de HSC, el cuerpo no puede producir suficiente 21-hidroxilasa. Esto hace que las glándulas suprarrenales trabajen más para utilizar la 17-OHP para producir cortisol. Cuando las glándulas suprarrenales trabajan más, se agrandan y producen niveles anormalmente altos de 17-OHP.\n\nSin suficiente 21-hidroxilasa para ayudar a utilizar la 17-OHP para producir cortisol, los niveles de 17-OHP aumentan. Para eliminar este exceso de 17-OHP, las glándulas suprarrenales la utilizan para producir más hormonas sexuales masculinas de lo normal. Esto ocurre en niños y adultos de ambos sexos. Por ello, las pruebas de hormonas sexuales masculinas, incluida la testosterona, se suelen realizar junto con las pruebas de 17-OHP para ayudar a diagnosticar la HSC.",
+  "definitionSource": {
+   "name": "MedlinePlus en español — Pruebas médicas: «17-hidroxiprogesterona» (última actualización: 29 septiembre 2026)",
+   "url": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/17-hidroxiprogesterona/",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "Una prueba de 17-hidroxiprogesterona (17-OHP) utiliza una muestra de sangre para diagnosticar un trastorno de las glándulas suprarrenales, llamado hiperplasia suprarrenal congénita. Conozca más.",
+  "plainSummarySource": {
+   "name": "MedlinePlus en español — descripción de la guía «17-hidroxiprogesterona»",
+   "url": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/17-hidroxiprogesterona/",
+   "retrievedAt": "2026-09-30T15:38:39.949Z",
+   "kind": "medlineplus-meta-description"
+  },
+  "metaDescription": "Una prueba de 17-hidroxiprogesterona (17-OHP) utiliza una muestra de sangre para diagnosticar un trastorno de las glándulas suprarrenales, llamado hiperplasia suprarrenal congénita. Conozca más.",
+  "categoryRule": "medlineplus-lab:descripcion-menciona-muestra",
+  "tagKeys": [],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "pruebas-medicas",
+    "display": "MedlinePlus: Pruebas médicas"
+   }
+  ],
+  "externalIds": {},
+  "relations": [],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "nlm-medlineplus-es-pruebas",
+  "sourceUrl": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/17-hidroxiprogesterona/",
+  "sourceUpdatedAt": "29 septiembre 2026",
+  "sourceRetrievedAt": "2026-09-30T15:38:39.949Z",
+  "reviewStatus": "external-source",
+  "hasDetail": false,
+  "sourceName": "MedlinePlus en español — Pruebas médicas (U.S. National Library of Medicine)",
+  "sourceLicense": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/",
+  "id": "4e59febd-c55d-4587-a243-4e6a698eccb4"
+ },
+ {
+  "categoryKey": "lab",
+  "slug": "inlasa-lac-001",
+  "code": "LAC-001",
+  "codeSystem": "inlasa-aranceles-2026",
+  "esName": "Ácido úrico",
+  "officialName": "ÁCIDO ÚRICO",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "",
+  "plainSummarySource": null,
+  "tagKeys": [],
+  "categoryRule": "área de INLASA «LAB. DE ANÁLISIS CLÍNICO»",
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "LAB. DE ANÁLISIS CLÍNICO",
+    "display": "LAB. DE ANÁLISIS CLÍNICO"
+   }
+  ],
+  "externalIds": {},
+  "relations": [],
+  "referencePrice": {
+   "amount": "43.00",
+   "currency": "BOB",
+   "schedule": "INLASA 2026",
+   "priceText": "43 Bs."
+  },
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "inlasa-aranceles-2026",
+  "sourceUrl": "https://inlasa.gob.bo/servicios-y-aranceles-del-inlasa/",
+  "sourceRetrievedAt": "2026-10-01T22:09:50.226Z",
+  "reviewStatus": "external-source",
+  "hasDetail": false,
+  "sourceName": "INLASA — Listado de Servicios y Aranceles 2026 (Ministerio de Salud y Deportes de Bolivia)",
+  "sourceLicense": "Información pública del Estado Plurinacional de Bolivia (INLASA, Ministerio de Salud y Deportes), publicada para consulta ciudadana; se cita la fuente.",
+  "id": "08e8e87e-b44e-4326-a882-7a68021c6e04"
+ },
+ {
+  "categoryKey": "specialty",
+  "slug": "wikidata-especialidad-q1046686",
+  "code": "Q1046686",
+  "codeSystem": "wikidata-especialidad",
+  "esName": "Alergología",
+  "enDisplay": "allergology",
+  "esSynonyms": [],
+  "definition": "especialidad médica dedicada a las alergias",
+  "definitionKind": "wikidata-description",
+  "definitionSource": {
+   "name": "Wikidata Q1046686 — descripción en castellano (comunidad de Wikidata)",
+   "url": "https://www.wikidata.org/wiki/Q1046686",
+   "retrievedAt": "2026-10-01T21:51:15.011Z"
+  },
+  "plainSummaryEs": "",
+  "plainSummarySource": null,
+  "tagKeys": [
+   "dermatologic"
+  ],
+  "lang": "es",
+  "hierarchy": [],
+  "externalIds": {
+   "wikidata": "Q1046686"
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-j00",
+    "provenance": "wikidata:P1995 Q114085→Q1046686 (CIE-10 = J00; Wikidata = Q1046686)",
+    "targetId": "989d4fa3-7245-4f37-ad52-03f42f38a24a",
+    "targetName": "Nasofaringitis aguda [resfriado común]"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-l23-0",
+    "provenance": "wikidata:P1995 Q16606544→Q1046686 (CIE-10 = L23.0; Wikidata = Q1046686)",
+    "targetId": "9636a28f-2aff-4d81-ab9d-9cd271356820",
+    "targetName": "Dermatitis alérgica de contacto debida a metales"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-l25",
+    "provenance": "wikidata:P1995 Q783903→Q1046686 (CIE-10 = L25; Wikidata = Q1046686)",
+    "targetId": "b9592658-f251-4b2a-a41c-efd2d0bf2422",
+    "targetName": "Dermatitis de contacto no especificada"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-l50",
+    "provenance": "wikidata:P1995 Q187440→Q1046686 (CIE-10 = L50; Wikidata = Q1046686)",
+    "targetId": "b447d558-e633-499c-aae6-6f44fdb508b4",
+    "targetName": "Urticaria"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-t78-4",
+    "provenance": "wikidata:P1995 Q7157933→Q1046686 (CIE-10 = T78.4; Wikidata = Q1046686)",
+    "targetId": "200a5e93-59c9-4c77-ab0b-70441674227a",
+    "targetName": "Otros tipos de alergia y los no especificados"
+   }
+  ],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "wikidata-relaciones",
+  "sourceUrl": "https://www.wikidata.org/wiki/Q1046686",
+  "sourceRetrievedAt": "2026-10-01T21:51:15.011Z",
+  "reviewStatus": "external-source",
+  "categoryRule": "etiquetas compartidas por más de la mitad de sus 5 enfermedades vinculadas",
+  "hasDetail": false,
+  "sourceName": "Wikidata — síntoma o signo declarado por la enfermedad (P780); etiqueta y descripción ES de la comunidad",
+  "sourceLicense": "CC0 1.0 (Wikidata, dominio público)",
+  "id": "90d0a091-eff6-4fe7-a93a-017680302ee8"
+ },
+ {
+  "categoryKey": "diagnostic-test",
+  "slug": "medlineplus-es-6356",
+  "code": "6356",
+  "codeSystem": "medlineplus-es",
+  "esName": "Análisis de orina",
+  "enDisplay": "Urinalysis",
+  "esSynonyms": [
+   "Examen de orina",
+   "Pruebas de orina",
+   "Orina, Análisis"
+  ],
+  "definition": "Un análisis de orina es una prueba de su orina. A menudo se realiza para chequear si hay una infección de las vías urinarias, problemas renales o diabetes. Usted también puede someterse a uno durante un chequeo médico, si es ingresado al hospital, antes de una cirugía o si está embarazada. Este también puede monitorear algunas afecciones médicas y tratamientos.\n\nUn análisis de orina consiste en chequear:\n\n• Su color\n\n• Su aspecto (si es clara o turbia)\n\n• Su olor\n\n• El nivel de acidez (pH)\n\n• Si hay sustancias que normalmente no están en la orina, como la sangre, el exceso de proteínas, glucosa, cetonas, y bilirrubina\n\n• Si existen células, cristales y cilindros urinarios (proteínas en forma de tubo)\n\n• Si presenta bacterias u otros gérmenes",
+  "definitionSource": {
+   "name": "MedlinePlus en español — «Análisis de orina»",
+   "url": "https://medlineplus.gov/spanish/urinalysis.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z"
+  },
+  "plainSummaryEs": "El examen de orina puede servir para diagnosticar infecciones, como infecciones de las vías urinarias, y diabetes. Entérese en qué consiste esta prueba.",
+  "plainSummarySource": {
+   "name": "MedlinePlus en español — descripción del tema «Análisis de orina»",
+   "url": "https://medlineplus.gov/spanish/urinalysis.html",
+   "retrievedAt": "2026-09-30T15:38:39.949Z",
+   "kind": "medlineplus-meta-desc"
+  },
+  "metaDescription": "El examen de orina puede servir para diagnosticar infecciones, como infecciones de las vías urinarias, y diabetes. Entérese en qué consiste esta prueba.",
+  "tagKeys": [
+   "renal"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "group-11",
+    "display": "Riñones y sistema urinario"
+   },
+   {
+    "code": "group-25",
+    "display": "Pruebas de diagnóstico"
+   }
+  ],
+  "externalIds": {
+   "mesh": [
+    "D016482"
+   ],
+   "medlineplusEn": "6355"
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a27",
+    "provenance": "wikidata:P923 Q155098→Q842424 (CIE-10 = A27; MeSH = D016482)",
+    "targetId": "3348db11-56b1-4609-ac83-bd18f50d71aa",
+    "targetName": "Leptospirosis"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a70",
+    "provenance": "wikidata:P923 Q164727→Q842424 (CIE-10 = A70; MeSH = D016482)",
+    "targetId": "22420489-d767-4417-ad66-50ae70260a10",
+    "targetName": "Clamidia psittaci infecciones"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a96-0",
+    "provenance": "wikidata:P923 Q2583514→Q842424 (CIE-10 = A96.0; MeSH = D016482)",
+    "targetId": "98b90ebc-1349-4a22-a1b2-62e6e09c4afe",
+    "targetName": "Fiebre hemorrágica de Junín"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a98-0",
+    "provenance": "wikidata:P923 Q1077505→Q842424 (CIE-10 = A98.0; MeSH = D016482)",
+    "targetId": "8f156122-5d61-43fc-a0f8-271ac28d04de",
+    "targetName": "Fiebre hemorrágica de Crimea-Congo"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-a98-2",
+    "provenance": "wikidata:P923 Q1432397→Q842424 (CIE-10 = A98.2; MeSH = D016482)",
+    "targetId": "8d155dfc-5f9a-4f86-a531-010ae659f5e2",
+    "targetName": "Enfermedad de la selva de Kyasanur"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-e10",
+    "provenance": "wikidata:P923 Q124407→Q842424 (CIE-10 = E10; MeSH = D016482)",
+    "targetId": "e19bcbeb-f309-4ef5-a4e7-406a053e4a30",
+    "targetName": "Diabetes mellitus tipo 1"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-e11",
+    "provenance": "wikidata:P923 Q12206→Q842424 (CIE-10 = E11; MeSH = D016482)",
+    "targetId": "e09bca58-71ec-4130-a4ca-71d87157ce88",
+    "targetName": "Diabetes mellitus tipo 2"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-e23-2",
+    "provenance": "wikidata:P923 Q12412172→Q842424 (CIE-10 = E23.2; MeSH = D016482)",
+    "targetId": "98e00d3a-fcae-4cde-afcf-a6e4606ee7f8",
+    "targetName": "Diabetes insípida"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-n25-1",
+    "provenance": "wikidata:P923 Q2892779→Q842424 (CIE-10 = N25.1; MeSH = D016482)",
+    "targetId": "0c588168-ce69-4cf0-ad21-a888c1624d58",
+    "targetName": "Diabetes insípida nefrogénica"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-n28-8",
+    "provenance": "wikidata:P923 Q1641429→Q842424 (CIE-10 = N28.8; MeSH = D016482)",
+    "targetId": "bc2841a0-5e94-4414-a774-067403fd96f4",
+    "targetName": "Otros trastornos especificados del riñón y del uréter"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-p35-1",
+    "provenance": "wikidata:P923 Q5160416→Q842424 (CIE-10 = P35.1; MeSH = D016482)",
+    "targetId": "917e54af-16c8-40d7-a514-f20814d212f6",
+    "targetName": "Infección congénita por Citomegalovirus"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-r35",
+    "provenance": "wikidata:P923 Q1124286→Q842424 (CIE-10 = R35; MeSH = D016482)",
+    "targetId": "8369ea7f-2124-4cb5-aaf8-2216b6da7284",
+    "targetName": "Poliuria"
+   },
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-r63-1",
+    "provenance": "wikidata:P923 Q635195→Q842424 (CIE-10 = R63.1; MeSH = D016482)",
+    "targetId": "195c4fbe-b018-4bc6-a246-83c8cb02e7e4",
+    "targetName": "Polidipsia"
+   },
+   {
+    "type": "SPECIALTY",
+    "targetSlug": "wikidata-especialidad-q499500",
+    "provenance": "wikidata:P1995 Q842424→Q499500 (MeSH = D016482; Wikidata = Q499500)",
+    "targetId": "cfba6c25-ccce-46e1-a461-9f5c69716116",
+    "targetName": "Patología clínica"
+   }
+  ],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "nlm-medlineplus-es",
+  "sourceUrl": "https://medlineplus.gov/spanish/urinalysis.html",
+  "sourceXmlUrl": "https://medlineplus.gov/xml/mplus_topics_2026-09-30.xml",
+  "sourceRetrievedAt": "2026-09-30T15:38:39.949Z",
+  "reviewStatus": "external-source",
+  "hasDetail": false,
+  "sourceName": "MedlinePlus en español — Temas de salud (U.S. National Library of Medicine)",
+  "sourceLicense": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/",
+  "id": "2c867fed-7129-4c61-a573-4a14b04d125e"
+ },
+ {
+  "categoryKey": "treatment",
+  "slug": "wikidata-tratamiento-q2823834",
+  "code": "Q2823834",
+  "codeSystem": "wikidata-tratamiento",
+  "esName": "17-acetato de medroxiprogesterona",
+  "enDisplay": "medroxyprogesterone acetate",
+  "esSynonyms": [],
+  "definition": "compuesto químico",
+  "definitionKind": "wikidata-description",
+  "definitionSource": {
+   "name": "Wikidata Q2823834 — descripción en castellano (comunidad de Wikidata)",
+   "url": "https://www.wikidata.org/wiki/Q2823834",
+   "retrievedAt": "2026-10-01T21:51:15.011Z"
+  },
+  "plainSummaryEs": "",
+  "plainSummarySource": null,
+  "tagKeys": [
+   "gyn-ob"
+  ],
+  "lang": "es",
+  "hierarchy": [],
+  "externalIds": {
+   "wikidata": "Q2823834",
+   "mesh": [
+    "D017258"
+   ]
+  },
+  "relations": [
+   {
+    "type": "DISEASE",
+    "targetSlug": "cie10es-dx-n80-0",
+    "provenance": "wikidata:P2176 Q2012569→Q2823834 (CIE-10 = N80.0; Wikidata = Q2823834)",
+    "targetId": "7db72bda-e46e-489e-ad9c-5804a905be58",
+    "targetName": "Endometriosis del útero"
+   }
+  ],
+  "imageUrl": null,
+  "imageThumbUrl": null,
+  "imageAttribution": null,
+  "imageLicense": null,
+  "imageLicenseUrl": null,
+  "imageSourcePage": null,
+  "imageOrigin": null,
+  "source": "wikidata-relaciones",
+  "sourceUrl": "https://www.wikidata.org/wiki/Q2823834",
+  "sourceRetrievedAt": "2026-10-01T21:51:15.011Z",
+  "reviewStatus": "external-source",
+  "categoryRule": "etiquetas compartidas por más de la mitad de sus 1 enfermedades vinculadas",
+  "hasDetail": false,
+  "sourceName": "Wikidata — síntoma o signo declarado por la enfermedad (P780); etiqueta y descripción ES de la comunidad",
+  "sourceLicense": "CC0 1.0 (Wikidata, dominio público)",
+  "id": "b0471750-f23d-4412-aad9-06c2c6578c82"
+ },
+ {
+  "categoryKey": "signs-symptoms",
+  "slug": "cie10es-dx-r06-3",
+  "code": "R06.3",
+  "codeSystem": "cie10es-diagnosticos-2026",
+  "esName": "Respiración periódica",
+  "enDisplay": null,
+  "esSynonyms": [],
+  "definition": "",
+  "definitionSource": null,
+  "plainSummaryEs": "tipo de respiración",
+  "tagKeys": [
+   "cardiovascular",
+   "respiratory"
+  ],
+  "lang": "es",
+  "hierarchy": [
+   {
+    "code": "Cap.18",
+    "display": "SÍNTOMAS, SIGNOS Y RESULTADOS ANORMALES DE PRUEBAS COMPLEMENTARIAS, NO CLASIFICADOS BAJO OTRO CONCEPTO (R00-R99)"
+   },
+   {
+    "code": "R00-R09",
+    "display": "SÍNTOMAS Y SIGNOS QUE AFECTAN A LOS APARATOS CIRCULATORIO Y RESPIRATORIO (R00-R09)"
+   },
+   {
+    "code": "R06",
+    "display": "Alteraciones de la respiración"
+   }
+  ],
+  "flags": {
+   "final": true
+  },
+  "externalIds": {
+   "icd10cm": "R06.3",
+   "wikidata": "Q1071481"
+  },
+  "relations": [
+   {
+    "type": "RELATED_TERM",
+    "targetSlug": "cie10es-dx-r06",
+    "provenance": "cie10es:jerarquía R06.3 ⊂ R06",
+    "targetId": "16718dad-ce19-45b9-a5d9-edacc627aef6",
+    "targetName": "Alteraciones de la respiración"
+   }
+  ],
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Cheyne-Stokes_respiration_no_lang.svg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+  "imageThumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Cheyne-Stokes_respiration_no_lang.svg/330px-Cheyne-Stokes_respiration_no_lang.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "imageAttribution": "Jmarchn · CC0 · vía Wikimedia Commons",
+  "imageLicense": "CC0",
+  "imageLicenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "imageSourcePage": "https://commons.wikimedia.org/wiki/File:Cheyne-Stokes_respiration_no_lang.svg",
+  "imageOrigin": "wikimedia-commons",
+  "source": "sanidad-cie10es-2026",
+  "sourceUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Diagnosticos_Tabla_Referencia_CIE10ES_2026.xlsx",
+  "sourceRetrievedAt": "2026-10-01T21:35:02.250Z",
+  "reviewStatus": "external-source",
+  "wikidataDescriptionEs": "tipo de respiración",
+  "images": [
+   {
+    "kind": "imagen",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Cheyne-Stokes_respiration_no_lang.svg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "thumbUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Cheyne-Stokes_respiration_no_lang.svg/330px-Cheyne-Stokes_respiration_no_lang.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "attribution": "Jmarchn · CC0 · vía Wikimedia Commons",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "sourcePage": "https://commons.wikimedia.org/wiki/File:Cheyne-Stokes_respiration_no_lang.svg",
+    "origin": "wikimedia-commons",
+    "wikidataId": "Q1071481",
+    "matchProperty": "P494 (CIE-10 (OMS)) = R06.3"
+   }
+  ],
+  "plainSummarySource": {
+   "name": "Wikidata Q1071481 — descripción en castellano (comunidad de Wikidata, CC0)",
+   "url": "https://www.wikidata.org/wiki/Q1071481",
+   "retrievedAt": "2026-09-30T15:38:00.874Z",
+   "kind": "wikidata-description"
+  },
+  "imageMatch": "P494 (CIE-10 (OMS)) = R06.3",
+  "hasDetail": false,
+  "sourceName": "CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)",
+  "sourceLicense": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU.",
+  "id": "a00259c9-02ed-4673-a335-e5cad1bfc76c"
+ }
+]
