@@ -138,3 +138,34 @@ API que no se hace sin que el usuario lo pida; se documenta y acepta en `ARCH-00
 - Servidor de producción/staging en `openapi/openapi.yaml` — no existe una URL real conocida que
   documentar sin inventarla; solo se declara `http://localhost:3000`. Añadir cuando exista un
   dominio real (Fase 14, `docs/operations/environments.md`).
+
+## Cuerpos de request: homónimos y `additionalProperties: false` (2026-10-09)
+
+`@nestjs/swagger` nombra cada esquema por el nombre de la clase. Con dos DTO
+homónimos en módulos distintos queda **un solo** esquema y una de las rutas se
+documenta con el cuerpo ajeno: `POST /surveys/assignments` figuraba con el
+`CreateAssignmentDto` de `forms` (`fieldId`, `targetResourceConceptId`) en vez
+del suyo (`surveyVersionId`, `targetType`, `targetId`). En `src/**/dto/` hay 85
+nombres de clase repetidos (contados con `grep`, no todos son cuerpos de
+request); Swagger sólo avisa «Duplicate DTO detected» por consola.
+
+Tampoco emitía `additionalProperties: false`, aunque el `ValidationPipe` global
+rechaza con 400 toda clave que el DTO no declara (`forbidNonWhitelisted`).
+
+`tools/openapi/request-body-contract.mjs` lo corrige en el generador, desde los
+metadatos reales y antes de `createDocument`:
+
+- lee el DTO de cada `@Body()` y su módulo Nest (`ModulesContainer`);
+- a los homónimos les pone `@ApiSchema({ name: '<Módulo><Clase>' })`
+  (`SurveysCreateAssignmentDto`); los que ya tienen nombre propio se respetan;
+- cierra con `additionalProperties: false` el cuerpo y los DTO anidados que
+  `@ValidateNested` recorre — sin `@ValidateNested`, el whitelist no entra y el
+  objeto anidado sigue abierto.
+
+`required` no se toca: lo sigue calculando Swagger.
+
+Pruebas: `yarn docs:openapi:request-bodies:test` (app Nest mínima, sin base; la
+primera prueba reproduce el defecto con Swagger real). El `openapi.json`
+versionado **no se regeneró** con este cambio: generar exige `yarn build` y los
+almacenes del stack arriba. Hasta regenerarlo, el paso `git diff --exit-code` de
+CI marca la diferencia, que es exactamente el efecto de este arreglo.
