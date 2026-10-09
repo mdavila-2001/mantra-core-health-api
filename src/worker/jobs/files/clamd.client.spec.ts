@@ -26,23 +26,23 @@ interface Emulador {
  * @returns El emulador con su puerto efímero.
  */
 async function emular(responder: string | 'cortar'): Promise<Emulador> {
-  const partes: Buffer[] = [];
+  const parts: Buffer[] = [];
   const server = createServer((socket: Socket) => {
-    socket.on('data', (parte) => {
-      partes.push(parte);
-      const texto = parte.toString('latin1');
-      const finDeFlujo =
-        parte.length >= 4 && parte.readUInt32BE(parte.length - 4) === 0;
-      if (texto.startsWith('zPING') || finDeFlujo) {
+    socket.on('data', (part) => {
+      parts.push(part);
+      const text = part.toString('latin1');
+      const flowEnd =
+        part.length >= 4 && part.readUInt32BE(part.length - 4) === 0;
+      if (text.startsWith('zPING') || flowEnd) {
         if (responder === 'cortar') socket.end();
         else socket.end(`${responder}\0`);
       }
     });
   });
-  await new Promise<void>((listo) => server.listen(0, '127.0.0.1', listo));
+  await new Promise<void>((ready) => server.listen(0, '127.0.0.1', ready));
   const address = server.address();
   const puerto = typeof address === 'object' && address ? address.port : 0;
-  return { server, puerto, recibido: () => Buffer.concat(partes) };
+  return { server, puerto, recibido: () => Buffer.concat(parts) };
 }
 
 describe('ClamdClient', () => {
@@ -50,13 +50,13 @@ describe('ClamdClient', () => {
 
   afterEach(async () => {
     if (emulador) {
-      await new Promise<void>((listo) => emulador!.server.close(() => listo()));
+      await new Promise<void>((ready) => emulador!.server.close(() => ready()));
       emulador = undefined;
     }
   });
 
   /** Cliente apuntando al emulador levantado. */
-  function cliente(puerto: number): ClamdClient {
+  function client(puerto: number): ClamdClient {
     return new ClamdClient({
       host: '127.0.0.1',
       port: puerto,
@@ -67,32 +67,32 @@ describe('ClamdClient', () => {
   it('responde limpio cuando clamd dice OK', async () => {
     emulador = await emular('stream: OK');
 
-    const veredicto = await cliente(emulador.puerto).scan(Buffer.from('hola'));
+    const verdict = await client(emulador.puerto).scan(Buffer.from('hola'));
 
-    expect(veredicto.clean).toBe(true);
+    expect(verdict.clean).toBe(true);
   });
 
   it('devuelve la firma cuando clamd encuentra algo', async () => {
     emulador = await emular('stream: Win.Test.EICAR_HDB-1 FOUND');
 
-    const veredicto = await cliente(emulador.puerto).scan(Buffer.from('x'));
+    const verdict = await client(emulador.puerto).scan(Buffer.from('x'));
 
-    expect(veredicto.clean).toBe(false);
-    expect(veredicto.signature).toBe('Win.Test.EICAR_HDB-1');
+    expect(verdict.clean).toBe(false);
+    expect(verdict.signature).toBe('Win.Test.EICAR_HDB-1');
   });
 
   it('enmarca el contenido como exige el protocolo INSTREAM', async () => {
     emulador = await emular('stream: OK');
-    const contenido = Buffer.from('doce  bytes!');
+    const content = Buffer.from('doce  bytes!');
 
-    await cliente(emulador.puerto).scan(contenido);
+    await client(emulador.puerto).scan(content);
 
-    const enviado = emulador.recibido();
+    const sent = emulador.recibido();
     // `zINSTREAM\0`, longitud en big-endian, contenido, y cuatro ceros de cierre.
-    expect(enviado.subarray(0, 10).toString('latin1')).toBe('zINSTREAM\0');
-    expect(enviado.readUInt32BE(10)).toBe(contenido.length);
-    expect(enviado.subarray(14, 14 + contenido.length)).toEqual(contenido);
-    expect(enviado.readUInt32BE(enviado.length - 4)).toBe(0);
+    expect(sent.subarray(0, 10).toString('latin1')).toBe('zINSTREAM\0');
+    expect(sent.readUInt32BE(10)).toBe(content.length);
+    expect(sent.subarray(14, 14 + content.length)).toEqual(content);
+    expect(sent.readUInt32BE(sent.length - 4)).toBe(0);
   });
 
   it('parte el contenido en trozos y los enmarca todos', async () => {
@@ -108,11 +108,11 @@ describe('ClamdClient', () => {
 
     await cliente8.scan(Buffer.alloc(20, 0x41));
 
-    const enviado = emulador.recibido();
+    const sent = emulador.recibido();
     const longitudes: number[] = [];
     let cursor = 10;
-    while (cursor + 4 <= enviado.length) {
-      const longitud = enviado.readUInt32BE(cursor);
+    while (cursor + 4 <= sent.length) {
+      const longitud = sent.readUInt32BE(cursor);
       longitudes.push(longitud);
       if (longitud === 0) break;
       cursor += 4 + longitud;
@@ -127,7 +127,7 @@ describe('ClamdClient', () => {
     emulador = await emular('ERROR: fuera de memoria');
 
     await expect(
-      cliente(emulador.puerto).scan(Buffer.from('x')),
+      client(emulador.puerto).scan(Buffer.from('x')),
     ).rejects.toThrow(/no es un veredicto/);
   });
 
@@ -135,24 +135,24 @@ describe('ClamdClient', () => {
     emulador = await emular('cortar');
 
     await expect(
-      cliente(emulador.puerto).scan(Buffer.from('x')),
+      client(emulador.puerto).scan(Buffer.from('x')),
     ).rejects.toThrow(/no es un veredicto/);
   });
 
   it('falla cuando no hay nadie escuchando', async () => {
     // Un puerto cerrado: el error tiene que propagarse, no volverse un limpio.
-    const sinNadie = new ClamdClient({
+    const withoutNobody = new ClamdClient({
       host: '127.0.0.1',
       port: 1,
       timeoutMs: 1_000,
     });
 
-    await expect(sinNadie.scan(Buffer.from('x'))).rejects.toBeDefined();
+    await expect(withoutNobody.scan(Buffer.from('x'))).rejects.toBeDefined();
   });
 
   it('confirma que el demonio está vivo con PING', async () => {
     emulador = await emular('PONG');
 
-    await expect(cliente(emulador.puerto).ping()).resolves.toBe(true);
+    await expect(client(emulador.puerto).ping()).resolves.toBe(true);
   });
 });
