@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AssetService } from '../services';
 import {
   CapitalizeAssetDto,
@@ -22,6 +27,11 @@ export class AccountingAssetController {
   constructor(private readonly assetService: AssetService) {}
 
   /** UC-16-10. */
+  @Audited({
+    action: 'ASSET_CAPITALIZED',
+    entity: 'asset',
+    entityId: 'result.id',
+  })
   @Post('assets/capitalize')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -34,6 +44,11 @@ export class AccountingAssetController {
   }
 
   /** UC-16-11. */
+  @Audited({
+    action: 'DEPRECIATION_RUN',
+    entity: 'asset_depreciation',
+    entityId: 'result.id',
+  })
   @Post('depreciation/run')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   getCurrentTenantId,
@@ -45,6 +46,11 @@ export class ChartTemplatesController {
   constructor(private readonly templatesService: ChartTemplatesService) {}
 
   /** UC-15-12. */
+  @Audited({
+    action: 'CHART_TEMPLATE_ASSIGNED',
+    entity: 'specialty_chart_template',
+    entityId: 'param:templateId',
+  })
   @Post(':templateId/assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -58,6 +64,11 @@ export class ChartTemplatesController {
   }
 
   /** Carril 2 · punto 1: crear una plantilla con su esquema de campos. */
+  @Audited({
+    action: 'CHART_TEMPLATE_CREATED',
+    entity: 'specialty_chart_template',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

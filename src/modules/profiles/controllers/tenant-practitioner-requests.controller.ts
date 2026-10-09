@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { ProfilesAffiliationsService } from '../services';
 import { AffiliationRequestListDto, RejectAffiliationDto } from '../dto';
 
@@ -66,6 +66,11 @@ export class TenantPractitionerRequestsController {
   }
 
   /** La organización acepta el vínculo. */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_REQUEST_APPROVED',
+    entity: 'practitioner_affiliation',
+    entityId: 'param:affiliationId',
+  })
   @Post(':tenantId/practitioner-requests/:affiliationId/approve')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Aprobar la solicitud de un profesional' })
@@ -78,6 +83,11 @@ export class TenantPractitionerRequestsController {
   }
 
   /** La organización rechaza el vínculo, con motivo si quiere darlo. */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_REQUEST_REJECTED',
+    entity: 'practitioner_affiliation',
+    entityId: 'param:affiliationId',
+  })
   @Post(':tenantId/practitioner-requests/:affiliationId/reject')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Rechazar la solicitud de un profesional' })
@@ -101,6 +111,11 @@ export class TenantPractitionerRequestsController {
    * no fueron parte. Lo que sí ocurre desde ya: no puede aceptar turnos nuevos
    * ni publicar más agenda acá.
    */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_REVOKED',
+    entity: 'practitioner_affiliation',
+    entityId: 'param:affiliationId',
+  })
   @Post(':tenantId/practitioner-requests/:affiliationId/revoke')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({

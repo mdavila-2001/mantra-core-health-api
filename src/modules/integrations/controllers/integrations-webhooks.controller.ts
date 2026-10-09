@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Public } from '../../../common';
+import { NotAudited, Public } from '../../../common';
 import { IntegrationsWebhooksService } from '../services';
 import { InboundWebhookDto, InboundMessageResponseDto } from '../dto';
 
@@ -20,6 +20,9 @@ export class IntegrationsWebhooksController {
   constructor(private readonly webhooksService: IntegrationsWebhooksService) {}
 
   /** UC-12-09. */
+  @NotAudited(
+    'integrations.inbound_messages (deduplicado por firma) en IntegrationsWebhooksService.receiveInbound.',
+  )
   @Post('webhooks/inbound')
   @Public()
   @HttpCode(HttpStatus.CREATED)

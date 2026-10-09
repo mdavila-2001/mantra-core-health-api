@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PractitionerAccessRequestsService } from '../services';
 import {
   DecidePractitionerAccessRequestDto,
@@ -28,6 +33,11 @@ export class PractitionerAccessRequestsController {
   constructor(private readonly service: PractitionerAccessRequestsService) {}
 
   /** FT-07-R05: el profesional pide acceso tras encontrar al paciente. */
+  @Audited({
+    action: 'PRACTITIONER_ACCESS_REQUESTED',
+    entity: 'consent',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)
@@ -55,6 +65,11 @@ export class PractitionerAccessRequestsController {
   }
 
   /** FT-07-R05/R06/R07: el paciente decide, eligiendo qué áreas autoriza. */
+  @Audited({
+    action: 'PRACTITIONER_ACCESS_DECIDED',
+    entity: 'consent',
+    entityId: 'param:id',
+  })
   @Post(':id/decision')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)

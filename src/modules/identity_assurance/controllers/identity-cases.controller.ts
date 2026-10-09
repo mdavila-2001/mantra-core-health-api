@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -85,6 +86,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */
+  @Audited({
+    action: 'VERIFICATION_CASES_EXPIRED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post('expire-sweep')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -98,6 +104,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-02. */
+  @Audited({
+    action: 'VERIFICATION_CASE_OPENED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -110,6 +121,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-03. */
+  @Audited({
+    action: 'VERIFICATION_EVIDENCE_SUBMITTED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
   @Post(':id/evidence')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -123,6 +139,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-04. */
+  @Audited({
+    action: 'VERIFICATION_CHECKS_PLANNED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
   @Post(':id/checks\\:plan')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +157,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-07. */
+  @Audited({
+    action: 'VERIFICATION_FRAUD_SIGNAL_RAISED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
   @Post(':id/fraud-signals')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -149,6 +175,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-08. */
+  @Audited({
+    action: 'VERIFICATION_MANUAL_REVIEW_OPENED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
   @Post(':id/manual-review')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -162,6 +193,11 @@ export class IdentityCasesController {
   }
 
   /** UC-27-10. */
+  @Audited({
+    action: 'IDENTITY_ASSERTION_ISSUED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
   @Post(':id/assertions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
