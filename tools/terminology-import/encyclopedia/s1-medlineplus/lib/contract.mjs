@@ -5,9 +5,8 @@
 // =============================================================================
 
 import { isAllowedImageUrl, allowedLicense } from './images.mjs';
-import { KINDS_BY_FAMILY } from './kinds.mjs';
+import { ALL_KINDS } from './kinds.mjs';
 
-const ALL_KINDS = new Set(Object.values(KINDS_BY_FAMILY).flat());
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SECTION_REQUIRED = ['kind', 'text', 'lang', 'source', 'sourceUrl', 'license', 'retrievedAt', 'sourceVersion', 'locator'];
 const IMAGE_REQUIRED = ['url', 'thumbUrl', 'kind', 'altText', 'altTextQuality', 'author', 'license', 'sourcePage', 'retrievedAt'];
@@ -23,12 +22,14 @@ export function validateArticle(article) {
   if (article?.lang !== 'es') at('lang', 'debe ser «es»');
   if (!Array.isArray(article?.sections) || article.sections.length === 0) at('sections', 'sin secciones');
 
-  const kinds = new Set();
+  const keys = new Set();
   for (const s of article?.sections ?? []) {
     for (const k of SECTION_REQUIRED) if (!present(s[k])) at(`sections[${s.kind}]`, `falta ${k}`);
     if (!ALL_KINDS.has(s.kind)) at(`sections[${s.kind}]`, 'kind fuera del catálogo cerrado');
-    if (kinds.has(s.kind)) at(`sections[${s.kind}]`, 'kind repetido');
-    kinds.add(s.kind);
+    const key = `${s.kind}\n${s.locator}\n${s.text}`;
+    if (keys.has(key)) at(`sections[${s.kind}]`, 'sección repetida (mismo kind, locator y texto)');
+    keys.add(key);
+    if (s.excerpt !== undefined && !(s.excerpt === true && Array.isArray(s.omitted) && s.omitted.length)) at(`sections[${s.kind}]`, 'excerpt exige omitted[]');
     if (s.lang !== 'es') at(`sections[${s.kind}]`, 'lang debe ser «es» (sin traducción automática)');
     for (const d of ['retrievedAt', 'sourceVersion']) if (present(s[d]) && !ISO_DATE.test(s[d])) at(`sections[${s.kind}]`, `${d} no es una fecha ISO`);
     if (present(s.sourceUrl) && !/^https:\/\/medlineplus\.gov\//.test(s.sourceUrl)) at(`sections[${s.kind}]`, 'sourceUrl fuera de medlineplus.gov');

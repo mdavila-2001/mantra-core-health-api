@@ -7,8 +7,8 @@
 // se devuelve en `rejected` con el motivo, y el artículo sale sin esa sección.
 // =============================================================================
 
-import { adamCheck, doseCheck } from './guards.mjs';
-import { KINDS_BY_FAMILY, familyOf, kindForHeading } from './kinds.mjs';
+import { adamCheck, doseCheck, redactDose } from './guards.mjs';
+import { KIND_ORDER, familyOf, kindForHeading } from './kinds.mjs';
 import { bulletItems, splitSections, squashedText, stripTrailingAttribution } from './sections.mjs';
 
 export const TOPIC_SOURCE = 'nlm-medlineplus-es';
@@ -38,15 +38,20 @@ function sectionBase({ source, sourceUrl, retrievedAt, sourceVersion }) {
   return { lang: 'es', source, sourceUrl, license: LICENSE_LABEL, retrievedAt, sourceVersion };
 }
 
+/** Banderas de marcado que impiden publicar el bloque (las demás son informativas). */
+const BLOCKING_FLAGS = new Set(['malformed-markup', 'adam-encyclopedia-link', 'text-not-found-in-live-page']);
+
 /**
  * Toma bloques ya cortados (heading/text/flags) y devuelve secciones del contrato
- * más los rechazos por sección. `leadAs` decide qué es el texto previo al primer
- * título: `definition` si el resumen no tiene títulos o ninguno es «¿Qué es…?».
+ * más los rechazos por sección. Cada bloque de la fuente es UNA sección: no se
+ * fusionan ni se reordenan por contenido (solo por el orden fijo de `KIND_ORDER`, estable).
+ * `leadAs`: el texto previo al primer título es `definition` si el resumen no tiene títulos
+ * o ninguno es «¿Qué es…?», y `overview` en el otro caso.
  */
 export function mapBlocksToSections({ blocks, family, seedRow, base }) {
-  const allowed = KINDS_BY_FAMILY[family];
   const sections = [];
   const rejected = [];
+  const seen = new Set();
   const hasHeadings = blocks.some((b) => b.heading);
   const headingKinds = blocks.map((b) => (b.heading ? kindForHeading(family, b.heading) : null));
   const hasDefinitionHeading = headingKinds.some((k) => k?.kind === 'definition');
@@ -58,12 +63,8 @@ export function mapBlocksToSections({ blocks, family, seedRow, base }) {
       ? { kind: !hasHeadings || !hasDefinitionHeading ? 'definition' : 'overview', rule: 'lead' }
       : headingKinds[i];
     const where = { locator, heading: block.heading ?? null, sourceUrl: base.sourceUrl };
-    if (!mapped) {
-      rejected.push(rejection('section', seedRow, 'unmapped-heading', { ...where, detail: `Encabezado sin regla en la familia «${family}»` }));
-      return;
-    }
     if (!block.text) return;
-    const [flag] = block.flags ?? [];
+    const flag = (block.flags ?? []).find((f) => BLOCKING_FLAGS.has(f));
     if (flag) {
       rejected.push(rejection('section', seedRow, flag, { ...where, kind: mapped.kind }));
       return;
@@ -73,27 +74,38 @@ export function mapBlocksToSections({ blocks, family, seedRow, base }) {
       rejected.push(rejection('section', seedRow, 'adam-content-detected', { ...where, kind: mapped.kind, detail: adam.match }));
       return;
     }
-    const dose = doseCheck(`${block.heading ?? ''}\n${block.text}`);
-    if (!dose.ok) {
-      rejected.push(rejection('section', seedRow, 'dose-or-posology', { ...where, kind: mapped.kind, detail: `${dose.pattern}: «${dose.match}»` }));
+    const headingDose = doseCheck(block.heading ?? '');
+    const redacted = headingDose.ok ? redactDose(block.text) : { text: null, kept: 0, removed: [{ pattern: headingDose.pattern, match: headingDose.match }] };
+    if (!redacted.text) {
+      const first = redacted.removed[0];
+      rejected.push(rejection('section', seedRow, 'dose-or-posology', { ...where, kind: mapped.kind, detail: `${first.pattern}: «${first.match}»` }));
       return;
     }
-    if (sections.some((s) => s.kind === mapped.kind)) {
-      rejected.push(rejection('section', seedRow, 'duplicate-kind', { ...where, kind: mapped.kind }));
+    const key = `${locator}\n${redacted.text}`;
+    if (seen.has(key)) {
+      rejected.push(rejection('section', seedRow, 'repeated-in-source', { ...where, kind: mapped.kind, detail: 'La fuente repite esta sección idéntica' }));
       return;
     }
-    const items = bulletItems(block.text);
+    seen.add(key);
+    const omittedList = [
+      ...(redacted.removed.length ? [{ reason: 'dose-or-posology', paragraphs: redacted.removed.length }] : []),
+      ...(block.adamLinksRemoved ? [{ reason: 'adam-encyclopedia-link', paragraphs: block.adamLinksRemoved }] : []),
+    ];
+    const items = bulletItems(redacted.text);
     sections.push({
       kind: mapped.kind,
-      text: block.text,
+      text: redacted.text,
       ...(items.length ? { items } : {}),
+      ...(block.flags?.includes('table') ? { table: true } : {}),
+      ...(omittedList.length ? { excerpt: true, omitted: omittedList } : {}),
       ...base,
       locator,
     });
   });
 
-  const order = (s) => allowed.indexOf(s.kind);
-  sections.sort((a, b) => order(a) - order(b));
+  const order = (s) => KIND_ORDER.indexOf(s.kind);
+  const position = new Map(sections.map((s, i) => [s, i]));
+  sections.sort((a, b) => order(a) - order(b) || position.get(a) - position.get(b));
   return { sections, rejected };
 }
 
@@ -125,9 +137,17 @@ export function buildTopicArticle({ seedRow, corpusRow, topic, page, snapshot })
     return { article: null, rejected: [rejection('article', seedRow, 'adam-content-detected', { sourceUrl: pageUrl, detail: 'La página nombra a A.D.A.M.' })] };
   }
 
-  const { html, attribution } = stripTrailingAttribution(topic.fullSummaryHtml, page.attributions);
+  let { html, attribution } = stripTrailingAttribution(topic.fullSummaryHtml, page.attributions);
+  // Si el XML ya quedó atrás de la página (la NLM editó el tema), la fuente citada manda: se arma
+  // desde el resumen de la propia página, que es la que enlaza `sourceUrl`.
+  let textFrom = 'xml';
   if (page.summarySquashed != null && squashedText(html) !== page.summarySquashed) {
-    return { article: null, rejected: [rejection('article', seedRow, 'source-text-differs-from-live-page', { sourceUrl: pageUrl, detail: 'El resumen del XML del 2026-09-30 no es idéntico al de la página actual' })] };
+    if (!page.summaryHtml) {
+      return { article: null, rejected: [rejection('article', seedRow, 'source-text-differs-from-live-page', { sourceUrl: pageUrl, detail: 'El XML no coincide con la página y la página no trae resumen legible' })] };
+    }
+    html = page.summaryHtml;
+    attribution = page.attributions[0] ?? null;
+    textFrom = 'page';
   }
 
   const sourceVersion = page.lastUpdatedIso ?? snapshot.xmlVersion;
@@ -156,6 +176,7 @@ export function buildTopicArticle({ seedRow, corpusRow, topic, page, snapshot })
   return {
     article: { conceptRef: conceptRefOf(seedRow), lang: 'es', sections, images: [], facts, references: refs },
     rejected,
+    textFrom,
   };
 }
 
@@ -182,7 +203,8 @@ export function buildLabArticle({ seedRow, corpusRow, pageHtml, updatedIso, snap
   let otherNames = null;
   const blocks = [];
   for (const s of corpusRow.sections ?? []) {
-    const { text, otherNames: names } = splitOtherNames(s.text);
+    // El importador deja a veces un comentario HTML sin cerrar («<!--») al final del texto: no es contenido.
+    const { text, otherNames: names } = splitOtherNames(String(s.text ?? '').replace(/<!--[\s\S]*?(?:-->|$)/g, '').trim());
     otherNames ??= names;
     const flags = [];
     if (text && !squashedPage.includes(squashedText(text.replace(/•/g, '')))) flags.push('text-not-found-in-live-page');

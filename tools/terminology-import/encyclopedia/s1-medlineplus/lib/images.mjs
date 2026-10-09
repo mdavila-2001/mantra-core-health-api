@@ -52,6 +52,8 @@ export function allowedLicense(shortName) {
 export function normalizeTitleForMatch(text) {
   const words = String(text ?? '')
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/['’]s\b/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
@@ -75,21 +77,59 @@ function qNum(id) {
   return Number(String(id).replace(/^Q/, '')) || Number.MAX_SAFE_INTEGER;
 }
 
+/** Hasta cuántos archivos de un mismo ítem de Wikidata se muestran en un artículo. */
+export const MAX_IMAGES_PER_ARTICLE = 3;
+
 /**
- * Candidato de imagen para un tema, con su nivel de confianza.
+ * Candidatos de imagen de un tema, en el orden de los descriptores MeSH que declara la NLM:
+ * uno por ítem de Wikidata (Q-id) que tiene ese MeSH en P486 y alguna imagen en P18.
+ * `nameMatch` = el nombre del descriptor coincide con el título inglés del tema.
  * @param {{ mesh: {id:string,name:string}[], enTitle: string|null }} topic
- * @returns {{ tier: 'name-match', row: object, meshId: string, meshName: string } | { tier: 'name-differs', row: object, meshId: string, meshName: string } | null}
+ * @returns {{ meshId: string, meshName: string, wikidataId: string, nameMatch: boolean, rows: object[] }[]}
  */
-export function imageCandidate(topic, meshIndex) {
+export function imageCandidates(topic, meshIndex) {
   const wanted = normalizeTitleForMatch(topic.enTitle);
-  let fallback = null;
+  const out = [];
   for (const m of topic.mesh) {
-    const rows = [...(meshIndex.get(m.id) ?? [])].sort((a, b) => qNum(a.wikidataId) - qNum(b.wikidataId) || a.file.localeCompare(b.file));
-    if (!rows.length) continue;
-    if (wanted && normalizeTitleForMatch(m.name) === wanted) return { tier: 'name-match', row: rows[0], meshId: m.id, meshName: m.name };
-    fallback ??= { tier: 'name-differs', row: rows[0], meshId: m.id, meshName: m.name };
+    const byQ = new Map();
+    for (const row of meshIndex.get(m.id) ?? []) byQ.set(row.wikidataId, [...(byQ.get(row.wikidataId) ?? []), row]);
+    for (const q of [...byQ.keys()].sort((a, b) => qNum(a) - qNum(b))) {
+      const rows = byQ.get(q).sort((a, b) => a.file.localeCompare(b.file));
+      out.push({ meshId: m.id, meshName: m.name, wikidataId: q, nameMatch: Boolean(wanted) && normalizeTitleForMatch(m.name) === wanted, rows });
+    }
   }
-  return fallback;
+  return out;
+}
+
+// --- Etiquetas de Wikidata (verificación de identidad) ---------------------------
+// Cuando el nombre del descriptor MeSH no coincide con el título del tema, el vínculo MeSH → Q-id
+// sigue siendo una igualdad de identificador, pero no basta para afirmar que la imagen ilustra ESTE
+// tema. Se acepta solo si el ítem de Wikidata se llama (etiqueta o alias, en castellano o inglés)
+// como el tema. Wikidata es CC0.
+
+export const WIKIDATA_API = 'https://www.wikidata.org/w/api.php';
+
+export function entitiesRequestUrl(ids) {
+  return `${WIKIDATA_API}?${new URLSearchParams({ action: 'wbgetentities', format: 'json', ids: ids.join('|'), props: 'labels|aliases', languages: 'es|en' })}`;
+}
+
+/** Respuesta de wbgetentities → Map(Q-id → { es: string[], en: string[] }) con etiqueta y alias. */
+export function parseEntities(json) {
+  const out = new Map();
+  for (const [id, e] of Object.entries(json?.entities ?? {})) {
+    if (e.missing !== undefined) continue;
+    const names = (lang) => [e.labels?.[lang]?.value, ...(e.aliases?.[lang] ?? []).map((a) => a.value)].filter(Boolean);
+    out.set(id, { es: names('es'), en: names('en') });
+  }
+  return out;
+}
+
+/** ¿El ítem se llama como el tema? Igualdad normalizada de etiqueta o alias, castellano contra castellano o inglés contra inglés. */
+export function entityMatchesTopic(entity, { esName, enTitle }) {
+  if (!entity) return false;
+  const es = normalizeTitleForMatch(esName);
+  const en = normalizeTitleForMatch(enTitle);
+  return Boolean((es && entity.es.some((n) => normalizeTitleForMatch(n) === es)) || (en && entity.en.some((n) => normalizeTitleForMatch(n) === en)));
 }
 
 // --- Respuesta de la API de Commons ------------------------------------------
@@ -101,6 +141,13 @@ export function commonsRequestUrl(files) {
     titles: files.map((f) => `File:${f}`).join('|'),
   });
   return `${COMMONS_API}?${params}`;
+}
+
+/** Artist/Credit de Commons vienen en HTML: se pasan a una sola línea de texto, sin viñetas ni saltos que agrega `htmlToText`. */
+export function cleanAttribution(html) {
+  if (!html) return null;
+  const text = (htmlToText(html) ?? '').replace(/^\s*•\s*/gm, '').replace(/\s+/g, ' ').trim();
+  return text || null;
 }
 
 function metaValue(md, key) {
@@ -166,14 +213,8 @@ export function parseCommonsResponse(json) {
       license: metaValue(md, 'LicenseShortName'),
       licenseUrl: metaValue(md, 'LicenseUrl'),
       usageTerms: metaValue(md, 'UsageTerms'),
-      author: (() => {
-        const artist = metaValue(md, 'Artist');
-        return artist ? htmlToText(artist) : null;
-      })(),
-      credit: (() => {
-        const credit = metaValue(md, 'Credit');
-        return credit ? htmlToText(credit) : null;
-      })(),
+      author: cleanAttribution(metaValue(md, 'Artist')),
+      credit: cleanAttribution(metaValue(md, 'Credit')),
       attributionRequired: metaValue(md, 'AttributionRequired'),
       restrictions: metaValue(md, 'Restrictions'),
       nonFree: metaValue(md, 'NonFree'),

@@ -50,6 +50,25 @@ export function doseCheck(text) {
  * A.D.A.M. escrito con puntos, o «ADAM, Inc.» / «ADAM Health…». El nombre propio suelto
  * («Adam MP», autor de una cita de GeneReviews) NO cuenta: sería un falso positivo.
  */
+/**
+ * Rescate por párrafo (regla «cero dosis», versión que no tira el resto del texto): separa el
+ * texto en párrafos (el `htmlToText` deja una línea en blanco entre párrafos y entre viñetas),
+ * conserva los que pasan `doseCheck` y descarta los demás. Los párrafos conservados son
+ * literales y van en su orden; lo descartado se cuenta y se informa.
+ * @returns {{ text: string|null, kept: number, removed: { pattern: string, match: string }[] }}
+ */
+export function redactDose(text) {
+  const kept = [];
+  const removed = [];
+  for (const paragraph of String(text ?? '').split(/\n{2,}/)) {
+    if (!paragraph.trim()) continue;
+    const check = doseCheck(paragraph);
+    if (check.ok) kept.push(paragraph);
+    else removed.push({ pattern: check.pattern, match: check.match });
+  }
+  return { text: kept.length ? kept.join('\n\n') : null, kept: kept.length, removed };
+}
+
 const ADAM = /\bA\.\s?D\.\s?A\.\s?M\b|\bADAM,?\s+(?:Inc\b|Health|Education|Medical\s+Encyclopedia)|Adam,\s*Inc\b/i;
 
 /** @returns {{ ok: boolean, match?: string }} */
