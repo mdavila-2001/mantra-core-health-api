@@ -1,0 +1,50 @@
+# Visor de docker logs (Dozzle, stack /opt/alovida-logs) con certificado Let's Encrypt.
+# Se copia a /data/coolify/proxy/dynamic/ del VPS; Traefik lo toma en caliente.
+# Alias de red estable (alovida-dozzle) en la red coolify.
+http:
+  routers:
+    alovida-logs-http:
+      rule: Host(`logs.62.169.18.132.sslip.io`)
+      entryPoints: [http]
+      middlewares: [alovida-redirect-https@file]
+      service: alovida-logs
+    alovida-logs-https:
+      rule: Host(`logs.62.169.18.132.sslip.io`)
+      entryPoints: [https]
+      middlewares: [alovida-logs-headers]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-logs
+    # El login va por un router propio para frenar la fuerza bruta sin estrangular
+    # el stream de logs, que comparte host.
+    alovida-logs-login:
+      rule: Host(`logs.62.169.18.132.sslip.io`) && Path(`/api/token`)
+      entryPoints: [https]
+      priority: 100
+      middlewares: [alovida-logs-login-limit, alovida-logs-headers]
+      tls:
+        certResolver: letsencrypt
+      service: alovida-logs
+
+  middlewares:
+    alovida-logs-login-limit:
+      rateLimit:
+        average: 5
+        period: 1m
+        burst: 5
+    alovida-logs-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: false
+        frameDeny: true
+        contentTypeNosniff: true
+        referrerPolicy: no-referrer
+        customResponseHeaders:
+          X-Robots-Tag: noindex, nofollow
+
+  services:
+    alovida-logs:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://alovida-dozzle:8080
