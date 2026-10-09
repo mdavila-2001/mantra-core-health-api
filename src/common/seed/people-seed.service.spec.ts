@@ -16,7 +16,7 @@ const MEDICOS = `# USUARIO MEDICOS 1
 | 2 | SIN MATRICULA |  | APELLIDO |  |  |  |  | CIRUJANO ODONTOLOGO |
 `;
 
-const PACIENTES = `# USUARIO PACIENTES 1
+const PATIENTS = `# USUARIO PACIENTES 1
 
 | NUMERO | NOMBRE | NOMBRE 2 | APELLIDO PATERNO | APELLIDO MATERNO | OCUPACION |
 | --- | --- | --- | --- | --- | --- |
@@ -55,7 +55,7 @@ describe('PeopleSeedService', () => {
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'people-seed-'));
     writeFileSync(join(dir, 'USUARIO_MEDICOS_1.md'), MEDICOS, 'utf-8');
-    writeFileSync(join(dir, 'USUARIO_PACIENTES_1.md'), PACIENTES, 'utf-8');
+    writeFileSync(join(dir, 'USUARIO_PACIENTES_1.md'), PATIENTS, 'utf-8');
   });
 
   afterEach(() => {
@@ -64,8 +64,8 @@ describe('PeopleSeedService', () => {
 
   it('sin SEED_PEOPLE_ENABLED no hace nada', async () => {
     const { service, practitionerRegistration } = build();
-    const resultado = await service.run(false, '12345678', dir);
-    expect(resultado.reason).toBe('not-configured');
+    const result = await service.run(false, '12345678', dir);
+    expect(result.reason).toBe('not-configured');
     expect(
       practitionerRegistration.registerPractitioner,
     ).not.toHaveBeenCalled();
@@ -73,28 +73,28 @@ describe('PeopleSeedService', () => {
 
   it('sin contraseña no hace nada, aunque esté habilitado', async () => {
     const { service } = build();
-    const resultado = await service.run(true, undefined, dir);
-    expect(resultado.reason).toBe('not-configured');
+    const result = await service.run(true, undefined, dir);
+    expect(result.reason).toBe('not-configured');
   });
 
   it('apagado y sin ruta explícita, no evalúa la ruta por defecto (en ESM no hay __dirname)', async () => {
     const { service } = build();
-    const resultado = await service.run(false, '12345678');
-    expect(resultado.reason).toBe('not-configured');
+    const result = await service.run(false, '12345678');
+    expect(result.reason).toBe('not-configured');
   });
 
   it('si no encuentra el padrón, lo dice y no falla', async () => {
     const { service } = build();
-    const resultado = await service.run(true, '12345678', '/no/existe');
-    expect(resultado.reason).toBe('source-not-found');
+    const result = await service.run(true, '12345678', '/no/existe');
+    expect(result.reason).toBe('source-not-found');
   });
 
   it('da de alta al médico con matrícula y salta al que no la tiene', async () => {
     const { service, practitionerRegistration } = build();
-    const resultado = await service.run(true, '12345678', dir);
+    const result = await service.run(true, '12345678', dir);
 
-    expect(resultado.practitionersCreated).toBe(1);
-    expect(resultado.skipped).toEqual([
+    expect(result.practitionersCreated).toBe(1);
+    expect(result.skipped).toEqual([
       expect.stringContaining('sin matrícula del Ministerio'),
     ]);
     expect(practitionerRegistration.registerPractitioner).toHaveBeenCalledWith(
@@ -135,12 +135,12 @@ describe('PeopleSeedService', () => {
       findOne: fn().mockResolvedValue({ id: 'ya-existe' }),
     });
 
-    const resultado = await service.run(true, '12345678', dir);
+    const result = await service.run(true, '12345678', dir);
 
     expect(
       practitionerRegistration.registerPractitioner,
     ).not.toHaveBeenCalled();
-    expect(resultado.practitionersExisting).toBe(1);
+    expect(result.practitionersExisting).toBe(1);
   });
 
   it('un paciente ya existente se cuenta como existente, no como problema', async () => {
@@ -155,11 +155,11 @@ describe('PeopleSeedService', () => {
       ),
     );
 
-    const resultado = await service.run(true, '12345678', dir);
+    const result = await service.run(true, '12345678', dir);
 
-    expect(resultado.patientsExisting).toBe(1);
-    expect(resultado.patientsCreated).toBe(0);
-    expect(resultado.skipped).not.toContainEqual(
+    expect(result.patientsExisting).toBe(1);
+    expect(result.patientsCreated).toBe(0);
+    expect(result.skipped).not.toContainEqual(
       expect.stringContaining('documento de identidad'),
     );
   });
@@ -170,9 +170,9 @@ describe('PeopleSeedService', () => {
       new Error('boom'),
     );
 
-    const resultado = await service.run(true, '12345678', dir);
+    const result = await service.run(true, '12345678', dir);
 
-    expect(resultado.practitionersCreated).toBe(0);
-    expect(resultado.skipped).toContainEqual(expect.stringContaining('boom'));
+    expect(result.practitionersCreated).toBe(0);
+    expect(result.skipped).toContainEqual(expect.stringContaining('boom'));
   });
 });

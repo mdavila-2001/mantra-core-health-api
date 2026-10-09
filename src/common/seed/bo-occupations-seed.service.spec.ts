@@ -23,7 +23,7 @@ import {
 } from './bo-occupations.catalog';
 
 /** Cuántas ocupaciones declara el catálogo; el resto de las cuentas sale de acá. */
-const OCUPACIONES = BO_OCCUPATIONS.length;
+const OCCUPATIONS = BO_OCCUPATIONS.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
@@ -73,11 +73,11 @@ describe('BoOccupationsSeedService', () => {
       expect(counters).toEqual({
         valueSets: 1,
         versions: 1,
-        occupations: OCUPACIONES,
+        occupations: OCCUPATIONS,
         // Una designación preferida y una rama de actividad por concepto.
-        designations: OCUPACIONES,
-        properties: OCUPACIONES,
-        memberships: OCUPACIONES,
+        designations: OCCUPATIONS,
+        properties: OCCUPATIONS,
+        memberships: OCCUPATIONS,
       });
 
       const [conjunto] = rowsOf('ValueSets');
@@ -102,20 +102,20 @@ describe('BoOccupationsSeedService', () => {
 
       await service.run();
 
-      const conceptos = rowsOf('CatalogConcepts');
-      expect(conceptos[0]).toMatchObject({
+      const concepts = rowsOf('CatalogConcepts');
+      expect(concepts[0]).toMatchObject({
         code: boOccupationConceptCode('ABOGADO'),
         display: 'Abogado / Abogada',
       });
       // La expansión filtra por `selectable`: una ocupación no seleccionable
       // sería una opción que no se puede elegir.
-      expect(conceptos.every((fila) => fila.selectable === true)).toBe(true);
+      expect(concepts.every((row) => row.selectable === true)).toBe(true);
       // El código va prefijado por el dominio: `catalog_concepts.code` es único
       // por versión del sistema de códigos, y todo el catálogo interno comparte
       // una sola.
       expect(
-        conceptos.every((fila) =>
-          String(fila.code).startsWith('occupation:bo:'),
+        concepts.every((row) =>
+          String(row.code).startsWith('occupation:bo:'),
         ),
       ).toBe(true);
     });
@@ -127,18 +127,18 @@ describe('BoOccupationsSeedService', () => {
 
       // El desplegable no ordena nada del lado del cliente: se apoya en este
       // `ordinal`, que es lo que hace que la lista se recorra por la letra.
-      const miembros = rowsOf('ValueSetMembers');
-      expect(miembros.map((fila) => fila.ordinal)).toEqual(
-        BO_OCCUPATIONS.map((_, indice) => indice),
+      const members = rowsOf('ValueSetMembers');
+      expect(members.map((row) => row.ordinal)).toEqual(
+        BO_OCCUPATIONS.map((_, index) => index),
       );
-      expect(miembros[0]).toMatchObject({
+      expect(members[0]).toMatchObject({
         id: boOccupationMemberId('ABOGADO'),
         conceptId: boOccupationConceptId('ABOGADO'),
         included: true,
       });
       // «Otra ocupación» va al final a propósito: ofrecida entre medio se elige
       // por comodidad antes de haber buscado.
-      expect(BO_OCCUPATIONS[OCUPACIONES - 1]?.code).toBe('OTRA');
+      expect(BO_OCCUPATIONS[OCCUPATIONS - 1]?.code).toBe('OTRA');
     });
 
     it('cada ocupación guarda su rama de actividad', async () => {
@@ -147,7 +147,7 @@ describe('BoOccupationsSeedService', () => {
       await service.run();
 
       const propiedades = rowsOf('ConceptProperties');
-      expect(propiedades).toHaveLength(OCUPACIONES);
+      expect(propiedades).toHaveLength(OCCUPATIONS);
       expect(propiedades[0]).toMatchObject({
         conceptId: boOccupationConceptId('ABOGADO'),
         propertyCode: BO_OCCUPATION_GROUP_PROPERTY_CODE,
@@ -158,22 +158,22 @@ describe('BoOccupationsSeedService', () => {
 
   describe('segunda corrida', () => {
     it('no escribe nada: los ids son deterministas y ya están', async () => {
-      const todo = new Set<string>([
+      const all = new Set<string>([
         boOccupationValueSetId(),
         boOccupationVersionId(),
-        ...BO_OCCUPATIONS.flatMap((ocupacion) => [
-          boOccupationConceptId(ocupacion.code),
-          boOccupationMemberId(ocupacion.code),
+        ...BO_OCCUPATIONS.flatMap((occupation) => [
+          boOccupationConceptId(occupation.code),
+          boOccupationMemberId(occupation.code),
         ]),
       ]);
       // Las designaciones y las propiedades tienen su propio derivador; se
       // agregan por su id real para que la pasada no cree ninguna.
-      for (const ocupacion of BO_OCCUPATIONS) {
-        todo.add(boOccupationDesignationId(ocupacion.code));
-        todo.add(boOccupationGroupPropertyId(ocupacion.code));
+      for (const occupation of BO_OCCUPATIONS) {
+        all.add(boOccupationDesignationId(occupation.code));
+        all.add(boOccupationGroupPropertyId(occupation.code));
       }
 
-      const { service, created } = build(todo);
+      const { service, created } = build(all);
 
       const counters = await service.run();
 
@@ -193,13 +193,13 @@ describe('BoOccupationsSeedService', () => {
     it('ningún código se declara dos veces', () => {
       // Dos entradas con el mismo código colapsarían en el mismo id
       // determinista y una taparía a la otra sin que nadie se entere.
-      const codigos = BO_OCCUPATIONS.map((ocupacion) => ocupacion.code);
-      expect(new Set(codigos).size).toBe(codigos.length);
+      const codes = BO_OCCUPATIONS.map((occupation) => occupation.code);
+      expect(new Set(codes).size).toBe(codes.length);
     });
 
     it('ningún nombre se repite: dos opciones iguales en un desplegable no se pueden elegir', () => {
-      const nombres = BO_OCCUPATIONS.map((ocupacion) => ocupacion.name);
-      expect(new Set(nombres).size).toBe(nombres.length);
+      const names = BO_OCCUPATIONS.map((occupation) => occupation.name);
+      expect(new Set(names).size).toBe(names.length);
     });
   });
 });

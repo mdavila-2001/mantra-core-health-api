@@ -16,7 +16,7 @@ export interface MarkdownTableRow {
   readonly cells: readonly string[];
 }
 
-function celdas(linea: string): string[] {
+function cells(linea: string): string[] {
   const t = linea.trim();
   if (!t.startsWith('|')) return [];
   return t
@@ -26,36 +26,36 @@ function celdas(linea: string): string[] {
     .map((c) => c.trim());
 }
 
-function esSeparador(fila: readonly string[]): boolean {
-  if (fila.length === 0) return false;
-  return fila.every((c) => c === '' || /^:?-{2,}:?$/.test(c));
+function isSeparator(row: readonly string[]): boolean {
+  if (row.length === 0) return false;
+  return row.every((c) => c === '' || /^:?-{2,}:?$/.test(c));
 }
 
 /** Emite `{header, cells}` por cada fila de dato de cada tabla del texto. */
-export function filasDeTabla(texto: string): MarkdownTableRow[] {
-  const filas: MarkdownTableRow[] = [];
-  let cabecera: string[] = [];
+export function tableRows(text: string): MarkdownTableRow[] {
+  const rows: MarkdownTableRow[] = [];
+  let header: string[] = [];
   let anterior: string[] = [];
-  for (const linea of texto.split(/\r?\n/)) {
-    const fila = celdas(linea);
-    if (fila.length === 0) {
+  for (const linea of text.split(/\r?\n/)) {
+    const row = cells(linea);
+    if (row.length === 0) {
       anterior = [];
       continue;
     }
-    if (esSeparador(fila)) {
-      cabecera = anterior;
+    if (isSeparator(row)) {
+      header = anterior;
       continue;
     }
-    if (cabecera.length > 0) {
-      filas.push({ header: cabecera, cells: fila });
+    if (header.length > 0) {
+      rows.push({ header: header, cells: row });
     }
-    anterior = fila;
+    anterior = row;
   }
-  return filas;
+  return rows;
 }
 
-function normalizar(texto: string): string {
-  return texto
+function normalize(text: string): string {
+  return text
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -64,17 +64,17 @@ function normalizar(texto: string): string {
 }
 
 /** La celda de la primera columna cuyo título case con alguno de `nombres`. */
-export function columna(fila: MarkdownTableRow, ...nombres: string[]): string {
-  for (const nombre of nombres) {
-    const objetivo = normalizar(nombre);
-    const i = fila.header.findIndex((h) => normalizar(h) === objetivo);
-    if (i >= 0 && i < fila.cells.length) return fila.cells[i].trim();
+export function column(row: MarkdownTableRow, ...names: string[]): string {
+  for (const nombre of names) {
+    const target = normalize(nombre);
+    const i = row.header.findIndex((h) => normalize(h) === target);
+    if (i >= 0 && i < row.cells.length) return row.cells[i].trim();
   }
   return '';
 }
 
 /** `undefined` si la celda está vacía, el valor recortado si no. */
-export function opcional(valor: string): string | undefined {
+export function optional(valor: string): string | undefined {
   const v = valor.trim();
   return v || undefined;
 }

@@ -52,7 +52,7 @@ export interface DirectoryNetworksResult {
   reason?: 'not-configured' | 'seed-actor-missing';
 }
 
-interface Sede {
+interface Site {
   direccion: string;
   telefonos: string[];
   source_file: string;
@@ -63,12 +63,12 @@ interface Ficha {
   key: string;
   nombre: string;
   especialidades: string[];
-  sedes: Sede[];
+  sedes: Site[];
   carriers: string[];
 }
 
-function normalizar(texto: string): string {
-  return texto
+function normalize(text: string): string {
+  return text
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^A-Za-z0-9 ]+/g, ' ')
@@ -117,7 +117,7 @@ export class DirectoryNetworksSeedService {
     enabled = process.env.SEED_DIRECTORY_NETWORKS_ENABLED === 'true',
     password = process.env.SEED_PEOPLE_PASSWORD,
   ): Promise<DirectoryNetworksResult> {
-    const resultado: DirectoryNetworksResult = {
+    const result: DirectoryNetworksResult = {
       practitionersCreated: 0,
       practitionersExisting: 0,
       sitesCreated: 0,
@@ -128,7 +128,7 @@ export class DirectoryNetworksSeedService {
       failed: [],
     };
     if (!enabled || !password)
-      return { ...resultado, reason: 'not-configured' };
+      return { ...result, reason: 'not-configured' };
 
     const em = this.orm.em.fork();
     if (!(await em.findOne(Users, { id: SEED_ACTOR_ID }))) {
@@ -136,21 +136,21 @@ export class DirectoryNetworksSeedService {
         { operation: 'seed.directory-networks' },
         'Falta el actor de arranque: sin él no se pueden crear redes ni membresías',
       );
-      return { ...resultado, reason: 'seed-actor-missing' };
+      return { ...result, reason: 'seed-actor-missing' };
     }
     const actor = { id: SEED_ACTOR_ID, roles: ['SECURITY_ADMIN'] };
 
-    const networkByCarrier = await this.ensureNetworks(resultado, actor);
-    const especialidades = await this.specialtyIndex();
-    const noMapean = new Set<string>();
+    const networkByCarrier = await this.ensureNetworks(result, actor);
+    const specialties = await this.specialtyIndex();
+    const doNotMap = new Set<string>();
 
-    for (const ficha of this.fichas()) {
-      const email = this.emailDe(ficha);
-      const conceptos: string[] = [];
-      for (const e of ficha.especialidades) {
-        const id = especialidades.get(normalizar(e));
-        if (!id) noMapean.add(e);
-        else if (!conceptos.includes(id)) conceptos.push(id);
+    for (const record of this.records()) {
+      const email = this.email(record);
+      const concepts: string[] = [];
+      for (const e of record.especialidades) {
+        const id = specialties.get(normalize(e));
+        if (!id) doNotMap.add(e);
+        else if (!concepts.includes(id)) concepts.push(id);
       }
 
       try {
@@ -161,10 +161,10 @@ export class DirectoryNetworksSeedService {
         let userId: string;
         let profileId: string;
         let practiceId: string | undefined;
-        const previo = await this.credencialDe(email);
-        if (previo) {
-          resultado.practitionersExisting++;
-          userId = previo.userId;
+        const previous = await this.credential(email);
+        if (previous) {
+          result.practitionersExisting++;
+          userId = previous.userId;
           const link = await this.orm.em.fork().findOne(PersonAccountLinks, {
             userId,
             statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
@@ -172,49 +172,49 @@ export class DirectoryNetworksSeedService {
           if (!link) throw new Error('la cuenta no tiene persona vinculada');
           profileId = link.personId;
         } else {
-          const [primera] = ficha.sedes;
-          const alta = await this.altaConNationalId(ficha, email, password, {
-            specialtyConceptIds: conceptos.length ? conceptos : undefined,
-            ownSite: primera ? this.sitioDe(primera) : undefined,
+          const [primera] = record.sedes;
+          const registration = await this.registrationWithNationalId(record, email, password, {
+            specialtyConceptIds: concepts.length ? concepts : undefined,
+            ownSite: primera ? this.siteOf(primera) : undefined,
           });
-          resultado.practitionersCreated++;
-          if (primera) resultado.sitesCreated++;
-          userId = alta.userId;
-          profileId = alta.practitionerProfileId;
-          practiceId = alta.ownPracticeId;
+          result.practitionersCreated++;
+          if (primera) result.sitesCreated++;
+          userId = registration.userId;
+          profileId = registration.practitionerProfileId;
+          practiceId = registration.ownPracticeId;
         }
 
-        const existentes = await runWithTenant(SEED.tenantId, () =>
+        const existing = await runWithTenant(SEED.tenantId, () =>
           this.sites.listSitesOfPractitioner(profileId, SEED.tenantId),
         );
-        practiceId ??= existentes[0]?.practiceId;
-        const nombres = new Set(existentes.map((x) => x.name));
-        for (const sede of ficha.sedes) {
-          const sitio = this.sitioDe(sede);
-          if (nombres.has(sitio.name)) continue;
-          const creada = await runWithTenant(SEED.tenantId, () =>
+        practiceId ??= existing[0]?.practiceId;
+        const names = new Set(existing.map((x) => x.name));
+        for (const site of record.sedes) {
+          const sitio = this.siteOf(site);
+          if (names.has(sitio.name)) continue;
+          const created = await runWithTenant(SEED.tenantId, () =>
             this.sites.createOwnSite(
               { id: userId, roles: ['PRACTITIONER'] },
               sitio,
             ),
           );
-          practiceId ??= creada.practiceId;
-          nombres.add(sitio.name);
-          resultado.sitesCreated++;
+          practiceId ??= created.practiceId;
+          names.add(sitio.name);
+          result.sitesCreated++;
         }
 
         // La guía publica «dónde atiende» desde las afiliaciones, no desde las
         // sedes de práctica: sin esto el médico salía sin ningún consultorio.
         // `addAffiliationFor` no repite un vínculo ya declarado.
-        for (const sede of ficha.sedes) {
-          const organizationName = sede.direccion.slice(0, 200);
-          const yaEsta = await this.orm.em
+        for (const site of record.sedes) {
+          const organizationName = site.direccion.slice(0, 200);
+          const alreadyPresent = await this.orm.em
             .fork()
             .findOne(PractitionerAffiliations, {
               practitionerProfileId: profileId,
               organizationName,
             });
-          if (yaEsta) continue;
+          if (alreadyPresent) continue;
           await this.profiles.addAffiliationFor(
             profileId,
             {
@@ -224,36 +224,36 @@ export class DirectoryNetworksSeedService {
             },
             actor,
           );
-          resultado.workplacesCreated++;
+          result.workplacesCreated++;
         }
 
         if (practiceId) {
-          const primera = ficha.sedes[0];
-          for (const carrier of ficha.carriers) {
+          const first = record.sedes[0];
+          for (const carrier of record.carriers) {
             const networkId = networkByCarrier.get(carrier);
             if (!networkId) continue;
-            const yaEsta = await this.orm.em
+            const alreadyPresent = await this.orm.em
               .fork()
               .findOne(NetworkProviderMemberships, {
                 providerNetworkId: networkId,
                 practiceId,
               });
-            if (yaEsta) continue;
+            if (alreadyPresent) continue;
             await this.insurance.addMembership(
               networkId,
               {
                 providerEntityId: practiceId,
                 practiceId,
-                contractReference: `${SOURCE_NAME}: ${primera?.source_file}#${primera?.source_row}`,
+                contractReference: `${SOURCE_NAME}: ${first?.source_file}#${first?.source_row}`,
               },
               actor,
             );
-            resultado.membershipsCreated++;
+            result.membershipsCreated++;
           }
         }
       } catch (error) {
-        const mensaje = error instanceof Error ? error.message : String(error);
-        resultado.failed.push(`${ficha.key}: ${mensaje}`);
+        const message = error instanceof Error ? error.message : String(error);
+        result.failed.push(`${record.key}: ${message}`);
         this.logger.warn(
           { operation: 'seed.directory-networks', err: error },
           'No se pudo dar de alta un médico de red',
@@ -261,78 +261,78 @@ export class DirectoryNetworksSeedService {
       }
     }
 
-    resultado.unmappedSpecialties = [...noMapean].sort();
+    result.unmappedSpecialties = [...doNotMap].sort();
     this.logger.info(
       {
         operation: 'seed.directory-networks',
-        created: resultado.practitionersCreated,
-        existing: resultado.practitionersExisting,
-        sites: resultado.sitesCreated,
-        memberships: resultado.membershipsCreated,
-        workplaces: resultado.workplacesCreated,
-        failed: resultado.failed.length,
-        unmapped: resultado.unmappedSpecialties.length,
+        created: result.practitionersCreated,
+        existing: result.practitionersExisting,
+        sites: result.sitesCreated,
+        memberships: result.membershipsCreated,
+        workplaces: result.workplacesCreated,
+        failed: result.failed.length,
+        unmapped: result.unmappedSpecialties.length,
       },
       'Directorio de redes sembrado',
     );
-    return resultado;
+    return result;
   }
 
   /** Una ficha por persona: pliega las filas repetidas y las dos redes. */
-  private fichas(): Ficha[] {
-    const porClave = new Map<string, Ficha>();
+  private records(): Ficha[] {
+    const byKey = new Map<string, Ficha>();
     for (const red of networksDataset.datos.redes) {
       for (const p of red.profesionales) {
-        const clave = normalizar(p.nombre);
-        const ficha = porClave.get(clave) ?? {
+        const clave = normalize(p.nombre);
+        const record = byKey.get(clave) ?? {
           key: clave,
           nombre: p.nombre,
           especialidades: [],
           sedes: [],
           carriers: [],
         };
-        porClave.set(clave, ficha);
-        if (!ficha.carriers.includes(red.carrierCode)) {
-          ficha.carriers.push(red.carrierCode);
+        byKey.set(clave, record);
+        if (!record.carriers.includes(red.carrierCode)) {
+          record.carriers.push(red.carrierCode);
         }
         for (const e of p.especialidades) {
-          if (!ficha.especialidades.includes(e)) ficha.especialidades.push(e);
+          if (!record.especialidades.includes(e)) record.especialidades.push(e);
         }
-        for (const s of p.sedes as Sede[]) {
+        for (const s of p.sedes as Site[]) {
           const dir = (s.direccion ?? '').trim();
-          if (dir && !ficha.sedes.some((x) => x.direccion === dir)) {
-            ficha.sedes.push({ ...s, direccion: dir });
+          if (dir && !record.sedes.some((x) => x.direccion === dir)) {
+            record.sedes.push({ ...s, direccion: dir });
           }
         }
       }
     }
-    return [...porClave.values()];
+    return [...byKey.values()];
   }
 
-  private emailDe(ficha: Ficha): string {
-    const partes = ficha.nombre.replace(',', ' ').split(/\s+/).filter(Boolean);
-    const sufijo = deterministicId(`seed:directory:${ficha.key}`).slice(0, 6);
+  private email(record: Ficha): string {
+    const parts = record.nombre.replace(',', ' ').split(/\s+/).filter(Boolean);
+    const suffix = deterministicId(`seed:directory:${record.key}`).slice(0, 6);
     return syntheticEmail(
-      partes[1] ?? partes[0] ?? '',
-      partes[0] ?? '',
-      sufijo,
+      parts[1] ?? parts[0] ?? '',
+      parts[0] ?? '',
+      suffix,
     );
   }
 
-  private sitioDe(sede: Sede): {
+  private siteOf(site: Site): {
     name: string;
     address: { lines: string[]; city: string };
   } {
-    const lines = [sede.direccion.slice(0, 200)];
-    if (sede.telefonos?.length)
-      lines.push(`Tel: ${sede.telefonos.join(' / ')}`);
+    const lines = [site.direccion.slice(0, 200)];
+    if (site.telefonos?.length)
+      lines.push(`Tel: ${site.telefonos.join(' / ')}`);
     return {
-      name: sede.direccion.slice(0, 120),
+      name: site.direccion.slice(0, 120),
       address: { lines, city: 'Santa Cruz de la Sierra' },
     };
   }
 
-  private credencialDe(email: string) {
+  private credential(email: string) {
     return this.orm.em
       .fork()
       .findOne(AuthenticationCredentials, { externalSubject: email });
@@ -342,24 +342,24 @@ export class DirectoryNetworksSeedService {
    * Alta con documento inventado. En 961 fichas una cédula de 7 dígitos puede
    * chocar con otra ya dada; se reintenta con otra sal en vez de fallar.
    */
-  private async altaConNationalId(
-    ficha: Ficha,
+  private async registrationWithNationalId(
+    record: Ficha,
     email: string,
     password: string,
     extra: Partial<RegisterPractitionerDto>,
   ) {
-    const coma = ficha.nombre.includes(',');
+    const coma = record.nombre.includes(',');
     const [apellidos, nombres] = coma
-      ? ficha.nombre.split(',').map((x) => x.trim())
+      ? record.nombre.split(',').map((x) => x.trim())
       : [undefined, undefined];
     for (let sal = 0; sal < 5; sal++) {
-      const key = `directory:${ficha.key}#${sal}`;
+      const key = `directory:${record.key}#${sal}`;
       const dto: RegisterPractitionerDto = {
         email,
         password,
         ...(coma
           ? { name: nombres, lastName: apellidos }
-          : { displayName: ficha.nombre }),
+          : { displayName: record.nombre }),
         nationalId: syntheticNationalId(key),
         issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
         birthDate: syntheticBirthDate(key),
@@ -378,23 +378,23 @@ export class DirectoryNetworksSeedService {
   }
 
   private async ensureNetworks(
-    resultado: DirectoryNetworksResult,
+    result: DirectoryNetworksResult,
     actor: { id: string; roles: string[] },
   ): Promise<Map<string, string>> {
     const em = this.orm.em.fork();
-    const mapa = new Map<string, string>();
+    const map = new Map<string, string>();
     for (const red of networksDataset.datos.redes) {
       const networkCode = `RED_${red.carrierCode}`;
-      const existente = await em.findOne(ProviderNetworks, { networkCode });
-      if (existente) {
-        mapa.set(red.carrierCode, existente.id);
+      const existing = await em.findOne(ProviderNetworks, { networkCode });
+      if (existing) {
+        map.set(red.carrierCode, existing.id);
         continue;
       }
       const carrier = await em.findOne(InsuranceCarriers, {
         carrierCode: red.carrierCode,
       });
       if (!carrier) continue;
-      const creada = await this.insurance.createProviderNetwork(
+      const created = await this.insurance.createProviderNetwork(
         {
           insuranceCarrierId: carrier.id,
           networkCode,
@@ -402,33 +402,33 @@ export class DirectoryNetworksSeedService {
         },
         actor,
       );
-      mapa.set(red.carrierCode, creada.id);
-      resultado.networksCreated++;
+      map.set(red.carrierCode, created.id);
+      result.networksCreated++;
     }
-    return mapa;
+    return map;
   }
 
   /** Nombre normalizado en castellano → concepto de `VS_MEDICAL_SPECIALTY`. */
   private async specialtyIndex(): Promise<Map<string, string>> {
     const em = this.orm.em.fork();
-    const conjunto = await this.valueSets.findByInternalCode(
+    const set = await this.valueSets.findByInternalCode(
       em,
       MEDICAL_SPECIALTY_VALUE_SET,
     );
-    const ids = conjunto
+    const ids = set
       ? ((await this.valueSets.findIncludedConceptIdsByValueSet(
           em,
-          conjunto.id,
+          set.id,
         )) ?? [])
       : [];
-    const conceptos = ids.length
+    const concepts = ids.length
       ? await em.find(CatalogConcepts, { id: { $in: [...ids] } })
       : [];
-    const indice = new Map<string, string>();
-    for (const c of conceptos) {
+    const index = new Map<string, string>();
+    for (const c of concepts) {
       const es = SPANISH_DESIGNATIONS.get(c.id)?.display;
-      indice.set(normalizar(es ?? c.display), c.id);
+      index.set(normalize(es ?? c.display), c.id);
     }
-    return indice;
+    return index;
   }
 }

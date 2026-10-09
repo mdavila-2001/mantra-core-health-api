@@ -146,26 +146,26 @@ export class VademecumSeedService {
     const now = new Date();
     let inserted = 0;
 
-    const fuentes = await this.seedSources(em, now);
-    inserted += fuentes.inserted;
+    const sources = await this.seedSources(em, now);
+    inserted += sources.inserted;
     await em.flush();
 
-    inserted += await this.seedCodeSystem(em, now, fuentes.idReal);
+    inserted += await this.seedCodeSystem(em, now, sources.idReal);
     await em.flush();
 
-    inserted += await this.seedVersion(em, now, fuentes.idReal);
+    inserted += await this.seedVersion(em, now, sources.idReal);
     await em.flush();
 
-    inserted += await this.seedConcepts(em, now, fuentes.idReal);
+    inserted += await this.seedConcepts(em, now, sources.idReal);
     await em.flush();
 
     // Designaciones, propiedades e interacciones cuelgan de los conceptos, que
     // recién ahora están en la base.
-    inserted += await this.seedDesignations(em, now, fuentes.idReal);
-    inserted += await this.seedProperties(em, now, fuentes.idReal);
-    inserted += await this.seedInteractions(em, now, fuentes.idReal);
+    inserted += await this.seedDesignations(em, now, sources.idReal);
+    inserted += await this.seedProperties(em, now, sources.idReal);
+    inserted += await this.seedInteractions(em, now, sources.idReal);
     await em.flush();
-    const reconciled = await this.reconcile(em, now, fuentes.idReal);
+    const reconciled = await this.reconcile(em, now, sources.idReal);
     await em.flush();
 
     if (inserted > 0 || reconciled > 0) {
@@ -215,11 +215,11 @@ export class VademecumSeedService {
     // Sólo lleva entradas para las fuentes que ya existían con OTRO id.
     const idReal = new Map<string, string>();
     for (const source of vademecumDataset.sources) {
-      const presente = await em.findOne(TerminologySources, {
+      const present = await em.findOne(TerminologySources, {
         code: source.code,
       });
-      if (presente) {
-        if (presente.id !== source.id) idReal.set(source.id, presente.id);
+      if (present) {
+        if (present.id !== source.id) idReal.set(source.id, present.id);
         continue;
       }
       em.create(
@@ -256,11 +256,11 @@ export class VademecumSeedService {
   ): Promise<number> {
     let inserted = 0;
     for (const system of vademecumDataset.codeSystem) {
-      const presente = await em.findOne(CodeSystems, {
+      const present = await em.findOne(CodeSystems, {
         internalCode: system.internal_code,
       });
-      if (presente) {
-        if (presente.id !== system.id) idReal.set(system.id, presente.id);
+      if (present) {
+        if (present.id !== system.id) idReal.set(system.id, present.id);
         continue;
       }
       em.create(
@@ -294,12 +294,12 @@ export class VademecumSeedService {
     for (const version of vademecumDataset.codeSystemVersion) {
       const codeSystemId =
         idReal.get(version.code_system_id) ?? version.code_system_id;
-      const presente = await em.findOne(CodeSystemVersions, {
+      const present = await em.findOne(CodeSystemVersions, {
         codeSystemId,
         version: version.version,
       });
-      if (presente) {
-        if (presente.id !== version.id) idReal.set(version.id, presente.id);
+      if (present) {
+        if (present.id !== version.id) idReal.set(version.id, present.id);
         continue;
       }
       em.create(
@@ -356,9 +356,9 @@ export class VademecumSeedService {
       const codeSystemVersionId =
         idReal.get(concept.code_system_version_id) ??
         concept.code_system_version_id;
-      const yaEsta = existing.get(`${codeSystemVersionId}|${concept.code}`);
-      if (yaEsta !== undefined) {
-        if (yaEsta !== concept.id) idReal.set(concept.id, yaEsta);
+      const alreadyPresent = existing.get(`${codeSystemVersionId}|${concept.code}`);
+      if (alreadyPresent !== undefined) {
+        if (alreadyPresent !== concept.id) idReal.set(concept.id, alreadyPresent);
         continue;
       }
       em.create(

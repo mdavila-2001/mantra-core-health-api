@@ -43,7 +43,7 @@ export interface BoliviaProcedureSeed {
   readonly ocrSospechoso: boolean;
 }
 
-interface FilaMedica {
+interface MedicalRow {
   readonly code: string;
   readonly especialidad: string;
   readonly grupo: string | null;
@@ -52,7 +52,7 @@ interface FilaMedica {
   readonly ocrSospechoso: boolean;
 }
 
-interface FilaOdontologica {
+interface DentalRow {
   readonly code: string;
   readonly seccion: string;
   readonly concepto: string;
@@ -60,9 +60,9 @@ interface FilaOdontologica {
   readonly ocrSospechoso: boolean;
 }
 
-const datos = dataset.datos as {
-  readonly honorariosMedicos: readonly FilaMedica[];
-  readonly arancelOdontologico: readonly FilaOdontologica[];
+const data = dataset.datos as {
+  readonly honorariosMedicos: readonly MedicalRow[];
+  readonly arancelOdontologico: readonly DentalRow[];
 };
 
 /**
@@ -74,23 +74,23 @@ const datos = dataset.datos as {
  * queda en `unidad` y en `especialidad`, que es donde se puede filtrar.
  */
 export const BOLIVIA_PROCEDURES: readonly BoliviaProcedureSeed[] = [
-  ...datos.honorariosMedicos.map((fila) => ({
-    code: fila.code,
-    nombre: fila.concepto,
-    especialidad: fila.especialidad,
-    grupo: fila.grupo,
-    precio: fila.uma,
+  ...data.honorariosMedicos.map((row) => ({
+    code: row.code,
+    nombre: row.concepto,
+    especialidad: row.especialidad,
+    grupo: row.grupo,
+    precio: row.uma,
     unidad: 'UMA' as const,
-    ocrSospechoso: fila.ocrSospechoso,
+    ocrSospechoso: row.ocrSospechoso,
   })),
-  ...datos.arancelOdontologico.map((fila) => ({
-    code: fila.code,
-    nombre: fila.concepto,
+  ...data.arancelOdontologico.map((row) => ({
+    code: row.code,
+    nombre: row.concepto,
     especialidad: 'Odontología',
-    grupo: fila.seccion,
-    precio: fila.precioUsd,
+    grupo: row.seccion,
+    precio: row.precioUsd,
     unidad: 'USD' as const,
-    ocrSospechoso: fila.ocrSospechoso,
+    ocrSospechoso: row.ocrSospechoso,
   })),
 ];
 
