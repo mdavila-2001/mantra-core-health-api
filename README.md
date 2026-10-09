@@ -1,130 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend de ALOVIDA
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API de salud de ALOVIDA (Mantra Core Technologies): historia clínica, agenda, identidad y acceso, perfiles, farmacia, seguros, contabilidad y comunidad, entre otros dominios. Se escribe en **NestJS 11, TypeScript 5 y MikroORM 7 sobre PostgreSQL**; expone rutas HTTP desde `src/main.ts` y ejecuta trabajos programados en **24 procesos worker** independientes (`src/worker-*.ts`). Los dominios viven en `src/modules/` (70 directorios); el catálogo ORM y la verificación del esquema están en `src/orm/`. Redis, MongoDB, OpenSearch, TimescaleDB, pgvector y MinIO sirven funciones específicas según el módulo y el despliegue. Node 24 y Yarn 4 (Corepack).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este README describe el código de la rama.
 
-## Description
+## Arquitectura y mapa
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Área | Código | Documentación |
+|---|---|---|
+| API, arranque y composición | `src/main.ts`, `src/app.module.ts` | [Mapa de `src`](src/README.md) |
+| 70 módulos de dominio | `src/modules/<dominio>/` | [Índice de módulos](src/modules/README.md) |
+| Autenticación, errores, tenant y utilidades | `src/common/` | [Common](src/common/README.md) |
+| ORM y catálogo de entidades, índices y FK | `src/orm/` | [ORM](src/orm/README.md) |
+| Workers y jobs | `src/worker/`, `src/worker-*.ts` | Un entry point por proceso; ver la tabla siguiente |
+| DDL versionado (copia del modelo; **no se edita aquí**, no hay migraciones en este repo) | `database/SQL/`, `database/NoSQL/` | [`database/README.md`](database/README.md), [ADR-0021](docs/adr/ADR-0021-fuente-unica-de-ddl.md), [Operaciones](docs/operations/deployment.md) |
+| Contratos externos | `openapi/`, `asyncapi/` | [OpenAPI](openapi/CONTRATO-PUBLICO.md), [AsyncAPI](asyncapi/asyncapi.yaml) |
 
-## Project setup
+### Procesos worker
 
-```bash
-$ yarn install
-```
+| Grupo | Entry points |
+|---|---|
+| Atención, clínica y agenda | `scheduling`, `health_context`, `identity_assurance`, `pharmacy_inventory`, `audio-assets`, `files`, `qa_lab` |
+| Comunicación y comunidad | `messaging`, `community`, `integrations`, `tracking`, `vector_rag` |
+| Cobros y operación | `billing`, `promotions`, `automation`, `workflow`, `delegated_access`, `consent`, `cross_store_consistency` |
+| Datos y análisis | `data_catalog`, `read_models`, `reporting`, `lakehouse`, `time_series` |
 
-## Compile and run the project
+Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. `docker-compose.yml` declara 24 servicios worker, algunos bajo perfiles; `docker-compose.coolify.yml` declara cuatro de forma explícita. El número de entrypoints no describe qué está activo en cada ambiente.
 
-```bash
-# development
-$ yarn run start
+### Carpetas de la raíz
 
-# watch mode
-$ yarn run start:dev
+| Carpeta | Contenido |
+|---|---|
+| `src/` | Código de la API y los workers (mapa arriba y en [`src/README.md`](src/README.md)). |
+| `test/` | Integración, smoke, e2e, dobles y fixtures; ver [`test/README.md`](test/README.md). |
+| `database/` | Copia versionada del DDL canónico (`SQL/`, `NoSQL/`). |
+| `docker/db-init/` | Scripts de los init jobs de Compose. |
+| `infra/` | Configuración de monitoreo y del collector OpenTelemetry. |
+| `scripts/` | Utilidades de operación (poda de Docker, DDL, Postgres, benchmark de telemetría). |
+| `tools/` | Generadores y verificadores en Node/Python: catálogo ORM, documentación, OpenAPI, seeds, Postman. |
+| `openapi/`, `asyncapi/` | Contratos HTTP y de eventos generados. |
+| `docs/` | Documentación técnica (fuente del sitio MkDocs); los informes de proceso históricos están en [`docs/progress/archive/`](docs/progress/archive/). |
+| `mock-provider-server/` | Emulador de proveedores externos para desarrollo; ver su [README](mock-provider-server/README.md). |
+| `structurizr/` | Modelo de arquitectura (`workspace.dsl`). |
+| `evidencias/` | Evidencia de merges y pruebas de ciclos anteriores. |
 
-# production mode
-$ yarn run start:prod
-```
+En la raíz quedan también `ESTADO-Y-PENDIENTES.md`, `REGISTRO-DEFECTOS.md`, `ALOVIDA-TRAZABILIDAD.md` y `ALOVIDA-COBERTURA.md` (este último lo regenera `corepack yarn alovida:coverage`); `AGENTS.md` tiene las instrucciones para agentes.
 
-## Run tests
+## Requisitos y configuración local
 
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Trazabilidad distribuida (OpenTelemetry → Jaeger)
-
-Los 22 procesos del backend (API + 21 workers) exportan trazas por OTLP. Está **apagada por
-defecto**: activarla es una decisión explícita del operador.
+- Node.js según el `Dockerfile` (`node:24-bookworm-slim` para la imagen), Corepack y Yarn 4.14.1 (`packageManager` en `package.json`).
+- Servicios de datos que exige el flujo que se vaya a ejecutar. [`docker-compose.yml`](docker-compose.yml) y [variables de entorno](docs/getting-started/environment-variables.md) describen la configuración; no copies credenciales de producción a una base local.
+- DDL versionado en [`database/SQL`](database/SQL) y extensiones NoSQL en [`database/NoSQL`](database/NoSQL). Con el perfil `local-db`, los init jobs (`postgres-init`, `mongo-init`) materializan el esquema desde esas carpetas antes de iniciar la API; [guía de despliegue](docs/operations/deployment.md).
 
 ```bash
-# 1. Jaeger local (se une a la red del docker-compose principal)
-yarn jaeger:up
-
-# 2. En el .env
-OTEL_ENABLED=true
-
-# 3. Arrancar como siempre
-yarn start:dev
-
-# 4. UI de trazas
-open http://localhost:16686
-
-# 5. Verificación extremo a extremo (Jaeger + backend + traza + privacidad)
-yarn jaeger:verify
-
-# Apagar Jaeger
-yarn jaeger:down
+corepack yarn install --immutable
+corepack yarn typecheck
+corepack yarn build
+corepack yarn start:dev
 ```
 
-Cada respuesta HTTP incluye la cabecera `x-trace-id` y cada línea de log lleva `trace_id`, así que
-un usuario puede entregar un identificador a soporte y soporte llega a la traza exacta.
+Para levantar el stack local según Compose, el arranque recomendado es `corepack yarn docker:up` (purga la caché de build vieja y hace `docker compose up -d`). **Ojo:** Postgres, MongoDB y sus init jobs pertenecen al perfil `local-db`, así que un `docker compose up -d` a secas no los levanta (el compose está pensado también para bases gestionadas). Para un stack con bases locales: `docker compose --profile local-db up -d`; para sólo la infraestructura de datos y desarrollar la API con `start:dev`: `docker compose up -d postgres mongodb redis opensearch minio` (nombrarlos activa el perfil). Con `clamav` y `worker-files` rige el perfil `malware-scan`. Los comandos de Compose de este párrafo están leídos de `docker-compose.yml` y `package.json`; no se ejecutaron al escribirlo. Para Coolify, seguí [su guía específica](docs/operations/coolify.md); tiene configuración, migración y secretos distintos. El arranque de seeds se controla mediante `corepack yarn seed:boot`; `corepack yarn seed:datasets` ejecuta el extractor de catálogos bolivianos. Verificá el ambiente y los efectos del comando antes de usarlo en una base persistente.
 
-Documentación completa en [`docs/observability/`](docs/observability/README.md): guía para
-desarrolladores, catálogo de spans de negocio, topología de producción, política de privacidad de
-datos, resultados de rendimiento medidos y runbook operativo.
+## Comandos de verificación
 
-## Deployment
+| Comando | Qué comprueba |
+|---|---|
+| `corepack yarn typecheck` | Tipado TypeScript sin emitir archivos. |
+| `corepack yarn lint` | ESLint sobre `src`, `apps`, `libs` y `test`. |
+| `corepack yarn test --runInBand` | Unitarios `src/**/*.spec.ts`. |
+| `corepack yarn test:integration --runInBand` | Integración real; requiere almacenes y fixtures apropiados. |
+| `corepack yarn smoke --runInBand` | Smoke real. **Destruye datos de negocio de la DB configurada**; leé [la advertencia](test/smoke/README.md) antes de ejecutarlo. |
+| `corepack yarn test:e2e --runInBand` | Actualmente sólo el saludo de `GET /`. |
+| `corepack yarn docs:validate` | Lints de OpenAPI/AsyncAPI y cobertura/enlaces documentales. |
+| `corepack yarn orm:audit` | Auditoría de fidelidad del catálogo ORM. |
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+El detalle y los prerrequisitos están en [test/README.md](test/README.md) y [test/integration/README.md](test/integration/README.md). La suite e2e actual no certifica flujos clínicos.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Contrato de errores
 
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
+`src/common/errors/domain.exception.ts` define `DomainException` y subclases con `HttpStatus` y `ErrorCode`; `src/common/filters/all-exceptions.filter.ts` arma la respuesta HTTP con `code`, `message`, `correlationId`, `details`, `timestamp` y `path`. Algunos dominios aportan `details.reason`, pero esta base **no lo exige de forma uniforme**; no verifiqué esa uniformidad en esta rama. Para clientes, `code` es más estable que el texto de `message`.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Observabilidad: OpenTelemetry y Jaeger
 
-## Resources
+La API y los workers tienen bootstrap de telemetría y pueden exportar trazas por OTLP. La exportación se habilita de forma explícita con `OTEL_ENABLED=true` y un destino configurado. Para Jaeger local, los scripts existentes son `corepack yarn jaeger:up`, `corepack yarn jaeger:verify` y `corepack yarn jaeger:down`; la UI local suele estar en `http://localhost:16686` según el Compose de Jaeger. Las respuestas HTTP incluyen `x-trace-id` cuando el interceptor de trazas actúa, y los logs estructurados permiten correlación. Consultá [la guía de observabilidad](docs/observability/README.md) para configuración, privacidad, topología y runbooks.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Operación y documentación
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Imagen y stack: [`Dockerfile`](Dockerfile), [`docker-compose.yml`](docker-compose.yml), [`docker-compose.coolify.yml`](docker-compose.coolify.yml).
+- Despliegue, rollback, salud y mantenimiento: [operaciones](docs/operations/deployment.md) y [runbooks](docs/operations/runbooks/index.md).
+- Contratos: [`openapi/`](openapi/), [`asyncapi/`](asyncapi/) y sitio MkDocs (`mkdocs.yml`).
