@@ -12,7 +12,7 @@ import { BoliviaInsuranceSeedService } from '../../common/seed/bolivia-insurance
 import { ClinicalFormsSeedService } from '../../common/seed/clinical-forms-seed.service';
 import { GlossarySeedService } from '../../common/seed/glossary-seed.service';
 import { ProviderAccountsSeedService } from '../../common/seed/provider-accounts-seed.service';
-import { contarInsertados } from '../../common/seed/seed-bootstrap.service';
+import { countInserted } from '../../common/seed/seed-bootstrap.service';
 import { VademecumSeedService } from '../../common/seed/vademecum-seed.service';
 import {
   buscarPaquete,
@@ -115,7 +115,7 @@ export class ContentPacksService {
     const counters = await this.correr(paquete.code, demoPassword);
     const resultado: ContentPackResult = {
       code: paquete.code,
-      inserted: contarInsertados(counters),
+      inserted: countInserted(counters),
       tookMs: Date.now() - desde,
       counters,
     };

@@ -16,14 +16,14 @@ import { FileVersions } from '../../modules/common/entities/file_versions.entity
  * es lo que deja ese defecto capturado en un unitario y no sólo en la corrida
  * viva.
  */
-function build(existentes: Set<string> = new Set()) {
+function build(existing: Set<string> = new Set()) {
   const created: any[] = [];
   const pendientes = new Set<string>();
-  const flusheados = new Set<string>(existentes);
+  const flushed = new Set<string>(existing);
   const em: any = {
     findOne: mockFn((entity: any, where: { id: string }) =>
       Promise.resolve(
-        entity === Files && existentes.has(where.id) ? { id: where.id } : null,
+        entity === Files && existing.has(where.id) ? { id: where.id } : null,
       ),
     ),
     findOneOrFail: mockFn((_entity: any, where: { id: string }) =>
@@ -32,7 +32,7 @@ function build(existentes: Set<string> = new Set()) {
     create: mockFn((entity: any, data: any) => {
       created.push({ entity, data });
       if (entity === Files) pendientes.add(data.id);
-      if (entity === FileVersions && !flusheados.has(data.fileId)) {
+      if (entity === FileVersions && !flushed.has(data.fileId)) {
         throw new Error(
           `fk_file_versions_file_id: "${data.fileId}" no está en "files" todavía (faltó flushear Files antes)`,
         );
@@ -40,7 +40,7 @@ function build(existentes: Set<string> = new Set()) {
       return data;
     }),
     flush: mockFn(() => {
-      for (const id of pendientes) flusheados.add(id);
+      for (const id of pendientes) flushed.add(id);
       pendientes.clear();
       return Promise.resolve();
     }),
@@ -58,9 +58,9 @@ describe('StickerPackSeedService (AG-17)', () => {
     const result = await d.service.run();
 
     expect(result.inserted).toBe(STICKER_PACK.length);
-    const filesCreados = d.created.filter((c) => c.entity === Files);
-    expect(filesCreados).toHaveLength(STICKER_PACK.length);
-    expect(filesCreados.map((c) => c.data.id).sort()).toEqual(
+    const filesCreated = d.created.filter((c) => c.entity === Files);
+    expect(filesCreated).toHaveLength(STICKER_PACK.length);
+    expect(filesCreated.map((c) => c.data.id).sort()).toEqual(
       [...STICKER_PACK.map((s) => s.id)].sort(),
     );
   });

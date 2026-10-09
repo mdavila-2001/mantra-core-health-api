@@ -14,7 +14,7 @@ import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
 } from '../../modules/iam/dto';
-import { filasDeTabla, columna, type MarkdownTableRow } from './markdown-table';
+import { tableRows, column, type MarkdownTableRow } from './markdown-table';
 import {
   syntheticNationalId,
   syntheticMobilePhone,
@@ -28,8 +28,8 @@ const DEPARTAMENTO_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
 const MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA =
   '97d3017f-3df3-540d-9f5c-da9a4f259611';
 
-const ARCHIVO_MEDICOS = 'USUARIO_MEDICOS_1.md';
-const ARCHIVO_PACIENTES = 'USUARIO_PACIENTES_1.md';
+const DOCTORS_FILE = 'USUARIO_MEDICOS_1.md';
+const PATIENTS_FILE = 'USUARIO_PACIENTES_1.md';
 
 /** Lo que el seed dejó hecho en esta pasada. */
 export interface PeopleSeedResult {
@@ -43,7 +43,7 @@ export interface PeopleSeedResult {
   reason?: 'not-configured' | 'source-not-found';
 }
 
-interface CandidatoComun {
+interface CommonCandidate {
   key: string;
   name: string;
   middleName?: string;
@@ -107,7 +107,7 @@ export class PeopleSeedService {
     // arranque del harness fallaba aunque `SEED_PEOPLE_ENABLED` estuviera apagado.
     sourceDir = process.env.SEED_PEOPLE_SOURCE_DIR,
   ): Promise<PeopleSeedResult> {
-    const vacio: PeopleSeedResult = {
+    const empty: PeopleSeedResult = {
       practitionersCreated: 0,
       practitionersExisting: 0,
       patientsCreated: 0,
@@ -115,7 +115,7 @@ export class PeopleSeedService {
       skipped: [],
     };
     if (!enabled || !password) {
-      return { ...vacio, reason: 'not-configured' };
+      return { ...empty, reason: 'not-configured' };
     }
 
     // `__dirname` en runtime es `dist/src/common/seed` (Nest compila a
@@ -139,128 +139,128 @@ export class PeopleSeedService {
           )
         : undefined);
     if (!origen) {
-      return { ...vacio, reason: 'source-not-found' };
+      return { ...empty, reason: 'source-not-found' };
     }
 
-    let medicosTexto: string;
-    let pacientesTexto: string;
+    let textDoctors: string;
+    let textPatients: string;
     try {
-      medicosTexto = readFileSync(join(origen, ARCHIVO_MEDICOS), 'utf-8');
-      pacientesTexto = readFileSync(join(origen, ARCHIVO_PACIENTES), 'utf-8');
+      textDoctors = readFileSync(join(origen, DOCTORS_FILE), 'utf-8');
+      textPatients = readFileSync(join(origen, PATIENTS_FILE), 'utf-8');
     } catch (error) {
       this.logger.warn(
         { operation: 'seed.people', sourceDir: origen, err: error },
         'No se encontró el padrón; SEED_PEOPLE_ENABLED no tiene efecto sin él',
       );
-      return { ...vacio, reason: 'source-not-found' };
+      return { ...empty, reason: 'source-not-found' };
     }
 
-    const resultado: PeopleSeedResult = { ...vacio };
+    const result: PeopleSeedResult = { ...empty };
 
-    for (const [i, fila] of filasDeTabla(medicosTexto).entries()) {
-      const candidato = this.candidatoComun(fila, ARCHIVO_MEDICOS, i);
-      if (!candidato) continue;
+    for (const [i, fila] of tableRows(textDoctors).entries()) {
+      const candidate = this.commonCandidate(fila, DOCTORS_FILE, i);
+      if (!candidate) continue;
 
-      const matricula = columna(
+      const matricula = column(
         fila,
         'MATRICULA MINISTERIO DE SALUD Y DEPORTES',
       );
       if (!matricula) {
-        resultado.skipped.push(
-          `${ARCHIVO_MEDICOS}#${i}: sin matrícula del Ministerio, no se inventa una credencial profesional`,
+        result.skipped.push(
+          `${DOCTORS_FILE}#${i}: sin matrícula del Ministerio, no se inventa una credencial profesional`,
         );
         continue;
       }
-      const sedes = columna(fila, 'SEDES GOBERNACION SANTA CRUZ');
-      const colegio = columna(fila, 'REGISTRO COLEGIO ODONTOLOGOS');
-      const ocupacion = columna(fila, 'OCUPACION');
+      const sites = column(fila, 'SEDES GOBERNACION SANTA CRUZ');
+      const college = column(fila, 'REGISTRO COLEGIO ODONTOLOGOS');
+      const occupation = column(fila, 'OCUPACION');
 
       const dto: RegisterPractitionerDto = {
-        email: candidato.email,
+        email: candidate.email,
         password,
-        name: candidato.name,
-        middleName: candidato.middleName,
-        lastName: candidato.lastName,
-        motherLastName: candidato.motherLastName,
-        nationalId: syntheticNationalId(candidato.key),
+        name: candidate.name,
+        middleName: candidate.middleName,
+        lastName: candidate.lastName,
+        motherLastName: candidate.motherLastName,
+        nationalId: syntheticNationalId(candidate.key),
         issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
         licenseNumber: matricula,
-        credentialNumber: sedes || colegio || matricula,
-        professionalTitle: ocupacion ? ocupacion.slice(0, 120) : undefined,
+        credentialNumber: sites || college || matricula,
+        professionalTitle: occupation ? occupation.slice(0, 120) : undefined,
       };
 
-      const creado = await this.altaPractitioner(dto);
-      if (creado === 'created') resultado.practitionersCreated++;
-      else if (creado === 'existing') resultado.practitionersExisting++;
-      else resultado.skipped.push(`${ARCHIVO_MEDICOS}#${i}: ${creado}`);
+      const created = await this.registrationPractitioner(dto);
+      if (created === 'created') result.practitionersCreated++;
+      else if (created === 'existing') result.practitionersExisting++;
+      else result.skipped.push(`${DOCTORS_FILE}#${i}: ${created}`);
     }
 
-    for (const [i, fila] of filasDeTabla(pacientesTexto).entries()) {
-      const candidato = this.candidatoComun(fila, ARCHIVO_PACIENTES, i);
-      if (!candidato) continue;
+    for (const [i, fila] of tableRows(textPatients).entries()) {
+      const candidate = this.commonCandidate(fila, PATIENTS_FILE, i);
+      if (!candidate) continue;
 
-      const ocupacion = columna(fila, 'OCUPACION');
+      const occupation = column(fila, 'OCUPACION');
       const dto: RegisterPatientDto = {
-        email: candidato.email,
+        email: candidate.email,
         password,
-        name: candidato.name,
-        middleName: candidato.middleName,
-        lastName: candidato.lastName,
-        motherLastName: candidato.motherLastName,
-        nationalId: syntheticNationalId(candidato.key),
+        name: candidate.name,
+        middleName: candidate.middleName,
+        lastName: candidate.lastName,
+        motherLastName: candidate.motherLastName,
+        nationalId: syntheticNationalId(candidate.key),
         issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
         residenceMunicipalityConceptId: MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA,
-        birthDate: syntheticBirthDate(candidato.key),
-        phone: syntheticMobilePhone(candidato.key),
+        birthDate: syntheticBirthDate(candidate.key),
+        phone: syntheticMobilePhone(candidate.key),
         // No se adivina: el padrón no declara sexo asignado al nacer para
         // nadie, y asignarlo por nombre sería inventar un dato clínico de una
         // persona real a partir de su nombre real. `UNKNOWN` es un valor
         // honesto del propio contrato, no un relleno.
         sexAtBirth: 'UNKNOWN',
-        occupationFreeText: ocupacion ? ocupacion.slice(0, 120) : undefined,
+        occupationFreeText: occupation ? occupation.slice(0, 120) : undefined,
       };
 
-      const creado = await this.altaPatient(dto);
-      if (creado === 'created') resultado.patientsCreated++;
-      else if (creado === 'existing') resultado.patientsExisting++;
-      else resultado.skipped.push(`${ARCHIVO_PACIENTES}#${i}: ${creado}`);
+      const created = await this.registrationPatient(dto);
+      if (created === 'created') result.patientsCreated++;
+      else if (created === 'existing') result.patientsExisting++;
+      else result.skipped.push(`${PATIENTS_FILE}#${i}: ${created}`);
     }
 
     this.logger.info(
       {
         operation: 'seed.people',
-        practitionersCreated: resultado.practitionersCreated,
-        practitionersExisting: resultado.practitionersExisting,
-        patientsCreated: resultado.patientsCreated,
-        patientsExisting: resultado.patientsExisting,
-        skippedCount: resultado.skipped.length,
+        practitionersCreated: result.practitionersCreated,
+        practitionersExisting: result.practitionersExisting,
+        patientsCreated: result.patientsCreated,
+        patientsExisting: result.patientsExisting,
+        skippedCount: result.skipped.length,
       },
       'Padrón de personas sembrado',
     );
-    return resultado;
+    return result;
   }
 
   /** Nombre, apellidos y correo — lo que médicos y pacientes comparten. */
-  private candidatoComun(
-    fila: MarkdownTableRow,
-    archivo: string,
-    indice: number,
-  ): CandidatoComun | undefined {
-    const name = columna(fila, 'NOMBRE');
+  private commonCandidate(
+    row: MarkdownTableRow,
+    file: string,
+    index: number,
+  ): CommonCandidate | undefined {
+    const name = column(row, 'NOMBRE');
     if (!name) return undefined;
-    const lastName = columna(fila, 'APELLIDO PATERNO');
+    const lastName = column(row, 'APELLIDO PATERNO');
     if (!lastName) return undefined;
 
-    const middleName = columna(fila, 'NOMBRE 2') || undefined;
-    const motherLastName = columna(fila, 'APELLIDO MATERNO') || undefined;
-    const key = `${archivo}#${indice}`;
+    const middleName = column(row, 'NOMBRE 2') || undefined;
+    const motherLastName = column(row, 'APELLIDO MATERNO') || undefined;
+    const key = `${file}#${index}`;
     return {
       key,
       name,
       middleName,
       lastName,
       motherLastName,
-      email: syntheticEmail(name, lastName, String(indice)),
+      email: syntheticEmail(name, lastName, String(index)),
     };
   }
 
@@ -276,47 +276,47 @@ export class PeopleSeedService {
    * reintentaba las 92 altas y las resolvía por la vía más lenta (la
    * excepción de duplicado del propio servicio) en vez de esta.
    */
-  private async existeCredencial(externalSubject: string): Promise<boolean> {
+  private async existsCredential(externalSubject: string): Promise<boolean> {
     const em = this.orm.em.fork();
-    const existente = await em.findOne(AuthenticationCredentials, {
+    const existing = await em.findOne(AuthenticationCredentials, {
       externalSubject,
     });
-    return existente !== null;
+    return existing !== null;
   }
 
   /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
-  private async altaPractitioner(
+  private async registrationPractitioner(
     dto: RegisterPractitionerDto,
   ): Promise<string> {
-    if (await this.existeCredencial(dto.email)) return 'existing';
+    if (await this.existsCredential(dto.email)) return 'existing';
     try {
       await this.practitionerRegistration.registerPractitioner(dto);
       return 'created';
     } catch (error) {
       if (error instanceof ConflictException) return 'existing';
-      const mensaje = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
         { operation: 'seed.people.practitioner', err: error },
         'No se pudo dar de alta un médico del padrón',
       );
-      return mensaje;
+      return message;
     }
   }
 
   /** Devuelve 'created', 'existing' o el mensaje del error si no se pudo dar de alta. */
-  private async altaPatient(dto: RegisterPatientDto): Promise<string> {
-    if (await this.existeCredencial(dto.nationalId)) return 'existing';
+  private async registrationPatient(dto: RegisterPatientDto): Promise<string> {
+    if (await this.existsCredential(dto.nationalId)) return 'existing';
     try {
       await this.patientRegistration.registerPatient(dto);
       return 'created';
     } catch (error) {
       if (error instanceof ConflictException) return 'existing';
-      const mensaje = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(
         { operation: 'seed.people.patient', err: error },
         'No se pudo dar de alta un paciente del padrón',
       );
-      return mensaje;
+      return message;
     }
   }
 }

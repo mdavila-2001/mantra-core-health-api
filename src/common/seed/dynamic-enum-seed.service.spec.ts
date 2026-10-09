@@ -103,16 +103,16 @@ describe('DynamicEnumSeedService', () => {
   it('no reinserta nada cuando el catálogo ya está sembrado', async () => {
     // Se siembra una vez para recoger los identificadores deterministas y se
     // vuelve a correr declarándolos como existentes.
-    const primera = build();
-    await primera.service.run();
-    const yaExisten = new Set<string>(
-      primera.created.map((row) => row.data.id as string),
+    const first = build();
+    await first.service.run();
+    const alreadyExist = new Set<string>(
+      first.created.map((row) => row.data.id as string),
     );
 
-    const segunda = build(yaExisten);
-    const result = await segunda.service.run();
+    const second = build(alreadyExist);
+    const result = await second.service.run();
 
-    expect(segunda.created).toEqual([]);
+    expect(second.created).toEqual([]);
     expect(result).toEqual({
       valueSets: 0,
       definitions: 0,
@@ -127,9 +127,9 @@ describe('DynamicEnumSeedService', () => {
     await d.service.run();
 
     for (const option of d.rowsOf('DynamicEnumOptions')) {
-      const concepto = CONCEPT_INDEX_BY_ID.get(option.conceptId);
-      expect(option.code).toBe(concepto?.code);
-      expect(option.display).toBe(concepto?.display);
+      const concept = CONCEPT_INDEX_BY_ID.get(option.conceptId);
+      expect(option.code).toBe(concept?.code);
+      expect(option.display).toBe(concept?.display);
       expect(option.enabled).toBe(true);
     }
   });
@@ -139,17 +139,17 @@ describe('DynamicEnumSeedService', () => {
 
     await d.service.run();
 
-    const conDefecto = DYNAMIC_ENUM_CATALOG.filter(
+    const withDefault = DYNAMIC_ENUM_CATALOG.filter(
       (entry) => entry.defaultConceptId,
     );
-    const marcadas = d
+    const marked = d
       .rowsOf('DynamicEnumOptions')
       .filter((option) => option.isDefault);
 
-    expect(marcadas).toHaveLength(conDefecto.length);
-    for (const entry of conDefecto) {
+    expect(marked).toHaveLength(withDefault.length);
+    for (const entry of withDefault) {
       expect(
-        marcadas.some((option) => option.conceptId === entry.defaultConceptId),
+        marked.some((option) => option.conceptId === entry.defaultConceptId),
       ).toBe(true);
     }
   });
@@ -159,14 +159,14 @@ describe('DynamicEnumSeedService', () => {
 
     await d.service.run();
 
-    const genero = d
+    const gender = d
       .rowsOf('DynamicEnumBindings')
       .find(
         (binding) =>
           binding.targetFieldName === 'administrative_gender_concept_id',
       );
 
-    expect(genero).toMatchObject({
+    expect(gender).toMatchObject({
       targetSchemaName: 'profiles',
       targetEntityName: 'persons',
       statusConceptId: CONCEPTS.ENUM_BINDING_ACTIVE,
@@ -190,11 +190,11 @@ describe('DynamicEnumSeedService', () => {
 
     await d.service.run();
 
-    const testigos = d
+    const witnesses = d
       .rowsOf('DynamicEnumVersions')
       .map((version) => version.cacheToken);
 
-    expect(new Set(testigos).size).toBe(testigos.length);
+    expect(new Set(witnesses).size).toBe(witnesses.length);
   });
 
   it('numera los miembros y las opciones en el orden declarado', async () => {
@@ -202,16 +202,16 @@ describe('DynamicEnumSeedService', () => {
 
     await d.service.run();
 
-    const primera = DYNAMIC_ENUM_CATALOG[0];
-    const opciones = d
+    const first = DYNAMIC_ENUM_CATALOG[0];
+    const options = d
       .rowsOf('DynamicEnumOptions')
-      .slice(0, primera.concepts.length);
+      .slice(0, first.concepts.length);
 
-    expect(opciones.map((option) => option.ordinal)).toEqual(
-      primera.concepts.map((_, index) => index),
+    expect(options.map((option) => option.ordinal)).toEqual(
+      first.concepts.map((_, index) => index),
     );
-    expect(opciones.map((option) => option.conceptId)).toEqual([
-      ...primera.concepts,
+    expect(options.map((option) => option.conceptId)).toEqual([
+      ...first.concepts,
     ]);
   });
 });

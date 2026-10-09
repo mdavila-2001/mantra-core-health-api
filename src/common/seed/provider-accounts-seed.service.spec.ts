@@ -12,41 +12,41 @@ import { DIR } from '../../modules/directory/directory.concepts';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { PROVIDER_ACCOUNTS } from './provider-accounts.catalog';
 
-const ASEGURADORA = 'aseguradora.demo@alovida.test';
-const FARMACIA = 'farmacia.demo@alovida.test';
+const INSURER = 'aseguradora.demo@alovida.test';
+const PHARMACY = 'farmacia.demo@alovida.test';
 
 /**
  * Construye el seed con un `em` en memoria: credenciales y membresías que la
  * base «ya tiene», y lo que el seed crea o modifica.
  *
- * @param membresias - Rol de tenant que ya tiene cada cuenta, por correo.
+ * @param memberships - Rol de tenant que ya tiene cada cuenta, por correo.
  *   Las cuentas que no aparecen todavía no existen.
  */
-function build(membresias: Record<string, string> = {}) {
-  const userIdDe = (email: string) => `user:${email}`;
-  const filas = new Map(
-    Object.entries(membresias).map(([email, rol]) => [
-      userIdDe(email),
-      { userId: userIdDe(email), tenantRoleConceptId: rol } as any,
+function build(memberships: Record<string, string> = {}) {
+  const userId = (email: string) => `user:${email}`;
+  const rows = new Map(
+    Object.entries(memberships).map(([email, rol]) => [
+      userId(email),
+      { userId: userId(email), tenantRoleConceptId: rol } as any,
     ]),
   );
-  const creadas: { entity: string; data: any }[] = [];
+  const created: { entity: string; data: any }[] = [];
 
   const em = {
     findOne: mockFn((entity: any, where: any) => {
       if (entity.name === 'AuthenticationCredentials') {
         const email = where.externalSubject as string;
         return Promise.resolve(
-          email in membresias ? { userId: userIdDe(email) } : null,
+          email in memberships ? { userId: userId(email) } : null,
         );
       }
       if (entity.name === 'TenantMemberships') {
-        return Promise.resolve(filas.get(where.userId) ?? null);
+        return Promise.resolve(rows.get(where.userId) ?? null);
       }
       return Promise.resolve(null);
     }),
     create: mockFn((entity: any, data: any) => {
-      creadas.push({ entity: entity.name, data });
+      created.push({ entity: entity.name, data });
       return data;
     }),
     flush: mockFn(() => Promise.resolve()),
@@ -54,7 +54,7 @@ function build(membresias: Record<string, string> = {}) {
   const orm = { em: { fork: mockFn(() => em) } };
   const users = {
     createUser: mockFn((input: any) =>
-      Promise.resolve({ id: userIdDe(input.email) }),
+      Promise.resolve({ id: userId(input.email) }),
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -68,25 +68,25 @@ function build(membresias: Record<string, string> = {}) {
     service,
     /** Rol de tenant con el que quedó (o se creó) la membresía de la cuenta. */
     rolDe: (email: string): string | undefined => {
-      const creada = creadas.find(
-        (fila) =>
-          fila.entity === 'TenantMemberships' &&
-          fila.data.userId === userIdDe(email),
+      const creada = created.find(
+        (row) =>
+          row.entity === 'TenantMemberships' &&
+          row.data.userId === userId(email),
       );
       return (
         creada?.data.tenantRoleConceptId ??
-        filas.get(userIdDe(email))?.tenantRoleConceptId
+        rows.get(userId(email))?.tenantRoleConceptId
       );
     },
-    row: (email: string) => filas.get(userIdDe(email)),
+    row: (email: string) => rows.get(userId(email)),
   };
 }
 
 describe('ProviderAccountsSeedService · rol en la organización', () => {
   it('la aseguradora demo es ADMIN: sin eso la API le niega editar su catálogo', () => {
-    const cuenta = PROVIDER_ACCOUNTS.find((c) => c.email === ASEGURADORA);
+    const account = PROVIDER_ACCOUNTS.find((c) => c.email === INSURER);
 
-    expect(cuenta?.tenantRole).toBe('ADMIN');
+    expect(account?.tenantRole).toBe('ADMIN');
   });
 
   it('una base nueva crea la membresía con el rol que declara el catálogo', async () => {
@@ -94,8 +94,8 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
 
     await service.run('demo-password', 'development');
 
-    expect(rolDe(ASEGURADORA)).toBe(DIR.ROLE_ADMIN);
-    expect(rolDe(FARMACIA)).toBe(DIR.ROLE_STAFF);
+    expect(rolDe(INSURER)).toBe(DIR.ROLE_ADMIN);
+    expect(rolDe(PHARMACY)).toBe(DIR.ROLE_STAFF);
   });
 
   it('una base ya sembrada sube a la aseguradora de STAFF a ADMIN', async () => {
@@ -106,9 +106,9 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
 
     await service.run('demo-password', 'development');
 
-    expect(fila(ASEGURADORA).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
-    expect(fila(ASEGURADORA).updatedAt).toBeInstanceOf(Date);
-    expect(fila(FARMACIA).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
-    expect(fila(FARMACIA).updatedAt).toBeUndefined();
+    expect(fila(INSURER).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+    expect(fila(INSURER).updatedAt).toBeInstanceOf(Date);
+    expect(fila(PHARMACY).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
+    expect(fila(PHARMACY).updatedAt).toBeUndefined();
   });
 });

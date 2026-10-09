@@ -201,7 +201,7 @@ export class BoEmployersSeedService {
     counters.memberships += await this.seedMemberships(em, now);
 
     const total = Object.values(counters).reduce(
-      (suma, valor) => suma + valor,
+      (sum, valor) => sum + valor,
       0,
     );
     if (total > 0) {
@@ -245,7 +245,7 @@ export class BoEmployersSeedService {
       BO_EMPLOYERS.map((employer) => boEmployerDesignationId(employer.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const employer of BO_EMPLOYERS) {
       const id = boEmployerDesignationId(employer.code);
       if (existing.has(id)) continue;
@@ -263,10 +263,10 @@ export class BoEmployersSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -287,7 +287,7 @@ export class BoEmployersSeedService {
       BO_EMPLOYERS.map((employer) => boEmployerSectorPropertyId(employer.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const employer of BO_EMPLOYERS) {
       const id = boEmployerSectorPropertyId(employer.code);
       if (existing.has(id)) continue;
@@ -304,10 +304,10 @@ export class BoEmployersSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión: un miembro por empresa, con el ordinal del orden declarado. */
@@ -321,7 +321,7 @@ export class BoEmployersSeedService {
       BO_EMPLOYERS.map((employer) => boEmployerMemberId(employer.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     const versionIdentifier = boEmployerVersionId();
     BO_EMPLOYERS.forEach((employer, ordinal) => {
       const id = boEmployerMemberId(employer.code);
@@ -339,10 +339,10 @@ export class BoEmployersSeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Los ids que ya están en la base, de entre los que se van a sembrar. */

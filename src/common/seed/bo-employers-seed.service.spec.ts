@@ -24,7 +24,7 @@ import {
 } from './bo-employers.catalog';
 
 /** Cuántas empresas declara el catálogo; el resto de las cuentas sale de acá. */
-const EMPRESAS = BO_EMPLOYERS.length;
+const COMPANIES = BO_EMPLOYERS.length;
 
 /**
  * Construye el seed con un contexto de persistencia controlado — el mismo
@@ -74,11 +74,11 @@ describe('BoEmployersSeedService', () => {
       expect(counters).toEqual({
         valueSets: 1,
         versions: 1,
-        employers: EMPRESAS,
+        employers: COMPANIES,
         // Una designación preferida y un sector económico por concepto.
-        designations: EMPRESAS,
-        properties: EMPRESAS,
-        memberships: EMPRESAS,
+        designations: COMPANIES,
+        properties: COMPANIES,
+        memberships: COMPANIES,
       });
 
       const [conjunto] = rowsOf('ValueSets');
@@ -103,18 +103,18 @@ describe('BoEmployersSeedService', () => {
 
       await service.run();
 
-      const conceptos = rowsOf('CatalogConcepts');
+      const concepts = rowsOf('CatalogConcepts');
       // La expansión filtra por `selectable`: una empresa no seleccionable
       // sería una opción que no se puede elegir.
-      expect(conceptos.every((fila) => fila.selectable === true)).toBe(true);
+      expect(concepts.every((row) => row.selectable === true)).toBe(true);
       // El código va prefijado por el dominio: `catalog_concepts.code` es único
       // por versión del sistema de códigos, y todo el catálogo interno comparte
       // una sola — sin el prefijo, este `OTRA` chocaría con el de ocupaciones.
       expect(
-        conceptos.every((fila) => String(fila.code).startsWith('employer:bo:')),
+        concepts.every((row) => String(row.code).startsWith('employer:bo:')),
       ).toBe(true);
       expect(
-        conceptos.some((fila) => fila.code === boEmployerConceptCode('ENTEL')),
+        concepts.some((row) => row.code === boEmployerConceptCode('ENTEL')),
       ).toBe(true);
     });
 
@@ -125,17 +125,17 @@ describe('BoEmployersSeedService', () => {
 
       // El buscador no ordena nada del lado del cliente: se apoya en este
       // `ordinal`, que agrupa por sector y deja las salidas al final.
-      const miembros = rowsOf('ValueSetMembers');
-      expect(miembros.map((fila) => fila.ordinal)).toEqual(
-        BO_EMPLOYERS.map((_, indice) => indice),
+      const members = rowsOf('ValueSetMembers');
+      expect(members.map((row) => row.ordinal)).toEqual(
+        BO_EMPLOYERS.map((_, index) => index),
       );
-      expect(miembros[0]).toMatchObject({
+      expect(members[0]).toMatchObject({
         conceptId: boEmployerConceptId(BO_EMPLOYERS[0]!.code),
         included: true,
       });
       // «Otra empresa» va al final a propósito: ofrecida entre medio se elige
       // por comodidad antes de haber buscado.
-      expect(BO_EMPLOYERS[EMPRESAS - 1]?.code).toBe(BO_EMPLOYER_OTHER_CODE);
+      expect(BO_EMPLOYERS[COMPANIES - 1]?.code).toBe(BO_EMPLOYER_OTHER_CODE);
     });
 
     it('cada empresa guarda su sector económico', async () => {
@@ -144,7 +144,7 @@ describe('BoEmployersSeedService', () => {
       await service.run();
 
       const propiedades = rowsOf('ConceptProperties');
-      expect(propiedades).toHaveLength(EMPRESAS);
+      expect(propiedades).toHaveLength(COMPANIES);
       expect(propiedades[0]).toMatchObject({
         conceptId: boEmployerConceptId(BO_EMPLOYERS[0]!.code),
         propertyCode: BO_EMPLOYER_SECTOR_PROPERTY_CODE,
@@ -155,22 +155,22 @@ describe('BoEmployersSeedService', () => {
 
   describe('segunda corrida', () => {
     it('no escribe nada: los ids son deterministas y ya están', async () => {
-      const todo = new Set<string>([
+      const all = new Set<string>([
         boEmployerValueSetId(),
         boEmployerVersionId(),
-        ...BO_EMPLOYERS.flatMap((empresa) => [
-          boEmployerConceptId(empresa.code),
-          boEmployerMemberId(empresa.code),
+        ...BO_EMPLOYERS.flatMap((company) => [
+          boEmployerConceptId(company.code),
+          boEmployerMemberId(company.code),
         ]),
       ]);
       // Las designaciones y las propiedades tienen su propio derivador; se
       // agregan por su id real para que la pasada no cree ninguna.
-      for (const empresa of BO_EMPLOYERS) {
-        todo.add(boEmployerDesignationId(empresa.code));
-        todo.add(boEmployerSectorPropertyId(empresa.code));
+      for (const company of BO_EMPLOYERS) {
+        all.add(boEmployerDesignationId(company.code));
+        all.add(boEmployerSectorPropertyId(company.code));
       }
 
-      const { service, created } = build(todo);
+      const { service, created } = build(all);
 
       const counters = await service.run();
 
@@ -191,20 +191,20 @@ describe('BoEmployersSeedService', () => {
      * sembrar esa y sólo esa.
      */
     it('agregar una empresa siembra sólo la nueva', async () => {
-      const nueva = BO_EMPLOYERS[EMPRESAS - 1]!;
-      const todo = new Set<string>([
+      const fresh = BO_EMPLOYERS[COMPANIES - 1]!;
+      const all = new Set<string>([
         boEmployerValueSetId(),
         boEmployerVersionId(),
       ]);
-      for (const empresa of BO_EMPLOYERS) {
-        if (empresa.code === nueva.code) continue;
-        todo.add(boEmployerConceptId(empresa.code));
-        todo.add(boEmployerMemberId(empresa.code));
-        todo.add(boEmployerDesignationId(empresa.code));
-        todo.add(boEmployerSectorPropertyId(empresa.code));
+      for (const company of BO_EMPLOYERS) {
+        if (company.code === fresh.code) continue;
+        all.add(boEmployerConceptId(company.code));
+        all.add(boEmployerMemberId(company.code));
+        all.add(boEmployerDesignationId(company.code));
+        all.add(boEmployerSectorPropertyId(company.code));
       }
 
-      const { service } = build(todo);
+      const { service } = build(all);
 
       const counters = await service.run();
 
@@ -223,13 +223,13 @@ describe('BoEmployersSeedService', () => {
     it('ningún código se declara dos veces', () => {
       // Dos entradas con el mismo código colapsarían en el mismo id
       // determinista y una taparía a la otra sin que nadie se entere.
-      const codigos = BO_EMPLOYERS.map((empresa) => empresa.code);
-      expect(new Set(codigos).size).toBe(codigos.length);
+      const codes = BO_EMPLOYERS.map((company) => company.code);
+      expect(new Set(codes).size).toBe(codes.length);
     });
 
     it('ningún nombre se repite: dos opciones iguales en un buscador no se pueden elegir', () => {
-      const nombres = BO_EMPLOYERS.map((empresa) => empresa.name);
-      expect(new Set(nombres).size).toBe(nombres.length);
+      const names = BO_EMPLOYERS.map((company) => company.name);
+      expect(new Set(names).size).toBe(names.length);
     });
 
     /**
@@ -238,10 +238,10 @@ describe('BoEmployersSeedService', () => {
      * opción sin salida y nadie se enteraría hasta verlo en producción.
      */
     it('declara la salida «Otra empresa», que es la que habilita el texto libre', () => {
-      const otra = BO_EMPLOYERS.find(
-        (empresa) => empresa.code === BO_EMPLOYER_OTHER_CODE,
+      const other = BO_EMPLOYERS.find(
+        (company) => company.code === BO_EMPLOYER_OTHER_CODE,
       );
-      expect(otra).toBeDefined();
+      expect(other).toBeDefined();
       // El cliente la reconoce por el código FHIR, no por el nombre visible.
       expect(boEmployerConceptCode(BO_EMPLOYER_OTHER_CODE)).toBe(
         'employer:bo:OTRA',

@@ -63,13 +63,13 @@ describe('DYNAMIC_ENUM_CATALOG', () => {
   });
 
   it('referencia sólo conceptos que el seed materializa', () => {
-    const huerfanos = DYNAMIC_ENUM_CATALOG.flatMap((entry) =>
+    const orphaned = DYNAMIC_ENUM_CATALOG.flatMap((entry) =>
       entry.concepts
         .filter((conceptId) => !CONCEPT_INDEX_BY_ID.has(conceptId))
         .map((conceptId) => `${entry.code} -> ${conceptId}`),
     );
 
-    expect(huerfanos).toEqual([]);
+    expect(orphaned).toEqual([]);
   });
 
   it('no declara ninguna enumeración vacía', () => {

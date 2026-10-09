@@ -20,29 +20,29 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  */
 describe('Catálogo en castellano', () => {
   /** Todos los conceptos que componen algún conjunto de valores publicado. */
-  const conceptosVisibles = new Set(
+  const visibleConcepts = new Set(
     DYNAMIC_ENUM_CATALOG.flatMap((entry) => entry.concepts),
   );
 
   it('cubre todos los conceptos que el glosario puede mostrar', () => {
-    const sinTraducir = [...conceptosVisibles].filter(
+    const withoutTranslate = [...visibleConcepts].filter(
       (conceptId) => !SPANISH_DESIGNATIONS.has(conceptId),
     );
 
     // El mensaje lista los identificadores a propósito: quien rompa esto tiene
     // que poder ir a `terminology-designations.es.ts` y saber qué escribir, no
     // enterarse sólo de que falta algo.
-    expect(sinTraducir).toEqual([]);
+    expect(withoutTranslate).toEqual([]);
   });
 
   it('no declara traducciones para conceptos que ningún conjunto ofrece', () => {
     // No es un error funcional —el seed las omite y avisa—, pero sí es trabajo
     // de traducción que nadie va a ver: mejor detectarlo acá.
-    const sobrantes = [...SPANISH_DESIGNATIONS.keys()].filter(
-      (conceptId) => !conceptosVisibles.has(conceptId),
+    const surplus = [...SPANISH_DESIGNATIONS.keys()].filter(
+      (conceptId) => !visibleConcepts.has(conceptId),
     );
 
-    expect(sobrantes).toEqual([]);
+    expect(surplus).toEqual([]);
   });
 
   it('no repite ningún concepto: dos traducciones del mismo se colapsarían', () => {
@@ -50,12 +50,12 @@ describe('Catálogo en castellano', () => {
   });
 
   it('ninguna traducción queda a medias', () => {
-    const incompletas = [...SPANISH_DESIGNATIONS.entries()].filter(
+    const incomplete = [...SPANISH_DESIGNATIONS.entries()].filter(
       ([, traduccion]) =>
         traduccion.display.trim() === '' || traduccion.definition.trim() === '',
     );
 
-    expect(incompletas).toEqual([]);
+    expect(incomplete).toEqual([]);
   });
 
   it('el código de la propiedad de definición es el mismo que busca la lectura', () => {
