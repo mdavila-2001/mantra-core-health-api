@@ -20,7 +20,7 @@ export function termClass(term) {
   return 'categoria_final_especifica';
 }
 
-export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCode, mesh, hpo, bridge, hpoAck, includeWikipediaCited, flags }) {
+export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCode, mesh, hpo, bridge, hpoAck, includeWikipediaCited, bridges, icd10cm, flags }) {
   const s = {
     total: perTerm.length,
     byCategory: {}, byFinal: { final: 0, notFinal: 0 },
@@ -32,6 +32,8 @@ export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCod
     sections: { byKind: {}, bySource: {}, byKindSource: {}, termsWithAnySection: 0, termsWithSpanishSection: 0 },
     articles: { total: 0, byKind: { text: 0, 'image-only': 0, 'facts-only': 0 }, byCategory: {}, factsOnlyWikidataOnly: 0 },
     images: { total: 0, termsWithImages: 0, byLicense: {}, byHost: {}, outsideCsp: 0 },
+    bridge: { termsWithBridgeCandidate: bridges?.size ?? 0, termsWithBridgedText: 0, termsTextOnlyFromBridge: 0 },
+    icd10cm: { version: icd10cm?.label ?? null, codesInTabular: icd10cm?.codes.size ?? 0, termsWithCodeInTabular: 0, termsWithNotes: 0, termsTextOnlyFromTabular: 0 },
     wikidata: { uniqueQid: 0, qidWithImageFiles: 0, rejectedByReason: {} },
     noArticle: { total: 0, byClass: {}, byClassAndCause: {}, byChapter: {} },
     byChapter: {},
@@ -71,6 +73,7 @@ export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCod
       if (wd.files.length) s.wikidata.qidWithImageFiles++;
     }
     if (wd?.rejectReason) inc(s.wikidata.rejectedByReason, wd.rejectReason);
+    if (icd10cm?.codes.has(term.code)) s.icd10cm.termsWithCodeInTabular++;
 
     if (article) {
       s.articles.total++;
@@ -88,6 +91,13 @@ export function computeStats({ perTerm, rejected, orphanet, orphaIdx, mondoByCod
         if (sec.source === 'disease-ontology') s.texts.doidDefinition++;
         if (sec.source === 'nlm-mesh') s.texts.meshScopeNote++;
         if (sec.source === 'hpo') s.texts.hpoSymptomsEmitted++;
+      }
+      const bridged = article.sections.filter((x) => /vía puente Wikidata/.test(x.locator));
+      if (bridged.length) s.bridge.termsWithBridgedText++;
+      if (bridged.length && bridged.length === article.sections.filter((x) => x.source !== 'icd10cm-tabular').length && article.sections.some((x) => x.source !== 'icd10cm-tabular')) s.bridge.termsTextOnlyFromBridge++;
+      if (article.sections.some((x) => x.source === 'icd10cm-tabular')) {
+        s.icd10cm.termsWithNotes++;
+        if (article.sections.every((x) => x.source === 'icd10cm-tabular')) s.icd10cm.termsTextOnlyFromTabular++;
       }
       if (article.sections.length) s.sections.termsWithAnySection++;
       if (article.sections.some((x) => x.lang === 'es')) s.sections.termsWithSpanishSection++;
@@ -164,6 +174,8 @@ export function renderCoverage(s) {
   out.push(`Términos con **alguna sección de texto**: ${fmt(s.sections.termsWithAnySection)} (${pct(s.sections.termsWithAnySection, t)}); con sección **en castellano**: ${fmt(s.sections.termsWithSpanishSection)} (${pct(s.sections.termsWithSpanishSection, t)}).`);
   out.push(`Síntomas de HPO: emitidos ${fmt(s.texts.hpoSymptomsEmitted)}; **retenidos por licencia sin verificar** en ${fmt(s.texts.hpoSymptomsBlockedByLicense)} términos (corrida ${s.hpoAck ? 'CON' : 'SIN'} \`--hpo-license-ack\`).`, '');
   out.push(`Definiciones de MONDO/DOID **retenidas** por citar a Wikipedia como referencia (CC BY-SA; regla §12.2.8): ${fmt(s.texts.withheldCitingWikipedia)} secciones (corrida ${s.includeWikipediaCited ? 'CON' : 'SIN'} \`--include-wikipedia-cited\`).`, '');
+  out.push(`ICD-10-CM (${s.icd10cm.version ?? 'sin cargar'}): ${fmt(s.icd10cm.codesInTabular)} códigos en el tabular; ${fmt(s.icd10cm.termsWithCodeInTabular)} términos tienen su código ahí; ${fmt(s.icd10cm.termsWithNotes)} reciben notas de clasificación (${fmt(s.icd10cm.termsTextOnlyFromTabular)} solo con ellas).`);
+  out.push(`Puente Wikidata (T3) para texto: ${fmt(s.bridge.termsWithBridgeCandidate)} candidatos; ${fmt(s.bridge.termsWithBridgedText)} términos reciben alguna sección vía puente (${fmt(s.bridge.termsTextOnlyFromBridge)} solo por él).`, '');
   out.push('## 3 · Artículos', '');
   out.push(table(['Resultado', 'Términos', '%'], [
     ['Con artículo — texto (≥1 sección)', fmt(s.articles.byKind.text), pct(s.articles.byKind.text, t)],

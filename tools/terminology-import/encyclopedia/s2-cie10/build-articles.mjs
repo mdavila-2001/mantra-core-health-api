@@ -4,7 +4,7 @@
 //
 //   node --max-old-space-size=4096 build-articles.mjs \
 //        [--seed-dir <shards>] [--cache-dir <dir>] [--out-dir <dir>] \
-//        [--offline] [--hpo-license-ack] [--include-wikipedia-cited]
+//        [--offline] [--hpo-license-ack] [--include-wikipedia-cited] [--wikidata-bridge]
 //
 // Salida (en --out-dir): articles.ndjson · rejected.ndjson · sources.json ·
 // stats.json · COVERAGE.md. Determinista: con la misma caché produce los mismos
@@ -24,7 +24,9 @@ import { HttpClient, ensureDir, writeJson, writeNdjson } from '../../lib/glossar
 import { articleKind, buildArticle, meshIdsFor } from './lib/article.mjs';
 import { defaultCacheDir, defaultOutDir, defaultSeedDir, parseArgs } from './lib/cli.mjs';
 import { SOURCES } from './lib/config.mjs';
+import { computeBridges } from './lib/bridge.mjs';
 import { computeStats, renderCoverage } from './lib/coverage.mjs';
+import { parseTabular } from './lib/icd10cm.mjs';
 import { parseDoid } from './lib/doid.mjs';
 import { parseBabelon, parseHpJson, parseHpoa } from './lib/hpo.mjs';
 import { resolveIdentities } from './lib/identity.mjs';
@@ -55,7 +57,7 @@ function remoteRetrievedAt(cacheDir, offline) {
 
 const read = (dir, file) => readFileSync(join(dir, 'files', file), 'utf8');
 
-export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpoAck = false, includeWikipediaCited = false, limit = null, http: injected = null }) {
+export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpoAck = false, includeWikipediaCited = false, wikidataBridge = false, limit = null, http: injected = null }) {
   const manifest = JSON.parse(readFileSync(join(cacheDir, 'sources-manifest.json'), 'utf8'));
   const day = (name) => manifest[name].retrievedAt;
   const http = injected ?? (offline ? new OfflineHttp() : new HttpClient({ concurrency: 1, minDelayMs: 1000 }));
@@ -86,27 +88,33 @@ export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpo
     hpoa: parseHpoa(read(cacheDir, manifest['hpo-annotations'].file)),
   };
 
+  const icd10cm = manifest['icd10cm-tabular'] ? { ...parseTabular(read(cacheDir, manifest['icd10cm-tabular'].file)), label: 'FY2025' } : null;
+
   console.log('[5/7] identidad por código CIE-10 exacto');
   const identities = resolveIdentities(terms, {
     orphaConcepts: orphanet.concepts, orphaByCode: orphaIdx.exact, mondoConcepts: mondo.concepts, mondoByCode,
   });
 
   console.log('[6/7] MeSH (notas de alcance), Wikidata y Commons');
-  const meshIds = [...new Set([...identities.values()].flatMap((id) => meshIdsFor(id)))];
-  const mesh = await fetchMeshScopeNotes(http, meshIds, cacheDir);
   const bridge = await fetchWikidataBridge(http, cacheDir);
   const wikidata = resolveWikidata(terms, bridge, identities);
+  const bridges = wikidataBridge ? computeBridges(terms, identities, wikidata, { orphaConcepts: orphanet.concepts, mondoConcepts: mondo.concepts }) : new Map();
+  const meshIds = [...new Set([
+    ...[...identities.values()].flatMap((id) => meshIdsFor(id)),
+    ...[...bridges.values()].flatMap((b) => [...(b.mondo?.exact.mesh ?? []), ...(b.orpha?.xrefs ?? []).filter((x) => x.source === 'MeSH' && x.exact).map((x) => x.reference), b.meshId].filter(Boolean)),
+  ])];
+  const mesh = await fetchMeshScopeNotes(http, meshIds, cacheDir);
   const files = [...wikidata.values()].flatMap((w) => w.files);
   const commons = await fetchCommonsInfo(http, files, cacheDir);
 
   console.log('[7/7] ensamblado');
   const today = remoteRetrievedAt(cacheDir, offline);
   const ctx = {
-    hpoAck, includeWikipediaCited,
+    hpoAck, includeWikipediaCited, icd10cm, bridges,
     orphanet, mondo, doid, mesh, hpo, commons,
     retrievedAt: {
       'orphanet-es': day('orphanet-es'), 'orphanet-epidemiology-es': day('orphanet-prevalence'), mondo: day('mondo'),
-      'disease-ontology': day('disease-ontology'), 'nlm-mesh': today, hpo: day('hpo-annotations'), wikidata: today,
+      'disease-ontology': day('disease-ontology'), 'icd10cm-tabular': manifest['icd10cm-tabular']?.retrievedAt ?? today, 'nlm-mesh': today, hpo: day('hpo-annotations'), wikidata: today,
     },
   };
   const articles = [];
@@ -128,7 +136,7 @@ export async function buildAll({ seedDir, cacheDir, outDir, offline = false, hpo
     Object.entries(SOURCES).map(([id, s]) => [id, { ...s, retrievedAt: ctx.retrievedAt[id] ?? null }]),
   );
   const stats = computeStats({
-    perTerm, rejected, orphanet, orphaIdx, mondoByCode, mesh, hpo, bridge, hpoAck, includeWikipediaCited, flags: flagsAll,
+    perTerm, rejected, orphanet, orphaIdx, mondoByCode, mesh, hpo, bridge, hpoAck, includeWikipediaCited, bridges, icd10cm, flags: flagsAll,
   });
   const review = identityReviewRows(perTerm);
   stats.identityReview = {
@@ -162,6 +170,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     offline: Boolean(args.offline),
     hpoAck: Boolean(args['hpo-license-ack']),
     includeWikipediaCited: Boolean(args['include-wikipedia-cited']),
+    wikidataBridge: Boolean(args['wikidata-bridge']),
     limit: args.limit ? Number(args.limit) : null,
   });
 }
