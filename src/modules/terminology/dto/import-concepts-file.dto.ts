@@ -13,7 +13,7 @@ import type { FormatoDeArchivo } from '../import';
  * @param params - El valor tal como llegó del formulario.
  * @returns El booleano, o el valor original si no es uno de los dos textos.
  */
-function comoBooleano({ value }: TransformFnParams): unknown {
+function asBoolean({ value }: TransformFnParams): unknown {
   if (value === 'true') return true;
   if (value === 'false') return false;
   return value;
@@ -31,7 +31,7 @@ export class ImportConceptsFileRequestDto {
     default: false,
   })
   @IsOptional()
-  @Transform(comoBooleano)
+  @Transform(asBoolean)
   @IsBoolean()
   dryRun?: boolean;
 
@@ -86,7 +86,7 @@ export class ImportFileIssueDto {
  * `display` y `definition`.
  */
 export class ImportPreviewRowDto {
-  [columna: string]: string | number | undefined;
+  [column: string]: string | number | undefined;
 
   /** Fila del archivo de la que salió. */
   @ApiProperty({ description: 'Fila del archivo, empezando en 1' })
