@@ -11,27 +11,27 @@
  */
 import { CsvParser } from './csv-parser';
 import { NdjsonParser } from './ndjson-parser';
-import type { ParseadorDeArchivo } from './row-contract';
+import type { FileParser } from './row-contract';
 import { XlsxParser } from './xlsx-parser';
 
 export { CsvParser } from './csv-parser';
-export { detectarFormato } from './format-detector';
+export { detectFormat as detectarFormato } from './format-detector';
 export { NdjsonParser } from './ndjson-parser';
 export {
-  PERFILES_DE_IMPORTACION,
-  normalizarEncabezado,
-  resolverColumna,
+  IMPORT_PROFILES as PERFILES_DE_IMPORTACION,
+  normalizeHeader as normalizarEncabezado,
+  resolverColumn as resolverColumna,
 } from './import-profiles';
 export {
-  FormatoNoAdmitidoError,
-  type ColumnaDePerfil,
-  type DetectorDeFormato,
-  type FilaLeida,
-  type FormatoDeArchivo,
-  type ParseadorDeArchivo,
-  type PerfilDeImportacion,
-  type ProblemaDeFila,
-  type ResultadoDeParseo,
+  UnsupportedFormatError as FormatoNoAdmitidoError,
+  type ProfileColumn as ColumnaDePerfil,
+  type DetectorFormat as DetectorDeFormato,
+  type ReadRow as FilaLeida,
+  type FileFormat as FormatoDeArchivo,
+  type FileParser as ParseadorDeArchivo,
+  type ImportProfile as PerfilDeImportacion,
+  type RowProblem as ProblemaDeFila,
+  type ParsingResult as ResultadoDeParseo,
 } from './row-contract';
 export { XlsxParser } from './xlsx-parser';
 
@@ -42,7 +42,7 @@ export { XlsxParser } from './xlsx-parser';
  * eso el formato `xlsx` quedó cubierto sin tocar ni el servicio ni el detector:
  * ésa es toda la razón de que esta lista exista.
  */
-export const PARSEADORES_DE_IMPORTACION: readonly ParseadorDeArchivo[] = [
+export const PARSEADORES_DE_IMPORTACION: readonly FileParser[] = [
   new NdjsonParser(),
   new CsvParser(),
   new XlsxParser(),

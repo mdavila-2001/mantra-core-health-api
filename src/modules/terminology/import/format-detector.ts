@@ -1,10 +1,10 @@
-import { FormatoNoAdmitidoError, type FormatoDeArchivo } from './row-contract';
+import { UnsupportedFormatError, type FileFormat } from './row-contract';
 
 /**
  * Firma con la que empieza todo archivo ZIP, y por lo tanto toda planilla
  * moderna: `PK` más dos bytes de control.
  */
-const FIRMA_ZIP = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+const SIGNATURE_ZIP = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
 
 /**
  * Entrada que sólo existe dentro de una planilla.
@@ -14,7 +14,7 @@ const FIRMA_ZIP = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
  * una planilla buscando esa cadena en los bytes crudos, sin descomprimir nada y
  * sin sumar una dependencia para responder una pregunta de sí o no.
  */
-const ENTRADA_DE_PLANILLA = 'xl/workbook.xml';
+const SPREADSHEET_ENTRY = 'xl/workbook.xml';
 
 /**
  * Marca de orden de bytes que Excel escribe al frente de los CSV que exporta.
@@ -32,7 +32,7 @@ const BOM = '﻿';
  * primeros bytes, y recorrer diez megabytes para confirmarlo sería pagar el
  * costo del archivo entero antes de saber si sirve.
  */
-const BYTES_QUE_SE_MIRAN = 4096;
+const BYTES_INSPECTED = 4096;
 
 /**
  * Decide de qué formato es el archivo, mirando su contenido.
@@ -54,41 +54,41 @@ const BYTES_QUE_SE_MIRAN = 4096;
  *
  * @param buffer - El contenido del archivo subido.
  * @returns El formato reconocido.
- * @throws {FormatoNoAdmitidoError} Si no es ninguno de los tres.
+ * @throws {UnsupportedFormatError} Si no es ninguno de los tres.
  */
-export function detectarFormato(buffer: Buffer): FormatoDeArchivo {
+export function detectFormat(buffer: Buffer): FileFormat {
   if (buffer.byteLength === 0) {
-    throw new FormatoNoAdmitidoError('el archivo llegó vacío');
+    throw new UnsupportedFormatError('el archivo llegó vacío');
   }
 
-  if (buffer.subarray(0, FIRMA_ZIP.byteLength).equals(FIRMA_ZIP)) {
+  if (buffer.subarray(0, SIGNATURE_ZIP.byteLength).equals(SIGNATURE_ZIP)) {
     // `latin1` no falla nunca ante un byte cualquiera, y acá sólo se busca una
     // cadena ASCII: decodificar como UTF-8 un ZIP produciría caracteres de
     // reemplazo justo en los bytes comprimidos y podría partir la búsqueda.
-    if (buffer.toString('latin1').includes(ENTRADA_DE_PLANILLA)) return 'xlsx';
-    throw new FormatoNoAdmitidoError(
+    if (buffer.toString('latin1').includes(SPREADSHEET_ENTRY)) return 'xlsx';
+    throw new UnsupportedFormatError(
       'es un archivo comprimido, pero no una planilla',
     );
   }
 
-  const comienzo = buffer.subarray(0, BYTES_QUE_SE_MIRAN);
-  if (!pareceTexto(comienzo)) {
-    throw new FormatoNoAdmitidoError(
+  const beginning = buffer.subarray(0, BYTES_INSPECTED);
+  if (!looksLikeText(beginning)) {
+    throw new UnsupportedFormatError(
       'no es un archivo de texto ni una planilla',
     );
   }
 
-  const primeraLinea = primeraLineaConContenido(buffer);
-  if (primeraLinea === undefined) {
-    throw new FormatoNoAdmitidoError(
+  const firstLine = firstLineWithContent(buffer);
+  if (firstLine === undefined) {
+    throw new UnsupportedFormatError(
       'el archivo no tiene ninguna línea con contenido',
     );
   }
 
-  if (esObjetoJson(primeraLinea)) return 'ndjson';
-  if (primeraLinea.includes(',') || primeraLinea.includes(';')) return 'csv';
+  if (isObjectJson(firstLine)) return 'ndjson';
+  if (firstLine.includes(',') || firstLine.includes(';')) return 'csv';
 
-  throw new FormatoNoAdmitidoError(
+  throw new UnsupportedFormatError(
     'la primera línea no tiene columnas separadas por coma ni por punto y ' +
       'coma, y tampoco es un objeto JSON',
   );
@@ -104,7 +104,7 @@ export function detectarFormato(buffer: Buffer): FormatoDeArchivo {
  * @param bytes - El principio del archivo.
  * @returns Si parece texto.
  */
-function pareceTexto(bytes: Buffer): boolean {
+function looksLikeText(bytes: Buffer): boolean {
   if (bytes.includes(0x00)) return false;
   return !bytes.toString('utf8').includes('�');
 }
@@ -115,11 +115,11 @@ function pareceTexto(bytes: Buffer): boolean {
  * @param buffer - El contenido del archivo.
  * @returns La línea, o `undefined` si el archivo son puros saltos y espacios.
  */
-function primeraLineaConContenido(buffer: Buffer): string | undefined {
-  const texto = buffer.toString('utf8').replace(BOM, '');
-  for (const linea of texto.split(/\r?\n/)) {
-    const limpia = linea.trim();
-    if (limpia !== '') return limpia;
+function firstLineWithContent(buffer: Buffer): string | undefined {
+  const text = buffer.toString('utf8').replace(BOM, '');
+  for (const linea of text.split(/\r?\n/)) {
+    const clean = linea.trim();
+    if (clean !== '') return clean;
   }
   return undefined;
 }
@@ -133,7 +133,7 @@ function primeraLineaConContenido(buffer: Buffer): string | undefined {
  * @param linea - La primera línea con contenido.
  * @returns Si es un objeto JSON.
  */
-function esObjetoJson(linea: string): boolean {
+function isObjectJson(linea: string): boolean {
   if (!linea.startsWith('{')) return false;
   try {
     const valor: unknown = JSON.parse(linea);
