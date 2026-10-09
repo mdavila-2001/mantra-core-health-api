@@ -39,8 +39,8 @@ const BODY_FONT_SIZE = 10;
 const FOOTER_FONT_SIZE = 8;
 const SECTION_GAP_BEFORE = 14;
 const LINE_GAP = 4;
-const SIN_DATOS = 'Sin datos registrados.';
-const SIN_IDENTIFICAR = 'Sin identificar';
+const WITHOUT_DATA = 'Sin datos registrados.';
+const UNIDENTIFIED = 'Sin identificar';
 
 /** Resultado de renderizar el PDF: los bytes y el nombre sugerido de archivo. */
 export interface EncounterPdfResult {
@@ -49,7 +49,7 @@ export interface EncounterPdfResult {
 }
 
 /** Una sección del papel: un título y sus líneas ya formateadas para imprimir. */
-export interface SeccionDelPapel {
+export interface RoleSection {
   readonly titulo: string;
   readonly lineas: readonly string[];
 }
@@ -60,37 +60,37 @@ export interface SeccionDelPapel {
  * la línea exacta que termina impresa, no una estructura que hay que
  * reinterpretar.
  */
-export interface PapelDelEncuentro {
+export interface EncounterRole {
   readonly titulo: string;
   readonly encabezado: readonly string[];
-  readonly secciones: readonly SeccionDelPapel[];
+  readonly secciones: readonly RoleSection[];
   readonly pie: string;
   readonly contentHash: string;
   readonly encounterId: string;
 }
 
 /** Fecha y hora en formato es-BO, o un guion si no se conoce. */
-function formatearFecha(fecha: Date | null | undefined): string {
-  if (!fecha) return '—';
+function formatDate(date: Date | null | undefined): string {
+  if (!date) return '—';
   return new Intl.DateTimeFormat('es-BO', {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(fecha);
+  }).format(date);
 }
 
 /** Resuelve un `code_concept_id` a «CÓDIGO — display», o un guion si no está. */
-function etiqueta(
+function label(
   conceptsById: ReadonlyMap<string, CatalogConcepts>,
   conceptId: string | undefined,
 ): string {
   if (!conceptId) return '—';
-  const concepto = conceptsById.get(conceptId);
-  if (!concepto) return '—';
-  return `${concepto.code} — ${concepto.display}`;
+  const concept = conceptsById.get(conceptId);
+  if (!concept) return '—';
+  return `${concept.code} — ${concept.display}`;
 }
 
 /** Los datos ya resueltos que `armarPapel` necesita para armar el texto. */
-export interface DatosDelPapel {
+export interface RoleData {
   readonly encounterId: string;
   readonly startAt: Date | null;
   readonly endAt: Date | null;
@@ -128,15 +128,15 @@ export interface DatosDelPapel {
  * Arma el contenido del papel — pura, sin `pdfkit` — para que el spec pueda
  * assertar sobre texto exacto sin depender de si `pdfkit` comprime el stream.
  */
-export function armarPapel(datos: DatosDelPapel): PapelDelEncuentro {
-  const encabezado = [
-    `Paciente: ${datos.patientName}`,
-    `Profesional: ${datos.practitionerName}`,
-    `Inicio: ${formatearFecha(datos.startAt)}`,
-    `Cierre: ${formatearFecha(datos.endAt)}`,
+export function buildRole(data: RoleData): EncounterRole {
+  const header = [
+    `Paciente: ${data.patientName}`,
+    `Profesional: ${data.practitionerName}`,
+    `Inicio: ${formatDate(data.startAt)}`,
+    `Cierre: ${formatDate(data.endAt)}`,
   ];
 
-  const lineasDeNotas = datos.notas.flatMap(({ version }) => {
+  const notesLines = data.notas.flatMap(({ version }) => {
     if (!version) return [];
     const lineas: string[] = [];
     if (version.chiefComplaintText)
@@ -151,14 +151,14 @@ export function armarPapel(datos: DatosDelPapel): PapelDelEncuentro {
     return lineas;
   });
 
-  const lineasDeDiagnosticos = datos.conditions.map(
+  const diagnosesLines = data.conditions.map(
     (condition) =>
-      `CIE-10 ${etiqueta(datos.conceptsById, condition.codeConceptId)}`,
+      `CIE-10 ${label(data.conceptsById, condition.codeConceptId)}`,
   );
 
-  const lineasDePrescripciones = datos.medicationRequests.map((request) =>
+  const prescriptionsLines = data.medicationRequests.map((request) =>
     [
-      etiqueta(datos.conceptsById, request.medicationConceptId),
+      label(data.conceptsById, request.medicationConceptId),
       request.doseText,
       request.frequencyText,
     ]
@@ -166,62 +166,62 @@ export function armarPapel(datos: DatosDelPapel): PapelDelEncuentro {
       .join(' · '),
   );
 
-  const lineasDePlan = datos.carePlans.flatMap((plan) => {
+  const linesPlan = data.carePlans.flatMap((plan) => {
     const lineas: string[] = [];
     if (plan.goalText) lineas.push(`Meta: ${plan.goalText}`);
     for (const activity of plan.activities) {
       lineas.push(
-        `- ${etiqueta(datos.conceptsById, activity.activityConceptId)}`,
+        `- ${label(data.conceptsById, activity.activityConceptId)}`,
       );
     }
     return lineas;
   });
 
-  const lineasDeDocumentos = datos.documents.flatMap((documento) =>
+  const documentsLines = data.documents.flatMap((documento) =>
     documento.files.map(
       (file) =>
-        `- ${datos.fileNamesById.get(file.fileId) ?? 'archivo adjunto'}`,
+        `- ${data.fileNamesById.get(file.fileId) ?? 'archivo adjunto'}`,
     ),
   );
 
-  const secciones: SeccionDelPapel[] = [
+  const sections: RoleSection[] = [
     {
       titulo: 'Notas de evolución',
-      lineas: lineasDeNotas.length > 0 ? lineasDeNotas : [SIN_DATOS],
+      lineas: notesLines.length > 0 ? notesLines : [WITHOUT_DATA],
     },
     {
       titulo: 'Diagnósticos',
       lineas:
-        lineasDeDiagnosticos.length > 0 ? lineasDeDiagnosticos : [SIN_DATOS],
+        diagnosesLines.length > 0 ? diagnosesLines : [WITHOUT_DATA],
     },
     {
       titulo: 'Prescripciones',
       lineas:
-        lineasDePrescripciones.length > 0
-          ? lineasDePrescripciones
-          : [SIN_DATOS],
+        prescriptionsLines.length > 0
+          ? prescriptionsLines
+          : [WITHOUT_DATA],
     },
     {
       titulo: 'Plan de cuidados',
-      lineas: lineasDePlan.length > 0 ? lineasDePlan : [SIN_DATOS],
+      lineas: linesPlan.length > 0 ? linesPlan : [WITHOUT_DATA],
     },
     {
       titulo: 'Documentos',
-      lineas: lineasDeDocumentos.length > 0 ? lineasDeDocumentos : [SIN_DATOS],
+      lineas: documentsLines.length > 0 ? documentsLines : [WITHOUT_DATA],
     },
   ];
 
-  const pie = `Sello digital: SHA-256 ${datos.contentHash} · sellado el ${formatearFecha(
-    datos.sealedAt,
-  )} · cerrado por ${datos.practitionerName}`;
+  const pie = `Sello digital: SHA-256 ${data.contentHash} · sellado el ${formatDate(
+    data.sealedAt,
+  )} · cerrado por ${data.practitionerName}`;
 
   return {
     titulo: 'Encuentro clínico oficial',
-    encabezado,
-    secciones,
+    encabezado: header,
+    secciones: sections,
     pie,
-    contentHash: datos.contentHash,
-    encounterId: datos.encounterId,
+    contentHash: data.contentHash,
+    encounterId: data.encounterId,
   };
 }
 
@@ -229,15 +229,15 @@ export function armarPapel(datos: DatosDelPapel): PapelDelEncuentro {
  * Dibuja el papel con `pdfkit`. Lo único de este archivo que toca la
  * librería: todo el contenido ya llega resuelto a texto en `papel`.
  */
-export function dibujar(papel: PapelDelEncuentro): Promise<Buffer> {
+export function draw(role: EncounterRole): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
       margin: PAGE_MARGIN,
       info: {
-        Title: `Encuentro clínico oficial ${papel.encounterId}`,
+        Title: `Encuentro clínico oficial ${role.encounterId}`,
         Subject: 'Documento oficial de encuentro clínico cerrado',
-        Keywords: `sello:${papel.contentHash}`,
+        Keywords: `sello:${role.contentHash}`,
       },
     });
 
@@ -246,22 +246,22 @@ export function dibujar(papel: PapelDelEncuentro): Promise<Buffer> {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    doc.fontSize(TITLE_FONT_SIZE).text(papel.titulo);
+    doc.fontSize(TITLE_FONT_SIZE).text(role.titulo);
     doc.moveDown(0.5);
     doc.fontSize(BODY_FONT_SIZE);
-    for (const linea of papel.encabezado) doc.text(linea);
+    for (const linea of role.encabezado) doc.text(linea);
 
-    for (const seccion of papel.secciones) {
+    for (const section of role.secciones) {
       doc.moveDown(SECTION_GAP_BEFORE / 10);
-      doc.fontSize(SECTION_FONT_SIZE).text(seccion.titulo);
+      doc.fontSize(SECTION_FONT_SIZE).text(section.titulo);
       doc.moveDown(0.3);
-      for (const linea of seccion.lineas) {
+      for (const linea of section.lineas) {
         doc.fontSize(BODY_FONT_SIZE).text(linea, { lineGap: LINE_GAP });
       }
     }
 
     doc.moveDown(SECTION_GAP_BEFORE / 10);
-    doc.fontSize(FOOTER_FONT_SIZE).text(papel.pie);
+    doc.fontSize(FOOTER_FONT_SIZE).text(role.pie);
 
     doc.end();
   });
@@ -336,7 +336,7 @@ export class EncounterPdfService {
       });
     }
 
-    return this.componer(em, encounter, encounterId, {
+    return this.compose(em, encounter, encounterId, {
       versionIdOf: (header) => header.currentVersionId,
       documentFilter: () => true,
     });
@@ -390,7 +390,7 @@ export class EncounterPdfService {
       });
     }
 
-    return this.componer(em, encounter, encounterId, {
+    return this.compose(em, encounter, encounterId, {
       versionIdOf: (header) => header.currentReleasedVersionId,
       documentFilter: (document) =>
         document.patientVisibilityConceptId ===
@@ -406,7 +406,7 @@ export class EncounterPdfService {
    * de `opts`; nada de un flag booleano que ramifique el comportamiento
    * adentro de este método (BR-15 §5).
    */
-  private async componer(
+  private async compose(
     em: EntityManager,
     encounter: Encounters,
     encounterId: string,
@@ -446,7 +446,7 @@ export class EncounterPdfService {
     );
     const practitionerName = encounter.primaryPractitionerId
       ? await this.resolvePractitionerName(em, encounter.primaryPractitionerId)
-      : SIN_IDENTIFICAR;
+      : UNIDENTIFIED;
 
     const fileIds = documents.flatMap((document) =>
       document.files.map((file) => file.fileId),
@@ -460,7 +460,7 @@ export class EncounterPdfService {
         .map((file) => [file.id, file.originalName ?? 'archivo adjunto']),
     );
 
-    const papel = armarPapel({
+    const role = buildRole({
       encounterId,
       startAt: encounter.startAt ?? null,
       endAt: encounter.endAt ?? null,
@@ -482,7 +482,7 @@ export class EncounterPdfService {
       sealedAt: encounter.sealedAt ?? null,
     });
 
-    const buffer = await dibujar(papel);
+    const buffer = await draw(role);
 
     return {
       buffer,
@@ -505,12 +505,12 @@ export class EncounterPdfService {
       em,
       patientProfileId,
     );
-    if (!patientProfile) return SIN_IDENTIFICAR;
+    if (!patientProfile) return UNIDENTIFIED;
     const person = await this.personsRepo.findById(
       em,
       patientProfile.profileId,
     );
-    return this.displayNameOf(person) ?? SIN_IDENTIFICAR;
+    return this.displayNameOf(person) ?? UNIDENTIFIED;
   }
 
   /** Misma cadena que {@link resolvePatientName}, para el profesional. */
@@ -522,12 +522,12 @@ export class EncounterPdfService {
       em,
       practitionerProfileId,
     );
-    if (!practitionerProfile) return SIN_IDENTIFICAR;
+    if (!practitionerProfile) return UNIDENTIFIED;
     const person = await this.personsRepo.findById(
       em,
       practitionerProfile.profileId,
     );
-    return this.displayNameOf(person) ?? SIN_IDENTIFICAR;
+    return this.displayNameOf(person) ?? UNIDENTIFIED;
   }
 
   private displayNameOf(person: Persons | null): string | undefined {

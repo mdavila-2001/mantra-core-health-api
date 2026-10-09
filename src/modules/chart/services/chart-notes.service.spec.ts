@@ -612,7 +612,7 @@ describe('ChartNotesService', () => {
 });
 
 describe('ChartNotesService · MCH-007, mutaciones por id', () => {
-  const cabecera = () => ({
+  const header = () => ({
     id: 'n1',
     patientProfileId: 'paciente-ajeno',
     lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
@@ -625,9 +625,9 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     releaseEligibilityConceptId: CHART.ELIGIBILITY_ELIGIBLE,
   });
 
-  function sinPermiso() {
+  function withoutPermission() {
     const d = build();
-    d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+    d.notesRepo.findHeaderById.mockResolvedValue(header());
     d.notesRepo.findVersionById.mockResolvedValue(version());
     d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
@@ -662,9 +662,9 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     ],
   ])(
     '%s pregunta por el paciente de la nota y, sin permiso, no escribe',
-    async (_nombre, operar) => {
-      const d = sinPermiso();
-      await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
+    async (_nombre, operate) => {
+      const d = withoutPermission();
+      await expect(operate(d)).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'paciente-ajeno',
         actor,
