@@ -196,7 +196,7 @@ export class ChartNotesService {
       'Signing note version',
     );
     return this.em.transactional(async (tx) => {
-      this.assertFirmaConPerfilPropio(actor, dto.signerProfileId);
+      this.assertSignatureWithOwnProfile(actor, dto.signerProfileId);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -252,7 +252,7 @@ export class ChartNotesService {
       'Cosigning note version',
     );
     return this.em.transactional(async (tx) => {
-      this.assertFirmaConPerfilPropio(actor, dto.signerProfileId);
+      this.assertSignatureWithOwnProfile(actor, dto.signerProfileId);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
@@ -389,7 +389,7 @@ export class ChartNotesService {
         });
       // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
       // la cabecera de su nota.
-      await this.assertPuedeEscribirNota(tx, version.clinicalNoteId, actor);
+      await this.assertCanWriteNote(tx, version.clinicalNoteId, actor);
       const signed =
         version.statusConceptId === CHART.VERSION_SIGNED ||
         version.statusConceptId === CHART.VERSION_COSIGNED;
@@ -513,7 +513,7 @@ export class ChartNotesService {
         });
       // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
       // la cabecera de su nota.
-      await this.assertPuedeEscribirNota(tx, version.clinicalNoteId, actor);
+      await this.assertCanWriteNote(tx, version.clinicalNoteId, actor);
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
           'La versión ya está firmada; los hallazgos quedan sellados',
@@ -550,7 +550,7 @@ export class ChartNotesService {
    * @throws ForbiddenException si la sesión no tiene perfil profesional, o si
    *   el perfil declarado no es el suyo.
    */
-  private assertFirmaConPerfilPropio(
+  private assertSignatureWithOwnProfile(
     actor: AuthenticatedUser,
     signerProfileId: string,
   ): void {
@@ -570,7 +570,7 @@ export class ChartNotesService {
   /**
    * CL-20 (BR-13): el autor de una nota, de una versión o de una enmienda es
    * el profesional de la sesión, nunca el que diga el cuerpo. La misma regla
-   * que {@link assertFirmaConPerfilPropio}, aplicada a escribir en vez de a
+   * que {@link assertSignatureWithOwnProfile}, aplicada a escribir en vez de a
    * firmar: el DTO conserva `authorProfileId` por compatibilidad —si viene, se
    * confirma; si difiere, 403— y si no viene, el autor es el perfil de la
    * sesión. `SUPERADMIN` pasa con lo que declare.
@@ -584,13 +584,13 @@ export class ChartNotesService {
     actor: AuthenticatedUser,
   ): string {
     if (actor.roles.includes(SUPERADMIN_ROLE)) {
-      const elegido = declared ?? actor.practitionerProfileId;
-      if (!elegido) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
         throw new ForbiddenException(
           'Una nota clínica necesita un profesional autor.',
         );
       }
-      return elegido;
+      return chosen;
     }
     if (!actor.practitionerProfileId) {
       throw new ForbiddenException(
@@ -609,7 +609,7 @@ export class ChartNotesService {
    * MCH-007: exige poder escribir en la historia del paciente de la nota. Lo
    * usan las mutaciones que llegan sólo con el id de una versión.
    */
-  private async assertPuedeEscribirNota(
+  private async assertCanWriteNote(
     tx: EntityManager,
     noteId: string,
     actor: AuthenticatedUser,

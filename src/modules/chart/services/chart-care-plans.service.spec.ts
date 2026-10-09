@@ -168,7 +168,7 @@ describe('ChartCarePlansService', () => {
 
     // CL-29 (BR-13) — el autor del plan sale de la sesión.
     describe('autor por sesión (CL-29)', () => {
-      const creado = () => ({
+      const created = () => ({
         id: 'cp1',
         statusConceptId: CHART.CAREPLAN_ACTIVE,
         createdAt: new Date(),
@@ -176,7 +176,7 @@ describe('ChartCarePlansService', () => {
 
       it('sin autor en el cuerpo, queda el perfil de la sesión', async () => {
         const d = build();
-        d.carePlansRepo.createPlan.mockReturnValue(creado());
+        d.carePlansRepo.createPlan.mockReturnValue(created());
         await d.service.createCarePlan({ patientProfileId: 'p1' }, actor);
         expect(d.carePlansRepo.createPlan).toHaveBeenCalledWith(
           d.tx,
