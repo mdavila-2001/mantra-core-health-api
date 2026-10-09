@@ -18,6 +18,36 @@
 Geolocalización y rastreo móvil: sujetos rastreados, sesiones de tracking, pings
 de ubicación de alta frecuencia, geofences con sus eventos de cruce, y viajes.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/geo -name '*.controller.ts' | wc -l
+  find src/modules/geo -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/geo -name '*.entity.ts' | wc -l
+  find src/modules/geo -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **4 controllers, 10 rutas HTTP, 6 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 6 de 6 archivos `*.entity.ts`): `geofence_events`, `geofences`, `location_pings`, `tracked_subjects`, `tracking_sessions`, `trips`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /geo/geofences` | SECURITY_ADMIN | `geo-geofences` |
+| `POST /geo/geofence-events` | SECURITY_ADMIN | `geo-geofences` |
+| `POST /geo/tracked-subjects` | SECURITY_ADMIN | `geo-tracked-subjects` |
+| `POST /geo/tracked-subjects/:id/pings` | SECURITY_ADMIN | `geo-tracked-subjects` |
+| `GET /geo/tracked-subjects/:id/last-position` | SECURITY_ADMIN | `geo-tracked-subjects` |
+| `POST /geo/tracked-subjects/:id/revoke-consent` | SECURITY_ADMIN | `geo-tracked-subjects` |
+| `POST /geo/tracking-sessions` | SECURITY_ADMIN | `geo-tracking-sessions` |
+| `POST /geo/tracking-sessions/:id/close` | SECURITY_ADMIN | `geo-tracking-sessions` |
+| `POST /geo/trips` | SECURITY_ADMIN | `geo-trips` |
+| `POST /geo/trips/:id/close` | SECURITY_ADMIN | `geo-trips` |
+
 ## Endpoints (UC-13-01 .. UC-13-10)
 
 | UC | Método y ruta | Resumen | Rol |

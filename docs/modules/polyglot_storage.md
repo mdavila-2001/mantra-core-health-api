@@ -20,6 +20,41 @@ versionados con huella de esquema, colecciones físicas, colocaciones que sólo 
 cumplen residencia y clasificación a la vez, políticas de consistencia, acceso, cifrado, replicación
 y retención, salud con failover, consolidación de costes e integridad de las proyecciones.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/polyglot_storage -name '*.controller.ts' | wc -l
+  find src/modules/polyglot_storage -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/polyglot_storage -name '*.entity.ts' | wc -l
+  find src/modules/polyglot_storage -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 15 rutas HTTP, 20 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 20 de 20 archivos `*.entity.ts`): `collection_definitions`, `collection_schema_versions`, `consistency_policies`, `data_access_policies`, `data_classifications`, `dataset_definitions`, `dataset_placements`, `dataset_versions`, `encryption_profiles`, `key_rotation_policies`, `replication_policies`, `residency_policies`, `retention_policies`, `storage_backend_regions`, `storage_backends`, `storage_capabilities`, `storage_cost_snapshots`, `storage_integrity_policies`, `store_health_checks`, `tenant_storage_bindings`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /finops/storage-cost-snapshots` | SYSTEM, FINOPS_ANALYST, PLATFORM_ADMIN | `storage-finops` |
+| `POST /governance/storage-backends` | PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets/:id/versions` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/collections` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/placements/approve` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/consistency-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets/:id/data-access-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/tenants/:tenantId/storage-bindings` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/encryption-profiles` | SECURITY_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/placements/:id/failover` | PLATFORM_ADMIN | `storage-governance` |
+| `POST /ops/store-health-checks` | SYSTEM, PLATFORM_ADMIN | `storage-operations` |
+| `POST /ops/integrity-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-operations` |
+| `POST /ops/integrity/:datasetId/verify` | SYSTEM, PLATFORM_ADMIN | `storage-operations` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |

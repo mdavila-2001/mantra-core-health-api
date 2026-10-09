@@ -19,6 +19,43 @@ Agentes con versiones publicables, herramientas con permiso, guardrails que deti
 pasar, workflows con pasos enlazados, ejecuciones con traza paso a paso, aprobaciones humanas y
 escritura de registros con deduplicación.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/automation -name '*.controller.ts' | wc -l
+  find src/modules/automation -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/automation -name '*.entity.ts' | wc -l
+  find src/modules/automation -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 17 rutas HTTP, 16 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `agent_guardrails`, `agent_memory`, `agent_run_steps`, `agent_runs`, `agent_tool_bindings`, `agent_tools`, `agent_versions`, `agents`, `automation_approvals`, `automation_triggers`, `guardrail_policies`, `knowledge_sources`, `record_automations`, `workflow_runs`, `workflow_steps`, `workflows`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /automation/agents` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/versions/publish` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/tools` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/versions/:versionId/tool-bindings` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/guardrails` | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/guardrails` | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/memory` | SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/workflows` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/triggers` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/triggers/calendar/tick` | SYSTEM | `automation-orchestration` |
+| `POST /automation/workflows/:id/runs` | SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/runs/:workflowRunId/agent-runs` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/steps` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/approvals` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/approvals/:id/decide` | CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/record-automations/:recordAutomationId/execute` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/runs/:workflowRunId/finalize` | SYSTEM, PLATFORM_ADMIN | `automation-orchestration` |
+
 ## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |

@@ -18,6 +18,45 @@
 Entornos gobernados, suites con casos y aserciones, corridas con evidencia inmutable, defectos
 deduplicados por firma de fallo y enlace de evidencia a un release.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/qa_lab -name '*.controller.ts' | wc -l
+  find src/modules/qa_lab -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/qa_lab -name '*.entity.ts' | wc -l
+  find src/modules/qa_lab -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 19 rutas HTTP, 13 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `assertion_results`, `request_payloads`, `response_payloads`, `run_artifacts`, `test_assertions`, `test_case_results`, `test_cases`, `test_defects`, `test_environments`, `test_fixtures`, `test_runs`, `test_schedules`, `test_suites`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /internal/qa/schedules/run-due` | SYSTEM, QA_ADMIN | `qa-lab-internal` |
+| `GET /admin/qa/environments` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `GET /admin/qa/suites` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `GET /admin/qa/suites/:suiteId` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `GET /admin/qa/runs` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `GET /admin/qa/runs/:runId` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `GET /admin/qa/defects` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
+| `POST /qa/environments` | QA_ADMIN | `qa-lab` |
+| `POST /qa/suites/:suiteId/cases` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
+| `POST /qa/suites/:suiteId/publish` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
+| `POST /qa/runs` | QA_ADMIN, QA_ENGINEER, SYSTEM | `qa-lab` |
+| `POST /qa/runs/:runId/cases/:caseId/execute` | SYSTEM, QA_ENGINEER | `qa-lab` |
+| `POST /qa/case-results/:resultId/evaluate` | SYSTEM, QA_ENGINEER | `qa-lab` |
+| `POST /qa/runs/:runId/finalize` | SYSTEM, QA_ENGINEER | `qa-lab` |
+| `POST /qa/runs/:runId/artifacts` | SYSTEM, QA_ENGINEER | `qa-lab` |
+| `POST /qa/defects` | SYSTEM, QA_ENGINEER, QA_ADMIN | `qa-lab` |
+| `PATCH /qa/defects/:defectId` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
+| `POST /qa/schedules` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
+| `POST /qa/runs/:runId/link-release` | RELEASE_MANAGER, QA_ADMIN | `qa-lab` |
+
 ## Casos de uso cubiertos (12)
 
 | UC | Endpoint | Descripción |

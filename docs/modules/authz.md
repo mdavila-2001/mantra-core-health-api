@@ -20,6 +20,53 @@ herencia, asignaciones y excepciones por usuario, accesos clínicos con propósi
 de uso, break-the-glass, enmascaramiento de campos, grants polimórficos y el PDP
 (invalidación de cache + evaluación de decisiones efectivas).
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/authz -name '*.controller.ts' | wc -l
+  find src/modules/authz -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/authz -name '*.entity.ts' | wc -l
+  find src/modules/authz -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **8 controllers, 27 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`AuditModule`, `MessagingModule`).
+
+Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `access_policies`, `break_glass_sessions`, `care_relationships`, `clinical_access_grants`, `field_permissions`, `ip_access_rules`, `patient_legal_representations`, `permission_categories`, `permissions`, `resource_scope_grants`, `role_permissions`, `roles`, `service_principals`, `user_permission_grants`, `user_role_assignments`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /authz/care-relationships` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
+| `POST /authz/care-relationships/:id/revoke` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
+| `GET /authz/care-relationships` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
+| `GET /authz/care-relationships/requests/mine` | PATIENT | `authz-care-relationships` |
+| `POST /authz/care-relationships/request` | CLINICIAN, PRACTITIONER | `authz-care-relationships` |
+| `POST /authz/care-relationships/:id/respond` | PATIENT | `authz-care-relationships` |
+| `POST /authz/legal-representations` | SECURITY_ADMIN | `authz-care-relationships` |
+| `POST /authz/legal-representations/:id/revoke` | SECURITY_ADMIN | `authz-care-relationships` |
+| `GET /authz/legal-representations` | SECURITY_ADMIN | `authz-care-relationships` |
+| `POST /authz/permission-categories` | SECURITY_ADMIN | `authz-catalog` |
+| `POST /authz/permissions` | SECURITY_ADMIN | `authz-catalog` |
+| `POST /authz/patients/:patientProfileId/clinical-access-grants` | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical` |
+| `POST /authz/patients/:patientProfileId/break-the-glass` | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical` |
+| `DELETE /authz/clinical-access-grants/:grantId` | SECURITY_ADMIN | `authz-clinical` |
+| `POST /authz/users/:userId/role-assignments` | SECURITY_ADMIN | `authz-grants` |
+| `POST /authz/users/:userId/permission-grants` | SECURITY_ADMIN | `authz-grants` |
+| `POST /authz/resource-scope-grants` | SECURITY_ADMIN | `authz-grants` |
+| `GET /authz/me/access` | PATIENT | `authz-me` |
+| `POST /authz/me/care-relationships/:id/revoke` | PATIENT | `authz-me` |
+| `POST /authz/me/clinical-access-grants/:grantId/revoke` | PATIENT | `authz-me` |
+| `POST /authz/pdp/cache/invalidate` | SECURITY_ADMIN | `authz-pdp` |
+| `POST /authz/decisions/evaluate` | SECURITY_ADMIN | `authz-pdp` |
+| `POST /authz/tenants/:tenantId/access-policies` | SECURITY_ADMIN | `authz-policies` |
+| `GET /authz/roles` | SECURITY_ADMIN | `authz-roles` |
+| `POST /authz/roles` | SECURITY_ADMIN | `authz-roles` |
+| `PUT /authz/roles/:roleId/permissions` | SECURITY_ADMIN | `authz-roles` |
+| `PUT /authz/roles/:roleId/field-permissions` | SECURITY_ADMIN | `authz-roles` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Rol | Descripción |

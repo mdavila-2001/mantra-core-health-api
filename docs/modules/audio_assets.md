@@ -17,6 +17,36 @@
 
 Módulo de assets TTS **cache-first** para onboarding y otras experiencias acotadas. El dominio no conoce ElevenLabs, S3, HTTP ni la cola concreta. El proveedor se elige por entorno y los bytes finales siempre quedan en almacenamiento propio.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/audio_assets -name '*.controller.ts' | wc -l
+  find src/modules/audio_assets -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/audio_assets -name '*.entity.ts' | wc -l
+  find src/modules/audio_assets -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 10 rutas HTTP, 4 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`, `MessagingModule`).
+
+Entidades (`tableName`, 4 de 4 archivos `*.entity.ts`): `audio_assets`, `audio_generation_events`, `audio_generation_usage`, `audio_templates`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /internal/audio-assets/status` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/pregenerate` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/verify` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/garbage-collect` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/:assetId/deprecate` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/:assetId/prepare-generation` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/:assetId/generated` | SYSTEM | `audio-assets-internal` |
+| `POST /internal/audio-assets/:assetId/generation-failed` | SYSTEM | `audio-assets-internal` |
+| `POST /audio-assets/resolve` | sesión | `audio-assets` |
+| `GET /audio-assets/:assetId/content` | sesión | `audio-assets` |
+
 ## Invariantes
 
 - La identidad de un asset es SHA-256 de un payload canónico que incluye plantilla, versión, texto normalizado, idioma, proveedor/modelo, voice profile/version, encoding y **tenant propietario**.

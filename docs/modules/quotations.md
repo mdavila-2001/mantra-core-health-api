@@ -23,6 +23,27 @@ conserva el suyo.
 No tiene entidades propias: persiste en `billing` (`Quotations` y sus cuotas),
 a través de los repositorios de este módulo.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/quotations -name '*.controller.ts' | wc -l
+  find src/modules/quotations -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/quotations -name '*.entity.ts' | wc -l
+  find src/modules/quotations -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 3 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`PracticeModule`).
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /quotations` | PRACTITIONER, CLINICIAN | `quotations` |
+| `GET /quotations` | sesión | `quotations` |
+| `GET /quotations/:id` | sesión | `quotations` |
+
 ## Endpoints
 
 | Método | Ruta | Rol | Qué hace |

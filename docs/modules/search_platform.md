@@ -21,6 +21,27 @@ directorio de profesionales/organizaciones, catálogo de servicios y publicacion
 por tenant se aplica **a nivel de consulta**: no hay forma de que un tenant vea documentos de otro
 aunque el índice físico sea común.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/search_platform -name '*.controller.ts' | wc -l
+  find src/modules/search_platform -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/search_platform -name '*.entity.ts' | wc -l
+  find src/modules/search_platform -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 3 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /search/:index/documents` | PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM | `search-platform` |
+| `POST /search/:index/_search` | PLATFORM_ADMIN, SEARCH_ADMIN, SEARCH_READER, SYSTEM | `search-platform` |
+| `DELETE /search/:index/documents/:id` | PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM | `search-platform` |
+
 ## Endpoints
 
 | Método | Ruta | Descripción |

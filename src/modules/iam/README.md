@@ -15,6 +15,8 @@ La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@
 
 El módulo tiene **3 controllers, 35 rutas HTTP, 14 entidades y 15 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
 Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, `DirectoryModule`, `AuthzModule`, `InsuranceModule`, `TerminologyModule`, `PracticeModule`.
 
 | Método y ruta | Acceso | Controller |
