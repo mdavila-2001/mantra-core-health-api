@@ -39,12 +39,9 @@ describe('SchedulingModule · grafo de inyección', () => {
   ) as never[];
 
   it('provee explícitamente cada puerto (el mocker no puede taparlo)', () => {
-    const provided = providers
-      .filter(
-        (p): p is { provide: unknown } =>
-          typeof p === 'object' && 'provide' in p,
-      )
-      .map((p) => p.provide);
+    const provided = (providers as { provide?: unknown }[]).map(
+      (provider) => provider.provide,
+    );
     for (const token of [
       AGENDA_NOTICE_PORT,
       BOOKING_HISTORY_PORT,
