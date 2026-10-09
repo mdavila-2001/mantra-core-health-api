@@ -169,6 +169,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
     return {
       service,
+      em,
       effectiveRoles,
       specialtiesRepo,
       specialtyCatalog,
@@ -1276,6 +1277,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       );
 
       expect(result.photoFileId).toBe('file-foto-123');
+      expect(result.profilePhotoStored).toBe(true);
     });
 
     it('omite la subida y el identificador de foto cuando no se envía foto', async () => {
@@ -1297,9 +1299,29 @@ describe('IamPractitionerSelfRegistrationService', () => {
         }),
       );
       expect(result.photoFileId).toBeUndefined();
+      expect(result).not.toHaveProperty('profilePhotoStored');
     });
 
-    it('si el servicio de subida falla, el registro concluye sin bloquear', async () => {
+    it('si la foto no es una imagen legible responde 422 y no escribe nada', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          profilePhotoBase64:
+            'data:image/jpeg;base64,' + Buffer.from('no soy una foto').toString('base64'),
+        }),
+      ).rejects.toMatchObject({
+        status: 422,
+        response: expect.objectContaining({
+          details: expect.objectContaining({ field: 'profilePhotoBase64' }),
+        }),
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.fileUploadService.upload).not.toHaveBeenCalled();
+    });
+
+    it('si el servicio de subida falla, el registro concluye y lo dice en la respuesta', async () => {
       const d = build();
       d.fileUploadService.upload.mockRejectedValue(new Error('storage full'));
 
@@ -1310,6 +1332,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       expect(result.userId).toBe('user-1');
       expect(result.photoFileId).toBeUndefined();
+      expect(result.profilePhotoStored).toBe(false);
       expect(d.personsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({

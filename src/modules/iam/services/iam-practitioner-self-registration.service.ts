@@ -93,6 +93,13 @@ const TIPOS_DE_CREDENCIAL: readonly string[] = [
   PROF.CREDENTIAL_TYPE_SPECIALTY,
 ];
 
+/** Si el base64 decodifica a bytes que son, por su firma, una imagen. */
+function isReadableImage(base64: string): boolean {
+  const parsed = parseBase64Image(base64);
+  if (!parsed || parsed.buffer.length === 0) return false;
+  return sniffMimeType(parsed.buffer)?.startsWith('image/') ?? false;
+}
+
 /** Texto recortado, o `undefined` si viene vacío: una cadena en blanco no es un dato. */
 function textoOpcional(valor: string | undefined): string | undefined {
   const limpio = valor?.trim();
@@ -426,6 +433,16 @@ export class IamPractitionerSelfRegistrationService {
     ) {
       throw new PreconditionFailedException(
         'Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos',
+      );
+    }
+
+    // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
+    // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
+    // el profesional había cargado.
+    if (dto.profilePhotoBase64 && !isReadableImage(dto.profilePhotoBase64)) {
+      throw new PreconditionFailedException(
+        'La foto de perfil no es una imagen válida',
+        { field: 'profilePhotoBase64' },
       );
     }
 
@@ -992,6 +1009,11 @@ export class IamPractitionerSelfRegistrationService {
       verificationStatus: 'PENDING',
       emailVerificationSent,
       ...(created.photoFileId ? { photoFileId: created.photoFileId } : {}),
+      // Si mandó foto, la respuesta dice si quedó guardada: la subida al
+      // almacenamiento puede fallar sin tumbar el alta, pero no en silencio.
+      ...(dto.profilePhotoBase64
+        ? { profilePhotoStored: created.photoFileId !== undefined }
+        : {}),
       ...(created.clinicalRoles.length > 0
         ? { clinicalRoles: created.clinicalRoles }
         : {}),
