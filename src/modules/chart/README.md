@@ -83,7 +83,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   el documento no existe como si el archivo no cuelga de él, sin distinguir
   cuál de las dos cosas falló.
 - **Firma propia (`sign`/`cosign` de una versión de nota).** El
-  `signerProfileId` del cuerpo tiene que ser el perfil profesional de quien
+  `signerProfileId` es opcional: si falta, el firmante es el perfil profesional de la sesión; si viene, tiene que ser el perfil profesional de quien
   firma (`practitionerProfileId` de la sesión); si no coincide, 403. Sin
   perfil profesional en la sesión, también 403. Un rol `SUPERADMIN` tiene
   paso franco, igual que en el resto de barreras por rol del sistema.
