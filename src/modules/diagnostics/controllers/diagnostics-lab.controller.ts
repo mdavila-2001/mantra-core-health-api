@@ -15,6 +15,7 @@ import {
   CurrentUser,
   requireTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import { LabStaffGuard } from '../guards';
 import { DiagnosticsLabService } from '../services';
@@ -59,6 +60,7 @@ export class DiagnosticsLabController {
    * pendiente.
    */
   @Get('work-orders')
+  @AccessLogged({ resourceType: 'LAB_WORK_ORDERS' })
   @ApiOperation({
     summary: 'Listar las órdenes de trabajo del laboratorio',
     description: 'Acotado siempre al tenant del contexto.',

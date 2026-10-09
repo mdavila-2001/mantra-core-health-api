@@ -21,7 +21,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { InsurancePortabilityService } from '../services/insurance-portability.service';
 import {
   PortabilityExportResultDto,
@@ -73,6 +77,11 @@ export class InsurancePortabilityController {
 
   /** El certificado oficial en PDF, con su código QR de verificación. */
   @Get('certificates/:certificateId/pdf')
+  @AccessLogged({
+    resourceType: 'PORTABILITY_CERTIFICATE',
+    resourceId: 'param:certificateId',
+    purpose: 'PAYMENT',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el certificado de portabilidad en PDF',
@@ -106,6 +115,11 @@ export class InsurancePortabilityController {
 
   /** El certificado en JSON interoperable, tal como se selló. */
   @Get('certificates/:certificateId/json')
+  @AccessLogged({
+    resourceType: 'PORTABILITY_CERTIFICATE',
+    resourceId: 'param:certificateId',
+    purpose: 'PAYMENT',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el certificado de portabilidad en JSON interoperable',

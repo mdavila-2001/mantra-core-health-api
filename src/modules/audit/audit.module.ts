@@ -58,6 +58,14 @@ import {
   ],
   // Exportados para la auditoría TRANSVERSAL (CAN-AUDIT-001): otros dominios
   // sellan sus mutaciones sensibles en la misma transacción vía AuditTrailService.
-  exports: [AuditTrailService, AuditLogRepository, HistoryRepository],
+  // `DataAccessLogRepository` se exporta para que una lectura de PHI no tenga que
+  // proveerlo suelto (informe C §1.3); lo usa también `AuditTrailInterceptor`,
+  // que `AppModule` registra como interceptor global.
+  exports: [
+    AuditTrailService,
+    AuditLogRepository,
+    DataAccessLogRepository,
+    HistoryRepository,
+  ],
 })
 export class AuditModule {}

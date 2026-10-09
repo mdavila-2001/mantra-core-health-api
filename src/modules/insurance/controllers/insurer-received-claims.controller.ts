@@ -18,7 +18,11 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { InsurerReceivedClaimsService } from '../services';
 import {
   ReceivedClaimDecisionDto,
@@ -60,6 +64,7 @@ export class InsurerReceivedClaimsController {
    * @returns Hasta 500, de la más reciente a la más vieja, con aviso de recorte.
    */
   @Get()
+  @AccessLogged({ resourceType: 'INSURANCE_CLAIMS', purpose: 'PAYMENT' })
   @ApiOperation({
     summary: 'Solicitudes de seguro recibidas por la aseguradora activa',
     description:

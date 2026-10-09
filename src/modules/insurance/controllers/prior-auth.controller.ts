@@ -15,7 +15,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { PriorAuthReadService, PriorAuthService } from '../services';
 import {
   CreatePriorAuthRequestDto,
@@ -51,6 +56,7 @@ export class PriorAuthController {
    * suya. El servicio exige administrar el tenant de la aseguradora.
    */
   @Get('prior-authorization-requests/inbox')
+  @AccessLogged({ resourceType: 'PRIOR_AUTHORIZATIONS', purpose: 'PAYMENT' })
   @Roles()
   @ApiOkResponse({ type: PriorAuthListDto })
   @ApiOperation({
@@ -65,6 +71,11 @@ export class PriorAuthController {
 
   /** Detalle con ítems y decisión vigente por ítem (aseguradora). */
   @Get('prior-authorization-requests/:id')
+  @AccessLogged({
+    resourceType: 'PRIOR_AUTHORIZATION',
+    resourceId: 'param:id',
+    purpose: 'PAYMENT',
+  })
   @Roles()
   @ApiOkResponse({ type: PriorAuthDetailDto })
   @ApiOperation({
