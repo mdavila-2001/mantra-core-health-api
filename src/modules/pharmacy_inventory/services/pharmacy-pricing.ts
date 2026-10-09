@@ -46,9 +46,9 @@ export function winningPriceFor(
           candidate.list.pharmacySiteId === siteId),
     )
     .sort((a, b) => {
-      const aSiteSpecific = a.list.pharmacySiteId ? 0 : 1;
+      const toSiteSpecific = a.list.pharmacySiteId ? 0 : 1;
       const bSiteSpecific = b.list.pharmacySiteId ? 0 : 1;
-      if (aSiteSpecific !== bSiteSpecific) return aSiteSpecific - bSiteSpecific;
+      if (toSiteSpecific !== bSiteSpecific) return toSiteSpecific - bSiteSpecific;
       return (
         numericOf(payableAmount(a.price)) - numericOf(payableAmount(b.price))
       );

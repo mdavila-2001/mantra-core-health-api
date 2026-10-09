@@ -24,7 +24,7 @@ import { PINV } from '../pharmacy_inventory.concepts';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const paciente = {
+const patient = {
   id: 'user-1',
   roles: ['PATIENT'],
   patientProfileId: 'pat-1',
@@ -32,14 +32,14 @@ const paciente = {
 const staff = { id: 'user-9', roles: ['SECURITY_ADMIN'] } as any;
 const sistema = { id: 'user-sys', roles: ['SYSTEM'] } as any;
 
-const FARMACIA = {
+const PHARMACY = {
   id: 'ph-1',
   tenantId: 'tenant-a',
   legalName: 'Farmacia Andina S.R.L.',
   tradeName: 'Farmacia Andina',
 } as any;
-const SEDE = { id: 'site-1', pharmacyId: 'ph-1', name: 'Sede Centro' } as any;
-const PRODUCTO = {
+const SITE = { id: 'site-1', pharmacyId: 'ph-1', name: 'Sede Centro' } as any;
+const PRODUCT = {
   id: 'prod-1',
   pharmacyId: 'ph-1',
   productCode: 'COD-1',
@@ -48,7 +48,7 @@ const PRODUCTO = {
 } as any;
 
 /** Una posición de stock disponible en la sede. */
-function posicion(extra: Record<string, unknown> = {}) {
+function position(extra: Record<string, unknown> = {}) {
   return {
     inventoryLocationId: 'loc-1',
     pharmacyProductId: 'prod-1',
@@ -62,7 +62,7 @@ function posicion(extra: Record<string, unknown> = {}) {
 }
 
 /** Un pedido persistido (reserva con estado `PINV_ORDER_*`). */
-function pedido(extra: Record<string, unknown> = {}) {
+function order(extra: Record<string, unknown> = {}) {
   return {
     id: 'order-1',
     pharmacyId: 'ph-1',
@@ -94,10 +94,10 @@ function build() {
     findOrderByIdempotencyKey: mockFn(async () => null),
     findDueOrdersForUpdate: mockFn(async () => []),
     findLinesByReservationIds: mockFn(async () => []),
-    findPharmaciesByIdsInTenant: mockFn(async () => [FARMACIA]),
-    findPharmaciesByIds: mockFn(async () => [FARMACIA]),
-    findSitesByIds: mockFn(async () => [SEDE]),
-    findProductsByIds: mockFn(async () => [PRODUCTO]),
+    findPharmaciesByIdsInTenant: mockFn(async () => [PHARMACY]),
+    findPharmaciesByIds: mockFn(async () => [PHARMACY]),
+    findSitesByIds: mockFn(async () => [SITE]),
+    findProductsByIds: mockFn(async () => [PRODUCT]),
     findConceptsByIds: mockFn(async () => []),
     findOwnMedicationRequest: mockFn(async () => null),
     findPrescriberProfileId: mockFn(async () => null),
@@ -105,7 +105,7 @@ function build() {
     findPrescriberProfileIdsByRequestIds: mockFn(async () => new Map()),
     findPrimarySpecialtyConceptIds: mockFn(async () => new Map()),
     findAddressesByIds: mockFn(async () => []),
-    findPharmaciesByTenant: mockFn(async () => [FARMACIA]),
+    findPharmaciesByTenant: mockFn(async () => [PHARMACY]),
     findOrdersForPharmacies: mockFn(async () => []),
   };
   const reservationsRepo = {
@@ -137,9 +137,9 @@ function build() {
     create: mockFn(() => ({ id: 'sub-1' })),
   };
   const pharmacyRepo = {
-    findActiveSiteById: mockFn(async () => SEDE),
-    findVisibleById: mockFn(async () => FARMACIA),
-    findActiveProductsByIds: mockFn(async () => [PRODUCTO]),
+    findActiveSiteById: mockFn(async () => SITE),
+    findVisibleById: mockFn(async () => PHARMACY),
+    findActiveProductsByIds: mockFn(async () => [PRODUCT]),
     findCurrentPublicPriceLists: mockFn(async () => []),
     findCurrentPrices: mockFn(async () => []),
   };
@@ -204,7 +204,7 @@ function build() {
 }
 
 /** Mocks de lectura para que `readOwnOrder`/`getOrder` compongan el pedido dado. */
-function conLectura(d: ReturnType<typeof build>, order: any, lines: any[]) {
+function withReading(d: ReturnType<typeof build>, order: any, lines: any[]) {
   d.ordersRepo.findOrderById.mockResolvedValue(order);
   d.ordersRepo.findLinesByReservationIds.mockResolvedValue(lines);
 }
@@ -213,10 +213,10 @@ describe('PharmacyOrdersService', () => {
   describe('create', () => {
     it('creates the order ENVIADO reserving stock with UC-25-04 accounting', async () => {
       const d = build();
-      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
-      const bloqueada = posicion();
-      d.stockRepo.findByKeyForUpdate.mockResolvedValue(bloqueada);
-      conLectura(d, pedido(), [
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+      const blocked = position();
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(blocked);
+      withReading(d, order(), [
         {
           inventoryReservationId: 'order-1',
           pharmacyProductId: 'prod-1',
@@ -229,7 +229,7 @@ describe('PharmacyOrdersService', () => {
       const res = await runWithTenant('tenant-a', () =>
         d.service.create(
           { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
-          paciente,
+          patient,
         ),
       );
 
@@ -261,8 +261,8 @@ describe('PharmacyOrdersService', () => {
           reservationDelta: '3',
         }),
       );
-      expect(bloqueada.reservedQuantity).toBe('3');
-      expect(bloqueada.availableQuantity).toBe('7');
+      expect(blocked.reservedQuantity).toBe('3');
+      expect(blocked.availableQuantity).toBe('7');
       // El hecho se publica en la misma transacción.
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
@@ -275,12 +275,12 @@ describe('PharmacyOrdersService', () => {
 
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
-      const productos = [PRODUCTO, { ...PRODUCTO, id: 'prod-2' }];
+      const productos = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
       d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue(productos);
       // Solo prod-1 tiene posición; prod-2 no existe en el estante.
-      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
-      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
-      conLectura(d, pedido(), []);
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
+      withReading(d, order(), []);
 
       await runWithTenant('tenant-a', () =>
         d.service.create(
@@ -291,7 +291,7 @@ describe('PharmacyOrdersService', () => {
               { productId: 'prod-2', quantity: 2 },
             ],
           },
-          paciente,
+          patient,
         ),
       );
 
@@ -315,15 +315,15 @@ describe('PharmacyOrdersService', () => {
 
     it('sets the 48 hour expiry window', async () => {
       const d = build();
-      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
-      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
-      conLectura(d, pedido(), []);
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
+      withReading(d, order(), []);
 
       const antes = Date.now();
       await runWithTenant('tenant-a', () =>
         d.service.create(
           { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 1 }] },
-          paciente,
+          patient,
         ),
       );
 
@@ -336,9 +336,9 @@ describe('PharmacyOrdersService', () => {
     it('idempotency: repeating the key returns the existing order without reserving again', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdempotencyKey.mockResolvedValue(
-        pedido({ id: 'order-9' }),
+        order({ id: 'order-9' }),
       );
-      conLectura(d, pedido({ id: 'order-9' }), []);
+      withReading(d, order({ id: 'order-9' }), []);
 
       const res = await runWithTenant('tenant-a', () =>
         d.service.create(
@@ -347,7 +347,7 @@ describe('PharmacyOrdersService', () => {
             idempotencyKey: 'k-1',
             lines: [{ productId: 'prod-1', quantity: 3 }],
           },
-          paciente,
+          patient,
         ),
       );
 
@@ -369,7 +369,7 @@ describe('PharmacyOrdersService', () => {
               medicationRequestId: 'req-ajena',
               lines: [{ productId: 'prod-1', quantity: 1 }],
             },
-            paciente,
+            patient,
           ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
@@ -409,9 +409,9 @@ describe('PharmacyOrdersService', () => {
           patientAmount: null,
         },
       ]);
-      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
-      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
-      conLectura(d, pedido(), [
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
+      withReading(d, order(), [
         {
           inventoryReservationId: 'order-1',
           pharmacyProductId: 'prod-1',
@@ -426,7 +426,7 @@ describe('PharmacyOrdersService', () => {
       await runWithTenant('tenant-a', () =>
         d.service.create(
           { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
-          paciente,
+          patient,
         ),
       );
 
@@ -439,16 +439,16 @@ describe('PharmacyOrdersService', () => {
         }),
       );
       // Y la cabecera con el total exacto: 3 × 68.00.
-      const cabecera = d.reservationsRepo.create.mock.results[0].value;
-      expect(cabecera.totalAmount).toBe('204.00');
-      expect(cabecera.currencyConceptId).toBe('cur-bob');
+      const header = d.reservationsRepo.create.mock.results[0].value;
+      expect(header.totalAmount).toBe('204.00');
+      expect(header.currencyConceptId).toBe('cur-bob');
     });
 
     it('a product without a published price leaves the line and the total honestly null', async () => {
       const d = build();
-      d.inventoryReadRepo.findStockPositions.mockResolvedValue([posicion()]);
-      d.stockRepo.findByKeyForUpdate.mockResolvedValue(posicion());
-      conLectura(d, pedido(), [
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
+      withReading(d, order(), [
         {
           inventoryReservationId: 'order-1',
           pharmacyProductId: 'prod-1',
@@ -461,7 +461,7 @@ describe('PharmacyOrdersService', () => {
       await runWithTenant('tenant-a', () =>
         d.service.create(
           { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 3 }] },
-          paciente,
+          patient,
         ),
       );
 
@@ -469,15 +469,15 @@ describe('PharmacyOrdersService', () => {
         d.tx,
         expect.objectContaining({ unitPriceAmount: undefined }),
       );
-      const cabecera = d.reservationsRepo.create.mock.results[0].value;
-      expect(cabecera.totalAmount).toBeUndefined();
+      const header = d.reservationsRepo.create.mock.results[0].value;
+      expect(header.totalAmount).toBeUndefined();
     });
   });
 
   describe('create · modalidad de entrega (v4.2.1)', () => {
     it('persists the RETIRO concept when the order declares pickup', async () => {
       const d = build();
-      conLectura(d, pedido(), []);
+      withReading(d, order(), []);
 
       await runWithTenant('tenant-a', () =>
         d.service.create(
@@ -486,7 +486,7 @@ describe('PharmacyOrdersService', () => {
             deliveryMode: 'RETIRO',
             lines: [{ productId: 'prod-1', quantity: 3 }],
           },
-          paciente,
+          patient,
         ),
       );
 
@@ -509,7 +509,7 @@ describe('PharmacyOrdersService', () => {
               deliveryMode: 'DOMICILIO',
               lines: [{ productId: 'prod-1', quantity: 3 }],
             },
-            paciente,
+            patient,
           )
           .catch((e: unknown) => e),
       );
@@ -572,7 +572,7 @@ describe('PharmacyOrdersService', () => {
         d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
           tenantRoleConceptId: role,
         });
-        conLectura(d, pedido(), [
+        withReading(d, order(), [
           {
             id: 'line-1',
             inventoryReservationId: 'order-1',
@@ -620,7 +620,7 @@ describe('PharmacyOrdersService', () => {
         const d = build();
         const provider = { id: 'user-provider', roles: ['USER'] };
         d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(membership);
-        conLectura(d, pedido({ expiresAt: new Date(Date.now() - 1_000) }), []);
+        withReading(d, order({ expiresAt: new Date(Date.now() - 1_000) }), []);
         const denied = await runWithTenant('tenant-a', () =>
           d.service
             .getOrder('order-1', provider)
@@ -655,7 +655,7 @@ describe('PharmacyOrdersService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
         tenantRoleConceptId: DIR.ROLE_OWNER,
       });
-      conLectura(d, pedido({ expiresAt: new Date(Date.now() - 1_000) }), []);
+      withReading(d, order({ expiresAt: new Date(Date.now() - 1_000) }), []);
       d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
       const denied = await runWithTenant('tenant-b', () =>
         d.service
@@ -688,7 +688,7 @@ describe('PharmacyOrdersService', () => {
       'keeps %s detail access without consulting patient settlements',
       async (role) => {
         const d = build();
-        conLectura(d, pedido(), []);
+        withReading(d, order(), []);
         const result = await runWithTenant('tenant-a', () =>
           d.service.getOrder('order-1', { id: 'platform', roles: [role] }),
         );
@@ -700,13 +700,13 @@ describe('PharmacyOrdersService', () => {
 
     it('keeps private enrichment exclusive to the patient owner', async () => {
       const d = build();
-      conLectura(d, pedido(), []);
+      withReading(d, order(), []);
       await runWithTenant('tenant-a', () =>
-        d.service.getOrder('order-1', paciente),
+        d.service.getOrder('order-1', patient),
       );
       expect(d.settlements.forOrders).toHaveBeenCalledWith(
         d.fork,
-        paciente.id,
+        patient.id,
         'PHARMACY',
         ['order-1'],
       );
@@ -723,7 +723,7 @@ describe('PharmacyOrdersService', () => {
         statusConceptId: PINV.RES_LINE_CONFIRMED,
         currencyConceptId: 'currency-bob',
       };
-      conLectura(d, pedido(), [
+      withReading(d, order(), [
         {
           ...portion,
           id: 'line-b',
@@ -787,29 +787,29 @@ describe('PharmacyOrdersService', () => {
       const d = build();
       // Pedido de otro titular.
       d.ordersRepo.findOrderById.mockResolvedValue(
-        pedido({ patientProfileId: 'pat-2' }),
+        order({ patientProfileId: 'pat-2' }),
       );
-      const ajeno = await runWithTenant('tenant-a', () =>
-        d.service.getOrder('order-1', paciente).catch((e: unknown) => e),
+      const foreign = await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', patient).catch((e: unknown) => e),
       );
 
       // Pedido inexistente.
       d.ordersRepo.findOrderById.mockResolvedValue(null);
-      const inexistente = await runWithTenant('tenant-a', () =>
-        d.service.getOrder('order-1', paciente).catch((e: unknown) => e),
+      const nonexistent = await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', patient).catch((e: unknown) => e),
       );
 
-      expect(ajeno).toBeInstanceOf(ResourceNotFoundException);
-      expect(inexistente).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(nonexistent).toBeInstanceOf(ResourceNotFoundException);
       // Mismos bytes: ni el mensaje ni el detalle distinguen los casos.
-      expect((ajeno as any).getResponse()).toEqual(
-        (inexistente as any).getResponse(),
+      expect((foreign as any).getResponse()).toEqual(
+        (nonexistent as any).getResponse(),
       );
     });
 
     it('a pharmacy from another tenant hides the order behind the same 404', async () => {
       const d = build();
-      d.ordersRepo.findOrderById.mockResolvedValue(pedido());
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
       d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
 
       await expect(
@@ -825,19 +825,19 @@ describe('PharmacyOrdersService', () => {
 
     it('lazily expires an overdue order before serving it', async () => {
       const d = build();
-      const vencido = pedido({ expiresAt: new Date(Date.now() - 1_000) });
+      const overdue = order({ expiresAt: new Date(Date.now() - 1_000) });
       d.ordersRepo.findOrderById
-        .mockResolvedValueOnce(vencido)
+        .mockResolvedValueOnce(overdue)
         .mockResolvedValue(
-          pedido({
+          order({
             reservationStatusConceptId: PINV.ORDER_VENCIDO,
-            expiresAt: vencido.expiresAt,
+            expiresAt: overdue.expiresAt,
           }),
         );
-      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([vencido]);
+      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([overdue]);
 
       const res = await runWithTenant('tenant-a', () =>
-        d.service.getOrder('order-1', paciente),
+        d.service.getOrder('order-1', patient),
       );
 
       expect(d.ordersRepo.findDueOrdersForUpdate).toHaveBeenCalledWith(
@@ -855,8 +855,8 @@ describe('PharmacyOrdersService', () => {
     it('resolves names in batch: one query per table, no N+1', async () => {
       const d = build();
       d.ordersRepo.findOrdersByPatient.mockResolvedValue([
-        pedido(),
-        pedido({ id: 'order-2' }),
+        order(),
+        order({ id: 'order-2' }),
       ]);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
         {
@@ -876,7 +876,7 @@ describe('PharmacyOrdersService', () => {
       ]);
 
       const res = await runWithTenant('tenant-a', () =>
-        d.service.listMine(paciente),
+        d.service.listMine(patient),
       );
 
       expect(res.count).toBe(2);
@@ -893,7 +893,7 @@ describe('PharmacyOrdersService', () => {
 
     it('preserves a null medication concept on an order line', async () => {
       const d = build();
-      d.ordersRepo.findOrdersByPatient.mockResolvedValue([pedido()]);
+      d.ordersRepo.findOrdersByPatient.mockResolvedValue([order()]);
       d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
         {
           inventoryReservationId: 'order-1',
@@ -904,11 +904,11 @@ describe('PharmacyOrdersService', () => {
         },
       ]);
       d.ordersRepo.findProductsByIds.mockResolvedValue([
-        { ...PRODUCTO, medicationConceptId: null },
+        { ...PRODUCT, medicationConceptId: null },
       ]);
 
       const res = await runWithTenant('tenant-a', () =>
-        d.service.listMine(paciente),
+        d.service.listMine(patient),
       );
 
       expect(res.items[0].lines[0].medicationConceptId).toBeNull();
@@ -918,12 +918,12 @@ describe('PharmacyOrdersService', () => {
     it('an order from a pharmacy outside the tenant simply does not appear', async () => {
       const d = build();
       d.ordersRepo.findOrdersByPatient.mockResolvedValue([
-        pedido({ pharmacyId: 'ph-ajena' }),
+        order({ pharmacyId: 'ph-ajena' }),
       ]);
       d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
 
       const res = await runWithTenant('tenant-a', () =>
-        d.service.listMine(paciente),
+        d.service.listMine(patient),
       );
       expect(res.items).toEqual([]);
       expect(res.count).toBe(0);
@@ -931,11 +931,11 @@ describe('PharmacyOrdersService', () => {
 
     it('runs lazy expiry over the overdue ones before answering', async () => {
       const d = build();
-      const vencido = pedido({ expiresAt: new Date(Date.now() - 1_000) });
-      d.ordersRepo.findOrdersByPatient.mockResolvedValue([vencido]);
-      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([vencido]);
+      const overdue = order({ expiresAt: new Date(Date.now() - 1_000) });
+      d.ordersRepo.findOrdersByPatient.mockResolvedValue([overdue]);
+      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([overdue]);
 
-      await runWithTenant('tenant-a', () => d.service.listMine(paciente));
+      await runWithTenant('tenant-a', () => d.service.listMine(patient));
 
       expect(d.ordersRepo.findDueOrdersForUpdate).toHaveBeenCalledWith(
         d.tx,
@@ -949,7 +949,7 @@ describe('PharmacyOrdersService', () => {
 
     it('requires the tenant in the request', async () => {
       const d = build();
-      await expect(d.service.listMine(paciente)).rejects.toBeInstanceOf(
+      await expect(d.service.listMine(patient)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
     });
@@ -958,16 +958,16 @@ describe('PharmacyOrdersService', () => {
   describe('cancel', () => {
     it('cancels a live order releasing stock through the shared primitive', async () => {
       const d = build();
-      const vivo = pedido();
+      const vivo = order();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
-      conLectura(
+      withReading(
         d,
-        pedido({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
+        order({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
         [],
       );
 
       const res = await runWithTenant('tenant-a', () =>
-        d.service.cancel('order-1', paciente),
+        d.service.cancel('order-1', patient),
       );
 
       expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_CANCELADO);
@@ -975,7 +975,7 @@ describe('PharmacyOrdersService', () => {
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
         vivo,
-        paciente,
+        patient,
       );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
@@ -987,11 +987,11 @@ describe('PharmacyOrdersService', () => {
     it('double cancel: a terminal order answers 409 without touching the ledger', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        pedido({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
+        order({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
       );
 
       await expect(
-        runWithTenant('tenant-a', () => d.service.cancel('order-1', paciente)),
+        runWithTenant('tenant-a', () => d.service.cancel('order-1', patient)),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(
         d.reservationsService.releaseConfirmedLines,
@@ -1002,11 +1002,11 @@ describe('PharmacyOrdersService', () => {
     it('a non-owner cancelling gets the indistinguishable 404', async () => {
       const d = build();
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        pedido({ patientProfileId: 'pat-2' }),
+        order({ patientProfileId: 'pat-2' }),
       );
 
       await expect(
-        runWithTenant('tenant-a', () => d.service.cancel('order-1', paciente)),
+        runWithTenant('tenant-a', () => d.service.cancel('order-1', patient)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(
         d.reservationsService.releaseConfirmedLines,
@@ -1017,17 +1017,17 @@ describe('PharmacyOrdersService', () => {
   describe('expireDue', () => {
     it('expires overdue orders releasing stock, race-safe by construction', async () => {
       const d = build();
-      const vencible = pedido({ expiresAt: new Date(Date.now() - 1_000) });
-      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([vencible]);
+      const expirable = order({ expiresAt: new Date(Date.now() - 1_000) });
+      d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([expirable]);
 
       const res = await d.service.expireDue(sistema);
 
       expect(res.expiredCount).toBe(1);
-      expect(vencible.reservationStatusConceptId).toBe(PINV.ORDER_VENCIDO);
-      expect(vencible.releasedAt).toBeInstanceOf(Date);
+      expect(expirable.reservationStatusConceptId).toBe(PINV.ORDER_VENCIDO);
+      expect(expirable.releasedAt).toBeInstanceOf(Date);
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        vencible,
+        expirable,
         sistema,
       );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
