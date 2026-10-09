@@ -44,7 +44,7 @@ Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. El [mapa d
 | `structurizr/` | Modelo de arquitectura (`workspace.dsl`). |
 | `evidencias/` | Evidencia de merges y pruebas de ciclos anteriores. |
 
-En la raíz quedan también `ESTADO-Y-PENDIENTES.md`, `REGISTRO-DEFECTOS.md`, `ALOVIDA-TRAZABILIDAD.md` y `ALOVIDA-COBERTURA.md` (este último lo regenera `corepack yarn alovida:coverage`); `AGENTS.md` tiene las instrucciones para agentes.
+En la raíz quedan `ESTADO-Y-PENDIENTES.md` (lo citan comentarios de código y la plantilla de `tools/docs/sync-module-docs.mjs`) y `ALOVIDA-COBERTURA.md` (lo escribe `corepack yarn alovida:coverage`). El registro de defectos está en [`docs/progress/REGISTRO-DEFECTOS.md`](docs/progress/REGISTRO-DEFECTOS.md) y la matriz de trazabilidad en [`docs/governance/ALOVIDA-TRAZABILIDAD.md`](docs/governance/ALOVIDA-TRAZABILIDAD.md). `AGENTS.md` tiene las instrucciones para agentes.
 
 ## Requisitos y configuración local
 
