@@ -16,7 +16,7 @@
  */
 
 /** Un objeto tal como lo ve el almacén, sin pasar por el catálogo. */
-export interface ObjetoInventariado {
+export interface InventoriedObject {
   /** Clave exacta dentro del bucket. */
   key: string;
   /** Tamaño que declara el proveedor. */
@@ -24,11 +24,11 @@ export interface ObjetoInventariado {
 }
 
 /** Resultado de recorrer un bucket. */
-export type InventarioDeObjetos =
+export type ObjectInventory =
   | {
       /** El recorrido terminó y estos son los objetos. */
       estado: 'COMPLETO';
-      objetos: ObjetoInventariado[];
+      objetos: InventoriedObject[];
     }
   | {
       /**
@@ -37,7 +37,7 @@ export type InventarioDeObjetos =
        * en particular, una clave ausente de esta lista no es un huérfano.
        */
       estado: 'TRUNCADO';
-      objetos: ObjetoInventariado[];
+      objetos: InventoriedObject[];
     }
   | {
       /** El proveedor no respondió. No se sabe nada del bucket. */
@@ -46,7 +46,7 @@ export type InventarioDeObjetos =
     };
 
 /** Qué bucket recorrer. */
-export interface AlcanceDeInventario {
+export interface InventoryScope {
   /** `object_namespaces.backend_code`: qué proveedor sabe leerlo. */
   backendCode: string;
   /** Bucket o contenedor. */
@@ -59,7 +59,7 @@ export interface AlcanceDeInventario {
 
 /** Recorre el almacén de objetos. */
 export interface ObjectStoreInventory {
-  listar(alcance: AlcanceDeInventario): Promise<InventarioDeObjetos>;
+  list(alcance: InventoryScope): Promise<ObjectInventory>;
 }
 
 /** Token de inyección del inventario activo. */

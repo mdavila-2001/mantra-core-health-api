@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { ObjectStoreReconciliationService } from './object-store-reconciliation.service';
 import { ObjectContentUnavailableError } from '../../object_storage/ports';
-import type { InventarioDeObjetos } from '../ports/object-store-inventory.port';
+import type { ObjectInventory } from '../ports/object-store-inventory.port';
 
 /**
  * Ejecuta la operación mock fn.
@@ -11,15 +11,15 @@ import type { InventarioDeObjetos } from '../ports/object-store-inventory.port';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const ALCANCE = { backendCode: 'minio', bucket: 'adjuntos', limit: 100 };
+const SCOPE = { backendCode: 'minio', bucket: 'adjuntos', limit: 100 };
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  *
- * @param opciones - Referencias del canónico, objetos presentes e inventario.
+ * @param options - Referencias del canónico, objetos presentes e inventario.
  * @returns El servicio y sus dobles.
  */
-function build(opciones: {
+function build(options: {
   /** Filas que devuelve Postgres. */
   referencias?: {
     file_version_id: string;
@@ -31,14 +31,14 @@ function build(opciones: {
   /** Claves cuya consulta falla. */
   incomprobables?: string[];
   /** Qué devuelve el inventario del bucket. */
-  inventario?: InventarioDeObjetos;
+  inventario?: ObjectInventory;
 }) {
   const {
     referencias = [],
     presentes = [],
     incomprobables = [],
     inventario = { estado: 'COMPLETO', objetos: [] },
-  } = opciones;
+  } = options;
 
   const em = {
     fork: () => ({
@@ -57,7 +57,7 @@ function build(opciones: {
     digest: mockFn(),
     open: mockFn(),
   };
-  const inventoryPort = { listar: mockFn().mockResolvedValue(inventario) };
+  const inventoryPort = { list: mockFn().mockResolvedValue(inventario) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ObjectStoreReconciliationService(
@@ -92,7 +92,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
         objetos: [{ key: 'a/1.pdf', sizeBytes: 10n }],
       },
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
     expect(res.items).toEqual([
       {
         canonicalEntityId: 'fv1',
@@ -110,7 +110,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
       presentes: [],
       inventario: { estado: 'COMPLETO', objetos: [] },
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
     expect(res.items).toEqual([
       {
         canonicalEntityId: 'fv1',
@@ -128,7 +128,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
         objetos: [{ key: 'huerfano.bin', sizeBytes: 4n }],
       },
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
     expect(res.items).toEqual([
       {
         canonicalEntityId: 'orphan:huerfano.bin',
@@ -148,7 +148,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
         objetos: [{ key: 'borrado/1.pdf', sizeBytes: 9n }],
       },
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
     expect(res.items[0]).toMatchObject({ result: 'EXTRA' });
   });
 
@@ -163,7 +163,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
         objetos: [{ key: 'a/1.pdf', sizeBytes: 1n }],
       },
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
 
     expect(res.noVerificadas).toBe(1);
     expect(res.items.map((i) => i.canonicalEntityId)).not.toContain('fv2');
@@ -179,13 +179,13 @@ describe('ObjectStoreReconciliationService · F09', () => {
       'el inventario quedó truncado',
       { estado: 'TRUNCADO', objetos: [{ key: 'x.bin', sizeBytes: 1n }] },
     ],
-  ])('no emite ningún EXTRA cuando %s', async (_caso, inventario) => {
+  ])('no emite ningún EXTRA cuando %s', async (_caso, inventory) => {
     const d = build({
       referencias: [ref('fv1', 'a/1.pdf')],
       presentes: ['a/1.pdf'],
-      inventario: inventario as InventarioDeObjetos,
+      inventario: inventory as ObjectInventory,
     });
-    const res = await d.service.escanear(ALCANCE);
+    const res = await d.service.scan(SCOPE);
 
     expect(res.inventarioIncompleto).toBe(true);
     expect(res.motivoInventario).toBeDefined();
@@ -209,7 +209,7 @@ describe('ObjectStoreReconciliationService · F09', () => {
         objetos: [{ key: 'huerfano.bin', sizeBytes: 1n }],
       },
     });
-    await d.service.escanear(ALCANCE);
+    await d.service.scan(SCOPE);
     // El lector sólo se usa para `stat`; nunca para abrir ni borrar.
     expect(d.reader.digest).not.toHaveBeenCalled();
     expect(d.reader.open).not.toHaveBeenCalled();
