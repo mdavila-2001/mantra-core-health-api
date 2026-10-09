@@ -13,7 +13,7 @@ import { COMM } from '../community.concepts';
 import { CommunityVerificationController } from './community-verification.controller';
 
 /** Roles exigidos por un handler del controlador. */
-function rolesDe(metodo: string): string[] | undefined {
+function roles(method: string): string[] | undefined {
   return Reflect.getMetadata(
     ROLES_KEY,
     (
@@ -21,7 +21,7 @@ function rolesDe(metodo: string): string[] | undefined {
         string,
         object
       >
-    )[metodo],
+    )[method],
   );
 }
 
@@ -51,20 +51,20 @@ describe('CommunityVerificationController', () => {
       // El camino normal del sello es el puente desde identity_assurance. Esto
       // no es una segunda puerta al mismo sitio: si dejara de pedir el rol,
       // cualquiera con sesión podría fabricarse un «Verificado».
-      expect(rolesDe('grant')).toEqual(['SECURITY_ADMIN']);
+      expect(roles('grant')).toEqual(['SECURITY_ADMIN']);
     });
 
     it('la baja también', () => {
-      expect(rolesDe('revoke')).toEqual(['SECURITY_ADMIN']);
+      expect(roles('revoke')).toEqual(['SECURITY_ADMIN']);
     });
 
     it('el barrido lo puede correr el worker, además del administrador', () => {
-      expect(rolesDe('expireSweep')).toEqual(['SYSTEM', 'SECURITY_ADMIN']);
+      expect(roles('expireSweep')).toEqual(['SYSTEM', 'SECURITY_ADMIN']);
     });
 
     it('ningún handler queda sin roles: no hay superficie pública acá', () => {
-      for (const metodo of ['grant', 'revoke', 'expireSweep']) {
-        expect(rolesDe(metodo)).toBeDefined();
+      for (const method of ['grant', 'revoke', 'expireSweep']) {
+        expect(roles(method)).toBeDefined();
       }
     });
   });

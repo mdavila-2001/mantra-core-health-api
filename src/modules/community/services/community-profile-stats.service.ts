@@ -101,15 +101,15 @@ export class CommunityProfileStatsService {
     profileId: string,
     hoy: Date = new Date(),
   ): Promise<ProfileStatsDto> {
-    const dias = this.ultimosDias(hoy);
+    const days = this.lastDays(hoy);
     const claves = [
-      ...dias.map((dia) => this.key(profileId, 'view', dia)),
-      ...dias.map((dia) => this.key(profileId, 'impression', dia)),
+      ...days.map((day) => this.key(profileId, 'view', day)),
+      ...days.map((day) => this.key(profileId, 'impression', day)),
     ];
 
-    let valores: Map<string, number>;
+    let values: Map<string, number>;
     try {
-      valores = await this.redis.getCounters(tenantId, claves);
+      values = await this.redis.getCounters(tenantId, claves);
     } catch (error) {
       // Sin Redis no hay estadísticas, pero tampoco un 500: la pantalla del
       // profesional muestra ceros y un rótulo, no un error.
@@ -120,21 +120,21 @@ export class CommunityProfileStatsService {
         },
         'Counters unavailable: profile stats served as zeroes',
       );
-      valores = new Map();
+      values = new Map();
     }
 
-    const daily = dias.map((dia) => ({
-      date: dia,
-      views: valores.get(this.key(profileId, 'view', dia)) ?? 0,
+    const daily = days.map((day) => ({
+      date: day,
+      views: values.get(this.key(profileId, 'view', day)) ?? 0,
       searchAppearances:
-        valores.get(this.key(profileId, 'impression', dia)) ?? 0,
+        values.get(this.key(profileId, 'impression', day)) ?? 0,
     }));
 
     return {
       windowDays: WINDOW_DAYS,
-      views: daily.reduce((total, dia) => total + dia.views, 0),
+      views: daily.reduce((total, day) => total + day.views, 0),
       searchAppearances: daily.reduce(
-        (total, dia) => total + dia.searchAppearances,
+        (total, day) => total + day.searchAppearances,
         0,
       ),
       daily,
@@ -147,7 +147,7 @@ export class CommunityProfileStatsService {
   private record(tenantId: string, profileId: string, signal: Signal): void {
     if (!tenantId || !profileId) return;
 
-    const key = this.key(profileId, signal, this.dia(new Date()));
+    const key = this.key(profileId, signal, this.day(new Date()));
     void this.redis
       .incrWithWindow(tenantId, key, COUNTER_TTL_SEC)
       .catch((error: unknown) => {
@@ -163,22 +163,22 @@ export class CommunityProfileStatsService {
   }
 
   /** Clave del contador: perfil, señal y día. Nada del visitante. */
-  private key(profileId: string, signal: Signal, dia: string): string {
-    return `profile-stats:${profileId}:${signal}:${dia}`;
+  private key(profileId: string, signal: Signal, day: string): string {
+    return `profile-stats:${profileId}:${signal}:${day}`;
   }
 
   /** El día en `YYYY-MM-DD`, en UTC para que el corte no dependa del servidor. */
-  private dia(fecha: Date): string {
-    return fecha.toISOString().slice(0, 10);
+  private day(date: Date): string {
+    return date.toISOString().slice(0, 10);
   }
 
   /** Los últimos `WINDOW_DAYS` días, del más viejo al más nuevo. */
-  private ultimosDias(hoy: Date): string[] {
-    const dias: string[] = [];
+  private lastDays(hoy: Date): string[] {
+    const days: string[] = [];
     for (let i = WINDOW_DAYS - 1; i >= 0; i -= 1) {
-      const fecha = new Date(hoy.getTime() - i * 24 * 3_600_000);
-      dias.push(this.dia(fecha));
+      const date = new Date(hoy.getTime() - i * 24 * 3_600_000);
+      days.push(this.day(date));
     }
-    return dias;
+    return days;
   }
 }

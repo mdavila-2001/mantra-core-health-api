@@ -313,9 +313,9 @@ export class CommunityModerationService {
         });
       }
 
-      const resolucion = APPEAL_RESOLUTION_BY_CODE[dto.resolution];
-      appeal.statusConceptId = resolucion;
-      appeal.resolutionConceptId = resolucion;
+      const resolution = APPEAL_RESOLUTION_BY_CODE[dto.resolution];
+      appeal.statusConceptId = resolution;
+      appeal.resolutionConceptId = resolution;
       appeal.reviewedByUserId = actor.id;
       appeal.resolvedAt = new Date();
       touch(appeal, actor.id);
@@ -334,14 +334,14 @@ export class CommunityModerationService {
           )
         : null;
       if (original) {
-        const reencolada = await this.moderationRepo.findOpenQueueForContent(
+        const requeued = await this.moderationRepo.findOpenQueueForContent(
           tx,
           original.contentRefId,
           COMM.QUEUE_RESOLVED,
         );
-        if (reencolada) {
-          reencolada.statusConceptId = COMM.QUEUE_RESOLVED;
-          touch(reencolada, actor.id);
+        if (requeued) {
+          requeued.statusConceptId = COMM.QUEUE_RESOLVED;
+          touch(requeued, actor.id);
         }
       }
 

@@ -31,7 +31,7 @@ import type {
 import type { ModerationDecisions } from '../entities';
 
 /** Milisegundos en una hora, para traducir la antigüedad pedida a un instante. */
-const UNA_HORA_MS = 60 * 60 * 1000;
+const ONE_HOUR_MS = 60 * 60 * 1000;
 
 /**
  * Cara de lectura de la moderación (UC-19-09/10).
@@ -118,7 +118,7 @@ export class CommunityModerationReadService {
         ...(query.minAgeHours !== undefined
           ? {
               queuedBefore: new Date(
-                Date.now() - query.minAgeHours * UNA_HORA_MS,
+                Date.now() - query.minAgeHours * ONE_HOUR_MS,
               ),
             }
           : {}),
@@ -134,42 +134,42 @@ export class CommunityModerationReadService {
       this.moderationRepo.listReportsByIds(
         em,
         page
-          .map((fila) => fila.contentReportId)
+          .map((row) => row.contentReportId)
           .filter((id): id is string => id !== undefined),
       ),
       this.moderationRepo.countReportsByContent(
         em,
-        page.map((fila) => fila.contentRefId),
+        page.map((row) => row.contentRefId),
       ),
     ]);
 
-    const reportePorId = new Map(reportes.map((r) => [r.id, r]));
-    const recuentoPorContenido = new Map(
+    const reportById = new Map(reportes.map((r) => [r.id, r]));
+    const countByContent = new Map(
       recuentos.map((r) => [r.targetId, r.count]),
     );
 
     const last = page.at(-1);
     return {
-      items: page.map((fila) => {
-        const reporte = fila.contentReportId
-          ? reportePorId.get(fila.contentReportId)
+      items: page.map((row) => {
+        const report = row.contentReportId
+          ? reportById.get(row.contentReportId)
           : undefined;
         return {
-          id: fila.id,
-          contentTypeConceptId: fila.contentTypeConceptId,
-          contentRefId: fila.contentRefId,
-          sourceConceptId: fila.sourceConceptId,
-          priorityConceptId: fila.priorityConceptId ?? null,
-          statusConceptId: fila.statusConceptId,
-          assignedToUserId: fila.assignedToUserId ?? null,
-          queuedAt: fila.queuedAt ?? null,
-          reportCount: recuentoPorContenido.get(fila.contentRefId) ?? 0,
-          report: reporte
+          id: row.id,
+          contentTypeConceptId: row.contentTypeConceptId,
+          contentRefId: row.contentRefId,
+          sourceConceptId: row.sourceConceptId,
+          priorityConceptId: row.priorityConceptId ?? null,
+          statusConceptId: row.statusConceptId,
+          assignedToUserId: row.assignedToUserId ?? null,
+          queuedAt: row.queuedAt ?? null,
+          reportCount: countByContent.get(row.contentRefId) ?? 0,
+          report: report
             ? {
-                id: reporte.id,
-                reasonConceptId: reporte.reasonConceptId,
-                detailText: reporte.detailText ?? null,
-                createdAt: reporte.createdAt,
+                id: report.id,
+                reasonConceptId: report.reasonConceptId,
+                detailText: report.detailText ?? null,
+                createdAt: report.createdAt,
               }
             : null,
         };
@@ -227,7 +227,7 @@ export class CommunityModerationReadService {
     const last = page.at(-1);
 
     return {
-      items: page.map((fila) => this.toDecision(fila)),
+      items: page.map((row) => this.toDecision(row)),
       count: page.length,
       limit,
       nextCursor:
@@ -279,25 +279,25 @@ export class CommunityModerationReadService {
     // Las decisiones de toda la página en una consulta: resolver una apelación
     // sin leer qué se decidió es resolverla a ciegas, y pedirla por fila serían
     // N lecturas por pantalla.
-    const decisiones = await this.moderationRepo.listDecisionsByIds(em, [
-      ...new Set(page.map((fila) => fila.moderationDecisionId)),
+    const decisions = await this.moderationRepo.listDecisionsByIds(em, [
+      ...new Set(page.map((row) => row.moderationDecisionId)),
     ]);
-    const decisionPorId = new Map(decisiones.map((d) => [d.id, d]));
+    const decisionById = new Map(decisions.map((d) => [d.id, d]));
 
     const last = page.at(-1);
     return {
-      items: page.map((fila): ModerationAppealItemDto => {
-        const decision = decisionPorId.get(fila.moderationDecisionId);
+      items: page.map((row): ModerationAppealItemDto => {
+        const decision = decisionById.get(row.moderationDecisionId);
         return {
-          id: fila.id,
-          moderationDecisionId: fila.moderationDecisionId,
-          appellantProfileId: fila.appellantProfileId,
-          reasonText: fila.reasonText,
-          statusConceptId: fila.statusConceptId,
-          resolutionConceptId: fila.resolutionConceptId ?? null,
-          reviewedByUserId: fila.reviewedByUserId ?? null,
-          resolvedAt: fila.resolvedAt ?? null,
-          createdAt: fila.createdAt,
+          id: row.id,
+          moderationDecisionId: row.moderationDecisionId,
+          appellantProfileId: row.appellantProfileId,
+          reasonText: row.reasonText,
+          statusConceptId: row.statusConceptId,
+          resolutionConceptId: row.resolutionConceptId ?? null,
+          reviewedByUserId: row.reviewedByUserId ?? null,
+          resolvedAt: row.resolvedAt ?? null,
+          createdAt: row.createdAt,
           decision: decision ? this.toDecision(decision) : null,
         };
       }),
@@ -354,28 +354,28 @@ export class CommunityModerationReadService {
     const decisionIds = [
       ...new Set(strikes.map((strike) => strike.moderationDecisionId)),
     ];
-    const decisiones = await this.moderationRepo.listDecisionsByIds(
+    const decisions = await this.moderationRepo.listDecisionsByIds(
       em,
       decisionIds,
     );
     // Más reciente primero; `id` desempata para que el orden sea estable
     // cuando dos decisiones se tomaron en el mismo instante.
-    const ordenadas = [...decisiones].sort((a, b) => {
-      const diferencia =
+    const sorted = [...decisions].sort((a, b) => {
+      const difference =
         (b.decidedAt?.getTime() ?? 0) - (a.decidedAt?.getTime() ?? 0);
-      return diferencia !== 0 ? diferencia : b.id.localeCompare(a.id);
+      return difference !== 0 ? difference : b.id.localeCompare(a.id);
     });
 
     // El listado de una persona es chico —son sanciones, no actividad—, así
     // que el cursor corta en memoria por posición en vez de pedir un `JOIN`
     // keyset sólo para un puñado de filas.
-    const indiceCursor = query.cursor
-      ? ordenadas.findIndex(
+    const indexCursor = query.cursor
+      ? sorted.findIndex(
           (d) => d.id === decodeKeysetCursor(query.cursor!).id,
         )
       : -1;
-    const desde = indiceCursor >= 0 ? indiceCursor + 1 : 0;
-    const ventana = ordenadas.slice(desde, desde + limit + 1);
+    const from = indexCursor >= 0 ? indexCursor + 1 : 0;
+    const ventana = sorted.slice(from, from + limit + 1);
     const hasMore = ventana.length > limit;
     const page = hasMore ? ventana.slice(0, limit) : ventana;
     const last = page.at(-1);
@@ -412,16 +412,16 @@ export class CommunityModerationReadService {
   }
 
   /** Proyecta la entidad de decisión a su DTO. */
-  private toDecision(fila: ModerationDecisions): ModerationDecisionItemDto {
+  private toDecision(row: ModerationDecisions): ModerationDecisionItemDto {
     return {
-      id: fila.id,
-      moderationQueueId: fila.moderationQueueId,
-      decisionConceptId: fila.decisionConceptId,
-      policyConceptId: fila.policyConceptId,
-      rationaleText: fila.rationaleText ?? null,
-      actionTakenConceptId: fila.actionTakenConceptId ?? null,
-      decidedByUserId: fila.decidedByUserId,
-      decidedAt: fila.decidedAt ?? null,
+      id: row.id,
+      moderationQueueId: row.moderationQueueId,
+      decisionConceptId: row.decisionConceptId,
+      policyConceptId: row.policyConceptId,
+      rationaleText: row.rationaleText ?? null,
+      actionTakenConceptId: row.actionTakenConceptId ?? null,
+      decidedByUserId: row.decidedByUserId,
+      decidedAt: row.decidedAt ?? null,
     };
   }
 }

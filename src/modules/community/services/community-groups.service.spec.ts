@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import {
   CommunityGroupsService,
-  GRUPO_DISUELTO,
+  DISSOLVED_GROUP,
 } from './community-groups.service';
 import {
   CONCEPTS,
@@ -308,7 +308,7 @@ describe('CommunityGroupsService', () => {
       const res = await d.service.leaveGroup('g1', 'p1', actor);
 
       expect(res.joinStatusConceptId).toBe(COMM.GROUP_JOIN_LEFT);
-      expect(group.statusConceptId).toBe(GRUPO_DISUELTO);
+      expect(group.statusConceptId).toBe(DISSOLVED_GROUP);
     });
   });
 
@@ -424,13 +424,13 @@ describe('CommunityGroupsService', () => {
    * que ser dueño.
    */
   describe('createGroup · creador = primer miembro (TP-3, regla 07)', () => {
-    const alta = { slug: 'cardio', name: 'Cardiología' } as any;
+    const registration = { slug: 'cardio', name: 'Cardiología' } as any;
 
     it('el grupo nace con exactamente un integrante, y es su dueño', async () => {
       const d = build();
       d.groupsRepo.create.mockReturnValue({ id: 'grp-1' });
 
-      await d.service.createGroup(alta, actor);
+      await d.service.createGroup(registration, actor);
 
       expect(d.groupsRepo.createMember).toHaveBeenCalledWith(
         d.tx,
@@ -448,7 +448,7 @@ describe('CommunityGroupsService', () => {
       const d = build();
       d.visibility.resolveActorProfileId.mockResolvedValue(null);
 
-      await expect(d.service.createGroup(alta, actor)).rejects.toBeInstanceOf(
+      await expect(d.service.createGroup(registration, actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
       expect(d.groupsRepo.create).not.toHaveBeenCalled();
@@ -462,7 +462,7 @@ describe('CommunityGroupsService', () => {
    * Un grupo público se le muestra a desconocidos con la cara de quien lo creó.
    */
   describe('createGroup · perfil público completo (TP-3, regla 06)', () => {
-    const publico = { slug: 'cardio', name: 'Cardiología' } as any;
+    const isPublic = { slug: 'cardio', name: 'Cardiología' } as any;
 
     it('sin foto no se puede crear un grupo público, con el código en el cuerpo', async () => {
       const d = build();
@@ -474,7 +474,7 @@ describe('CommunityGroupsService', () => {
       });
 
       const error = await d.service
-        .createGroup(publico, actor)
+        .createGroup(isPublic, actor)
         .catch((e: unknown) => e as any);
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
@@ -494,7 +494,7 @@ describe('CommunityGroupsService', () => {
       });
 
       await expect(
-        d.service.createGroup(publico, actor),
+        d.service.createGroup(isPublic, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -512,7 +512,7 @@ describe('CommunityGroupsService', () => {
       });
 
       await expect(
-        d.service.createGroup(publico, actor),
+        d.service.createGroup(isPublic, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -559,13 +559,13 @@ describe('CommunityGroupsService', () => {
    */
   describe('leaveGroup · disolución y sucesión (TP-3, regla 08)', () => {
     /** El grupo y la membresía que se va, montados para cada caso. */
-    function conGrupo(
+    function withGroup(
       d: ReturnType<typeof build>,
-      opciones: { rolDelQueSale: string; quedan: number },
+      options: { rolDelQueSale: string; quedan: number },
     ): any {
       const group = {
         id: 'grp-1',
-        memberCount: opciones.quedan + 1,
+        memberCount: options.quedan + 1,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         ownerProfileId: 'owner-profile',
       };
@@ -578,23 +578,23 @@ describe('CommunityGroupsService', () => {
         id: 'gm-1',
         groupId: 'grp-1',
         memberProfileId: 'owner-profile',
-        memberRoleConceptId: opciones.rolDelQueSale,
+        memberRoleConceptId: options.rolDelQueSale,
         joinStatusConceptId: COMM.GROUP_JOIN_ACTIVE,
       });
-      d.groupsRepo.countMembersByStatus.mockResolvedValue(opciones.quedan);
+      d.groupsRepo.countMembersByStatus.mockResolvedValue(options.quedan);
       return group;
     }
 
     it('el último que sale disuelve el grupo', async () => {
       const d = build();
-      const group = conGrupo(d, {
+      const group = withGroup(d, {
         rolDelQueSale: COMM.GROUP_ROLE_OWNER,
         quedan: 0,
       });
 
       await d.service.leaveGroup('grp-1', 'owner-profile', actor);
 
-      expect(group.statusConceptId).toBe(GRUPO_DISUELTO);
+      expect(group.statusConceptId).toBe(DISSOLVED_GROUP);
       expect(group.memberCount).toBe(0);
     });
 
@@ -612,7 +612,7 @@ describe('CommunityGroupsService', () => {
      */
     it('un administrador NO puede expulsar al dueño y quedarse con el grupo', async () => {
       const d = build();
-      const group = conGrupo(d, {
+      const group = withGroup(d, {
         rolDelQueSale: COMM.GROUP_ROLE_OWNER,
         quedan: 2,
       });
@@ -631,11 +631,11 @@ describe('CommunityGroupsService', () => {
 
     it('si el dueño sale y queda gente, alguien hereda el grupo', async () => {
       const d = build();
-      const group = conGrupo(d, {
+      const group = withGroup(d, {
         rolDelQueSale: COMM.GROUP_ROLE_OWNER,
         quedan: 2,
       });
-      const heredero = {
+      const heir = {
         id: 'gm-2',
         memberProfileId: 'perfil-2',
         memberRoleConceptId: COMM.GROUP_ROLE_ADMIN,
@@ -646,36 +646,36 @@ describe('CommunityGroupsService', () => {
           memberProfileId: 'perfil-3',
           memberRoleConceptId: COMM.GROUP_ROLE_MEMBER,
         },
-        heredero,
+        heir,
       ]);
 
       await d.service.leaveGroup('grp-1', 'owner-profile', actor);
 
       // Gana el administrador aunque sea más nuevo: la sucesión es una
       // continuidad, no un ascenso sorpresa para quien sólo participaba.
-      expect(heredero.memberRoleConceptId).toBe(COMM.GROUP_ROLE_OWNER);
+      expect(heir.memberRoleConceptId).toBe(COMM.GROUP_ROLE_OWNER);
       expect(group.ownerProfileId).toBe('perfil-2');
       expect(group.statusConceptId).toBe(CONCEPTS.STATE_ACTIVE);
     });
 
     it('sin administradores hereda el integrante más antiguo', async () => {
       const d = build();
-      conGrupo(d, { rolDelQueSale: COMM.GROUP_ROLE_OWNER, quedan: 1 });
-      const masAntiguo = {
+      withGroup(d, { rolDelQueSale: COMM.GROUP_ROLE_OWNER, quedan: 1 });
+      const oldest = {
         id: 'gm-3',
         memberProfileId: 'perfil-3',
         memberRoleConceptId: COMM.GROUP_ROLE_MEMBER,
       };
-      d.groupsRepo.listActiveMembersByAge.mockResolvedValue([masAntiguo]);
+      d.groupsRepo.listActiveMembersByAge.mockResolvedValue([oldest]);
 
       await d.service.leaveGroup('grp-1', 'owner-profile', actor);
 
-      expect(masAntiguo.memberRoleConceptId).toBe(COMM.GROUP_ROLE_OWNER);
+      expect(oldest.memberRoleConceptId).toBe(COMM.GROUP_ROLE_OWNER);
     });
 
     it('si sale alguien que no es el dueño, el dueño no cambia', async () => {
       const d = build();
-      const group = conGrupo(d, {
+      const group = withGroup(d, {
         rolDelQueSale: COMM.GROUP_ROLE_MEMBER,
         quedan: 3,
       });
@@ -693,7 +693,7 @@ describe('CommunityGroupsService', () => {
      */
     it('toma el grupo con candado antes de contar', async () => {
       const d = build();
-      conGrupo(d, { rolDelQueSale: COMM.GROUP_ROLE_MEMBER, quedan: 1 });
+      withGroup(d, { rolDelQueSale: COMM.GROUP_ROLE_MEMBER, quedan: 1 });
 
       await d.service.leaveGroup('grp-1', 'owner-profile', actor);
 
@@ -710,7 +710,7 @@ describe('CommunityGroupsService', () => {
      */
     it('el recuento se recalcula contra la base, no restando', async () => {
       const d = build();
-      const group = conGrupo(d, {
+      const group = withGroup(d, {
         rolDelQueSale: COMM.GROUP_ROLE_MEMBER,
         quedan: 7,
       });

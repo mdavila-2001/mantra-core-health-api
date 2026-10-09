@@ -78,7 +78,7 @@ function build(membresias: Record<string, string> = {}) {
         filas.get(userIdDe(email))?.tenantRoleConceptId
       );
     },
-    fila: (email: string) => filas.get(userIdDe(email)),
+    row: (email: string) => filas.get(userIdDe(email)),
   };
 }
 
@@ -102,7 +102,7 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
     const todasStaff = Object.fromEntries(
       PROVIDER_ACCOUNTS.map((c) => [c.email, DIR.ROLE_STAFF]),
     );
-    const { service, fila } = build(todasStaff);
+    const { service, row: fila } = build(todasStaff);
 
     await service.run('demo-password', 'development');
 

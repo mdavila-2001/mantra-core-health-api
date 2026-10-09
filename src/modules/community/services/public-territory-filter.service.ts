@@ -61,12 +61,12 @@ export function departmentSiglaOfMunicipalityCode(
 
 /** Los prefijos de código de los municipios de un departamento, en las dos formas. */
 function municipalityCodePrefixesOf(sigla: string): string[] {
-  const prefijos = [`${sigla}-`];
+  const prefixes = [`${sigla}-`];
   for (const [ine, candidata] of BO_DEPARTMENT_BY_INE_PREFIX) {
     if (candidata === sigla)
-      prefijos.push(`${MUNICIPALITY_INE_CODE_PREFIX}${ine}`);
+      prefixes.push(`${MUNICIPALITY_INE_CODE_PREFIX}${ine}`);
   }
-  return prefijos;
+  return prefixes;
 }
 
 /**
@@ -97,17 +97,17 @@ export class PublicTerritoryFilterService {
    * Resuelve el par pedido a un filtro aplicable.
    *
    * @param em - Contexto de persistencia.
-   * @param pedido - `concept_id` de departamento y/o de municipio, tal como llegaron.
+   * @param order - `concept_id` de departamento y/o de municipio, tal como llegaron.
    * @returns El filtro, o `undefined` si no se pidió ninguno de los dos.
    * @throws PreconditionFailedException (422) si alguno no es del catálogo, o si
    *   el municipio no pertenece al departamento.
    */
   async resolve(
     em: EntityManager,
-    pedido: { department?: string; municipality?: string },
+    order: { department?: string; municipality?: string },
   ): Promise<PublicTerritoryFilter | undefined> {
-    const department = pedido.department?.trim() || undefined;
-    const municipality = pedido.municipality?.trim() || undefined;
+    const department = order.department?.trim() || undefined;
+    const municipality = order.municipality?.trim() || undefined;
     if (!department && !municipality) return undefined;
 
     let departmentSigla: string | undefined;
@@ -155,21 +155,21 @@ export class PublicTerritoryFilterService {
     em: EntityManager,
     valueSetCode: string,
     conceptId: string,
-    opciones: { mensaje: string },
+    options: { mensaje: string },
   ): Promise<void> {
-    const conjunto = await this.valueSets.findByInternalCode(em, valueSetCode);
-    const miembros = conjunto
-      ? await this.valueSets.findIncludedConceptIdsByValueSet(em, conjunto.id)
+    const set = await this.valueSets.findByInternalCode(em, valueSetCode);
+    const members = set
+      ? await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id)
       : null;
     // Un catálogo ausente no es «ningún lugar es válido»: se dice lo que pasa.
-    if (miembros === null) {
+    if (members === null) {
       throw new PreconditionFailedException(
         'El catálogo territorial no está disponible',
         { valueSet: valueSetCode },
       );
     }
-    if (!miembros.includes(conceptId)) {
-      throw new PreconditionFailedException(opciones.mensaje, {
+    if (!members.includes(conceptId)) {
+      throw new PreconditionFailedException(options.mensaje, {
         conceptId,
         valueSet: valueSetCode,
       });

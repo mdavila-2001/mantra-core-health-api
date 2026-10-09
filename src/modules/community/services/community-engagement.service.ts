@@ -17,7 +17,7 @@ export interface PostEngagement {
 }
 
 /** Compromiso vacío, para una publicación sin reacciones ni comentarios. */
-const SIN_COMPROMISO: PostEngagement = {
+const WITHOUT_COMMITMENT: PostEngagement = {
   reactions: { tallies: [], total: 0 },
   commentCount: 0,
 };
@@ -61,8 +61,8 @@ export class CommunityEngagementService {
   ) {}
 
   /** El compromiso de una publicación sin reacciones ni comentarios. */
-  static vacio(): PostEngagement {
-    return SIN_COMPROMISO;
+  static empty(): PostEngagement {
+    return WITHOUT_COMMITMENT;
   }
 
   /**
@@ -106,19 +106,19 @@ export class CommunityEngagementService {
         : Promise.resolve([]),
     ]);
 
-    const propiaPor = new Map(
+    const ownBy = new Map(
       propias.map((reaction) => [
         reaction.reactableRefId,
         reaction.reactionTypeConceptId,
       ]),
     );
-    const comentariosPor = new Map(
+    const commentsBy = new Map(
       comentarios.map((row) => [row.commentableRefId, row.count]),
     );
 
     return new Map(
       postIds.map((postId) => {
-        const recuento = tallies
+        const count = tallies
           .filter((tally) => tally.reactableRefId === postId)
           .map((tally) => ({
             reactionTypeConceptId: tally.reactionTypeConceptId,
@@ -130,23 +130,23 @@ export class CommunityEngagementService {
           postId,
           {
             reactions: {
-              tallies: recuento,
-              total: recuento.reduce((sum, tally) => sum + tally.count, 0),
+              tallies: count,
+              total: count.reduce((sum, tally) => sum + tally.count, 0),
               // `undefined` es «no se preguntó» —lector sin perfil—; `null` es
               // «no reaccionó». La interfaz necesita distinguirlos para saber si
               // puede pintar el botón como activo o si no tiene el dato.
               ...(actorProfileId
                 ? {
-                    actorReactionTypeConceptId: propiaPor.get(postId) ?? null,
-                    actorReactionType: propiaPor.has(postId)
+                    actorReactionTypeConceptId: ownBy.get(postId) ?? null,
+                    actorReactionType: ownBy.has(postId)
                       ? (REACTION_CODE_BY_CONCEPT[
-                          propiaPor.get(postId) as string
+                          ownBy.get(postId) as string
                         ] ?? null)
                       : null,
                   }
                 : {}),
             },
-            commentCount: comentariosPor.get(postId) ?? 0,
+            commentCount: commentsBy.get(postId) ?? 0,
           },
         ];
       }),
