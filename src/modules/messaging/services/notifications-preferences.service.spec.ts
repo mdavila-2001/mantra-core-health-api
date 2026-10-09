@@ -78,7 +78,7 @@ function build() {
  * @param overrides - Lo que la prueba quiera cambiar.
  * @returns La fila doblada.
  */
-function preferencia(overrides: Record<string, unknown> = {}): any {
+function preference(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'pref-1',
     userId: actor.id,
@@ -111,11 +111,11 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
     it('refleja lo silenciado y la ventana de silencio del canal', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([
-        preferencia({
+        preference({
           categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
           optedIn: false,
         }),
-        preferencia({
+        preference({
           id: 'pref-canal',
           quietHoursJson: { start: '22:00', end: '07:00' },
         }),
@@ -137,7 +137,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
     it('trata una ventana mal escrita como ausente, no como error', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([
-        preferencia({ quietHoursJson: { start: 42 } }),
+        preference({ quietHoursJson: { start: 42 } }),
       ]);
 
       // Devolver un 500 dejaría a alguien sin poder arreglar su propia fila.
@@ -164,17 +164,17 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
 
     it('actualiza la fila que ya existía en vez de crear otra', async () => {
       const d = build();
-      const fila = preferencia({
+      const row = preference({
         categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.MESSAGES,
         optedIn: true,
       });
-      d.notificationsRepo.findPreferences.mockResolvedValue([fila]);
+      d.notificationsRepo.findPreferences.mockResolvedValue([row]);
 
       await d.service.updateMyPreferences(actor as any, {
         categories: [{ category: 'MESSAGES', optedIn: false }],
       });
 
-      expect(fila.optedIn).toBe(false);
+      expect(row.optedIn).toBe(false);
       expect(d.notificationsRepo.createPreference).not.toHaveBeenCalled();
     });
 
@@ -195,7 +195,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
 
     it('`null` quita la ventana; ausente no la toca', async () => {
       const d = build();
-      const canal = preferencia({
+      const canal = preference({
         quietHoursJson: { start: '22:00', end: '07:00' },
       });
       d.notificationsRepo.findPreferences.mockResolvedValue([canal]);
@@ -215,7 +215,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
     it('no entrega lo social si la categoría está silenciada', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([
-        preferencia({
+        preference({
           categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
           optedIn: false,
         }),
@@ -236,7 +236,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
     it('pero sí entrega lo clínico: silenciar «social» no silencia una receta', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([
-        preferencia({
+        preference({
           categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
           optedIn: false,
         }),
@@ -258,7 +258,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
         // Sin categoría: es la fila del canal. Antes del carril P9 el emisor
         // buscaba sólo la de la categoría y esta nunca se encontraba, así que
         // el silencio nocturno no se aplicaba jamás.
-        preferencia({ quietHoursJson: { start: '00:00', end: '23:59' } }),
+        preference({ quietHoursJson: { start: '00:00', end: '23:59' } }),
       ]);
 
       const res = await d.service.emitInApp({
@@ -281,7 +281,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
     it('fuera de la ventana la deja disponible en el acto', async () => {
       const d = build();
       d.notificationsRepo.findPreferences.mockResolvedValue([
-        preferencia({ quietHoursJson: { start: '22:00', end: '22:01' } }),
+        preference({ quietHoursJson: { start: '22:00', end: '22:01' } }),
       ]);
 
       await d.service.emitInApp({
