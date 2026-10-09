@@ -945,12 +945,22 @@ export class ProfilesPractitionersService {
       this.sinTumbarLaFicha(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'especialidades', section: 'specialties', unavailable },
+        {
+          profileId,
+          pieza: 'especialidades',
+          section: 'specialties',
+          unavailable,
+        },
       ),
       this.sinTumbarLaFicha(
         () => this.credentialsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'credenciales', section: 'credentials', unavailable },
+        {
+          profileId,
+          pieza: 'credenciales',
+          section: 'credentials',
+          unavailable,
+        },
       ),
       this.sinTumbarLaFicha(
         () => this.authorizationsRepo.findByPractitioner(em, profileId),
@@ -978,7 +988,12 @@ export class ProfilesPractitionersService {
             ? this.affiliations.visiblesDeTerceros(em, profileId)
             : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'afiliaciones', section: 'affiliations', unavailable },
+        {
+          profileId,
+          pieza: 'afiliaciones',
+          section: 'affiliations',
+          unavailable,
+        },
       ),
       subjectUserId === undefined
         ? Promise.resolve(SIN_ACTIVIDAD)

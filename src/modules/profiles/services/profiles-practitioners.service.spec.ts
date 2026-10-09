@@ -2912,7 +2912,10 @@ describe('ProfilesPractitionersService', () => {
 
     it('P-09: una ficha que llegó completa no trae unavailableSections', async () => {
       const d = build();
-      d.personsRepo.findById.mockResolvedValue({ id: 'per-1', displayName: 'Dra. Ana' });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Ana',
+      });
       d.practitionersRepo.findById.mockResolvedValue({
         profileId: 'per-1',
         practitionerCode: 'PRC-1',

@@ -1051,7 +1051,11 @@ function storedCents(line: InsuranceClaimLines, amount: string): bigint {
     return toCents(amount);
   } catch (error) {
     if (error instanceof RangeError) {
-      throw new CorruptStoredAmountError(line.insuranceClaimId, line.id, amount);
+      throw new CorruptStoredAmountError(
+        line.insuranceClaimId,
+        line.id,
+        amount,
+      );
     }
     throw error;
   }

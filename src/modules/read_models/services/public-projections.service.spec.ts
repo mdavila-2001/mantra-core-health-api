@@ -62,9 +62,9 @@ describe('PublicProjectionsService (UC-30-10)', () => {
     const { service, execute } = build();
     execute.mockRejectedValueOnce(new Error('relation does not exist'));
 
-    await expect(service.searchDirectory({ city: 'Lima' })).rejects.toBeInstanceOf(
-      ServiceUnavailableException,
-    );
+    await expect(
+      service.searchDirectory({ city: 'Lima' }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
   it('serves the public directory filtered by city and specialty', async () => {

@@ -350,8 +350,12 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
     await d.repo.matchIdsByText(d.em, 'pedia', where, 10);
 
     const consultas = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
-    expect(consultas.filter((sql: string) => sql.includes('pg_extension'))).toHaveLength(1);
-    expect(consultas.filter((sql: string) => sql.includes('unaccent(lower'))).toHaveLength(2);
+    expect(
+      consultas.filter((sql: string) => sql.includes('pg_extension')),
+    ).toHaveLength(1);
+    expect(
+      consultas.filter((sql: string) => sql.includes('unaccent(lower')),
+    ).toHaveLength(2);
   });
 
   it('sin la extensión consulta con lower(...) directo, sin intentar unaccent', async () => {
@@ -360,7 +364,9 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
     await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
 
     const consultas = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
-    expect(consultas.some((sql: string) => sql.includes('unaccent(lower'))).toBe(false);
+    expect(
+      consultas.some((sql: string) => sql.includes('unaccent(lower')),
+    ).toBe(false);
     expect(d.execute).toHaveBeenCalledTimes(2);
   });
 
@@ -372,7 +378,9 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
       throw caida;
     });
 
-    await expect(d.repo.matchIdsByText(d.em, 'cardio', where, 10)).rejects.toBe(caida);
+    await expect(d.repo.matchIdsByText(d.em, 'cardio', where, 10)).rejects.toBe(
+      caida,
+    );
     expect(d.execute).toHaveBeenCalledTimes(2);
   });
 });

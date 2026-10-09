@@ -396,8 +396,8 @@ export class CdsService {
     } catch (err) {
       if (!(err instanceof UnparseableCdsRuleError)) throw err;
       throw new PreconditionFailedException(
-        `La lógica de la regla no se puede interpretar: ${err.message}`,
-        { field: 'logicJson' },
+        'La lógica de la regla no se puede interpretar',
+        { field: 'logicJson', reason: err.message },
       );
     }
   }

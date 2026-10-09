@@ -108,7 +108,9 @@ describe('CdsService', () => {
         updatedAt: new Date(),
       };
       d.rulesRepo.findById.mockResolvedValue(rule);
-      await expect(d.service.publishVersion('r1', {}, actor)).rejects.toMatchObject({
+      await expect(
+        d.service.publishVersion('r1', {}, actor),
+      ).rejects.toMatchObject({
         status: 422,
         response: expect.objectContaining({
           details: expect.objectContaining({ field: 'logicJson' }),

@@ -213,7 +213,11 @@ describe('PractitionerAccessRequestsService', () => {
         avisoDentro = dentroDeLaTransaccion;
       });
 
-      await d.service.decide('c-1', { decision: 'DECLINED' } as any, actorPaciente);
+      await d.service.decide(
+        'c-1',
+        { decision: 'DECLINED' } as any,
+        actorPaciente,
+      );
 
       expect(d.notices.emit).toHaveBeenCalledTimes(1);
       expect(avisoDentro).toBe(false);
