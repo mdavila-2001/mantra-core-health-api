@@ -69,6 +69,57 @@ recibe el cliente, el que está mal es este documento.
 }
 ```
 
+### 400 · los campos, estructurados (`details.fields`)
+
+Desde el 2026-10-08 el `ValidationPipe` global sale de una sola fábrica,
+`createGlobalValidationPipe()` (`src/common/http/validation-pipe.ts`), que usan `main.ts`
+y el harness de integración. Además de las frases de `violations`, que no cambian, el
+400 trae **`details.fields`**: la ruta completa de cada campo y el nombre de las
+restricciones incumplidas.
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Error de validación",
+  "details": {
+    "violations": ["items.0.quantity must not be less than 1"],
+    "fields": [
+      { "field": "items.0.quantity", "constraints": ["min"], "messages": ["quantity must not be less than 1"] },
+      { "field": "patientName", "constraints": ["whitelistValidation"], "messages": ["property patientName should not exist"] }
+    ]
+  }
+}
+```
+
+- `field` es la ruta en el cuerpo: los objetos anidados y los índices de arreglo son
+  segmentos (`items.0.quantity`). El cliente la usa para anclar el error al control.
+- `whitelistValidation` es una propiedad que el DTO **no declara**: casi siempre, un
+  contrato front ↔ API desalineado.
+- El log del filtro registra `violations: [{ field, constraints }]` y el `userId`. Los
+  `messages` no se registran porque un mensaje propio puede interpolar el valor.
+
+### Diagnóstico opcional (`API_ERROR_DIAGNOSTICS=true`)
+
+Con el interruptor encendido, **todo** cuerpo de error agrega `diagnostics`. Sigue siendo
+cierto que el `message` público de un 500 es «Error interno del servidor»:
+
+```json
+{
+  "code": "INTERNAL",
+  "message": "Error interno del servidor",
+  "correlationId": "5b0c…",
+  "diagnostics": {
+    "exception": "TypeError",
+    "message": "Cannot read properties of undefined (reading 'id')",
+    "where": ["src/modules/scheduling/services/appointments.service.ts:120:31"]
+  }
+}
+```
+
+Para una violación de integridad trae también `constraint`, `table` y `column`. Nunca
+trae el `detail` del driver, que lleva el valor de la clave. **Apagado por defecto.** Se
+enciende sólo en local o en entornos con datos sintéticos.
+
 ### 400 · uuid mal formado en la ruta
 
 `POST /iam/users/no-es-uuid/lock` → **400**
