@@ -109,6 +109,13 @@ export const SOURCES = Object.freeze({
     homepage: 'https://hpo.jax.org',
     status: 'conditional',
   },
+  'icd10cm-tabular': {
+    name: 'ICD-10-CM Tabular List (NCHS/CDC)',
+    license: 'Obra del gobierno de EE. UU. (NCHS/CDC); ICD-10-CM de uso público',
+    licenseUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html',
+    homepage: 'https://www.cdc.gov/nchs/icd/icd-10-cm/',
+    status: 'conditional',
+  },
   wikidata: {
     name: 'Wikidata',
     license: 'CC0 1.0 — Wikidata',

@@ -11,6 +11,7 @@ import {
 } from './config.mjs';
 import { imageHostOk, pickImage, sectionProblem } from './guards.mjs';
 import { phenotypeItems } from './hpo.mjs';
+import { noteItems } from './icd10cm.mjs';
 import { icdSystemsFor } from './mondo.mjs';
 import { isMeshDescriptor } from './remote.mjs';
 
@@ -56,9 +57,9 @@ function mondoDefinition(mondo, ctx) {
   };
 }
 
-function doidDefinitions(mondo, ctx, skipTexts) {
+function doidDefinitions(mondo, ctx, skipTexts, extraDoid = null) {
   const out = [];
-  for (const n of mondo?.exact.doid ?? []) {
+  for (const n of [...(mondo?.exact.doid ?? []), ...(extraDoid ? [extraDoid] : [])]) {
     const term = ctx.doid.terms.get(`DOID:${n}`);
     if (!term?.definition || skipTexts.has(term.definition)) continue;
     out.push({
@@ -74,15 +75,16 @@ function doidDefinitions(mondo, ctx, skipTexts) {
   return out;
 }
 
-export function meshIdsFor(identity) {
+export function meshIdsFor(identity, extra = null) {
   const ids = new Set(identity.mondo?.exact.mesh ?? []);
+  if (extra) ids.add(extra);
   for (const x of identity.orpha?.xrefs ?? []) if (x.source === 'MeSH' && x.exact) ids.add(x.reference);
   return [...ids].filter(isMeshDescriptor).sort();
 }
 
-function meshOverviews(identity, ctx) {
+function meshOverviews(identity, ctx, extra = null) {
   const out = [];
-  for (const id of meshIdsFor(identity)) {
+  for (const id of meshIdsFor(identity, extra)) {
     const entry = ctx.mesh.get(id);
     if (!entry?.scopeNote) continue;
     out.push({
@@ -95,6 +97,20 @@ function meshOverviews(identity, ctx) {
     });
   }
   return out;
+}
+
+function icdClassification(term, ctx) {
+  const entry = ctx.icd10cm?.codes.get(term.code);
+  const items = entry ? noteItems(entry) : [];
+  if (!items.length) return null;
+  return {
+    kind: 'classification', text: null, lang: 'en', items,
+    ...provenance('icd10cm-tabular', ctx, {
+      sourceUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html',
+      sourceVersion: `ICD-10-CM Tabular List ${ctx.icd10cm.version ?? ctx.icd10cm.label}`,
+      locator: `Tabular List · ${term.code} · ${entry.title}`,
+    }),
+  };
 }
 
 /** Clave de `phenotype.hpoa` de la enfermedad: ORPHA exacto, o el único OMIM que MONDO declara exacto. */
@@ -145,11 +161,14 @@ function buildFacts(term, identity, wd, ctx) {
   const facts = [];
   const seen = new Set();
   pushFact(facts, seen, { label: 'Código CIE-10-ES', value: term.code, source: GLOSSARY_SOURCE, sourceUrl: CIE_SOURCE_URL });
+  const icd = ctx.icd10cm?.codes.get(term.code);
+  if (icd?.title) pushFact(facts, seen, { label: 'Título ICD-10-CM (inglés)', value: icd.title, source: 'icd10cm-tabular', sourceUrl: 'https://www.cdc.gov/nchs/icd/icd-10-cm/files.html' });
   const { orpha, mondo } = identity;
   if (orpha) {
     const url = orpha.expertLink ?? ORPHANET_EXPERT_FALLBACK(orpha.orpha);
     pushFact(facts, seen, { label: 'Código ORPHA', value: `ORPHA:${orpha.orpha}`, source: 'orphanet-es', sourceUrl: url });
     pushFact(facts, seen, { label: 'Nombre en Orphanet', value: orpha.name, source: 'orphanet-es', sourceUrl: url });
+    for (const syn of orpha.synonyms ?? []) pushFact(facts, seen, { label: 'Sinónimo (Orphanet)', value: syn, source: 'orphanet-es', sourceUrl: url });
     pushFact(facts, seen, { label: 'Tipo de entidad (Orphanet)', value: orpha.type, source: 'orphanet-es', sourceUrl: url });
     for (const p of ctx.orphanet.prevalence.get(orpha.orpha) ?? []) {
       pushFact(facts, seen, { label: 'Prevalencia (Orphanet)', value: prevalenceValue(p), source: 'orphanet-epidemiology-es', sourceUrl: url });
@@ -167,6 +186,10 @@ function buildFacts(term, identity, wd, ctx) {
     const mondoUrl = `https://monarchinitiative.org/${mondo.id}`;
     pushFact(facts, seen, { label: WIKIDATA_FACT_PROPERTIES.P5270.factLabel, value: mondo.id, source: 'mondo', sourceUrl: mondoUrl });
     pushFact(facts, seen, { label: 'Nombre en MONDO (inglés)', value: mondo.label, source: 'mondo', sourceUrl: mondoUrl });
+    for (const syn of mondo.synonyms ?? []) if (syn.toLowerCase() !== (mondo.label ?? '').toLowerCase()) pushFact(facts, seen, { label: 'Sinónimo en MONDO (inglés)', value: syn, source: 'mondo', sourceUrl: mondoUrl });
+    for (const n of mondo.exact.ncit ?? []) pushFact(facts, seen, { label: 'NCI Thesaurus', value: n, source: 'mondo', sourceUrl: `https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&code=${n}` });
+    for (const n of mondo.exact.medgen ?? []) pushFact(facts, seen, { label: 'MedGen', value: n, source: 'mondo', sourceUrl: `https://www.ncbi.nlm.nih.gov/medgen/${n}` });
+    for (const n of mondo.exact.icd11foundation ?? []) pushFact(facts, seen, { label: 'Entidad CIE-11 (Foundation)', value: n, source: 'mondo', sourceUrl: `http://id.who.int/icd/entity/${n}` });
     for (const [key, prop] of [['doid', 'P699'], ['omim', 'P492'], ['mesh', 'P486'], ['umls', 'P2892']]) {
       for (const v of mondo.exact[key]) {
         const value = key === 'doid' ? `DOID:${v}` : v;
@@ -238,15 +261,25 @@ const ICD_SYSTEM_LABEL = { icd10cm: 'ICD10CM', icd10who: 'CIE-10 OMS' };
  * revisor sepan cuánta confianza tiene la identidad): `corroborated` solo si Orphanet y MONDO,
  * independientes, declaran la misma enfermedad.
  */
-export function identityBasis(term, identity, wd) {
+export function identityBasis(term, identity, wd, via = {}, icdEntry = null) {
   const basis = [];
-  if (identity.orpha) basis.push({ source: 'orphanet-es', id: `ORPHA:${identity.orpha.orpha}`, mapping: 'E (correspondencia exacta, validada) con el código CIE-10 de la OMS' });
+  const bridgeMapping = (extra) => `puente Wikidata ${wd?.qid}: el ítem declara este código y ${extra} (T3, sugerencia; no corroborado por otra fuente)`;
+  if (identity.orpha) {
+    basis.push(via.orpha
+      ? { source: 'orphanet-es', id: `ORPHA:${identity.orpha.orpha}`, mapping: bridgeMapping('P1550'), via: 'wikidata-bridge' }
+      : { source: 'orphanet-es', id: `ORPHA:${identity.orpha.orpha}`, mapping: 'E (correspondencia exacta, validada) con el código CIE-10 de la OMS' });
+  }
   if (identity.mondo) {
     const systems = icdSystemsFor(identity.mondo, term.code).map((s) => ICD_SYSTEM_LABEL[s]).join(' + ');
-    basis.push({ source: 'mondo', id: identity.mondo.id, mapping: `skos:exactMatch con ${systems}` });
+    basis.push(via.mondo
+      ? { source: 'mondo', id: identity.mondo.id, mapping: bridgeMapping('P5270'), via: 'wikidata-bridge' }
+      : { source: 'mondo', id: identity.mondo.id, mapping: `skos:exactMatch con ${systems}` });
   }
+  if (via.meshId) basis.push({ source: 'nlm-mesh', id: via.meshId, mapping: bridgeMapping('P486'), via: 'wikidata-bridge' });
+  if (via.doidId) basis.push({ source: 'disease-ontology', id: `DOID:${via.doidId}`, mapping: bridgeMapping('P699'), via: 'wikidata-bridge' });
+  if (icdEntry) basis.push({ source: 'icd10cm-tabular', id: term.code, mapping: 'mismo código ICD-10-CM (la CIE-10-ES es su traducción oficial)' });
   if (wd?.qid) basis.push({ source: 'wikidata', id: wd.qid, mapping: 'el ítem declara este código (P4229/P494); único para el código y para el término' });
-  return { basis, corroborated: Boolean(identity.orpha && identity.mondo) };
+  return { basis, corroborated: Boolean(identity.orpha && identity.mondo && !via.orpha && !via.mondo) };
 }
 
 // --- API ---------------------------------------------------------------------------
@@ -267,16 +300,25 @@ export function buildArticle(term, identity, wd, ctx) {
   }
   if (wd?.rejectReason) reject('wikidata', wd.rejectReason, wd.detail);
 
+  // Identidad efectiva: la unión por código y, en su defecto, el puente de Wikidata (T3).
+  const bridge = ctx.bridges?.get(term.code) ?? null;
+  const via = { orpha: Boolean(!identity.orpha && bridge?.orpha), mondo: Boolean(!identity.mondo && bridge?.mondo), meshId: bridge?.meshId ?? null, doidId: bridge?.doidId ?? null };
+  const eff = { ...identity, orpha: identity.orpha ?? bridge?.orpha ?? null, mondo: identity.mondo ?? bridge?.mondo ?? null };
+  const viaTag = ` · vía puente Wikidata ${wd?.qid}`;
+
   const candidates = [];
-  const orphaDef = orphanetDefinition(identity.orpha, ctx);
-  const mondoDef = mondoDefinition(identity.mondo, ctx);
-  if (orphaDef) candidates.push(orphaDef);
-  if (mondoDef) candidates.push(mondoDef);
+  const orphaDef = orphanetDefinition(eff.orpha, ctx);
+  const mondoDef = mondoDefinition(eff.mondo, ctx);
+  if (orphaDef) candidates.push(via.orpha ? { ...orphaDef, locator: orphaDef.locator + viaTag } : orphaDef);
+  if (mondoDef) candidates.push(via.mondo ? { ...mondoDef, locator: mondoDef.locator + viaTag } : mondoDef);
   const seenTexts = new Set([mondoDef?.text].filter(Boolean));
-  candidates.push(...doidDefinitions(identity.mondo, ctx, seenTexts));
-  candidates.push(...meshOverviews(identity, ctx));
-  const symptoms = hpoSymptoms(identity, ctx, flags);
-  if (symptoms) candidates.push(symptoms);
+  const tagIf = (flag) => (s) => (flag ? { ...s, locator: s.locator + viaTag } : s);
+  candidates.push(...doidDefinitions(eff.mondo, ctx, seenTexts, via.doidId).map((s) => tagIf(via.mondo || (via.doidId && s.locator.endsWith(`(DOID:${via.doidId})`)))(s)));
+  candidates.push(...meshOverviews(eff, ctx, via.meshId).map((s) => tagIf(s.sourceUrl.endsWith(`ui=${via.meshId}`) || via.mondo || via.orpha)(s)));
+  const symptoms = hpoSymptoms(eff, ctx, flags);
+  if (symptoms) candidates.push(via.orpha || via.mondo ? { ...symptoms, locator: symptoms.locator + viaTag } : symptoms);
+  const classification = icdClassification(term, ctx);
+  if (classification) candidates.push(classification);
 
   const sections = [];
   for (const { citesWikipedia, ...s } of candidates) {
@@ -294,11 +336,11 @@ export function buildArticle(term, identity, wd, ctx) {
   const images = buildImages(term, wd, ctx, imageRejects);
   for (const r of imageRejects) reject(r.level, r.reason, r.detail);
 
-  const facts = buildFacts(term, identity, wd, ctx);
+  const facts = buildFacts(term, eff, wd, ctx);
   // El puntero al ítem de Wikidata no basta para tener artículo: es un enlace, no un dato.
   const hasSourceFacts = facts.some((f) => f.source !== GLOSSARY_SOURCE && f.label !== WIKIDATA_ITEM_LABEL);
   if (sections.length === 0 && images.length === 0 && !hasSourceFacts) {
-    const linked = identity.orpha || identity.mondo || wd?.qid;
+    const linked = eff.orpha || eff.mondo || wd?.qid;
     reject('term', linked ? REJECT_REASONS.EMPTY_ARTICLE : REJECT_REASONS.NO_EXACT_SOURCE, null);
     return { article: null, rejected, flags };
   }
@@ -306,12 +348,12 @@ export function buildArticle(term, identity, wd, ctx) {
   const hasSpanish = sections.some((s) => s.lang === 'es');
   const article = {
     conceptRef,
-    identity: identityBasis(term, identity, wd),
+    identity: identityBasis(term, eff, wd, via, ctx.icd10cm?.codes.get(term.code) && classification ? true : null),
     lang: hasSpanish || sections.length === 0 ? 'es' : 'en',
     sections,
     images,
     facts,
-    references: buildReferences(identity, wd, sections, ctx),
+    references: buildReferences(eff, wd, sections, ctx),
   };
   return { article, rejected, flags };
 }

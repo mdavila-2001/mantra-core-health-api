@@ -18,6 +18,7 @@ import { DISEASE_SECTION_KINDS, SECTION_PROVENANCE_FIELDS } from '../lib/config.
 import { parseDoid, unescapeObo } from '../lib/doid.mjs';
 import { dosePattern, imageHostOk, pickImage, sectionProblem, stripTracking } from '../lib/guards.mjs';
 import { frequencyOf, parseBabelon, parseHpJson, parseHpoa, phenotypeItems } from '../lib/hpo.mjs';
+import { computeBridges } from '../lib/bridge.mjs';
 import { corroborates, resolveIdentities } from '../lib/identity.mjs';
 import { icdSystemsFor, indexIcd10 as mondoIndex, parseMondo, toMondoConcept } from '../lib/mondo.mjs';
 import { indexIcd10 as orphaIndex, parseAges, parseHeader, parsePrevalence, parseProduct1 } from '../lib/orphanet.mjs';
@@ -410,4 +411,37 @@ test('Canalización completa sobre fixtures: contrato, idempotencia y rechazos',
   assert.equal(a.articles.find((x) => x.conceptRef.code === 'E84').sections.some((s) => s.kind === 'symptoms'), false);
   const withAck = await run('c', { hpoAck: true });
   assert.equal(withAck.articles.find((x) => x.conceptRef.code === 'E84').sections.some((s) => s.kind === 'symptoms'), true);
+});
+
+// --- Puente Wikidata para texto (T3) -------------------------------------------------------------------
+
+test('Puente: Wikidata aporta el concepto solo si es único y nadie más lo reclama (sintético)', () => {
+  const orphaConcepts = new Map([['586', product1.get('586')]]);
+  const mondoConcepts = mondo.concepts;
+  const terms2 = [{ code: 'X1' }, { code: 'X2' }, { code: 'X3' }];
+  const ids = new Map(terms2.map((t) => [t.code, { orpha: null, mondo: null }]));
+  const wd = (facts) => ({ qid: 'Q1', facts });
+  const wikidata = new Map([
+    ['X1', wd({ P1550: ['586'], P5270: ['MONDO_0009061'], P486: ['D003550'] })],
+    ['X2', wd({ P1550: ['586'] })], // reclama el mismo ORPHA que X1: es un grupo, nadie lo recibe
+    ['X3', wd({ P1550: ['586', '999'] })], // dos valores: ambiguo
+  ]);
+  const out = computeBridges(terms2, ids, wikidata, { orphaConcepts, mondoConcepts });
+  assert.equal(out.get('X1')?.orpha ?? null, null, 'ORPHA:586 lo reclaman X1 y X2');
+  assert.equal(out.get('X1').mondo.id, 'MONDO:0009061');
+  assert.equal(out.get('X1').meshId, 'D003550');
+  assert.equal(out.has('X2'), false);
+  assert.equal(out.has('X3'), false);
+});
+
+test('Artículo: el texto vía puente queda marcado en locator e identity y nunca como corroborado (sintético)', () => {
+  const term = { code: 'X1', slug: 'cie10es-dx-x1', esName: 'Término sintético' };
+  const identity = { orpha: null, mondo: null, notes: [], conflict: false, orphaDeclared: [], mondoDeclared: [] };
+  const wd = { qid: 'Q1', rejectReason: null, detail: null, files: [], facts: {} };
+  const bridges = new Map([['X1', { orpha: product1.get('586'), mondo: mondo.concepts.get('MONDO:0009061'), meshId: null, doidId: null }]]);
+  const { article } = buildArticle(term, identity, wd, baseCtx({ bridges }));
+  assert.ok(article.sections.length >= 2);
+  for (const s of article.sections.filter((x) => ['orphanet-es', 'mondo'].includes(x.source))) assert.match(s.locator, /vía puente Wikidata Q1/);
+  assert.equal(article.identity.corroborated, false);
+  assert.ok(article.identity.basis.filter((b) => b.via === 'wikidata-bridge').length >= 2);
 });
