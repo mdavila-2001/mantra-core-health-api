@@ -2525,7 +2525,6 @@ Content-Type: application/json
 | `resourceId` | Sí | `string` | formato `uuid` | Recurso al que se adjunta el formulario | `00000000-0000-4000-8000-000000000001` |
 | `resourceTypeConceptId` | No | `string` | formato `uuid` | Tipo de recurso (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `tenantContextId` | No | `string` | formato `uuid` | Contexto de tenant | `00000000-0000-4000-8000-000000000001` |
-| `definitionSetVersionId` | No | `string` | formato `uuid` | Versión publicada del set cuyo schema se congela | `00000000-0000-4000-8000-000000000001` |
 | `schemaVersion` | No | `number` | mínimo 1 | Versión de schema explícita | `1` |
 
 ### Payload completo de ejemplo
@@ -2542,7 +2541,6 @@ Content-Type: application/json
   "resourceId": "00000000-0000-4000-8000-000000000001",
   "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "tenantContextId": "00000000-0000-4000-8000-000000000001",
-  "definitionSetVersionId": "00000000-0000-4000-8000-000000000001",
   "schemaVersion": 1
 }
 ```

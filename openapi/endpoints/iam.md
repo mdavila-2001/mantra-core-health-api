@@ -1595,6 +1595,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "verificationStatus": "PENDING",
   "emailVerificationSent": true,
   "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "profilePhotoStored": true,
   "ownPracticeId": "00000000-0000-4000-8000-000000000001",
   "ownSiteId": "00000000-0000-4000-8000-000000000001"
 }
@@ -1614,6 +1615,7 @@ Campos de la respuesta:
 | `verificationStatus` | Sí | `string` | Sin restricción adicional declarada | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `PENDING` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación. | `true` |
 | `photoFileId` | No | `string` | formato `uuid` | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `00000000-0000-4000-8000-000000000001` |
+| `profilePhotoStored` | No | `boolean` | Sin restricción adicional declarada | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `true` |
 | `ownPracticeId` | No | `string` | formato `uuid` | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `00000000-0000-4000-8000-000000000001` |
 | `ownSiteId` | No | `string` | formato `uuid` | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `00000000-0000-4000-8000-000000000001` |
 
@@ -1630,6 +1632,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
@@ -4742,6 +4745,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
