@@ -4511,7 +4511,7 @@ Contexto declarado en el controlador: Un consultorio de OTRO profesional — las
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -4521,7 +4521,7 @@ NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `Prof
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/00000000-0000-4000-8000-000000000001/affiliations HTTP/1.1
@@ -4530,8 +4530,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -4546,15 +4546,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -4567,15 +4565,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 
@@ -6543,7 +6539,7 @@ El sujeto sale de la sesión: no hay forma de escribir el historial de otro.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -6551,7 +6547,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/me/affiliations HTTP/1.1
@@ -6560,8 +6556,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -6574,15 +6570,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -6595,15 +6589,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 
@@ -7436,8 +7428,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa matrícula ya tiene historial de auditoría; no se puede borrar | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7557,8 +7549,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -7597,7 +7589,7 @@ Contexto declarado en el controlador: El buscador de instituciones para declarar
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.buscar`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
+NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.search`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
 
 ### Parámetros
 
@@ -8137,7 +8129,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8252,7 +8244,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 409 | `CONFLICT` | El profesional ya tiene esa especialidad activa | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verbo} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -8847,7 +8839,7 @@ Contexto declarado en el controlador: Las solicitudes pendientes de las sedes de
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listarSolicitudes`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
+NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listSolicitudes`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
 
 ### Parámetros
 
@@ -8977,7 +8969,7 @@ Contexto declarado en el controlador: La organización acepta el vínculo.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.aprobar`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.approve`. No recibe body. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -9077,7 +9069,7 @@ Contexto declarado en el controlador: La organización rechaza el vínculo, con 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.rechazar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.reject`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -9190,7 +9182,7 @@ Contexto declarado en el controlador: La organización da de baja un vínculo qu
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revocar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revoke`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 

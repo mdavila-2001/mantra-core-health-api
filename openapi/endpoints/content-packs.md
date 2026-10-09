@@ -148,7 +148,7 @@ Contexto declarado en el controlador: Aplica un paquete. Responde `200` y no `20
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /admin/content-packs/{code}/apply` en `ContentPacksController_aplicar`. El controlador delega en `ContentPacksService.aplicar`. Valida el body como `ApplyContentPackDto` y consume `application/json`. El tipo de retorno estático es `Promise<ApplyContentPackResponseDto>`.
+NestJS resuelve `POST /admin/content-packs/{code}/apply` en `ContentPacksController_aplicar`. El controlador delega en `ContentPacksService.apply`. Valida el body como `ApplyContentPackDto` y consume `application/json`. El tipo de retorno estático es `Promise<ApplyContentPackResponseDto>`.
 
 ### Parámetros
 
