@@ -50,20 +50,20 @@ export class NdjsonParser implements FileParser {
         // archivo. No se cuentan como leídas.
         if (text === '') return;
 
-        const numero = index + 1;
+        const lineNumber = index + 1;
 
         let raw: unknown;
         try {
           raw = JSON.parse(text);
         } catch {
           problems.push({
-            fila: numero,
+            fila: lineNumber,
             motivo: 'la línea no es un JSON válido',
           });
           return;
         }
         if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-          problems.push({ fila: numero, motivo: 'la línea no es un objeto' });
+          problems.push({ fila: lineNumber, motivo: 'la línea no es un objeto' });
           return;
         }
 
@@ -77,7 +77,7 @@ export class NdjsonParser implements FileParser {
           if (value === undefined || value === null) continue;
           if (typeof value !== 'string') {
             problems.push({
-              fila: numero,
+              fila: lineNumber,
               columna: key,
               motivo: `«${key}» no es texto`,
             });
@@ -87,7 +87,7 @@ export class NdjsonParser implements FileParser {
           values[key] = value;
         }
 
-        if (serves) rows.push({ numero, valores: values });
+        if (serves) rows.push({ numero: lineNumber, valores: values });
       });
 
     return { filas: rows, problemas: problems };

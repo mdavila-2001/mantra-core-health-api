@@ -593,8 +593,8 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      const [, tipo, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
-      expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
+      const [, ownerType, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
+      expect(ownerType).toBe(CONCEPTS.OWNER_PATIENT);
       expect(owner).toBe('p-7');
       expect(typeof tope).toBe('number');
     });

@@ -166,13 +166,13 @@ function originOf(
 /** Decimal de un parámetro de consulta, o `undefined`. */
 function toDecimal(value?: string): number | undefined {
   if (value === undefined) return undefined;
-  const numero = Number.parseFloat(value);
-  return Number.isFinite(numero) ? numero : undefined;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 /** Entero de un parámetro de consulta, o `undefined`. */
 function toInteger(value?: string): number | undefined {
   if (value === undefined) return undefined;
-  const numero = Number.parseInt(value, 10);
-  return Number.isFinite(numero) ? numero : undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

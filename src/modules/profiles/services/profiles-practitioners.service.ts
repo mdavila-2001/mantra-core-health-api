@@ -1508,23 +1508,23 @@ export class ProfilesPractitionersService {
     const current = rows.find(
       (row) => row.typeConceptId === CONCEPTS.ID_TYPE_TAX,
     );
-    const numero = (nit ?? current?.value ?? '').trim();
+    const nitValue = (nit ?? current?.value ?? '').trim();
     const titular = (legalName ?? current?.holderName ?? '').trim();
 
-    if (current?.value === numero && (current.holderName ?? '') === titular) {
+    if (current?.value === nitValue && (current.holderName ?? '') === titular) {
       return;
     }
     if (current) {
       current.validTo = now;
       touch(current, actorUserId);
     }
-    if (numero === '') return;
+    if (nitValue === '') return;
 
     this.identifiersRepo.create(tx, {
       ownerId: personId,
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       typeConceptId: CONCEPTS.ID_TYPE_TAX,
-      value: numero,
+      value: nitValue,
       holderName: titular === '' ? undefined : titular,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId,

@@ -688,8 +688,8 @@ export class IamPractitionerSelfRegistrationService {
         // El DTO ya lo exige, y se comprueba acá también por lo mismo que el
         // departamento emisor: un llamador que no pase por el `ValidationPipe`
         // podría saltárselo, y una credencial sin número no se puede verificar.
-        const numero = declared.number.trim();
-        if (numero === '') {
+        const registrationNumber = declared.number.trim();
+        if (registrationNumber === '') {
           throw new PreconditionFailedException(
             'El número del título no puede estar vacío',
             { credentialTypeConceptId: declared.credentialTypeConceptId },
@@ -725,7 +725,7 @@ export class IamPractitionerSelfRegistrationService {
         this.professionalCredentialsRepo.create(tx, {
           practitionerProfileId: person.id,
           credentialTypeConceptId: declared.credentialTypeConceptId,
-          number: numero,
+          number: registrationNumber,
           issuingInstitutionText: declared.issuingInstitutionText?.trim(),
           issuingCityText: optionalText(declared.issuingCityText),
           issuingCountryText: optionalText(declared.issuingCountryText),

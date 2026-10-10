@@ -1511,9 +1511,9 @@ export class ProfilesPatientsService {
     const current = rows.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
     // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
     // social no puede borrar el NIT, ni al revés.
-    const numero = (nit ?? current?.value ?? '').trim();
+    const nitValue = (nit ?? current?.value ?? '').trim();
     const titular = (legalName ?? current?.holderName ?? '').trim();
-    if (current?.value === numero && (current?.holderName ?? '') === titular) {
+    if (current?.value === nitValue && (current?.holderName ?? '') === titular) {
       return;
     }
 
@@ -1523,13 +1523,13 @@ export class ProfilesPatientsService {
     }
     // Sin número no hay identificador que abrir: una razón social sola no es un
     // NIT, y guardarla suelta dejaría una fila fiscal sin valor.
-    if (numero === '') return;
+    if (nitValue === '') return;
 
     this.identifiersRepo.create(tx, {
       ownerId: personId,
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
       typeConceptId: CONCEPTS.ID_TYPE_TAX,
-      value: numero,
+      value: nitValue,
       holderName: titular === '' ? undefined : titular,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
       actorUserId,
