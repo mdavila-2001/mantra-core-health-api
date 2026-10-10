@@ -387,9 +387,9 @@ describe('ChartNotesService', () => {
 
     it('C5: sin perfil profesional en la sesión y sin cuerpo, 403 y no firma', async () => {
       const d = build();
-      const sinPerfil = { id: 'u-9', roles: [] } as any;
+      const withoutProfile = { id: 'u-9', roles: [] } as any;
       await expect(
-        d.service.signVersion('h1', 'v1', {}, sinPerfil),
+        d.service.signVersion('h1', 'v1', {}, withoutProfile),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
     });
@@ -726,7 +726,7 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     ],
   ])(
     '%s pregunta por el paciente de la nota y, sin permiso, no escribe',
-    async (_nombre, operate) => {
+    async (_name, operate) => {
       const d = withoutPermission();
       await expect(operate(d)).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(

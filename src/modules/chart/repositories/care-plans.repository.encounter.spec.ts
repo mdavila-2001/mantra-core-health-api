@@ -14,8 +14,8 @@ describe('CarePlansRepository.findByEncounter', () => {
       em: {
         find: (...args: unknown[]) => {
           calls.push(args);
-          const [entidad] = args;
-          if (entidad === CarePlans) {
+          const [entity] = args;
+          if (entity === CarePlans) {
             return Promise.resolve([{ id: 'cp-1', createdAt: new Date() }]);
           }
           return Promise.resolve(activities);
@@ -25,11 +25,11 @@ describe('CarePlansRepository.findByEncounter', () => {
   }
 
   it('filtra los planes por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new CarePlansRepository().findByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       CarePlans,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },

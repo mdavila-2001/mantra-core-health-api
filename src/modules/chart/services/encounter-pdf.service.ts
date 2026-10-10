@@ -138,17 +138,17 @@ export function buildRole(data: RoleData): EncounterRole {
 
   const notesLines = data.notas.flatMap(({ version }) => {
     if (!version) return [];
-    const lineas: string[] = [];
+    const lines: string[] = [];
     if (version.chiefComplaintText)
-      lineas.push(`Motivo: ${version.chiefComplaintText}`);
+      lines.push(`Motivo: ${version.chiefComplaintText}`);
     if (version.subjectiveText)
-      lineas.push(`Subjetivo: ${version.subjectiveText}`);
+      lines.push(`Subjetivo: ${version.subjectiveText}`);
     if (version.objectiveText)
-      lineas.push(`Objetivo: ${version.objectiveText}`);
+      lines.push(`Objetivo: ${version.objectiveText}`);
     if (version.assessmentText)
-      lineas.push(`Evaluación: ${version.assessmentText}`);
-    if (version.planText) lineas.push(`Plan: ${version.planText}`);
-    return lineas;
+      lines.push(`Evaluación: ${version.assessmentText}`);
+    if (version.planText) lines.push(`Plan: ${version.planText}`);
+    return lines;
   });
 
   const diagnosesLines = data.conditions.map(
@@ -167,16 +167,16 @@ export function buildRole(data: RoleData): EncounterRole {
   );
 
   const linesPlan = data.carePlans.flatMap((plan) => {
-    const lineas: string[] = [];
-    if (plan.goalText) lineas.push(`Meta: ${plan.goalText}`);
+    const lines: string[] = [];
+    if (plan.goalText) lines.push(`Meta: ${plan.goalText}`);
     for (const activity of plan.activities) {
-      lineas.push(`- ${label(data.conceptsById, activity.activityConceptId)}`);
+      lines.push(`- ${label(data.conceptsById, activity.activityConceptId)}`);
     }
-    return lineas;
+    return lines;
   });
 
-  const documentsLines = data.documents.flatMap((documento) =>
-    documento.files.map(
+  const documentsLines = data.documents.flatMap((document) =>
+    document.files.map(
       (file) => `- ${data.fileNamesById.get(file.fileId) ?? 'archivo adjunto'}`,
     ),
   );
@@ -243,14 +243,14 @@ export function draw(role: EncounterRole): Promise<Buffer> {
     doc.fontSize(TITLE_FONT_SIZE).text(role.titulo);
     doc.moveDown(0.5);
     doc.fontSize(BODY_FONT_SIZE);
-    for (const linea of role.encabezado) doc.text(linea);
+    for (const line of role.encabezado) doc.text(line);
 
     for (const section of role.secciones) {
       doc.moveDown(SECTION_GAP_BEFORE / 10);
       doc.fontSize(SECTION_FONT_SIZE).text(section.titulo);
       doc.moveDown(0.3);
-      for (const linea of section.lineas) {
-        doc.fontSize(BODY_FONT_SIZE).text(linea, { lineGap: LINE_GAP });
+      for (const line of section.lineas) {
+        doc.fontSize(BODY_FONT_SIZE).text(line, { lineGap: LINE_GAP });
       }
     }
 
