@@ -6,7 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
  * Son claves y no números: el orden puede cambiar y un `2` guardado en algún
  * lado dejaría de significar lo mismo. La pantalla las traduce.
  */
-export const PASOS_DE_ONBOARDING = [
+export const ONBOARDING_STEPS = [
   'professional-data',
   'photo',
   'organizations',
@@ -15,12 +15,12 @@ export const PASOS_DE_ONBOARDING = [
 ] as const;
 
 /** Una de las cinco etapas. */
-export type PasoDeOnboarding = (typeof PASOS_DE_ONBOARDING)[number];
+export type PasoDeOnboarding = (typeof ONBOARDING_STEPS)[number];
 
 /** El estado de una etapa concreta. */
 export class OnboardingStepDto {
   /** Qué etapa es. */
-  @ApiProperty({ enum: PASOS_DE_ONBOARDING }) key!: PasoDeOnboarding;
+  @ApiProperty({ enum: ONBOARDING_STEPS }) key!: PasoDeOnboarding;
 
   /** Está cumplida con los datos que el profesional ya cargó. */
   @ApiProperty() complete!: boolean;
@@ -60,6 +60,6 @@ export class PractitionerOnboardingDto {
    *
    * Es lo único que la pantalla necesita para decidir dónde aterrizar.
    */
-  @ApiProperty({ enum: [...PASOS_DE_ONBOARDING, 'done'] })
+  @ApiProperty({ enum: [...ONBOARDING_STEPS, 'done'] })
   firstIncomplete!: PasoDeOnboarding | 'done';
 }

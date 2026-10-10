@@ -16,12 +16,12 @@ function withConnection() {
   return { em: em as never, execute };
 }
 
-const AHORA = new Date('2026-10-01T12:00:00.000Z');
+const NOW = new Date('2026-10-01T12:00:00.000Z');
 
 const base = {
   ownerPersonId: 'person-1',
   proxyUserId: 'user-1',
-  now: AHORA,
+  now: NOW,
   limit: 8,
 };
 
@@ -36,9 +36,9 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
       tokens: ['ana', 'perez'],
     });
 
-    const [sql, parametros] = execute.mock.calls[0];
-    expect((sql.match(/\?/g) ?? []).length).toBe(parametros.length);
-    expect(parametros).toEqual([
+    const [sql, params] = execute.mock.calls[0];
+    expect((sql.match(/\?/g) ?? []).length).toBe(params.length);
+    expect(params).toEqual([
       CONCEPTS.ID_TYPE_NATIONAL,
       CONCEPTS.STATE_ACTIVE,
       'person-1',
@@ -46,8 +46,8 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
       'user-1',
       PROF.PROXY_PENDING,
       PROF.PROXY_ACTIVE,
-      AHORA,
-      AHORA,
+      NOW,
+      NOW,
       '% ana%',
       '% perez%',
       8,
@@ -62,9 +62,9 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
       tokens: ['ana', 'maria', 'perez'],
     });
 
-    const [sql, parametros] = execute.mock.calls[0];
+    const [sql, params] = execute.mock.calls[0];
     expect(sql.match(/like \? escape/g)).toHaveLength(3);
-    expect((sql.match(/\?/g) ?? []).length).toBe(parametros.length);
+    expect((sql.match(/\?/g) ?? []).length).toBe(params.length);
   });
 
   it('una sola palabra también deja la consulta alineada', async () => {
@@ -72,9 +72,9 @@ describe('PatientPortalProxiesRepository.searchRepresentableByName', () => {
 
     await repo.searchRepresentableByName(em, { ...base, tokens: ['ana'] });
 
-    const [sql, parametros] = execute.mock.calls[0];
-    expect((sql.match(/\?/g) ?? []).length).toBe(parametros.length);
-    expect(parametros.at(-1)).toBe(8);
+    const [sql, params] = execute.mock.calls[0];
+    expect((sql.match(/\?/g) ?? []).length).toBe(params.length);
+    expect(params.at(-1)).toBe(8);
   });
 
   it('escapa los comodines de LIKE aunque hoy el servicio ya no los deje pasar', async () => {

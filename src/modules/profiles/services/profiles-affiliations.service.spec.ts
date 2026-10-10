@@ -10,7 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import {
-  ESTADO_DEL_VINCULO,
+  LINK_STATUS,
   ProfilesAffiliationsService,
 } from './profiles-affiliations.service';
 import {
@@ -30,7 +30,7 @@ const orgAdmin = {
 } as any;
 
 /** Un profesional cualquiera, sin organización propia. */
-const medico = {
+const doctor = {
   id: 'user-med',
   roles: ['PRACTITIONER'],
   tenantIds: [],
@@ -80,7 +80,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // El emisor de avisos: interesa CON QUÉ se lo llama, no que entregue.
-  const avisos = { emit: mockFn().mockResolvedValue({ delivered: true }) };
+  const notices = { emit: mockFn().mockResolvedValue({ delivered: true }) };
 
   const service = new ProfilesAffiliationsService(
     em,
@@ -89,7 +89,7 @@ function build() {
     tenantAdmin as any,
     memberships as any,
     logger as any,
-    avisos as any,
+    notices as any,
   );
   return {
     service,
@@ -100,7 +100,7 @@ function build() {
     tenantAdmin,
     memberships,
     logger,
-    avisos,
+    avisos: notices,
   };
 }
 
@@ -118,8 +118,8 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
 
       await expect(
-        d.service.initialState(d.em, undefined, medico),
-      ).resolves.toBe(ESTADO_DEL_VINCULO.DECLARADO);
+        d.service.initialState(d.em, undefined, doctor),
+      ).resolves.toBe(LINK_STATUS.DECLARADO);
     });
 
     it('con una sede de una organización QUE TIENE dueño nace pendiente', async () => {
@@ -127,8 +127,8 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
       d.tenantAdmin.hasAdministrators.mockResolvedValue(true);
 
-      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
-        ESTADO_DEL_VINCULO.PENDIENTE,
+      await expect(d.service.initialState(d.em, SITE, doctor)).resolves.toBe(
+        LINK_STATUS.PENDIENTE,
       );
     });
 
@@ -140,8 +140,8 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
       d.tenantAdmin.hasAdministrators.mockResolvedValue(false);
 
-      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
-        ESTADO_DEL_VINCULO.DECLARADO,
+      await expect(d.service.initialState(d.em, SITE, doctor)).resolves.toBe(
+        LINK_STATUS.DECLARADO,
       );
     });
 
@@ -154,7 +154,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
 
       await expect(d.service.initialState(d.em, SITE, orgAdmin)).resolves.toBe(
-        ESTADO_DEL_VINCULO.APROBADO,
+        LINK_STATUS.APROBADO,
       );
     });
 
@@ -162,8 +162,8 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: undefined });
 
-      await expect(d.service.initialState(d.em, SITE, medico)).resolves.toBe(
-        ESTADO_DEL_VINCULO.DECLARADO,
+      await expect(d.service.initialState(d.em, SITE, doctor)).resolves.toBe(
+        LINK_STATUS.DECLARADO,
       );
     });
 
@@ -172,7 +172,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.findOne.mockResolvedValue(null);
 
       await expect(
-        d.service.initialState(d.em, SITE, medico),
+        d.service.initialState(d.em, SITE, doctor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -181,11 +181,11 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
     it('a un tercero sólo se le muestran los vínculos aprobados', async () => {
       const d = build();
 
-      await d.service.visiblesThird(d.em, 'pp-1');
+      await d.service.visibleThird(d.em, 'pp-1');
 
       expect(
         d.affiliationsRepo.findByPractitionerInStatus,
-      ).toHaveBeenCalledWith(d.em, 'pp-1', [ESTADO_DEL_VINCULO.APROBADO]);
+      ).toHaveBeenCalledWith(d.em, 'pp-1', [LINK_STATUS.APROBADO]);
     });
   });
 
@@ -197,7 +197,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       );
 
       await expect(
-        d.service.listSolicitudes(TENANT, orgAdmin),
+        d.service.listRequests(TENANT, orgAdmin),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -211,14 +211,14 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
       d.em.find.mockResolvedValue([{ id: SITE }]);
 
-      await d.service.listSolicitudes(TENANT, orgAdmin);
+      await d.service.listRequests(TENANT, orgAdmin);
 
-      const [, criterio] = d.em.find.mock.calls[0] as [unknown, any];
-      expect(criterio).toEqual({ managingTenantId: TENANT });
+      const [, criterion] = d.em.find.mock.calls[0] as [unknown, any];
+      expect(criterion).toEqual({ managingTenantId: TENANT });
       expect(d.affiliationsRepo.findBySites).toHaveBeenCalledWith(
         d.em,
         [SITE],
-        [ESTADO_DEL_VINCULO.PENDIENTE],
+        [LINK_STATUS.PENDIENTE],
       );
     });
 
@@ -227,7 +227,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.em.find.mockResolvedValue([]);
 
       await expect(
-        d.service.listSolicitudes(TENANT, orgAdmin),
+        d.service.listRequests(TENANT, orgAdmin),
       ).resolves.toEqual({ items: [] });
     });
   });
@@ -239,7 +239,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         id: 'af-1',
         practitionerProfileId: 'pp-1',
         practiceSiteId: SITE,
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       };
       d.affiliationsRepo.findById.mockResolvedValue(request);
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
@@ -281,7 +281,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       // irreversible por omisión, no por decisión.
       const d = build();
       const request = withRequest(d);
-      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      request.statusConceptId = LINK_STATUS.APROBADO;
 
       await d.service.revoke(
         TENANT,
@@ -290,7 +290,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         orgAdmin,
       );
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.REVOCADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.REVOCADO);
       expect(request.decisionReasonText).toBe('Terminó su contrato');
     });
 
@@ -311,10 +311,10 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.kind).toBe('AFFILIATION_APPROVED');
-      expect(aviso.recipientUserId).toBe('user-med');
-      expect(aviso.bodyText).toMatch(/publicar su agenda/);
+      const [notice] = d.avisos.emit.mock.calls[0];
+      expect(notice.kind).toBe('AFFILIATION_APPROVED');
+      expect(notice.recipientUserId).toBe('user-med');
+      expect(notice.bodyText).toMatch(/publicar su agenda/);
     });
 
     it('el aviso del rechazo LLEVA el motivo', async () => {
@@ -328,20 +328,20 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         orgAdmin,
       );
 
-      const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.kind).toBe('AFFILIATION_REJECTED');
-      expect(aviso.bodyText).toContain('No figura en nuestro plantel');
+      const [notice] = d.avisos.emit.mock.calls[0];
+      expect(notice.kind).toBe('AFFILIATION_REJECTED');
+      expect(notice.bodyText).toContain('No figura en nuestro plantel');
     });
 
     it('el aviso de la revocación aclara que las citas siguen', async () => {
       const d = build();
       const request = withRequest(d);
-      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      request.statusConceptId = LINK_STATUS.APROBADO;
 
       await d.service.revoke(TENANT, 'af-1', {} as never, orgAdmin);
 
-      const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.bodyText).toMatch(/ya confirmó siguen en pie/);
+      const [notice] = d.avisos.emit.mock.calls[0];
+      expect(notice.bodyText).toMatch(/ya confirmó siguen en pie/);
     });
 
     it('un profesional sin cuenta no rompe la decisión', async () => {
@@ -353,7 +353,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.APROBADO);
       expect(d.avisos.emit).not.toHaveBeenCalled();
     });
 
@@ -369,7 +369,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.APROBADO);
     });
 
     it('aprobar deja el vínculo activo', async () => {
@@ -378,7 +378,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.APROBADO);
     });
 
     it('rechazar deja el vínculo fuera de pie', async () => {
@@ -392,7 +392,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         orgAdmin,
       );
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.RECHAZADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.RECHAZADO);
     });
 
     /**
@@ -407,7 +407,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       d.affiliationsRepo.findById.mockResolvedValue({
         id: 'af-1',
         practiceSiteId: SITE,
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       });
       // La sede no aparece cuando se la busca acotada a ESTE tenant.
       d.em.findOne.mockResolvedValue(null);
@@ -423,14 +423,14 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      const [, criterio] = d.em.findOne.mock.calls.at(-1) as [unknown, any];
-      expect(criterio).toEqual({ id: SITE, managingTenantId: TENANT });
+      const [, criterion] = d.em.findOne.mock.calls.at(-1) as [unknown, any];
+      expect(criterion).toEqual({ id: SITE, managingTenantId: TENANT });
     });
 
     it('una solicitud ya resuelta no se vuelve a decidir', async () => {
       const d = build();
       const request = withRequest(d);
-      request.statusConceptId = ESTADO_DEL_VINCULO.APROBADO;
+      request.statusConceptId = LINK_STATUS.APROBADO;
 
       await expect(
         d.service.approve(TENANT, 'af-1', orgAdmin),
@@ -475,7 +475,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         id: 'af-1',
         practitionerProfileId: 'pp-1',
         practiceSiteId: SITE,
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       };
       d.affiliationsRepo.findById.mockResolvedValue(request);
       d.em.findOne.mockResolvedValue({ id: SITE, managingTenantId: TENANT });
@@ -526,7 +526,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      expect(request.statusConceptId).toBe(ESTADO_DEL_VINCULO.APROBADO);
+      expect(request.statusConceptId).toBe(LINK_STATUS.APROBADO);
       expect(d.memberships.ensureCareMembership).not.toHaveBeenCalled();
       expect(d.logger.warn).toHaveBeenCalled();
     });
@@ -583,9 +583,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       await d.service.orderNotify(TENANT, 'af-1', 'pp-1');
 
       expect(d.avisos.emit).toHaveBeenCalledTimes(3);
-      const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.kind).toBe('AFFILIATION_REQUESTED');
-      expect(aviso.tenantId).toBe(TENANT);
+      const [notice] = d.avisos.emit.mock.calls[0];
+      expect(notice.kind).toBe('AFFILIATION_REQUESTED');
+      expect(notice.tenantId).toBe(TENANT);
     });
 
     it('sin administradores no avisa a nadie, y no falla', async () => {
@@ -605,16 +605,16 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         sql.includes('tenant_memberships') ? [{ user_id: 'admin-0' }] : [],
       );
       d.em.find.mockImplementation(async (entity: any) => {
-        const nombre = entity?.name ?? String(entity);
-        return nombre.includes('Persons')
+        const name = entity?.name ?? String(entity);
+        return name.includes('Persons')
           ? [{ id: 'pp-1', displayName: 'Ana Rossell' }]
           : [];
       });
 
       await d.service.orderNotify(TENANT, 'af-1', 'pp-1');
 
-      const [aviso] = d.avisos.emit.mock.calls[0];
-      expect(aviso.bodyText).toContain('Ana Rossell');
+      const [notice] = d.avisos.emit.mock.calls[0];
+      expect(notice.bodyText).toContain('Ana Rossell');
     });
   });
 });
