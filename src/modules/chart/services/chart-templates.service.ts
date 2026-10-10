@@ -455,13 +455,13 @@ function applyPresentation(
 
     const condition = p.showWhen as
       { field?: unknown; equals?: unknown } | undefined;
-    const padre =
+    const parent =
       typeof condition?.field === 'string'
         ? idByCode.get(condition.field)
         : undefined;
-    if (padre !== undefined && condition?.equals !== undefined) {
+    if (parent !== undefined && condition?.equals !== undefined) {
       extra.showWhen = {
-        fieldId: padre,
+        fieldId: parent,
         equals: condition.equals as ChartTemplateShowWhenDto['equals'],
       };
     }
