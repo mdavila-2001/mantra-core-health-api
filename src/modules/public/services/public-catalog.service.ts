@@ -74,12 +74,12 @@ export class PublicCatalogService {
     );
     const hasMore = rows.length > limit;
     const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const ultima = pagina[pagina.length - 1];
+    const last = pagina[pagina.length - 1];
     return {
       items: pagina.map(toServiceDto),
       nextCursor:
-        hasMore && ultima
-          ? encodeKeysetCursor({ k: ultima.code, i: ultima.id })
+        hasMore && last
+          ? encodeKeysetCursor({ k: last.code, i: last.id })
           : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
@@ -113,12 +113,12 @@ export class PublicCatalogService {
     );
     const hasMore = rows.length > limit;
     const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const ultima = pagina[pagina.length - 1];
+    const last = pagina[pagina.length - 1];
     return {
       items: pagina.map(toProductDto),
       nextCursor:
-        hasMore && ultima
-          ? encodeKeysetCursor({ k: ultima.sortName, i: ultima.id })
+        hasMore && last
+          ? encodeKeysetCursor({ k: last.sortName, i: last.id })
           : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
@@ -161,9 +161,9 @@ export class PublicCatalogService {
  */
 function afterFromCursor(cursor: string | undefined): KeysetAfter | null {
   if (cursor === undefined || cursor === '') return null;
-  const clave = decodeKeysetCursor(cursor);
-  const sortKey = clave.k;
-  const id = clave.i;
+  const key = decodeKeysetCursor(cursor);
+  const sortKey = key.k;
+  const id = key.i;
   if (typeof sortKey !== 'string' || typeof id !== 'string' || !UUID.test(id)) {
     throw new BadRequestException('El cursor de paginación no es válido');
   }

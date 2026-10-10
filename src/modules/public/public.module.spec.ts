@@ -26,9 +26,9 @@ describe('PublicCatalogModule (M4 · H2)', () => {
   it.each([
     ['organizationServices', 'public/profiles/o/:slug/services'],
     ['pharmacyProducts', 'public/profiles/f/:slug/products'],
-  ])('%s es GET %s y @Public()', (method, ruta) => {
+  ])('%s es GET %s y @Public()', (method, route) => {
     const handler = (PublicCatalogController.prototype as any)[method];
-    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(ruta);
+    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(route);
     expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
       RequestMethod.GET,
     );
