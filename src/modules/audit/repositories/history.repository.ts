@@ -229,7 +229,7 @@ export class HistoryRepository {
     // agregado es la que queda. Ordenar descendente y quedarse con la primera
     // haría lo mismo, pero dependería de que el motor conserve el orden entre
     // filas con el mismo instante, que no está garantizado.
-    const ultimas = new Map<string, HistoryRevision>();
+    const last = new Map<string, HistoryRevision>();
     for (const row of rows) {
       const source = (row as unknown as Record<string, unknown>)[
         binding.sourceField
@@ -246,9 +246,9 @@ export class HistoryRepository {
         dataSnapshot: row.dataSnapshot,
       };
       if (matches && !matches(revision)) continue;
-      ultimas.set(source, revision);
+      last.set(source, revision);
     }
-    return ultimas;
+    return last;
   }
 
   /**
