@@ -65,9 +65,7 @@ function validCreate(overrides: Record<string, unknown> = {}) {
  */
 describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () => {
   it('un alta válida no tiene errores', async () => {
-    expect(await errors(CreateInsuranceCampaignDto, validCreate())).toEqual(
-      [],
-    );
+    expect(await errors(CreateInsuranceCampaignDto, validCreate())).toEqual([]);
   });
 
   it.each([
@@ -164,9 +162,9 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it('acepta limit dentro de 1..100', async () => {
-    expect(
-      await errors(InsuranceCampaignListQueryDto, { limit: 50 }),
-    ).toEqual([]);
+    expect(await errors(InsuranceCampaignListQueryDto, { limit: 50 })).toEqual(
+      [],
+    );
   });
 
   it('rechaza un carrierId que no es uuid en la consulta pública', async () => {

@@ -144,9 +144,7 @@ export class CommunityModerationReadService {
     ]);
 
     const reportById = new Map(reportes.map((r) => [r.id, r]));
-    const countByContent = new Map(
-      recuentos.map((r) => [r.targetId, r.count]),
-    );
+    const countByContent = new Map(recuentos.map((r) => [r.targetId, r.count]));
 
     const last = page.at(-1);
     return {
@@ -370,9 +368,7 @@ export class CommunityModerationReadService {
     // que el cursor corta en memoria por posición en vez de pedir un `JOIN`
     // keyset sólo para un puñado de filas.
     const indexCursor = query.cursor
-      ? sorted.findIndex(
-          (d) => d.id === decodeKeysetCursor(query.cursor!).id,
-        )
+      ? sorted.findIndex((d) => d.id === decodeKeysetCursor(query.cursor!).id)
       : -1;
     const from = indexCursor >= 0 ? indexCursor + 1 : 0;
     const ventana = sorted.slice(from, from + limit + 1);

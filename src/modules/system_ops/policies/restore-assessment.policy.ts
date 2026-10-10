@@ -160,16 +160,10 @@ function missingEvidence(
   run: RunMeasurements,
 ): string[] {
   const missing: string[] = [];
-  if (
-    policy.rpoSeconds !== undefined &&
-    run.measuredRpoSeconds === undefined
-  ) {
+  if (policy.rpoSeconds !== undefined && run.measuredRpoSeconds === undefined) {
     missing.push('el RPO medido');
   }
-  if (
-    policy.rtoSeconds !== undefined &&
-    run.measuredRtoSeconds === undefined
-  ) {
+  if (policy.rtoSeconds !== undefined && run.measuredRtoSeconds === undefined) {
     missing.push('el RTO medido');
   }
   if (run.integrityCheckPassed !== true) {

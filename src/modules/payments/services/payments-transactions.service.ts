@@ -537,10 +537,8 @@ export class PaymentsTransactionsService {
           .map((r) => r.amount),
       );
       if (
-        compareAmounts(
-          addAmounts([refunded, dto.amount]),
-          transaction.amount,
-        ) > 0
+        compareAmounts(addAmounts([refunded, dto.amount]), transaction.amount) >
+        0
       ) {
         throw new ConflictException(
           'El reembolso excede el importe capturado',
@@ -654,16 +652,15 @@ export class PaymentsTransactionsService {
     intentId: string,
     inCourse?: { id: string; statusConceptId: string },
   ): Promise<string> {
-    const transactions = await this.transactionsRepo.findByIntent(
-      tx,
-      intentId,
-    );
+    const transactions = await this.transactionsRepo.findByIntent(tx, intentId);
     return addAmounts(
       transactions
         .map((t) => ({
           amount: t.amount,
           statusConceptId:
-            t.id === inCourse?.id ? inCourse.statusConceptId : t.statusConceptId,
+            t.id === inCourse?.id
+              ? inCourse.statusConceptId
+              : t.statusConceptId,
         }))
         .filter((t) => CAPTURED_STATES.includes(t.statusConceptId))
         .map((t) => t.amount),

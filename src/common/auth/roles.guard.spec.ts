@@ -18,7 +18,9 @@ function contextFor(user: AuthenticatedUser, resolvedTenantId?: string) {
 
 function build(required: string[] | undefined) {
   const reflector = {
-    getAllAndOverride: fn((key: unknown) => (key === IS_PUBLIC_KEY ? false : required)),
+    getAllAndOverride: fn((key: unknown) =>
+      key === IS_PUBLIC_KEY ? false : required,
+    ),
   };
   const guard = new RolesGuard(reflector as never);
   return { guard };
@@ -85,9 +87,9 @@ describe('RolesGuard', () => {
     it('retirar el rol (fuera de scopedRoles y de roles) deja de autorizar', () => {
       const { guard } = build(['STORAGE_ADMIN']);
       const withoutRole: AuthenticatedUser = { id: 'u1', roles: [] };
-      expect(() => guard.canActivate(contextFor(withoutRole, 'tenant-A'))).toThrow(
-        ForbiddenException,
-      );
+      expect(() =>
+        guard.canActivate(contextFor(withoutRole, 'tenant-A')),
+      ).toThrow(ForbiddenException);
     });
   });
 });
@@ -95,7 +97,9 @@ describe('RolesGuard', () => {
 describe('RolesGuard · rutas @Public()', () => {
   const guardCon = (publica: boolean, roles: string[]) =>
     new RolesGuard({
-      getAllAndOverride: fn((key: unknown) => (key === IS_PUBLIC_KEY ? publica : roles)),
+      getAllAndOverride: fn((key: unknown) =>
+        key === IS_PUBLIC_KEY ? publica : roles,
+      ),
     } as never);
 
   it('una ruta @Public() con @Roles() por error no devuelve 403 (no hay request.user)', () => {
@@ -106,7 +110,9 @@ describe('RolesGuard · rutas @Public()', () => {
   it('una ruta que no es pública sigue exigiendo el rol', () => {
     const guard = guardCon(false, ['STORAGE_ADMIN']);
     expect(() =>
-      guard.canActivate(contextFor({ id: 'u1', roles: [] } as AuthenticatedUser)),
+      guard.canActivate(
+        contextFor({ id: 'u1', roles: [] } as AuthenticatedUser),
+      ),
     ).toThrow(ForbiddenException);
   });
 });

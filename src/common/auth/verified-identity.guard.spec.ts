@@ -80,9 +80,9 @@ describe('VerifiedIdentityGuard', () => {
   it('lets a @Public() route through even if it also declares the decorator by mistake', async () => {
     const d = build(true, true);
 
-    await expect(
-      d.guard.canActivate(contextFor(undefined)),
-    ).resolves.toBe(true);
+    await expect(d.guard.canActivate(contextFor(undefined))).resolves.toBe(
+      true,
+    );
     expect(d.em.fork).not.toHaveBeenCalled();
   });
 

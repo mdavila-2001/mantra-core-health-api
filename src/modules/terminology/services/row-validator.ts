@@ -50,8 +50,7 @@ export function validateRows(
     const values = trim(row.valores);
     const rowProblems = reviewColumns(row.numero, values, profile);
 
-    const clave =
-      identity === undefined ? undefined : values[identity.nombre];
+    const clave = identity === undefined ? undefined : values[identity.nombre];
     if (
       rowProblems.length === 0 &&
       identity !== undefined &&

@@ -164,12 +164,7 @@ export class CommunityChatAutoReplyService {
       return null;
     }
 
-    const absent = await this.wasAbsent(
-      em,
-      config,
-      recipientProfileId,
-      ahora,
-    );
+    const absent = await this.wasAbsent(em, config, recipientProfileId, ahora);
     if (!absent) {
       return null;
     }

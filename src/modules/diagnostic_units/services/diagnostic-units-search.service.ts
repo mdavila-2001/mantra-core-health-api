@@ -218,16 +218,10 @@ export class DiagnosticUnitsSearchService {
       sitios.map((sitio) => [sitio.id, sitio.diagnosticUnitId]),
     );
     const unitBySchedule = new Map(
-      cronogramas.map((schedule) => [
-        schedule.id,
-        schedule.diagnosticUnitId,
-      ]),
+      cronogramas.map((schedule) => [schedule.id, schedule.diagnosticUnitId]),
     );
     const currencyBySchedule = new Map(
-      cronogramas.map((schedule) => [
-        schedule.id,
-        schedule.currencyConceptId,
-      ]),
+      cronogramas.map((schedule) => [schedule.id, schedule.currencyConceptId]),
     );
 
     const sitesByUnit = countBy(sitios, (s) => s.diagnosticUnitId);

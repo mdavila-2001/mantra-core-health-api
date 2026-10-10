@@ -194,7 +194,9 @@ describe('CommunityVerificationService', () => {
     it('un sello cuya ventana ya pasó NO es VERIFIED aunque siga marcado activo', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [stamp({ validTo: YESTERDAY })]);
+      const badge = d.service.readBadge(perfil, [
+        stamp({ validTo: YESTERDAY }),
+      ]);
 
       // La ventana manda sobre el estado: es lo que hace que un sello vencido
       // no siga luciendo mientras el barrido no pasó todavía.

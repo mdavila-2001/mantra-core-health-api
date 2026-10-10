@@ -74,7 +74,14 @@ function build(
     documents as never,
     logger as never,
   );
-  return { service, legalRepo, concepts, documents, tx: tx as never, orden: order };
+  return {
+    service,
+    legalRepo,
+    concepts,
+    documents,
+    tx: tx as never,
+    orden: order,
+  };
 }
 
 describe('TenantLegalRepresentativesService', () => {

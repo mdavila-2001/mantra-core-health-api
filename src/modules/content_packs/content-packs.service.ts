@@ -97,10 +97,7 @@ export class ContentPacksService {
    * @throws PreconditionFailedException Si el paquete necesita una contraseña
    *   que no se declaró por ningún lado.
    */
-  async apply(
-    code: string,
-    demoPassword?: string,
-  ): Promise<ContentPackResult> {
+  async apply(code: string, demoPassword?: string): Promise<ContentPackResult> {
     const pkg = searchPackage(code);
     if (pkg === undefined) {
       throw new ResourceNotFoundException(

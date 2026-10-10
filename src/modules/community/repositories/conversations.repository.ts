@@ -320,11 +320,13 @@ export class ConversationsRepository {
       // Exactamente los dos: una directa con un tercero adentro no es la
       // conversación privada que se está buscando.
       const profiles = new Set(
-        participants.map(
-          (participation) => participation.participantProfileId,
-        ),
+        participants.map((participation) => participation.participantProfileId),
       );
-      if (profiles.size === 2 && profiles.has(profileA) && profiles.has(profileB))
+      if (
+        profiles.size === 2 &&
+        profiles.has(profileA) &&
+        profiles.has(profileB)
+      )
         return conversation;
     }
     return null;

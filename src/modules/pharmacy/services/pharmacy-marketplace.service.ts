@@ -271,9 +271,7 @@ export class PharmacyMarketplaceService {
         therapeuticGroup: grupoDe(group[0].atcCode),
         brands: unique(group.map((offer) => offer.brandName)),
         presentations: unique(group.map((offer) => presentation(offer))),
-        requiresPrescription: group.some(
-          (offer) => offer.requiresPrescription,
-        ),
+        requiresPrescription: group.some((offer) => offer.requiresPrescription),
         priceFrom: cheapest.price,
         priceTo: mostExpensive.price,
         currency: group[0].currency,

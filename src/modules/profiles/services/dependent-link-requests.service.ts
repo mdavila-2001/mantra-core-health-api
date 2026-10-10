@@ -280,11 +280,7 @@ export class DependentLinkRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
     const { solicitante, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud, yo } = await this.pendingRequest(
-        tx,
-        requestId,
-        actor,
-      );
+      const { solicitud, yo } = await this.pendingRequest(tx, requestId, actor);
       const ahora = new Date();
 
       const alreadyRepresentsIt =
@@ -354,11 +350,7 @@ export class DependentLinkRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
     const { solicitante, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud, yo } = await this.pendingRequest(
-        tx,
-        requestId,
-        actor,
-      );
+      const { solicitud, yo } = await this.pendingRequest(tx, requestId, actor);
       const ahora = new Date();
       solicitud.statusConceptId = PROF.PROXY_REJECTED;
       // Cerrada la ventana: una fila rechazada no tiene vigencia que abrir.
@@ -635,9 +627,7 @@ function nombreDe(person: Persons): string {
  */
 function toIncoming(row: PendingRequestRow): IncomingDependentLinkRequestDto {
   const created =
-    row.created_at instanceof Date
-      ? row.created_at
-      : new Date(row.created_at);
+    row.created_at instanceof Date ? row.created_at : new Date(row.created_at);
   return {
     id: row.id,
     requesterDisplayName:

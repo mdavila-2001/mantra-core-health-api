@@ -134,8 +134,7 @@ describe('SeedBootstrapService', () => {
     if (environmentOriginal === undefined) delete process.env.SEED_ON_BOOT;
     else process.env.SEED_ON_BOOT = environmentOriginal;
 
-    if (contentOriginal === undefined)
-      delete process.env.SEED_CONTENT_ON_BOOT;
+    if (contentOriginal === undefined) delete process.env.SEED_CONTENT_ON_BOOT;
     else process.env.SEED_CONTENT_ON_BOOT = contentOriginal;
   });
 

@@ -68,8 +68,7 @@ export class XlsxParser implements FileParser {
     const sheetName = book.SheetNames.includes(PREFERRED_SHEET)
       ? PREFERRED_SHEET
       : book.SheetNames[0];
-    const sheet =
-      sheetName === undefined ? undefined : book.Sheets[sheetName];
+    const sheet = sheetName === undefined ? undefined : book.Sheets[sheetName];
 
     if (sheet === undefined) {
       return {
@@ -109,12 +108,7 @@ export class XlsxParser implements FileParser {
     // seguir, y el problema que generan viaja aparte porque apunta a una
     // celda concreta, no a la fila entera.
     const completeRecords = records.map((record, recordIndex) =>
-      completeFormulasWithoutValor(
-        record,
-        sheet,
-        recordIndex,
-        cellProblems,
-      ),
+      completeFormulasWithoutValor(record, sheet, recordIndex, cellProblems),
     );
 
     const header = completeRecords[0];
@@ -131,9 +125,7 @@ export class XlsxParser implements FileParser {
     }
 
     const problems: RowProblem[] = [];
-    const columns = header.map((cell) =>
-      resolverColumn(profile, String(cell)),
-    );
+    const columns = header.map((cell) => resolverColumn(profile, String(cell)));
     header.forEach((cell, index) => {
       if (columns[index] === undefined) {
         problems.push({

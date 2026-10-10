@@ -200,12 +200,7 @@ export class ConceptFileImportService {
 
     const { sourceId } = await this.requireVersionInDraft(versionId);
 
-    const reading = this.readWithParser(
-      parser,
-      buffer,
-      profile,
-      versionId,
-    );
+    const reading = this.readWithParser(parser, buffer, profile, versionId);
     const validation = validateRows(reading.filas, profile);
     const problems = [...reading.problemas, ...validation.problemas];
     const totalRead = countReadRows(format, reading.filas, problems);
@@ -247,9 +242,7 @@ export class ConceptFileImportService {
         aborted: false,
         inserted: 0,
         skipped: 0,
-        preview: validation.validas
-          .slice(0, PREVIEW_ROWS)
-          .map(toPreviewDto),
+        preview: validation.validas.slice(0, PREVIEW_ROWS).map(toPreviewDto),
       });
     }
 

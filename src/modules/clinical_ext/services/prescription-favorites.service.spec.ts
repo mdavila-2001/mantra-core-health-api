@@ -101,9 +101,9 @@ describe('PrescriptionFavoritesService', () => {
       d.favoritesRepo.findByPractitioner.mockResolvedValue([
         { id: 'fav-0', name: 'ATB post extracción' },
       ]);
-      await expect(
-        d.service.create(newFavorite as any, actor),
-      ).rejects.toThrow(ConflictException);
+      await expect(d.service.create(newFavorite as any, actor)).rejects.toThrow(
+        ConflictException,
+      );
       expect(d.favoritesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -112,9 +112,9 @@ describe('PrescriptionFavoritesService', () => {
       d.favoritesRepo.countByPractitioner.mockResolvedValue(
         MAX_FAVORITES_PER_PRACTITIONER,
       );
-      await expect(
-        d.service.create(newFavorite as any, actor),
-      ).rejects.toThrow(PreconditionFailedException);
+      await expect(d.service.create(newFavorite as any, actor)).rejects.toThrow(
+        PreconditionFailedException,
+      );
       expect(d.favoritesRepo.create).not.toHaveBeenCalled();
     });
   });

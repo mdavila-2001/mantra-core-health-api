@@ -90,10 +90,7 @@ export class MedicalSpecialtyCatalogService {
     const members =
       set === null
         ? null
-        : await this.valueSets.findIncludedConceptIdsByValueSet(
-            em,
-            set.id,
-          );
+        : await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id);
     if (members === null) {
       throw new PreconditionFailedException(
         'El catálogo de especialidades médicas no está disponible',

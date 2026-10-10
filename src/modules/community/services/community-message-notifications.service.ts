@@ -74,10 +74,7 @@ export class CommunityMessageNotificationsService {
   ): Promise<void> {
     try {
       const em = this.em.fork();
-      const sender = await this.profilesRepo.findById(
-        em,
-        senderProfileId,
-      );
+      const sender = await this.profilesRepo.findById(em, senderProfileId);
       // El nombre de quien escribe es lo único que hace útil el aviso: «Mensaje
       // nuevo» a secas obliga a abrir el hilo para saber si vale la pena.
       const ofWhom = sender?.displayName ?? 'Alguien';

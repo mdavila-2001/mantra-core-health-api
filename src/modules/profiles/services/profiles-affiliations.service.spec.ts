@@ -492,10 +492,11 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
         d.tx,
         'pp-1',
       );
-      expect(d.memberships.ensureCareMembership).toHaveBeenCalledWith(
-        d.tx,
-        { userId: 'user-med', tenantId: TENANT, actorUserId: orgAdmin.id },
-      );
+      expect(d.memberships.ensureCareMembership).toHaveBeenCalledWith(d.tx, {
+        userId: 'user-med',
+        tenantId: TENANT,
+        actorUserId: orgAdmin.id,
+      });
     });
 
     /**
@@ -556,8 +557,7 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
 
       await d.service.approve(TENANT, 'af-1', orgAdmin);
 
-      const [, params] =
-        d.memberships.ensureCareMembership.mock.calls.at(-1);
+      const [, params] = d.memberships.ensureCareMembership.mock.calls.at(-1);
       expect(params.tenantId).toBe(TENANT);
     });
   });

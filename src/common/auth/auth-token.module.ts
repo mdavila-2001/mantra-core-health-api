@@ -20,13 +20,15 @@ import { TokenService } from './token.service';
 @Global()
 @Module({
   imports: [
-    JwtModule.register(((): JwtModuleOptions => {
-      const env = loadAuthEnv();
-      return {
-        secret: env.secret,
-        signOptions: { expiresIn: env.accessTtl },
-      } as JwtModuleOptions;
-    })()),
+    JwtModule.register(
+      ((): JwtModuleOptions => {
+        const env = loadAuthEnv();
+        return {
+          secret: env.secret,
+          signOptions: { expiresIn: env.accessTtl },
+        } as JwtModuleOptions;
+      })(),
+    ),
   ],
   providers: [TokenService],
   exports: [TokenService, JwtModule],

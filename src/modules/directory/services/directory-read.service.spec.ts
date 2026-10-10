@@ -264,11 +264,7 @@ describe('DirectoryReadService.listMemberships', () => {
       membershipRow('m1', '2026-01-01T00:00:00Z'),
       membershipRow('m2', '2026-01-01T00:00:00Z'),
     ]);
-    const first = await d.service.listMemberships(
-      TENANT,
-      { limit: 1 },
-      actor,
-    );
+    const first = await d.service.listMemberships(TENANT, { limit: 1 }, actor);
 
     d.membershipsRepo.findPageByTenant.mockClear();
     d.membershipsRepo.findPageByTenant.mockResolvedValue([]);

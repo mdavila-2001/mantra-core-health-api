@@ -16,7 +16,10 @@ describe('el padrón de establecimientos', () => {
 
   /** Cómo se decide que dos nombres son el mismo lugar. */
   function clave(nombre: string): string {
-    const withoutAccents = nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+    const withoutAccents = nombre
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toUpperCase();
     return withoutAccents
       .replace(
         /\b(CLINICA|CENTRO|MEDICO|MEDICA|HOSPITAL|INSTITUTO|SRL|SA|LTDA|DE|DEL|LA|EL|LOS|LAS|Y)\b/g,

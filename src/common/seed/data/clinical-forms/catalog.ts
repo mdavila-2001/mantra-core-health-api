@@ -285,7 +285,8 @@ function validateOptions(
       failure('declara varias respuestas sin opciones');
     return;
   }
-  if (field.options.length === 0) failure('declara una lista de opciones vacía');
+  if (field.options.length === 0)
+    failure('declara una lista de opciones vacía');
   if (new Set(field.options).size !== field.options.length) {
     failure('repite una opción');
   }
@@ -318,7 +319,9 @@ function validateCondition(
   for (const valor of values) {
     if (padre.dataType === 'boolean') {
       if (typeof valor !== 'boolean') {
-        failure(`depende del sí/no "${padre.code}" con un valor que no es sí/no`);
+        failure(
+          `depende del sí/no "${padre.code}" con un valor que no es sí/no`,
+        );
       }
     } else if (padre.options !== undefined) {
       if (typeof valor !== 'string' || !padre.options.includes(valor)) {

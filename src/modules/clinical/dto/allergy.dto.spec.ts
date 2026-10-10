@@ -40,7 +40,9 @@ function bodyFront(over: Record<string, unknown> = {}) {
   };
 }
 
-async function validateRegistration(registration: Record<string, unknown>): Promise<string[]> {
+async function validateRegistration(
+  registration: Record<string, unknown>,
+): Promise<string[]> {
   const dto = plainToInstance(CreateAllergyIntoleranceDto, registration);
   const errors = await validate(dto, {
     whitelist: true,

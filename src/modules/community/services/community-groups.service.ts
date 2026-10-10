@@ -426,11 +426,7 @@ export class CommunityGroupsService {
         // Antes esto ni siquiera podía pasar: el dueño tenía prohibido irse
         // «hasta transferirlo», lo que en la práctica lo dejaba atado a un
         // grupo del que quería salir.
-        const heir = await this.chooseHeir(
-          tx,
-          groupId,
-          memberProfileId,
-        );
+        const heir = await this.chooseHeir(tx, groupId, memberProfileId);
         if (heir) {
           heir.memberRoleConceptId = COMM.GROUP_ROLE_OWNER;
           touch(heir, actor.id);

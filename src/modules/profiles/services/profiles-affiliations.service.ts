@@ -250,10 +250,7 @@ export class ProfilesAffiliationsService {
     // Y si la organización no tiene a nadie que pueda decidir —los hospitales
     // públicos y las cajas del padrón, que nunca van a registrarse—, dejar el
     // pedido pendiente lo condenaría a esperar para siempre.
-    const hasDecider = await this.tenantAdmin.hasAdministrators(
-      em,
-      tenantId,
-    );
+    const hasDecider = await this.tenantAdmin.hasAdministrators(em, tenantId);
     return hasDecider
       ? ESTADO_DEL_VINCULO.PENDIENTE
       : ESTADO_DEL_VINCULO.DECLARADO;
@@ -350,10 +347,7 @@ export class ProfilesAffiliationsService {
     ]);
 
     const matriculaByProfile = new Map(
-      matriculas.map((row) => [
-        row.practitionerProfileId,
-        row.licenseNumber,
-      ]),
+      matriculas.map((row) => [row.practitionerProfileId, row.licenseNumber]),
     );
     for (const persona of personas) {
       identities.set(persona.id, {
@@ -638,9 +632,7 @@ export class ProfilesAffiliationsService {
 
     // El mismo resolutor que usa la bandeja: quien decide tiene que saber sobre
     // quién decide, tanto en el aviso como en la lista.
-    const identities = await this.identity(this.em, [
-      practitionerProfileId,
-    ]);
+    const identities = await this.identity(this.em, [practitionerProfileId]);
     const who =
       identities.get(practitionerProfileId)?.nombre ?? 'Un profesional';
     for (const admin of admins) {
@@ -735,12 +727,14 @@ export class ProfilesAffiliationsService {
       return;
     }
 
-    const { membership, creada } =
-      await this.memberships.ensureCareMembership(tx, {
+    const { membership, creada } = await this.memberships.ensureCareMembership(
+      tx,
+      {
         userId: account.userId,
         tenantId,
         actorUserId: actor.id,
-      });
+      },
+    );
 
     this.logger.info(
       {

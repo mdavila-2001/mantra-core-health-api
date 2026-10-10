@@ -201,11 +201,7 @@ export class DiagnosticUnitsAdminReadService {
     const scheduleById = new Map(
       schedules.map((schedule) => [schedule.id, schedule]),
     );
-    const pricesByStudy = this.pricesByStudy(
-      prices,
-      scheduleById,
-      byId,
-    );
+    const pricesByStudy = this.pricesByStudy(prices, scheduleById, byId);
     const ahora = new Date();
 
     return {

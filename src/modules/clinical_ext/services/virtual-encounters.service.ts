@@ -139,12 +139,7 @@ export class VirtualEncountersService {
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
-      await this.requireEncounterParticipant(
-        tx,
-        due.encounterId,
-        actor,
-        false,
-      );
+      await this.requireEncounterParticipant(tx, due.encounterId, actor, false);
       if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('La sesión no está en progreso', {
           id,

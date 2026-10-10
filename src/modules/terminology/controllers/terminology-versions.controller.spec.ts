@@ -97,13 +97,7 @@ describe('TerminologyVersionsController', () => {
       fileImport.importFromFile.mockResolvedValue(report());
       const res = response();
 
-      await controller.importConceptsFile(
-        'v-1',
-        file,
-        {},
-        user,
-        res as never,
-      );
+      await controller.importConceptsFile('v-1', file, {}, user, res as never);
 
       expect(res.status).not.toHaveBeenCalled();
     });
@@ -135,13 +129,7 @@ describe('TerminologyVersionsController', () => {
       );
       const res = response();
 
-      await controller.importConceptsFile(
-        'v-1',
-        file,
-        {},
-        user,
-        res as never,
-      );
+      await controller.importConceptsFile('v-1', file, {}, user, res as never);
 
       expect(res.status).toHaveBeenCalledWith(200);
     });

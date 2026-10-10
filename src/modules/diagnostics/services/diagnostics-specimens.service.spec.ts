@@ -74,7 +74,10 @@ describe('DiagnosticsSpecimensService', () => {
         id: 's1',
         statusConceptId: DIAG.SPECIMEN_COLLECTED,
       });
-      await d.service.createSpecimen(registration(DIAG.SPECIMEN_TYPE_SERUM), actor);
+      await d.service.createSpecimen(
+        registration(DIAG.SPECIMEN_TYPE_SERUM),
+        actor,
+      );
       expect(d.repo.createSpecimen).toHaveBeenCalled();
     });
 

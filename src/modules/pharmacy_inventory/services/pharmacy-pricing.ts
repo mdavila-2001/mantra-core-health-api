@@ -48,7 +48,8 @@ export function winningPriceFor(
     .sort((a, b) => {
       const toSiteSpecific = a.list.pharmacySiteId ? 0 : 1;
       const bSiteSpecific = b.list.pharmacySiteId ? 0 : 1;
-      if (toSiteSpecific !== bSiteSpecific) return toSiteSpecific - bSiteSpecific;
+      if (toSiteSpecific !== bSiteSpecific)
+        return toSiteSpecific - bSiteSpecific;
       return (
         numericOf(payableAmount(a.price)) - numericOf(payableAmount(b.price))
       );

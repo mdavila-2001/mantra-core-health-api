@@ -198,4 +198,7 @@ export type { StickerPackEntry } from './constants/sticker-pack';
 
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)
-export { addDecimals as sumarDecimales, sameDecimals as mismosDecimales } from './money/decimal-money';
+export {
+  addDecimals as sumarDecimales,
+  sameDecimals as mismosDecimales,
+} from './money/decimal-money';
