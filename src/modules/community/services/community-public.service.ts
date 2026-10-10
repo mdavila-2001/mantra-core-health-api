@@ -1221,7 +1221,7 @@ export class CommunityPublicService {
       const value = source[key];
       return typeof value === 'string' && value.length > 0 ? value : null;
     };
-    const numero = (key: string): number | null => {
+    const readNumber = (key: string): number | null => {
       const value = source[key];
       return typeof value === 'number' && Number.isFinite(value) ? value : null;
     };
@@ -1269,8 +1269,8 @@ export class CommunityPublicService {
       city: text('city'),
       avatarUrl: text('avatarUrl'),
       verified: verifiedBadge.status === 'VERIFIED',
-      ratingAverage: numero('ratingAverage'),
-      ratingCount: numero('ratingCount') ?? 0,
+      ratingAverage: readNumber('ratingAverage'),
+      ratingCount: readNumber('ratingCount') ?? 0,
       verifiedBadge,
       hasPublishedAgenda: source.hasPublishedAgenda === true,
       nextAvailableDate: text('nextAvailableDate'),

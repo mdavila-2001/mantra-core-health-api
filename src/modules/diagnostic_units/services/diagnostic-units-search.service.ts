@@ -247,7 +247,7 @@ export class DiagnosticUnitsSearchService {
       // Se compara el importe **base publicado**, que es el que el centro
       // muestra en su tarifa. `patient_amount` puede no estar fijado y usar uno
       // u otro según la fila haría comparar peras con manzanas entre centros.
-      const amount = numero(price.baseAmount);
+      const amount = parseAmount(price.baseAmount);
       if (amount === undefined) continue;
       const previous = minimumByUnit.get(unitId);
       if (previous === undefined || amount < previous) {
@@ -351,7 +351,7 @@ function booleanValue(value: string | undefined): boolean | undefined {
  * segura. Se hace en la frontera y no en la pantalla: cada consumidor
  * convirtiendo por su cuenta es cómo se cuela un `NaN` en un precio.
  */
-function numero(value: string | undefined): number | undefined {
+function parseAmount(value: string | undefined): number | undefined {
   if (value === undefined) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;

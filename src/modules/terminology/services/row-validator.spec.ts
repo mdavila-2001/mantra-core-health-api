@@ -19,20 +19,20 @@ function withErrors(): string {
   const length256 = 'x'.repeat(256);
   const rows = Array.from({ length: 50 }, (_, index) => {
     const fileRow = index + 2;
-    const numero = String(index + 1).padStart(3, '0');
-    const byDefault = `ZZ-${numero},Ejemplo ${numero},Definición ${numero}`;
+    const ordinal = String(index + 1).padStart(3, '0');
+    const byDefault = `ZZ-${ordinal},Ejemplo ${ordinal},Definición ${ordinal}`;
 
     switch (fileRow) {
       case 5:
-        return `ZZ-${numero},,Definición ${numero}`;
+        return `ZZ-${ordinal},,Definición ${ordinal}`;
       case 9:
-        return `,Ejemplo ${numero},Definición ${numero}`;
+        return `,Ejemplo ${ordinal},Definición ${ordinal}`;
       case 14:
-        return `${length256},Ejemplo ${numero},Definición ${numero}`;
+        return `${length256},Ejemplo ${ordinal},Definición ${ordinal}`;
       case 20:
-        return `ZZ-003,Ejemplo ${numero},Definición ${numero}`;
+        return `ZZ-003,Ejemplo ${ordinal},Definición ${ordinal}`;
       case 33:
-        return `ZZ-${numero},${length256},Definición ${numero}`;
+        return `ZZ-${ordinal},${length256},Definición ${ordinal}`;
       default:
         return byDefault;
     }
