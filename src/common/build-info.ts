@@ -26,7 +26,7 @@ export interface BuildInfo {
 }
 
 /** Lo que se muestra cuando el dato no viajó en la imagen. */
-const SIN_DATO = 'desconocido';
+const NO_DATA = 'desconocido';
 
 /**
  * Resuelve la identidad del artefacto.
@@ -37,15 +37,15 @@ const SIN_DATO = 'desconocido';
  */
 export function loadBuildInfo(
   source: NodeJS.ProcessEnv = process.env,
-  version = source.npm_package_version ?? SIN_DATO,
+  version = source.npm_package_version ?? NO_DATA,
 ): BuildInfo {
   return {
     version,
     // `GIT_COMMIT` es el nombre que ya usan los `ARG` del Dockerfile; se acepta
     // `SOURCE_COMMIT` porque es lo que inyectan varios registries al construir.
-    commit: source.GIT_COMMIT ?? source.SOURCE_COMMIT ?? SIN_DATO,
-    builtAt: source.BUILD_TIME ?? SIN_DATO,
-    nodeEnv: source.NODE_ENV ?? SIN_DATO,
+    commit: source.GIT_COMMIT ?? source.SOURCE_COMMIT ?? NO_DATA,
+    builtAt: source.BUILD_TIME ?? NO_DATA,
+    nodeEnv: source.NODE_ENV ?? NO_DATA,
   };
 }
 
@@ -58,10 +58,10 @@ export function loadBuildInfo(
  * @param info - La identidad ya resuelta.
  */
 export function describeBuild(info: BuildInfo): string {
-  const commitCorto =
-    info.commit === SIN_DATO ? SIN_DATO : info.commit.slice(0, 8);
+  const commitShort =
+    info.commit === NO_DATA ? NO_DATA : info.commit.slice(0, 8);
   return (
-    `Arranca v${info.version} · commit ${commitCorto} · ` +
+    `Arranca v${info.version} · commit ${commitShort} · ` +
     `construido ${info.builtAt} · entorno ${info.nodeEnv}`
   );
 }
