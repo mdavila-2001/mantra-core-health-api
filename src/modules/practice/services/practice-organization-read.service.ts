@@ -276,8 +276,8 @@ export class PracticeOrganizationReadService {
       role: concept(concepts, row.roleConceptId),
       specialty: optionalConcept(concepts, row.specialtyConceptId),
       isPrimary: row.isPrimary ?? null,
-      validFrom: soloDate(row.validFrom),
-      validTo: soloDate(row.validTo),
+      validFrom: onlyDate(row.validFrom),
+      validTo: onlyDate(row.validTo),
       status: concept(concepts, row.statusConceptId),
     };
   }
@@ -294,8 +294,8 @@ export class PracticeOrganizationReadService {
       number: doc.accreditationNumber ?? null,
       issuerName: doc.issuerName ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloDate(doc.validFrom),
-      validTo: soloDate(doc.validTo),
+      validFrom: onlyDate(doc.validFrom),
+      validTo: onlyDate(doc.validTo),
       daysToExpiry: daysUntil(doc.validTo, hoy),
       verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
@@ -309,7 +309,7 @@ export class PracticeOrganizationReadService {
       id: item.id,
       name: item.name,
       lotNumber: item.lotNumber ?? null,
-      expiryDate: soloDate(item.expiryDate),
+      expiryDate: onlyDate(item.expiryDate),
       quantityOnHand: item.quantityOnHand,
       unit: optionalConcept(concepts, item.unitConceptId),
       reorderLevel: item.reorderLevel ?? null,
@@ -346,7 +346,7 @@ function optionalConcept(
   return id === undefined ? null : concept(concepts, id);
 }
 
-function soloDate(valor: Date | undefined): string | null {
+function onlyDate(valor: Date | undefined): string | null {
   return valor?.toISOString().slice(0, 10) ?? null;
 }
 

@@ -359,8 +359,8 @@ function searchWhere(
   if (criteria.q !== undefined && criteria.q !== '') {
     // `$ilike` y no `$like`: quien busca «lab central» no escribe la mayúscula,
     // y una búsqueda que distingue mayúsculas no encuentra nada.
-    const patron = `%${criteria.q}%`;
-    where.$or = [{ name: { $ilike: patron } }, { code: { $ilike: patron } }];
+    const pattern = `%${criteria.q}%`;
+    where.$or = [{ name: { $ilike: pattern } }, { code: { $ilike: pattern } }];
   }
   return where;
 }
