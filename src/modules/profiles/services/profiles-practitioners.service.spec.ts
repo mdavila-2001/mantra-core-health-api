@@ -3007,6 +3007,34 @@ describe('ProfilesPractitionersService', () => {
         clinicalNotes: 0,
         documents: 0,
       });
+      // P-09: los ceros de arriba no son datos: la respuesta dice qué faltó.
+      expect(profile.unavailableSections).toEqual([
+        'activity',
+        'affiliations',
+        'credentials',
+        'languages',
+        'licenses',
+        'specialties',
+      ]);
+    });
+
+    it('P-09: una ficha que llegó completa no trae unavailableSections', async () => {
+      const d = build();
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Ana',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'PRC-1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil).not.toHaveProperty('unavailableSections');
     });
 
     it('un perfil inexistente responde no encontrado', async () => {

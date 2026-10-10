@@ -374,6 +374,26 @@ function compareIds(a: string, b: string): number {
 @Injectable()
 export class PublicSearchRepository {
   /**
+   * Si la base tiene `unaccent`. Se pregunta UNA vez a `pg_extension` en vez de
+   * intentar cada consulta con la función y reintentarla sin ella: ese
+   * `try/catch` ocultaba la extensión faltante y, dentro de una transacción,
+   * el primer intento fallido deja la transacción abortada.
+   */
+  private unaccentAvailable: Promise<boolean> | null = null;
+
+  private async normalizer(em: EntityManager): Promise<string> {
+    this.unaccentAvailable ??= em
+      .getConnection()
+      .execute<{ present: boolean }[]>(
+        `SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'unaccent') AS present`,
+        [],
+        'all',
+      )
+      .then((rows) => rows[0]?.present === true);
+    return (await this.unaccentAvailable) ? 'unaccent' : '';
+  }
+
+  /**
    * Página del directorio público, filtrada por texto, ciudad, especialidad y tipo.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -505,25 +525,15 @@ export class PublicSearchRepository {
     // grande. Es holgado a propósito: por debajo del tamaño de cualquier
     // directorio de una ciudad real, y muy por encima del de éste.
     const params = [city, 5000];
-    try {
-      const rows = await em
-        .getConnection()
-        .execute<{ owner_id: string }[]>(
-          base.replace(/%NORM%/g, 'unaccent'),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.owner_id);
-    } catch {
-      const rows = await em
-        .getConnection()
-        .execute<{ owner_id: string }[]>(
-          base.replace(/%NORM%/g, ''),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.owner_id);
-    }
+    const norm = await this.normalizer(em);
+    const filas = await em
+      .getConnection()
+      .execute<{ owner_id: string }[]>(
+        base.replace(/%NORM%/g, norm),
+        params,
+        'all',
+      );
+    return filas.map((f) => f.owner_id);
   }
 
   /**
@@ -604,21 +614,11 @@ export class PublicSearchRepository {
       patron,
       limit,
     ];
-    try {
-      const rows = await em
-        .getConnection()
-        .execute<{ id: string }[]>(
-          base.replace(/%NORM%/g, 'unaccent'),
-          params,
-          'all',
-        );
-      return rows.map((f) => f.id);
-    } catch {
-      const rows = await em
-        .getConnection()
-        .execute<{ id: string }[]>(base.replace(/%NORM%/g, ''), params, 'all');
-      return rows.map((f) => f.id);
-    }
+    const norm = await this.normalizer(em);
+    const filas = await em
+      .getConnection()
+      .execute<{ id: string }[]>(base.replace(/%NORM%/g, norm), params, 'all');
+    return filas.map((f) => f.id);
   }
 
   /**

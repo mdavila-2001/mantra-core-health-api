@@ -868,6 +868,13 @@ export class RegisterPractitionerResponseDto {
   photoFileId?: string;
 
   /**
+   * Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no
+   * pudo guardarla y la cuenta se creó igual, sin foto.
+   */
+  @ApiPropertyOptional()
+  profilePhotoStored?: boolean;
+
+  /**
    * Práctica personal creada o reutilizada para el consultorio propio.
    *
    * Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo

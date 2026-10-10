@@ -109,7 +109,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     // el autorregistro la cuenta nace activa y no hay token que emitir.
     const activationsRepo = { create: fn() };
     const fileUploadService = {
-      upload: fn().mockResolvedValue({ id: 'file-foto-123' }),
+      uploadAnonymous: fn().mockResolvedValue({ id: 'file-foto-123' }),
     };
     const attachableFileService = {
       claimAnonymousUpload: fn().mockResolvedValue({
@@ -169,6 +169,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     );
     return {
       service,
+      em,
       effectiveRoles,
       specialtiesRepo,
       specialtyCatalog,
@@ -1239,7 +1240,35 @@ describe('IamPractitionerSelfRegistrationService', () => {
         0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
       ]).toString('base64');
 
-    it('procesa y vincula la foto de perfil en base64 cuando se envía', async () => {
+    it('sube la foto ANTES de abrir la transacción del alta, sin dueño', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...dto,
+        profilePhotoBase64: PHOTO_JPEG_B64,
+      });
+
+      // La E/S contra el almacenamiento no puede ocurrir dentro de la ventana
+      // de la transacción: si el alta se revierte, los bytes no se deshacen.
+      expect(d.fileUploadService.uploadAnonymous).toHaveBeenCalledWith(
+        expect.objectContaining({ mimetype: 'image/jpeg' }),
+        { category: 'IMAGE', sensitivity: 'NORMAL' },
+        expect.objectContaining({
+          allowedMimeTypes: [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+          ],
+        }),
+      );
+      const [uploadOrder] =
+        d.fileUploadService.uploadAnonymous.mock.invocationCallOrder;
+      const [transactionOrder] = d.em.transactional.mock.invocationCallOrder;
+      expect(uploadOrder).toBeLessThan(transactionOrder);
+    });
+
+    it('reclama la foto para la cuenta nueva DENTRO de la transacción y la vincula', async () => {
       const d = build();
 
       const result = await d.service.registerPractitioner({
@@ -1247,35 +1276,25 @@ describe('IamPractitionerSelfRegistrationService', () => {
         profilePhotoBase64: PHOTO_JPEG_B64,
       });
 
-      expect(d.fileUploadService.upload).toHaveBeenCalledWith(
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-foto-123',
+        { ownerUserId: 'user-1', tenantId: SEED.tenantId },
         expect.objectContaining({
-          mimetype: 'image/jpeg',
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
         }),
-        {
-          category: 'IMAGE',
-          sensitivity: 'NORMAL',
-        },
-        expect.objectContaining({
-          id: 'user-1',
-          roles: ['PRACTITIONER'],
-        }),
+        expect.objectContaining({ subject: 'La foto de perfil' }),
       );
-
       expect(d.personsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({
-          photoFileId: 'file-foto-123',
-        }),
+        expect.objectContaining({ photoFileId: 'file-foto-123' }),
       );
-
       expect(d.practitionersRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({
-          photoFileId: 'file-foto-123',
-        }),
+        expect.objectContaining({ photoFileId: 'file-foto-123' }),
       );
-
       expect(result.photoFileId).toBe('file-foto-123');
+      expect(result.profilePhotoStored).toBe(true);
     });
 
     it('omite la subida y el identificador de foto cuando no se envía foto', async () => {
@@ -1283,7 +1302,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       const result = await d.service.registerPractitioner(dto);
 
-      expect(d.fileUploadService.upload).not.toHaveBeenCalled();
+      expect(d.fileUploadService.uploadAnonymous).not.toHaveBeenCalled();
       expect(d.personsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -1297,11 +1316,51 @@ describe('IamPractitionerSelfRegistrationService', () => {
         }),
       );
       expect(result.photoFileId).toBeUndefined();
+      expect(result).not.toHaveProperty('profilePhotoStored');
     });
 
-    it('si el servicio de subida falla, el registro concluye sin bloquear', async () => {
+    it('si la foto no es una imagen legible responde 422 y no escribe nada', async () => {
       const d = build();
-      d.fileUploadService.upload.mockRejectedValue(new Error('storage full'));
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          profilePhotoBase64:
+            'data:image/jpeg;base64,' +
+            Buffer.from('no soy una foto').toString('base64'),
+        }),
+      ).rejects.toMatchObject({
+        status: 422,
+        response: expect.objectContaining({
+          details: expect.objectContaining({ field: 'profilePhotoBase64' }),
+        }),
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.fileUploadService.uploadAnonymous).not.toHaveBeenCalled();
+    });
+
+    it('si el almacenamiento rechaza la foto por un motivo del cliente (422), el alta no sigue sin ella', async () => {
+      const d = build();
+      d.fileUploadService.uploadAnonymous.mockRejectedValue(
+        new PreconditionFailedException(
+          'El archivo excede el tamaño máximo permitido',
+        ),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          profilePhotoBase64: PHOTO_JPEG_B64,
+        }),
+      ).rejects.toMatchObject({ status: 422 });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+    });
+
+    it('si el almacenamiento no responde, el registro concluye, lo dice en la respuesta y deja log', async () => {
+      const d = build();
+      d.fileUploadService.uploadAnonymous.mockRejectedValue(
+        new Error('storage full'),
+      );
 
       const result = await d.service.registerPractitioner({
         ...dto,
@@ -1310,11 +1369,27 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       expect(result.userId).toBe('user-1');
       expect(result.photoFileId).toBeUndefined();
+      expect(result.profilePhotoStored).toBe(false);
+      expect(
+        d.attachableFileService.claimAnonymousUpload,
+      ).not.toHaveBeenCalledWith(
+        d.tx,
+        'file-foto-123',
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+      );
       expect(d.personsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           photoFileId: undefined,
         }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'iam.auth.register-practitioner',
+        }),
+        expect.stringContaining('photo'),
       );
     });
   });
@@ -1322,9 +1397,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
   /**
    * El documento y su departamento emisor son obligatorios (MED-01); la FK
    * admite cualquier concepto, así que el servicio lo comprueba contra
-   * `VS_BO_DEPARTMENT` antes de escribir nada —
-   * la foto de perfil se sube a almacenamiento más abajo en la misma
-   * transacción y un rollback no la borraría.
+   * `VS_BO_DEPARTMENT` antes de escribir nada.
    */
   describe('departamento emisor del documento (1.4)', () => {
     it('comprueba el departamento obligatorio contra VS_BO_DEPARTMENT', async () => {

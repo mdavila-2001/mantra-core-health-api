@@ -221,6 +221,15 @@ export class PractitionerActivityDto {
 
 /** El perfil profesional completo que la persona ve de sí misma. */
 export class PractitionerProfileSummaryDto {
+  /**
+   * Piezas de la ficha que no se pudieron leer y viajan vacías (`specialties`,
+   * `credentials`, `licenses`, `languages`, `affiliations`, `activity`,
+   * `contact`, `identity`). Ausente cuando llegó todo: así la pantalla puede
+   * decir «no pudimos traer X» en vez de mostrar un cero que parece real.
+   */
+  @ApiPropertyOptional({ type: [String] })
+  unavailableSections?: string[];
+
   @ApiProperty({ format: 'uuid' })
   profileId!: string;
 

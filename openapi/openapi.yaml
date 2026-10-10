@@ -61956,6 +61956,10 @@ components:
     PractitionerProfileSummaryDto:
       type: object
       properties:
+        unavailableSections:
+          type: array
+          items:
+            type: string
         profileId:
           type: string
           format: uuid
@@ -62101,6 +62105,21 @@ components:
         - affiliations
         - activity
         - createdAt
+    PractitionerLanguageInputDto:
+      type: object
+      properties:
+        languageConceptId:
+          type: string
+          format: uuid
+        proficiencyConceptId:
+          type: string
+          format: uuid
+        clinicalInterpretationAllowed:
+          type: boolean
+      required:
+        - languageConceptId
+        - clinicalInterpretationAllowed
+      additionalProperties: false
     UpdateOwnPractitionerProfileDto:
       type: object
       properties:
@@ -62220,6 +62239,12 @@ components:
           type: string
           maxLength: 200
           description: Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto.
+        languages:
+          maxItems: 20
+          description: Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse.
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLanguageInputDto'
       additionalProperties: false
     SetPractitionerPhotoDto:
       type: object
@@ -72243,6 +72268,7 @@ components:
         tenantId:
           type: string
           format: uuid
+          description: Organización del documento. Si se omite, es la de la práctica; si viene, debe coincidir.
         clearingNumber:
           type: string
           description: Número de clearing (único por tenant); autogenerado si se omite
@@ -72267,7 +72293,6 @@ components:
           items:
             $ref: '#/components/schemas/ClearingItemInputDto'
       required:
-        - tenantId
         - practiceId
         - bankAccountId
         - clearingDate
@@ -75869,15 +75894,13 @@ components:
         signerProfileId:
           type: string
           format: uuid
-          description: Perfil del firmante (autor o delegado)
+          description: Perfil del firmante. Si se omite, es el perfil profesional de la sesión.
         certificateThumbprint:
           type: string
           description: Huella del certificado usado en la firma
         signatureValueEncrypted:
           type: string
           description: Valor de firma cifrado (opaco al backend)
-      required:
-        - signerProfileId
       additionalProperties: false
     CosignVersionDto:
       type: object
@@ -75885,13 +75908,11 @@ components:
         signerProfileId:
           type: string
           format: uuid
-          description: Perfil del cofirmante / supervisor
+          description: Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión.
         certificateThumbprint:
           type: string
         signatureValueEncrypted:
           type: string
-      required:
-        - signerProfileId
       additionalProperties: false
     AmendNoteDto:
       type: object
@@ -79865,10 +79886,6 @@ components:
         tenantContextId:
           type: string
           description: Contexto de tenant
-          format: uuid
-        definitionSetVersionId:
-          type: string
-          description: Versión publicada del set cuyo schema se congela
           format: uuid
         schemaVersion:
           type: number

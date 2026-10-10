@@ -334,3 +334,56 @@ describe('PublicSearchRepository.practiceSitesByPractitioner', () => {
     ]);
   });
 });
+
+describe('PublicSearchRepository · unaccent (P-14)', () => {
+  const where = { visibilityConceptId: 'vis', statusConceptId: 'st' };
+
+  function build(present: boolean) {
+    const execute = mockFn(async (sql: string) =>
+      sql.includes('pg_extension') ? [{ present }] : [{ id: 'p1' }],
+    );
+    const em = { getConnection: mockFn(() => ({ execute })) };
+    return { repo: new PublicSearchRepository() as any, em, execute };
+  }
+
+  it('pregunta por la extensión una sola vez y la usa si está', async () => {
+    const d = build(true);
+
+    await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
+    await d.repo.matchIdsByText(d.em, 'pedia', where, 10);
+
+    const consultas = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
+    expect(
+      consultas.filter((sql: string) => sql.includes('pg_extension')),
+    ).toHaveLength(1);
+    expect(
+      consultas.filter((sql: string) => sql.includes('unaccent(lower')),
+    ).toHaveLength(2);
+  });
+
+  it('sin la extensión consulta con lower(...) directo, sin intentar unaccent', async () => {
+    const d = build(false);
+
+    await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
+
+    const consultas = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
+    expect(
+      consultas.some((sql: string) => sql.includes('unaccent(lower')),
+    ).toBe(false);
+    expect(d.execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('un fallo real de la consulta se propaga: ya no se reintenta a ciegas', async () => {
+    const d = build(true);
+    const caida = new Error('connection terminated unexpectedly');
+    d.execute.mockImplementation(async (sql: string) => {
+      if (sql.includes('pg_extension')) return [{ present: true }];
+      throw caida;
+    });
+
+    await expect(d.repo.matchIdsByText(d.em, 'cardio', where, 10)).rejects.toBe(
+      caida,
+    );
+    expect(d.execute).toHaveBeenCalledTimes(2);
+  });
+});

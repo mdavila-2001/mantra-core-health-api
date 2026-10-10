@@ -12,6 +12,25 @@
 const AMOUNT_PATTERN = /^\d+(?:\.\d+)?$/;
 
 /**
+ * Un importe guardado que no es un decimal válido. No es un error del cliente
+ * (no puede corregirlo): es un dato corrupto en la base, y convertirlo en cero
+ * mostraría dinero equivocado en silencio. Sale como 500 con los ids para
+ * encontrar la fila.
+ */
+export class CorruptStoredAmountError extends Error {
+  constructor(
+    readonly claimId: string,
+    readonly lineId: string,
+    readonly amount: string,
+  ) {
+    super(
+      `Importe ilegible en el renglón ${lineId} de la solicitud ${claimId}: ${amount}`,
+    );
+    this.name = 'CorruptStoredAmountError';
+  }
+}
+
+/**
  * Pasa una cadena decimal a centavos.
  *
  * Admite ceros de más a la derecha (`'400.2500'`, que es como `numeric` sin

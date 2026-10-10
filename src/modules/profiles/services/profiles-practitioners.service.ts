@@ -922,6 +922,9 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
+    // Las piezas que no se pudieron leer viajan en la respuesta (P-09): un
+    // vacío que en realidad es un fallo tiene que poder decirse en pantalla.
+    const unavailable: string[] = [];
     // Cada pieza del perfil se lee **sin poder tumbar a las demás** (F-18,
     // 18/08/2026). La ficha de la Guía devolvía 500 —con código de soporte a la
     // vista del paciente— en cuanto una de estas seis lecturas fallaba sobre un
@@ -943,22 +946,32 @@ export class ProfilesPractitionersService {
       this.withoutBreakingRecord(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'especialidades' },
+        {
+          profileId,
+          pieza: 'especialidades',
+          section: 'specialties',
+          unavailable,
+        },
       ),
       this.withoutBreakingRecord(
         () => this.credentialsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'credenciales' },
+        {
+          profileId,
+          pieza: 'credenciales',
+          section: 'credentials',
+          unavailable,
+        },
       ),
       this.withoutBreakingRecord(
         () => this.authorizationsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'matrículas' },
+        { profileId, pieza: 'matrículas', section: 'licenses', unavailable },
       ),
       this.withoutBreakingRecord(
         () => this.languagesRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'idiomas' },
+        { profileId, pieza: 'idiomas', section: 'languages', unavailable },
       ),
       // TP-2: el titular ve su trayectoria entera —incluida la solicitud que
       // mandó y todavía nadie aceptó, que si no no sabría que la mandó—; quien
@@ -976,14 +989,19 @@ export class ProfilesPractitionersService {
             ? this.affiliations.visiblesThird(em, profileId)
             : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
-        { profileId, pieza: 'afiliaciones' },
+        {
+          profileId,
+          pieza: 'afiliaciones',
+          section: 'affiliations',
+          unavailable,
+        },
       ),
       subjectUserId === undefined
         ? Promise.resolve(WITHOUT_ACTIVITY)
         : this.withoutBreakingRecord(
             () => this.countActivity(em, subjectUserId),
             WITHOUT_ACTIVITY,
-            { profileId, pieza: 'actividad' },
+            { profileId, pieza: 'actividad', section: 'activity', unavailable },
           ),
       // El contacto: sólo en la lectura propia, y envuelto como las demás. Un
       // fallo leyendo `common.contact_points` deja el perfil sin correo, no
@@ -992,7 +1010,7 @@ export class ProfilesPractitionersService {
         ? this.withoutBreakingRecord(
             () => this.contactPointsRepo.findVigentesByOwner(em, person.id),
             [],
-            { profileId, pieza: 'contacto' },
+            { profileId, pieza: 'contacto', section: 'contact', unavailable },
           )
         : Promise.resolve([]),
       // El documento y las direcciones: sólo en la lectura propia y envueltos
@@ -1001,7 +1019,7 @@ export class ProfilesPractitionersService {
         ? this.withoutBreakingRecord(
             () => this.readDocumentAndAddresses(em, person.id),
             {},
-            { profileId, pieza: 'filiación' },
+            { profileId, pieza: 'filiación', section: 'identity', unavailable },
           )
         : Promise.resolve(
             {} as Awaited<ReturnType<typeof this.readDocumentAndAddresses>>,
@@ -1026,6 +1044,9 @@ export class ProfilesPractitionersService {
       )?.value;
 
     return {
+      ...(unavailable.length > 0
+        ? { unavailableSections: [...unavailable].sort() }
+        : {}),
       profileId,
       personId: person.id,
       practitionerCode: practitioner.practitionerCode,
@@ -1656,13 +1677,20 @@ export class ProfilesPractitionersService {
   private async withoutBreakingRecord<T>(
     leer: () => Promise<T>,
     empty: T,
-    context: { profileId: string; pieza: string },
+    context: {
+      profileId: string;
+      pieza: string;
+      /** Nombre de la pieza en el contrato (`unavailableSections`). */
+      section: string;
+      unavailable: string[];
+    },
   ): Promise<T> {
     try {
       return await leer();
     } catch (error) {
+      context.unavailable.push(context.section);
       this.logger.warn(
-        { ...context, err: error },
+        { profileId: context.profileId, pieza: context.pieza, err: error },
         'La ficha del profesional se devuelve sin esta pieza: la lectura falló',
       );
       return empty;

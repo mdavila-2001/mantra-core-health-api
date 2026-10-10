@@ -14,6 +14,7 @@ import {
   PreconditionFailedException,
   SEED,
   TokenService,
+  UPLOAD_MIME_ALLOWLIST,
   sniffMimeType,
   type AuthenticatedUser,
 } from '../../../common';
@@ -92,6 +93,13 @@ const CREDENTIAL_TYPES: readonly string[] = [
   PROF.CREDENTIAL_TYPE_DOCTORATE,
   PROF.CREDENTIAL_TYPE_SPECIALTY,
 ];
+
+/** Si el base64 decodifica a bytes que son, por su firma, una imagen. */
+function isReadableImage(base64: string): boolean {
+  const parsed = parseBase64Image(base64);
+  if (!parsed || parsed.buffer.length === 0) return false;
+  return sniffMimeType(parsed.buffer)?.startsWith('image/') ?? false;
+}
 
 /** Texto recortado, o `undefined` si viene vacío: una cadena en blanco no es un dato. */
 function optionalText(valor: string | undefined): string | undefined {
@@ -429,6 +437,25 @@ export class IamPractitionerSelfRegistrationService {
       );
     }
 
+    // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
+    // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
+    // el profesional había cargado.
+    if (dto.profilePhotoBase64 && !isReadableImage(dto.profilePhotoBase64)) {
+      throw new PreconditionFailedException(
+        'La foto de perfil no es una imagen válida',
+        { field: 'profilePhotoBase64' },
+      );
+    }
+
+    // La foto se sube ANTES de abrir la transacción, sin dueño, y el alta la
+    // reclama adentro (igual que la firma y el sello): la E/S contra el
+    // almacenamiento no entra en la ventana de la transacción, y si el alta se
+    // revierte queda una subida anónima sin reclamar, no un archivo con dueño
+    // apuntando a una cuenta que no existe.
+    const uploadedPhotoId = await this.uploadProfilePhoto(
+      dto.profilePhotoBase64,
+    );
+
     const created = await this.em.transactional(async (tx) => {
       // El correo es la identidad de login: comprobarlo antes de escribir nada
       // convierte una violación de constraint (500) en un 409 explicativo.
@@ -525,11 +552,10 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // 1.5) Foto de perfil (si viene en el payload y el servicio de archivos está disponible).
-      const photoFileId = await this.uploadProfilePhoto(
-        user.id,
-        dto.profilePhotoBase64,
-      );
+      // 1.5) Foto de perfil, ya subida: pasa a ser de la cuenta nueva.
+      const photoFileId = uploadedPhotoId
+        ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
+        : undefined;
 
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
@@ -990,6 +1016,11 @@ export class IamPractitionerSelfRegistrationService {
       verificationStatus: 'PENDING',
       emailVerificationSent,
       ...(created.photoFileId ? { photoFileId: created.photoFileId } : {}),
+      // Si mandó foto, la respuesta dice si quedó guardada: la subida al
+      // almacenamiento puede fallar sin tumbar el alta, pero no en silencio.
+      ...(dto.profilePhotoBase64
+        ? { profilePhotoStored: created.photoFileId !== undefined }
+        : {}),
       ...(created.clinicalRoles.length > 0
         ? { clinicalRoles: created.clinicalRoles }
         : {}),
@@ -1077,23 +1108,33 @@ export class IamPractitionerSelfRegistrationService {
     }
   }
 
+  /**
+   * Sube la foto de perfil como pre-carga anónima, fuera de toda transacción.
+   *
+   * Un rechazo por algo que el cliente puede corregir (tamaño, formato) se
+   * propaga como 422: seguir con el alta sin la foto que mandó sería perderla
+   * en silencio. Un fallo del almacenamiento no tumba el alta: se registra y
+   * la respuesta lo dice con `profilePhotoStored: false`.
+   *
+   * @param profilePhotoBase64 - La foto tal como llegó, ya comprobada legible.
+   * @returns El id del archivo subido, o `undefined` si no hay foto o no se
+   *   pudo guardar.
+   * @throws PreconditionFailedException si el almacenamiento la rechaza.
+   */
   private async uploadProfilePhoto(
-    userId: string,
     profilePhotoBase64?: string,
   ): Promise<string | undefined> {
     if (!profilePhotoBase64 || !this.fileUploadService) {
       return undefined;
     }
     const parsed = parseBase64Image(profilePhotoBase64);
-    if (!parsed || parsed.buffer.length === 0) {
-      return undefined;
-    }
+    if (!parsed) return undefined;
     const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
     const ext = detectedMimeType.split('/')[1] ?? 'jpg';
     try {
-      const uploaded = await this.fileUploadService.upload(
+      const uploaded = await this.fileUploadService.uploadAnonymous(
         {
-          originalname: `practitioner-photo-${userId}.${ext}`,
+          originalname: `practitioner-photo.${ext}`,
           mimetype: detectedMimeType,
           buffer: parsed.buffer,
         },
@@ -1102,21 +1143,54 @@ export class IamPractitionerSelfRegistrationService {
           sensitivity: FileSensitivity.NORMAL,
         },
         {
-          id: userId,
-          roles: ['PRACTITIONER'],
-          tenantIds: [SEED.tenantId],
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'iam.auth.register-practitioner',
         },
       );
       return uploaded.id;
     } catch (err) {
+      if (err instanceof PreconditionFailedException) throw err;
       this.logger.warn(
         {
           operation: 'iam.auth.register-practitioner',
           error: (err as Error).message,
         },
-        'Could not process practitioner profile photo; continuing registration without photo',
+        'Could not store practitioner profile photo; continuing registration without photo',
       );
       return undefined;
     }
+  }
+
+  /**
+   * Asigna la foto pre-cargada a la cuenta que se está creando. Va en la
+   * transacción del alta: si el alta se revierte, el archivo vuelve a quedar
+   * sin dueño. El tenant es el DEFAULT, el mismo de la única membresía que el
+   * autorregistro le da al profesional (paso 7).
+   *
+   * @param tx - Transacción del alta.
+   * @param fileId - Archivo subido por {@link uploadProfilePhoto}.
+   * @param userId - Cuenta recién creada.
+   * @returns El id del archivo, ya reclamado.
+   */
+  private async claimProfilePhoto(
+    tx: EntityManager,
+    fileId: string,
+    userId: string,
+  ): Promise<string> {
+    await this.attachableFiles.claimAnonymousUpload(
+      tx,
+      fileId,
+      { ownerUserId: userId, tenantId: SEED.tenantId },
+      {
+        allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        operation: 'iam.auth.register-practitioner.profile-photo',
+      },
+      {
+        subject: 'La foto de perfil',
+        notFound: 'La foto de perfil no existe',
+      },
+    );
+    return fileId;
   }
 }
