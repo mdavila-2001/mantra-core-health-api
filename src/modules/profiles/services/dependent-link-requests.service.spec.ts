@@ -19,7 +19,7 @@ const mother = { id: 'user-madre', roles: ['USER', 'PATIENT'] } as any;
 /** El abuelo: la persona a la que se le pide. */
 const grandparent = { id: 'user-abuelo', roles: ['USER', 'PATIENT'] } as any;
 
-const personas: Record<string, any> = {
+const persons: Record<string, any> = {
   'person-madre': { id: 'person-madre', displayName: 'Ana Pérez' },
   'person-abuelo': { id: 'person-abuelo', displayName: 'Luis Pérez' },
 };
@@ -76,7 +76,7 @@ function build(
   const withoutPatient = new Set(options.sinPaciente ?? []);
   const patientProfilesRepo = {
     findById: fn(async (_em: unknown, id: string) =>
-      personas[id] && !withoutPatient.has(id) ? { profileId: id } : null,
+      persons[id] && !withoutPatient.has(id) ? { profileId: id } : null,
     ),
   };
   const personsRepo = {
@@ -401,11 +401,11 @@ describe('DependentLinkRequestsService', () => {
           },
         ];
         const messages: string[] = [];
-        for (const { opciones, perfil } of cases) {
-          const { service, portalProxiesRepo, notifications } = build(opciones);
+        for (const { opciones: options, perfil: profile } of cases) {
+          const { service, portalProxiesRepo, notifications } = build(options);
 
           const error = await service
-            .request({ patientProfileId: perfil }, mother)
+            .request({ patientProfileId: profile }, mother)
             .catch((e: unknown) => e);
 
           expect(error).toBeInstanceOf(ResourceNotFoundException);
@@ -438,15 +438,15 @@ describe('DependentLinkRequestsService', () => {
         ).rejects.toBeInstanceOf(ConflictException);
         expect(current.portalProxiesRepo.create).not.toHaveBeenCalled();
 
-        const pendiente = build({ pendiente: grandparentPending() });
+        const pending = build({ pendiente: grandparentPending() });
         await expect(
-          pendiente.service.request(
+          pending.service.request(
             { patientProfileId: 'person-abuelo' },
             mother,
           ),
         ).rejects.toBeInstanceOf(ConflictException);
-        expect(pendiente.portalProxiesRepo.create).not.toHaveBeenCalled();
-        expect(pendiente.notifications.emitInApp).not.toHaveBeenCalled();
+        expect(pending.portalProxiesRepo.create).not.toHaveBeenCalled();
+        expect(pending.notifications.emitInApp).not.toHaveBeenCalled();
       });
     });
 
@@ -503,9 +503,9 @@ describe('DependentLinkRequestsService', () => {
         },
       ]);
 
-      const [fila] = await service.listIncoming(grandparent);
+      const [row] = await service.listIncoming(grandparent);
 
-      expect(fila.requesterDisplayName).toBe('');
+      expect(row.requesterDisplayName).toBe('');
     });
 
     it('una cuenta sin perfil de paciente recibe vacío, no un error', async () => {

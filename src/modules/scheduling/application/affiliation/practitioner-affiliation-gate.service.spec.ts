@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
-import { ESTADO_DEL_VINCULO } from '../../../profiles/services/profiles-affiliations.service';
+import { LINK_STATUS } from '../../../profiles/services/profiles-affiliations.service';
 import { PROF } from '../../../profiles/profiles.concepts';
 import { ProfilesAffiliationsAdapter } from '../../infrastructure/adapters/profiles-affiliations.adapter';
 
@@ -97,8 +97,8 @@ describe('PractitionerAffiliationGateService', () => {
     // consultorio, castigándolo por haber declarado dónde trabaja.
     const d = build();
     withAffiliations(d, [
-      { practiceSiteId: null, statusConceptId: ESTADO_DEL_VINCULO.APROBADO },
-      { practiceSiteId: null, statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE },
+      { practiceSiteId: null, statusConceptId: LINK_STATUS.APROBADO },
+      { practiceSiteId: null, statusConceptId: LINK_STATUS.PENDIENTE },
     ]);
 
     expect(await d.service.evaluate(TENANT, practitioner)).toBe('sin-vinculos');
@@ -110,7 +110,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -123,7 +123,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       },
     ]);
     sitesOf(d, TENANT);
@@ -149,7 +149,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, OTHER_TENANT);
@@ -167,7 +167,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-caja',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     spreadSites(d, { 'sede-caja': OTHER_TENANT });
@@ -187,11 +187,11 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-otra',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
       {
         practiceSiteId: 'sede-esta',
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       },
     ]);
     spreadSites(d, {
@@ -209,11 +209,11 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.PENDIENTE,
+        statusConceptId: LINK_STATUS.PENDIENTE,
       },
       {
         practiceSiteId: 'sede-2',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -226,7 +226,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.RECHAZADO,
+        statusConceptId: LINK_STATUS.RECHAZADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -241,15 +241,15 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
       {
         practiceSiteId: 'sede-2',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
       {
         practiceSiteId: 'sede-3',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -270,7 +270,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.DECLARADO,
+        statusConceptId: LINK_STATUS.DECLARADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -311,7 +311,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.REVOCADO,
+        statusConceptId: LINK_STATUS.REVOCADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -334,7 +334,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, OTHER_TENANT);
@@ -353,7 +353,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, TENANT);
@@ -375,7 +375,7 @@ describe('PractitionerAffiliationGateService', () => {
     withAffiliations(d, [
       {
         practiceSiteId: 'sede-1',
-        statusConceptId: ESTADO_DEL_VINCULO.APROBADO,
+        statusConceptId: LINK_STATUS.APROBADO,
       },
     ]);
     sitesOf(d, TENANT);

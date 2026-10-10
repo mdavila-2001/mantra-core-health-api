@@ -77,22 +77,22 @@ export class PatientMergeEventsRepository {
    * saber— si el que mira fue el que sobrevivió o el que quedó absorbido.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Paciente involucrado, opcional.
+   * @param filters - Paciente involucrado, opcional.
    * @param limit - Tope de filas a devolver.
    * @returns Los eventos, del más reciente al más antiguo.
    */
   findEvents(
     em: EntityManager,
-    filtros: { patientProfileId?: string },
+    filters: { patientProfileId?: string },
     limit: number,
   ): Promise<PatientMergeEvents[]> {
     const where =
-      filtros.patientProfileId === undefined
+      filters.patientProfileId === undefined
         ? {}
         : {
             $or: [
-              { survivingPatientProfileId: filtros.patientProfileId },
-              { mergedPatientProfileId: filtros.patientProfileId },
+              { survivingPatientProfileId: filters.patientProfileId },
+              { mergedPatientProfileId: filters.patientProfileId },
             ],
           };
 

@@ -786,8 +786,8 @@ describe('ProfilesPatientsService', () => {
 
       await d.service.getOwnSummary(titular);
 
-      const [, filtro] = d.tx.findOne.mock.calls[0];
-      expect(filtro).toMatchObject({
+      const [, filter] = d.tx.findOne.mock.calls[0];
+      expect(filter).toMatchObject({
         subjectEntityId: 'per-1',
         revokedAt: null,
       });
@@ -1192,14 +1192,14 @@ describe('ProfilesPatientsService', () => {
 
     it('un cuerpo vacío no toca la auditoría de la persona', async () => {
       const d = withPatient();
-      const antes = d.person.updatedAt;
+      const before = d.person.updatedAt;
 
       const res = await d.service.updateOwnProfile({}, titular);
 
       // «Sin cambios» incluye la fila: mover `updated_at`, `updated_by_user_id` y
       // `row_version` sin haber escrito una sola columna convierte la auditoría
       // en ruido y hace fallar por conflicto de versión a quien la tuviera leída.
-      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedAt).toBe(before);
       expect(d.person.updatedByUserId).toBeUndefined();
       // Y sigue devolviendo el perfil, que es lo que el contrato promete.
       expect(res).toMatchObject({ personId: 'per-1', name: 'Ada' });
@@ -1207,13 +1207,13 @@ describe('ProfilesPatientsService', () => {
 
     it('un PATCH que sólo trae el teléfono no toca la persona', async () => {
       const d = withPatient();
-      const antes = d.person.updatedAt;
+      const before = d.person.updatedAt;
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
       // El teléfono no vive en `profiles.persons`, y su propia fila ya nace con
       // su auditoría: marcar la persona diría que cambió algo suyo que no cambió.
-      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedAt).toBe(before);
       expect(d.person.updatedByUserId).toBeUndefined();
       expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
     });
@@ -1473,7 +1473,7 @@ describe('ProfilesPatientsService', () => {
 
       it('un PATCH que sólo trae la del catálogo marca la fila como modificada', async () => {
         const d = withPatient();
-        const antes = d.person.updatedAt;
+        const before = d.person.updatedAt;
 
         await d.service.updateOwnProfile(
           { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
@@ -1483,7 +1483,7 @@ describe('ProfilesPatientsService', () => {
         // La ocupación vive en `profiles.persons`: escribirla es cambiar la fila,
         // y la auditoría tiene que decirlo igual que con el resto de sus campos.
         expect(d.person.updatedByUserId).toBe('user-1');
-        expect(d.person.updatedAt).not.toBe(antes);
+        expect(d.person.updatedAt).not.toBe(before);
       });
     });
 
@@ -1613,29 +1613,29 @@ describe('ProfilesPatientsService', () => {
      */
     it('cambiarlo cierra el anterior en vez de pisarlo', async () => {
       const d = withPatient();
-      const anterior = {
+      const previous = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([anterior]);
+      d.tx.find.mockResolvedValue([previous]);
 
       await d.service.updateOwnProfile({ taxId: '222' } as any, titular);
 
-      expect(anterior.validTo).toBeInstanceOf(Date);
+      expect(previous.validTo).toBeInstanceOf(Date);
     });
 
     it('vaciarlo cierra el anterior y no abre otro', async () => {
       const d = withPatient();
-      const anterior = {
+      const previous = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([anterior]);
+      d.tx.find.mockResolvedValue([previous]);
       await d.service.updateOwnProfile({ taxId: '' } as any, titular);
 
-      expect(anterior.validTo).toBeInstanceOf(Date);
+      expect(previous.validTo).toBeInstanceOf(Date);
       expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1914,22 +1914,22 @@ describe('ProfilesPatientsService', () => {
 
     it('corrige el departamento de emisión sin tocar el número del documento', async () => {
       const d = withPatient();
-      const documento = {
+      const document = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '4821993',
         issuerAdministrativeAreaConceptId: 'dep-lp',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([documento]);
+      d.tx.find.mockResolvedValue([document]);
 
       await d.service.updateOwnProfile(
         { issuerAdministrativeAreaConceptId: 'dep-sc' } as any,
         titular,
       );
 
-      expect(documento.issuerAdministrativeAreaConceptId).toBe('dep-sc');
-      expect(documento.value).toBe('4821993');
-      expect(documento.validTo).toBeNull();
+      expect(document.issuerAdministrativeAreaConceptId).toBe('dep-sc');
+      expect(document.value).toBe('4821993');
+      expect(document.validTo).toBeNull();
       expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 
@@ -2237,9 +2237,9 @@ describe('ProfilesPatientsService', () => {
 
       await b.service.registerOwnDependent(child as never, actor);
 
-      const [, datos] = b.portalProxiesRepo.create.mock.calls[0];
-      expect(datos.validFrom).toBeInstanceOf(Date);
-      expect(datos.validTo).toBeUndefined();
+      const [, data] = b.portalProxiesRepo.create.mock.calls[0];
+      expect(data.validFrom).toBeInstanceOf(Date);
+      expect(data.validTo).toBeUndefined();
     });
 
     it('sin documento no escribe identificador: un recién nacido no tiene cédula', async () => {
@@ -2343,9 +2343,9 @@ describe('ProfilesPatientsService', () => {
         },
       ]);
 
-      const [dependiente] = await b.service.getOwnDependents(actor);
+      const [dependent] = await b.service.getOwnDependents(actor);
 
-      expect(dependiente).toMatchObject({
+      expect(dependent).toMatchObject({
         id: 'proxy-1',
         patientProfileId: 'person-hijo',
         fullName: 'Mateo Quispe',
@@ -2355,7 +2355,7 @@ describe('ProfilesPatientsService', () => {
       });
       // La edad la calcula el servidor: dejarla al navegador daría edades
       // distintas según la hora del aparato.
-      expect(dependiente.ageYears).toBe(
+      expect(dependent.ageYears).toBe(
         new Date().getUTCFullYear() -
           2018 -
           (new Date() < new Date(Date.UTC(new Date().getUTCFullYear(), 2, 14))
@@ -2363,7 +2363,7 @@ describe('ProfilesPatientsService', () => {
             : 0),
       );
       // Lo que no hay no viaja vacío.
-      expect(dependiente).not.toHaveProperty('nationalId');
+      expect(dependent).not.toHaveProperty('nationalId');
     });
 
     it('sin dependientes devuelve una lista vacía, no un error', async () => {

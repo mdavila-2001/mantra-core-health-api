@@ -38,8 +38,8 @@ import { BIRTH_SEX_CODES, type BirthSexCode } from '../profiles.concepts';
  * `false` y la validación de más abajo exige que los dos sean números, así que
  * el `null` suelto falla como el dato incoherente que es.
  */
-function removesDot(latitude: unknown, longitud: unknown): boolean {
-  return latitude === null && longitud === null;
+function removesDot(latitude: unknown, longitude: unknown): boolean {
+  return latitude === null && longitude === null;
 }
 
 /**

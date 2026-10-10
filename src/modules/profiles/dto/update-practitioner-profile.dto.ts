@@ -49,7 +49,7 @@ import {
  * edita, y distinta de omitirlo.
  */
 /** Formato aceptado por los cuatro campos telefónicos del perfil. */
-const PATRON_TELEFONO = /^[+]?[0-9 ()-]{6,}$/;
+const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
 
 /**
  * Si el par de coordenadas viene a **quitar** el punto del mapa.
@@ -59,12 +59,12 @@ const PATRON_TELEFONO = /^[+]?[0-9 ()-]{6,}$/;
  * Medio `null` no quita nada: la validación de abajo exige entonces que los dos
  * sean números, así que el `null` suelto falla como el dato incoherente que es.
  */
-function removesDot(latitude: unknown, longitud: unknown): boolean {
-  return latitude === null && longitud === null;
+function removesDot(latitude: unknown, longitude: unknown): boolean {
+  return latitude === null && longitude === null;
 }
 
 /** Mensaje único para los cuatro campos telefónicos del perfil. */
-const MENSAJE_TELEFONO =
+const PHONE_MESSAGE =
   'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
 
 /** Tope de idiomas por profesional: la lista se reemplaza entera en cada PATCH. */
@@ -215,7 +215,7 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  @Matches(PHONE_PATTERN, { message: PHONE_MESSAGE })
   phone?: string;
 
   /* --- los cinco contactos que el alta captura por separado ----------------
@@ -249,7 +249,7 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  @Matches(PHONE_PATTERN, { message: PHONE_MESSAGE })
   mobilePhone?: string;
 
   /** Celular del lugar de trabajo. */
@@ -257,7 +257,7 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  @Matches(PHONE_PATTERN, { message: PHONE_MESSAGE })
   workMobilePhone?: string;
 
   /** Teléfono fijo del lugar de trabajo. */
@@ -265,7 +265,7 @@ export class UpdateOwnPractitionerProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
-  @Matches(PATRON_TELEFONO, { message: MENSAJE_TELEFONO })
+  @Matches(PHONE_PATTERN, { message: PHONE_MESSAGE })
   workLandline?: string;
 
   @ApiPropertyOptional({

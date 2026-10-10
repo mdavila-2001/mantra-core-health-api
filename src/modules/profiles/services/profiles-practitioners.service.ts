@@ -42,7 +42,7 @@ import { IdentityVerificationCases } from '../../identity_assurance/entities';
 import { IDA } from '../../identity_assurance/identity_assurance.concepts';
 import { JurisdictionAuthorizationsHistory } from '../../audit/entities';
 import { PracticeSites } from '../../practice/entities';
-import { esEstado } from './profiles-affiliations.service';
+import { isStatus } from './profiles-affiliations.service';
 import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
@@ -344,7 +344,7 @@ export class ProfilesPractitionersService {
     }
     const practitionerProfileId = profile.profileId;
 
-    const [matriculas, especialidades, afiliaciones, recursos] =
+    const [registrations, specialties, affiliations, resources] =
       await Promise.all([
         this.authorizationsRepo.findByPractitioner(em, practitionerProfileId),
         this.specialtiesRepo.findAllByPractitioner(em, practitionerProfileId),
@@ -363,20 +363,20 @@ export class ProfilesPractitionersService {
     // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
     // propia superficie.
     const quotas =
-      recursos.length === 0
+      resources.length === 0
         ? 0
         : await em.count(BookableSlots, {
-            resourceId: { $in: recursos.map((resource) => resource.id) },
+            resourceId: { $in: resources.map((resource) => resource.id) },
           });
 
     const hasPhoto =
       profile.photoFileId !== undefined && profile.photoFileId !== null;
 
     const missingInData: string[] = [];
-    if (!matriculas.some((row) => row.licenseNumber.trim() !== '')) {
+    if (!registrations.some((row) => row.licenseNumber.trim() !== '')) {
       missingInData.push('license-number');
     }
-    if (especialidades.length === 0) missingInData.push('specialty');
+    if (specialties.length === 0) missingInData.push('specialty');
 
     const steps: OnboardingStepDto[] = [
       {
@@ -398,9 +398,9 @@ export class ProfilesPractitionersService {
         // atiende en su propio consultorio no está afiliado a nadie, y pedirle
         // una afiliación lo dejaría trabado en un paso que no le corresponde.
         key: 'organizations',
-        complete: afiliaciones.length > 0 || recursos.length > 0,
+        complete: affiliations.length > 0 || resources.length > 0,
         missing:
-          afiliaciones.length > 0 || recursos.length > 0 ? [] : ['affiliation'],
+          affiliations.length > 0 || resources.length > 0 ? [] : ['affiliation'],
       },
       {
         key: 'schedule',
@@ -408,7 +408,7 @@ export class ProfilesPractitionersService {
         missing:
           quotas > 0
             ? []
-            : recursos.length === 0
+            : resources.length === 0
               ? ['published-schedule']
               : ['slots'],
       },
@@ -423,12 +423,12 @@ export class ProfilesPractitionersService {
       missing: previousComplete ? [] : ['previous-steps'],
     });
 
-    const primerIncomplete = steps.find((step) => !step.complete);
+    const firstIncomplete = steps.find((step) => !step.complete);
 
     this.logger.info(
       {
         operation: 'profiles.practitioner.onboarding',
-        firstIncomplete: primerIncomplete?.key ?? 'done',
+        firstIncomplete: firstIncomplete?.key ?? 'done',
       },
       'Calculando el avance del alta del profesional',
     );
@@ -436,7 +436,7 @@ export class ProfilesPractitionersService {
     return {
       practitionerProfileId,
       steps: steps,
-      firstIncomplete: primerIncomplete?.key ?? 'done',
+      firstIncomplete: firstIncomplete?.key ?? 'done',
     };
   }
 
@@ -507,12 +507,12 @@ export class ProfilesPractitionersService {
       this.specialtiesRepo.findCurrentSpecialtyPairs(em),
     ]);
 
-    const visibles = new Set(visibleIds);
+    const visible = new Set(visibleIds);
     // Por especialidad, los profesionales SIN repetir: una fila por cada
     // vigencia haría contar dos veces a quien la recertificó.
     const bySpecialty = new Map<string, Set<string>>();
     for (const par of pairs) {
-      if (!visibles.has(par.practitionerProfileId)) continue;
+      if (!visible.has(par.practitionerProfileId)) continue;
       const people =
         bySpecialty.get(par.specialtyConceptId) ?? new Set<string>();
       people.add(par.practitionerProfileId);
@@ -525,17 +525,17 @@ export class ProfilesPractitionersService {
     // que se registra solo, médicos con cuenta incluidos—.
     const withSpecialty = new Set(
       pairs
-        .filter((par) => visibles.has(par.practitionerProfileId))
+        .filter((par) => visible.has(par.practitionerProfileId))
         .map((par) => par.practitionerProfileId),
     );
-    const withoutSpecialtyCount = [...visibles].filter(
+    const withoutSpecialtyCount = [...visible].filter(
       (id) => !withSpecialty.has(id),
     ).length;
 
     const items = [...bySpecialty.entries()]
-      .map(([specialtyConceptId, gente]) => ({
+      .map(([specialtyConceptId, people]) => ({
         specialtyConceptId,
-        practitionerCount: gente.size,
+        practitionerCount: people.size,
       }))
       // De mayor a menor, y a igualdad por concepto para que el orden sea
       // estable entre llamadas: quien dibuja decide cómo mostrarlo, pero no
@@ -546,7 +546,7 @@ export class ProfilesPractitionersService {
           a.specialtyConceptId.localeCompare(b.specialtyConceptId),
       );
 
-    return { items, practitionerTotal: visibles.size, withoutSpecialtyCount };
+    return { items, practitionerTotal: visible.size, withoutSpecialtyCount };
   }
 
   async listPractitioners(options: {
@@ -577,14 +577,14 @@ export class ProfilesPractitionersService {
 
     let profileIds: readonly string[] | undefined;
     if (options.withoutSpecialty === true) {
-      const [visibles, pares] = await Promise.all([
+      const [visible, pairs] = await Promise.all([
         this.practitionersRepo.findVisibleProfileIds(em, undefined),
         this.specialtiesRepo.findCurrentSpecialtyPairs(em),
       ]);
       const withSpecialty = new Set(
-        pares.map((par) => par.practitionerProfileId),
+        pairs.map((par) => par.practitionerProfileId),
       );
-      profileIds = visibles.filter((id) => !withSpecialty.has(id));
+      profileIds = visible.filter((id) => !withSpecialty.has(id));
       if (profileIds.length === 0) {
         return { items: [], count: 0, limit: options.limit, nextCursor: null };
       }
@@ -632,12 +632,12 @@ export class ProfilesPractitionersService {
     // trabajo y no se hace a ciegas acá.
     const workplacesByProfile = new Map<string, string[]>();
     for (const affiliation of affiliations) {
-      const nombre = affiliation.organizationName?.trim();
-      if (!nombre) continue;
+      const name = affiliation.organizationName?.trim();
+      if (!name) continue;
       const places =
         workplacesByProfile.get(affiliation.practitionerProfileId) ?? [];
-      if (!places.includes(nombre)) {
-        places.push(nombre);
+      if (!places.includes(name)) {
+        places.push(name);
       }
       workplacesByProfile.set(affiliation.practitionerProfileId, places);
     }
@@ -738,9 +738,9 @@ export class ProfilesPractitionersService {
     personId: string,
     phone: string,
     actorUserId: string,
-    ahora: Date,
+    now: Date,
   ): Promise<void> {
-    await this.replaceContact(tx, personId, phone, actorUserId, ahora, {
+    await this.replaceContact(tx, personId, phone, actorUserId, now, {
       systemConceptId: CONCEPTS.CONTACT_PHONE,
       useConceptId: CONCEPTS.CONTACT_USE_WORK,
     });
@@ -759,20 +759,20 @@ export class ProfilesPractitionersService {
    *
    * @param tx - Transacción activa.
    * @param personId - Persona dueña del contacto.
-   * @param valor - Valor declarado; vacío borra.
+   * @param value - Valor declarado; vacío borra.
    * @param actorUserId - Quién hace el cambio.
-   * @param ahora - Instante del cambio, para la vigencia.
+   * @param now - Instante del cambio, para la vigencia.
    * @param par - Sistema y uso que identifican al contacto.
    */
   private async replaceContact(
     tx: EntityManager,
     personId: string,
-    valor: string,
+    value: string,
     actorUserId: string,
-    ahora: Date,
+    now: Date,
     par: { systemConceptId: string; useConceptId: string },
   ): Promise<void> {
-    const fresh = valor.trim() === '' ? undefined : valor.trim();
+    const fresh = value.trim() === '' ? undefined : value.trim();
     const current = await this.contactPointsRepo.findCurrentByOwnerSystemAndUse(
       tx,
       personId,
@@ -782,12 +782,12 @@ export class ProfilesPractitionersService {
 
     if (fresh === undefined) {
       if (current)
-        this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
+        this.contactPointsRepo.closeCurrent(current, now, actorUserId);
       return;
     }
     if (current?.value === fresh) return;
     if (current)
-      this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
+      this.contactPointsRepo.closeCurrent(current, now, actorUserId);
 
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -820,7 +820,7 @@ export class ProfilesPractitionersService {
       longitude?: number | null;
     },
     actorUserId: string,
-    ahora: Date,
+    now: Date,
   ): Promise<void> {
     await replaceResidenceAddress(
       this.addressesRepo,
@@ -835,7 +835,7 @@ export class ProfilesPractitionersService {
         longitude: changes.longitude,
         actorUserId,
       },
-      ahora,
+      now,
     );
   }
 
@@ -860,7 +860,7 @@ export class ProfilesPractitionersService {
     homeAddress?: AddressSummary;
     workAddress?: AddressSummary;
   }> {
-    const [documentos, domicilio, trabajo] = await Promise.all([
+    const [documents, homeAddress, work] = await Promise.all([
       em.find(Identifiers, { ownerId: personId, validTo: null }),
       this.addressesRepo.findCurrentByOwnerAndUse(
         em,
@@ -873,20 +873,20 @@ export class ProfilesPractitionersService {
         CONCEPTS.ADDR_USE_WORK,
       ),
     ]);
-    const documento = documentos.find(
+    const document = documents.find(
       (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
-    const fiscal = documentos.find(
+    const fiscal = documents.find(
       (d: Identifiers) => d.typeConceptId === CONCEPTS.ID_TYPE_TAX,
     );
     return {
-      nationalId: documento?.value,
-      issuerArea: documento?.issuerAdministrativeAreaConceptId,
+      nationalId: document?.value,
+      issuerArea: document?.issuerAdministrativeAreaConceptId,
       taxId: fiscal?.value,
       taxHolderName: fiscal?.holderName,
-      municipio: domicilio?.municipalityConceptId,
-      homeAddress: summarizeAddress(domicilio),
-      workAddress: summarizeAddress(trabajo),
+      municipio: homeAddress?.municipalityConceptId,
+      homeAddress: summarizeAddress(homeAddress),
+      workAddress: summarizeAddress(work),
     };
   }
 
@@ -950,8 +950,8 @@ export class ProfilesPractitionersService {
       languages,
       affiliations,
       activity,
-      contactos,
-      filiacion,
+      contacts,
+      affiliation,
     ] = await Promise.all([
       this.withoutBreakingRecord(
         () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
@@ -996,7 +996,7 @@ export class ProfilesPractitionersService {
       this.withoutBreakingRecord(
         () =>
           subjectUserId === undefined
-            ? this.affiliations.visiblesThird(em, profileId)
+            ? this.affiliations.visibleThird(em, profileId)
             : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
         {
@@ -1038,19 +1038,19 @@ export class ProfilesPractitionersService {
 
     // El primero de cada sistema gana: el repositorio ya los devuelve por
     // `rank`, que es la columna que dice cuál es el preferido.
-    const contact = (sistema: string): string | undefined =>
-      contactos.find((punto) => punto.systemConceptId === sistema)?.value;
+    const contact = (system: string): string | undefined =>
+      contacts.find((punto) => punto.systemConceptId === system)?.value;
 
     // Desde que el alta pide los contactos separados, el sistema no alcanza
     // para saber cuál es cuál: hay dos correos y dos celulares, y lo que los
     // distingue es el uso. Sin este par, el personal y el de trabajo se pisan.
     const contactByUsage = (
-      sistema: string,
+      system: string,
       usage: string,
     ): string | undefined =>
-      contactos.find(
+      contacts.find(
         (punto) =>
-          punto.systemConceptId === sistema && punto.useConceptId === usage,
+          punto.systemConceptId === system && punto.useConceptId === usage,
       )?.value;
 
     return {
@@ -1099,13 +1099,13 @@ export class ProfilesPractitionersService {
       ...(includesContact && person.sexAtBirthConceptId
         ? { sexAtBirth: BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId] }
         : {}),
-      nationalId: filiacion.nationalId,
-      issuerAdministrativeAreaConceptId: filiacion.issuerArea,
-      taxId: filiacion.taxId,
-      taxHolderName: filiacion.taxHolderName,
-      residenceMunicipalityConceptId: filiacion.municipio,
-      homeAddress: filiacion.homeAddress,
-      workAddress: filiacion.workAddress,
+      nationalId: affiliation.nationalId,
+      issuerAdministrativeAreaConceptId: affiliation.issuerArea,
+      taxId: affiliation.taxId,
+      taxHolderName: affiliation.taxHolderName,
+      residenceMunicipalityConceptId: affiliation.municipio,
+      homeAddress: affiliation.homeAddress,
+      workAddress: affiliation.workAddress,
       // Ocupación y empleador viven en `persons`, no en `filiacion` (que ya
       // resuelve solo `incluyeContacto`): sin este condicional saldrían
       // también en la ficha que ve un tercero, y son un dato personal como el
@@ -1265,7 +1265,7 @@ export class ProfilesPractitionersService {
       // --- los datos personales, que viven en `persons` y no en el perfil ----
       const person = await this.personsRepo.findById(tx, link.personId);
       if (person) {
-        const ahora = new Date();
+        const now = new Date();
         // Una cadena vacía BORRA el dato opcional: es lo que hace falta cuando
         // alguien descubre que no lleva segundo nombre ni apellido materno.
         if (dto.name !== undefined) person.name = dto.name;
@@ -1329,26 +1329,26 @@ export class ProfilesPractitionersService {
             dto.taxId,
             dto.taxHolderName,
             actor.id,
-            ahora,
+            now,
           );
         }
 
         if (dto.phone !== undefined) {
-          await this.replacePhone(tx, person.id, dto.phone, actor.id, ahora);
+          await this.replacePhone(tx, person.id, dto.phone, actor.id, now);
         }
         // Los cinco contactos que el alta captura por separado. `phone` sigue
         // arriba —es la forma anterior— y escribe el mismo par que
         // `workMobilePhone` escribiría con el sistema viejo, así que enviar los
         // dos a la vez no tiene sentido: gana el que llegue segundo.
-        for (const [valor, par] of [
+        for (const [value, par] of [
           [dto.workEmail, PAR_WORK_EMAIL],
           [dto.personalEmail, PAR_EMAIL_PERSONAL],
           [dto.mobilePhone, PAR_MOBILE_PERSONAL],
           [dto.workMobilePhone, PAR_WORK_MOBILE],
           [dto.workLandline, PAR_LANDLINE_WORK],
         ] as const) {
-          if (valor === undefined) continue;
-          await this.replaceContact(tx, person.id, valor, actor.id, ahora, par);
+          if (value === undefined) continue;
+          await this.replaceContact(tx, person.id, value, actor.id, now, par);
         }
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
@@ -1368,7 +1368,7 @@ export class ProfilesPractitionersService {
               longitude: dto.homeLongitude,
             },
             actor.id,
-            ahora,
+            now,
           );
         }
         if (
@@ -1386,7 +1386,7 @@ export class ProfilesPractitionersService {
               longitude: dto.workLongitude,
             },
             actor.id,
-            ahora,
+            now,
           );
         }
       }
@@ -1473,17 +1473,17 @@ export class ProfilesPractitionersService {
       ownerId: personId,
       validTo: null,
     });
-    const documento = rows.find(
+    const document = rows.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
     if (
-      !documento ||
-      documento.issuerAdministrativeAreaConceptId === departmentId
+      !document ||
+      document.issuerAdministrativeAreaConceptId === departmentId
     ) {
       return;
     }
-    documento.issuerAdministrativeAreaConceptId = departmentId;
-    touch(documento, actorUserId);
+    document.issuerAdministrativeAreaConceptId = departmentId;
+    touch(document, actorUserId);
   }
 
   /**
@@ -1497,9 +1497,9 @@ export class ProfilesPractitionersService {
     tx: EntityManager,
     personId: string,
     nit: string | undefined,
-    razonSocial: string | undefined,
+    legalName: string | undefined,
     actorUserId: string,
-    ahora: Date,
+    now: Date,
   ): Promise<void> {
     const rows = await tx.find(Identifiers, {
       ownerId: personId,
@@ -1509,13 +1509,13 @@ export class ProfilesPractitionersService {
       (row) => row.typeConceptId === CONCEPTS.ID_TYPE_TAX,
     );
     const numero = (nit ?? current?.value ?? '').trim();
-    const titular = (razonSocial ?? current?.holderName ?? '').trim();
+    const titular = (legalName ?? current?.holderName ?? '').trim();
 
     if (current?.value === numero && (current.holderName ?? '') === titular) {
       return;
     }
     if (current) {
-      current.validTo = ahora;
+      current.validTo = now;
       touch(current, actorUserId);
     }
     if (numero === '') return;
@@ -1696,7 +1696,7 @@ export class ProfilesPractitionersService {
    * es peor que el 500 que reemplaza: el log es lo que lo hace visible.
    */
   private async withoutBreakingRecord<T>(
-    leer: () => Promise<T>,
+    read: () => Promise<T>,
     empty: T,
     context: {
       profileId: string;
@@ -1707,7 +1707,7 @@ export class ProfilesPractitionersService {
     },
   ): Promise<T> {
     try {
-      return await leer();
+      return await read();
     } catch (error) {
       context.unavailable.push(context.section);
       this.logger.warn(
@@ -2182,8 +2182,8 @@ export class ProfilesPractitionersService {
       );
     }
 
-    const ahora = new Date();
-    for (const [orden, specialtyConceptId] of unique.entries()) {
+    const now = new Date();
+    for (const [order, specialtyConceptId] of unique.entries()) {
       await this.specialtyCatalog.assertIsMedicalSpecialty(
         tx,
         specialtyConceptId,
@@ -2191,10 +2191,10 @@ export class ProfilesPractitionersService {
       this.specialtiesRepo.create(tx, {
         practitionerProfileId: profileId,
         specialtyConceptId,
-        isPrimary: orden === 0,
+        isPrimary: order === 0,
         boardCertified: false,
         verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
-        validFrom: ahora,
+        validFrom: now,
         actorUserId: actor.id,
       });
     }
@@ -2623,10 +2623,10 @@ export class ProfilesPractitionersService {
         'retirar',
       );
 
-      const historia = await tx.count(JurisdictionAuthorizationsHistory, {
+      const history = await tx.count(JurisdictionAuthorizationsHistory, {
         jurisdictionAuthorizationId: licenseId,
       });
-      if (historia > 0) {
+      if (history > 0) {
         throw new PreconditionFailedException(
           'Esa matrícula ya tiene historial de auditoría; no se puede borrar',
           { licenseId },
@@ -2673,7 +2673,7 @@ export class ProfilesPractitionersService {
         { licenseId, stateConceptId: license.stateConceptId },
       );
     }
-    const abiertos = await tx.count(IdentityVerificationCases, {
+    const open = await tx.count(IdentityVerificationCases, {
       subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
       subjectEntityId: licenseId,
       statusConceptId: {
@@ -2685,7 +2685,7 @@ export class ProfilesPractitionersService {
         ],
       },
     });
-    if (abiertos > 0) {
+    if (open > 0) {
       throw new PreconditionFailedException(
         `Esa matrícula tiene una verificación en curso; no se puede ${verb}`,
         { licenseId },
@@ -3409,7 +3409,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
     endDate: row.endDate ?? null,
     current: row.endDate === undefined || row.endDate === null,
     status: row.statusConceptId,
-    statusKind: estadoLegible(row.statusConceptId),
+    statusKind: readableStatus(row.statusConceptId),
     decisionReasonText: row.decisionReasonText ?? null,
     createdAt: row.createdAt,
   };
@@ -3424,7 +3424,7 @@ function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
  * @param conceptId - El estado tal como está guardado.
  * @returns El caso conocido, o `desconocido` si no es ninguno.
  */
-function estadoLegible(
+function readableStatus(
   conceptId: string,
 ):
   | 'pendiente'
@@ -3433,10 +3433,10 @@ function estadoLegible(
   | 'rechazado'
   | 'revocado'
   | 'desconocido' {
-  if (esEstado(conceptId, 'PENDIENTE')) return 'pendiente';
-  if (esEstado(conceptId, 'DECLARADO')) return 'declarado';
-  if (esEstado(conceptId, 'APROBADO')) return 'aprobado';
-  if (esEstado(conceptId, 'RECHAZADO')) return 'rechazado';
-  if (esEstado(conceptId, 'REVOCADO')) return 'revocado';
+  if (isStatus(conceptId, 'PENDIENTE')) return 'pendiente';
+  if (isStatus(conceptId, 'DECLARADO')) return 'declarado';
+  if (isStatus(conceptId, 'APROBADO')) return 'aprobado';
+  if (isStatus(conceptId, 'RECHAZADO')) return 'rechazado';
+  if (isStatus(conceptId, 'REVOCADO')) return 'revocado';
   return 'desconocido';
 }

@@ -112,7 +112,7 @@ function build() {
   };
   const affiliations = {
     initialState: mockFn().mockResolvedValue(PROF.AFFILIATION_ACTIVE),
-    visiblesThird: mockFn().mockResolvedValue([]),
+    visibleThird: mockFn().mockResolvedValue([]),
   };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
@@ -504,7 +504,7 @@ describe('ProfilesPractitionersService', () => {
      * NOMBRA, así que un campo que el repo no lista queda en NULL sin que nada
      * se queje.
      */
-    const matricula = {
+    const registration = {
       licenseNumber: 'MAT-2024-88',
       regulatoryAuthority: 'Colegio Médico de Santa Cruz',
     };
@@ -521,7 +521,7 @@ describe('ProfilesPractitionersService', () => {
       });
       d.authorizationsRepo.create.mockReturnValue({
         id: 'auth-9',
-        licenseNumber: matricula.licenseNumber,
+        licenseNumber: registration.licenseNumber,
         stateConceptId: PROF.AUTH_ACTIVE,
         fileId: 'file-1',
         createdAt: new Date(),
@@ -534,7 +534,7 @@ describe('ProfilesPractitionersService', () => {
 
       const created = await d.service.addJurisdictionAuthorization(
         'pp1',
-        { ...matricula, fileId: 'file-1' } as any,
+        { ...registration, fileId: 'file-1' } as any,
         actor,
       );
 
@@ -558,7 +558,7 @@ describe('ProfilesPractitionersService', () => {
       await expect(
         d.service.addJurisdictionAuthorization(
           'pp1',
-          { ...matricula, fileId: 'file-1' } as any,
+          { ...registration, fileId: 'file-1' } as any,
           actor,
         ),
       ).resolves.toBeDefined();
@@ -581,7 +581,7 @@ describe('ProfilesPractitionersService', () => {
       await expect(
         d.service.addJurisdictionAuthorization(
           'pp1',
-          { ...matricula, fileId: 'file-1' } as any,
+          { ...registration, fileId: 'file-1' } as any,
           actor,
         ),
       ).rejects.toThrow();
@@ -597,14 +597,14 @@ describe('ProfilesPractitionersService', () => {
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
       d.authorizationsRepo.create.mockReturnValue({
         id: 'auth-9',
-        licenseNumber: matricula.licenseNumber,
+        licenseNumber: registration.licenseNumber,
         stateConceptId: PROF.AUTH_ACTIVE,
         createdAt: new Date(),
       });
 
       const created = await d.service.addJurisdictionAuthorization(
         'pp1',
-        matricula as any,
+        registration as any,
         actor,
       );
 
@@ -1945,15 +1945,15 @@ describe('ProfilesPractitionersService', () => {
 
     describe('idiomas (informe B, C13)', () => {
       const QUECHUA = '11111111-1111-4111-8111-111111111111';
-      const ESPANOL = '22222222-2222-4222-8222-222222222222';
+      const SPANISH = '22222222-2222-4222-8222-222222222222';
       const AYMARA = '33333333-3333-4333-8333-333333333333';
-      const FLUIDO = '44444444-4444-4444-8444-444444444444';
+      const FLUID = '44444444-4444-4444-8444-444444444444';
 
       it('reemplaza la lista: actualiza el que sigue, quita el que no vino y agrega el nuevo', async () => {
         const d = build();
         prepareForEdit(d, practitionerBase());
-        const espanol: any = {
-          languageConceptId: ESPANOL,
+        const spanish: any = {
+          languageConceptId: SPANISH,
           clinicalInterpretationAllowed: true,
         };
         const aymara: any = {
@@ -1961,7 +1961,7 @@ describe('ProfilesPractitionersService', () => {
           clinicalInterpretationAllowed: false,
         };
         d.languagesRepo.findByPractitioner.mockResolvedValueOnce([
-          espanol,
+          spanish,
           aymara,
         ]);
 
@@ -1969,8 +1969,8 @@ describe('ProfilesPractitionersService', () => {
           {
             languages: [
               {
-                languageConceptId: ESPANOL,
-                proficiencyConceptId: FLUIDO,
+                languageConceptId: SPANISH,
+                proficiencyConceptId: FLUID,
                 clinicalInterpretationAllowed: false,
               },
               {
@@ -1986,8 +1986,8 @@ describe('ProfilesPractitionersService', () => {
           d.tx,
           'per-1',
         );
-        expect(espanol.proficiencyConceptId).toBe(FLUIDO);
-        expect(espanol.clinicalInterpretationAllowed).toBe(false);
+        expect(spanish.proficiencyConceptId).toBe(FLUID);
+        expect(spanish.clinicalInterpretationAllowed).toBe(false);
         expect(d.languagesRepo.remove).toHaveBeenCalledWith(d.tx, aymara);
         expect(d.languagesRepo.remove).toHaveBeenCalledTimes(1);
         expect(d.languagesRepo.create).toHaveBeenCalledWith(d.tx, {
@@ -2003,14 +2003,14 @@ describe('ProfilesPractitionersService', () => {
       it('una lista vacía quita todos los idiomas', async () => {
         const d = build();
         prepareForEdit(d, practitionerBase());
-        const espanol: any = { languageConceptId: ESPANOL };
-        d.languagesRepo.findByPractitioner.mockResolvedValueOnce([espanol]);
+        const spanish: any = { languageConceptId: SPANISH };
+        d.languagesRepo.findByPractitioner.mockResolvedValueOnce([spanish]);
 
         await d.service.updateOwnPractitionerProfile({ languages: [] }, {
           id: 'u-1',
         } as any);
 
-        expect(d.languagesRepo.remove).toHaveBeenCalledWith(d.tx, espanol);
+        expect(d.languagesRepo.remove).toHaveBeenCalledWith(d.tx, spanish);
         expect(d.languagesRepo.create).not.toHaveBeenCalled();
       });
 
@@ -2035,11 +2035,11 @@ describe('ProfilesPractitionersService', () => {
             {
               languages: [
                 {
-                  languageConceptId: ESPANOL,
+                  languageConceptId: SPANISH,
                   clinicalInterpretationAllowed: true,
                 },
                 {
-                  languageConceptId: ESPANOL,
+                  languageConceptId: SPANISH,
                   clinicalInterpretationAllowed: false,
                 },
               ],
@@ -2553,9 +2553,9 @@ describe('ProfilesPractitionersService', () => {
         { practitionerProfileId: 'per-1', organizationName: '  ' },
       ]);
 
-      const pagina = await d.service.listPractitioners({ limit: 50 });
+      const page = await d.service.listPractitioners({ limit: 50 });
 
-      expect(pagina.items[0].workplaces).toEqual([
+      expect(page.items[0].workplaces).toEqual([
         'Clínica Foianini',
         'Hospital San Juan de Dios',
       ]);
@@ -2573,12 +2573,12 @@ describe('ProfilesPractitionersService', () => {
 
       await d.service.listPractitioners({ limit: 50 });
 
-      const estados = d.affiliationsRepo.findByPractitioners.mock.calls[0][2];
-      expect(estados).toEqual([
+      const states = d.affiliationsRepo.findByPractitioners.mock.calls[0][2];
+      expect(states).toEqual([
         PROF.AFFILIATION_DECLARED,
         PROF.AFFILIATION_APPROVED,
       ]);
-      expect(estados).not.toContain(PROF.AFFILIATION_PENDING);
+      expect(states).not.toContain(PROF.AFFILIATION_PENDING);
     });
   });
 
@@ -2696,12 +2696,12 @@ describe('ProfilesPractitionersService', () => {
         { practitionerProfileId: 'per-1', specialtyConceptId: 'con-cardio' },
       ]);
 
-      const pagina = await d.service.listPractitioners({
+      const page = await d.service.listPractitioners({
         withoutSpecialty: true,
         limit: 50,
       });
 
-      expect(pagina.items).toEqual([]);
+      expect(page.items).toEqual([]);
       expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
     });
   });
@@ -2737,15 +2737,15 @@ describe('ProfilesPractitionersService', () => {
         },
       ]);
 
-      const pagina = await d.service.listPractitioners({ limit: 50 });
+      const page = await d.service.listPractitioners({ limit: 50 });
 
-      expect(pagina.items).toHaveLength(1);
-      expect(pagina.items[0]).toMatchObject({
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({
         profileId: 'per-1',
         displayName: 'Dra. Lucía Salas',
         specialties: [{ specialtyConceptId: 'con-cardio', isPrimary: true }],
       });
-      expect(pagina.nextCursor).toBeNull();
+      expect(page.nextCursor).toBeNull();
     });
 
     /** La fila de más existe sólo para saber si hay página siguiente. */
@@ -2756,10 +2756,10 @@ describe('ProfilesPractitionersService', () => {
         { ...row, profileId: 'per-2', practitionerCode: 'MED-2' },
       ]);
 
-      const pagina = await d.service.listPractitioners({ limit: 1 });
+      const page = await d.service.listPractitioners({ limit: 1 });
 
-      expect(pagina.items).toHaveLength(1);
-      expect(pagina.nextCursor).not.toBeNull();
+      expect(page.items).toHaveLength(1);
+      expect(page.nextCursor).not.toBeNull();
       // El repo recibió el tope + 1: así se detecta la página siguiente sin
       // pagar un COUNT por página.
       expect(d.practitionersRepo.listPage.mock.calls[0][2]).toBe(2);
@@ -2773,12 +2773,12 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       d.specialtiesRepo.findProfileIdsBySpecialty.mockResolvedValue([]);
 
-      const pagina = await d.service.listPractitioners({
+      const page = await d.service.listPractitioners({
         specialtyConceptId: 'con-cardio',
         limit: 50,
       });
 
-      expect(pagina).toEqual({
+      expect(page).toEqual({
         items: [],
         count: 0,
         limit: 50,
@@ -2823,11 +2823,11 @@ describe('ProfilesPractitionersService', () => {
         ]),
       );
 
-      const pagina = await d.service.listPractitioners({ limit: 50 });
+      const page = await d.service.listPractitioners({ limit: 50 });
 
       // El front no compara conceptos: el uuid del estado no viaja escrito en
       // ningún cliente.
-      expect(pagina.items.map((i) => i.verified)).toEqual([true, false]);
+      expect(page.items.map((i) => i.verified)).toEqual([true, false]);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {
@@ -2849,12 +2849,12 @@ describe('ProfilesPractitionersService', () => {
       d.specialtiesRepo.findProfileIdsBySpecialty.mockResolvedValue(['per-1']);
       d.practitionersRepo.listPage.mockResolvedValue([row]);
 
-      const pagina = await d.service.listPractitioners({
+      const page = await d.service.listPractitioners({
         specialtyConceptId: 'con-cardio',
         limit: 50,
       });
 
-      expect(pagina.items).toHaveLength(1);
+      expect(page.items).toHaveLength(1);
       expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
         profileIds: ['per-1'],
         verificationStatusConceptId: undefined,
@@ -3032,9 +3032,9 @@ describe('ProfilesPractitionersService', () => {
         createdAt: new Date(),
       });
 
-      const perfil = await d.service.getPractitionerSummary('per-1');
+      const profile = await d.service.getPractitionerSummary('per-1');
 
-      expect(perfil).not.toHaveProperty('unavailableSections');
+      expect(profile).not.toHaveProperty('unavailableSections');
     });
 
     it('un perfil inexistente responde no encontrado', async () => {
@@ -3132,8 +3132,8 @@ describe('ProfilesPractitionersService', () => {
       expect(profile.credentials[0]?.fileId).toBeUndefined();
       // La actividad es la del TITULAR del perfil consultado, no la de quien
       // mira: los cuatro conteos filtran por su cuenta.
-      const filtros = d.em.count.mock.calls.map((c: any[]) => c[1]);
-      for (const filter of filtros) {
+      const filters = d.em.count.mock.calls.map((c: any[]) => c[1]);
+      for (const filter of filters) {
         expect(filter).toEqual({ createdByUserId: 'u-titular' });
       }
     });
@@ -3377,8 +3377,8 @@ describe('ProfilesPractitionersService', () => {
 
       await d.service.getOwnOnboarding(actor);
 
-      const [, filtro] = d.em.count.mock.calls.at(-1) as [unknown, any];
-      expect(filtro).toEqual({ resourceId: { $in: ['res-1'] } });
+      const [, filter] = d.em.count.mock.calls.at(-1) as [unknown, any];
+      expect(filter).toEqual({ resourceId: { $in: ['res-1'] } });
     });
 
     /** Sin recursos no se pregunta por cupos: la consulta ya se sabe vacía. */
@@ -3928,7 +3928,7 @@ describe('ProfilesPractitionersService', () => {
   });
 
   describe('matrícula propia: corregir y retirar (ID-08)', () => {
-    const matricula = (over: Record<string, unknown> = {}) => ({
+    const registration = (over: Record<string, unknown> = {}) => ({
       id: 'lic-1',
       practitionerProfileId: 'pp1',
       licenseNumber: 'MP-1',
@@ -3938,7 +3938,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('corrige el número de una matrícula pendiente sin verificación abierta', async () => {
       const d = build();
-      const row = matricula();
+      const row = registration();
       d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(row);
 
       await d.service.updateOwnLicense(
@@ -3955,7 +3955,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('con archivo nuevo lo valida como el alta de la matrícula', async () => {
       const d = build();
-      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(registration());
       d.filesRepo.findById.mockResolvedValue(null);
 
       await expect(
@@ -3967,7 +3967,7 @@ describe('ProfilesPractitionersService', () => {
     it('ajena e inexistente responden 404', async () => {
       const d = build();
       d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(
-        matricula({ practitionerProfileId: 'OTRO' }),
+        registration({ practitionerProfileId: 'OTRO' }),
       );
       await expect(
         d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
@@ -3981,7 +3981,7 @@ describe('ProfilesPractitionersService', () => {
     it('una matrícula activa no se corrige ni se retira: 422', async () => {
       const d = build();
       d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(
-        matricula({ stateConceptId: PROF.AUTH_ACTIVE }),
+        registration({ stateConceptId: PROF.AUTH_ACTIVE }),
       );
       await expect(
         d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
@@ -3994,7 +3994,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('con un caso de verificación abierto no se toca: 422', async () => {
       const d = build();
-      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(registration());
       d.tx.count.mockResolvedValueOnce(1);
       await expect(
         d.service.updateOwnLicense('lic-1', { licenseNumber: 'X' }, actor),
@@ -4003,7 +4003,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('retira una pendiente sin historia de auditoría', async () => {
       const d = build();
-      const row = matricula();
+      const row = registration();
       d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(row);
 
       await d.service.removeOwnLicense('lic-1', actor);
@@ -4013,7 +4013,7 @@ describe('ProfilesPractitionersService', () => {
 
     it('con historia de auditoría no la borra: 422 sin capturar un 23503 a ciegas', async () => {
       const d = build();
-      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(matricula());
+      d.authorizationsRepo.findByIdForUpdate.mockResolvedValue(registration());
       // 1.ª cuenta: casos abiertos (0). 2.ª: filas de historia (1).
       d.tx.count.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
 
@@ -4039,11 +4039,11 @@ describe('ProfilesPractitionersService', () => {
     it('guarda el sexo al nacer como concepto y valida el departamento contra su catálogo', async () => {
       const d = build();
       const persona: Record<string, unknown> = withOwnProfile(d);
-      const documento = {
+      const document = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         issuerAdministrativeAreaConceptId: 'LP',
       };
-      d.tx.find.mockResolvedValue([documento]);
+      d.tx.find.mockResolvedValue([document]);
 
       await d.service.updateOwnPractitionerProfile(
         { sexAtBirth: 'FEMALE', issuerAdministrativeAreaConceptId: 'SCZ' },
@@ -4054,17 +4054,17 @@ describe('ProfilesPractitionersService', () => {
       expect(
         d.administrativeAreas.assertIsAdministrativeArea,
       ).toHaveBeenCalledWith(d.tx, 'SCZ');
-      expect(documento.issuerAdministrativeAreaConceptId).toBe('SCZ');
+      expect(document.issuerAdministrativeAreaConceptId).toBe('SCZ');
     });
 
     it('un departamento fuera de VS_BO_DEPARTMENT responde 422 y no escribe', async () => {
       const d = build();
       withOwnProfile(d);
-      const documento = {
+      const document = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         issuerAdministrativeAreaConceptId: 'LP',
       };
-      d.tx.find.mockResolvedValue([documento]);
+      d.tx.find.mockResolvedValue([document]);
       d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValue(
         new PreconditionFailedException('no es departamento'),
       );
@@ -4075,7 +4075,7 @@ describe('ProfilesPractitionersService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(documento.issuerAdministrativeAreaConceptId).toBe('LP');
+      expect(document.issuerAdministrativeAreaConceptId).toBe('LP');
     });
   });
 

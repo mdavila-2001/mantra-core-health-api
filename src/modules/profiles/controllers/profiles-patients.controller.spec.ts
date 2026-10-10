@@ -279,13 +279,13 @@ describe('ProfilesPatientsController', () => {
     it('exige los mismos roles que el GET y responde 200, no 201', () => {
       // Se lee el descriptor y no el método suelto: es lo que Nest inspecciona,
       // y evita separar el método de su objeto.
-      const handler = (nombre: string): object =>
+      const handler = (name: string): object =>
         Object.getOwnPropertyDescriptor(
           ProfilesPatientsController.prototype,
-          nombre,
+          name,
         )?.value as object;
-      const roles = (nombre: string): unknown =>
-        Reflect.getMetadata('requiredRoles', handler(nombre));
+      const roles = (name: string): unknown =>
+        Reflect.getMetadata('requiredRoles', handler(name));
 
       // Igualdad no vacía: dos `undefined` también serían «iguales».
       expect(roles('searchPatients')).toEqual(
