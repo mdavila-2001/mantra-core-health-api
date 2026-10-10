@@ -162,14 +162,14 @@ describe('HttpDispatcherService · destino resuelto (MCH-006)', () => {
  * devuelve el despacho, no la configuración pasada a axios.
  */
 describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => {
-  const abiertos: http.Server[] = [];
+  const open: http.Server[] = [];
 
   /** Levanta un servidor local con el manejador dado y devuelve su URL. */
   async function servidor(
     handler: http.RequestListener,
   ): Promise<{ url: string; server: http.Server }> {
     const server = http.createServer(handler);
-    abiertos.push(server);
+    open.push(server);
     await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
     const { port } = server.address() as AddressInfo;
     return { url: `http://127.0.0.1:${port}/hook`, server };
@@ -177,7 +177,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
   afterEach(async () => {
     await Promise.all(
-      abiertos.splice(0).map(
+      open.splice(0).map(
         (s) =>
           new Promise<void>((r) => {
             s.closeAllConnections();
@@ -312,9 +312,9 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
   });
 
   it('las cabeceras del llamador no pisan la firma ni las de transporte', async () => {
-    let vistas: http.IncomingHttpHeaders = {};
+    let views: http.IncomingHttpHeaders = {};
     const { url } = await servidor((req, res) => {
-      vistas = req.headers;
+      views = req.headers;
       req.resume();
       req.on('end', () => res.end('{}'));
     });
@@ -333,10 +333,10 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
     });
 
     expect(res.ok).toBe(true);
-    expect(vistas['x-signature']).toBe(`sha256=${res.signature}`);
-    expect(vistas['x-signature-algorithm']).toBe('HMAC-SHA256');
-    expect(vistas['content-type']).toBe('application/json');
-    expect(vistas.host).toMatch(/^127\.0\.0\.1:/);
-    expect(vistas['x-proveedor']).toBe('se-conserva');
+    expect(views['x-signature']).toBe(`sha256=${res.signature}`);
+    expect(views['x-signature-algorithm']).toBe('HMAC-SHA256');
+    expect(views['content-type']).toBe('application/json');
+    expect(views.host).toMatch(/^127\.0\.0\.1:/);
+    expect(views['x-proveedor']).toBe('se-conserva');
   });
 });
