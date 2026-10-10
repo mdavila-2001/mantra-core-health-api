@@ -236,7 +236,10 @@ describe('DependentLinkRequestsService', () => {
         ],
       });
 
-      const [candidateWithoutName] = await service.findCandidates('luis', mother);
+      const [candidateWithoutName] = await service.findCandidates(
+        'luis',
+        mother,
+      );
 
       expect(candidateWithoutName.displayName).toBe('');
     });

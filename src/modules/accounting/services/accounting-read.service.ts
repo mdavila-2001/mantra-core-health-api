@@ -547,10 +547,7 @@ export class AccountingReadService {
    */
   async documentFlow(transactionId: string): Promise<CockpitDocumentFlowDto> {
     const em = this.em.fork();
-    const entry = await this.journalRepo.findTransactionById(
-      em,
-      transactionId,
-    );
+    const entry = await this.journalRepo.findTransactionById(em, transactionId);
     if (!entry) {
       throw new ResourceNotFoundException('Asiento no encontrado', {
         transactionId,

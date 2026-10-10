@@ -100,10 +100,7 @@ describe('PharmacyMarketplaceService · la vitrina', () => {
 
     const page = await service.listMedications({});
 
-    expect(page.groups).toEqual([
-      'Antiinfecciosos',
-      'Aparato cardiovascular',
-    ]);
+    expect(page.groups).toEqual(['Antiinfecciosos', 'Aparato cardiovascular']);
   });
 
   it('sin origen no inventa distancias y ordena por cobertura', async () => {
@@ -192,13 +189,8 @@ describe('PharmacyMarketplaceService · la vitrina', () => {
 
     const page = await service.listMedications({ group: 'Antiinfecciosos' });
 
-    expect(page.items.map((item) => item.genericName)).toEqual([
-      'Amoxicilina',
-    ]);
-    expect(page.groups).toEqual([
-      'Antiinfecciosos',
-      'Aparato cardiovascular',
-    ]);
+    expect(page.items.map((item) => item.genericName)).toEqual(['Amoxicilina']);
+    expect(page.groups).toEqual(['Antiinfecciosos', 'Aparato cardiovascular']);
   });
 
   it('recorta el tope al máximo y nunca lo deja en cero', async () => {

@@ -146,7 +146,13 @@ function realSpreadsheet(rows: readonly (readonly string[])[]): Buffer {
 describe('ConceptFileImportService', () => {
   describe('el archivo entra entero', () => {
     it('importa las filas y deja el lote registrado', async () => {
-      const { service, archivo: file, creados: created, lotes: batches, tx } = build();
+      const {
+        service,
+        archivo: file,
+        creados: created,
+        lotes: batches,
+        tx,
+      } = build();
       const content = file(
         '{"code":"A00","display":"Cólera"}\n' +
           '{"code":"A01","display":"Fiebre tifoidea","definition":"Por salmonella"}\n',
@@ -257,7 +263,11 @@ describe('ConceptFileImportService', () => {
     });
 
     it('un código que ya está en la versión se saltea, no se cuenta como error', async () => {
-      const { service, archivo: file, creados: created } = build({
+      const {
+        service,
+        archivo: file,
+        creados: created,
+      } = build({
         existentes: new Set(['A00']),
       });
 
@@ -285,7 +295,12 @@ describe('ConceptFileImportService', () => {
     // deshacerlo era borrar concepto por concepto sin saber cuáles habían
     // entrado. Ahora el archivo se corrige entero y se vuelve a subir.
     it('una línea rota deja el archivo entero afuera', async () => {
-      const { service, archivo: file, creados: created, lotes: batches } = build();
+      const {
+        service,
+        archivo: file,
+        creados: created,
+        lotes: batches,
+      } = build();
 
       const result = await service.importFromFile(
         'v-1',
@@ -397,7 +412,12 @@ describe('ConceptFileImportService', () => {
 
   describe('validar sin escribir', () => {
     it('devuelve la vista previa y no toca ni la base ni el lote', async () => {
-      const { service, archivo: file, creados: created, lotes: batches } = build();
+      const {
+        service,
+        archivo: file,
+        creados: created,
+        lotes: batches,
+      } = build();
 
       const result = await service.importFromFile(
         'v-1',
@@ -532,7 +552,11 @@ describe('ConceptFileImportService', () => {
 
   describe('la versión manda', () => {
     it('no importa a una versión ya publicada', async () => {
-      const { service, archivo: file, conceptsRepo } = build({
+      const {
+        service,
+        archivo: file,
+        conceptsRepo,
+      } = build({
         version: {
           id: 'v-1',
           codeSystemId: 'cs-1',

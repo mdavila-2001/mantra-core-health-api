@@ -105,8 +105,7 @@ function build() {
       ) =>
         Promise.resolve(
           (
-            reservations.get(key(practitionerProfileId, patientProfileId)) ??
-            []
+            reservations.get(key(practitionerProfileId, patientProfileId)) ?? []
           ).filter((r) => r.startAt >= from && r.startAt < until),
         ),
     ),

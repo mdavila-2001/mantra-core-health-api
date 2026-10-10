@@ -104,8 +104,7 @@ export function countInserted(result: unknown): number | null {
     // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
     // pasada — y tampoco cuentan.
     .filter(
-      ([name]) =>
-        !name.startsWith('orphan') && !name.endsWith('Existing'),
+      ([name]) => !name.startsWith('orphan') && !name.endsWith('Existing'),
     )
     .map(([, value]) => value)
     .filter((value): value is number => typeof value === 'number');

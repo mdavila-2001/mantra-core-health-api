@@ -529,7 +529,9 @@ export class ClinicalReadService {
       const today = localDayOf(now, zone);
       const day = localDayOf(reservation.startAt, zone);
       return (
-        day.year === today.year && day.month === today.month && day.day === today.day
+        day.year === today.year &&
+        day.month === today.month &&
+        day.day === today.day
       );
     });
   }

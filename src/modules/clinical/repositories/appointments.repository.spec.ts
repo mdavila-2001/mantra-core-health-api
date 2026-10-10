@@ -80,7 +80,10 @@ describe('AppointmentsRepository', () => {
     // `actorUserId` se traduce a dos columnas de auditoría y por eso se
     // comprueba aparte, no por su propio nombre.
     for (const [field, value] of Object.entries(entry)) {
-      expect({ campo: field, valor: row[field] }).toEqual({ campo: field, valor: value });
+      expect({ campo: field, valor: row[field] }).toEqual({
+        campo: field,
+        valor: value,
+      });
     }
   });
 

@@ -367,9 +367,9 @@ describe('PublicSearchRepository · unaccent (P-14)', () => {
     await d.repo.matchIdsByText(d.em, 'cardio', where, 10);
 
     const queries = d.execute.mock.calls.map((c: unknown[]) => String(c[0]));
-    expect(
-      queries.some((sql: string) => sql.includes('unaccent(lower')),
-    ).toBe(false);
+    expect(queries.some((sql: string) => sql.includes('unaccent(lower'))).toBe(
+      false,
+    );
     expect(d.execute).toHaveBeenCalledTimes(2);
   });
 

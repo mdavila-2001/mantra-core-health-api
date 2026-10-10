@@ -261,7 +261,9 @@ describe('CommunityVerificationService', () => {
     it('no resta con sello vencido: renovar la matrícula no es un castigo', () => {
       const d = build();
       expect(
-        d.service.verificationTerm(publicProfile, [stamp({ validTo: YESTERDAY })]),
+        d.service.verificationTerm(publicProfile, [
+          stamp({ validTo: YESTERDAY }),
+        ]),
       ).toBe(0);
     });
 

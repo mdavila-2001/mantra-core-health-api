@@ -63,7 +63,10 @@ export class NdjsonParser implements FileParser {
           return;
         }
         if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-          problems.push({ fila: lineNumber, motivo: 'la línea no es un objeto' });
+          problems.push({
+            fila: lineNumber,
+            motivo: 'la línea no es un objeto',
+          });
           return;
         }
 

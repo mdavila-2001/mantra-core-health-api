@@ -251,7 +251,9 @@ export class BoGeographySeedService {
       views.add(department.code);
     }
 
-    const acronyms = new Set(BO_DEPARTMENTS.map((department) => department.code));
+    const acronyms = new Set(
+      BO_DEPARTMENTS.map((department) => department.code),
+    );
     const codes = new Set<string>();
     for (const municipality of BO_MUNICIPALITIES) {
       if (codes.has(municipality.ine)) {

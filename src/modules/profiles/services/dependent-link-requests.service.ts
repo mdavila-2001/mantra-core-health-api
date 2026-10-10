@@ -281,55 +281,61 @@ export class DependentLinkRequestsService {
     dto: AcceptDependentLinkRequestDto,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
-    const { solicitante: requester, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud: request, yo } = await this.pendingRequest(tx, requestId, actor);
-      const now = new Date();
+    const { solicitante: requester, yo } = await this.em.transactional(
+      async (tx) => {
+        const { solicitud: request, yo } = await this.pendingRequest(
+          tx,
+          requestId,
+          actor,
+        );
+        const now = new Date();
 
-      const alreadyRepresentsIt =
-        await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
+        const alreadyRepresentsIt =
+          await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
+            tx,
+            request.proxyUserId,
+            yo.patientProfileId,
+            now,
+          );
+        if (alreadyRepresentsIt) {
+          throw new ConflictException(
+            'Esa persona ya le representa. Puede rechazar esta solicitud.',
+          );
+        }
+
+        const link = await this.accountLinksRepo.findActiveByUser(
           tx,
           request.proxyUserId,
-          yo.patientProfileId,
-          now,
         );
-      if (alreadyRepresentsIt) {
-        throw new ConflictException(
-          'Esa persona ya le representa. Puede rechazar esta solicitud.',
-        );
-      }
+        if (!link) {
+          throw new ConflictException(
+            'La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud.',
+          );
+        }
 
-      const link = await this.accountLinksRepo.findActiveByUser(
-        tx,
-        request.proxyUserId,
-      );
-      if (!link) {
-        throw new ConflictException(
-          'La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud.',
-        );
-      }
+        // Cuelga de quien acepta y nombra a quien pidió, como toda fila de esta
+        // tabla: «la persona relacionada con este paciente es fulano».
+        const kinship = this.relatedPersonsRepo.create(tx, {
+          patientProfileId: yo.patientProfileId,
+          personId: link.personId,
+          relationshipConceptId:
+            dto.relationshipConceptId ?? PROF.RELATIONSHIP_OTHER,
+          isEmergencyContact: false,
+          isLegalGuardian: false,
+          statusConceptId: PROF.RELATED_ACTIVE,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
 
-      // Cuelga de quien acepta y nombra a quien pidió, como toda fila de esta
-      // tabla: «la persona relacionada con este paciente es fulano».
-      const kinship = this.relatedPersonsRepo.create(tx, {
-        patientProfileId: yo.patientProfileId,
-        personId: link.personId,
-        relationshipConceptId:
-          dto.relationshipConceptId ?? PROF.RELATIONSHIP_OTHER,
-        isEmergencyContact: false,
-        isLegalGuardian: false,
-        statusConceptId: PROF.RELATED_ACTIVE,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        request.relatedPersonId = kinship.id;
+        request.statusConceptId = PROF.PROXY_ACTIVE;
+        request.validFrom = now;
+        touch(request, actor.id, now);
+        await tx.flush();
 
-      request.relatedPersonId = kinship.id;
-      request.statusConceptId = PROF.PROXY_ACTIVE;
-      request.validFrom = now;
-      touch(request, actor.id, now);
-      await tx.flush();
-
-      return { solicitante: request.proxyUserId, yo };
-    });
+        return { solicitante: request.proxyUserId, yo };
+      },
+    );
 
     this.logger.info(
       { operation: 'profiles.dependent-link.accept', requestId },
@@ -352,16 +358,22 @@ export class DependentLinkRequestsService {
     requestId: string,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
-    const { solicitante: requester, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud: request, yo } = await this.pendingRequest(tx, requestId, actor);
-      const now = new Date();
-      request.statusConceptId = PROF.PROXY_REJECTED;
-      // Cerrada la ventana: una fila rechazada no tiene vigencia que abrir.
-      request.validTo = now;
-      touch(request, actor.id, now);
-      await tx.flush();
-      return { solicitante: request.proxyUserId, yo };
-    });
+    const { solicitante: requester, yo } = await this.em.transactional(
+      async (tx) => {
+        const { solicitud: request, yo } = await this.pendingRequest(
+          tx,
+          requestId,
+          actor,
+        );
+        const now = new Date();
+        request.statusConceptId = PROF.PROXY_REJECTED;
+        // Cerrada la ventana: una fila rechazada no tiene vigencia que abrir.
+        request.validTo = now;
+        touch(request, actor.id, now);
+        await tx.flush();
+        return { solicitante: request.proxyUserId, yo };
+      },
+    );
 
     this.logger.info(
       { operation: 'profiles.dependent-link.reject', requestId },

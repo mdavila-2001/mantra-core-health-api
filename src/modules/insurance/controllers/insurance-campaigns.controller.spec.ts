@@ -157,7 +157,9 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
   });
 
   it.each([0, 101])('rechaza limit=%i en el listado', async (limit) => {
-    const validationErrors = await errors(InsuranceCampaignListQueryDto, { limit });
+    const validationErrors = await errors(InsuranceCampaignListQueryDto, {
+      limit,
+    });
     expect(validationErrors).toContain('limit');
   });
 

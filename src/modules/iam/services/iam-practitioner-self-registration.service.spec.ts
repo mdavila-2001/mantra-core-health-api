@@ -1103,8 +1103,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     const mobiles = d.contactPointsRepo.create.mock.calls
       .map(
-        ([, row]: [unknown, { systemConceptId: string; value: string }]) =>
-          row,
+        ([, row]: [unknown, { systemConceptId: string; value: string }]) => row,
       )
       .filter(
         (row: { systemConceptId: string }) =>
@@ -1143,8 +1142,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     const landline = d.contactPointsRepo.create.mock.calls
       .map(
-        ([, row]: [unknown, { systemConceptId: string; value: string }]) =>
-          row,
+        ([, row]: [unknown, { systemConceptId: string; value: string }]) => row,
       )
       .filter(
         (row: { systemConceptId: string }) =>

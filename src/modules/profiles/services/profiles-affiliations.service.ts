@@ -246,9 +246,7 @@ export class ProfilesAffiliationsService {
     // públicos y las cajas del padrón, que nunca van a registrarse—, dejar el
     // pedido pendiente lo condenaría a esperar para siempre.
     const hasDecider = await this.tenantAdmin.hasAdministrators(em, tenantId);
-    return hasDecider
-      ? LINK_STATUS.PENDIENTE
-      : LINK_STATUS.DECLARADO;
+    return hasDecider ? LINK_STATUS.PENDIENTE : LINK_STATUS.DECLARADO;
   }
 
   /**
@@ -342,7 +340,10 @@ export class ProfilesAffiliationsService {
     ]);
 
     const registrationByProfile = new Map(
-      registrations.map((row) => [row.practitionerProfileId, row.licenseNumber]),
+      registrations.map((row) => [
+        row.practitionerProfileId,
+        row.licenseNumber,
+      ]),
     );
     for (const persona of persons) {
       identities.set(persona.id, {
@@ -708,14 +709,12 @@ export class ProfilesAffiliationsService {
       return;
     }
 
-    const { membership, creada: created } = await this.memberships.ensureCareMembership(
-      tx,
-      {
+    const { membership, creada: created } =
+      await this.memberships.ensureCareMembership(tx, {
         userId: account.userId,
         tenantId,
         actorUserId: actor.id,
-      },
-    );
+      });
 
     this.logger.info(
       {

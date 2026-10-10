@@ -1111,7 +1111,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La línea acumula y el pedido cierra.
       expect(lin.fulfilledQuantity).toBe('3');
       expect(lin.statusConceptId).toBe(PINV.RES_LINE_FULFILLED);
-      expect(pharmacyOrder.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_RETIRADO,
+      );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -1162,10 +1164,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         inventoryLotId: undefined,
       });
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
-      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([
-        line1,
-        line2,
-      ]);
+      d.ordersRepo.findLinesByReservationIds.mockResolvedValue([line1, line2]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
 
       // Primera entrega: solo prod-1. El pedido sigue LISTO, mismo código.
@@ -1201,7 +1200,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         ),
       );
       expect(line2.fulfilledQuantity).toBe('3');
-      expect(pharmacyOrder.reservationStatusConceptId).toBe(PINV.ORDER_RETIRADO);
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_RETIRADO,
+      );
     });
 
     it('a product without standing balance answers 422 without a ghost delivery', async () => {
@@ -1234,7 +1235,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('replaying the idempotency key returns the order without re-dispensing', async () => {
       const d = build();
-      const pharmacyOrder = ready({ reservationStatusConceptId: PINV.ORDER_RETIRADO });
+      const pharmacyOrder = ready({
+        reservationStatusConceptId: PINV.ORDER_RETIRADO,
+      });
       d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(pharmacyOrder);
       d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({
         id: 'disp-0',
@@ -1392,7 +1395,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La propuesta sobrevive como historia decidida.
       expect(sub.statusConceptId).toBe(PINV.SUBSTITUTION_ACEPTADA);
       expect(sub.decidedAt).toBeInstanceOf(Date);
-      expect(pharmacyOrder.reservationStatusConceptId).toBe(PINV.ORDER_ACEPTADO);
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_ACEPTADO,
+      );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -1523,7 +1528,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // La propuesta queda como historia rechazada.
       expect(sub.statusConceptId).toBe(PINV.SUBSTITUTION_RECHAZADA);
       expect(sub.decidedAt).toBeInstanceOf(Date);
-      expect(pharmacyOrder.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_CONFIRMADO,
+      );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -1546,7 +1553,9 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
-      expect(pharmacyOrder.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
+      expect(pharmacyOrder.reservationStatusConceptId).toBe(
+        PINV.ORDER_CONFIRMADO,
+      );
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });
 
