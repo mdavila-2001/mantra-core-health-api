@@ -40,7 +40,9 @@ function mirrorStatementsFor(
       {
         type: ChangeSetType.CREATE,
         meta: { schema, tableName, primaryKeys: ['id'] },
-        entity: { id: SOURCE_ID },
+        // El espejo serializa con `wrap(entity).toObject()`; un objeto plano
+        // no lo tiene, así que la entidad de mentira lo trae puesto.
+        entity: { id: SOURCE_ID, toObject: () => ({ id: SOURCE_ID }) },
       },
     ],
   };
