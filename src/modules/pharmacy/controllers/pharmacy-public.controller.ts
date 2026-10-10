@@ -109,7 +109,7 @@ export class PharmacyPublicController {
     return this.service.listMedications({
       q,
       group,
-      origin: origenDe(lat, lng),
+      origin: originOf(lat, lng),
       radiusKm: toDecimal(radiusKm),
       limit: toInteger(limit),
     });
@@ -140,7 +140,7 @@ export class PharmacyPublicController {
     @Query('radiusKm') radiusKm?: string,
   ): Promise<PublicMedicationAvailabilityDto> {
     return this.service.getAvailability(conceptId, {
-      origin: origenDe(lat, lng),
+      origin: originOf(lat, lng),
       radiusKm: toDecimal(radiusKm),
     });
   }
@@ -153,26 +153,26 @@ export class PharmacyPublicController {
  * la superficie pública recorta lo que no entiende en vez de fallar, y media
  * coordenada no dice desde dónde medir nada.
  */
-function origenDe(
+function originOf(
   lat?: string,
   lng?: string,
 ): { lat: number; lng: number } | undefined {
   const latitude = toDecimal(lat);
-  const longitud = toDecimal(lng);
-  if (latitude === undefined || longitud === undefined) return undefined;
-  return { lat: latitude, lng: longitud };
+  const longitude = toDecimal(lng);
+  if (latitude === undefined || longitude === undefined) return undefined;
+  return { lat: latitude, lng: longitude };
 }
 
 /** Decimal de un parámetro de consulta, o `undefined`. */
-function toDecimal(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseFloat(valor);
+function toDecimal(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const numero = Number.parseFloat(value);
   return Number.isFinite(numero) ? numero : undefined;
 }
 
 /** Entero de un parámetro de consulta, o `undefined`. */
-function toInteger(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseInt(valor, 10);
+function toInteger(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const numero = Number.parseInt(value, 10);
   return Number.isFinite(numero) ? numero : undefined;
 }
