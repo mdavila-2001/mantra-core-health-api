@@ -33,8 +33,8 @@ export function drawQr(
   // margen en blanco de al menos 4 módulos alrededor de la matriz para que
   // los lectores lo reconozcan.
   const moduleMargin = 4;
-  const totalModulos = size + moduleMargin * 2;
-  const pointsPerModule = side / totalModulos;
+  const totalModules = size + moduleMargin * 2;
+  const pointsPerModule = side / totalModules;
 
   doc.save();
   doc.fillColor('#000000');

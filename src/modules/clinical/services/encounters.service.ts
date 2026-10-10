@@ -330,7 +330,7 @@ export class EncountersService {
       { operation: 'clinical.encounter.close', encounterId },
       'Closing encounter',
     );
-    const cerrado = await this.em.transactional(async (tx) => {
+    const closed = await this.em.transactional(async (tx) => {
       const encounter = await this.encountersRepo.findById(tx, encounterId);
       if (!encounter) {
         throw new ResourceNotFoundException('Encuentro no encontrado', {
@@ -408,10 +408,10 @@ export class EncountersService {
     // mismo que en la receta — el encuentro ya está cerrado y no puede
     // desandarse porque falle un aviso.
     await this.clinicalNotifications.encounterClosed(
-      cerrado.id,
-      cerrado.patientProfileId,
+      closed.id,
+      closed.patientProfileId,
       actor.id,
     );
-    return cerrado;
+    return closed;
   }
 }

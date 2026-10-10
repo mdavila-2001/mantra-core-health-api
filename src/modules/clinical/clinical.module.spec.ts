@@ -10,8 +10,8 @@ import {
  *
  * @returns Las clases registradas en `controllers`.
  */
-function controllers(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 

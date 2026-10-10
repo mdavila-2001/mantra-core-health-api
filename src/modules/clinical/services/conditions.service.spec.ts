@@ -181,12 +181,12 @@ describe('ConditionsService (UC-08-08)', () => {
       ],
       ['un concepto que no es de verificación', CLIN.CONDITION_ACTIVE],
       ['un uuid cualquiera', '2f3c6a52-6a0e-4c0e-9c8e-3d9c8e1f5a77'],
-    ])('no se registra %s: 422 y no escribe nada', async (_caso, valor) => {
+    ])('no se registra %s: 422 y no escribe nada', async (_case, value) => {
       const d = build();
 
       await expect(
         d.service.create(
-          { ...body, verificationStatusConceptId: valor },
+          { ...body, verificationStatusConceptId: value },
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
