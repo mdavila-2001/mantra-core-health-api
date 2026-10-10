@@ -479,7 +479,7 @@ export class ClinicalReadService {
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const ahora = Date.now();
+    const now = Date.now();
     const relations =
       await this.careRelationshipsRepo.findActiveForPractitionerPatient(
         em,
@@ -488,8 +488,8 @@ export class ClinicalReadService {
       );
     return relations.some((relation) => {
       if (relation.purposeConceptId) return false;
-      if (relation.validFrom.getTime() > ahora) return false;
-      if (relation.validTo && relation.validTo.getTime() <= ahora) {
+      if (relation.validFrom.getTime() > now) return false;
+      if (relation.validTo && relation.validTo.getTime() <= now) {
         return false;
       }
       return true;
@@ -513,23 +513,23 @@ export class ClinicalReadService {
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const ahora = new Date();
+    const now = new Date();
     const reservations =
       await this.bookingsRepo.findConfirmedWithPatientBetween(
         em,
         practitionerProfileId,
         patientProfileId,
-        new Date(ahora.getTime() - WINDOW_MS),
-        new Date(ahora.getTime() + WINDOW_MS),
+        new Date(now.getTime() - WINDOW_MS),
+        new Date(now.getTime() + WINDOW_MS),
         STATES_THAT_ENABLE,
       );
 
     return reservations.some((reservation) => {
       const zone = reservation.timeZone ?? DEFAULT_ZONE;
-      const hoy = localDayOf(ahora, zone);
+      const today = localDayOf(now, zone);
       const day = localDayOf(reservation.startAt, zone);
       return (
-        day.year === hoy.year && day.month === hoy.month && day.day === hoy.day
+        day.year === today.year && day.month === today.month && day.day === today.day
       );
     });
   }
