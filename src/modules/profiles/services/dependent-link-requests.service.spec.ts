@@ -80,7 +80,7 @@ function build(
     ),
   };
   const personsRepo = {
-    findById: fn(async (_em: unknown, id: string) => personas[id] ?? null),
+    findById: fn(async (_em: unknown, id: string) => persons[id] ?? null),
   };
   const relatedPersonsRepo = {
     create: fn((_em: unknown, data: Record<string, unknown>) => ({
