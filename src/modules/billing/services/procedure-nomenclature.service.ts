@@ -162,13 +162,13 @@ export class ProcedureNomenclatureService {
       );
 
     const hasMore = rows.length > limit;
-    const pagina = hasMore ? rows.slice(0, limit) : rows;
-    if (pagina.length === 0) return { items: [], nextCursor: null };
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    if (page.length === 0) return { items: [], nextCursor: null };
 
-    const propiedades = await this.properties(pagina.map((f) => f.id));
+    const properties = await this.properties(page.map((f) => f.id));
 
-    const items: ProcedureNomenclatureItemDto[] = pagina.map((row) => {
-      const their = propiedades.get(row.id) ?? new Map<string, string>();
+    const items: ProcedureNomenclatureItemDto[] = page.map((row) => {
+      const their = properties.get(row.id) ?? new Map<string, string>();
       return {
         conceptId: row.id,
         code: row.code,
@@ -182,10 +182,10 @@ export class ProcedureNomenclatureService {
       };
     });
 
-    const ultima = pagina[pagina.length - 1];
+    const last = page[page.length - 1];
     return {
       items,
-      nextCursor: hasMore ? encodeKeysetCursor({ code: ultima.code }) : null,
+      nextCursor: hasMore ? encodeKeysetCursor({ code: last.code }) : null,
     };
   }
 

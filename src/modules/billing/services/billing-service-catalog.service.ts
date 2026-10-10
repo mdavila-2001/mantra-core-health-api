@@ -148,7 +148,7 @@ export class BillingServiceCatalogService {
       },
       'Creating service catalog item',
     );
-    await this.assertRegistrationCanDar(actor, dto.practiceId);
+    await this.assertRegistrationCanRegister(actor, dto.practiceId);
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -201,7 +201,7 @@ export class BillingServiceCatalogService {
    * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
    * práctica ajena responde igual que uno inventado.
    */
-  private async assertRegistrationCanDar(
+  private async assertRegistrationCanRegister(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {

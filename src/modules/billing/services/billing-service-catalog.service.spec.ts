@@ -18,7 +18,7 @@ import {
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 /** Quien atiende: sin rol administrativo, con perfil profesional. */
-const medico = {
+const doctor = {
   id: 'user-med',
   roles: ['PRACTITIONER'],
   practitionerProfileId: 'hp-1',
@@ -208,7 +208,7 @@ describe('BillingServiceCatalogService', () => {
           publicationStatusConceptId: 'draft',
         });
 
-        await runWithTenant('tenant-1', () => d.service.create(dto, medico));
+        await runWithTenant('tenant-1', () => d.service.create(dto, doctor));
 
         expect(d.practiceTenantLookup.isOwnOffice).toHaveBeenCalledWith(
           'pr1',
@@ -221,7 +221,7 @@ describe('BillingServiceCatalogService', () => {
         const d = build();
         d.practiceTenantLookup.isOwnOffice.mockResolvedValue(false);
 
-        await expect(d.service.create(dto, medico)).rejects.toThrow(
+        await expect(d.service.create(dto, doctor)).rejects.toThrow(
           /Práctica no encontrada/,
         );
         expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
@@ -268,14 +268,14 @@ describe('BillingServiceCatalogService', () => {
               name: 'Consulta general',
               defaultPrice: '100.00',
             },
-            medico,
+            doctor,
           ),
         );
 
         expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
           d.tx,
           expect.objectContaining({
-            ownerPractitionerId: medico.practitionerProfileId,
+            ownerPractitionerId: doctor.practitionerProfileId,
             title: expect.stringContaining('Consulta general'),
           }),
         );
@@ -390,7 +390,7 @@ describe('BillingServiceCatalogService', () => {
       const res = await d.service.update(
         's1',
         { defaultPrice: '150.00' },
-        medico,
+        doctor,
       );
 
       expect(res.defaultPrice).toBe('150.00');
@@ -398,7 +398,7 @@ describe('BillingServiceCatalogService', () => {
       // unidad no es un precio.
       expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_BOB);
       expect(res.currencyCode).toBe('BOB');
-      expect(row.updatedByUserId).toBe(medico.id);
+      expect(row.updatedByUserId).toBe(doctor.id);
       expect(d.tx.flush).toHaveBeenCalled();
     });
 
@@ -413,7 +413,7 @@ describe('BillingServiceCatalogService', () => {
       const res = await d.service.update(
         's1',
         { defaultPrice: '20.00' },
-        medico,
+        doctor,
       );
 
       expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_USD);
@@ -428,7 +428,7 @@ describe('BillingServiceCatalogService', () => {
         ['pr1'],
       );
 
-      const res = await d.service.update('s1', { isActive: false }, medico);
+      const res = await d.service.update('s1', { isActive: false }, doctor);
 
       expect(res.isActive).toBe(false);
       expect(res.defaultPrice).toBe('80.00');
@@ -440,7 +440,7 @@ describe('BillingServiceCatalogService', () => {
       d.serviceCatalogRepo.findById.mockResolvedValue(null);
 
       await expect(
-        d.service.update('s1', { defaultPrice: '10.00' }, medico),
+        d.service.update('s1', { defaultPrice: '10.00' }, doctor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -452,7 +452,7 @@ describe('BillingServiceCatalogService', () => {
       );
 
       await expect(
-        d.service.update('s1', { defaultPrice: '10.00' }, medico),
+        d.service.update('s1', { defaultPrice: '10.00' }, doctor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
