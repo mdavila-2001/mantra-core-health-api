@@ -58,8 +58,8 @@ export class FormsInstancesService {
     tx: EntityManager,
     resourceId: string,
   ): Promise<string> {
-    const encuentro = await tx.findOne(Encounters, { id: resourceId });
-    return encuentro === null
+    const encounter = await tx.findOne(Encounters, { id: resourceId });
+    return encounter === null
       ? FORMS.RESOURCE_TYPE_PATIENT
       : FORMS.RESOURCE_TYPE_ENCOUNTER;
   }
