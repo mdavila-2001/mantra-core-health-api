@@ -10,8 +10,8 @@ import { AuthzMeController } from '../authz/controllers';
  * Importar un controlador no lo publica: si no entra en `controllers`, Nest no
  * mapea sus rutas (ver `community.module.spec.ts`).
  */
-function controllers(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 
