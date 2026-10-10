@@ -5,7 +5,10 @@ const CONCEPTS = PERFILES_DE_IMPORTACION.conceptos;
 
 /** Lee un CSV escrito como texto y valida sus filas, como hace el servicio. */
 function readAndValidate(csv: string) {
-  const { filas: rows } = new CsvParser().parse(Buffer.from(csv, 'utf8'), CONCEPTS);
+  const { filas: rows } = new CsvParser().parse(
+    Buffer.from(csv, 'utf8'),
+    CONCEPTS,
+  );
   return validateRows(rows, CONCEPTS);
 }
 
@@ -42,17 +45,16 @@ function withErrors(): string {
 
 describe('validarFilas', () => {
   it('señala exactamente las cinco filas malas, con su columna', () => {
-    const { validas: valid, problemas: problems } = readAndValidate(withErrors());
+    const { validas: valid, problemas: problems } =
+      readAndValidate(withErrors());
 
-    expect(problems.map((problem) => [problem.fila, problem.columna])).toEqual(
-      [
-        [5, 'display'],
-        [9, 'code'],
-        [14, 'code'],
-        [20, 'code'],
-        [33, 'display'],
-      ],
-    );
+    expect(problems.map((problem) => [problem.fila, problem.columna])).toEqual([
+      [5, 'display'],
+      [9, 'code'],
+      [14, 'code'],
+      [20, 'code'],
+      [33, 'display'],
+    ]);
     expect(valid).toHaveLength(45);
   });
 
@@ -126,7 +128,9 @@ describe('validarFilas', () => {
   });
 
   it('una celda con espacios no cuenta como celda con contenido', () => {
-    const { problemas: problems } = readAndValidate('code,display\n"   ",Uno\n');
+    const { problemas: problems } = readAndValidate(
+      'code,display\n"   ",Uno\n',
+    );
 
     expect(problems).toEqual([
       { fila: 2, columna: 'code', motivo: '«code» está vacía' },

@@ -73,7 +73,11 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('kpis: una sola consulta con las CTEs de reclamos, afiliados, meses y primas', async () => {
-    const { em, llamadas: calls, repo } = build([
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([
       [
         {
           total_claims: 4,
@@ -121,7 +125,11 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('monthlyTrends: un mes por fila, agrupado en La Paz', async () => {
-    const { em, llamadas: calls, repo } = build([
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([
       [
         {
           period: '2026-03',
@@ -187,9 +195,11 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('immunization: tasa calculada en SQL, null sin afiliados (nunca NaN)', async () => {
-    const { em, llamadas: calls, repo } = build([
-      [{ vaccinated: 2, total: 3, rate_percent: '66.67' }],
-    ]);
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([[{ vaccinated: 2, total: 3, rate_percent: '66.67' }]]);
 
     const result = await repo.immunization(
       em,

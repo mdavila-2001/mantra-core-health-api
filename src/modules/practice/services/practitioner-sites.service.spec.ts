@@ -165,7 +165,9 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(siteRecord({ addressId: 'addr-1' }));
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ addressId: 'addr-1' }),
+      );
       d.fork.findOne.mockResolvedValue({
         lines: 'Av. Brasil 1234',
         city: 'La Paz',
@@ -337,7 +339,9 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(siteRecord({ bankQrFileId: 'file-qr' }));
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ bankQrFileId: 'file-qr' }),
+      );
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: TENANT,
@@ -431,7 +435,9 @@ describe('PractitionerSitesService', () => {
 
     it('fails with not found when the site is not their own office', async () => {
       const d = build();
-      d.sitesRepo.findById.mockResolvedValue(siteRecord({ practiceId: 'pr-ajena' }));
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ practiceId: 'pr-ajena' }),
+      );
       d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
 
       await expect(

@@ -400,7 +400,9 @@ export class ProfilesPractitionersService {
         key: 'organizations',
         complete: affiliations.length > 0 || resources.length > 0,
         missing:
-          affiliations.length > 0 || resources.length > 0 ? [] : ['affiliation'],
+          affiliations.length > 0 || resources.length > 0
+            ? []
+            : ['affiliation'],
       },
       {
         key: 'schedule',
@@ -786,8 +788,7 @@ export class ProfilesPractitionersService {
       return;
     }
     if (current?.value === fresh) return;
-    if (current)
-      this.contactPointsRepo.closeCurrent(current, now, actorUserId);
+    if (current) this.contactPointsRepo.closeCurrent(current, now, actorUserId);
 
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -2272,7 +2273,9 @@ export class ProfilesPractitionersService {
         tx,
         profileId,
       );
-      const active = current.filter((specialtyRecord) => !specialtyRecord.validTo);
+      const active = current.filter(
+        (specialtyRecord) => !specialtyRecord.validTo,
+      );
       if (active.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
           `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,

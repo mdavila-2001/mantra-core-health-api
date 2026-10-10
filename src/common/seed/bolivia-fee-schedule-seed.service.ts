@@ -217,8 +217,7 @@ export class BoliviaFeeScheduleSeedService {
     const declared = new Map(
       BOLIVIA_PROCEDURES.flatMap((p) =>
         this.propertiesOf(p).map(
-          ([code, value]) =>
-            [boFeePropertyId(p.code, code), value] as const,
+          ([code, value]) => [boFeePropertyId(p.code, code), value] as const,
         ),
       ),
     );

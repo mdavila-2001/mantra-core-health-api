@@ -870,20 +870,19 @@ export class CommunityPublicService {
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
     // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
     // pedirlas para el resto sería un viaje que siempre vuelve vacío.
-    const [señales, posts, specialties, trajectory, sites] =
-      await Promise.all([
-        this.signals(em, [profile]),
-        this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-        kind === 'PRACTITIONER'
-          ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, string[]>()),
-        kind === 'PRACTITIONER'
-          ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
-        kind === 'PRACTITIONER'
-          ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
-      ]);
+    const [señales, posts, specialties, trajectory, sites] = await Promise.all([
+      this.signals(em, [profile]),
+      this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+      kind === 'PRACTITIONER'
+        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, string[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
+    ]);
     // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
     // comentarios lleva. Un solo viaje para todo el lote.
     const engagement = await this.repo.engagementByPost(

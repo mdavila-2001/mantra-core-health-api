@@ -143,8 +143,7 @@ export function buildRole(data: RoleData): EncounterRole {
       lines.push(`Motivo: ${version.chiefComplaintText}`);
     if (version.subjectiveText)
       lines.push(`Subjetivo: ${version.subjectiveText}`);
-    if (version.objectiveText)
-      lines.push(`Objetivo: ${version.objectiveText}`);
+    if (version.objectiveText) lines.push(`Objetivo: ${version.objectiveText}`);
     if (version.assessmentText)
       lines.push(`Evaluación: ${version.assessmentText}`);
     if (version.planText) lines.push(`Plan: ${version.planText}`);

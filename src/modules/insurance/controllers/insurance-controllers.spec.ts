@@ -323,9 +323,7 @@ describe('Insurance controllers (delegación)', () => {
     for (const name of methodsHttp) {
       const method = Reflect.getMetadata(
         METHOD_METADATA,
-        (ClaimsController.prototype as unknown as Record<string, object>)[
-          name
-        ],
+        (ClaimsController.prototype as unknown as Record<string, object>)[name],
       );
       expect(method).toBe(RequestMethod.POST);
     }
@@ -494,7 +492,10 @@ describe('Insurance controllers (delegación)', () => {
       path: 'patient/:patientProfileId',
       method: RequestMethod.GET,
     });
-    expect(route('getById')).toEqual({ path: ':id', method: RequestMethod.GET });
+    expect(route('getById')).toEqual({
+      path: ':id',
+      method: RequestMethod.GET,
+    });
     expect(route('changeStatus')).toEqual({
       path: ':id/status',
       method: RequestMethod.PATCH,

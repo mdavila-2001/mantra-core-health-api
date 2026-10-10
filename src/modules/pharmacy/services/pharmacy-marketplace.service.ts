@@ -126,9 +126,7 @@ export class PharmacyMarketplaceService {
     const filtered =
       consultation.group === undefined || consultation.group === ''
         ? cards
-        : cards.filter(
-            (card) => card.therapeuticGroup === consultation.group,
-          );
+        : cards.filter((card) => card.therapeuticGroup === consultation.group);
 
     const tope = Math.min(
       Math.max(consultation.limit ?? DEFAULT_CAP, 1),

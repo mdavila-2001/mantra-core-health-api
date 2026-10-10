@@ -42,9 +42,7 @@ describe('TerminologyImportTemplateController', () => {
 
     controller.descargarPlantilla({}, response as never);
 
-    expect(headers['Content-Disposition']).toContain(
-      'plantilla-conceptos.csv',
-    );
+    expect(headers['Content-Disposition']).toContain('plantilla-conceptos.csv');
   });
 
   it('la descarga es del administrador de seguridad, como la importación', () => {

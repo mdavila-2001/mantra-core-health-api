@@ -1308,8 +1308,7 @@ export class PublicSearchRepository {
       [postIds, COMM.MEDIA_ROLE_IMAGE],
       'all',
     );
-    for (const row of media)
-      ensure(row.post_id).imageFileIds.push(row.file_id);
+    for (const row of media) ensure(row.post_id).imageFileIds.push(row.file_id);
 
     const reactions = await conn.execute<
       { reactable_ref_id: string; total: string }[]

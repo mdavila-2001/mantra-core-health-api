@@ -1513,7 +1513,10 @@ export class ProfilesPatientsService {
     // social no puede borrar el NIT, ni al revés.
     const nitValue = (nit ?? current?.value ?? '').trim();
     const titular = (legalName ?? current?.holderName ?? '').trim();
-    if (current?.value === nitValue && (current?.holderName ?? '') === titular) {
+    if (
+      current?.value === nitValue &&
+      (current?.holderName ?? '') === titular
+    ) {
       return;
     }
 

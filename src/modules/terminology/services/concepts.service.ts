@@ -1301,21 +1301,15 @@ export class ConceptsService {
       });
     }
 
-    const [
-      texts,
-      labels,
-      designations,
-      glossaryTexts,
-      relations,
-      properties,
-    ] = await Promise.all([
-      this.resolveTexts([conceptId], language),
-      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
-      this.designationsRepo.findByConcept(this.em, conceptId),
-      this.resolveGlossaryTexts([conceptId], language),
-      this.resolveGlossaryRelations([conceptId]),
-      this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
-    ]);
+    const [texts, labels, designations, glossaryTexts, relations, properties] =
+      await Promise.all([
+        this.resolveTexts([conceptId], language),
+        this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+        this.designationsRepo.findByConcept(this.em, conceptId),
+        this.resolveGlossaryTexts([conceptId], language),
+        this.resolveGlossaryRelations([conceptId]),
+        this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
+      ]);
 
     const conceptLabels = labels.get(conceptId);
     const isGlossaryTerm = (conceptLabels ?? []).some(

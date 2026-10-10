@@ -226,9 +226,9 @@ describe('ProfilesAffiliationsService (TP-2)', () => {
       const d = build();
       d.em.find.mockResolvedValue([]);
 
-      await expect(
-        d.service.listRequests(TENANT, orgAdmin),
-      ).resolves.toEqual({ items: [] });
+      await expect(d.service.listRequests(TENANT, orgAdmin)).resolves.toEqual({
+        items: [],
+      });
     });
   });
 

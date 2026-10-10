@@ -275,7 +275,9 @@ describe('fichas de las NNAC de Bolivia', () => {
   });
 
   it('el código CIE-10 de 2025 es una lista de «código: nombre» de la norma', () => {
-    const formsWithOptions = STANDARD_FORMS.filter((f) => f.code.startsWith('NNAC25_'))
+    const formsWithOptions = STANDARD_FORMS.filter((f) =>
+      f.code.startsWith('NNAC25_'),
+    )
       .map((f) => f.fields.find((c) => c.code === 'codigo_cie10'))
       .filter((c) => c?.options !== undefined);
     expect(formsWithOptions.length).toBeGreaterThan(60);

@@ -199,10 +199,7 @@ describe('CommunitySearchIndexService', () => {
         build({ specialties: ['Cardiología', 'Medicina interna'] }),
       );
 
-      expect(document.specialties).toEqual([
-        'Cardiología',
-        'Medicina interna',
-      ]);
+      expect(document.specialties).toEqual(['Cardiología', 'Medicina interna']);
     });
   });
 

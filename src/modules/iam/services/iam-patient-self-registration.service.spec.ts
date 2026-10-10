@@ -337,8 +337,10 @@ describe('IamPatientSelfRegistrationService', () => {
      */
     it('writes no address at all when nothing about it was given', async () => {
       const d = build();
-      const { residenceMunicipalityConceptId: _withoutMunicipality, ...withoutAddress } =
-        dto;
+      const {
+        residenceMunicipalityConceptId: _withoutMunicipality,
+        ...withoutAddress
+      } = dto;
 
       await d.service.registerPatient(withoutAddress as typeof dto);
 
@@ -497,7 +499,11 @@ describe('IamPatientSelfRegistrationService', () => {
      */
     it('skips every email side effect when no email is given', async () => {
       const d = build();
-      const { email: _withoutMail, phone: _withoutPhone, ...withoutContact } = dto;
+      const {
+        email: _withoutMail,
+        phone: _withoutPhone,
+        ...withoutContact
+      } = dto;
 
       await d.service.registerPatient(withoutContact as typeof dto);
 

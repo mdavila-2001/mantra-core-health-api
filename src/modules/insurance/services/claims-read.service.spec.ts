@@ -709,9 +709,7 @@ describe('ClaimsReadService', () => {
 
     /** `em()` con una unidad diagnóstica activa del tenant. */
     function emWithUnit() {
-      return em((name) =>
-        name === 'DiagnosticUnits' ? [{ id: UNIT }] : [],
-      );
+      return em((name) => (name === 'DiagnosticUnits' ? [{ id: UNIT }] : []));
     }
 
     it('amplía el alcance a las unidades diagnósticas activas del tenant', async () => {

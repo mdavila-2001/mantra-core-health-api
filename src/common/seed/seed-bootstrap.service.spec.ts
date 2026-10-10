@@ -122,9 +122,7 @@ const CONTENT: readonly Step[] = [
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
-const CORE: readonly Step[] = STEPS.filter(
-  (name) => !CONTENT.includes(name),
-);
+const CORE: readonly Step[] = STEPS.filter((name) => !CONTENT.includes(name));
 
 describe('SeedBootstrapService', () => {
   const environmentOriginal = process.env.SEED_ON_BOOT;

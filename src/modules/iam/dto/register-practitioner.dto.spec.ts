@@ -25,7 +25,8 @@ const MINIMAL_REGISTRATION = {
 
 describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
   it('rechaza el alta si falta el documento de identidad', async () => {
-    const { nationalId: _nationalId, ...withoutDocument } = MINIMAL_REGISTRATION;
+    const { nationalId: _nationalId, ...withoutDocument } =
+      MINIMAL_REGISTRATION;
     expect(await propertiesWithError(withoutDocument)).toContain('nationalId');
   });
 });
@@ -402,7 +403,8 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
   });
 
   it('rechaza el departamento sin documento', async () => {
-    const { nationalId: _nationalId, ...withoutDocument } = MINIMAL_REGISTRATION;
+    const { nationalId: _nationalId, ...withoutDocument } =
+      MINIMAL_REGISTRATION;
     expect(
       await propertiesWithError({
         ...withoutDocument,
@@ -490,7 +492,8 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
   });
 
   it('el alta asistida (OmitType) hereda ownSite', async () => {
-    const { password: _password, ...signupWithoutPassword } = MINIMAL_REGISTRATION;
+    const { password: _password, ...signupWithoutPassword } =
+      MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
       ...signupWithoutPassword,
       reason: 'Alta de plantel',
@@ -563,7 +566,8 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
   });
 
   it('el alta asistida (OmitType) hereda el domicilio', async () => {
-    const { password: _password, ...signupWithoutPassword } = MINIMAL_REGISTRATION;
+    const { password: _password, ...signupWithoutPassword } =
+      MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
       ...signupWithoutPassword,
       reason: 'Alta de plantel',

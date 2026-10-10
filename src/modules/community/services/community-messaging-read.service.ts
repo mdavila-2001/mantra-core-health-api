@@ -333,8 +333,10 @@ export class CommunityMessagingReadService {
         return {
           peers: other.map((otherSide) => ({
             profileId: otherSide.participantProfileId,
-            displayName: nameByProfile.get(otherSide.participantProfileId) ?? null,
-            avatarUrl: avatarByProfile.get(otherSide.participantProfileId) ?? null,
+            displayName:
+              nameByProfile.get(otherSide.participantProfileId) ?? null,
+            avatarUrl:
+              avatarByProfile.get(otherSide.participantProfileId) ?? null,
           })),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
