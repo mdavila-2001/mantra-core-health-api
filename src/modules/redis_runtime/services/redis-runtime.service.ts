@@ -149,8 +149,8 @@ export class RedisRuntimeService {
     );
     keys.forEach((key, i) => {
       const raw = values[i];
-      const valor = raw === null ? 0 : Number.parseInt(raw, 10);
-      output.set(key, Number.isFinite(valor) ? valor : 0);
+      const value = raw === null ? 0 : Number.parseInt(raw, 10);
+      output.set(key, Number.isFinite(value) ? value : 0);
     });
     return output;
   }
