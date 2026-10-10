@@ -12,7 +12,7 @@ import type {
 const S3_BACKENDS: ReadonlySet<string> = new Set(['s3', 'minio']);
 
 /** Objetos por página; el tope real lo pone `alcance.limit`. */
-const PAGINA = 1000;
+const PAGE = 1000;
 
 /**
  * Inventario S3 compatible, para reconciliar el almacén contra Postgres.
@@ -37,27 +37,27 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
       };
     }
 
-    const objetos: InventoriedObject[] = [];
+    const objects: InventoriedObject[] = [];
     let continuationToken: string | undefined;
 
     try {
       const client = this.cliente();
       do {
-        const remaining = scope.limit - objetos.length;
-        if (remaining <= 0) return { estado: 'TRUNCADO', objetos };
+        const remaining = scope.limit - objects.length;
+        if (remaining <= 0) return { estado: 'TRUNCADO', objetos: objects };
 
-        const pagina = await client.send(
+        const page = await client.send(
           new ListObjectsV2Command({
             Bucket: scope.bucket,
             Prefix: scope.prefix || undefined,
-            MaxKeys: Math.min(PAGINA, remaining),
+            MaxKeys: Math.min(PAGE, remaining),
             ContinuationToken: continuationToken,
           }),
         );
 
-        for (const obj of pagina.Contents ?? []) {
+        for (const obj of page.Contents ?? []) {
           if (obj.Key === undefined) continue;
-          objetos.push({
+          objects.push({
             key: obj.Key,
             sizeBytes: BigInt(obj.Size ?? 0),
           });
@@ -65,11 +65,11 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
 
         // Si el proveedor dice que hay más y ya llegamos al tope, el inventario
         // está truncado: lo que no se vio no se puede declarar ausente.
-        continuationToken = pagina.IsTruncated
-          ? pagina.NextContinuationToken
+        continuationToken = page.IsTruncated
+          ? page.NextContinuationToken
           : undefined;
-        if (continuationToken && objetos.length >= scope.limit) {
-          return { estado: 'TRUNCADO', objetos };
+        if (continuationToken && objects.length >= scope.limit) {
+          return { estado: 'TRUNCADO', objetos: objects };
         }
       } while (continuationToken);
     } catch (error) {
@@ -82,7 +82,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
       };
     }
 
-    return { estado: 'COMPLETO', objetos };
+    return { estado: 'COMPLETO', objetos: objects };
   }
 
   /**
