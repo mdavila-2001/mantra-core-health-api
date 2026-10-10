@@ -2272,7 +2272,7 @@ export class ProfilesPractitionersService {
         tx,
         profileId,
       );
-      const active = current.filter((especialidad) => !especialidad.validTo);
+      const active = current.filter((specialtyRecord) => !specialtyRecord.validTo);
       if (active.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
           `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,

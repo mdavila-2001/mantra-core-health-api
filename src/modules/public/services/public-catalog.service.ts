@@ -73,10 +73,10 @@ export class PublicCatalogService {
       limit + 1,
     );
     const hasMore = rows.length > limit;
-    const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const last = pagina[pagina.length - 1];
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const last = pageRows[pageRows.length - 1];
     return {
-      items: pagina.map(toServiceDto),
+      items: pageRows.map(toServiceDto),
       nextCursor:
         hasMore && last
           ? encodeKeysetCursor({ k: last.code, i: last.id })
@@ -112,10 +112,10 @@ export class PublicCatalogService {
       limit + 1,
     );
     const hasMore = rows.length > limit;
-    const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const last = pagina[pagina.length - 1];
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const last = pageRows[pageRows.length - 1];
     return {
-      items: pagina.map(toProductDto),
+      items: pageRows.map(toProductDto),
       nextCursor:
         hasMore && last
           ? encodeKeysetCursor({ k: last.sortName, i: last.id })

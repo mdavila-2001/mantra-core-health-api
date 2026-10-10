@@ -36,11 +36,11 @@ function build() {
  */
 async function errors(body: unknown): Promise<string[]> {
   const dto = plainToInstance(RequestDependentLinkDto, body);
-  const errores = await validate(dto, {
+  const validationErrors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return errores.map((e) => e.property);
+  return validationErrors.map((e) => e.property);
 }
 
 describe('ProfilesDependentRequestsController', () => {
@@ -76,11 +76,11 @@ describe('ProfilesDependentRequestsController', () => {
      */
     async function errorsQuery(query: unknown): Promise<string[]> {
       const dto = plainToInstance(DependentCandidatesQueryDto, query);
-      const errores = await validate(dto, {
+      const validationErrors = await validate(dto, {
         whitelist: true,
         forbidNonWhitelisted: true,
       });
-      return errores.map((e) => e.property);
+      return validationErrors.map((e) => e.property);
     }
 
     it('delega el texto y la sesión, sin tomar a nadie del cliente', async () => {

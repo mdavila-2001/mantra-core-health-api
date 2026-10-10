@@ -322,13 +322,13 @@ describe('ClaimsReadService', () => {
       // AC-16-14: 403, y sin `details` — si el id viajara ahí, «no es tuya» y
       // «no existe» dejarían de ser indistinguibles. Se mira el cuerpo que el
       // filtro va a serializar, no la instancia.
-      const rechazo = await rejection(() =>
+      const rejectionError = await rejection(() =>
         withTenant(() => serviceWith(r).getClaim(CLAIM)),
       );
 
-      expect(rechazo.getStatus()).toBe(403);
-      expect(rechazo.getResponse()).not.toHaveProperty('details');
-      expect(JSON.stringify(rechazo.getResponse())).not.toContain(CLAIM);
+      expect(rejectionError.getStatus()).toBe(403);
+      expect(rejectionError.getResponse()).not.toHaveProperty('details');
+      expect(JSON.stringify(rejectionError.getResponse())).not.toContain(CLAIM);
     });
 
     it('el rechazo de una ajena y el de una inexistente son el mismo cuerpo', async () => {

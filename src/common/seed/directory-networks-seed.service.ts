@@ -194,16 +194,16 @@ export class DirectoryNetworksSeedService {
         practiceId ??= existing[0]?.practiceId;
         const names = new Set(existing.map((x) => x.name));
         for (const site of record.sedes) {
-          const sitio = this.siteOf(site);
-          if (names.has(sitio.name)) continue;
+          const resolvedSite = this.siteOf(site);
+          if (names.has(resolvedSite.name)) continue;
           const created = await runWithTenant(SEED.tenantId, () =>
             this.sites.createOwnSite(
               { id: userId, roles: ['PRACTITIONER'] },
-              sitio,
+              resolvedSite,
             ),
           );
           practiceId ??= created.practiceId;
-          names.add(sitio.name);
+          names.add(resolvedSite.name);
           result.sitesCreated++;
         }
 

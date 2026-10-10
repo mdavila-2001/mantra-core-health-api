@@ -77,7 +77,7 @@ function build() {
 }
 
 /** Una fila editable del catálogo, con los campos que el servicio toca. */
-function fila(overrides: Record<string, unknown> = {}) {
+function catalogRow(overrides: Record<string, unknown> = {}) {
   return {
     id: 's1',
     practiceId: 'pr1',
@@ -324,7 +324,7 @@ describe('BillingServiceCatalogService', () => {
   describe('update', () => {
     it('quien atiende en esa práctica corrige el precio y su moneda', async () => {
       const d = build();
-      const row = fila();
+      const row = catalogRow();
       d.serviceCatalogRepo.findById.mockResolvedValue(row);
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['otra', 'pr1'],
@@ -347,7 +347,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('conserva la moneda que la fila ya tenía', async () => {
       const d = build();
-      const row = fila({ currencyConceptId: CONCEPTS.CURRENCY_USD });
+      const row = catalogRow({ currencyConceptId: CONCEPTS.CURRENCY_USD });
       d.serviceCatalogRepo.findById.mockResolvedValue(row);
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['pr1'],
@@ -365,7 +365,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('deja intacto lo que el cuerpo no menciona', async () => {
       const d = build();
-      const row = fila({ defaultPrice: '80.00' });
+      const row = catalogRow({ defaultPrice: '80.00' });
       d.serviceCatalogRepo.findById.mockResolvedValue(row);
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['pr1'],
@@ -389,7 +389,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('un servicio de una práctica ajena es el MISMO 404, no un 403', async () => {
       const d = build();
-      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
         ['otra-practica'],
       );
@@ -402,7 +402,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('la cuenta administradora corrige lo que su organización dio de alta', async () => {
       const d = build();
-      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
       d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
         'mi-tenant',
       );
@@ -416,7 +416,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('la cuenta administradora de otra organización recibe 404', async () => {
       const d = build();
-      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
       d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
         'otro-tenant',
       );
@@ -430,7 +430,7 @@ describe('BillingServiceCatalogService', () => {
 
     it('una cuenta sin perfil profesional ni rol administrativo recibe 404', async () => {
       const d = build();
-      d.serviceCatalogRepo.findById.mockResolvedValue(fila());
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
 
       await expect(
         d.service.update('s1', { defaultPrice: '10.00' }, {

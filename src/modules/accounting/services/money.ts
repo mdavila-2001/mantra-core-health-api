@@ -55,7 +55,7 @@ export function amountInBase(line: {
  * por un error real. Los importes llegan como texto decimal desde `numeric` de
  * PostgreSQL justamente para no perder precisión en el camino.
  */
-export function toCentimos(value: string | number | null | undefined): bigint {
+export function toBigIntCents(value: string | number | null | undefined): bigint {
   if (value === null || value === undefined) {
     return 0n;
   }

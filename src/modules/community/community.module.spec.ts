@@ -32,8 +32,8 @@ describe('CommunityModule', () => {
   });
 
   it('publica los controladores de reseñas, con sesión y sin ella', () => {
-    const controladores = controllers(CommunityModule);
-    expect(controladores).toContain(CommunityReviewsController);
-    expect(controladores).toContain(CommunityPublicController);
+    const declaredControllers = controllers(CommunityModule);
+    expect(declaredControllers).toContain(CommunityReviewsController);
+    expect(declaredControllers).toContain(CommunityPublicController);
   });
 });

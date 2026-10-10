@@ -105,7 +105,7 @@ describe('ChartNotesService', () => {
 
   // CL-20 (BR-13) — el autor sale de la sesión, nunca del cuerpo.
   describe('autor por sesión (CL-20)', () => {
-    const cabecera = () => ({
+    const noteHeader = () => ({
       id: 'h1',
       currentVersionId: 'v1',
       lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
@@ -119,7 +119,7 @@ describe('ChartNotesService', () => {
 
     it('createNote sin autor en el cuerpo usa el perfil de la sesión', async () => {
       const d = build();
-      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createHeader.mockReturnValue(noteHeader());
       d.notesRepo.createVersion.mockReturnValue({
         id: 'v1',
         versionNumber: 1,
@@ -156,7 +156,7 @@ describe('ChartNotesService', () => {
 
     it('addVersion con otro autor responde 403 y no crea la versión', async () => {
       const d = build();
-      d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+      d.notesRepo.findHeaderById.mockResolvedValue(noteHeader());
       await expect(
         d.service.addVersion('h1', { authorProfileId: 'hp-otro' }, actor),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -165,7 +165,7 @@ describe('ChartNotesService', () => {
 
     it('addVersion sin autor en el cuerpo usa el perfil de la sesión', async () => {
       const d = build();
-      const header = cabecera();
+      const header = noteHeader();
       d.notesRepo.findHeaderById.mockResolvedValue(header);
       d.notesRepo.maxVersionNumber.mockResolvedValue(1);
       d.notesRepo.createVersion.mockReturnValue(version());
@@ -179,7 +179,7 @@ describe('ChartNotesService', () => {
     it('amendNote con otro autor responde 403 y no crea la enmienda', async () => {
       const d = build();
       d.notesRepo.findHeaderById.mockResolvedValue({
-        ...cabecera(),
+        ...noteHeader(),
         lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
       });
       await expect(
@@ -194,7 +194,7 @@ describe('ChartNotesService', () => {
 
     it('SUPERADMIN escribe con el perfil que declare', async () => {
       const d = build();
-      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createHeader.mockReturnValue(noteHeader());
       d.notesRepo.createVersion.mockReturnValue({
         id: 'v1',
         versionNumber: 1,

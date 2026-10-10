@@ -17,9 +17,9 @@ function controllers(module: unknown): readonly unknown[] {
 
 describe('ConsentModule / AuthzModule (BR-20)', () => {
   it('publica las lecturas del titular y la ruta del consentimiento informado del médico', () => {
-    const controladores = controllers(ConsentModule);
-    expect(controladores).toContain(ConsentMeController);
-    expect(controladores).toContain(EncounterInformedConsentsController);
+    const declaredControllers = controllers(ConsentModule);
+    expect(declaredControllers).toContain(ConsentMeController);
+    expect(declaredControllers).toContain(EncounterInformedConsentsController);
   });
 
   it('publica «Quién ve mi historia»', () => {

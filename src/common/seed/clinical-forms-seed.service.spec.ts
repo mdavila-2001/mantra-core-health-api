@@ -206,7 +206,7 @@ describe('ClinicalFormsSeedService', () => {
   });
 
   it('flushea la sección antes de crear la plantilla que la referencia', async () => {
-    const { service, bitacora } = build();
+    const { service, bitacora: createdEntities } = build();
 
     await service.run();
 
@@ -215,7 +215,7 @@ describe('ClinicalFormsSeedService', () => {
     // flush intermedio la plantilla entra antes que su sección y la base rechaza
     // el lote entero — el seed queda «omitido» y el catálogo, vacío. Pasó de
     // verdad al correrlo contra postgres; esta prueba es la que lo fija.
-    const log = bitacora();
+    const log = createdEntities();
     const section = log.indexOf('DynamicFieldSections');
     const template = log.indexOf('SpecialtyChartTemplates');
 

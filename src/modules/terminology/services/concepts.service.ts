@@ -1335,11 +1335,11 @@ export class ConceptsService {
     const display = text?.display ?? concept.display;
     const { category, tags } = splitCategoryAndTags(conceptLabels);
     const glossaryText = glossaryTexts.get(conceptId);
-    const propiedades: Record<string, unknown> = Object.fromEntries(
+    const propertyList: Record<string, unknown> = Object.fromEntries(
       properties.map((property) => [property.propertyCode, property.valueJson]),
     );
     const image = imageFromProperty(
-      propiedades[GLOSSARY_IMAGE_PROPERTY_CODE],
+      propertyList[GLOSSARY_IMAGE_PROPERTY_CODE],
       display,
     );
 
@@ -1381,7 +1381,7 @@ export class ConceptsService {
       // nunca recorriéndolo. Si un code system repitiera el mismo código en dos
       // filas —que el UPSERT de `upsertProperties` impide— gana la última, que
       // es la misma regla que aplica esa escritura.
-      properties: propiedades,
+      properties: propertyList,
       // La imagen viaja además como campo propio, ya validada: sin URL, sin
       // atribución o sin licencia no se publica — una foto sin crédito no se
       // muestra, por linda que sea.

@@ -20,7 +20,7 @@ import {
   SubledgerRepository,
 } from '../repositories';
 import {
-  toCentimos,
+  toBigIntCents,
   toText,
   amountInBase,
   sumCents,
@@ -339,7 +339,7 @@ export class AccountingReadService {
 
     const items: CockpitOpenItemDto[] = [];
     for (const { openItem, subledger } of rows) {
-      const outstandingCents = toCentimos(openItem.outstandingAmount);
+      const outstandingCents = toBigIntCents(openItem.outstandingAmount);
       if (outstandingCents <= 0n) continue; // saldada de hecho, aunque el estado no lo diga
 
       const account = accountById.get(subledger.reconciliationAccountId);
@@ -365,7 +365,7 @@ export class AccountingReadService {
         dueDate: formatDate(dueDate),
         amount: openItem.originalAmount ?? '0.00',
         clearedAmount: toText(
-          toCentimos(openItem.originalAmount) - outstandingCents,
+          toBigIntCents(openItem.originalAmount) - outstandingCents,
         ),
         openAmount: toText(outstandingCents),
         overdueDays,
@@ -383,10 +383,10 @@ export class AccountingReadService {
         const ofBracket = filtered.filter((i) => i.agingBucket === bucket);
         const receivable = ofBracket
           .filter((i) => i.side === 'RECEIVABLE')
-          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+          .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
         const payable = ofBracket
           .filter((i) => i.side === 'PAYABLE')
-          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+          .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
         return {
           bucket,
           label,
@@ -399,10 +399,10 @@ export class AccountingReadService {
 
     const totalReceivable = filtered
       .filter((i) => i.side === 'RECEIVABLE')
-      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
     const totalPayable = filtered
       .filter((i) => i.side === 'PAYABLE')
-      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
 
     return {
       items: filtered,
@@ -441,7 +441,7 @@ export class AccountingReadService {
     ): void => {
       if (!id) return;
       const actual = map.get(id) ?? { debit: 0n, credit: 0n };
-      const cents = toCentimos(amount);
+      const cents = toBigIntCents(amount);
       if (address === ACCT.DIRECTION_DEBIT) {
         actual.debit += cents;
       } else {
@@ -627,28 +627,28 @@ export class AccountingReadService {
     let totalNetBookValue = 0;
     let monthlyCharge = 0;
 
-    const items: CockpitFixedAssetDto[] = sorted.map((activo: Assets) => {
-      const cost = toCents(activo.acquisitionCost ?? '0');
-      const salvage = toCents(activo.salvageValue ?? '0');
+    const items: CockpitFixedAssetDto[] = sorted.map((asset: Assets) => {
+      const cost = toCents(asset.acquisitionCost ?? '0');
+      const salvage = toCents(asset.salvageValue ?? '0');
       const bookValueCents = toCents(
-        activo.bookValue ?? activo.acquisitionCost ?? '0',
+        asset.bookValue ?? asset.acquisitionCost ?? '0',
       );
       const depreciableCents = bookValueCents - salvage;
       const monthly =
-        activo.usefulLifeMonths && activo.usefulLifeMonths > 0
-          ? Math.round((cost - salvage) / activo.usefulLifeMonths)
+        asset.usefulLifeMonths && asset.usefulLifeMonths > 0
+          ? Math.round((cost - salvage) / asset.usefulLifeMonths)
           : 0;
       const installment = Math.min(monthly, depreciableCents);
 
-      const activa = activo.statusConceptId === ACCT.ASSET_ACTIVE;
+      const isActive = asset.statusConceptId === ACCT.ASSET_ACTIVE;
       const depreciable =
-        activa &&
-        !!activo.usefulLifeMonths &&
-        activo.usefulLifeMonths > 0 &&
+        isActive &&
+        !!asset.usefulLifeMonths &&
+        asset.usefulLifeMonths > 0 &&
         depreciableCents > 0 &&
         installment > 0;
 
-      const accumulatedCents = toCents(activo.accumulatedDepreciation ?? '0');
+      const accumulatedCents = toCents(asset.accumulatedDepreciation ?? '0');
 
       totalAcquisition += cost;
       totalAccumulated += accumulatedCents;
@@ -656,18 +656,18 @@ export class AccountingReadService {
       if (depreciable) monthlyCharge += installment;
 
       return {
-        id: activo.id,
-        code: activo.code,
-        name: activo.name,
-        className: resolver.display(activo.assetTypeConceptId) ?? '',
-        classCode: resolver.code(activo.assetTypeConceptId) ?? '',
-        usefulLifeMonths: activo.usefulLifeMonths ?? 0,
+        id: asset.id,
+        code: asset.code,
+        name: asset.name,
+        className: resolver.display(asset.assetTypeConceptId) ?? '',
+        classCode: resolver.code(asset.assetTypeConceptId) ?? '',
+        usefulLifeMonths: asset.usefulLifeMonths ?? 0,
         acquisitionCost: fromCents(cost),
         accumulatedDepreciation: fromCents(accumulatedCents),
         netBookValue: fromCents(bookValueCents),
         monthlyDepreciation: depreciable ? fromCents(installment) : '0.00',
         depreciable,
-        status: activa ? 'ACTIVE' : 'RETIRED',
+        status: isActive ? 'ACTIVE' : 'RETIRED',
       };
     });
 
