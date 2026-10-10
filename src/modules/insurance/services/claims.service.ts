@@ -137,7 +137,10 @@ export class ClaimsService {
         if (existing)
           throw new ConflictException(
             'El pedido ya tiene un reclamo activo',
-            { inventoryReservationId: dto.inventoryReservationId, serviceRequestId: dto.serviceRequestId },
+            {
+              inventoryReservationId: dto.inventoryReservationId,
+              serviceRequestId: dto.serviceRequestId,
+            },
             InsuranceErrorReason.CLAIM_ALREADY_EXISTS_FOR_ORDER,
           );
         await this.validatePriorAuthorization(tx, dto);
@@ -160,7 +163,10 @@ export class ClaimsService {
         if (!plan)
           throw new PreconditionFailedException(
             'La cobertura no corresponde a la aseguradora indicada',
-            { coverageId: dto.patientCoverageId, carrierId: dto.insuranceCarrierId },
+            {
+              coverageId: dto.patientCoverageId,
+              carrierId: dto.insuranceCarrierId,
+            },
             InsuranceErrorReason.CARRIER_NOT_FOUND,
           );
         currencyConceptId = plan.currencyConceptId;

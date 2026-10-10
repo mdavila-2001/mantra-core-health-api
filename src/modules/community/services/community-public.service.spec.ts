@@ -574,7 +574,10 @@ describe('CommunityPublicService', () => {
     // en «Dra.» y saltaba a un lugar equivocado del listado.
     it('el cursor sobrevive a un nombre con espacios', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([completeProfile, completeProfile]);
+      d.repo.searchProfiles.mockResolvedValue([
+        completeProfile,
+        completeProfile,
+      ]);
 
       const first = await d.service.search({ limit: 1 });
       expect(first.nextCursor).not.toBeNull();

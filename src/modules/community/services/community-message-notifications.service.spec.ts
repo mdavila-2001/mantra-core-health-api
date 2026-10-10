@@ -58,12 +58,7 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
   it('avisa al destinatario con el nombre de quien escribe y el hilo como destino', async () => {
     const d = build();
 
-    await d.service.newMessage(
-      CONVERSATION,
-      SENDER,
-      [RECIPIENT],
-      'user-1',
-    );
+    await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.recipientUserId).toBe(ACCOUNT);
@@ -80,12 +75,7 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
   it('la clave de rebote incluye al destinatario, para no taparle el aviso a otro', async () => {
     const d = build();
 
-    await d.service.newMessage(
-      CONVERSATION,
-      SENDER,
-      [RECIPIENT],
-      'user-1',
-    );
+    await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.debounceKey).toBe(`conversation:${CONVERSATION}:${ACCOUNT}`);
@@ -101,12 +91,7 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
       createdByUserId: 'cuenta-creadora',
     });
 
-    await d.service.newMessage(
-      CONVERSATION,
-      SENDER,
-      [RECIPIENT],
-      'user-1',
-    );
+    await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
 
     const [input] = d.notifications.emitInApp.mock.calls[0] as any[];
     expect(input.recipientUserId).toBe('cuenta-creadora');
@@ -121,12 +106,7 @@ describe('CommunityMessageNotificationsService · enganche P2 → P1', () => {
       targetId: 'organizacion-1',
     });
 
-    await d.service.newMessage(
-      CONVERSATION,
-      SENDER,
-      [RECIPIENT],
-      'user-1',
-    );
+    await d.service.newMessage(CONVERSATION, SENDER, [RECIPIENT], 'user-1');
 
     // Un perfil público de organización que nadie encarna sigue recibiendo el
     // mensaje: lo verá al abrir su bandeja. No hay a quién sonarle la campana.

@@ -299,9 +299,7 @@ export class DirectoryReadService {
         timeZone: tenant.timeZone,
         updatedAt: tenant.updatedAt,
         myRoleConceptId: membership.tenantRoleConceptId,
-        canAdminister: ROLES_THAT_MANAGE.has(
-          membership.tenantRoleConceptId,
-        ),
+        canAdminister: ROLES_THAT_MANAGE.has(membership.tenantRoleConceptId),
         isVerified:
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
         ...(payer ? { payer } : {}),
@@ -607,10 +605,7 @@ export class DirectoryReadService {
           systemConceptIds.includes(c.systemConceptId),
       )?.value;
 
-    const record = (
-      link: (typeof links)[number],
-      role: RepresentativeRole,
-    ) => {
+    const record = (link: (typeof links)[number], role: RepresentativeRole) => {
       const persona = personas.get(link.personId);
       if (!persona) return undefined;
       return {

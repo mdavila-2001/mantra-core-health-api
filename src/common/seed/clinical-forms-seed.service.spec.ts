@@ -95,9 +95,7 @@ function build(
 }
 
 /** Las especialidades distintas que declara el catálogo. */
-const SPECIALTIES = new Set(
-  STANDARD_FORMS.map((form) => form.specialty.code),
-);
+const SPECIALTIES = new Set(STANDARD_FORMS.map((form) => form.specialty.code));
 
 /**
  * Lo que publicaría `VS_MEDICAL_SPECIALTY`: todas las del catálogo menos
@@ -423,10 +421,7 @@ describe('catálogo de formularios estándar', () => {
   });
 
   it('re-apunta al modelo las plantillas colgadas de un concepto acuñado', async () => {
-    const { service, actualizaciones } = build(
-      new Set(),
-      MODEL_SPECIALTIES,
-    );
+    const { service, actualizaciones } = build(new Set(), MODEL_SPECIALTIES);
 
     await service.run();
 

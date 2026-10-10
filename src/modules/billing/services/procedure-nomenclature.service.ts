@@ -119,8 +119,7 @@ export class ProcedureNomenclatureService {
     const cursor = options.cursor
       ? decodeKeysetCursor(options.cursor)
       : undefined;
-    const fromCode =
-      typeof cursor?.code === 'string' ? cursor.code : undefined;
+    const fromCode = typeof cursor?.code === 'string' ? cursor.code : undefined;
 
     const conditions: string[] = ['c.code LIKE ?'];
     const params: unknown[] = [`${PREFIX}%`];

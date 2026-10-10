@@ -160,7 +160,8 @@ export class IamOrganizationRepresentativesService {
                   legalRepresentative.powerOfAttorneyFileId,
               }
             : undefined,
-        executives: createdManagements.length > 0 ? createdManagements : undefined,
+        executives:
+          createdManagements.length > 0 ? createdManagements : undefined,
       });
 
     return { representativesRegistered: count };

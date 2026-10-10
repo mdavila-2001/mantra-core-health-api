@@ -185,9 +185,7 @@ describe('splitApproval', () => {
           0n,
         );
         const approved =
-          billed === 0n
-            ? 0n
-            : BigInt(Math.floor(r() * Number(billed + 1n)));
+          billed === 0n ? 0n : BigInt(Math.floor(r() * Number(billed + 1n)));
 
         const result = splitApproval(lineas(...amounts), approved);
 

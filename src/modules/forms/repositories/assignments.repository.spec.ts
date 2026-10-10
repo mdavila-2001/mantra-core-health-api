@@ -142,9 +142,7 @@ describe('AssignmentsRepository', () => {
         TENANT,
         50,
       );
-      expect(bySection.map((row: any) => row.id)).toEqual([
-        'a-activa-propia',
-      ]);
+      expect(bySection.map((row: any) => row.id)).toEqual(['a-activa-propia']);
     });
 
     it('without a tenant in context it only serves the global ones', async () => {

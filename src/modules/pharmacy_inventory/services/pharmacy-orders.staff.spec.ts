@@ -1552,9 +1552,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('a non-owner gets the same 404 as a nonexistent order', async () => {
       const d = build();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        waitingDecision(),
-      );
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(waitingDecision());
       const foreign = {
         id: 'user-x',
         roles: ['PATIENT'],
@@ -1571,9 +1569,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
     it('without standing proposals there is nothing to decide: 422', async () => {
       const d = build();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(
-        waitingDecision(),
-      );
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(waitingDecision());
       d.substitutionsRepo.findByReservationIds.mockResolvedValue([
         proposal({ statusConceptId: PINV.SUBSTITUTION_RECHAZADA }),
       ]);

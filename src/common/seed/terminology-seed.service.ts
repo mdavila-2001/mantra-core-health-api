@@ -394,7 +394,9 @@ export class TerminologySeedService {
     const designationAlreadyPresent = new Set(
       existingDesignations.map((row) => row.id),
     );
-    const propertyAlreadyPresent = new Set(existingProperties.map((row) => row.id));
+    const propertyAlreadyPresent = new Set(
+      existingProperties.map((row) => row.id),
+    );
     // Traducir un concepto que no existe violaría la FK y abortaría el arranque
     // entero. Se filtra y se avisa: el catálogo declarado y el sembrado pueden
     // divergir mientras alguien está a mitad de mover un concepto de módulo.

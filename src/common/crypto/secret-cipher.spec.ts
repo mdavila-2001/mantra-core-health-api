@@ -1,8 +1,4 @@
-import {
-  createCipheriv,
-  randomBytes,
-  scryptSync,
-} from 'node:crypto';
+import { createCipheriv, randomBytes, scryptSync } from 'node:crypto';
 import { decryptSecret, encryptSecret } from './secret-cipher';
 
 /**
@@ -36,7 +32,10 @@ describe('secret-cipher', () => {
     const key = scryptSync(clave, 'alovida.mfa.totp.v1', 32);
     const iv = randomBytes(12);
     const cipher = createCipheriv('aes-256-gcm', key, iv);
-    const data = Buffer.concat([cipher.update('SECRETO-ANTIGUO', 'utf8'), cipher.final()]);
+    const data = Buffer.concat([
+      cipher.update('SECRETO-ANTIGUO', 'utf8'),
+      cipher.final(),
+    ]);
     const legado = [
       iv.toString('base64'),
       cipher.getAuthTag().toString('base64'),
@@ -47,8 +46,12 @@ describe('secret-cipher', () => {
   });
 
   it('rechaza un formato que no es ninguno de los dos', () => {
-    expect(() => decryptSecret('a.b')).toThrow('Formato de secreto cifrado inválido');
-    expect(() => decryptSecret('a.b.c.d.e')).toThrow('Formato de secreto cifrado inválido');
+    expect(() => decryptSecret('a.b')).toThrow(
+      'Formato de secreto cifrado inválido',
+    );
+    expect(() => decryptSecret('a.b.c.d.e')).toThrow(
+      'Formato de secreto cifrado inválido',
+    );
   });
 
   it('detecta un secreto manipulado', () => {

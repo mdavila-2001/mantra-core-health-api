@@ -533,9 +533,7 @@ function applyPresentation(
   presentation: Presentations,
 ): ChartTemplateFieldDto[] {
   if (presentation.size === 0) return fields;
-  const idByCode = new Map(
-    fields.map((f) => [bareCode(f.code), f.fieldId]),
-  );
+  const idByCode = new Map(fields.map((f) => [bareCode(f.code), f.fieldId]));
 
   return fields.map((field) => {
     const p = presentation.get(bareCode(field.code));

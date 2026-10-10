@@ -62,10 +62,7 @@ const CONCEPTS: ImportProfile = {
  * Es una lista cerrada a propósito: un perfil desconocido es un error del
  * contrato y no algo que se resuelva adivinando columnas.
  */
-export const IMPORT_PROFILES: Record<
-  ImportProfile['id'],
-  ImportProfile
-> = {
+export const IMPORT_PROFILES: Record<ImportProfile['id'], ImportProfile> = {
   conceptos: CONCEPTS,
   // El perfil de designaciones se suma cuando se confirme que su entidad, su
   // DTO y su repositorio existen; hasta entonces declararlo sería prometer una

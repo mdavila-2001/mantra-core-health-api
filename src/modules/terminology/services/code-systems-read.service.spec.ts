@@ -22,11 +22,7 @@ function build(versions: readonly Record<string, unknown>[]) {
     // jest no ve —transpila sin chequear— y aparece recién en `yarn typecheck`.
     find: jest
       .fn<
-        (
-          entity: unknown,
-          filter: unknown,
-          options: unknown,
-        ) => Promise<unknown>
+        (entity: unknown, filter: unknown, options: unknown) => Promise<unknown>
       >()
       .mockResolvedValue(versions),
   };

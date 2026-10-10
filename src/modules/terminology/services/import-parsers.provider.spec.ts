@@ -9,15 +9,9 @@ import { LECTOR_IMPORT } from './import-parsers.provider';
 describe('LECTOR_DE_IMPORTACION', () => {
   describe('parseadorDe', () => {
     it('devuelve el parseador de cada formato registrado', () => {
-      expect(LECTOR_IMPORT.parseadorDe('csv')).toBeInstanceOf(
-        CsvParser,
-      );
-      expect(LECTOR_IMPORT.parseadorDe('ndjson')).toBeInstanceOf(
-        NdjsonParser,
-      );
-      expect(LECTOR_IMPORT.parseadorDe('xlsx')).toBeInstanceOf(
-        XlsxParser,
-      );
+      expect(LECTOR_IMPORT.parseadorDe('csv')).toBeInstanceOf(CsvParser);
+      expect(LECTOR_IMPORT.parseadorDe('ndjson')).toBeInstanceOf(NdjsonParser);
+      expect(LECTOR_IMPORT.parseadorDe('xlsx')).toBeInstanceOf(XlsxParser);
     });
 
     it('cubre todos los formatos que el contrato declara', () => {

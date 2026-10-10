@@ -447,9 +447,9 @@ describe('QuotationsService.getQuotation', () => {
     const d = build();
     d.quotationsRepo.findById.mockResolvedValue(quotationRow());
 
-    await expect(
-      d.service.getQuotation('q-1', patient),
-    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    await expect(d.service.getQuotation('q-1', patient)).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
     expect(
       d.practiceTenantLookup.findActivePracticeIdsForPractitioner,
     ).not.toHaveBeenCalled();

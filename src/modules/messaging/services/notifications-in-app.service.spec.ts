@@ -373,7 +373,10 @@ describe('NotificationsService · carril P1 (campana)', () => {
         readAt: new Date('2026-08-01T00:00:00.000Z'),
       });
       const withoutRead = row({ id: 'nueva' });
-      d.notificationsRepo.findUnreadInApp.mockResolvedValue([alreadyRead, withoutRead]);
+      d.notificationsRepo.findUnreadInApp.mockResolvedValue([
+        alreadyRead,
+        withoutRead,
+      ]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(0);
 
       const res = await d.service.markAllInAppRead(actor as any);

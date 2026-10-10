@@ -28,9 +28,7 @@ function controllers(modulo: unknown): readonly unknown[] {
  */
 describe('CommunityModule', () => {
   it('publica PatientReviewsController: importarlo no alcanza para mapear sus rutas', () => {
-    expect(controllers(CommunityModule)).toContain(
-      PatientReviewsController,
-    );
+    expect(controllers(CommunityModule)).toContain(PatientReviewsController);
   });
 
   it('publica los controladores de reseñas, con sesión y sin ella', () => {

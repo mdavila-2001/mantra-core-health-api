@@ -35,10 +35,7 @@ export class HealthFacilityCatalogService {
     const members =
       set === null
         ? null
-        : await this.valueSets.findIncludedConceptIdsByValueSet(
-            em,
-            set.id,
-          );
+        : await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id);
     if (members === null) {
       throw new PreconditionFailedException(
         'El padrón de establecimientos no está disponible',

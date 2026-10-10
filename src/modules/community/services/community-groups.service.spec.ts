@@ -448,9 +448,9 @@ describe('CommunityGroupsService', () => {
       const d = build();
       d.visibility.resolveActorProfileId.mockResolvedValue(null);
 
-      await expect(d.service.createGroup(registration, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.createGroup(registration, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.groupsRepo.create).not.toHaveBeenCalled();
       expect(d.groupsRepo.createMember).not.toHaveBeenCalled();
     });

@@ -424,10 +424,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue({ id: 'm-nueva' });
 
-      const res = await d.service.ensureCareMembership(
-        d.tx as any,
-        params,
-      );
+      const res = await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(res).toEqual({ membership: { id: 'm-nueva' }, creada: true });
       const [, data] = d.membershipsRepo.create.mock.calls.at(-1);
@@ -454,10 +451,7 @@ describe('DirectoryMembershipsService', () => {
       };
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existing);
 
-      const res = await d.service.ensureCareMembership(
-        d.tx as any,
-        params,
-      );
+      const res = await d.service.ensureCareMembership(d.tx as any, params);
 
       expect(res).toEqual({ membership: existing, creada: false });
       expect(d.membershipsRepo.create).not.toHaveBeenCalled();

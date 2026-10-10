@@ -292,9 +292,7 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
     ]);
 
     const { offers } = await service.getAvailability('concepto-losartan', {});
-    const bySlug = new Map(
-      offers.map((o) => [o.pharmacySlug, o.presentation]),
-    );
+    const bySlug = new Map(offers.map((o) => [o.pharmacySlug, o.presentation]));
 
     expect(bySlug.get('completa')).toBe('50 mg · Caja x 30 comprimidos');
     expect(bySlug.get('parcial')).toBe('50 mg');
